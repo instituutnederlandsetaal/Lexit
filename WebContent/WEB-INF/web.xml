@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns="http://java.sun.com/xml/ns/javaee" 
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+id="WebApp_ID" version="2.5">
+  <display-name>lexit</display-name>
+	 <servlet>	 
+	    <servlet-name>LexIt</servlet-name>	    
+	    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+	    
+	    <init-param>
+	      <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+	      <param-value>true</param-value>
+	    </init-param>
+	    <init-param>
+	      <param-name>com.sun.jersey.config.property.packages</param-name>
+	      <param-value>lexit.resources</param-value>
+	    </init-param>
+	    
+	    <load-on-startup>1</load-on-startup>
+	  </servlet>
+	  
+	  <servlet-mapping>
+	    <servlet-name>LexIt</servlet-name>
+	    <url-pattern>/lexit/*</url-pattern>
+	  </servlet-mapping> 
+	  
+	  <welcome-file-list>
+		<welcome-file>
+            index.html
+        </welcome-file>
+	  </welcome-file-list>	  
+	  
+	  <security-constraint>
+	  	<web-resource-collection>
+	  		<web-resource-name>Wildcard means whole app requires authentication</web-resource-name>
+	  		<url-pattern>/*</url-pattern>
+	  		<http-method>GET</http-method>
+	  		<http-method>POST</http-method>
+	  	</web-resource-collection>
+	  	
+	  	<!-- roles required to access the application -->
+	  	<auth-constraint>
+	  		<role-name>ambiguplus_all</role-name>
+	  		<role-name>gigantmolex_write</role-name>
+	  		<role-name>klussen_all</role-name>	  			  		
+	  		<role-name>lexicalsources_all</role-name>
+	  		<role-name>lexicalsources_read</role-name>	  		
+	  		<role-name>metadata_read</role-name>
+	  		<role-name>mnw2013_all</role-name>
+	  		<role-name>monele_all</role-name>
+	  		<role-name>namescape_all</role-name>
+	  		<role-name>robbie_all</role-name>
+	  		<role-name>snspelling_all</role-name>
+	  		<role-name>snspelling_read</role-name>
+	  		<role-name>sonar_read</role-name>
+	  		<role-name>spelling2015_all</role-name>
+	  		<role-name>spellingklus_all</role-name>
+	  		<role-name>spellingklus_marijke_all</role-name>
+	  		<role-name>spellinglexicon_all</role-name>
+	  		<role-name>spellinglexicon_read</role-name>
+	  		<role-name>superuser</role-name>
+	  		<role-name>superreader</role-name>
+	  	</auth-constraint>
+	  		  	
+	  	<user-data-constraint>
+	  		<!-- transport-guarantee can be CONFIDENTIAL, INTEGRAL, or NONE -->
+	  		<transport-guarantee>NONE</transport-guarantee>
+	  	</user-data-constraint>
+	  	
+	  </security-constraint>
+	  
+	  <login-config>
+	  	<auth-method>BASIC</auth-method>
+	  </login-config>
+	  
+</web-app>

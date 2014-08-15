@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+	
+	
+	<title>Lex'it 
+	v2014.07.18
+	-
+	1
+	</title>
+	
+	<style type="text/css" title="currentStyle">
+				
+				@import "css/lexit_table.css";
+				@import "css/extra.css";
+				@import "css/TableTools.css";
+				@import "css/jquery-ui-1.10.3.custom.min.css";
+				@import "css/tipTip.css";
+				@import "css/jquery.contextMenu.css";
+				@import "prettify/prettify.sunburst.css";
+				
+	</style>
+	
+	<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+	
+	<!-- 
+	Javascript import with needed functionalities:
+	
+	jquery            : JS extension
+	jquery.extensions : jQuery extension with handy functions like endsWith(), startsWith() etc
+                        (https://bitbucket.org/mrshrinkray/jquery-extensions/wiki/Home)
+    jQuery-contextMenu: jQuery context menu extension (works with 'prettify')
+    					(http://medialize.github.com/jQuery-contextMenu/ 
+						 https://github.com/medialize/jQuery-contextMenu) 
+	dataTables        : Graphic user interface supporting table search, sorting, etc. for jQuery
+	                    (http://datatables.net/)
+	dataTables TableTools: dataTables extension for data export, works with ZeroClipboard.js and swf-map
+						(http://datatables.net/extras/tabletools/)
+	jeditable         : Edit In Place Plugin for jQuery
+	                    (http://www.appelsiini.net/projects/jeditable)
+	jshashtable       : reliable js implementation of HashMap
+	                    (http://www.timdown.co.uk/jshashtable/)
+	spin			  : good spinner
+	                    (http://fgnass.github.com/spin.js/)
+	tipTip		      : better tooltip function than standard html tooltips
+	                    (http://code.drewwilson.com/entry/tiptip-jquery-plugin)
+	util              : all kinds of INL-made utilities
+	-->
+		
+	<!-- 
+	Lex'it javascript functions are spread among different name spaces:
+	asr	: advanced search and replace function (see also: ssr)
+	cm  : Context menus
+	conf: Configurator (process configuration)
+	fn	: User Functions, the functions designed to configurate the client
+	gui : Graphic User Interface functions
+	head: Table header
+	kf  : Key functions
+	mt	: Multitable (table properties registration, taking care 
+	      of doing that for more than one table at once)
+	refr: Refresh table when browser tab is regaining focus 
+	row : Row selection
+	sf  : Search functions
+	ssr	: simple search and replace function (see also: asr)
+	tb	: Table Builder, builds the table html frame 
+	      and the Datatable object
+	td  : Functions about table details
+	ts  : Functions about table selection
+	un	: Undo function
+	-->
+	
+	<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jshashtable.js"></script>
+	<script type="text/javascript" language="javascript" src="js/util.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.jeditable.1.7.2.dev.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.extensions.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.form-extensions.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery-ui-1.10.3.custom.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.tipTip.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.contextMenu.js"></script>
+	<script type="text/javascript" language="javascript" src="prettify/prettify.js"></script>
+	<script type="text/javascript" language="javascript" src="js/spin.js"></script>
+	
+	<!-- TableTools -->
+	<script type="text/javascript" language="javascript" src="js/ZeroClipboard.js"></script>
+	<script type="text/javascript" language="javascript" src="js/TableTools.js"></script>
+	
+	<!-- Lex'it code -->
+	<script type="text/javascript" language="javascript" src="js/lexit.searchFunctions.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableDetails.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.simpleSearchAndReplace.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.advancedSearchAndReplace.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_header.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_refresh.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_rowselect.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.keys.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableSelection.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.multitables.js"></script>
+	<!-- extra custom dataTables functions as an extension to the standard installation -->
+	<script type="text/javascript" language="javascript" src="js/lexit.dataTables.extension.js"></script> 
+	<script type="text/javascript" language="javascript" src="js/lexit.configurator.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.configfunctions.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableBuilder.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.undo.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.contextMenus.js"></script>
+	<script type="text/javascript" language="javascript" src="projects_overview.js"></script>
+	<script type="text/javascript" language="javascript" src="language.js"></script>
+	
+	
+	<script type="text/javascript"  charset="utf-8">
+	
+	// libraries to be loaded
+	
+	// general
+	var neutralValue = "Kies een tabel";
+	var neutralColumnValue = "Alles";
+	
+	// configuration file variables
+	var oTableSettingsList;
+	var oHiddenTablesList;
+	var oTableConfigurationList;
+	
+	// about the database
+	var asTableNames = new Array();			// list of database tables names	
+	var asTableDescriptions = new Array();	// list of database tables descriptions (visible to user)
+	var asTableTypes = new Array();			// list of database tables types ('base table', 'view')
+	var abTableVisible = new Array();		// list of database tables visibility (available to user)
+	
+	// state variables
+	var originalBgColor;
+	
+	// tooltips in table allowed by user or not (default is true)
+	var bTooltipsAllowedInTable = true;
+	
+	// ***** CONSTANTS *****
+	// Argument separator within single string 
+	// this must be the same as in TableResources.java (same variable name)
+	var ARG_INTERNAL_SEPARATOR = "@@@"; 
+	// Data type returned by database when a field type is user-defined
+	var USER_DEFINED = "USER-DEFINED";
+	// Name of user that has logged in. This is set by fn.setCurrentUser() at initialization
+	var USERNAME = null; 
+	
+	
+	
+	$(document).ready(function() {	
+		
+		initialize();
+					
+	});	 // end of document ready
+	
+	
+	// initialize the application
+	// (this happens once the libraries are fully loaded)
+	function initialize(){	
+		
+		// set current user name
+		fn.setCurrentUser();
+		
+		// generate unique id for this page
+		// we will need this to detect page focus/blur in a reliable way
+		$("#page_id").attr("name", getUniqueNumber());
+		$.cookie('active_lexit_window', $("#page_id").attr("name"));
+		
+		// user instruction for accessing tables
+		$("#indicator").empty().append(
+				$("<span></span>")
+				.html("Kies een tabel: <I>(+ CTRL om tabel toe te voegen) (+ SHIFT voor nieuwe tab)</I>")
+				);
+		
+		// get url parameters
+		var paramsHash = getHttpParams();
+		if (paramsHash == null || paramsHash.get("db") == null)
+			{
+			showListOfProjects();
+			}
+		else
+			{			
+			// Assign key functions
+			// This needs to be called here because it has global scope
+			// and recalling it at each new table creation will alter other key functions 
+			// which than malfunction (because of unbinds)
+			kf.addKeyFunctions();
+			
+			// load the specific client configuration file for the required database
+			// and get the list of tables (getScript never reads this file from cache)
+			$.getScript(paramsHash.get("db")+".config.js")
+			.done(function(){
+				var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
+				ts.getListOfTables( paramsHash.get("table"), 
+						oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
+			.fail(function(jqxhr, settings, exception){
+				alert("'"+paramsHash.get("db")+"' is geen correcte waarde. Is dit wel goed getikt? \n\nFout: ["+exception+"]");
+				});
+			
+			// show the project name at the top of the screen
+			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
+			$("#projectname").append(
+					$("<span></span>").text(sProjectName)
+					.css("font-size", "50px").css("color", "#3970b3").css("font-weight", "bold")
+					);
+			
+			$("title").text(sProjectName + " - " + $("title").text())
+			}
+		
+	};
+	
+	
+	// get table filters from url if available (... &filter_a=... & filter_b=...)
+	function getTableFiltersAndSettings(paramsHash){
+		
+		var oContentToMatch = new Array();
+		var oExtraSettings = new Array();
+		for (var i=0; i<paramsHash.keys().length; i++)
+			{
+			var sOneParam = paramsHash.keys()[i];
+			// read all parameters, except 'db' and 'table', since we process those elsewhere
+			if ( $.inArray(sOneParam, ["db", "table"])<0 )
+				{
+				// table setting parameters
+				if ($.startsWith(sOneParam, "setting."))
+					{
+					var sTrueSettingName = sOneParam.replace("setting.", "");
+					oExtraSettings[sTrueSettingName] = paramsHash.get(sOneParam);					
+					}
+				// table filters
+				else
+					{
+					oContentToMatch[sOneParam] = paramsHash.get(sOneParam);
+					}				
+				}
+			}
+		
+		return { 
+			contentToMatch: oContentToMatch,
+			extraSettings: oExtraSettings
+			};
+	}
+	
+	// generate a welcome page with a project overview 
+	// (projects have to be declared and described in file 'projects_overview.js' so as to be show here)
+	function showListOfProjects(){
+		
+		var sCurrentURL = document.URL;
+		
+		// keep this list private to internal environment
+		if ( sCurrentURL.indexOf("lex-it.inl.nl")<0 )
+			{
+			$("#indicator").empty().append(
+					$("<span></span>")
+					.html("<br><h2>Welkom in Lex'it</h2>Kies een project<br><br>")
+					);
+			
+			var docOpenTitle = $("<span></span>").html("<b>Lopende projecten</b>");
+			var docOpen = $("<table></table>").css("border", "dotted black 1px");
+			
+			var docClosedTitle = $("<span></span>").html("<b>Afgesloten projecten</b>");
+			var docClosed = $("<table></table>").css("border", "dotted black 1px");
+			
+			for (var i=0; i<aProjectList.length; i++)
+				{
+				var sProjectLinkPart = aProjectList[i]["config_filename"];
+				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit"))+"/lexit/?db="+sProjectLinkPart;
+				
+				var sProjectDescription =
+					"<td style='text-align: right; width: 400px'>"+
+					"<A href='"+sProjectLink+"'><B>"+aProjectList[i]["name"]+
+					"</B></A></td><td>" +					 
+					"</td><td style='text-align: left; width: 700px'>" +
+					(typeof aProjectList[i]["description"] != 'undefined' && aProjectList[i]["description"] != "" ? 
+						" : <I>"+aProjectList[i]["description"]+"</I>" : "") + 
+					"</td>";
+				
+				var eProjectDiv = $("<tr></tr>").html(sProjectDescription);
+				
+				if (typeof aProjectList[i]["closed"]  != 'undefined' && aProjectList[i]["closed"])
+					docClosed.append(eProjectDiv)
+				else
+					docOpen.append(eProjectDiv);
+				}
+				
+			$("#page").append(docOpenTitle);
+			$("#page").append(docOpen);
+			$("#page").append($("<br>"));
+			$("#page").append(docClosedTitle);
+			$("#page").append(docClosed);
+			}
+		else
+			alert("Geen toegang");
+		
+	}
+		
+	</script>
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	
+	  ga('create', 'UA-47548163-1', 'inl.nl');
+	  ga('send', 'pageview');
+	
+	</script>	
+	
+</head>
+
+<body>
+	
+	<div id="page">
+		<div style="position:absolute; right:10px; top:10px;">
+			<img src="/lexit/images/INL-logo.gif">
+		</div>
+		<div style="text-align:center;" id="projectname">
+			
+		</div>
+		<div id="indicators">
+			<div style="display:inline" id="indicator"></div>
+			<div style="display:inline" id="tablechoice"></div>			
+		</div>
+
+		
+		<div id="container">
+	
+			<div id="dynamic">
+			
+				<!--  this is the table container -->
+				
+			</div>	
+			<div id="temporary_stuff">
+				<!-- this is some container for temporary stuff -->
+			</div>	
+		</div>
+	</div>
+	<div id="page_id" style="visibility: hidden"></div>
+	
+	
+</body>
+</html>

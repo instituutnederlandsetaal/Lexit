@@ -1,0 +1,5 @@
+db=Spellingklus_20140416
+schema=public
+host=svowdb02.inl.loc
+user=postgres
+pass=inl

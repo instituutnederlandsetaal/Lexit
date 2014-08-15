@@ -1,0 +1,573 @@
+/**
+ * KEY FUNCTIONS
+ */
+
+
+var kf = {};
+
+
+var sKeyPressed = "";
+var sKeyReleased = "";
+var bKeyDebug = false;
+
+
+var sActiveTableName = null;
+var iActiveRowNumber = 0;
+
+
+// get and set the active table (t.i. the table that has focus for arrow keys)
+kf.setActiveTable = function(sTableName){
+	
+	var sPreviousActiveTable = kf.getActiveTable();
+	if (sPreviousActiveTable != null)
+		{
+		// show focus is lost on current active table
+		$("#"+sPreviousActiveTable+"_tablename").css("color", "#A4A4A4");
+		}
+	
+	sActiveTableName = sTableName;
+	// show focus is gained
+	$("#"+sActiveTableName+"_tablename").css("color", "#000000");
+};
+
+kf.getActiveTable = function(){
+	return sActiveTableName;
+};
+
+
+// get and set the active row (t.i. the table/row that has focus for arrow keys)
+kf.setActiveRowNumber = function(iRowNumber){
+	iActiveRowNumber = iRowNumber;
+};
+
+kf.getActiveRowNumber = function(){
+	return iActiveRowNumber;
+};
+
+
+// check if the last pressed key is a given key name
+kf.isPressed = function(sKeyName){
+	return (kf._getPressedKey()==sKeyName);
+};
+// check if the last released key is a given key name
+kf.wasPressed = function(sKeyName){
+	return (kf._getReleasedKey()==sKeyName);
+};
+
+
+//register the name of the pressed key, given its code
+kf.registerPressedKey = function(event){
+	
+	var iCode = (event != null) ? event.keyCode : -1;
+	
+	if (kf._getPressedKey() != kf._translateCode(iCode) )
+		kf._setReleasedKey( kf._getPressedKey() );
+	kf._setPressedKey( kf._translateCode(iCode) );
+	
+};
+
+//register the name of the pressed key, given its code
+kf.registerReleasedKey = function(){
+	
+	if (kf._getPressedKey() != "released")
+		kf._setReleasedKey( kf._getPressedKey() );
+	kf._setPressedKey("released");	
+	
+};
+
+
+
+
+
+// get the name of the last pressed key
+kf._getPressedKey = function(){
+	return sKeyPressed;
+};
+
+// set the name of the last pressed key
+kf._setPressedKey = function(sKeyName){
+	
+	sKeyPressed = sKeyName;
+	
+	
+	if (sKeyPressed == "ctrl"){ // CTRL
+		// deactivate mouse click functions, since CTRL is about selecting (prevents function triggering)
+		conf.deactivateConfigFunctionsInAllTables();
+	}
+	else if (sKeyPressed == "shift") { // Shift    		
+		// deactivate mouse click functions, since Shift is about selecting (prevents function triggering)
+		conf.deactivateConfigFunctionsInAllTables();
+		// disable highlighting of text when selecting rows with shift pressed
+		$('html, body').disableSelection(); 
+	}
+	else if (sKeyPressed == "escape"){ // ESC
+		row.clearRowSelectionInAllTables();
+    }
+};
+
+
+
+// get the name of the last released key
+kf._getReleasedKey = function(){
+	return sKeyReleased;
+};
+// set the name of the last released key
+kf._setReleasedKey = function(sKeyName){
+	
+	sKeyReleased = sKeyName;	
+	
+	if (sKeyReleased == "ctrl"){ // CTRL
+		// reactivate mouse click functions, since CTRL pressed was about selecting 
+		// (deactivation was about preventing trigger of function upon click during row selection)
+		conf.activateConfigFunctionsInAllTables();
+	}
+	else if (sKeyReleased == "shift") { // Shift
+		// reactivate mouse click functions, since Shift pressed was about selecting 
+		// (deactivation was about preventing trigger of function upon click during row selection)
+		conf.activateConfigFunctionsInAllTables();
+		// re-enable selection of text, otherwise jeditable malfunctions
+		$('html, body').enableSelection(); 
+	}
+};
+
+
+
+
+
+
+kf._translateCode = function(iCode){
+	
+	var translation = "unknown";
+	
+	if ((iCode>=48 & iCode<=90) || (iCode>=96 & iCode<=105))
+		{
+		return String.fromCharCode(iCode).toLowerCase();;
+		}
+	
+	switch(iCode)
+	{
+	case -1:		
+		translation = "released";
+		break;
+	case 8:
+		translation = "backspace";
+		break;
+	case 9:
+		translation = "tab";
+		break;
+	case 13:
+		translation = "enter";
+		break;
+	case 16:
+		translation = "shift";
+		break;
+	case 17:
+		translation = "ctrl";
+		break;
+	case 18:
+		translation = "alt";
+		break;
+	case 19:
+		translation = "pause";
+		break;
+	case 20:
+		translation = "capslock";
+		break;
+	case 27:
+		translation = "escape";
+		break;
+	case 32:
+		translation = "spacebar";
+		break;
+	case 33:
+		translation = "pageup";
+		break;
+	case 34:
+		translation = "pagedown";
+		break;
+	case 35:
+		translation = "end";
+		break;
+	case 36:
+		translation = "home";
+		break;
+	case 37:
+		translation = "leftarrow";
+		break;
+	case 38:
+		translation = "uparrow";
+		break;
+	case 39:
+		translation = "rightarrow";
+		break;
+	case 40:
+		translation = "downarrow";
+		break;
+	case 45:
+		translation = "insert";
+		break;
+	case 46:
+		translation = "delete";
+		break;
+	case 91:
+		translation = "leftwindow";
+		break;
+	case 92:
+		translation = "rightwindow";
+		break;
+	case 93:
+		translation = "select";
+		break;
+	case 106:
+		translation = "*";
+		break;
+	case 107:
+		translation = "+";
+		break;
+	case 109:
+		translation = "-";
+		break;
+	case 110:
+		translation = ".";
+		break;
+	case 111:
+		translation = "/";
+		break;
+	case 112:
+		translation = "f1";
+		break;
+	case 113:
+		translation = "f2";
+		break;
+	case 114:
+		translation = "f3";
+		break;
+	case 115:
+		translation = "f4";
+		break;
+	case 116:
+		translation = "f5";
+		break;
+	case 117:
+		translation = "f6";
+		break;
+	case 118:
+		translation = "f7";
+		break;
+	case 119:
+		translation = "f8";
+		break;
+	case 120:
+		translation = "f9";
+		break;
+	case 121:
+		translation = "f10";
+		break;
+	case 122:
+		translation = "f11";
+		break;
+	case 123:
+		translation = "f12";
+		break;
+	case 192:
+		translation = "`";
+		break;
+	default:
+		translation = "unknown";
+	};
+	
+	return translation;
+};
+
+
+
+//add key detection
+kf.addKeyFunctions = function(){
+	
+	// context menu key/button function
+	
+	// trick to get it to work, 
+	// see: http://jsfiddle.net/W7DhD/ 
+	// and  http://stackoverflow.com/questions/12437918/firefox-how-to-get-context-menu-for-button	
+	
+	$(document).on('contextmenu', function(event){
+
+		var sActiveTable = kf.getActiveTable();
+		var iActiveRow = kf.getActiveRowNumber();
+		// triggers jQuery.contextMenu 
+		// (see: http://medialize.github.com/jQuery-contextMenu/docs.html)
+		$("#"+sActiveTable+" tbody tr:eq("+iActiveRow+") td").contextMenu();
+		
+		event.preventDefault();
+	});
+	
+	
+	// normal key functions
+	
+	$(document).unbind('keydown');	
+	$(document).bind('keydown', function(e) {
+		
+		var bSearchboxOfActiveTableHasFocus = $(".dataTables_wrapper div div input").is(":focus");
+		
+		// register which key was pressed
+		kf.registerPressedKey(e);
+		
+		// prevent default behaviour (eg.scrolling of screen) when pressing the up/down arrows etc
+		if (
+				kf.isPressed("f8") ||
+				kf.isPressed("pageup") || kf.isPressed("pagedown") ||
+				
+				// one exception is when we are within a textarea, because we want
+				// to be able to navigate in there!
+				( (kf.isPressed("uparrow") || kf.isPressed("downarrow")) 
+						&& !$("td form textarea").elementExists()) ||
+				
+				// one another exception is when cursor is in a searchbox of the active table:
+				// switching to next searchbox by pressing tab must be possible then
+				(kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus )
+			)
+			{			
+			e.preventDefault();
+			}
+		
+		// call user key functions
+    	kf._callCustomKeyFunctions('keydown');
+    	
+    	// F8 (toggle tooltips in table)
+    	if (kf.isPressed("f8"))
+    	{
+    		var sActiveTable = kf.getActiveTable();
+    		bTooltipsAllowedInTable = !bTooltipsAllowedInTable;
+    		// force tooltip to fadeout (otherwise it will keep in sight)
+    		$("#tiptip_holder").fadeOut();    		
+    		fn.refreshTable(sActiveTable);
+    		
+    	}
+    	
+    	
+    	// F2 (shortcut for rows selection button)
+    	if (kf.isPressed("f2"))
+		{
+    		var sActiveTable = kf.getActiveTable();
+    		$("#"+sActiveTable+"_wrapper #selectionbutton").click();
+		}
+    	
+    	
+    	// pageup/down
+    	if (kf.isPressed("pageup") || kf.isPressed("pagedown"))
+			{			
+			var sActiveTable = kf.getActiveTable();
+			
+			// 1. there must be some table active 
+			// 2. don't interfere with context menu
+			if (sActiveTable != null 
+					&& !$("div#context-menu-layer").elementExists()	)
+				{
+				if (kf.isPressed("pageup"))
+					mt.getDataTableObjectOf(sActiveTable).fnPageChange("previous");
+				else if (kf.isPressed("pagedown"))
+					mt.getDataTableObjectOf(sActiveTable).fnPageChange("next");
+				}
+			// prevent scrolling of screen when pressing the up/down arrows
+			// (needed as last command)
+			return false;
+			}
+    	
+    	
+		// arrow keys
+		if (kf.isPressed("uparrow") || kf.isPressed("downarrow"))
+			{			
+			var sActiveTable = kf.getActiveTable();	
+			
+			
+			// 1. there must be some table active 
+			// 2. don't interfere with context menu
+			// 3. don't interfere with textarea of jeditable
+			if (sActiveTable != null 
+					&& !$("div#context-menu-layer").elementExists()
+					&& !$("td form textarea").elementExists() )
+				{
+				
+				var iActiveRow = kf.getActiveRowNumber();
+				var iMaximalIndex = fn.getNumberOfVisibleRows(sActiveTable) - 1;
+				var nActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
+				
+				if (kf.isPressed("uparrow") && iActiveRow > 0 )
+					{
+					// remove highlight from current row
+					// except in selection mode when shiftkey is pressed
+					if ($(nActiveRowNode).hasClass('row_selected') && 
+							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) )
+						{
+						$(nActiveRowNode).toggleClass('row_selected');						
+						}
+					
+					// decrease row index
+					iActiveRow--;
+					kf.setActiveRowNumber(iActiveRow);
+					
+					// put highlight on new row
+					var newActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
+					$(newActiveRowNode).toggleClass('row_selected');
+					
+					
+					// if row is out of viewport, scroll down
+					if( !$(newActiveRowNode).isOnScreen() )
+						{
+						var iPositionToGoTo = $(newActiveRowNode).position().top;
+						$('html, body').animate({scrollTop: iPositionToGoTo}, 800);
+						}
+						
+					}
+				
+				else if (kf.isPressed("downarrow") && iActiveRow < iMaximalIndex )
+					{
+					// remove highlight from current row
+					// except in selection mode when shiftkey is pressed
+					if ($(nActiveRowNode).hasClass('row_selected') && 
+							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) )
+						{
+						$(nActiveRowNode).toggleClass('row_selected');
+						}
+					
+					// increase row index
+					iActiveRow++;
+					kf.setActiveRowNumber(iActiveRow);
+					
+					// put highlight on new row
+					var newActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
+					$(newActiveRowNode).toggleClass('row_selected');
+					
+					
+					// if row is out of viewport, scroll up
+					if( !$(newActiveRowNode).isOnScreen() )
+						{
+						var iPositionToGoTo = $(newActiveRowNode).position().top;
+						$('html, body').animate({scrollTop: iPositionToGoTo}, 800);
+						}
+					}
+				
+				else if (kf.isPressed("uparrow") && iActiveRow == 0 
+						&& $("#"+sActiveTable+"_paginate a.paginate_active:eq(0)").text()!="1"	)
+					{
+					row.clearRowSelection(sActiveTable);
+					kf.setActiveRowNumber(iMaximalIndex);
+					
+					$('html, body').animate({scrollTop: mt.getDataTableObjectOf(sActiveTable).$("tr").last().position().top}, 800);
+					mt.getDataTableObjectOf(sActiveTable).fnPageChange("previous");					
+					}
+				
+				else if (kf.isPressed("downarrow") && iActiveRow == iMaximalIndex)
+					{
+					row.clearRowSelection(sActiveTable);
+					kf.setActiveRowNumber(0);
+					
+					$('html, body').animate({scrollTop: mt.getDataTableObjectOf(sActiveTable).$("tr").first().position().top}, 800);
+					mt.getDataTableObjectOf(sActiveTable).fnPageChange("next");
+					}
+				}
+			
+			// prevent scrolling of screen when pressing the up/down arrows
+			// (needed as last command)
+			// exception: when we are inside a textarea, where default behaviour of
+			//            arrow keys is needed for navigation in the textarea 
+			if (!$("td form textarea").elementExists())
+				return false;
+			}
+		
+		if (kf.isPressed("leftarrow") && e.ctrlKey)
+			{
+			var iXposition = $('html, body').scrollLeft();
+			var iStep = $('html').width()/2;
+			$('html, body').animate({scrollLeft: iXposition-iStep}, 250);
+			e.preventDefault();
+			}
+		
+		if (kf.isPressed("rightarrow") && e.ctrlKey)
+			{
+			var iXposition = $('html, body').scrollLeft();
+			var iStep = $('html').width()/2;
+			$('html, body').animate({scrollLeft: iXposition+iStep}, 250);
+			e.preventDefault();
+			}
+		
+		// call context menu
+		// and don't interfere with inline edit (jeditable)
+//		if (kf.isPressed("+") && !$("td form input").elementExists())
+//			{			
+//			var sActiveTable = kf.getActiveTable();
+//			var iActiveRow = kf.getActiveRowNumber();
+//			// triggers jQuery.contextMenu 
+//			// (see: http://medialize.github.com/jQuery-contextMenu/docs.html)
+//			$("#"+sActiveTable+" tbody tr:eq("+iActiveRow+") td").contextMenu();
+//			
+//			}
+		
+		// switch table
+		if (kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus)
+			{	
+			
+			var sActiveTable = kf.getActiveTable();
+			// look up the current table in the list of available tables
+			// get its index and compute the index of the next table,
+			// then switch!
+			var aTableList = kf._getListOfTablesGettingFocusUponTab();
+			var iIndexOfActiveTable = $.inArray(sActiveTable, aTableList);
+			if (iIndexOfActiveTable + 1 < aTableList.length)
+				iIndexOfActiveTable++;
+			else
+				iIndexOfActiveTable = 0;
+			
+			// this will call a header function setting this table active
+			$("#" + aTableList[iIndexOfActiveTable] + "_wrapper .top").mousedown();			
+			}
+    });
+    
+	$(document).unbind('keyup');
+    $(document).bind('keyup', function() {
+    	
+    	// call user key functions
+    	// (needs to be called before kf.registerReleasedKey)
+    	kf._callCustomKeyFunctions('keyup'); 
+    	
+    	// register that all keys are released
+    	kf.registerReleasedKey();  
+    	  		
+    });
+	
+};
+
+// get the list of tables which are set to be sensitive to tab (get focus upon tab)
+kf._getListOfTablesGettingFocusUponTab = function(){
+	var aTableList = mt.getListOfLoadedTables();
+	var aListOfTabSensitiveTables = new Array();
+	for (var i=0; i<aTableList.length; i++)
+		{
+		var aTableSettings = conf.getTableSettings(aTableList[i]);
+		var bTabSensitive = conf.getTabSetting(aTableSettings);
+		if (bTabSensitive)
+			aListOfTabSensitiveTables.push(aTableList[i]);
+		}
+	return aListOfTabSensitiveTables;
+};
+
+// call user key functions, if defined in the user configuration
+kf._callCustomKeyFunctions = function(sKeyEventType){
+	
+	// prevents execution while editing a cell or typing a search query
+	if ($("input:focus").elementExists()) return false;
+	
+	var sActiveTable = kf.getActiveTable();	
+	var aTableSettings = conf.getTableSettings(sActiveTable);
+	var aKeySettings = conf.getKeysSettings(aTableSettings, sKeyEventType);
+	var sPressedKey = kf._getPressedKey();
+	
+	if (aKeySettings!= null && aKeySettings[sPressedKey] != null)
+		{
+		aKeySettings[sPressedKey](sActiveTable);
+		}
+};
+
+kf._getTrElement = function(sTableName, iRowNumber){
+	return "#"+sTableName+" tbody tr:eq("+iRowNumber+")";
+};

@@ -1,0 +1,5 @@
+db=gb_gigp_20140618
+schema=public
+host=svowdb02.inl.loc
+user=postgres
+pass=inl

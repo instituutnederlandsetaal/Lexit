@@ -1,0 +1,582 @@
+package lexit.util;
+
+
+
+import lexit.resources.DbResponseObject;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Properties;
+
+
+
+public class PostgresDatabaseCommunication {
+
+	public PostgresDatabaseCommunication() {
+	}	
+	
+	/**
+	 * Database connection
+	 */
+	private Connection db;
+	
+	
+	/**
+	 * Sluit de connectie met de MySQL database. Dit moet helemaal aan het eind 
+	 * van het programma gebeuren.
+	 */
+	public void closeConnection()
+		{
+		try {
+			db.close();
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException("Error while closing the connection!", e);
+		}
+	}
+	
+	public void connectTo(String host, String db, String user, String password)
+	{
+		// location		
+		String location = "jdbc:postgresql://"+host+":5432/"+db;
+		
+		System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
+		
+        // checks if the class exists (implicitly if the library is there)
+        try {
+        Class.forName("org.postgresql.Driver");
+
+        } catch (ClassNotFoundException e) {        
+        throw new RuntimeException("PostgreSQL JDBC Driver not found. Include it in your library path!", e);
+        }
+
+        try {
+        	Properties props = new Properties();
+        	props.setProperty("user", user);
+        	props.setProperty("password", password);
+        	props.setProperty("charSet", "UTF8");
+        	//props.setProperty("prepareThreshold", "1");
+        	this.db = DriverManager.getConnection(location, props);
+
+        } catch (Exception e) {
+        throw new RuntimeException("Connection Failed! Check output console!", e);
+        }
+
+        if (this.db == null)
+            System.out.println("Failed to make connection!");
+		
+	}
+	
+	
+	public ResultSet sendQuery(String query) 
+	{
+		System.out.println(query);
+		
+		// Get the results
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{			
+			// Create a Statement object
+			stmt = this.db.createStatement();
+			rs = stmt.executeQuery(query);			
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException("Error while executing query "+query, e);
+		}				
+		return rs;
+	}
+	
+	/**
+	 * Send a query with a time limit
+	 * @param query
+	 * @param timeLimitInMilliseconds
+	 * @return
+	 */
+	public ResultSet sendQueryWithTimeout(String query, int timeLimitInMilliseconds) 
+	{
+		System.out.println(query);
+		long timeBeforeQuery = new Date().getTime();
+		
+		// Get the results
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{			
+			// Create a Statement object
+			stmt = this.db.createStatement();
+			
+			// set a timeout in milliseconds
+			// (beware: setting this must happen in a separate query: we can't bundle this
+			//  with the main query, or it won't have any effect!)
+			String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+			stmt.executeUpdate(SetTimeOutQuery);
+			
+			// the timeout is set, now execute the query
+			rs = stmt.executeQuery(query);			
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception "+e.getMessage());
+			if (e.getMessage().toLowerCase().contains("timeout"))
+			{
+				// show a message but throw no exception
+				// so time out will return null
+				long timeAfterQuery = new Date().getTime();
+				System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
+			}
+			else
+			{
+				// error, throw an exception and return no value
+				throw new RuntimeException("Error while executing query "+query, e);
+			}
+		}
+		finally {
+			
+			// finally, reset the original timeout settings
+			String ResetTimeOutQuery = "RESET statement_timeout;";
+			
+			try {
+				// Create a new Statement object
+				stmt = this.db.createStatement();
+				// reset timeout
+				stmt.executeUpdate(ResetTimeOutQuery);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException("Error while executing query "+query, e);
+			}
+		}
+		
+		return rs;
+	}
+
+	public void sendUpdate(String query) 
+	{
+		System.out.println(query);
+		
+		Statement stmt = null;
+		try
+		{
+			// Create a Statement object
+			stmt = this.db.createStatement();
+			stmt.executeUpdate(query);
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException("Error while executing query "+query, e);
+		}
+	}
+	
+	
+	public ResultSet sendPreparedQuery(String query, String[] args) 
+	{
+		// if the query args contains null values,
+		// the query needs to be rebuilt
+		QueryObject qo = rebuildQueryIfArgListContainsNullValues(new QueryObject(query, args, null));
+		// if the query requires 'exact equality', remove regex operator to speed up the query
+		qo = rebuildQueryIfArgRequiresStrictEquality(qo);
+		query = qo.getQuery();
+		args = qo.getArgs();
+		
+		System.out.println(query);
+		System.out.println(Util.join(args, ", "));
+		
+		// Get the results
+		ResultSet rs = null;
+		PreparedStatement prest = null;
+		try
+		{
+			// prepare statement
+			prest = this.db.prepareStatement(query,
+					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+			// debug
+			//System.out.println(query);
+			for (int i=0; i<args.length; i++)
+			{
+				String oneArg = args[i];
+				
+				if ( Util.isInteger(oneArg))
+					prest.setInt(i+1, Integer.parseInt(oneArg));
+				else
+					prest.setString(i+1,oneArg);				
+			}
+			
+						
+			rs = prest.executeQuery();
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException("Error while executing query "+query, e);
+		}
+		
+		return rs;
+	}
+	
+	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato) 
+	{
+		
+		// if the query args contains null values,
+		// the query needs to be rebuilt
+		QueryObject qo = rebuildQueryIfArgListContainsNullValues(new QueryObject(query, args, ato));
+		// if the query requires 'exact equality', remove regex operator to speed up the query
+		qo = rebuildQueryIfArgRequiresStrictEquality(qo);
+		query = qo.getQuery();
+		args = qo.getArgs();
+		ato = qo.getAto();
+		
+		System.out.println(query);
+		System.out.println(Util.join(args, ", "));
+		
+		// Get the results
+		ResultSet rs = null;
+		PreparedStatement prest = null;
+		try
+		{
+			// prepare statement
+			prest = this.db.prepareStatement(query,
+					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+			for (int i=0; i<args.length; i++)
+			{
+				String oneArg = args[i];
+				String oneType = ato.getType(i);
+						
+				
+				if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
+				}
+				else if (oneType.equals("boolean"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.BOOLEAN);
+					else 
+						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
+				}
+				else if ( isNumericType(oneType) )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.INTEGER);
+					else 
+						prest.setInt(i+1, Integer.parseInt(oneArg));
+				}
+				else
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.VARCHAR);
+					else 
+						prest.setString(i+1, oneArg);
+				}				
+			}
+			
+			
+			rs = prest.executeQuery();
+		}
+		catch (SQLException e)
+		{
+			throw new RuntimeException("Error while executing query "+query, e);
+		}
+		
+		return rs;
+	}
+	
+	public void sendPreparedUpdate(String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) 
+	{
+		
+		// if the query args contains null values,
+		// the query needs to be rebuilt
+		QueryObject qo = rebuildQueryIfArgListContainsNullValues(new QueryObject(query, args, ato));
+		// if the query requires 'exact equality', remove regex operator to speed up the query
+		qo = rebuildQueryIfArgRequiresStrictEquality(qo);
+		query = qo.getQuery();
+		args = qo.getArgs();
+		ato = qo.getAto();
+		
+		System.out.println(query);
+		System.out.println(Util.join(args, ", "));
+		
+		PreparedStatement prest;
+		
+		try
+		{
+			// Create a Statement object
+			prest = this.db.prepareStatement(query);
+			
+			for (int i=0; i<args.length; i++)
+			{
+				String oneArg = args[i];						
+				String oneType = ato.getType(i);
+				
+				
+				
+				if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
+				}
+				else if (oneType.equals("boolean"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.BOOLEAN);
+					else 
+						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
+				}
+				else if ( isNumericType(oneType) )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.INTEGER);
+					else 
+						prest.setInt(i+1, Integer.parseInt(oneArg));
+				}
+				else
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.VARCHAR);
+					else 
+						prest.setString(i+1, oneArg);
+				}
+				
+				
+				String showArg = oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
+				System.out.println(i+1+" -> "+showArg+" "+oneType);
+			}
+			
+			
+			prest.executeUpdate();
+			dro.setResponse("OK");
+		}
+		catch (SQLException e)
+		{
+			dro.setResponse("Error while executing query "+query);
+			throw new RuntimeException("Error while executing query "+query, e);
+		}			
+
+	}
+	
+	
+	/**
+	 * Somehow prepared statements don't work with " IS ? "
+	 * so in this special case, we need to replace the question mark by its value in the query
+	 * @param query
+	 * @param args
+	 */
+	private QueryObject rebuildQueryIfArgListContainsNullValues(QueryObject qo){
+				
+		// what's the query about?
+		String query = qo.getQuery();
+		String[] args = qo.getArgs();
+		ArgumentTypesObject ato = qo.getAto();
+		
+		// if current query doesn't contain any null value, leave right away
+		if (Util.getIndexOf(null, args)<0)
+			return qo;
+		
+		// Split the query into its elements.
+		// As we are dealing with a prepared statement, the question marks in the
+		// query won't be part of text strings, but will only represent such strings,
+		// so there is no danger of misinterpreting the questions marks
+		String[] querySplit = query.split("\\?");
+		ArrayList<String> newArgsList = new ArrayList<String>();
+		ArgumentTypesObject newAto = new ArgumentTypesObject();
+		
+		// rebuild the query without null values in args list
+		String rebuiltQuery = "";
+		
+		for (int i=0; i<querySplit.length; i++)
+		{
+			rebuiltQuery += querySplit[i];
+			
+			// if we have reached the last part of the query
+			// we won't have any corresponding argument, so break
+			if (i+1 == querySplit.length)
+				break;
+		
+			
+			// if we have a null value as an argument for the question mark 
+			if (args[i] == null)
+			{
+				// we replace the question mark by its value
+				// an remove the corresponding argument
+				rebuiltQuery += " null ";
+			}
+			// otherwise
+			else
+			{
+				// we keep the question mark and the corresponding argument
+				rebuiltQuery += "?";
+				newArgsList.add(args[i]);
+				if (ato!=null) newAto.setType(newArgsList.size()-1, ato.getType(i));
+			}
+		}
+		
+		// rewrite query, args list, and argument types object				
+		return new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);
+	}
+	
+	
+	/**
+	 * Change  [~* 'exact:word'] into  [= 'word']
+	 * This is convenient because = is much faster than ~* 
+	 * @param qo
+	 * @return
+	 */
+	private QueryObject rebuildQueryIfArgRequiresStrictEquality(QueryObject qo){
+		
+		// what's the query about?
+		String query = qo.getQuery();
+		String[] args = qo.getArgs();
+		ArgumentTypesObject ato = qo.getAto();
+		
+		// if current query doesn't contain any 'exact equality' regex, leave right away
+		boolean found = false;
+		for (String oneArg : args)
+		{
+			if (oneArg.startsWith("exact:")) 
+				{
+				found = true;
+				break;
+				}
+		}
+		if ( !found )
+			return qo;
+		
+		// Split the query into its elements.
+		// As we are dealing with a prepared statement, the question marks in the
+		// query won't be part of text strings, but will only represent such strings,
+		// so there is no danger of misinterpreting the questions marks
+		String[] querySplit = query.split("\\?");
+		ArrayList<String> newArgsList = new ArrayList<String>();
+		ArgumentTypesObject newAto = new ArgumentTypesObject();
+		
+		// rebuild the query without 'exact equality' regexes
+		String rebuiltQuery = "";
+		
+		for (int i=0; i<querySplit.length; i++)
+		{
+			rebuiltQuery += querySplit[i];
+			
+			// if we have reached the last part of the query
+			// we won't have any corresponding argument, so break
+			if (i+1 == querySplit.length)
+				break;
+		
+			
+			// if we have an 'exact equality' as an argument for the question mark 
+			if (args[i].startsWith("exact:"))
+			{
+				// we remove 'exact:'	
+				// and change the operator into '='		
+						
+				rebuiltQuery = rebuiltQuery.trim();
+				
+				// two possibilities: case sensitive or insensitive
+				
+				// 1. case sensitive
+				//    (exact equality operator)
+				if (rebuiltQuery.endsWith("~"))
+				{
+					// remove 'exact:'
+					newArgsList.add( args[i].substring("exact:".length()) );
+					// set argument type
+					if (ato!=null) newAto.setType(newArgsList.size()-1, ato.getType(i));
+					// change regex operator into strict equality
+					rebuiltQuery = rebuiltQuery.substring(0, rebuiltQuery.lastIndexOf("~")) + "=";
+				}
+				
+				
+				// 2. or case insensitive 
+				//    (put everything to lowercase a both sides of equality operator)
+				else if (rebuiltQuery.endsWith("~*"))
+				{
+					// remove 'exact:' and lowercase the argument
+					newArgsList.add(args[i].substring("exact:".length()).toLowerCase());
+					// set argument type
+					// it must be set to 'text' as we will cast the argument to text further on
+					if (ato!=null) newAto.setType(newArgsList.size()-1, "text"); 
+					
+					// remove last regex operator and surround the last column name with 'lower(...)'
+					// first: make sure the column name will be surrounded by spaces, since
+					//  we will be using spaces to recognize borders
+					rebuiltQuery = rebuiltQuery.replaceAll("\\(", "( ").replaceAll("\\)", " )").replaceAll("\\s+", " ");
+					
+					// remove the regex operator ~* 
+					String rebuiltQueryWithoutLastOperator = rebuiltQuery.substring(0, rebuiltQuery.lastIndexOf("~*")).trim();
+					// the last column name might be the complex expression 'cast(... as text)'
+					// or otherwise just a column name
+					String expectedBeforeColumnName = " ";
+					if (rebuiltQueryWithoutLastOperator.toLowerCase().endsWith("as text )"))
+						expectedBeforeColumnName = " cast(";
+					String lastColumnName = 
+						rebuiltQueryWithoutLastOperator.substring(rebuiltQueryWithoutLastOperator.toLowerCase().lastIndexOf(expectedBeforeColumnName)+1);					
+					rebuiltQuery = 
+						rebuiltQueryWithoutLastOperator.substring(0, rebuiltQueryWithoutLastOperator.toLowerCase().lastIndexOf(expectedBeforeColumnName)) + 
+					" LOWER(CAST("+lastColumnName+" AS text)) = ";	// cast needed to support custom types columns 			
+				}
+				// we keep the question mark and the corresponding argument
+				rebuiltQuery += "?";
+			}
+			// otherwise
+			else
+			{
+				// we keep the question mark and the corresponding argument
+				rebuiltQuery += "?";
+				newArgsList.add(args[i]);
+				if (ato!=null) newAto.setType(newArgsList.size()-1, ato.getType(i));
+			}
+		}
+		
+		// rewrite query, args list, and argument types object				
+		return new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);
+	}
+	
+	
+	
+	
+	/**
+	 * check which kind of data type we have
+	 */
+	
+	// do we have a textual type?
+	public static boolean isTextualType(String typeName){
+		
+		// see: http://www.postgresql.org/docs/9.0/static/datatype-character.html
+		return typeName.startsWith("character varying(") ||
+			typeName.startsWith("varchar(") ||
+			typeName.startsWith("character(") ||
+			typeName.startsWith("char(")||
+			typeName.equals("text");
+	};
+	
+	// do we have a numeric type?
+	public static boolean isNumericType(String typeName){
+		
+		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
+		return typeName.startsWith("integer") ||
+			typeName.startsWith("bigint") ||
+			typeName.startsWith("smallint") ||
+			typeName.startsWith("decimal") ||
+			typeName.startsWith("real") ||
+			typeName.startsWith("double precision") ||
+			typeName.startsWith("serial") ||
+			typeName.startsWith("bigserial") ||
+			typeName.startsWith("numeric");
+	};
+	
+
+}
