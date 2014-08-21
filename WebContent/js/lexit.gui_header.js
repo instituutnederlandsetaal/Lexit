@@ -578,12 +578,17 @@ head.putSelectionButton = function(sSomeTablename){
 			function(){	
 		
 		mt.putRowSelectionIsAllowed(sSomeTablename, true);
+		
+		// disable the checkboxes to make sure those won't be (un)checked during row selection 
+		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", true);
 				
+		// give button the right settings
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
 			.css("background-color", "#EE0000")
 			.attr("title", "Zet rijselectie UIT [F2]").addClass("tooltip");
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
 			.delay(500).removeClass("functions_awake").addClass("functions_sleep");
+		
 		$(".tooltip").tipTip(oTiptipConfig);
 		
 	});
@@ -591,12 +596,17 @@ head.putSelectionButton = function(sSomeTablename){
 			function(){		
 		
 		mt.putRowSelectionIsAllowed(sSomeTablename, false);
-				
+		
+		// re-enable checkboxes after those have been disabled when selection modus was put on
+		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", false);		
+		
+		// give button the right settings
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
 			.css("background-color", "#99CCFF")
 			.attr("title", "Zet rijselectie AAN [F2]").addClass("tooltip");
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
-			.delay(500).removeClass("functions_sleep").addClass("functions_awake");	
+			.delay(500).removeClass("functions_sleep").addClass("functions_awake");
+		
 		$(".tooltip").tipTip(oTiptipConfig);
 		
 		// remove row selection

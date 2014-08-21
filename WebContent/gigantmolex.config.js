@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-06-25                                        **
+// **      2014-08-19                                        **
 // **                                                        **
 // ************************************************************
 
@@ -39,11 +39,11 @@ oTableSettingsList = {
 					var sTableName = fn.getTableName(t);
 					
 					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
-					filterValues["gb05"] = (!filterValues["gb05"]==false) ? "":true;
+					filterValues["source_gb05"] = (!filterValues["source_gb05"]==false) ? "":true;
 					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
 					
 					fn.refreshTable(t);
-					fn.setCustomButtonCss(t, 0, "background-color", (filterValues["gb05"]?"#F5A9A9":"#FBEFEF"));
+					fn.setCustomButtonCss(t, 0, "background-color", (filterValues["source_gb05"]?"#F5A9A9":"#FBEFEF"));
 				}
 			},
 			"button_1":{
@@ -55,15 +55,15 @@ oTableSettingsList = {
 					var sTableName = fn.getTableName(t);
 					
 					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
-					filterValues["molex_hom"] = (!filterValues["molex_hom"]==false) ? "":true;
+					filterValues["source_molex_hom"] = (!filterValues["source_molex_hom"]==false) ? "":true;
 					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
 					
 					fn.refreshTable(t);
-					fn.setCustomButtonCss(t, 1, "background-color", (filterValues["molex_hom"]?"#F5A9A9":"#FBEFEF"));
+					fn.setCustomButtonCss(t, 1, "background-color", (filterValues["source_molex_hom"]?"#F5A9A9":"#FBEFEF"));
 				}
 			},
 			"button_2":{
-				"name": "Logfiles paradigma-uitbreiding",
+				"name": "Logfiles",
 				"bgcolor":"#FBEFEF",
 				"textcolor": "black",
 				"click": function(t){
@@ -71,11 +71,11 @@ oTableSettingsList = {
 					var sTableName = fn.getTableName(t);
 					
 					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
-					filterValues["prdgm_uitbr"] = (!filterValues["prdgm_uitbr"]==false) ? "":true;
+					filterValues["source_logfiles"] = (!filterValues["source_logfiles"]==false) ? "":true;
 					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
 					
 					fn.refreshTable(t);
-					fn.setCustomButtonCss(t, 2, "background-color", (filterValues["prdgm_uitbr"]?"#F5A9A9":"#FBEFEF"));
+					fn.setCustomButtonCss(t, 2, "background-color", (filterValues["source_logfiles"]?"#F5A9A9":"#FBEFEF"));
 				}
 			},
 			"button_3":{
@@ -87,11 +87,11 @@ oTableSettingsList = {
 					var sTableName = fn.getTableName(t);
 					
 					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
-					filterValues["molex_nw_lem"] = (!filterValues["molex_nw_lem"]==false) ? "":true;
+					filterValues["source_molex_nw_lem"] = (!filterValues["source_molex_nw_lem"]==false) ? "":true;
 					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
 					
 					fn.refreshTable(t);
-					fn.setCustomButtonCss(t, 3, "background-color", (filterValues["molex_nw_lem"]?"#F5A9A9":"#FBEFEF"));
+					fn.setCustomButtonCss(t, 3, "background-color", (filterValues["source_molex_nw_lem"]?"#F5A9A9":"#FBEFEF"));
 				}
 			},
 			"button_4":{
@@ -103,11 +103,59 @@ oTableSettingsList = {
 					var sTableName = fn.getTableName(t);
 					
 					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
-					filterValues["molex_niet_hom"] = (!filterValues["molex_niet_hom"]==false) ? "":true;
+					filterValues["source_molex_niet_hom"] = (!filterValues["source_molex_niet_hom"]==false) ? "":true;
 					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
 					
 					fn.refreshTable(t);
-					fn.setCustomButtonCss(t, 4, "background-color", (filterValues["molex_niet_hom"]?"#F5A9A9":"#FBEFEF"));
+					fn.setCustomButtonCss(t, 4, "background-color", (filterValues["source_molex_niet_hom"]?"#F5A9A9":"#FBEFEF"));
+				}
+			},
+			"button_5":{
+				"name": "ANW",
+				"bgcolor":"#FBEFEF",
+				"textcolor": "black",
+				"click": function(t){
+					
+					var sTableName = fn.getTableName(t);
+					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					filterValues["source_anw"] = (!filterValues["source_anw"]==false) ? "":true;
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					
+					fn.refreshTable(t);
+					fn.setCustomButtonCss(t, 5, "background-color", (filterValues["source_anw"]?"#F5A9A9":"#FBEFEF"));
+				}
+			},
+			"button_6":{
+				"name": "Telwoord",
+				"bgcolor":"#FBEFEF",
+				"textcolor": "black",
+				"click": function(t){
+					
+					var sTableName = fn.getTableName(t);
+					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					filterValues["source_telw"] = (!filterValues["source_telw"]==false) ? "":true;
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					
+					fn.refreshTable(t);
+					fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
+				}
+			},
+			"button_7":{
+				"name": "CHN++",
+				"bgcolor":"#FBEFEF",
+				"textcolor": "black",
+				"click": function(t){
+					
+					var sTableName = fn.getTableName(t);
+					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					filterValues["source_chn"] = (!filterValues["source_chn"]==false) ? "":true;
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					
+					fn.refreshTable(t);
+					fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
 				}
 			}
 
@@ -149,15 +197,21 @@ oTableConfigurationList = {
 
 		lemmata_view: {
 			
-			"molex_hom": { "visible": false },
-			"prdgm_uitbr": { "visible": false },
-			"molex_nw_lem": { "visible": false },
-			"molex_niet_hom": { "visible": false },
-			"gb05": { "visible": false },
+			"source_molex_hom": { "visible": false },			
+			"source_molex_nw_lem": { "visible": false },
+			"source_molex_niet_hom": { "visible": false },
+			"source_logfiles": { "visible": false },
+			"source_anw": { "visible": false },
+			"source_telw": { "visible": false },
+			"source_chn": { "visible": false },
+			"source_gb05": { "visible": false },
 			
 			"pkid":{				
 				"visible": false
 			},
+			"parent_id":{				
+				"visible": false
+			}, 
 			"parent":{
 				"cell_tooltip": "Toon alle lemmata behorend bij dit superlemma",
 				"click": function(t, n){
@@ -215,8 +269,8 @@ oTableConfigurationList = {
 			"trademark": {
 				"visible": false
 			},
-			"homo":{
-				"visible": false
+			"gedrukt":{
+				"editable": true
 			}
 			
 		},

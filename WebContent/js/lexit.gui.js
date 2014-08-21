@@ -258,13 +258,15 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 	// CHECKBOXES
 	
 	$("#"+sSomeTableName+" td.editable_checkbox").bind("click", function(){
-					
+		
+		// if rows are being selected, undo doesn't make sense!
+		if (mt.rowSelectionIsAllowed(sSomeTableName))
+			return true;
+		
 		var aPos = mt.getDataTableObjectOf(sSomeTableName).fnGetPosition( this );
 		
-		// get value of cell
-		
-		var checked = !$(this).find("input").eq(0).attr("checked");
-		
+		// get value of cell		
+		var checked = !$(this).find("input").eq(0).attr("checked");		
 		
 		var isACheckBoxType = $.inArray(mt.getListOfColumnTypesOf(sSomeTableName)[aPos[2]], ["bit varying(1)", "boolean"]);
 		var bIsBooleanType = mt.getListOfColumnTypesOf(sSomeTableName)[aPos[2]] == "boolean";
@@ -289,6 +291,10 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 	
 	$("#"+sSomeTableName+" td.editable_selectbox").bind("change", function(){
 		
+		// if rows are being selected, undo doesn't make sense!
+		if (mt.rowSelectionIsAllowed(sSomeTableName))
+			return true;
+		
 		var aPos = mt.getDataTableObjectOf(sSomeTableName).fnGetPosition( this );
 		
 		// get value of cell
@@ -310,6 +316,13 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 
 
 gui.makeTableEditable = function(sSomeTablename){
+	
+	// special case:
+	// if this function is called at fnDrawCallback, while row selection mode is activated
+	// than the checkboxes must keep disabled until the row selection mode is put back off	
+	if (mt.rowSelectionIsAllowed(sSomeTablename))
+		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", true);
+	
 	
 	// TEXT CELLS HANDLER	
 	
@@ -484,7 +497,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		
 		// if rows are being selected, we don't want to edit rows!
 		if (mt.rowSelectionIsAllowed(sSomeTablename))
-			{			
+			{
 			// handle row selection
 			row._rowSelectionHandler(sSomeTablename, this.parentNode);
 			return true;

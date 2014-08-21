@@ -22,7 +22,8 @@ oShowOnlyTables = ["lexiconexport1",
                    
                    "non_homonyms_worktable_verbs", 
                    "non_homonyms_worktable_nouns", 
-                   "non_homonyms_worktable_rest"];
+                   "non_homonyms_worktable_rest",
+                   "klus_verwijslemmata"];
 
 
 
@@ -244,6 +245,11 @@ oTableSettingsList = {
 		logfiles_090514_pos: {
 			"size": "60%"
 		},
+
+               klus_verwijslemmata: {
+                     "nice_name": "Check de verwijslemmata",
+                     "column_order":  ["histlemma", "refhistlemma", "corrected_modlemma", "refmodlemma", "nagekeken", "comment", "hulkcomment", "resolved", "type",  "historicallemmaid", "referencedlemmaid", "modlemma", "id", "info", "rowid"]
+                },
 		
 		nieuwe_mnw_lemmata: {
 			
@@ -1022,5 +1028,51 @@ oTableConfigurationList = {
 			"opmerkingen": {				
 				"editable": true
 			}
-		}
+		},
+
+
+
+               klus_verwijslemmata:
+               {
+                  rowid: { visible: false},
+                  id: { visible: false},
+                  info:  { visible: false},
+                  type: { visible: false},
+                  resolved: { visible: false},
+                  histlemma: { "textstyle" : "oblique" },
+                  refhistlemma: { "textstyle" : "oblique" },
+                  corrected_modlemma: { editable: true, "bgcolor": ["#9999FF", "#6666FF"], "font-style": "italic" },
+                  comment: { editable: true },
+                  refmodlemma: {
+                      "bgcolor": ["#FF9999", "#FF6666"],
+                      "click":   function(confTable,confNode)
+                          {
+                            var l = fn.getDataFromSiblingNode(confTable, confNode, "refmodlemma");
+                            fn.updateDatabaseGivenANode(confTable, confNode, "corrected_modlemma", l, true,
+                                          function(){fn.refreshTable("verwijslemma_nakijkklus");});
+                          },
+                   },
+                   historicallemmaid : {
+				"button": "Verwijslemma",
+				"button_tooltip": "Open woordenboek",
+				"sortable": false,
+				"click": function(confTable, confNode){
+					var id = fn.getDataFromSiblingNode(confTable, confNode, "historicallemmaid");
+					var dic = "WNT";
+					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb="+dic+"&id="+id+"&content-type=text/html; charset=utf-8";
+					window.open(url);
+				}
+			},
+                   referencedlemmaid: {
+				"button": "Verwijst naar",
+				"button_tooltip": "Open woordenboek",
+				"sortable": false,
+				"click": function(confTable, confNode){
+					var id = fn.getDataFromSiblingNode(confTable, confNode, "referencedlemmaid");
+					var dic = "WNT";
+					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb="+dic+"&id="+id+"&content-type=text/html; charset=utf-8";
+					window.open(url);
+				}
+			}
+              }
 };
