@@ -7,12 +7,51 @@ oTableSettingsList = {
 		
 		hulk_worktable:{
 			"button_0":{
-				"name": "Verstuur bestand"
+				"name": "Verstuur bestand",
+				"click": function(t){
+					
+					/*
+					$.getJSON( "http://svowhu02.inl.loc/?callback=?", function( data ){
+						
+						alert("Het bestand is geladen");
+				 		fn.refreshTable(t);
+					});
+					*/
+
+					
+					$.ajax({
+						
+						"type": "GET",
+						"url": "http://svowhu02.inl.loc/ws/kick-result/1",
+						
+						"crossDomain": true,
+					 	"dataType": "json",
+					 	"success": function(data) {
+					 		alert(data.message);
+					 		fn.refreshTable(t);
+					 		},
+						"error": function(jqXHR, textStatus, errorThrown){
+							alert("Er is een fout opgetreden: "+
+								textStatus+" "+errorThrown);
+							}
+						
+					});
+					
+				}
 			},
 			"button_1":{
-				"name": "Rij dupliceren"
+				"name": "Rij dupliceren",
+				"click": function(t){
+					
+				}
 			}
 		}
+};
+
+// callback function for jsonp call
+// http://stackoverflow.com/questions/2067472/what-is-jsonp-all-about
+mycallback = function(data){
+	
 };
 
 
@@ -47,27 +86,43 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);
+					//fn.refreshTable(t);
 					}
 				},
 			en: {"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					uncheckOtherBoxes(t, n, ["wv", "afke", "ok"]);
+					//fn.refreshTable(t);
 					}
 				},
 			afke: {"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					uncheckOtherBoxes(t, n, ["wv", "en", "ok"]);
+					//fn.refreshTable(t);
 					}
 				},
 			ok: {"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
+					//fn.refreshTable(t);
 					}
 				}
 		}
 
 };
+
+var bPreventCallback = false;
+
+function uncheckOtherBoxes(oTable, nNode, aBoxesToUncheck){
+	
+	if (bPreventCallback)
+		return true;
+	
+	bPreventCallback = true;	
+	fn.uncheckCheckboxes(oTable, nNode, aBoxesToUncheck);
+	bPreventCallback = false;
+}

@@ -263,26 +263,33 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 		if (mt.rowSelectionIsAllowed(sSomeTableName))
 			return true;
 		
+		// if the checkbox wasn't clicked but only the surrounding cell, cancel!
+		if ($(this).find("input").is(":focus") == false)
+			return true;
+		
 		var aPos = mt.getDataTableObjectOf(sSomeTableName).fnGetPosition( this );
 		
 		// get value of cell		
-		var checked = !$(this).find("input").eq(0).attr("checked");		
+		// prop is most reliable (http://jquery-howto.blogspot.nl/2013/02/jquery-test-check-if-checkbox-checked.html)
+		var checked = $(this).find("input").eq(0).prop("checked") == true;	
 		
 		var isACheckBoxType = $.inArray(mt.getListOfColumnTypesOf(sSomeTableName)[aPos[2]], ["bit varying(1)", "boolean"]);
 		var bIsBooleanType = mt.getListOfColumnTypesOf(sSomeTableName)[aPos[2]] == "boolean";
 		var trueValue = bIsBooleanType ? true : 1;
 		var falseValue = bIsBooleanType ? false : 0;
 		
-		var sOldValue = (checked == 'checked'||checked == true) ? trueValue : falseValue;
+
+		var sOldValue = !checked ? trueValue : falseValue;
 		
 		// add event to undo memory stack, consisting
 		// of the id of a node, its position in the table, and its old value
 		un.addEvent(sSomeTableName, fn.getRowNode(this).getAttribute('id'), aPos[1], sOldValue);
 		
 		
-		// give cell element true or false value (must be contrary of old value, since it's been given a new value now)
-		
-		$(this).find("input").val( !(checked == 'checked'||checked == true) );
+		// give cell element true or false value 
+		// (must be contrary of old values, as the checkbox was clicked upon) 
+		var bNewValue = checked;
+		$(this).find("input").val( bNewValue );
 		
 	});
 	
@@ -337,7 +344,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			var nCurrentNode = this;
 			
 			// (needed for the undo registration, which is triggered by change events on cells)
-			if ($.browser.msie || $.browser.mozilla) // here needed for IE and FF
+			if (bowser.msie || bowser.firefox) // here needed for IE and FF
 				$(nCurrentNode).change();
 			
 			// instead of submitting an url (default in jEditable)
@@ -503,6 +510,10 @@ gui.makeTableEditable = function(sSomeTablename){
 			return true;
 			}
 		
+		// if the checkbox wasn't clicked but only the surrounding cell, cancel!
+		if ($(this).find("input").is(":focus") == false)
+			return true;
+		
 		// current node 
 		var nCurrentNode = this;
 		
@@ -511,7 +522,8 @@ gui.makeTableEditable = function(sSomeTablename){
 		var sColumnName = mt.getListOfColumnsOf(sSomeTablename)[aPos[2]];
 		var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[aPos[2]];
 		
-		// get the current (new) value of the checkbox
+		// get the new value of the checkbox
+		// (must be contrary of current value, which is actully the value before the click)
 		var newValue = gui.getTrueCheckboxValue(sSomeTablename, nCurrentNode);
 		
 		
@@ -633,7 +645,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					var nCurrentNode = this;
 				
 					// (needed for the undo registration, which is triggered by change events on cells)
-					if ($.browser.msie) // here needed for IE
+					if (bowser.msie) // here needed for IE
 						$(nCurrentNode).change();
 					
 					// instead of submitting an url (default in jEditable)
@@ -790,7 +802,8 @@ gui.getTrueCheckboxValue = function(sSomeTablename, nSomeNode){
 	var aPos = mt.getDataTableObjectOf(sSomeTablename).fnGetPosition( nSomeNode );
 	
 	// is the checkbox checked?
-	var checked = $(nSomeNode).find("input").eq(0).attr("checked");
+	// prop is the most reliable way (http://jquery-howto.blogspot.nl/2013/02/jquery-test-check-if-checkbox-checked.html)
+	var checked = $(nSomeNode).find("input").eq(0).prop("checked") == true;
 	
 	var isACheckBoxType = 
 		$.inArray(mt.getListOfColumnTypesOf(sSomeTablename)[aPos[2]], ["bit varying(1)", "boolean"]);
@@ -799,7 +812,7 @@ gui.getTrueCheckboxValue = function(sSomeTablename, nSomeNode){
 	var trueValue = bIsBooleanType ? true : 1;
 	var falseValue = bIsBooleanType ? false : 0;
 	
-	return (checked == 'checked'||checked == true) ? trueValue : falseValue;
+	return checked ? trueValue : falseValue;
 };
 
 

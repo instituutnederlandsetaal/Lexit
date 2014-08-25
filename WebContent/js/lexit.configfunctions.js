@@ -755,6 +755,38 @@ fn.isEditableNode = function(sSomeTableName, nNode){
 };
 
 
+// uncheck a list of checkboxes
+fn.uncheckCheckboxes = function(oTable, nNode, aListOfColumns){
+	
+	if (typeof oTable != 'object')
+		oTable = mt.getDataTableObjectOf(oTable);
+	
+	var sTableName = fn.getTableName(oTable);
+	// make sure we have a row node, and get its position on the screen
+	nNode = fn.getRowNode(nNode);
+	var iRowNumber = fn.getRowNumberOnScreen(oTable, nNode);
+	
+	for (var i=0; i<aListOfColumns.length; i++)
+		{
+		// get the the setting of the checkbox
+		var sColumnName = aListOfColumns[i];			
+		var iVisibleColumnNumber = fn.getVisibleColumnNumberOf(oTable, sColumnName);
+		var eCellSelector = $("#"+sTableName+" tbody tr").eq(iRowNumber).find("td").eq(iVisibleColumnNumber).find("input").eq(0);
+		// prop is the most reliable (http://jquery-howto.blogspot.nl/2013/02/jquery-test-check-if-checkbox-checked.html)
+		var bSetting = (eCellSelector.prop("checked") == true);
+		
+		// if checkbox is checked, uncheck it! 
+		if (bSetting)
+			{			
+			// focus is needed for the checkbox handler, which need to know
+			// if the checkbox was clicked, or only the surrounding cell
+			eCellSelector.focus();
+			eCellSelector.click();			
+			}
+		}
+};
+
+
 /*****************************************************************
  *     GENERAL COLUMN FUNCTIONS                                  *
  *****************************************************************/
