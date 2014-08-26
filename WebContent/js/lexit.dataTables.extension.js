@@ -55,8 +55,15 @@ $.fn.dataTableExt.oApi.fnFilterClear  = function ( oSettings )
 };
 
 // reset filters (that is: set those to the filter value from the config file)
-$.fn.dataTableExt.oApi.fnFilterReset  = function ( oSettings, sTableName )
+$.fn.dataTableExt.oApi.fnFilterReset  = function ( oSettings, bUpdateSearchBoxesValues )
 {
+	if ( typeof bUpdateSearchBoxesValues == 'undefined' )
+    {
+		bUpdateSearchBoxesValues = true;
+    }
+	
+	var sTableName = oSettings.sTableId;
+	
 	/* Remove global filter */
 	oSettings.oPreviousSearch.sSearch = "";
 	
@@ -71,13 +78,23 @@ $.fn.dataTableExt.oApi.fnFilterReset  = function ( oSettings, sTableName )
 		var sValue = keepfilter ? conf.getFilter(aColumnConfig) : null;
 		sValue = (sValue == null) ? "" : sValue;		
 		
-		oSettings.aoPreSearchCols[i].sSearch = ( sValue );
+		oSettings.aoPreSearchCols[i].sSearch = sValue;
+		
+		if (bUpdateSearchBoxesValues)
+			fn.putDataIntoFilterBox(sTableName, sColumnName, sValue);
 	}
 };
 
 // set filters to some values, given array of filters
-$.fn.dataTableExt.oApi.fnFilterSet  = function ( oSettings, sTableName, oFilters )
+$.fn.dataTableExt.oApi.fnFilterSet  = function ( oSettings, oFilters, bUpdateSearchBoxesValues )
 {
+	if ( typeof bUpdateSearchBoxesValues == 'undefined' )
+    {
+		bUpdateSearchBoxesValues = true;
+    }
+	
+	var sTableName = oSettings.sTableId;
+	
 	/* Remove global filter */
 	oSettings.oPreviousSearch.sSearch = "";
 	
@@ -87,11 +104,16 @@ $.fn.dataTableExt.oApi.fnFilterSet  = function ( oSettings, sTableName, oFilters
 		var sColumnName = mt.getListOfColumnsOf(sTableName)[i];
 		var sValue = (oFilters[sColumnName] == null) ? "" : oFilters[sColumnName];
 		
-		oSettings.aoPreSearchCols[i].sSearch = ( sValue );
+		oSettings.aoPreSearchCols[i].sSearch = sValue;
+		
+		if (bUpdateSearchBoxesValues)
+			fn.putDataIntoFilterBox(sTableName, sColumnName, sValue);
 	}
 };
-$.fn.dataTableExt.oApi.fnFilterGet  = function ( oSettings, sTableName )
+$.fn.dataTableExt.oApi.fnFilterGet  = function ( oSettings )
 {
+	var sTableName = oSettings.sTableId;
+	
 	var filterList = {};
 	
 	/* Set the search text for the column filters */
@@ -111,7 +133,7 @@ $.fn.dataTableExt.oApi.fnFilterGet  = function ( oSettings, sTableName )
 };
 
 // set the global filter
-$.fn.dataTableExt.oApi.fnGlobalFilterSet  = function ( oSettings, sValue)
+$.fn.dataTableExt.oApi.fnGlobalFilterSet  = function ( oSettings, sValue )
 {
 	/* Set global filter */
 	oSettings.oPreviousSearch.sSearch = sValue;
@@ -124,8 +146,10 @@ $.fn.dataTableExt.oApi.fnGlobalFilterGet  = function ( oSettings )
 
 
 // add some filters to existing filters (see fnFilterSet)
-$.fn.dataTableExt.oApi.fnFilterAdd  = function ( oSettings, sTableName, oFilters )
+$.fn.dataTableExt.oApi.fnFilterAdd  = function ( oSettings, oFilters )
 {	
+	var sTableName = oSettings.sTableId;
+	
 	// Loop throught the columns and add the searched text for each column filter 
 	for ( var i=0, iLen=oSettings.aoPreSearchCols.length ; i<iLen ; i++ )
 	{

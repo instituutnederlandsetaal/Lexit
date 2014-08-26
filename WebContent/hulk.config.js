@@ -2,12 +2,15 @@
 oHiddenTablesList = [];
 oShowOnlyTables = ["hulk_worktable"];
 
+
+var bToonHulkGeaccepteerd = true;
+
 // table general settings
 oTableSettingsList = {
 		
 		hulk_worktable:{
 			"button_0":{
-				"name": "Verstuur bestand",
+				"name": "Genereer resultaatbestand",
 				"click": function(t){
 					
 					/*
@@ -40,6 +43,17 @@ oTableSettingsList = {
 				}
 			},
 			"button_1":{
+				"name": "Toon HulK-geaccepteerd",
+				"click": function(t){
+					bToonHulkGeaccepteerd = !bToonHulkGeaccepteerd;
+					var hulkOordeelToLookFor = bToonHulkGeaccepteerd ? "" : "!^OK";
+					fn.putDataIntoFilterBox(t, "hulk_oordeel", hulkOordeelToLookFor);
+					t.fnFilterSet({"hulk_oordeel": hulkOordeelToLookFor});
+					fn.setCustomButtonName(t, 1, (bToonHulkGeaccepteerd ? "Toon" : "Verberg") + " HulK-geaccepteerd");
+					fn.refreshTable(t);
+				}
+			},
+			"button_2":{
 				"name": "Rij dupliceren",
 				"click": function(t){
 					

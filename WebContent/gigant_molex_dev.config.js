@@ -38,9 +38,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_gb05"] = (!filterValues["source_gb05"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 0, "background-color", (filterValues["source_gb05"]?"#F5A9A9":"#FBEFEF"));
@@ -54,9 +54,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_molex_hom"] = (!filterValues["source_molex_hom"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 1, "background-color", (filterValues["source_molex_hom"]?"#F5A9A9":"#FBEFEF"));
@@ -70,9 +70,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_logfiles"] = (!filterValues["source_logfiles"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 2, "background-color", (filterValues["source_logfiles"]?"#F5A9A9":"#FBEFEF"));
@@ -86,9 +86,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_molex_nw_lem"] = (!filterValues["source_molex_nw_lem"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 3, "background-color", (filterValues["source_molex_nw_lem"]?"#F5A9A9":"#FBEFEF"));
@@ -102,9 +102,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_molex_niet_hom"] = (!filterValues["source_molex_niet_hom"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 4, "background-color", (filterValues["source_molex_niet_hom"]?"#F5A9A9":"#FBEFEF"));
@@ -118,9 +118,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_anw"] = (!filterValues["source_anw"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 5, "background-color", (filterValues["source_anw"]?"#F5A9A9":"#FBEFEF"));
@@ -134,9 +134,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_telw"] = (!filterValues["source_telw"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
@@ -150,9 +150,9 @@ oTableSettingsList = {
 					
 					var sTableName = fn.getTableName(t);
 					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet(sTableName);					
+					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
 					filterValues["source_chn"] = (!filterValues["source_chn"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(sTableName, filterValues);
+					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
@@ -221,7 +221,10 @@ oTableConfigurationList = {
 				}
 			},
 			"modern_lemma": {				
-				"colsort": "asc"				
+				"colsort": "asc"
+//					,
+//				"filter": "06-nummer",
+//				"keepfilter": true
 			},
 			"th_lemma": {			
 			},

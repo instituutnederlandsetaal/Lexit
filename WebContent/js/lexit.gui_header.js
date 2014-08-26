@@ -252,7 +252,7 @@ head.putResetButton = function(sSomeTablename){
 				function(){
 				
 					// send empty search request			
-					mt.getDataTableObjectOf(sSomeTablename).fnFilterReset(sSomeTablename);			
+					mt.getDataTableObjectOf(sSomeTablename).fnFilterReset();			
 					mt.getDataTableObjectOf(sSomeTablename).fnSort(conf.getDefaultSortingSettings(sSomeTablename));
 				
 					// put the current search filters values into the search boxes

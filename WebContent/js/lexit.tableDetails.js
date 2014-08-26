@@ -250,6 +250,7 @@ td.selectColumns = function(sSomeTablename){
 		// is the column visible?
 		var columnVisible = conf.getVisibility(oColumnConfig);
 		
+		
 		var input = $("<input></input>")
 			.attr("type", "checkbox")
 			.attr("name", fieldLC)			
@@ -310,8 +311,9 @@ td.selectColumns = function(sSomeTablename){
              		{
              			var sNewColumnNameAfterResorting = $( "#"+promptDivId+" ul li:eq("+i+")" ).text();
              			aColumnListInNewOrder.push(sNewColumnNameAfterResorting);
-             			var columnChecked = $( "#"+promptDivId+" ul li:eq("+i+") input").attr("checked");
-             			conf.changeTableConfigValue(sSomeTablename, sNewColumnNameAfterResorting, "visible", (columnChecked == "checked"));
+             			var columnChecked = $( "#"+promptDivId+" ul li:eq("+i+") input").eq(0).prop("checked") == true;
+             			
+             			conf.changeTableConfigValue(sSomeTablename, sNewColumnNameAfterResorting, "visible", columnChecked );
              		}
              		// change the column order settings according to the user's choices
              		conf.changeTableSettingValue(sSomeTablename, "column_order", aColumnListInNewOrder);
@@ -321,7 +323,7 @@ td.selectColumns = function(sSomeTablename){
              		
              		// read the current Datatables filters settings and page number 
              		// we will reapply those to the table as it is rebuilt with the new column selection
-             		var oFilterSettings = mt.getDataTableObjectOf(sSomeTablename).fnFilterGet(sSomeTablename);
+             		var oFilterSettings = mt.getDataTableObjectOf(sSomeTablename).fnFilterGet();
              		var iRecordNumberToStartAt = parseInt(fn.getCurrentDisplayStart(sSomeTablename));
              		var oOldTableSettings = mt.getDataTableObjectOf(sSomeTablename).fnSettings();
              		var aSortingSettings = oOldTableSettings.aaSorting;
@@ -375,7 +377,7 @@ td.selectColumns = function(sSomeTablename){
                  				// put back the search boxes settings
                  				for (var j=0; j<aListOfFilterNames.length; j++)
                  					{
-                 					fn.putDataIntoFilterBox(sSomeTablename, aListOfFilterNames[j], aListOfFilterValues[j]);		
+                 					//fn.putDataIntoFilterBox(sSomeTablename, aListOfFilterNames[j], aListOfFilterValues[j]);		
                  					}
              					});
              				

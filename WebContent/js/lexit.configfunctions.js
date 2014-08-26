@@ -267,7 +267,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
 	
 	// set the required filters
-	mt.getDataTableObjectOf(sSomeTablename).fnFilterSet(sSomeTablename, aContentToMatch);
+	mt.getDataTableObjectOf(sSomeTablename).fnFilterSet(aContentToMatch);
 	mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 	
 	// if table is hidden, we call it back
@@ -2113,17 +2113,18 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
 		
 		// determine right selector for searchbox (input or select type)
-		var searchDivSelector = $("#"+sSomeTableName+"_searchboxes div:eq("+iColNr+")");
-		var searchBoxSelector = (oColumnSelectionBox!=null) ? 
-				searchDivSelector.find("select").eq(0) : searchDivSelector.find("input").eq(0);
+		
+		var searchBoxSelector = $("#"+sSomeTableName+"_searchbox_"+sCellName);		
 			
 		if (searchBoxSelector.attr("disabled") != "disabled")
-			{
+			{			
 			// put value
-			searchBoxSelector.val(sSomeData);
+			searchBoxSelector.val( sSomeData );
+
 			// special case: if we have a checkbox, we also need to (un)check it			
 			if (searchBoxSelector.attr("type")=="checkbox" && sf.isCheckboxTrueValue(sSomeData))
 				searchBoxSelector.attr("checked", "checked");
+			
 			}
 		}
 };
@@ -2160,7 +2161,7 @@ fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	mt.getDataTableObjectOf(sSomeTablename).fnFilterReset(sSomeTablename);
+	mt.getDataTableObjectOf(sSomeTablename).fnFilterReset(false);
 	
 	// initialize compulsory filters arrays
 	// (these are filters in addition to the "go to"-filter)

@@ -374,7 +374,7 @@ asr.alterTable = function(sSomeTablename, addOrReplaceMode, bReallyChange){
  	 				filterValuesList[indexOfMatchValue].replace(/(\w+)/i, "($1|"+replaceValuesList[i]+")");
  				} 			
  			} 		
- 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(sSomeTablename, filtersToShowChanges);
+ 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(filtersToShowChanges);
  		
 		
 		

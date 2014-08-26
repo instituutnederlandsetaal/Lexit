@@ -18,7 +18,7 @@ sf.goTo = function(sSomeTablename){
 	// reset filters
 	// this is needed because we will add filters here and we want to make
 	// sure that filters from previous rounds get cleaned
-	mt.getDataTableObjectOf(sSomeTablename).fnFilterReset(sSomeTablename);
+	mt.getDataTableObjectOf(sSomeTablename).fnFilterReset(false);
 	
 	
 	// find the column to search and the value to match against
@@ -63,7 +63,7 @@ sf.goTo = function(sSomeTablename){
 				// These added filters can be easily removed by user upon clicking on RESET
 				var tmpArray = new Array();
 				tmpArray[sCurrentColumnName] = sCurrentColumnValue;
-				mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(sSomeTablename, tmpArray);
+				mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(tmpArray);
 				}
 			}
 	});
@@ -203,10 +203,7 @@ sf.enableSearchFields = function(someTablename){
 	$("#"+someTablename+"_dynamic").off("focus", '#'+someTablename+'_searchboxes div input');
     $("#"+someTablename+"_dynamic").on("focus", '#'+someTablename+'_searchboxes div input', function () {
     	
-    	// clear this field
-    	$(this).val("");
-        
-     	// clear whole-table search field
+    	// clear whole-table search field
      	sf.clearSearchField(someTablename);
     } );
 	
@@ -216,9 +213,6 @@ sf.enableSearchFields = function(someTablename){
     $("#"+someTablename+"_dynamic").off("focus", '#'+someTablename+'_filter input');
 	$("#"+someTablename+"_dynamic").on("focus", '#'+someTablename+'_filter input', function () {
 		
-		// clear this field
-        $(this).val("");
-        
 		// clear per-column search fields		
 		sf.clearPerColumnSearchFields(someTablename);
 	});
@@ -322,9 +316,9 @@ sf.enableSearchFields = function(someTablename){
 		// the right filter type is set,	
 		// now append the search box to the user interface
 				
-		sCurrentSearchBoxDiv = $("<div></div>")
+		sCurrentSearchBoxDiv = $("<div></div>")			
 			.css("display", "inline")
-			.append(inputTag);
+			.append(inputTag.attr("id", someTablename+"_searchbox_"+sCurrentColumnName));
 		sSearchBoxesDiv.append(sCurrentSearchBoxDiv);
 		
 		
@@ -335,7 +329,7 @@ sf.enableSearchFields = function(someTablename){
 		
 		
 		var sStartValueOfThisColumn = "";
-		var oFilterSettings = mt.getDataTableObjectOf(someTablename).fnFilterGet(someTablename);
+		var oFilterSettings = mt.getDataTableObjectOf(someTablename).fnFilterGet();
 		if (oFilterSettings[sCurrentColumnName] != null)
 			sStartValueOfThisColumn = oFilterSettings[sCurrentColumnName];
 	
@@ -473,7 +467,7 @@ sf.enableSearchFields = function(someTablename){
 sf.putCurrentValueInAllSearchBoxes = function(sTablename){	
 	
 	// get the table filters settings
-	var oFilterSettings = mt.getDataTableObjectOf(sTablename).fnFilterGet(sTablename);
+	var oFilterSettings = mt.getDataTableObjectOf(sTablename).fnFilterGet();
 	var oTableConfig = conf.getTableConfig(sTablename);
 	
 	// process each visible column
@@ -649,7 +643,7 @@ sf.startSearch = function(someTablename){
 	
 	
 	// clear all search filters and reset compulsory init filters (config file)
-	mt.getDataTableObjectOf(someTablename).fnFilterReset(someTablename);
+	mt.getDataTableObjectOf(someTablename).fnFilterReset(false);
 	
 	// start search
 	var searchBoxValue = $.trim($("#"+someTablename+"_filter input").val());
@@ -672,7 +666,7 @@ sf.startMultiColumnSearch = function(someTablename){
 	
 	
 	// clear all search filters and reset compulsory init filters (config file)
-	mt.getDataTableObjectOf(someTablename).fnFilterReset(someTablename);
+	mt.getDataTableObjectOf(someTablename).fnFilterReset(false);
 	
 	// collect data from all per-column fields 
 	$("#"+someTablename+"_searchboxes div").each(function(i){

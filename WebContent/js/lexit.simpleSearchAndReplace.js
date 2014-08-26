@@ -317,7 +317,7 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 				{
 				var filtersToShowChanges = new Array();
 		 		filtersToShowChanges[sSelectedColumn] = sOldString.replace(/(\w+)/i, "($1|"+sNewString+")");
-		 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(sSomeTablename, filtersToShowChanges);
+		 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(filtersToShowChanges);
 				}	 		
 			} 		
 		
