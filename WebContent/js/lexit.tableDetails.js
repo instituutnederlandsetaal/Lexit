@@ -377,7 +377,7 @@ td.selectColumns = function(sSomeTablename){
                  				// put back the search boxes settings
                  				for (var j=0; j<aListOfFilterNames.length; j++)
                  					{
-                 					//fn.putDataIntoFilterBox(sSomeTablename, aListOfFilterNames[j], aListOfFilterValues[j]);		
+                 					fn.putDataIntoFilterBox(sSomeTablename, aListOfFilterNames[j], aListOfFilterValues[j]);		
                  					}
              					});
              				
