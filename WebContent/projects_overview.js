@@ -29,9 +29,14 @@ var aProjectList =
 		closed: true
 	 },
 	 {
-		name: "Hulk (nieuw)",
-		description: "De nieuwe HulK-database",
+		name: "Hulk (nieuwe versie van Michel)",
+		description: "De nieuwe HulK-database van Michel",
 		config_filename: "nieuwehulk"
+	 },
+	 {
+		name: "Hulk (2014)",
+		description: "HulK 2014",
+		config_filename: "hulk"
 	 },
 	 {
 			name: "Klussen",

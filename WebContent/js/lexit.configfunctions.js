@@ -1699,7 +1699,7 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
  			var oFieldsAndValues = fn._getRecord(xml);
 	 		// check what the return column name is: we will use it to access
 	 		// the returned table value from the associative array.
- 			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName);
+ 			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName.toLowerCase());
  			
 	 		// if some table name was given as an argument,
 	 		// we will update that table with the output of the function
@@ -1732,8 +1732,9 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 	 			}
 	 		
 	 		// store the output for later retrieval 
- 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
-	 		
+	 		if (typeof oFieldsAndValues[sColumnNameToReadFrom] != 'undefined')
+	 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
+	 			 		
 	 		// if some callback function is given, call it now
 	 		if (fnCallback!=null) fnCallback();
 	 		},
@@ -2088,6 +2089,16 @@ fn.setCustomButtonCss = function(sTableName, iButtonNumber, sProperty, sNewValue
 	
 	var oButton = $("div#"+sTableName+"_custombutton_"+iButtonNumber+" button#"+sTableName+"_button_"+iButtonNumber);
 	oButton.css(sProperty, sNewValue);
+};
+
+fn.getCustomButtonCss = function(sTableName, iButtonNumber, sProperty){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var oButton = $("div#"+sTableName+"_custombutton_"+iButtonNumber+" button#"+sTableName+"_button_"+iButtonNumber);
+	return oButton.css(sProperty);
+	
 };
 
 

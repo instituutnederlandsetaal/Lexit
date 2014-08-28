@@ -1,3 +1,10 @@
+
+
+// HulK specific
+
+var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
+
+
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
 oShowOnlyTables = ["hulk_worktable"];
@@ -13,24 +20,23 @@ oTableSettingsList = {
 				"name": "Genereer resultaatbestand",
 				"click": function(t){
 					
-					/*
-					$.getJSON( "http://svowhu02.inl.loc/?callback=?", function( data ){
-						
-						alert("Het bestand is geladen");
-				 		fn.refreshTable(t);
-					});
-					*/
+					var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 
+					fn.showProcessingMsg(t);
+					var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
+					fn.setCustomButtonCss(t, 0, "background-color", "red");
 					
 					$.ajax({
 						
 						"type": "GET",
-						"url": "http://svowhu02.inl.loc/ws/kick-result/1",
+						"url": sHulKUrlServer + ($.endsWith(sHulKUrlServer, "/") ? "":"/") + sDocumentId,
 						
 						"crossDomain": true,
 					 	"dataType": "json",
 					 	"success": function(data) {
 					 		alert(data.message);
+					 		fn.removeProcessingMsg(t);
+					 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
 					 		fn.refreshTable(t);
 					 		},
 						"error": function(jqXHR, textStatus, errorThrown){
@@ -57,6 +63,31 @@ oTableSettingsList = {
 				"name": "Rij dupliceren",
 				"click": function(t){
 					
+					var nRow = fn.getActiveRowNode(t);
+					
+					
+					if (typeof nRow == 'undefined' || nRow == null || fn.getNumberOfSelectedRows(t)>1)
+						{
+						alert("U moet exact één rij selecteren, niet meer, niet minder!");
+						}
+					else
+						{
+						var wordformId= fn.getDataFromCellNamed(t, nRow, "wordform_id");
+						var spellingVersionId = fn.getDataFromCellNamed(t, nRow, "spelling_version_id");
+						var documentId = fn.getDataFromCellNamed(t, nRow, "document_id");
+						
+						fn.callFunction("duplicateRow", 
+								[wordformId, spellingVersionId, documentId], 
+								null, null, null, null, 
+								function(){ fn.refreshTable(t);});
+						}
+					 
+				}
+			},
+			"button_3":{
+				"name": "Update stats",
+				"click": function(t){
+					showStatistics(t);
 				}
 			}
 		}
@@ -77,57 +108,108 @@ oTableConfigurationList = {
 			pkid: {"visible": false},
 			judgement_id: {"visible": false},
 			document: {"choosefrom":[]},
+			document_id: {
+				"visible": false
+				},
+			spelling_version_id: {"visible": false},
 			correction: {
 				"editable": true,
 				"bgcolor": "#CECEF6",
-				"textcolor": "blue"
-					},
+				"textcolor": "blue",
+				"editcallback": function(t, n, value){
+					logUser(t, n);
+					
+				}
+			},
 			gloss: {
 				"textstyle": "oblique"				
 			},
 			lemma: {
 				"textstyle": "oblique",
-				"textcolor": "brown"
+				"textcolor": "brown",
+				"colsort": "asc"
 			},
 			part_of_speech:{
 				
 			},
 			remarks: {
 				"editable": true,
-				"bgcolor": "#CECEF6"
-				},
+				"bgcolor": "#CECEF6",
+				"editcallback": function(t, n, value){
+					logUser(t, n);					
+				}
+			},
+			wordform_id: {
+				"visible": false				
+			},
 			wv: {
 				"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);
-					//fn.refreshTable(t);
+					logUser(t, n);
 					}
 				},
 			en: {"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "afke", "ok"]);
-					//fn.refreshTable(t);
+					logUser(t, n);
 					}
 				},
 			afke: {"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "ok"]);
-					//fn.refreshTable(t);
+					logUser(t, n);
 					}
 				},
 			ok: {"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
-					//fn.refreshTable(t);
+					logUser(t, n);
 					}
-				}
+				},
+			name: {
+				"visible": false
+			},
+			verified_date: {
+				"visible": false
+			}
+			
 		}
 
 };
+
+function logUser(t, n){
+	
+	var sUser = "'"+fn.getCurrentUser()+"'";
+	var sDate = "'"+fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")+"'";
+	var sId = fn.getRowId(n);
+	
+	fn.callFunction("logUser", [sUser, sDate, sId]);
+
+};
+
+function showStatistics(t){
+	
+	var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+	
+	fn.callFunction("getStatistics", [documentId], null, null, null, null, 
+			function(){
+		var sStats = fn.getFunctionOutput()[0];
+		
+		$("#hulk_worktable_wrapper #hulk_worktable_info").find("span").remove();
+		$("#hulk_worktable_wrapper #hulk_worktable_info").append(
+				$("<span></span>")
+				.html("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>"+sStats+"</B>")				
+				);
+	});
+	
+};
+
+
 
 var bPreventCallback = false;
 

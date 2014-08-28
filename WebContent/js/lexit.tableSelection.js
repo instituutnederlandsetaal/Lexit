@@ -93,6 +93,9 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		{
 		var iIndexOfFirstVisibleTable = $.inArray(true, abTableVisible, 1);
 		$("#selected_source").val(asTableNames[iIndexOfFirstVisibleTable]).change();
+		// if we have only one table available, let's hide the table selector (which is meaningless now)
+		$("#selected_source").hide();
+		$("#indicator").find("span").eq(0).hide();
 		}
 	// else if we are required to open a given table at start up, do it
 	else if (sTableToCallUponStartUp != null)
