@@ -23,7 +23,12 @@ head.setHeaderSensitivity = function(sSomeTableName){
 		
 		kf.setActiveTable(sSomeTableName);
 		kf.setActiveRowNumber( iRowToSetActive );
-		fn.selectRow(sSomeTableName, iRowToSetActive);
+		
+		// BEWARE: we only select a row if none is selected yet.
+		// We do so to prevent a given rows selection from getting currupted (as some new row 
+		// would be unpredictably added to the selection than)
+		if (fn.getNumberOfSelectedRows(sSomeTableName) == 0)
+			fn.selectRow(sSomeTableName, iRowToSetActive);
 		
 	});
 	
@@ -558,15 +563,22 @@ head.putSelectionButton = function(sSomeTablename){
 	var aTableSettings = conf.getTableSettings(sSomeTablename);
 	if ( !conf.getSelectionButton(aTableSettings)) return true;
 	
+	// what is the current setting of the button?
+	var bRowSelectionAllowed = mt.rowSelectionIsAllowed(sSomeTablename);	
+	var sButtonMsg = bRowSelectionAllowed ? "Zet rijselectie UIT [F2]" : "Zet rijselectie AAN [F2]";
+	var sBackgroundColor = bRowSelectionAllowed ? "#EE0000" : "#99CCFF";
+	var sFunctionAwakeOrAsleep = bRowSelectionAllowed ? "functions_sleep" : "functions_awake";
+		
+	
 	// button to activate/deactivate selection mode
 	var makeSelectionButton = $("<button/>")
 		.attr("type", "button")
 		.attr("id", "selectionbutton")
-		.css("background-color", "#99CCFF")
-		.addClass("functions_awake")
+		.css("background-color", sBackgroundColor)
+		.addClass(sFunctionAwakeOrAsleep)
 		.addClass("header_button")
 		.append($("<span></span>").addClass("ui-icon ui-icon-pin-s"))
-		.attr("title", "Zet rijselectie AAN [F2]").addClass("tooltip");
+		.attr("title", sButtonMsg).addClass("tooltip");
 	
 	$("#"+sSomeTablename+"_filter").append(
 			$("<div></div>").css("display", "inline").prepend(makeSelectionButton)

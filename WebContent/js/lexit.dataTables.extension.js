@@ -85,7 +85,9 @@ $.fn.dataTableExt.oApi.fnFilterReset  = function ( oSettings, bUpdateSearchBoxes
 	}
 };
 
-// set filters to some values, given array of filters
+// Set filters to some values, given array of filters
+// BEWARE: this function erases previous settings,
+//         so to be able to keep filter values in other columns, use fnFilterAdd instead
 $.fn.dataTableExt.oApi.fnFilterSet  = function ( oSettings, oFilters, bUpdateSearchBoxesValues )
 {
 	if ( typeof bUpdateSearchBoxesValues == 'undefined' )
@@ -145,7 +147,9 @@ $.fn.dataTableExt.oApi.fnGlobalFilterGet  = function ( oSettings )
 };
 
 
-// add some filters to existing filters (see fnFilterSet)
+// Add some filters to existing filters (see fnFilterSet)
+// BEWARE: this function keeps the values op other columns,
+// so to set a filter and automatically remove filters in other columns, use fnFilterSet instead
 $.fn.dataTableExt.oApi.fnFilterAdd  = function ( oSettings, oFilters )
 {	
 	var sTableName = oSettings.sTableId;

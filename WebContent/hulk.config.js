@@ -1,12 +1,22 @@
 
 
-// HulK specific
 
+// *******************************************
+//             HulK specific
+// *******************************************
+
+// this url will be called for the generation of the 'customer result file'
 var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
 
+// this url will be called to export the data to the Gigant-spelling database
+var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 
-// list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
-oHiddenTablesList = [];
+
+
+// *******************************************
+//          TABLE CONFIGURATION
+// *******************************************
+
 oShowOnlyTables = ["hulk_worktable"];
 
 
@@ -16,6 +26,13 @@ var bToonHulkGeaccepteerd = true;
 oTableSettingsList = {
 		
 		hulk_worktable:{
+			
+			"callback": function(t){
+				showStatistics(t);
+				putExportToGigantButton(t);
+			},
+			"repeat_callback": true,
+			
 			"button_0":{
 				"name": "Genereer resultaatbestand",
 				"click": function(t){
@@ -54,7 +71,8 @@ oTableSettingsList = {
 					bToonHulkGeaccepteerd = !bToonHulkGeaccepteerd;
 					var hulkOordeelToLookFor = bToonHulkGeaccepteerd ? "" : "!^OK";
 					fn.putDataIntoFilterBox(t, "hulk_oordeel", hulkOordeelToLookFor);
-					t.fnFilterSet({"hulk_oordeel": hulkOordeelToLookFor});
+					//t.fnFilterSet({"hulk_oordeel": hulkOordeelToLookFor});
+					t.fnFilterAdd({"hulk_oordeel": hulkOordeelToLookFor});
 					fn.setCustomButtonName(t, 1, (bToonHulkGeaccepteerd ? "Toon" : "Verberg") + " HulK-geaccepteerd");
 					fn.refreshTable(t);
 				}
@@ -63,16 +81,16 @@ oTableSettingsList = {
 				"name": "Rij dupliceren",
 				"click": function(t){
 					
-					var nRow = fn.getActiveRowNode(t);
+					var aRow = fn.getSelectedRowsFrom(t);					
 					
-					
-					if (typeof nRow == 'undefined' || nRow == null || fn.getNumberOfSelectedRows(t)>1)
+					if (typeof aRow == 'undefined' || aRow == null || fn.getNumberOfSelectedRows(t)>1)
 						{
 						alert("U moet exact één rij selecteren, niet meer, niet minder!");
 						}
 					else
 						{
-						var wordformId= fn.getDataFromCellNamed(t, nRow, "wordform_id");
+						var nRow = aRow[0];
+						var wordformId = fn.getDataFromCellNamed(t, nRow, "wordform_id");
 						var spellingVersionId = fn.getDataFromCellNamed(t, nRow, "spelling_version_id");
 						var documentId = fn.getDataFromCellNamed(t, nRow, "document_id");
 						
@@ -85,34 +103,75 @@ oTableSettingsList = {
 				}
 			},
 			"button_3":{
-				"name": "Update stats",
+				"name": "Rij verwijderen",
 				"click": function(t){
-					showStatistics(t);
+					
+					var answer = confirm("Weet u het zeker? Dit kan niet ongedaan worden gemaakt.");
+					var aRows = fn.getSelectedRowsFrom(t);
+					if (answer)
+						{
+						aRows.each(function(){
+							
+							var nCurrentRow = this;
+							
+							var sHulkableWordId = fn.getRowId(nCurrentRow);
+							var sDocumentId = fn.getDataFromCellNamed(t, nCurrentRow, "document_id");
+							
+							fn.removeFromDatabaseGivenFieldValues(
+									"judgements", 
+									{
+										"hulkable_word_id": sHulkableWordId
+									}, 
+									false, 
+									function(){
+								
+										fn.removeFromDatabaseGivenFieldValues(
+												"hulkable_words", 
+												{
+													"hulkable_word_id": sHulkableWordId,
+													"document_id": sDocumentId
+												},
+												false, 
+												function(){
+													if (fn.isLastNodeOf(nCurrentRow, aRows))
+														fn.refreshTable(t);
+													});
+									});
+
+							});
+						}					
 				}
 			}
 		}
 };
 
-// callback function for jsonp call
-// http://stackoverflow.com/questions/2067472/what-is-jsonp-all-about
-mycallback = function(data){
-	
-};
+
 
 
 // configuration at column level
 oTableConfigurationList = {
 		
 		hulk_worktable: {
-			
-			pkid: {"visible": false},
-			judgement_id: {"visible": false},
-			document: {"choosefrom":[]},
+						
+			judgement_id: {
+				"sortable": false,
+				"visible": false
+				},
+			document: {
+				"sortable": false,
+				"choosefrom":[]
+			},
 			document_id: {
 				"visible": false
 				},
-			spelling_version_id: {"visible": false},
+			spelling_version_id: {
+				"visible": false
+				},
+			hulk_oordeel: {
+					"sortable": false
+				},
 			correction: {
+				"sortable": false,
 				"editable": true,
 				"bgcolor": "#CECEF6",
 				"textcolor": "blue",
@@ -122,17 +181,30 @@ oTableConfigurationList = {
 				}
 			},
 			gloss: {
+				"sortable": false,
 				"textstyle": "oblique"				
 			},
 			lemma: {
 				"textstyle": "oblique",
 				"textcolor": "brown",
-				"colsort": "asc"
+				"sortable": false,
+				"colsort": "asc",				// sort #1
+				"click": function(t, n){
+					var sLemma = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "correction", sLemma);
+				},
+				"cell_tooltip": "Klik om te kopiëren naar 'correction'"
 			},
+			pkid: {
+				"sortable": false,
+				"colsort": "asc",				// sort #2
+				"visible": false
+				},			
 			part_of_speech:{
-				
+				"sortable": false
 			},
 			remarks: {
+				"sortable": false,
 				"editable": true,
 				"bgcolor": "#CECEF6",
 				"editcallback": function(t, n, value){
@@ -140,9 +212,11 @@ oTableConfigurationList = {
 				}
 			},
 			wordform_id: {
+				"sortable": false,
 				"visible": false				
 			},
 			wv: {
+				"sortable": false,
 				"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
@@ -150,28 +224,34 @@ oTableConfigurationList = {
 					logUser(t, n);
 					}
 				},
-			en: {"editable": true,
+			en: {
+				"sortable": false,
+				"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "afke", "ok"]);
 					logUser(t, n);
 					}
 				},
-			afke: {"editable": true,
+			afke: {
+				"sortable": false,
+				"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "ok"]);
 					logUser(t, n);
 					}
 				},
-			ok: {"editable": true,
+			ok: {
+				"sortable": false,
+				"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editcallback": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
 					logUser(t, n);
 					}
 				},
-			name: {
+			name: {				
 				"visible": false
 			},
 			verified_date: {
@@ -181,6 +261,12 @@ oTableConfigurationList = {
 		}
 
 };
+
+
+
+// *******************************************
+//              LOGGING
+// *******************************************
 
 function logUser(t, n){
 	
@@ -192,24 +278,111 @@ function logUser(t, n){
 
 };
 
+
+// *******************************************
+//               STATISTICS
+// *******************************************
+
 function showStatistics(t){
 	
-	var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+	// Get the documentId
+	// But do that only if some document was chosen. If no choice was made, show a warning instead
+	var sDocumentChoice = fn.getValueOfFilterBox(t, "document");
 	
-	fn.callFunction("getStatistics", [documentId], null, null, null, null, 
-			function(){
-		var sStats = fn.getFunctionOutput()[0];
+	if (sDocumentChoice == '')
+		{
+		showStatisticsInHeader("Kies een document in de linker kolom!");
+		}
+	else
+		{
+		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 		
-		$("#hulk_worktable_wrapper #hulk_worktable_info").find("span").remove();
-		$("#hulk_worktable_wrapper #hulk_worktable_info").append(
-				$("<span></span>")
-				.html("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>"+sStats+"</B>")				
-				);
-	});
-	
+		fn.callFunction("getStatistics", [documentId], null, null, null, null, 
+				function(){
+			
+			showStatisticsInHeader(fn.getFunctionOutput()[0]);
+						
+			});
+		}
 };
 
+function showStatisticsInHeader(sStats){
+	
+	$("#hulk_worktable_wrapper .top").find("#hulk_stats").remove();
+	$("#hulk_worktable_wrapper .top").append(
+			$("<div></div>")
+			.attr("id", "hulk_stats")
+			.css("border", "1px black dotted")
+			.css("width", "450px")
+			.css("text-align", "center")
+			);
+	$("#hulk_worktable_wrapper .top #hulk_stats").append(
+			$("<span></span>")
+			.html(sStats)
+			.css("font-size", "120%")
+			);
+	$("#hulk_worktable_wrapper .top #hulk_stats")
+	.css("position", "relative")
+	.css("top", "60px")
+	.css("left", "250px");	
+}
 
+
+
+// *******************************************
+//                   EXPORT
+// *******************************************
+
+var bExportToGigantExists = false;
+
+function putExportToGigantButton(t){
+	
+	if (bExportToGigantExists)
+		return true;
+	
+	bExportToGigantExists = true;
+	$("#dynamic").append(
+			$("<div></div>")
+			.css("position", "relative")
+			.css("top", $("#hulk_worktable_dynamic").css("height"))			
+			.attr("id", "export_to_gigant_div")
+			.append(
+					$("<button></button>")
+					.attr("type", "button")
+					.html("Exporteer naar Gigant-lexicon")
+					.bind("click", function(){
+						
+						doExport(t);
+						})
+					)
+			);
+}
+
+function doExport(t){
+	
+	// Get the documentId
+	// But do that only if some document was chosen. If no choice was made, show a warning instead
+	var sDocumentChoice = fn.getValueOfFilterBox(t, "document");
+	
+	if (sDocumentChoice == '')
+		{
+		alert("Kies een document in de linker kolom!");
+		}
+	else
+		{
+		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+		
+		alert("Exporteer document_id = "+documentId);
+		
+		// Ajax call with:   sHulKExportUrl
+		// to be built @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		}
+}
+
+
+// *******************************************
+//             CHECKBOXES HANDLER
+// *******************************************
 
 var bPreventCallback = false;
 
