@@ -20,7 +20,17 @@ var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 oShowOnlyTables = ["hulk_worktable"];
 
 
+// for logging
+
+var sUser = fn.getCurrentUser();
+
+
+// global button setting 
+
 var bToonHulkGeaccepteerd = true;
+//var bDocumentVisible = true;
+
+
 
 // table general settings
 oTableSettingsList = {
@@ -28,13 +38,16 @@ oTableSettingsList = {
 		hulk_worktable:{
 			
 			"callback": function(t){
+				buildDocumentSelector(t);
 				showStatistics(t);
 				putExportToGigantButton(t);
+				//fn.setCustomButtonName(t, 4, (bDocumentVisible ? "Verberg":"Toon")+" Documentnaam-kolom");
 			},
 			"repeat_callback": true,
 			
 			"button_0":{
 				"name": "Genereer resultaatbestand",
+				"bgcolor": "lightblue",
 				"click": function(t){
 					
 					var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
@@ -67,6 +80,7 @@ oTableSettingsList = {
 			},
 			"button_1":{
 				"name": "Toon HulK-geaccepteerd",
+				"bgcolor": "lightblue",
 				"click": function(t){
 					bToonHulkGeaccepteerd = !bToonHulkGeaccepteerd;
 					var hulkOordeelToLookFor = bToonHulkGeaccepteerd ? "" : "!^OK";
@@ -79,6 +93,8 @@ oTableSettingsList = {
 			},
 			"button_2":{
 				"name": "Rij dupliceren",
+				"bgcolor": "lightgrey",
+				"textcolor": "black",
 				"click": function(t){
 					
 					var aRow = fn.getSelectedRowsFrom(t);					
@@ -104,6 +120,8 @@ oTableSettingsList = {
 			},
 			"button_3":{
 				"name": "Rij verwijderen",
+				"bgcolor": "lightgrey",
+				"textcolor": "black",
 				"click": function(t){
 					
 					var answer = confirm("Weet u het zeker? Dit kan niet ongedaan worden gemaakt.");
@@ -142,6 +160,26 @@ oTableSettingsList = {
 						}					
 				}
 			}
+//			,
+//			"button_4": {
+//				"name": "Verberg documentnaam",
+//				"bgcolor": "lightblue",
+//				"click": function(t){
+//					
+//					bDocumentVisible = !bDocumentVisible;
+//					var sDocumentName = fn.getValueOfFilterBox(t, "document");
+//					
+//					fn.setCustomButtonName(t, 4, (bDocumentVisible ? "Verberg":"Toon")+" Documentnaam-kolom");
+//				
+//					$("#hulk_worktable_wrapper").hide();
+//					tb.destroyTable("hulk_worktable", null, true);
+//					
+//					conf.changeTableConfigValue("hulk_worktable", "document", "visible", bDocumentVisible);
+//					
+//					fn.callDatabase("hulk_worktable", {"document": sDocumentName});
+//					
+//				}
+//			}
 		}
 };
 
@@ -158,8 +196,9 @@ oTableConfigurationList = {
 				"visible": false
 				},
 			document: {
-				"sortable": false,
-				"choosefrom":[]
+				"sortable": false,				
+				"choosefrom":[],
+				"visible": false
 			},
 			document_id: {
 				"visible": false
@@ -175,14 +214,30 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#CECEF6",
 				"textcolor": "blue",
-				"editcallback": function(t, n, value){
-					logUser(t, n);
-					
+				"editfunc": function(t, n, value){
+					fn.updateDatabaseGivenANode(t, n, 
+							["correction", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], false,
+							function(){fn.refreshTable(t);});
+					if (value == 'NOK')
+						{
+						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);
+						var sHulkableWordId = fn.getRowId(n);
+						fn.updateDatabaseGivenFieldValues("judgements", 
+								{"hulkable_word_id": sHulkableWordId}, 
+								{"judgement": "NOK"});
+						}
 				}
 			},
 			gloss: {
+				"editable": true,
 				"sortable": false,
-				"textstyle": "oblique"				
+				"textstyle": "oblique",
+				"editfunc": function(t, n, value){
+					fn.updateDatabaseGivenANode(t, n, 
+							["gloss", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);					
+				}
 			},
 			lemma: {
 				"textstyle": "oblique",
@@ -201,14 +256,23 @@ oTableConfigurationList = {
 				"visible": false
 				},			
 			part_of_speech:{
-				"sortable": false
+				"editable": true,
+				"sortable": false,
+				"editfunc": function(t, n, value){
+					fn.updateDatabaseGivenANode(t, n, 
+							["part_of_speech", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);					
+				}
 			},
 			remarks: {
 				"sortable": false,
 				"editable": true,
 				"bgcolor": "#CECEF6",
-				"editcallback": function(t, n, value){
-					logUser(t, n);					
+				"editfunc": function(t, n, value){
+					fn.updateDatabaseGivenANode(t, n, 
+							["remarks", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], false,
+							function(){fn.refreshTable(t);});					
 				}
 			},
 			wordform_id: {
@@ -219,36 +283,45 @@ oTableConfigurationList = {
 				"sortable": false,
 				"editable": true,
 				"bgcolor": "#E0F8E0",
-				"editcallback": function(t, n, value){
+				"editfunc": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);
-					logUser(t, n);
+					fn.updateDatabaseGivenANode(t, n, 
+							["wv", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					}
 				},
 			en: {
 				"sortable": false,
 				"editable": true,
 				"bgcolor": "#A9F5BC",
-				"editcallback": function(t, n, value){
+				"editfunc": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "afke", "ok"]);
-					logUser(t, n);
+					fn.updateDatabaseGivenANode(t, n, 
+							["en", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
+					
 					}
 				},
 			afke: {
 				"sortable": false,
 				"editable": true,
 				"bgcolor": "#E0F8E0",
-				"editcallback": function(t, n, value){
+				"editfunc": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "ok"]);
-					logUser(t, n);
+					fn.updateDatabaseGivenANode(t, n, 
+							["afke", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					}
 				},
 			ok: {
 				"sortable": false,
 				"editable": true,
 				"bgcolor": "#A9F5BC",
-				"editcallback": function(t, n, value){
+				"editfunc": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
-					logUser(t, n);
+					fn.updateDatabaseGivenANode(t, n, 
+							["ok", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					}
 				},
 			name: {				
@@ -264,19 +337,6 @@ oTableConfigurationList = {
 
 
 
-// *******************************************
-//              LOGGING
-// *******************************************
-
-function logUser(t, n){
-	
-	var sUser = "'"+fn.getCurrentUser()+"'";
-	var sDate = "'"+fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")+"'";
-	var sId = fn.getRowId(n);
-	
-	fn.callFunction("logUser", [sUser, sDate, sId]);
-
-};
 
 
 // *******************************************
@@ -287,11 +347,12 @@ function showStatistics(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sDocumentChoice = fn.getValueOfFilterBox(t, "document");
+	var sTableName = fn.getTableName(t);
+	var sDocumentChoice = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
 	
 	if (sDocumentChoice == '')
 		{
-		showStatisticsInHeader("Kies een document in de linker kolom!");
+		showStatisticsInHeader("Kies een document!", true);
 		}
 	else
 		{
@@ -306,7 +367,17 @@ function showStatistics(t){
 		}
 };
 
-function showStatisticsInHeader(sStats){
+function showStatisticsInHeader(sStats, sWarning){
+	
+	var sColor = "black";
+	var sTextDecoration = "none";
+	
+	// if the message is a warning, change style accordingly
+	if (typeof sWarning != 'undefined' && sWarning == true)
+		{
+		sColor = "red";
+		sTextDecoration = "blink";
+		}
 	
 	$("#hulk_worktable_wrapper .top").find("#hulk_stats").remove();
 	$("#hulk_worktable_wrapper .top").append(
@@ -315,6 +386,10 @@ function showStatisticsInHeader(sStats){
 			.css("border", "1px black dotted")
 			.css("width", "450px")
 			.css("text-align", "center")
+			.css("color", sColor)
+			.append($("p").css("text-decoration", sTextDecoration)
+					)
+			
 			);
 	$("#hulk_worktable_wrapper .top #hulk_stats").append(
 			$("<span></span>")
@@ -341,10 +416,8 @@ function putExportToGigantButton(t){
 		return true;
 	
 	bExportToGigantExists = true;
-	$("#dynamic").append(
-			$("<div></div>")
-			.css("position", "relative")
-			.css("top", $("#hulk_worktable_dynamic").css("height"))			
+	$("#hulk_worktable_dynamic").append(
+			$("<div></div>")			
 			.attr("id", "export_to_gigant_div")
 			.append(
 					$("<button></button>")
@@ -362,22 +435,83 @@ function doExport(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sDocumentChoice = fn.getValueOfFilterBox(t, "document");
+	var sTableName = fn.getTableName(t);
+	var sDocumentChoice = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
 	
 	if (sDocumentChoice == '')
 		{
-		alert("Kies een document in de linker kolom!");
+		alert("Kies een document!");
 		}
 	else
 		{
 		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 		
-		alert("Exporteer document_id = "+documentId);
-		
 		// Ajax call with:   sHulKExportUrl
-		// to be built @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		// to be built 
 		}
 }
+
+
+
+// *******************************************
+//        DOCUMENT SELECTOR
+// *******************************************
+
+function buildDocumentSelector(t){
+	
+	// get the current document filter setting (which doc was already chosen?)
+	var sTableName = fn.getTableName(t);
+	var sSelectedDocument = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
+	
+	
+	// (re)build the document selector
+	$("#document_selector").remove();
+	$("#hulk_worktable_length")
+	.append(
+			$("<div></div>").attr("id", "document_selector")
+			.css("position", "relative")			
+			.css("top", "5px")
+			);
+	
+	var sTableName = fn.getTableName(t);
+	var oTableConfig = conf.getTableConfig(sTableName);
+	var oColumnConfig = conf.getColumnConfig(oTableConfig, "document");
+	
+	var aListOfOptions = conf.getSelectionBox(oColumnConfig);
+
+	var inputTag =  $("<select/>");
+	
+	inputTag.append(
+			$("<option></option>")
+				.attr("value", aListOfOptions[0] )
+				.text( "Document kiezen" )
+		);
+	for (var j=1; j<aListOfOptions.length; j++)
+		{
+		inputTag.append(
+				$("<option></option>")							
+					.attr("value", aListOfOptions[j] )
+					.text( aListOfOptions[j] )
+			);
+		}
+	
+	// when a choice is made, load the chosen table
+	inputTag.change(function(){
+		sSelectedDocument = $(this).val();		
+		mt.getDataTableObjectOf(sTableName).fnFilterAdd({"document": sSelectedDocument});
+		fn.refreshTable(t);
+	});
+	
+	$("#document_selector").append(inputTag);
+	
+	$("#document_selector select").val(sSelectedDocument);
+	
+}
+
+
+
+
+
 
 
 // *******************************************

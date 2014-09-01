@@ -338,13 +338,13 @@ gui.makeTableEditable = function(sSomeTablename){
 			
 			).editable( 
 			
-		function(value, settings){	
+		function(value, settings){
 			
 			// current node 
 			var nCurrentNode = this;
 			
 			// (needed for the undo registration, which is triggered by change events on cells)
-			if (bowser.msie || bowser.firefox) // here needed for IE and FF
+			//if (bowser.msie || bowser.firefox) // here needed for IE and FF
 				$(nCurrentNode).change();
 			
 			// instead of submitting an url (default in jEditable)
@@ -408,7 +408,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				 		gui.removeProcessingMsg(sSomeTablename);
 				 		if (gui.getDbResponse(xml))
 				 			{				 			
-				 			mt.getDataTableObjectOf(sSomeTablename).fnUpdate( value, aPos[0], aPos[2], false );
+				 			
 				 			// callcack function, if it is set in configuration
 				 			if (fnEditCallback!=null)
 								fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
@@ -416,7 +416,8 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			// new input might affect column and searchboxes alignment 
 				 			gui.setSearchboxesCss(sSomeTablename);				 			
 				 			// refresh the tables that config file requires to be refreshed upon editing of current cell
-				 			conf.refreshTables(oColumnConfig);				 			
+				 			conf.refreshTables(oColumnConfig);	
+				 			
 				 			}
 				 		else
 				 			{
@@ -431,7 +432,9 @@ gui.makeTableEditable = function(sSomeTablename){
 						}
 					} );
 				}			
-			
+						
+			// needed, otherwise clicking multiple times causes jeditable to be fired multiple times 
+			return(value);
 		},
 		// end of custom function
 			
@@ -439,6 +442,13 @@ gui.makeTableEditable = function(sSomeTablename){
 		{
 			"onblur": function(value){
 				gui._closeJEditable(this, value);
+			},
+			// we need to update the datatable object in the callback, because
+			// if we do it in the previous step of jeditable, it somehow breaks something
+			// so the final call 'return(value);' can't help prevent multiple firing anymore...
+			"callback": function(value, settings){
+				var aPos = mt.getDataTableObjectOf(sSomeTablename).fnGetPosition( this );
+				mt.getDataTableObjectOf(sSomeTablename).fnUpdate( value, aPos[0], aPos[2], false );
 			},
 			"tooltip": "Klik om te bewerken",
 			"type": "textarea", // this gives more room than the default 'input' field of jEditable
@@ -762,6 +772,7 @@ gui._closeJEditable = function(editor, value){
 	var sActiveTable = kf.getActiveTable();
 	gui.setSearchboxesCss(sActiveTable);
 };
+
 
 // for jEditable with selectbox input, we need to build an associative array
 // of 'select text' tot 'select values' to be set as options in the select box

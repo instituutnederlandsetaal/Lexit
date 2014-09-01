@@ -428,7 +428,7 @@ mt.setTableType = function(sSomeTablename, sTableType){
 // of a table. The filter function is stored in the hash hsfTableFilterFunction
 // and the corresponding entry in this hash is called after
 // initialization of the table, when the
-// column filter input fields are build (in sf.enableSearchFields).
+// column filter input fields are built (in sf.enableSearchFields).
 
 mt.callTableFilterFunction = function(sSomeTablename){
 	

@@ -44,6 +44,7 @@ id="WebApp_ID" version="2.5">
 	  	<auth-constraint>
 	  		<role-name>ambiguplus_all</role-name>
 	  		<role-name>gigantmolex_write</role-name>
+	  		<role-name>hulk_all</role-name>
 	  		<role-name>klussen_all</role-name>	  			  		
 	  		<role-name>lexicalsources_all</role-name>
 	  		<role-name>lexicalsources_read</role-name>	  		
