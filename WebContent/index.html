@@ -7,9 +7,9 @@
 	
 	
 	<title>Lex'it 
-	v2014.09.01
+	v2014.09.03
 	-
-	2
+	1
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -198,17 +198,13 @@
 				ts.getListOfTables( paramsHash.get("table"), 
 						oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
 			.fail(function(jqxhr, settings, exception){
-				alert("'"+paramsHash.get("db")+"' is geen correcte waarde. Is dit wel goed getikt? \n\nFout: ["+exception+"]");
+				alert("'"+paramsHash.get("db")+"' is geen correcte waarde. Het configuratiebestand bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
 				});
 			
 			// show the project name at the top of the screen
 			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
-			$("#projectname").append(
-					$("<span></span>").text(sProjectName)
-					.css("font-size", "50px").css("color", "#3970b3").css("font-weight", "bold")
-					);
 			
-			$("title").text(sProjectName + " - " + $("title").text())
+			fn.setProjectTitle(sProjectName);		
 			}
 		
 	};

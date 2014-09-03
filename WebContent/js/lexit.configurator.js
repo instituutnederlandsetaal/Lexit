@@ -282,7 +282,7 @@ conf.getFilter = function(aColumnConfig){
 
 // retrieve keep-filter setting for one column
 // default is false
-// (keep-filter is about reusing a column filter value upon resetting the table)
+// (keep-filter is about freezing a column filter value, so it won't be change by the user)
 
 conf.getKeepFilterSetting = function(aColumnConfig){
 	
@@ -1009,6 +1009,17 @@ conf.getFooterHeight = function(aTableSettings){
 	if (typeof aTableSettings["footer_height"] == 'undefined')
 		return "30px";
 	return aTableSettings["footer_height"];
+};
+
+// retrieve pre-reset callback function
+// (which is activated just before the Reset-button actually re-load the table to be reset)
+// default is null
+
+conf.getPreResetCallback = function(aTableSettings){
+	
+	if (typeof aTableSettings["prereset_callback"] == 'undefined')
+		return null;
+	return aTableSettings["prereset_callback"];
 };
 
 // retrieve callback function

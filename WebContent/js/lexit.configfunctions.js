@@ -44,6 +44,38 @@ EXTRA FUNCTIONS
 
 
 
+// set the project title on the screen
+fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFondWeight){
+	
+	// default values
+	if (typeof sColor == 'undefined')
+		sColor = "#04B486";
+	
+	if (typeof sFondWeight == 'undefined')
+		sFondWeight = "bold";
+	
+	if (typeof sFontSize == 'undefined')
+		sFontSize = "50px";
+	
+	// create container if not present yet
+	if ( !$("#projectname").find("span").elementExists())
+		$("#projectname").append($("<span></span>"));
+	
+	// set text, color, size, etc
+	$("#projectname").find("span")
+	.text(sProjectName)
+	.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFondWeight);
+	
+	// set title tab as well (and don't double the lex'it version number after the '-'
+	var sBaseTitle = $("title").text();
+	if (sBaseTitle.indexOf(" - ")>-1)
+		sBaseTitle = sBaseTitle.substring(sBaseTitle.indexOf(" - ")+3);
+	$("title").text(sProjectName + " - " + sBaseTitle);
+};
+
+
+
+
 /*****************************************************************
  *     GET GENERAL TABLE INFORMATION                             *
  *****************************************************************/
@@ -465,10 +497,14 @@ fn.breakTableLine = function(){
 
 // show/hide Processing... message
 fn.showProcessingMsg = function(sSomeTablename){
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
 	gui.showProcessingMsg(sSomeTablename);
 };
 
 fn.removeProcessingMsg = function(sSomeTablename){
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
 	gui.removeProcessingMsg(sSomeTablename);
 };
 

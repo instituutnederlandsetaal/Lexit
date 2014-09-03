@@ -398,7 +398,7 @@ mt.setDatatablesPropsOf = function(sSomeTablename, aSomeList){
 // functions for lists of oTables objects
 
 mt.getDataTableObjectOf = function(sSomeTablename){
-
+	
 	var oSomeOTable = hoTable.get(sSomeTablename);
 	return (oSomeOTable == null) ? null : oSomeOTable;
 };

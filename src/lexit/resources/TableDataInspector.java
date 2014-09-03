@@ -44,7 +44,7 @@ public class TableDataInspector {
 			ArrayList<String> newColumnsArr, ArrayList<String> newColumnSearchArr, 
 			ArrayList<Boolean> newCaseSensitiveColumnSearchArr,
 			boolean weMustSort, String[] aSortCol, String[] aSortDir) {
-
+		
 		this.dbObj = dbObj;
 		this.dbName = dbName;
 		this.uriInfo = uriInfo;
@@ -70,7 +70,7 @@ public class TableDataInspector {
 	// see JSON format expected: http://datatables.net/examples/examples_support/json_source.txt
 	@POST
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public ResultObject getTable() {			  
+	public ResultObject getTable() {		
 		
 		return new ResultObject(dbObj, dbName, tableName, access, countOfTable, countQualityOfTable, allColumns,
 				iDisplayLength, iDisplayStart, sSearch, 

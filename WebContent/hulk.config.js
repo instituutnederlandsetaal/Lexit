@@ -12,6 +12,8 @@ var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
 var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 
 
+fn.setProjectTitle("HulK", "#088A08");
+
 
 // *******************************************
 //          TABLE CONFIGURATION
@@ -27,8 +29,9 @@ var sUser = fn.getCurrentUser();
 
 // global button setting 
 
-var bToonHulkGeaccepteerd = true;
-//var bDocumentVisible = true;
+// default start setting is we don't show all HulK oordelen
+var bToonAlleHulkOordelen = false;
+
 
 
 
@@ -41,53 +44,72 @@ oTableSettingsList = {
 				buildDocumentSelector(t);
 				showStatistics(t);
 				putExportToGigantButton(t);
-				//fn.setCustomButtonName(t, 4, (bDocumentVisible ? "Verberg":"Toon")+" Documentnaam-kolom");
+				putRightHulkOordeelButton(t);
+				
 			},
 			"repeat_callback": true,
+			
+			"prereset_callback": function(t){
+				
+				t.fnFilterAdd(
+						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "!^OK")}
+						);				
+			},
+			
 			
 			"button_0":{
 				"name": "Genereer resultaatbestand",
 				"bgcolor": "lightblue",
 				"click": function(t){
 					
-					var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
-
-					fn.showProcessingMsg(t);
-					var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
-					fn.setCustomButtonCss(t, 0, "background-color", "red");
+					t.fnFilterAdd({"hulk_oordeel": ""});
 					
-					$.ajax({
+					fn.refreshTable(t, function(){
 						
-						"type": "GET",
-						"url": sHulKUrlServer + ($.endsWith(sHulKUrlServer, "/") ? "":"/") + sDocumentId,
+						var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+
+						fn.showProcessingMsg(t);
+						var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
+						fn.setCustomButtonCss(t, 0, "background-color", "red");
 						
-						"crossDomain": true,
-					 	"dataType": "json",
-					 	"success": function(data) {
-					 		alert(data.message);
-					 		fn.removeProcessingMsg(t);
-					 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
-					 		fn.refreshTable(t);
-					 		},
-						"error": function(jqXHR, textStatus, errorThrown){
-							alert("Er is een fout opgetreden: "+
-								textStatus+" "+errorThrown);
-							}
-						
+						$.ajax({
+							
+							"type": "GET",
+							"url": sHulKUrlServer + ($.endsWith(sHulKUrlServer, "/") ? "":"/") + sDocumentId,
+							
+							"crossDomain": true,
+						 	"dataType": "json",
+						 	"success": function(data) {
+						 		alert(data.message);
+						 		fn.removeProcessingMsg(t);
+						 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
+						 		fn.refreshTable(t, function(){window.open(data.link);});
+						 		
+						 		},
+							"error": function(jqXHR, textStatus, errorThrown){
+								alert("Er is een fout opgetreden: "+
+									textStatus+" "+errorThrown);
+								}
+							
+						});
 					});
+					
+					
 					
 				}
 			},
 			"button_1":{
-				"name": "Toon HulK-geaccepteerd",
+				"name": "Toon alle HulK-oordelen",
 				"bgcolor": "lightblue",
 				"click": function(t){
-					bToonHulkGeaccepteerd = !bToonHulkGeaccepteerd;
-					var hulkOordeelToLookFor = bToonHulkGeaccepteerd ? "" : "!^OK";
+					bToonAlleHulkOordelen = !bToonAlleHulkOordelen;
+					
+					var hulkOordeelToLookFor = bToonAlleHulkOordelen ? "" : "!^OK";
+					
+					t.fnFilterAdd({"hulk_oordeel": hulkOordeelToLookFor});										
 					fn.putDataIntoFilterBox(t, "hulk_oordeel", hulkOordeelToLookFor);
-					//t.fnFilterSet({"hulk_oordeel": hulkOordeelToLookFor});
-					t.fnFilterAdd({"hulk_oordeel": hulkOordeelToLookFor});
-					fn.setCustomButtonName(t, 1, (bToonHulkGeaccepteerd ? "Toon" : "Verberg") + " HulK-geaccepteerd");
+					
+					putRightHulkOordeelButton(t);
 					fn.refreshTable(t);
 				}
 			},
@@ -160,26 +182,6 @@ oTableSettingsList = {
 						}					
 				}
 			}
-//			,
-//			"button_4": {
-//				"name": "Verberg documentnaam",
-//				"bgcolor": "lightblue",
-//				"click": function(t){
-//					
-//					bDocumentVisible = !bDocumentVisible;
-//					var sDocumentName = fn.getValueOfFilterBox(t, "document");
-//					
-//					fn.setCustomButtonName(t, 4, (bDocumentVisible ? "Verberg":"Toon")+" Documentnaam-kolom");
-//				
-//					$("#hulk_worktable_wrapper").hide();
-//					tb.destroyTable("hulk_worktable", null, true);
-//					
-//					conf.changeTableConfigValue("hulk_worktable", "document", "visible", bDocumentVisible);
-//					
-//					fn.callDatabase("hulk_worktable", {"document": sDocumentName});
-//					
-//				}
-//			}
 		}
 };
 
@@ -207,7 +209,8 @@ oTableConfigurationList = {
 				"visible": false
 				},
 			hulk_oordeel: {
-					"sortable": false
+				"filter": "!^OK", // default start setting				
+				"sortable": false
 				},
 			correction: {
 				"sortable": false,
@@ -347,8 +350,7 @@ function showStatistics(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sTableName = fn.getTableName(t);
-	var sDocumentChoice = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
+	var sDocumentChoice = t.fnFilterGet()["document"];
 	
 	if (sDocumentChoice == '')
 		{
@@ -435,8 +437,8 @@ function doExport(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sTableName = fn.getTableName(t);
-	var sDocumentChoice = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
+	
+	var sDocumentChoice = t.fnFilterGet()["document"];
 	
 	if (sDocumentChoice == '')
 		{
@@ -444,10 +446,31 @@ function doExport(t){
 		}
 	else
 		{
-		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+		t.fnFilterAdd({"hulk_oordeel": ""});
 		
-		// Ajax call with:   sHulKExportUrl
-		// to be built 
+		fn.refreshTable(t, function(){
+			var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+			
+			$.ajax({
+				
+				"type": "GET",
+				"url": sHulKExportUrl + ($.endsWith(sHulKExportUrl, "/") ? "":"/") + sDocumentId,
+				
+				"crossDomain": true,
+			 	"dataType": "json",
+			 	"success": function(data) {
+			 		alert(data.message);
+			 		fn.removeProcessingMsg(t);
+			 		},
+				"error": function(jqXHR, textStatus, errorThrown){
+					alert("Er is een fout opgetreden: "+
+						textStatus+" "+errorThrown);
+					}
+				
+			});
+		});
+		
+		
 		}
 }
 
@@ -461,7 +484,7 @@ function buildDocumentSelector(t){
 	
 	// get the current document filter setting (which doc was already chosen?)
 	var sTableName = fn.getTableName(t);
-	var sSelectedDocument = mt.getDataTableObjectOf(sTableName).fnFilterGet()["document"];
+	var sSelectedDocument = t.fnFilterGet()["document"];
 	
 	
 	// (re)build the document selector
@@ -498,7 +521,7 @@ function buildDocumentSelector(t){
 	// when a choice is made, load the chosen table
 	inputTag.change(function(){
 		sSelectedDocument = $(this).val();		
-		mt.getDataTableObjectOf(sTableName).fnFilterAdd({"document": sSelectedDocument});
+		t.fnFilterAdd({"document": sSelectedDocument});
 		fn.refreshTable(t);
 	});
 	
@@ -509,8 +532,15 @@ function buildDocumentSelector(t){
 }
 
 
+// *******************************************
+//     HulK oordeel button
+// *******************************************
 
-
+// the button shows a different text,
+// depending on the current value of bToonAlleHulkOordelen
+function putRightHulkOordeelButton(t){
+	fn.setCustomButtonName(t, 1, (bToonAlleHulkOordelen ? "Verberg HulK-geaccepteerd" : "Toon alle HulK-oordelen") );
+}
 
 
 

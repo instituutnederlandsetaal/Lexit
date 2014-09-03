@@ -361,7 +361,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				if ( !( conf.getRepeatCallback(aTableSettings) == false && 
 						mt.getCallbackWasCalledAlready(sSomeTableName) == true))
 					{
-					conf.getCallback(aTableSettings)(sSomeTableName);
+					conf.getCallback(aTableSettings)(mt.getDataTableObjectOf(sSomeTableName));
 					mt.setCallbackWasCalledAlready(sSomeTableName);
 					}
 									

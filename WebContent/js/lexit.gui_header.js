@@ -257,7 +257,12 @@ head.putResetButton = function(sSomeTablename){
 				function(){
 				
 					// send empty search request			
-					mt.getDataTableObjectOf(sSomeTablename).fnFilterReset();			
+					mt.getDataTableObjectOf(sSomeTablename).fnFilterReset();
+					
+					// call the pre-reset callback before the table is actually reset
+					conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
+					
+					// this one does the table refresh!
 					mt.getDataTableObjectOf(sSomeTablename).fnSort(conf.getDefaultSortingSettings(sSomeTablename));
 				
 					// put the current search filters values into the search boxes
