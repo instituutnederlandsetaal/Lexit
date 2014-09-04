@@ -608,6 +608,43 @@ fn.getNodeWhere = function(sSomeTable, aFieldsAndValues){
 };
 
 
+fn.getAllNodesWhere = function(sSomeTable, aFieldsAndValues){
+	
+	var aAllRows = fn.getAllRows(sSomeTable);
+	var aNodesToReturn = new Array();
+	
+	// check each row, and stop as soon as we have found a row containing field with the right values
+	aAllRows.each(function(){
+		
+		var bAllValuesWhereFound = true;
+		for (sFieldName in aFieldsAndValues)
+			{
+			// does the table content match the values we are looking for?
+			var sFieldValueInTable = fn.getDataFromCellInRowNode(sSomeTable, this, sFieldName);
+			if (aFieldsAndValues[sFieldName] == sFieldValueInTable)
+				{
+				// yes? then carry on and check the next value
+				continue;
+				}
+			else
+				{
+				// no? stop right away and check the next row
+				bAllValuesWhereFound = false;
+				break;
+				}
+			}
+		
+		// if this row contained the right values, return its node
+		if (bAllValuesWhereFound)
+			{
+			aNodesToReturn.push(this);			
+			}
+	});	
+	
+	return $(aNodesToReturn);
+};
+
+
 // get the node of the row which has a given id;
 // if no node was found with this id, return null
 fn.getNodeWhereIdIs = function(sSomeTable, sId){

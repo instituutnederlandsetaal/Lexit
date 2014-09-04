@@ -5,12 +5,15 @@
 //             HulK specific
 // *******************************************
 
+
 // this url will be called for the generation of the 'customer result file'
 var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
 
 // this url will be called to export the data to the Gigant-spelling database
 var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 
+// this url will deliver us autocomplete information
+var sAutoCompletUrl = "";
 
 fn.setProjectTitle("HulK", "#088A08");
 
@@ -20,6 +23,40 @@ fn.setProjectTitle("HulK", "#088A08");
 // *******************************************
 
 oShowOnlyTables = ["hulk_worktable"];
+
+
+
+// autocomplete configuration
+// see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
+$(".correction textarea").autocomplete({
+    source: function(request, response){
+        $.ajax({
+            type: "POST",
+            url: sAutoCompletUrl,
+            data: "{}",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                response($.parseJSON(msg.d).Records);
+            },
+            error: function (msg) {
+                alert(msg.status + ' ' + msg.statusText);
+            }
+        });
+    },
+
+    select: function (event, ui) {
+        $(".correction textarea").val(ui.item.Work_Item);
+        return false;
+    }
+})
+.data("autocomplete")._renderItem = function (ul, item) {
+ return $("<li></li>")
+ .data("item.autocomplete", item)
+ .append("<a>" + item.Work_Item + "</a>")
+ .appendTo(ul);
+};
+
 
 
 // for logging
@@ -45,7 +82,7 @@ oTableSettingsList = {
 				showStatistics(t);
 				putExportToGigantButton(t);
 				putRightHulkOordeelButton(t);
-				
+				alterColorOfRowsGeneratedByUser(t);
 			},
 			"repeat_callback": true,
 			
@@ -128,14 +165,17 @@ oTableSettingsList = {
 					else
 						{
 						var nRow = aRow[0];
-						var wordformId = fn.getDataFromCellNamed(t, nRow, "wordform_id");
+						var sHulkableWordId = fn.getDataFromCellNamed(t, nRow, "hulkable_word_id");
 						var spellingVersionId = fn.getDataFromCellNamed(t, nRow, "spelling_version_id");
-						var documentId = fn.getDataFromCellNamed(t, nRow, "document_id");
+						//var wordformId = fn.getDataFromCellNamed(t, nRow, "wordform_id");						
+						//var sDocumentId = fn.getDataFromCellNamed(t, nRow, "document_id");
 						
 						fn.callFunction("duplicateRow", 
-								[wordformId, spellingVersionId, documentId], 
+								[sHulkableWordId, spellingVersionId], 
 								null, null, null, null, 
-								function(){ fn.refreshTable(t);});
+								function(){ 
+									fn.refreshTable(t);
+								});
 						}
 					 
 				}
@@ -150,35 +190,57 @@ oTableSettingsList = {
 					var aRows = fn.getSelectedRowsFrom(t);
 					if (answer)
 						{
+						
+						var bRemoveIsAllowed = true;
 						aRows.each(function(){
 							
 							var nCurrentRow = this;
 							
-							var sHulkableWordId = fn.getRowId(nCurrentRow);
-							var sDocumentId = fn.getDataFromCellNamed(t, nCurrentRow, "document_id");
+							var bAddedByUser = fn.getDataFromCellNamed(t, nCurrentRow, "added_by_editor");
+							if (bAddedByUser == 'f' || bAddedByUser == false)
+								bRemoveIsAllowed = false;
 							
-							fn.removeFromDatabaseGivenFieldValues(
-									"judgements", 
-									{
-										"hulkable_word_id": sHulkableWordId
-									}, 
-									false, 
-									function(){
+						});
+						
+						if ( !bRemoveIsAllowed)
+							{
+							alert("U kunt alleen rijen verwijderen die u zelf aangemaakt heeft.");
+							}
+						else
+							{
+							aRows.each(function(){
 								
-										fn.removeFromDatabaseGivenFieldValues(
-												"hulkable_words", 
-												{
-													"hulkable_word_id": sHulkableWordId,
-													"document_id": sDocumentId
-												},
-												false, 
-												function(){
-													if (fn.isLastNodeOf(nCurrentRow, aRows))
-														fn.refreshTable(t);
-													});
-									});
+								var nCurrentRow = this;
+								
+								var sJudgementId = fn.getDataFromCellNamed(t, nCurrentRow, "judgement_id");
+								//var sDocumentId = fn.getDataFromCellNamed(t, nCurrentRow, "document_id");
+								
+								fn.removeFromDatabaseGivenFieldValues(
+										"judgements", 
+										{
+											"judgement_id": sJudgementId
+										}, 
+										false, 
+										function(){
+									
+											fn.refreshTable(t);
+											
+//											fn.removeFromDatabaseGivenFieldValues(
+//													"hulkable_words", 
+//													{
+//														"hulkable_word_id": sHulkableWordId,
+//														"document_id": sDocumentId
+//													},
+//													false, 
+//													function(){
+//														if (fn.isLastNodeOf(nCurrentRow, aRows))
+//															fn.refreshTable(t);
+//														});
+										});
 
-							});
+								});
+							}
+						
 						}					
 				}
 			}
@@ -193,10 +255,11 @@ oTableConfigurationList = {
 		
 		hulk_worktable: {
 						
-			judgement_id: {
-				"sortable": false,
+			pkid: {
+				"sortable": false,				
 				"visible": false
-				},
+				},		
+			
 			document: {
 				"sortable": false,				
 				"choosefrom":[],
@@ -225,12 +288,15 @@ oTableConfigurationList = {
 					if (value == 'NOK')
 						{
 						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);
-						var sHulkableWordId = fn.getRowId(n);
+						var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
 						fn.updateDatabaseGivenFieldValues("judgements", 
 								{"hulkable_word_id": sHulkableWordId}, 
 								{"judgement": "NOK"});
 						}
 				}
+			},
+			uploader_gloss: {
+				"sortable": false
 			},
 			gloss: {
 				"editable": true,
@@ -253,13 +319,17 @@ oTableConfigurationList = {
 				},
 				"cell_tooltip": "Klik om te kopiëren naar 'correction'"
 			},
-			pkid: {
+			judgement_id: {
 				"sortable": false,
 				"colsort": "asc",				// sort #2
 				"visible": false
-				},			
-			part_of_speech:{
-				"editable": true,
+				},
+			hulkable_word_id: {
+				"sortable": false,				
+				"visible": false
+			},
+				
+			uploader_part_of_speech: {
 				"sortable": false,
 				"editfunc": function(t, n, value){
 					fn.updateDatabaseGivenANode(t, n, 
@@ -332,10 +402,40 @@ oTableConfigurationList = {
 			},
 			verified_date: {
 				"visible": false
+			},
+			added_by_editor: {
+				
+				"visible": false
 			}
 			
 		}
 
+};
+
+// *************************************************
+//   ALTER COLOR OF ROWS GENERATED BY EDITOR
+// *************************************************
+
+
+function alterColorOfRowsGeneratedByUser(t){
+
+	// get manually created row, and give those a different color
+	
+	var aRows = fn.getAllNodesWhere(t, {"added_by_editor": 't'});
+		
+	aRows.each(function(){
+		
+		var nNode = this;
+		aCellsSelector = $(nNode).find("td");
+		
+		var aColumns = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+		for (var i=0; i<aColumns.length; i++)
+			{
+			var eCell = fn.getCellElement(t, nNode, aColumns[i]);
+			eCell.css("opacity", "0.5");
+			}
+		
+	});	
 };
 
 
@@ -354,7 +454,7 @@ function showStatistics(t){
 	
 	if (sDocumentChoice == '')
 		{
-		showStatisticsInHeader("Kies een document!", true);
+		showStatisticsInHeader("&larr; Kies een document!", true);
 		}
 	else
 		{
