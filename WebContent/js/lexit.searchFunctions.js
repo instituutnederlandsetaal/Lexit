@@ -759,7 +759,7 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	if (isASelectBox && 
 			( sValue != '' && !$.startsWith(sValue, "exact:") ) 
 		)
-		sValue = "exact:"+escapeRegexChars( sValue );
+		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
 	
 	return sValue;
 };

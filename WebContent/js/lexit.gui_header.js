@@ -260,7 +260,8 @@ head.putResetButton = function(sSomeTablename){
 					mt.getDataTableObjectOf(sSomeTablename).fnFilterReset();
 					
 					// call the pre-reset callback before the table is actually reset
-					conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
+					if (conf.getPreResetCallback( conf.getTableSettings(sSomeTablename)) != null)
+						conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
 					
 					// this one does the table refresh!
 					mt.getDataTableObjectOf(sSomeTablename).fnSort(conf.getDefaultSortingSettings(sSomeTablename));
@@ -875,6 +876,10 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>*</I></CENTER></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD>nul of meer (letters)</TD>" +
 				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>?</I></CENTER></TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>de voorafgaande letter is optioneel</TD>" +
+				"</TR>" +
 				"</TABLE>" +
 				"<BR>" +
 				"Hier volgen een paar voorbeelden:" +
@@ -900,9 +905,12 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>\\yvan\\y</I></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek exact naar '<I>van</I>' als onderdeel van een woordgroep, zoals in '<I>hoofd van de school</I>'</TD>" +
 				"</TR>" +
-				"<TR>" +
-				"<TD>&nbsp;&nbsp;</TD><TD></TD>" +				
-				"</TR>" +
+				"</TABLE>" +
+				"<BR>" +
+				"Er kunnen ook combinaties van zoekopdrachten worden opgegeven, zoals: <I>zoek alle woorden met 'kop' of 'hoofd' in zich</I>. " +
+				"De verschillende alternatieven moeten dan tussen '(' en ')' worden opgegeven, gescheiden door een '|'." +
+				"<BR><BR>" +
+				"<TABLE>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>(hoofd|kop)</I></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar woorden met '<I>hoofd</I>' of '<I>kop</I>' in zich</TD>" +
@@ -911,13 +919,29 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^(hoofd|kop)$</I></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD>zoek exact naar '<I>hoofd</I>' of '<I>kop</I>'</TD>" +
 				"</TR>" +
+				"</TABLE>" +
+				"<BR>" +
+				"Wanneer de verschillende alternatieven geen woorden, maar losse letters betreffen (bijv. <I>zoek naar 'hoofd' eindigend op 'd' of 't'</I>), dan kunnen " +
+				"de verschillende alternatieven tussen '[' en ']' en zonder scheiding worden opgegeven. " +
+				"Geheel equivalent zijn:" +
+				"<BR><BR>" +
+				"<TABLE>" +				
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>hoof(d|t)</I></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>hoofd</I>' of '<I>hooft</I>'</TD>"+
 				"</TR>" +
 				"<TR>" +
-				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi(e|)$</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' of '<I>mooie</I>'. (e|) betekent dus 'e' of niets.</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD><I>hoof[dt]</I></TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>hoofd</I>' of '<I>hooft</I>'</TD>"+
+				"</TR>" +
+				"</TABLE>" +
+				"<BR>" +
+				"Andere voorbeelden:"+
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>mooie?$</I></TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' of '<I>mooie</I>'. 'e?' betekent dus 'e' of niets.</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD></TD>" +				

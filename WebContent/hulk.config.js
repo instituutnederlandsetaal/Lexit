@@ -13,7 +13,7 @@ var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
 var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 
 // this url will deliver us autocomplete information
-var sAutoCompletUrl = "";
+var sAutoCompleteUrl = "http://svowhu02.inl.loc/ws/autocomplete-lemmata/";
 
 fn.setProjectTitle("HulK", "#088A08");
 
@@ -26,41 +26,47 @@ oShowOnlyTables = ["hulk_worktable"];
 
 
 
-// autocomplete configuration
+// Autocomplete configuration
 // see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
-$(".correction textarea").autocomplete({
-    source: function(request, response){
-        $.ajax({
-            type: "POST",
-            url: sAutoCompletUrl,
-            data: "{}",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (msg) {
-                response($.parseJSON(msg.d).Records);
-            },
-            error: function (msg) {
-                alert(msg.status + ' ' + msg.statusText);
-            }
-        });
-    },
+//      http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
+var sAutoCompleteSelector = ".correction";
 
-    select: function (event, ui) {
-        $(".correction textarea").val(ui.item.Work_Item);
-        return false;
-    }
-})
-.data("autocomplete")._renderItem = function (ul, item) {
- return $("<li></li>")
- .data("item.autocomplete", item)
- .append("<a>" + item.Work_Item + "</a>")
- .appendTo(ul);
-};
+$(document).on(
+        "focus", 
+        sAutoCompleteSelector, 
+        function(event) {
+        	
+        	$(event.target).autocomplete({
+            	
+                source: function(request, response){
+                	
+                	$.ajax({
+                        "type": "GET",
+                        "crossDomain": true,
+                        "url": sAutoCompleteUrl + request.term,
+                        "dataType": "json",
+                        "success": function (data){
+                        	response($.map(data, function (item) {
+                                return {
+                                    label: item,
+                                    value: item
+                                };
+                            }));
+                        },
+                        "error": function(jqXHR, textStatus, errorThrown){
+        					alert("Er is een fout opgetreden: "+
+        						textStatus+" "+errorThrown);
+        					}
+                    });
+                }
+            });
+            
+        }
+    );
 
 
 
-// for logging
-
+// get user name for logging
 var sUser = fn.getCurrentUser();
 
 
@@ -87,9 +93,11 @@ oTableSettingsList = {
 			"repeat_callback": true,
 			
 			"prereset_callback": function(t){
-				
+								
+				conf.changeTableConfigValue(fn.getTableName(t), "document", "keepfilter", false);
 				t.fnFilterAdd(
-						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "!^OK")}
+						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "!^OK"),
+						 "document":""}
 						);				
 			},
 			
@@ -124,6 +132,8 @@ oTableSettingsList = {
 						 		
 						 		},
 							"error": function(jqXHR, textStatus, errorThrown){
+								fn.removeProcessingMsg(t);
+								fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
 								alert("Er is een fout opgetreden: "+
 									textStatus+" "+errorThrown);
 								}
@@ -167,9 +177,7 @@ oTableSettingsList = {
 						var nRow = aRow[0];
 						var sHulkableWordId = fn.getDataFromCellNamed(t, nRow, "hulkable_word_id");
 						var spellingVersionId = fn.getDataFromCellNamed(t, nRow, "spelling_version_id");
-						//var wordformId = fn.getDataFromCellNamed(t, nRow, "wordform_id");						
-						//var sDocumentId = fn.getDataFromCellNamed(t, nRow, "document_id");
-						
+												
 						fn.callFunction("duplicateRow", 
 								[sHulkableWordId, spellingVersionId], 
 								null, null, null, null, 
@@ -213,29 +221,15 @@ oTableSettingsList = {
 								var nCurrentRow = this;
 								
 								var sJudgementId = fn.getDataFromCellNamed(t, nCurrentRow, "judgement_id");
-								//var sDocumentId = fn.getDataFromCellNamed(t, nCurrentRow, "document_id");
-								
+																
 								fn.removeFromDatabaseGivenFieldValues(
 										"judgements", 
 										{
 											"judgement_id": sJudgementId
 										}, 
 										false, 
-										function(){
-									
-											fn.refreshTable(t);
-											
-//											fn.removeFromDatabaseGivenFieldValues(
-//													"hulkable_words", 
-//													{
-//														"hulkable_word_id": sHulkableWordId,
-//														"document_id": sDocumentId
-//													},
-//													false, 
-//													function(){
-//														if (fn.isLastNodeOf(nCurrentRow, aRows))
-//															fn.refreshTable(t);
-//														});
+										function(){									
+											fn.refreshTable(t);											
 										});
 
 								});
@@ -397,7 +391,7 @@ oTableConfigurationList = {
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					}
 				},
-			name: {				
+			name: {
 				"visible": false
 			},
 			verified_date: {
@@ -460,12 +454,13 @@ function showStatistics(t){
 		{
 		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 		
-		fn.callFunction("getStatistics", [documentId], null, null, null, null, 
-				function(){
-			
-			showStatisticsInHeader(fn.getFunctionOutput()[0]);
-						
-			});
+		if (documentId != '')
+			fn.callFunction("getStatistics", [documentId], null, null, null, null, 
+					function(){
+				
+				showStatisticsInHeader(fn.getFunctionOutput()[0]);
+							
+				});
 		}
 };
 
@@ -486,7 +481,7 @@ function showStatisticsInHeader(sStats, sWarning){
 			$("<div></div>")
 			.attr("id", "hulk_stats")
 			.css("border", "1px black dotted")
-			.css("width", "450px")
+			.css("width", "400px")
 			.css("text-align", "center")
 			.css("color", sColor)
 			.append($("p").css("text-decoration", sTextDecoration)
@@ -501,7 +496,7 @@ function showStatisticsInHeader(sStats, sWarning){
 	$("#hulk_worktable_wrapper .top #hulk_stats")
 	.css("position", "relative")
 	.css("top", "60px")
-	.css("left", "250px");	
+	.css("left", "280px");	
 }
 
 
@@ -563,6 +558,7 @@ function doExport(t){
 			 		fn.removeProcessingMsg(t);
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
+					fn.removeProcessingMsg(t);
 					alert("Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
 					}
@@ -621,7 +617,9 @@ function buildDocumentSelector(t){
 	// when a choice is made, load the chosen table
 	inputTag.change(function(){
 		sSelectedDocument = $(this).val();		
-		t.fnFilterAdd({"document": sSelectedDocument});
+		t.fnFilterAdd({"document": "exact:"+sSelectedDocument});
+		conf.changeTableConfigValue(sTableName, "document", "filter", sSelectedDocument);
+		conf.changeTableConfigValue(sTableName, "document", "keepfilter", true);
 		fn.refreshTable(t);
 	});
 	

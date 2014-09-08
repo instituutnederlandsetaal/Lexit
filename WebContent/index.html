@@ -7,9 +7,9 @@
 	
 	
 	<title>Lex'it 
-	v2014.09.04
+	v2014.09.08
 	-
-	1
+	2
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -198,7 +198,7 @@
 				ts.getListOfTables( paramsHash.get("table"), 
 						oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
 			.fail(function(jqxhr, settings, exception){
-				alert("'"+paramsHash.get("db")+"' is geen correcte waarde. Het configuratiebestand bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+				alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
 				});
 			
 			// show the project name at the top of the screen

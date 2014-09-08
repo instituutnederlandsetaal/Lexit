@@ -347,6 +347,9 @@ oTableConfigurationList = {
 			},
 			"homo":{
 				"visible": false
+			},
+			"weg":{
+				"editable": true
 			}
 			
 		},

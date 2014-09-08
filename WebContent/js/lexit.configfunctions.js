@@ -49,7 +49,7 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFondWeight){
 	
 	// default values
 	if (typeof sColor == 'undefined')
-		sColor = "#04B486";
+		sColor = "#3970b3";
 	
 	if (typeof sFondWeight == 'undefined')
 		sFondWeight = "bold";
@@ -935,7 +935,7 @@ fn.getNodeId = function(nNode){
 // This is to make sure we have a row, instead of only a cell
 fn.getRowNode = function(nNode){
 	
-	if (fn.isCellNode(nNode))
+	if (fn.isCellNode(nNode) && nNode != null)
 		return nNode.parentNode;
 	return nNode;
 };
@@ -2317,7 +2317,8 @@ fn.quote = function(str){
 	return "'"+fn.escapeSingleQuotes(str)+"'";
 };
 fn.escapeRegexChars = function(str){
-	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+	return str.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
+	//return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
 //highlight some part of a string

@@ -262,12 +262,24 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		// so we can read the extra server params from there!
 		// (see: http://www.datatables.net/forums/discussion/4968/accessing-the-ajax-json-response-from-within-fndrawcallback/p1)
 		"fnServerData" : function(sSource, aoData, fnCallback, oSettings ){
+			
+			// hide the 'ugly' string with table info, in which some items still
+			// need to be filled in at this stage
+			
+			$("#"+sSomeTableName+"_info").hide();
+			
 			oSettings.jqXHR = $.ajax({
 		        'dataType': 'json',
 		        'type': 'POST',
 		        'url': sSource,
 		        'data': aoData,
 		        'success': [fnCallback, function(json){
+		        	
+		        	// now we have a response from the server, show the
+		        	// table info again
+		        	$("#"+sSomeTableName+"_info").show();
+		        	
+		        	// now put in the info we got from the server
 		        	tb.processExtraParamsFromServerResponse(json, sSomeTableName);
 		        	
 		        	}]
@@ -604,12 +616,13 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 	
 	// pre-processing: if no query was send (so result is whole table), Datatables
 	// actually shows the whole count as if it was an query count. But the
-	// relevent count quality is in this case the total count quality, no the query
+	// relevent count quality is in this case the total count quality, not the query
 	// count quality. To make sure we will get just that, we replace _PLUSMN_ in the
 	// string by _TOTALPLUSMN_	
 	if (sSubTotal.indexOf("_TOTALPLUSMN_")<0)
 		sSubTotal = sSubTotal.replace("_PLUSMN_", "_TOTALPLUSMN_");
 	
+		
 	// query count part (size of resultset)
 	sSubTotal = sSubTotal.replace("_PLUSMN_", (json.bQueryCountIsExact ? "" : "±"));
 	// total table count (size of whole table)

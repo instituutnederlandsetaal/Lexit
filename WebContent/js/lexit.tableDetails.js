@@ -424,7 +424,8 @@ td.selectColumns = function(sSomeTablename){
             			else
             				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked");
             		});
-                }
+                },
+                style: "color: #3970b3"
         	},
         	{
         		text: "Alles",
@@ -442,7 +443,8 @@ td.selectColumns = function(sSomeTablename){
             			// else check this one
             			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).attr("checked", "checked");
             		});
-                } 
+                },
+                style: "color: #3970b3" 
         		
         	},
         	{
@@ -461,7 +463,8 @@ td.selectColumns = function(sSomeTablename){
             			// else UNcheck this one
             			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked");
             		});        		
-                }
+                },
+                style: "color: #3970b3"
         		
         	} 
         ]

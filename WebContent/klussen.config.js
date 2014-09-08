@@ -1,6 +1,7 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lexiconexport1", 
+oShowOnlyTables = ["anw_postags_corrigeren",
+                   "lexiconexport1", 
                    "lexiconexport2", 
                    "lexiconexport3", 
                    "spelling_logfiles_boukje", 
@@ -224,6 +225,10 @@ var oNonHomonymsWorktableSettings = {
 // table general settings
 
 oTableSettingsList = {
+		
+		anw_postags_corrigeren:{
+			"size": "60%"
+		},
 		
 		logfiles_worktable_verbs: oLogfilesWorktableSettings, 
 		
