@@ -27,6 +27,45 @@ oTableSettingsList = {
 		
 		lemmata_view: {
 			
+			// when pressing the reset button, reset all custom buttons as well
+			"prereset_callback": function(t){
+				
+				// set neutral values for filters
+				var filterValues = t.fnFilterGet();
+				filterValues["source_gb05"] = "";
+				filterValues["source_molex_hom"] = "";
+				filterValues["source_logfiles"] = "";
+				filterValues["source_molex_nw_lem"] = "";
+				filterValues["source_molex_niet_hom"] = "";
+				filterValues["source_anw"] = "";
+				filterValues["source_telw"] = "";
+				filterValues["source_chn"] = "";
+				t.fnFilterSet(filterValues);
+				
+				// give all buttons neutral color
+				for (var i=0; i<=7; i++)
+					{
+					fn.setCustomButtonCss(t, i, "background-color", "#FBEFEF");
+					}
+				
+				
+			},
+			
+			"callback": function(t){
+				
+				// we need to disable the checkbox of 
+				var aRows = fn.getAllRows(t);
+				aRows.each(function(){
+					var bSourceContainsTelwoorden = (fn.getDataFromCellNamed(t, this, "source")).indexOf("TELWOORDEN")>-1;
+					
+					if (bSourceContainsTelwoorden)
+						{				
+						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
+						}
+				});
+			},
+			"repeat_callback": true,
+			
 			"size": "90%",
 			
 			// we need buttons to choose the sources we are interested in
@@ -36,11 +75,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_gb05"] = (!filterValues["source_gb05"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 0, "background-color", (filterValues["source_gb05"]?"#F5A9A9":"#FBEFEF"));
@@ -52,11 +89,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_molex_hom"] = (!filterValues["source_molex_hom"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 1, "background-color", (filterValues["source_molex_hom"]?"#F5A9A9":"#FBEFEF"));
@@ -68,11 +103,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_logfiles"] = (!filterValues["source_logfiles"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 2, "background-color", (filterValues["source_logfiles"]?"#F5A9A9":"#FBEFEF"));
@@ -84,11 +117,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_molex_nw_lem"] = (!filterValues["source_molex_nw_lem"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 3, "background-color", (filterValues["source_molex_nw_lem"]?"#F5A9A9":"#FBEFEF"));
@@ -100,11 +131,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_molex_niet_hom"] = (!filterValues["source_molex_niet_hom"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 4, "background-color", (filterValues["source_molex_niet_hom"]?"#F5A9A9":"#FBEFEF"));
@@ -116,11 +145,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_anw"] = (!filterValues["source_anw"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 5, "background-color", (filterValues["source_anw"]?"#F5A9A9":"#FBEFEF"));
@@ -132,11 +159,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_telw"] = (!filterValues["source_telw"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
@@ -148,11 +173,9 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var sTableName = fn.getTableName(t);
-					
-					var filterValues = mt.getDataTableObjectOf(sTableName).fnFilterGet();					
+					var filterValues = t.fnFilterGet();					
 					filterValues["source_chn"] = (!filterValues["source_chn"]==false) ? "":true;
-					mt.getDataTableObjectOf(sTableName).fnFilterSet(filterValues);
+					t.fnFilterSet(filterValues);
 					
 					fn.refreshTable(t);
 					fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
@@ -223,9 +246,10 @@ oTableConfigurationList = {
 			"modern_lemma": {				
 				"colsort": "asc"				
 			},
-			"th_lemma": {			
+			"th_lemma": {
+				"visible": false
 			},
-			"keurmerk": {				
+			"keurmerk": {
 				"visible": false,
 				"flexible_visibility": false
 			},

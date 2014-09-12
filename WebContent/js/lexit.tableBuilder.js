@@ -709,8 +709,14 @@ tb._getRelevantColumnsStraightFromJson = function(sSomeTablename, json){
 			var aColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
 			var sButtonHere = conf.getButtonSetting(aColumnConfig);
 			
-			// if a column is non-empty, it is relevant
-			if (aaTableData[i][sColumnName] != "" || sButtonHere != null)
+			// not visible column with not-flexible visibility must keep hidden
+			var bMustKeepHidden = 
+				( !conf.getVisibility(aColumnConfig) &
+						!conf.getFlexibleVisibility(aColumnConfig) );
+			
+			// if a column is non-empty, it is relevant (except when it should keep hidden)
+			if ( !bMustKeepHidden && 
+					(aaTableData[i][sColumnName] != "" || sButtonHere != null) )
 				{
 				if ($.inArray(sColumnName, aRelevantColumnsUnsorted)<0)
 					aRelevantColumnsUnsorted.push(sColumnName);
@@ -826,6 +832,11 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				"bSearchable": false, 
 				"aTargets": [ i ],
 				"mRender": function ( data, type, full ) {
+					
+					// NOTE: it is not possible to set
+					// the 'disabled' attribute here, as the
+					// 'editable' property can't be accessed from here!
+					// So the 'disabled' attribute is set in gui.makeTableEditable().
 					
 					// checkbox must be checked
 					if (sf.isCheckboxTrueValue(data))

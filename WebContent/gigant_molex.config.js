@@ -12,7 +12,27 @@ var sChosenParentId = null;
 oTableSettingsList = {
 		
 
-lemmata_view: {
+		lemmata_view: {
+			
+			"prereset_callback": function(confTable){
+				
+				fn.addFilters(confTable, {"homo": ""});
+				
+				sChosenParentId = null;
+				fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+				
+			},
+	
+			"keyup" : {
+				
+				
+				"f9": function(confTable){
+					
+					var nNode = fn.getFirstSelectedRowFrom(confTable);
+					var sLemmaId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
+					fn.callDatabase("paradigma_view", {"lemma_id": sLemmaId});
+				}
+			},
 			
 			"size": "90%",
 			"button_0":{
@@ -170,7 +190,9 @@ lemmata_view: {
 				"textcolor": "white",
 				"click": function(confTable){
 					
-					fn.callDatabase(confTable, {"homo": true});
+					fn.addFilters(confTable, {"homo": true});
+					fn.refreshTable(confTable);
+					//fn.callDatabase(confTable, {"homo": true});
 					
 				}
 				
@@ -288,7 +310,7 @@ oTableConfigurationList = {
 						fn.callDatabase(t, {"parent": sLemma});
 				}
 			},
-			"modern_lemma": {				
+			"modern_lemma": {		
 				"colsort": "asc",
 				"editable": true				
 			},
@@ -349,6 +371,9 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"weg":{
+				"editable": true
+			},
+			"uitspraak":{
 				"editable": true
 			}
 			

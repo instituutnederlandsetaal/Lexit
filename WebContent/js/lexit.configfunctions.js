@@ -829,7 +829,7 @@ fn.isEditableNode = function(sSomeTableName, nNode){
 
 
 // uncheck a list of checkboxes
-fn.uncheckCheckboxes = function(oTable, nNode, aListOfColumns){
+fn.uncheckCheckboxes = function(oTable, nNode, aListOfColumns, fnCallback){
 	
 	if (typeof oTable != 'object')
 		oTable = mt.getDataTableObjectOf(oTable);
@@ -857,6 +857,9 @@ fn.uncheckCheckboxes = function(oTable, nNode, aListOfColumns){
 			eCellSelector.click();			
 			}
 		}
+	
+	if (fnCallback!=null)
+			fnCallback();
 };
 
 
@@ -2181,6 +2184,13 @@ fn.getCustomButtonCss = function(sTableName, iButtonNumber, sProperty){
  *             FILTER BOXES FUNCTIONS                     *
  **********************************************************/
 
+// PART 1
+// ------
+// BEWARE: The following functions affect the filter boxes in the user interface
+//         but have no effect on the filters variables (this happens only when
+//         the user presses 'enter'
+//         If you want to access the filters of the engine, see 'PART 2'
+
 // put some data into a search filter box
 fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	
@@ -2207,7 +2217,7 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 
 			// special case: if we have a checkbox, we also need to (un)check it			
 			if (searchBoxSelector.attr("type")=="checkbox" && sf.isCheckboxTrueValue(sSomeData))
-				searchBoxSelector.attr("checked", "checked");
+				searchBoxSelector.prop("checked", "checked");
 			
 			}
 		}
@@ -2299,6 +2309,95 @@ fn.getTypeOfFilterBox = function(sSomeTablename, sColumnName){
 	// default: text
 	return "text";
 };
+
+
+
+// PART 2
+// ------
+// BEWARE: The following functions affect the filters variables,
+//         but have no effect on the filter boxes in the user interface
+//         If you want to access the filter boxes, see 'PART 1'
+
+
+// clear all the filters
+ 
+fn.clearAllFilters = function(sSomeTable){
+	
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	sSomeTable.fnFilterClear();
+};
+
+
+// put the filters back into their state at initialisation time
+// (this might have a quite different effect than fn.clearAllFilters
+//  as this restore the initialisation values set by 'filter:'
+//  in the config file; beware: only if 'keepfilter':true is set) 
+fn.resetAllFilters = function(sSomeTable, bUpdateSearchBoxesValues){
+	
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	sSomeTable.fnFilterReset(bUpdateSearchBoxesValues);
+};
+
+
+// set some filter values for a given table
+// Beware: this erases existing settings. If you want to keep the current
+// search settings, use fn.addFilters instead.
+
+fn.setFilters = function(sSomeTable, oFilters, bUpdateSearchBoxesValues){
+	
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+
+	sSomeTable.fnFilterSet(oFilters, bUpdateSearchBoxesValues);
+};
+
+
+// get the filters values for a given table
+fn.getFilters = function(sSomeTable){
+	
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	return sSomeTable.fnFilterGet();
+};
+
+
+// set the global filter for a given table
+
+fn.setGlobalFilter = function(sSomeTable, sValue){
+
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	sSomeTable.fnGlobalFilterSet(sValue);
+};
+
+
+// get the value of the global filter for a given table
+
+fn.getGlobalFilter = function(sSomeTable){
+	
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	return sSomeTable.fnGlobalFilterGet();
+};
+
+
+// add some filters to the current filter settings
+// (this is different from fn.setFilters, which erases existing settings)
+
+fn.addFilters = function(sSomeTable, oFilters){
+	if (typeof sSomeTable == 'string')
+		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
+	
+	sSomeTable.fnFilterAdd(oFilters);
+};
+
 
 
 

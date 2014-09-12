@@ -27,6 +27,21 @@ oTableSettingsList = {
 		
 		lemmata_view: {
 			
+			"callback": function(t){
+				
+				// we need to disable the checkbox of 
+				var aRows = fn.getAllRows(t);
+				aRows.each(function(){
+					var bSourceContainsTelwoorden = (fn.getDataFromCellNamed(t, this, "source")).indexOf("TELWOORDEN")>-1;
+					
+					if (bSourceContainsTelwoorden)
+						{				
+						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
+						}
+				});
+			},
+			"repeat_callback": true,
+			
 			"size": "90%",
 			
 			// we need buttons to choose the sources we are interested in
@@ -222,9 +237,6 @@ oTableConfigurationList = {
 			},
 			"modern_lemma": {				
 				"colsort": "asc"
-//					,
-//				"filter": "06-nummer",
-//				"keepfilter": true
 			},
 			"th_lemma": {			
 			},

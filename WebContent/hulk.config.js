@@ -107,40 +107,48 @@ oTableSettingsList = {
 				"bgcolor": "lightblue",
 				"click": function(t){
 					
-					t.fnFilterAdd({"hulk_oordeel": ""});
+					var sDocumentChoice = t.fnFilterGet()["document"];
 					
-					fn.refreshTable(t, function(){
+					if (sDocumentChoice == '' || sDocumentChoice == null)
+						{
+						alert("Kies een document!");
+						}
+					else
+						{
+						t.fnFilterAdd({"hulk_oordeel": ""});
 						
-						var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+						fn.refreshTable(t, function(){
+							
+							var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 
-						fn.showProcessingMsg(t);
-						var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
-						fn.setCustomButtonCss(t, 0, "background-color", "red");
-						
-						$.ajax({
+							fn.showProcessingMsg(t);
+							var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
+							fn.setCustomButtonCss(t, 0, "background-color", "red");
 							
-							"type": "GET",
-							"url": sHulKUrlServer + ($.endsWith(sHulKUrlServer, "/") ? "":"/") + sDocumentId,
-							
-							"crossDomain": true,
-						 	"dataType": "json",
-						 	"success": function(data) {
-						 		alert(data.message);
-						 		fn.removeProcessingMsg(t);
-						 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
-						 		fn.refreshTable(t, function(){window.open(data.link);});
-						 		
-						 		},
-							"error": function(jqXHR, textStatus, errorThrown){
-								fn.removeProcessingMsg(t);
-								fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
-								alert("Er is een fout opgetreden: "+
-									textStatus+" "+errorThrown);
-								}
-							
+							$.ajax({
+								
+								"type": "GET",
+								"url": sHulKUrlServer + ($.endsWith(sHulKUrlServer, "/") ? "":"/") + sDocumentId,
+								
+								"crossDomain": true,
+							 	"dataType": "json",
+							 	"success": function(data) {
+							 		alert(data.message);
+							 		fn.removeProcessingMsg(t);
+							 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
+							 		fn.refreshTable(t, function(){window.open(data.link);});
+							 		
+							 		},
+								"error": function(jqXHR, textStatus, errorThrown){
+									fn.removeProcessingMsg(t);
+									fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
+									alert("Er is een fout opgetreden: "+
+										textStatus+" "+errorThrown);
+									}
+								
+							});
 						});
-					});
-					
+						}
 					
 					
 				}
@@ -348,7 +356,7 @@ oTableConfigurationList = {
 			},
 			wv: {
 				"sortable": false,
-				"editable": true,
+				"editable": true,				
 				"bgcolor": "#E0F8E0",
 				"editfunc": function(t, n, value){
 					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);
@@ -446,7 +454,7 @@ function showStatistics(t){
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
 	var sDocumentChoice = t.fnFilterGet()["document"];
 	
-	if (sDocumentChoice == '')
+	if (sDocumentChoice == '' || sDocumentChoice == null)
 		{
 		showStatisticsInHeader("&larr; Kies een document!", true);
 		}
@@ -480,8 +488,7 @@ function showStatisticsInHeader(sStats, sWarning){
 	$("#hulk_worktable_wrapper .top").append(
 			$("<div></div>")
 			.attr("id", "hulk_stats")
-			.css("border", "1px black dotted")
-			.css("width", "400px")
+			.css("width", "400px")			
 			.css("text-align", "center")
 			.css("color", sColor)
 			.append($("p").css("text-decoration", sTextDecoration)
@@ -495,8 +502,8 @@ function showStatisticsInHeader(sStats, sWarning){
 			);
 	$("#hulk_worktable_wrapper .top #hulk_stats")
 	.css("position", "relative")
-	.css("top", "60px")
-	.css("left", "280px");	
+	.css("top", "65px")
+	.css("left", "250px");	
 }
 
 
@@ -535,7 +542,7 @@ function doExport(t){
 	
 	var sDocumentChoice = t.fnFilterGet()["document"];
 	
-	if (sDocumentChoice == '')
+	if (sDocumentChoice == '' || sDocumentChoice == null)
 		{
 		alert("Kies een document!");
 		}
@@ -646,14 +653,22 @@ function putRightHulkOordeelButton(t){
 //             CHECKBOXES HANDLER
 // *******************************************
 
-var bPreventCallback = false;
+var bPreventEditFuncLoop = false;
 
 function uncheckOtherBoxes(oTable, nNode, aBoxesToUncheck){
 	
-	if (bPreventCallback)
+	// when unchecking the checkboxes automatically (simulating a manual click),
+	// we don't want the normal editfunc to be triggerd
+	// as this would cause an infinite loop
+	//(click -> editfunc -> uncheckboxes -> click -> editfunc -> uncheckboxes -> ... )
+	if (bPreventEditFuncLoop)
 		return true;
 	
-	bPreventCallback = true;	
-	fn.uncheckCheckboxes(oTable, nNode, aBoxesToUncheck);
-	bPreventCallback = false;
+	bPreventEditFuncLoop = true;	
+	
+	fn.uncheckCheckboxes(oTable, nNode, aBoxesToUncheck, 
+			function(){
+		bPreventEditFuncLoop = false;
+		});
+	
 }

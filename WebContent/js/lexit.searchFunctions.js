@@ -356,7 +356,7 @@ sf.enableSearchFields = function(someTablename){
 			else if (sf.isCheckboxTrueValue(sStartValueOfThisColumn))
 				{
 				iCycleValue = 1;
-				inputTag.attr("checked", "checked");
+				inputTag.prop("checked", "checked");
 				}
 			else if (sf.isCheckboxFalseValue(sStartValueOfThisColumn))
 				{
@@ -520,7 +520,7 @@ sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 				}			
 			sf.setCheckboxRight($(this), iCycleValue);			
 			if (sf.isCheckboxTrueValue(sCurrentValueOfThisColumn))
-				inputTag.attr("checked", "checked");
+				inputTag.prop("checked", "checked");
 			}
 		
 		// 3. text field
@@ -566,7 +566,7 @@ sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
 	inputTag.val( aCheckboxCheckvalue[iCycleValue] );
 	
 	// check or uncheck the checkbox (visible)
-	inputTag.attr("checked", aCheckboxVisibleSetting[iCycleValue]);
+	inputTag.prop("checked", aCheckboxVisibleSetting[iCycleValue]);
 	
 };
 

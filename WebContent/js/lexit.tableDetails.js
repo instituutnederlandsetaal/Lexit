@@ -260,7 +260,7 @@ td.selectColumns = function(sSomeTablename){
 		
 		// check the box if the column is visible
 		if (columnVisible)
-			input.attr("checked", "checked");
+			input.prop("checked", "checked");
 		// if modifying the visibility is not allowed, disable the checkbox 
 		if ( !conf.getFlexibleVisibility(oColumnConfig) )
 			input.attr("disabled", "disabled");
@@ -420,7 +420,7 @@ td.selectColumns = function(sSomeTablename){
             			
             			// (un)check (ir)relevant columns
             			if ($.inArray(sColumnName, aListOfRelevantColumns)>-1)
-            				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).attr("checked", "checked");
+            				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).prop("checked", "checked");
             			else
             				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked");
             		});
@@ -441,7 +441,7 @@ td.selectColumns = function(sSomeTablename){
             			if ( !conf.getFlexibleVisibility(oColumnConfig))
             				return true;
             			// else check this one
-            			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).attr("checked", "checked");
+            			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).prop("checked", "checked");
             		});
                 },
                 style: "color: #3970b3" 
