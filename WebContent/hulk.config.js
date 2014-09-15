@@ -18,6 +18,11 @@ var sAutoCompleteUrl = "http://svowhu02.inl.loc/ws/autocomplete-lemmata/";
 fn.setProjectTitle("HulK", "#088A08");
 
 
+// default document choice
+// this has to have a 'silly' default value, to make sure that the
+// default display shows no document at all
+var sDefaultDocumentWaarde = "even_een_onzin_waarde";
+
 // *******************************************
 //          TABLE CONFIGURATION
 // *******************************************
@@ -95,9 +100,11 @@ oTableSettingsList = {
 			"prereset_callback": function(t){
 								
 				conf.changeTableConfigValue(fn.getTableName(t), "document", "keepfilter", false);
-				t.fnFilterAdd(
+				
+				fn.addFilters(t, 
 						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "!^OK"),
-						 "document":""}
+						 "document": sDefaultDocumentWaarde
+						 }
 						);				
 			},
 			
@@ -107,15 +114,15 @@ oTableSettingsList = {
 				"bgcolor": "lightblue",
 				"click": function(t){
 					
-					var sDocumentChoice = t.fnFilterGet()["document"];
+					var sDocumentChoice = fn.getFilters(t)["document"];
 					
-					if (sDocumentChoice == '' || sDocumentChoice == null)
+					if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 						{
 						alert("Kies een document!");
 						}
 					else
 						{
-						t.fnFilterAdd({"hulk_oordeel": ""});
+						fn.addFilters(t, {"hulk_oordeel": ""});
 						
 						fn.refreshTable(t, function(){
 							
@@ -161,7 +168,7 @@ oTableSettingsList = {
 					
 					var hulkOordeelToLookFor = bToonAlleHulkOordelen ? "" : "!^OK";
 					
-					t.fnFilterAdd({"hulk_oordeel": hulkOordeelToLookFor});										
+					fn.addFilters(t, {"hulk_oordeel": hulkOordeelToLookFor});
 					fn.putDataIntoFilterBox(t, "hulk_oordeel", hulkOordeelToLookFor);
 					
 					putRightHulkOordeelButton(t);
@@ -263,7 +270,8 @@ oTableConfigurationList = {
 				},		
 			
 			document: {
-				"sortable": false,				
+				"sortable": false,			
+				"filter": sDefaultDocumentWaarde,
 				"choosefrom":[],
 				"visible": false
 			},
@@ -452,11 +460,11 @@ function showStatistics(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sDocumentChoice = t.fnFilterGet()["document"];
+	var sDocumentChoice = fn.getFilters(t)["document"];
 	
-	if (sDocumentChoice == '' || sDocumentChoice == null)
+	if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 		{
-		showStatisticsInHeader("&larr; Kies een document!", true);
+		showStatisticsInHeader("Kies een document!", true);
 		}
 	else
 		{
@@ -476,20 +484,27 @@ function showStatisticsInHeader(sStats, sWarning){
 	
 	var sColor = "black";
 	var sTextDecoration = "none";
+	var sTop = "-10px";
+	var sLeft = "410px";
+	var sTextAlign = "center";
+	var sBorder = "1px dotted black";
+
 	
 	// if the message is a warning, change style accordingly
 	if (typeof sWarning != 'undefined' && sWarning == true)
 		{
 		sColor = "red";
 		sTextDecoration = "blink";
+		sTop = "69px";
+		sBorder = "none";
 		}
 	
 	$("#hulk_worktable_wrapper .top").find("#hulk_stats").remove();
 	$("#hulk_worktable_wrapper .top").append(
 			$("<div></div>")
 			.attr("id", "hulk_stats")
-			.css("width", "400px")			
-			.css("text-align", "center")
+			.css("width", "400px")	
+			.css("text-align", sTextAlign)			
 			.css("color", sColor)
 			.append($("p").css("text-decoration", sTextDecoration)
 					)
@@ -501,9 +516,10 @@ function showStatisticsInHeader(sStats, sWarning){
 			.css("font-size", "120%")
 			);
 	$("#hulk_worktable_wrapper .top #hulk_stats")
+	.css("border", sBorder)
 	.css("position", "relative")
-	.css("top", "65px")
-	.css("left", "250px");	
+	.css("top", sTop)
+	.css("left", sLeft);	
 }
 
 
@@ -540,15 +556,15 @@ function doExport(t){
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
 	
-	var sDocumentChoice = t.fnFilterGet()["document"];
+	var sDocumentChoice = fn.getFilters(t)["document"];
 	
-	if (sDocumentChoice == '' || sDocumentChoice == null)
+	if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 		{
 		alert("Kies een document!");
 		}
 	else
 		{
-		t.fnFilterAdd({"hulk_oordeel": ""});
+		fn.addFilters(t, {"hulk_oordeel": ""});
 		
 		fn.refreshTable(t, function(){
 			var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
@@ -587,7 +603,7 @@ function buildDocumentSelector(t){
 	
 	// get the current document filter setting (which doc was already chosen?)
 	var sTableName = fn.getTableName(t);
-	var sSelectedDocument = t.fnFilterGet()["document"];
+	var sSelectedDocument = fn.getFilters(t)["document"];
 	
 	
 	// (re)build the document selector
@@ -596,7 +612,7 @@ function buildDocumentSelector(t){
 	.append(
 			$("<div></div>").attr("id", "document_selector")
 			.css("position", "relative")			
-			.css("top", "5px")
+			.css("top", "-105px")
 			);
 	
 	var sTableName = fn.getTableName(t);
@@ -609,7 +625,7 @@ function buildDocumentSelector(t){
 	
 	inputTag.append(
 			$("<option></option>")
-				.attr("value", aListOfOptions[0] )
+				.attr("value", sDefaultDocumentWaarde )
 				.text( "Document kiezen" )
 		);
 	for (var j=1; j<aListOfOptions.length; j++)
@@ -623,8 +639,8 @@ function buildDocumentSelector(t){
 	
 	// when a choice is made, load the chosen table
 	inputTag.change(function(){
-		sSelectedDocument = $(this).val();		
-		t.fnFilterAdd({"document": "exact:"+sSelectedDocument});
+		sSelectedDocument = $(this).val();	
+		fn.addFilters(sTableName, {"document": "exact:"+sSelectedDocument});
 		conf.changeTableConfigValue(sTableName, "document", "filter", sSelectedDocument);
 		conf.changeTableConfigValue(sTableName, "document", "keepfilter", true);
 		fn.refreshTable(t);

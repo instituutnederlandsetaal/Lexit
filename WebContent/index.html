@@ -190,16 +190,55 @@
 			// which than malfunction (because of unbinds)
 			kf.addKeyFunctions();
 			
+			
+			
 			// load the specific client configuration file for the required database
 			// and get the list of tables (getScript never reads this file from cache)
-			$.getScript(paramsHash.get("db")+".config.js")
-			.done(function(){
-				var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
-				ts.getListOfTables( paramsHash.get("table"), 
-						oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
-			.fail(function(jqxhr, settings, exception){
-				alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+			
+			
+			// are we in development (test) mode?
+			// if so, load the file from webcontent
+			// if not, load the file from the configuration directory
+			
+			var bTest = (paramsHash.get("test")!=null && paramsHash.get("test")=='true');
+			
+			// test mode (development)
+			if (bTest)
+				{
+				$.getScript(paramsHash.get("db")+".config.js")
+				.done(function(){
+					var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
+					ts.getListOfTables( paramsHash.get("table"), 
+							oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
+				.fail(function(jqxhr, settings, exception){
+					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+					});
+				}
+			
+			// normal mode (production)
+			else
+				{
+				var url = "../lexit/lexit/table/get_configfile"; 			
+				
+				$.ajax({
+					"type": "GET",
+					"url": url,
+					"dataType": "script",
+					"data": {
+						"db_name": paramsHash.get("db")
+					},
+					"success": function(){
+						var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
+						ts.getListOfTables( paramsHash.get("table"), 
+								oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings );
+					},
+					"error": function(jqxhr, settings, exception){
+					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+					}
 				});
+				}
+			
+			
 			
 			// show the project name at the top of the screen
 			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);

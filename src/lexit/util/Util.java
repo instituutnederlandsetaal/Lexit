@@ -3,6 +3,7 @@ package lexit.util;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,8 +64,6 @@ public class Util {
 	// read a properties file
 	public static HashMap<String, String> readPropertiesFile(String filename, HashMap<String, String> databaseAccessHash){
 		
-		StringBuilder sb = new StringBuilder();
-		
 		try{
 			FileInputStream fstream = new FileInputStream(filename);
 			// Get the object of DataInputStream
@@ -80,6 +79,7 @@ public class Util {
 				String value = strLine.split("=")[1];
 				databaseAccessHash.put(key, value);
 			}
+			br.close();
 			in.close();
 		}
 		catch (Exception e){//Catch exception if any

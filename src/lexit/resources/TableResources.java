@@ -1,8 +1,13 @@
 package lexit.resources;
 
 import java.awt.List;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +24,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
@@ -62,6 +68,28 @@ public class TableResources extends Application  {
 	// sort setting
 	boolean weMustSort = true;
 	String sortingTable = "", sortingDirection = "", sortingColumn = "";
+	
+	
+	// get the javascript configuration file from the configuration directory
+	// call:
+	// .../lexit/lexit/table/get_configfile
+	@Path("get_configfile")
+	@GET
+	@Produces({MediaType.TEXT_PLAIN})
+	public Response getJsConfigFile(@QueryParam("db_name") String dbName){
+		
+		System.out.println("Load config file...");
+		
+		String fileToSend = null;
+		try {
+			fileToSend = readJsConfigFile(dbName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
+	}
 	
 	
 	
@@ -1126,6 +1154,49 @@ public class TableResources extends Application  {
 		}
 		
 		return false;
+	}
+	
+	
+	/**
+	 * read the javascript configuration file from
+	 *  the configuration directory
+	 * @param dbName
+	 * @return
+	 * @throws IOException
+	 */
+	public String readJsConfigFile(String dbName) throws IOException{
+		
+		System.out.println("Read javascript configuration file '"+dbName+".config.js"+"'...");
+		
+		String fileName = dbName+".config.js";
+		
+		String filepath = context.getRealPath(fileName);
+		
+		filepath = filepath.replace(
+				File.separatorChar+"lexit"+File.separator+fileName, 
+				File.separatorChar+"lexit_config"+File.separator+fileName);
+		System.out.println("File: "+filepath);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		try{
+			FileInputStream fstream = new FileInputStream(filepath);
+			// Get the object of DataInputStream
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			while ((strLine = br.readLine()) != null) {				
+				sb.append(strLine);
+				sb.append("\n");
+			}
+			br.close();
+			in.close();
+		}
+		catch (Exception e){//Catch exception if any
+			throw new RuntimeException("Error while reading the "+filepath+" configuration file", e);
+		}
+		
+		return sb.toString();
 	}
 
 	

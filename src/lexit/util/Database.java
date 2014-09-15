@@ -12,9 +12,13 @@ import lexit.table.TableAndCountObject;
 import lexit.table.TableRecordObject;
 import lexit.table.UniqueValuesObject;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.sql.ResultSet;
@@ -2889,6 +2893,7 @@ public class Database {
 		
 		databaseAccessHash = Util.readPropertiesFile(filepath, new HashMap<String, String>());
 	}
+	
 	
 	/**
 	 * close the database connection
