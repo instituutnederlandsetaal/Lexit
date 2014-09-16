@@ -1,6 +1,7 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
 oShowOnlyTables = ["anw_postags_corrigeren",
+                   "antilliaans",
                    "lexiconexport1", 
                    "lexiconexport2", 
                    "lexiconexport3", 
@@ -1035,7 +1036,19 @@ oTableConfigurationList = {
 			}
 		},
 
-
+		antilliaans: {
+			
+			id: {"visible": false},
+			lemma: {"colsort": "asc"},
+			corrected_lemma: {"editable": true, "bgcolor": "#D8F6CE"},
+			pos: {},
+			corrected_pos: { "editable": true, "bgcolor": "#D8F6CE"},
+			opmerkingen: {"editable": true, "bgcolor": "#D8D8D8"},
+			frequentie: {},
+			an_score: {},
+			typisch_an: {"editable": true, "bgcolor": "#D8F6CE"},
+			weg: {"editable": true, "bgcolor": "#D8D8D8"}
+		},
 
                klus_verwijslemmata:
                {
@@ -1055,7 +1068,7 @@ oTableConfigurationList = {
                             var l = fn.getDataFromSiblingNode(confTable, confNode, "refmodlemma");
                             fn.updateDatabaseGivenANode(confTable, confNode, "corrected_modlemma", l, true,
                                           function(){fn.refreshTable("verwijslemma_nakijkklus");});
-                          },
+                          }
                    },
                    historicallemmaid : {
 				"button": "Verwijslemma",

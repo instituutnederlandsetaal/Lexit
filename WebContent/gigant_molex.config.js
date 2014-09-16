@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view"];
+oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
 
 
 

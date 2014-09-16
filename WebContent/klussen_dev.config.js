@@ -68,6 +68,20 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		antilliaans: {
+			
+			id: {"visible": false},
+			lemma: {"colsort": "asc"},
+			corrected_lemma: {"editable": true, "bgcolor": "#D8F6CE"},
+			pos: {},
+			corrected_pos: { "editable": true, "bgcolor": "#D8F6CE"},
+			opmerkingen: {"editable": true, "bgcolor": "#D8D8D8"},
+			frequentie: {},
+			an_score: {},
+			typisch_an: {"editable": true, "bgcolor": "#D8F6CE"},
+			weg: {"editable": true, "bgcolor": "#D8D8D8"}
+		},
+		
 		flexievormen_molex2gigp_vrb_a: {},
 		
 		flexievormen_molex2gigp_type_a: {},
