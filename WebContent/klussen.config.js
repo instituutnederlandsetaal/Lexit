@@ -25,7 +25,8 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "non_homonyms_worktable_verbs", 
                    "non_homonyms_worktable_nouns", 
                    "non_homonyms_worktable_rest",
-                   "klus_verwijslemmata"];
+                   "klus_verwijslemmata", 
+                   "anw_nieuwe_correctieronde_sept_2014"];
 
 
 
@@ -226,6 +227,18 @@ var oNonHomonymsWorktableSettings = {
 // table general settings
 
 oTableSettingsList = {
+		
+		anw_nieuwe_correctieronde_sept_2014: {
+			"size": "80%",
+			"column_order": ["lemma_id",
+			                 "lemma",
+			                 "lemma_corr",
+			                 "pos",
+			                 "pos_corr",
+			                 "opmerkingen",
+			                 "hulk_oordeel",
+			                 "hulk_corr"]
+		},
 		
 		anw_postags_corrigeren:{
 			"size": "60%"
@@ -1048,6 +1061,21 @@ oTableConfigurationList = {
 			an_score: {},
 			typisch_an: {"editable": true, "bgcolor": "#D8F6CE"},
 			weg: {"editable": true, "bgcolor": "#D8D8D8"}
+		},
+		
+		anw_nieuwe_correctieronde_sept_2014: {
+			lemma: {
+				"colsort": "asc",
+				"cell_tooltip": "Klik hier om lemma naar lemma_corr te kopiëren",
+				"click": function(t, n){
+					var sLemma = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "lemma_corr", sLemma);
+				}
+		},
+			lemma_corr : {"editable": true, "bgcolor": "#D8F6CE"},
+			
+			pos_corr : {"editable": true, "bgcolor": "#D8F6CE"},
+			opmerkingen : {"editable": true, "bgcolor": "#D8D8D8"}
 		},
 
                klus_verwijslemmata:
