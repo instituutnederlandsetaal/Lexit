@@ -527,7 +527,12 @@ var oNonHomonymsWorkTableConfig = {
 			"visible": false
 		},
 		"modern_lemma": {
-			"colsort": "asc" // [sort field #1]
+			"colsort": "asc", // [sort field #1]
+			"cell_tooltip": "Klik om lemma te kopiëren",
+			"click": function(t, n){
+				var sLemmaToCopy = fn.getDataFromCellNode(t, n);
+				fn.putDataIntoCell(t, fn.getRowNode(n), "wordform_corr", sLemmaToCopy);
+			}
 		},
 		"gloss": {
 			"visible": false

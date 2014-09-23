@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view"];
+oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 
 
 
@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-08-19                                        **
+// **      2014-08-23                                        **
 // **                                                        **
 // ************************************************************
 
@@ -24,6 +24,9 @@ var sChosenParentId = null;
 oTableSettingsList = {
 		
 
+		lemmata_en_paradigma_view: {
+			"size": "80%"
+		},
 		
 		lemmata_view: {
 			
@@ -343,5 +346,122 @@ oTableConfigurationList = {
 				"visible": false
 			}
 			
+		},
+		
+		// *****************
+		
+		lemmata_en_paradigma_view: {
+			
+			"source_molex_hom": { "visible": false },			
+			"source_molex_nw_lem": { "visible": false },
+			"source_molex_niet_hom": { "visible": false },
+			"source_logfiles": { "visible": false },
+			"source_anw": { "visible": false },
+			"source_telw": { "visible": false },
+			"source_chn": { "visible": false },
+			"source_gb05": { "visible": false },
+			
+			"analyzed_wordform_id":{				
+				"visible": false
+			},
+			
+			"modern_lemma": {				
+				"colsort": "asc"				
+			},
+			"th_lemma": {
+				"visible": false
+			},
+			"keurmerk": {
+				"visible": false,
+				"flexible_visibility": false
+			},
+			"sublemma_type": {		
+				"visible": false // ?
+			},
+			"opmerking": {
+				"visible": false
+			},
+			"gloss": {				
+			},
+			"lemma_gigpos": {				
+			},	
+			"gb_id":{				
+				"visible": false
+			},
+			"gb_wrdcat": {
+				"visible": false // ?
+			},
+			"gb_znwlid": {
+				"visible": false // ?
+			},
+			"lidw": {
+				"visible": false
+			},
+			"geslacht": {
+				"visible": false
+			},			
+	
+			
+			"trademark": {
+				"visible": false
+			},
+			"gedrukt":{
+				"editable": true
+			},
+			
+			"lemma_id":{				
+				"visible": false
+			},
+			"wordform_id":{				
+				"visible": false
+			},
+			"wordform":{	
+			},
+
+			"wordform_afbr":{				
+				
+			},
+			"th_wordform": {				
+				"visible": false				
+			},
+			"th_wordform_afbr": {				
+				"visible": false				
+			},
+			"wordform_gigpos":{				
+				
+			},
+
+			"comment": {
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+					if (sAwfId != null && sAwfId != '')
+						fn.updateDatabaseGivenFieldValues(t, 
+								{"analyzed_wordform_id": sAwfId}, 
+								{"comment": value}, 
+								false, 
+								function(){fn.refreshTable(t);});
+					else
+						fn.refreshTable(t);
+				}
+			},
+			
+			"rang":{			
+				"colsort": "asc",
+				"visible": false
+			},
+			"autom_wf":{
+				"visible": false
+			},
+			"wordform_source":{
+				"visible": false
+			}
+			
 		}
+		
+		
+		
 };

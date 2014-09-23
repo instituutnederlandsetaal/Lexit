@@ -6,10 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
 	
 	
-	<title>Lex'it 
-	v2014.09.12
-	-
-	1
+	<title>
+	Lex'it
+	v2014.09.19
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -207,9 +206,17 @@
 				{
 				$.getScript(paramsHash.get("db")+".config.js")
 				.done(function(){
+					
 					var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
 					ts.getListOfTables( paramsHash.get("table"), 
-							oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );})
+							oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );
+					
+					// prevent Chrome bug (sometimes pressing backslash causes navigating away)
+					if (bowser.chrome)
+						$(window).bind('beforeunload', function(){   
+							return false;
+							});
+					})
 				.fail(function(jqxhr, settings, exception){
 					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
 					});
@@ -225,12 +232,20 @@
 					"url": url,
 					"dataType": "script",
 					"data": {
-						"db_name": paramsHash.get("db")
+						"db_name": paramsHash.get("db"),
+						"dummy": getUniqueNumber()
 					},
 					"success": function(){
+						
 						var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
 						ts.getListOfTables( paramsHash.get("table"), 
 								oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings );
+						
+						// prevent Chrome bug (sometimes pressing backslash causes navigating away)
+						if (bowser.chrome)
+							$(window).bind('beforeunload', function(){   
+								return false;
+							});
 					},
 					"error": function(jqxhr, settings, exception){
 					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
