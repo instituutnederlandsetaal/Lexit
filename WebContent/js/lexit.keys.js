@@ -309,6 +309,9 @@ kf.addKeyFunctions = function(){
 		
 		var bSearchboxOfActiveTableHasFocus = $(".dataTables_wrapper div div input").is(":focus");
 		
+		var bSomeDialogBoxIsOpen = $(".ui-dialog").elementExists();
+		
+		
 		// register which key was pressed
 		kf.registerPressedKey(e);
 		
@@ -322,9 +325,19 @@ kf.addKeyFunctions = function(){
 				( (kf.isPressed("uparrow") || kf.isPressed("downarrow")) 
 						&& !$("td form textarea").elementExists()) ||
 				
-				// one another exception is when cursor is in a searchbox of the active table:
+				// one another exception is when the cursor is in a searchbox of the active table,
+				// or when the cursor is in a field of a dialog box:
 				// switching to next searchbox by pressing tab must be possible then
-				(kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus )
+				(kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus && !bSomeDialogBoxIsOpen ) ||
+				
+				// pressing enter mustn't submit the form of the dialog box
+				// (which would cause page reload; strange enough this happens only with forms having only one field)
+				// (see: http://stackoverflow.com/questions/15488411/why-does-my-jquery-dialog-reload-the-page-when-enter-is-pressed)
+				(kf.isPressed("enter") && bSomeDialogBoxIsOpen) ||
+				
+				// f5 will be used to table refresh instead of page reload
+				kf.isPressed("f5")
+				
 			)
 			{			
 			e.preventDefault();
@@ -335,22 +348,29 @@ kf.addKeyFunctions = function(){
     	
     	// F8 (toggle tooltips in table)
     	if (kf.isPressed("f8"))
-    	{
+    		{
     		var sActiveTable = kf.getActiveTable();
     		bTooltipsAllowedInTable = !bTooltipsAllowedInTable;
     		// force tooltip to fadeout (otherwise it will keep in sight)
     		$("#tiptip_holder").fadeOut();    		
     		fn.refreshTable(sActiveTable);
     		
-    	}
+    		}
+    	
+    	// refresh active table
+    	if (kf.isPressed("f5"))
+    		{
+    		var sActiveTable = kf.getActiveTable();
+    		fn.refreshTable(sActiveTable);
+    		}
     	
     	
     	// F2 (shortcut for rows selection button)
     	if (kf.isPressed("f2"))
-		{
+			{
     		var sActiveTable = kf.getActiveTable();
     		$("#"+sActiveTable+"_wrapper #selectionbutton").click();
-		}
+			}
     	
     	
     	// pageup/down
@@ -383,9 +403,12 @@ kf.addKeyFunctions = function(){
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
 			// 3. don't interfere with textarea of jeditable
+			// 4. don't interfere with dialog box
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
-					&& !$("td form textarea").elementExists() )
+					&& !$("td form textarea").elementExists()
+					&& !bSomeDialogBoxIsOpen
+					)
 				{
 				
 				var iActiveRow = kf.getActiveRowNumber();

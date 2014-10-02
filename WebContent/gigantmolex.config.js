@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-08-23                                        **
+// **      2014-09-29                                        **
 // **                                                        **
 // ************************************************************
 
@@ -26,6 +26,22 @@ oTableSettingsList = {
 
 		lemmata_en_paradigma_view: {
 			"size": "80%"
+//				,
+//		
+//			"callback": function(t){
+//
+//			var aRows = fn.getAllRows(t);
+//
+//			aRows.each(function(){
+//
+//			var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
+//
+//			if (sAwfId != null && sAwfId != '')
+//				(fn.getCellElement(t, this, "comment")).css("background-color", "white");
+//				
+//				});
+//			},
+//			"repeat_callback": true
 		},
 		
 		lemmata_view: {
@@ -253,8 +269,7 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"keurmerk": {
-				"visible": false,
-				"flexible_visibility": false
+				"visible": false
 			},
 			"sublemma_type": {				
 			},
@@ -283,7 +298,7 @@ oTableConfigurationList = {
 				"button": "Paradigma",
 				"click": function( confTable, confNode){					
 					var lemma_id = fn.getDataFromSiblingNode(confTable, confNode, "pkid");
-					fn.callDatabase("paradigma_view", {"lemma_id": lemma_id});
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemma_id});
 				}
 			},
 			"toon_morfologie":{				
@@ -302,65 +317,57 @@ oTableConfigurationList = {
 			
 		},
 		
-		paradigma_view: {
-			"pkid":{				
-				"visible": false
-			},
-			"lemma_id":{				
-				"visible": false
-			},
-			"wordform_id":{				
-				"visible": false
-			},
-			"pkid":{				
-				"visible": false
-			},
-			"wordform":{	
-			},
-
-			"wordform_afbr":{				
-				
-			},
-			"th_wordform": {				
-				"visible": false				
-			},
-			"th_wordform_afbr": {				
-				"visible": false				
-			},
-			"wordform_gigpos":{				
-				
-			},
-			"flex":{				
-				
-			},
-			"keurmerk":{				
-				"visible": false,
-				"flexible_visibility": false
-			},
-			"comment": {
-				
-			},
-			
-			"rang":{			
-				"colsort": "asc",
-				"visible": false
-			}
-			
-		},
+//		paradigma_view: {
+//			"pkid":{				
+//				"visible": false
+//			},
+//			"lemma_id":{				
+//				"visible": false
+//			},
+//			"wordform_id":{				
+//				"visible": false
+//			},
+//			"pkid":{				
+//				"visible": false
+//			},
+//			"wordform":{	
+//			},
+//
+//			"wordform_afbr":{				
+//				
+//			},
+//			"th_wordform": {				
+//				"visible": false				
+//			},
+//			"th_wordform_afbr": {				
+//				"visible": false				
+//			},
+//			"wordform_gigpos":{				
+//				
+//			},
+//			"flex":{				
+//				
+//			},
+//			"keurmerk":{				
+//				"visible": false,
+//				"flexible_visibility": false
+//			},
+//			"comment": {
+//				
+//			},
+//			
+//			"rang":{			
+//				"colsort": "asc",
+//				"visible": false
+//			}
+//			
+//		},
 		
 		// *****************
 		
 		lemmata_en_paradigma_view: {
 			
-			"source_molex_hom": { "visible": false },			
-			"source_molex_nw_lem": { "visible": false },
-			"source_molex_niet_hom": { "visible": false },
-			"source_logfiles": { "visible": false },
-			"source_anw": { "visible": false },
-			"source_telw": { "visible": false },
-			"source_chn": { "visible": false },
-			"source_gb05": { "visible": false },
-			
+		
 			"analyzed_wordform_id":{				
 				"visible": false
 			},
@@ -438,12 +445,19 @@ oTableConfigurationList = {
 					
 					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
 					
+					// if we have an awf-id
+					// update this 'view' but also the analyzed_wordforms table
 					if (sAwfId != null && sAwfId != '')
 						fn.updateDatabaseGivenFieldValues(t, 
 								{"analyzed_wordform_id": sAwfId}, 
 								{"comment": value}, 
 								false, 
-								function(){fn.refreshTable(t);});
+								function(){
+									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+											{"analyzed_wordform_id": sAwfId}, 
+											{"comment": value});
+									fn.refreshTable(t);
+									});
 					else
 						fn.refreshTable(t);
 				}

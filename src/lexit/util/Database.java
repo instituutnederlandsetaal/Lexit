@@ -1058,7 +1058,7 @@ public class Database {
 		// random id for a temporary table, to make sure we won't try to create an already existing table
 		int tableId = Math.abs(new Random().nextInt());
 		
-		System.out.println("## Get count estimate (fast)");
+		if (Constants.debug) System.out.println("## Get count estimate (fast)");
 		
 		// special case:
 		// if some argument requires strict equality, modify the query accordingly
@@ -1097,7 +1097,7 @@ public class Database {
 		PostgresDatabaseCommunication dc = connectDatabase(dbName);	
 		
 		try {
-			System.out.println("## Get count estimate (fast)");
+			if (Constants.debug) System.out.println("## Get count estimate (fast)");
 			
 			dc.sendUpdate(query1);
 			ResultSet rs = dc.sendQuery(query2);
@@ -1130,7 +1130,7 @@ public class Database {
 		// random id for a temporary table, to make sure we won't try to create an already existing table
 		int tableId = Math.abs(new Random().nextInt());
 		
-		System.out.println("## Get query cost");
+		if (Constants.debug) System.out.println("## Get query cost");
 		
 		
 		// special case:
@@ -1172,7 +1172,8 @@ public class Database {
 			queryCost = Integer.parseInt(res.get(0)[0]);
 			
 		} catch (Exception e) {
-			System.out.println("Error while executing query "+query1+" or "+query2);
+			if (Constants.debug)
+				System.out.println("Error while executing query "+query1+" or "+query2);
 			
 			// for the moment, we mustn't throw exception, to make sure this function always
 			// give some results otherwise the client won't have any count!!!
@@ -1182,7 +1183,7 @@ public class Database {
 			closeDatabase(dc);
 		}
 		
-		System.out.println("queryCost = "+queryCost);
+		if (Constants.debug) System.out.println("queryCost = "+queryCost);
 		return queryCost;		
 	}
 	
@@ -1685,7 +1686,7 @@ public class Database {
 				// read it from the cache
 				if (queryToCount.containsKey(queryForCache))
 				{
-					System.out.println("Query "+queryForCache+" found in cache");
+					if (Constants.debug) System.out.println("Query "+queryForCache+" found in cache");
 					count = queryToCount.get(queryForCache);
 					exactCount = queryToCountQuality.get(queryForCache);
 				}
@@ -1695,12 +1696,12 @@ public class Database {
 				{
 					queryCost = getQueryCost(dbName, replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 					
-					System.out.println("%%% FAST COUNT decision: "+queryCost+ "<"+maxAllowedCost +"?");					
+					if (Constants.debug) System.out.println("%%% FAST COUNT decision: "+queryCost+ "<"+maxAllowedCost +"?");					
 					
 					// count the normal way, t.i. count(*)
 					if (queryCost < maxAllowedCost)
 					{
-						System.out.println("%%% We will count the normal way");
+						if (Constants.debug) System.out.println("%%% We will count the normal way");
 						
 						dc.sendUpdate("SET search_path TO "+schema+"; ");
 						
@@ -1721,8 +1722,11 @@ public class Database {
 						}
 						// if the normal count takes too long, do an estimate count
 						catch (Exception e) {
-							System.out.println("%%% NORMAL COUNT TIME OUT !!");
-							System.out.println("%%% We will use an estimate count");
+							if (Constants.debug)
+								{
+								System.out.println("%%% NORMAL COUNT TIME OUT !!");
+								System.out.println("%%% We will use an estimate count");
+								}
 							count = getEstimateCount(dbName, replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
 						}						
@@ -1733,7 +1737,7 @@ public class Database {
 					// get an estimate count
 					else
 					{
-						System.out.println("%%% We will use an estimate count");
+						if (Constants.debug) System.out.println("%%% We will use an estimate count");
 						count = getEstimateCount(dbName, replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 						exactCount = false;
 					}											
@@ -1746,14 +1750,14 @@ public class Database {
 				if (recomputeMaxAllowedCost)
 				{
 					recomputeMaxAllowedCost(queryCost, timeBeforeCount, timeAfterCount);
-					System.out.println("$$$ RECOMPUTED maxAllowedCost = " + maxAllowedCost);
+					if (Constants.debug) System.out.println("$$$ RECOMPUTED maxAllowedCost = " + maxAllowedCost);
 				}				
-				System.out.println("Counting took "+(timeAfterCount - timeBeforeCount)+" ms");
+				if (Constants.debug) System.out.println("Counting took "+(timeAfterCount - timeBeforeCount)+" ms");
 											
 			}
 			else
 			{
-				System.out.println("## Query count is the same as total count");			
+				if (Constants.debug) System.out.println("## Query count is the same as total count");			
 			}
 			
 			
@@ -1787,7 +1791,7 @@ public class Database {
 			// otherwise the client will get stuck, so we won't throw an exception here!
 			
 			// show error in console
-			System.out.println("## ERROR: "+"Error while executing query "+query);
+			if (Constants.debug) System.out.println("## ERROR: "+"Error while executing query "+query);
 			e.printStackTrace(); 
 		}
 		finally {
@@ -1882,7 +1886,7 @@ public class Database {
 			// This is needed since some arguments can consist of a question mark, which
 			// we don't want to match at the next round!
 			lastQuestionMarkIndex = indexOfQuestionMark + stringLengthOfArgument;
-			System.out.println(">>>>>> "+query);
+			if (Constants.debug) System.out.println(">>>>>> "+query);
 		}
 		return query;
 	}
@@ -1980,7 +1984,7 @@ public class Database {
 		// (if we have already looked up the primary key, it is stored in a hash)
 		if ( tableNameToPrimaryKey.containsKey(dbName+schema+tableNameOnly) )
 			{
-			System.out.println("## PK from cache: "+tableNameToPrimaryKey.get(dbName+schema+tableNameOnly));
+			if (Constants.debug) System.out.println("## PK from cache: "+tableNameToPrimaryKey.get(dbName+schema+tableNameOnly));
 			return tableNameToPrimaryKey.get(dbName+schema+tableNameOnly);
 			}
 		
@@ -2026,7 +2030,7 @@ public class Database {
 		// store the primary key in a hash, for caching (for speed improvement)
 		tableNameToPrimaryKey.put(dbName+schema+tableNameOnly, primaryKeyColumn);
 		
-		System.out.println("PK of "+tableNameOnly+" is "+primaryKeyColumn);
+		if (Constants.debug) System.out.println("PK of "+tableNameOnly+" is "+primaryKeyColumn);
 		
 		return primaryKeyColumn;
 	}
@@ -2051,7 +2055,7 @@ public class Database {
 		
 		if ( tableAndColumnNameToTypes.containsKey(cachingKey) )
 			{
-			System.out.println("## Column type from cache: "+columnName+" = "+tableAndColumnNameToTypes.get(cachingKey));
+			if (Constants.debug) System.out.println("## Column type from cache: "+columnName+" = "+tableAndColumnNameToTypes.get(cachingKey));
 			return tableAndColumnNameToTypes.get(cachingKey);
 			}
 		
@@ -2137,7 +2141,7 @@ public class Database {
 				
 				if ( tableAndColumnNameToTypes.containsKey(cachingKey) )
 				{
-					System.out.println("## Column type from cache: "+columns[i]+" = "+tableAndColumnNameToTypes.get(cachingKey));
+					if (Constants.debug) System.out.println("## Column type from cache: "+columns[i]+" = "+tableAndColumnNameToTypes.get(cachingKey));
 					columnTypes[i] = tableAndColumnNameToTypes.get(cachingKey);
 				}
 				// if cache is empty, ask the database 
@@ -2257,7 +2261,7 @@ public class Database {
 		
 		if ( functionNameToTypes.containsKey(dbName+functionName) )
 		{
-		System.out.println("## Function arg types from cache");
+			if (Constants.debug) System.out.println("## Function arg types from cache");
 		return functionNameToTypes.get(dbName+functionName);
 		}
 		
@@ -2339,7 +2343,7 @@ public class Database {
 		// (if we have looked up the column names already, they are stored in a hash)
 		if ( tableNameToColumnNames.containsKey(dbName+schema+tableNameOnly) )
 			{
-			System.out.println("## Column names from cache");
+			if (Constants.debug) System.out.println("## Column names from cache");
 			return tableNameToColumnNames.get(dbName+schema+tableNameOnly);
 			}
 		
@@ -2604,7 +2608,7 @@ public class Database {
 		
 		if (rs == null) 
 		{
-			System.out.println("Result list empty");
+			if (Constants.debug) System.out.println("Result list empty");
 			return lijst;
 		}
 		
@@ -2654,7 +2658,7 @@ public class Database {
 		
 		if (rs == null) 
 		{
-			System.out.println("Result list is empty");
+			if (Constants.debug) System.out.println("Result list is empty");
 			return list;
 		}
 		
@@ -2716,7 +2720,7 @@ public class Database {
 		
 		if (rs == null) 
 		{
-			System.out.println("Result list is empty!");
+			if (Constants.debug) System.out.println("Result list is empty!");
 			return new ArrayList<HashMap<String, String>>();
 		}
 		
@@ -2739,7 +2743,7 @@ public class Database {
 		// otherwise, we take the column names from the resultset
 		
 		
-		System.out.println("We've got "+numberOfColumns+" columns in table "+tableName);
+		if (Constants.debug) System.out.println("We've got "+numberOfColumns+" columns in table "+tableName);
 	    String[] columnNames = new String[numberOfColumns];
 	    String[] columnTypes = new String[numberOfColumns];
 	    
@@ -2769,14 +2773,20 @@ public class Database {
 	    
 	    
 	    // get list of column types
-	    System.out.println("Requesting list of column types for:");
-	    System.out.println(columnNames.length+" => "+Util.join(columnNames, ", "));
+	    if (Constants.debug)
+	    {
+	    	System.out.println("Requesting list of column types for:");
+	    	System.out.println(columnNames.length+" => "+Util.join(columnNames, ", "));
+	    }
 	    for (int i = 0; i < columnNames.length; i++) {
 	    	columnTypes[i] = getTypeOfColumn(dbName, tableName, removeQuotesFromSqlReservedWord(columnNames[i]));
 	    }	    
 	 
-	    for (int i = 0; i < columnNames.length; i++) {
-	    	System.out.println(columnNames[i]+" -> '"+columnTypes[i]+"'");
+	    if (Constants.debug)
+	    {	    	
+		    for (int i = 0; i < columnNames.length; i++) {
+		    	System.out.println(columnNames[i]+" -> '"+columnTypes[i]+"'");
+		    }
 	    }
 	    
 
@@ -2880,7 +2890,7 @@ public class Database {
 	
 	public void readPropertiesFile(String dbName) throws IOException{
 		
-		System.out.println("Read database access data from properties file '"+dbName+".database"+"'...");
+		if (Constants.debug) System.out.println("Read database access data from properties file '"+dbName+".database"+"'...");
 		
 		String fileName = dbName+".database";
 		
@@ -2889,7 +2899,8 @@ public class Database {
 		filepath = filepath.replace(
 				File.separatorChar+"lexit"+File.separator+fileName, 
 				File.separatorChar+"lexit_config"+File.separator+fileName);
-		System.out.println("File: "+filepath);
+		
+		if (Constants.debug) System.out.println("File: "+filepath);
 		
 		databaseAccessHash = Util.readPropertiesFile(filepath, new HashMap<String, String>());
 	}
@@ -2902,7 +2913,8 @@ public class Database {
 	{
 		if (dc != null)
 			dc.closeConnection();
-		System.out.println("Connection with the database closed.\n");
+		if (Constants.debug)
+			System.out.println("Connection with the database closed.\n");
 	}
 
 	
@@ -2914,7 +2926,7 @@ public class Database {
 	 */
 	public Map getQuickCountOfAllTableRecords(String dbName, String tableName) {
 		
-		System.out.println("## Get quick count of all tables records");
+		if (Constants.debug) System.out.println("## Get quick count of all tables records");
 		String schema = getSchema(dbName, tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
 		boolean exactCount = true;
@@ -2924,7 +2936,7 @@ public class Database {
 		// (if we have looked up the count already, it is stored in a hash)
 		if ( tableNameToCount.containsKey(dbName+schema+tableNameOnly))
 			{
-			System.out.println("## Count from cache = "+tableNameToCount.get(dbName+schema+tableNameOnly)+" row(s)");
+			if (Constants.debug) System.out.println("## Count from cache = "+tableNameToCount.get(dbName+schema+tableNameOnly)+" row(s)");
 			countAndQuality.put("exactCount", tableNameToExactCount.get(dbName+schema+tableNameOnly));
 			countAndQuality.put("count", tableNameToCount.get(dbName+schema+tableNameOnly));
 			return countAndQuality;
@@ -2949,7 +2961,7 @@ public class Database {
 		ArrayList<String> listOfTrueTables = getTrueTablesList(dbName);
 		boolean currentTableIsATrueTable = listOfTrueTables.contains(tableNameOnly);
 		
-		System.out.println("## The current table is a "+(currentTableIsATrueTable?" genuine table":"view")+".");
+		if (Constants.debug) System.out.println("## The current table is a "+(currentTableIsATrueTable?" genuine table":"view")+".");
 		
 		// case [1] 
 		// if we have a view, get the true count
@@ -2972,7 +2984,7 @@ public class Database {
 		tableNameToCount.put(dbName+schema+tableNameOnly, count);
 		tableNameToExactCount.put(dbName+schema+tableNameOnly, exactCount);
 		
-		System.out.println("## Counting result was: "+(exactCount?"":"+/- ")+count+" row(s)");
+		if (Constants.debug) System.out.println("## Counting result was: "+(exactCount?"":"+/- ")+count+" row(s)");
 		
 		countAndQuality.put("exactCount", tableNameToExactCount.get(dbName+schema+tableNameOnly));
 		countAndQuality.put("count", tableNameToCount.get(dbName+schema+tableNameOnly));

@@ -615,7 +615,7 @@ gui.makeTableEditable = function(sSomeTablename){
 	
 	// SELECTBOX CELLS HANDLER
 	
-	for (var i=0; i<mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename).length; i++)
+	for (var i=0; i<mt.getListOfVisibleColumnsOf(sSomeTablename).length; i++)
 		{
 		var oTableConfig = conf.getTableConfig(sSomeTablename);
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(sSomeTablename)[i]);
@@ -627,137 +627,149 @@ gui.makeTableEditable = function(sSomeTablename){
 		if (aAllowedValues != '' && bColumnEditable)
 			{			
 			
-			$("td:eq("+i+")", 
-					mt.getDataTableObjectOf(sSomeTablename).fnGetNodes()
-					
-					).editable( 
-					
-				function(value, settings){
-					
-					// if rows are being selected, we don't want to edit rows!
-					if (mt.rowSelectionIsAllowed(sSomeTablename))
-						{
-						// close editor
-						var backValue = (this.revert != value) ? this.revert : value;
-						$(this).delay(100).queue(function(){
-							$(this).html(backValue); // needs a delay to work
-							$(this).dequeue();
-							});
-							
-						
-						// handle row selection
-						row._rowSelectionHandler(sSomeTablename, this.parentNode);
-						return true;
-						}
-					
-					
-					// current node 
-					var nCurrentNode = this;
+			var aAllRows = fn.getAllRows(sSomeTablename);
+			
+			aAllRows.each(function(j){
 				
-					// (needed for the undo registration, which is triggered by change events on cells)
-					if (bowser.msie) // here needed for IE
-						$(nCurrentNode).change();
+				var sCellName= mt.getListOfVisibleColumnsOf(sSomeTablename)[i];				
+				var sValueOfThisCell = fn.getDataFromCellNamed(sSomeTablename, this, sCellName);	
+				
+				var eRow = fn.getCellElement(sSomeTablename, this, sCellName);
+				
+				$(eRow).editable( 
+						
+					function(value, settings){
+						
+						// if rows are being selected, we don't want to edit rows!
+						if (mt.rowSelectionIsAllowed(sSomeTablename))
+							{
+							// close editor
+							var backValue = (this.revert != value) ? this.revert : value;
+							$(this).delay(100).queue(function(){
+								$(this).html(backValue); // needs a delay to work
+								$(this).dequeue();
+								});
+								
+							
+							// handle row selection
+							row._rowSelectionHandler(sSomeTablename, this.parentNode);
+							return true;
+							}
+						
+						
+						// current node 
+						var nCurrentNode = this;
 					
-					// instead of submitting an url (default in jEditable)
-					// we submit an own function which makes an Ajaxcall
-					// (so we control everything!)
-					var aPos = mt.getDataTableObjectOf(sSomeTablename).fnGetPosition( nCurrentNode );
-					
-					// check if we have a custom editing function from config file
-					// if available, it must overrule the normal (following) function
-					var oTableConfig = conf.getTableConfig(sSomeTablename);
-					var sColumnName = mt.getListOfColumnsOf(sSomeTablename)[aPos[2]];
-					var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[aPos[2]];
-					var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
-					var fnEditFunction = conf.getEditFunction(oColumnConfig);
-					var fnEditCallback = conf.getEditCallback(oColumnConfig);
-					var sEditTrigger = conf.getEditTrigger(oColumnConfig);
-					
-					// Special case: we apply the custom edit function
-					// If an edit trigger is defined, the edit function is called only 
-					// if the cell content matches a given regex stored in the config file 
-					// as 'edittrigger', which triggers the custom edit function!
-					if (fnEditFunction != null &&
-							// no trigger is needed, or trigger is matched
-							( sEditTrigger==null || new RegExp(sEditTrigger).test(value) ) )
-						{
-						conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
-						// callcack function, if it is set in configuration
-						if (fnEditCallback!=null)
-							fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
-						// refresh the tables that config file requires to be refreshed upon editing of current cell
-						conf.refreshTables(oColumnConfig);
-						}
-					
-					// normal case: we apply the normal edit function 
-					else
-						{
-						gui.showProcessingMsg(sSomeTablename);
-						var rowId = this.parentNode.getAttribute('id');
-						var url = "../lexit/lexit/table/setvalue";
-						$.ajax( {
-							"type": "GET",
-							"async": false,
-							"url": url,
-							"data": {
-								"row_id": rowId,
-								"db_name": getHttpParams().get("db"),
-								"table_name": sSomeTablename,
-								"column_name": sColumnName,
-								"new_value": value,
-								"value_type": sColumnType,
-								"dummy": getUniqueNumber()
-								},
-						 	"dataType": "xml", // get response as xml
-						 	"success": function(xml) {
-						 		gui.removeProcessingMsg(sSomeTablename);
-						 		if (gui.getDbResponse(xml))
-						 			{				 			
-						 			mt.getDataTableObjectOf(sSomeTablename).fnUpdate( value, aPos[0], aPos[2], false );
-						 			// callcack function, if it is set in configuration
-						 			if (fnEditCallback!=null)
-										fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
-						 			// refresh the tables that config file requires to be refreshed upon editing of current cell
-						 			conf.refreshTables(oColumnConfig);
-						 			}
-						 		else
-						 			{
-						 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
-						 			}
-						 		},
-							"error": function(jqXHR, textStatus, errorThrown){
-								gui.refreshTable(sSomeTablename);
-								mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-								alert("Er is een fout opgetreden: "+
-									textStatus+" "+errorThrown);
-								}
-							} );
-						}			
-					
-				},
-				// end of custom function
-					
-				// parameters
-				{
-					    "data": gui._buildDataArrayForJEditable(sSomeTablename, aAllowedValues ),
-					    "type": "select",
-					    "event": "mouseover",
-					    "onblur": function(value){
-					    	gui._closeJEditable(this, value);
-						},
-						"height": "14px",
-				        "width": "100%",
-				        "tooltip": "Klik om te bewerken",
-				        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
-				}
-			); // end of jEditable for select boxes
+						// (needed for the undo registration, which is triggered by change events on cells)
+						if (bowser.msie) // here needed for IE
+							$(nCurrentNode).change();
+						
+						// instead of submitting an url (default in jEditable)
+						// we submit an own function which makes an Ajaxcall
+						// (so we control everything!)
+						var aPos = mt.getDataTableObjectOf(sSomeTablename).fnGetPosition( nCurrentNode );
+						
+						// check if we have a custom editing function from config file
+						// if available, it must overrule the normal (following) function
+						var oTableConfig = conf.getTableConfig(sSomeTablename);
+						var sColumnName = mt.getListOfColumnsOf(sSomeTablename)[aPos[2]];
+						var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[aPos[2]];
+						var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+						var fnEditFunction = conf.getEditFunction(oColumnConfig);
+						var fnEditCallback = conf.getEditCallback(oColumnConfig);
+						var sEditTrigger = conf.getEditTrigger(oColumnConfig);
+						
+						// Special case: we apply the custom edit function
+						// If an edit trigger is defined, the edit function is called only 
+						// if the cell content matches a given regex stored in the config file 
+						// as 'edittrigger', which triggers the custom edit function!
+						if (fnEditFunction != null &&
+								// no trigger is needed, or trigger is matched
+								( sEditTrigger==null || new RegExp(sEditTrigger).test(value) ) )
+							{
+							conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
+							// callcack function, if it is set in configuration
+							if (fnEditCallback!=null)
+								fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
+							// refresh the tables that config file requires to be refreshed upon editing of current cell
+							conf.refreshTables(oColumnConfig);
+							}
+						
+						// normal case: we apply the normal edit function 
+						else
+							{
+							gui.showProcessingMsg(sSomeTablename);
+							var rowId = this.parentNode.getAttribute('id');
+							var url = "../lexit/lexit/table/setvalue";
+							$.ajax( {
+								"type": "GET",
+								"async": false,
+								"url": url,
+								"data": {
+									"row_id": rowId,
+									"db_name": getHttpParams().get("db"),
+									"table_name": sSomeTablename,
+									"column_name": sColumnName,
+									"new_value": value,
+									"value_type": sColumnType,
+									"dummy": getUniqueNumber()
+									},
+							 	"dataType": "xml", // get response as xml
+							 	"success": function(xml) {
+							 		gui.removeProcessingMsg(sSomeTablename);
+							 		if (gui.getDbResponse(xml))
+							 			{				 			
+							 			mt.getDataTableObjectOf(sSomeTablename).fnUpdate( value, aPos[0], aPos[2], false );
+							 			// callcack function, if it is set in configuration
+							 			if (fnEditCallback!=null)
+											fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
+							 			// refresh the tables that config file requires to be refreshed upon editing of current cell
+							 			conf.refreshTables(oColumnConfig);
+							 			}
+							 		else
+							 			{
+							 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+							 			}
+							 		},
+								"error": function(jqXHR, textStatus, errorThrown){
+									gui.refreshTable(sSomeTablename);
+									mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+									alert("Er is een fout opgetreden: "+
+										textStatus+" "+errorThrown);
+									}
+								} );
+							}			
+						
+					},
+					// end of custom function
+						
+					// parameters
+					// NOTE:
+					// we added a callback as we need to put the choosen value into the jeditable internal settings
+					// in such a way, that jeditable knows that value should be shown as 'selected'
+					{
+						    "data": gui._buildDataArrayForJEditable(sSomeTablename, aAllowedValues, sValueOfThisCell ),
+						    "type": "select",
+						    "event": "mouseover",
+						    "onblur": function(value){
+						    	gui._closeJEditable(this, value);
+							},							
+							"callback": function(value, settings) {
+								value = value.replace("&amp;", "&"); // prevent mismatch of value, as jeditable converts & into &amp;
+								settings.data.selected = value;
+						     },
+							"height": "14px",
+					        "width": "100%",
+					        "tooltip": "Klik om te bewerken",
+					        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
+					}
+				); // end of jEditable for select boxes
+				
+			});
+			
+			
 			}
 		};
-	
-	
-	
-	
-	
 	
 };
 
@@ -776,13 +788,14 @@ gui._closeJEditable = function(editor, value){
 
 // for jEditable with selectbox input, we need to build an associative array
 // of 'select text' tot 'select values' to be set as options in the select box
-gui._buildDataArrayForJEditable = function(sSomeTableName, aAllowedValues){
+gui._buildDataArrayForJEditable = function(sSomeTableName, aAllowedValues, sValueOfThisCell){
 	
 	var aNewArray = Array();
 	for (var i=0; i<aAllowedValues.length; i++)
 		{
 		aNewArray[aAllowedValues[i]] = aAllowedValues[i];
 		}
+	aNewArray['selected'] = sValueOfThisCell;
 	return aNewArray;
 };
 

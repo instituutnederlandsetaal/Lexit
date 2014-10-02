@@ -6,6 +6,7 @@ package lexit.table;
  * 
  */
 
+import lexit.resources.Constants;
 import lexit.util.Database;
 
 import java.util.ArrayList;
@@ -107,10 +108,13 @@ public class ResultObject {
 				weMustSort, aSortCol, aSortDir);
 		
 		// set content and content count
-		this.setTableContent( tableAndCount.getContent() );	
-		for (HashMap<String, String> a : tableContent)
+		this.setTableContent( tableAndCount.getContent() );
+		if (Constants.debug)
 		{
-			System.out.println(a.entrySet());
+			for (HashMap<String, String> a : tableContent)
+			{
+				System.out.println(a.entrySet());
+			}
 		}
 		this.setTotalDisplayRecords( tableAndCount.getPartialCount() );	
 		this.setQueryCountIsExact( tableAndCount.queryCountIsExact() );

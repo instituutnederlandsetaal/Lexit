@@ -1970,7 +1970,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback){
                 					);
                 		}
                 		// call callback
-                		fnCallback(); 
+                 		if (fnCallback != null)
+                 			fnCallback(); 
                 		$( this ).dialog( "close" );
                 		$( this ).remove(); 
                 	},

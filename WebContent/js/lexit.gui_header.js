@@ -402,7 +402,7 @@ head.putRefreshButton = function(sSomeTablename){
 		.attr("type", "button")
 		.css("background-color", "#99CCFF")
 		.append($("<span></span>").addClass("ui-icon ui-icon-refresh"))
-		.attr("title", "Ververs").addClass("tooltip")
+		.attr("title", "Ververs [F5]").addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){
 			
@@ -1161,6 +1161,9 @@ head.putHelpButton = function(sSomeTablename){
 				"</TR>" +
 				"<TR>" +
 				"<TD>Tab</TD><TD>&nbsp;&nbsp;</TD><TD>Switch tussen de tabellen: geef de eerst volgende tabel focus.</TD>" +				
+				"</TR>" +
+				"<TR>" +
+				"<TD>F5</TD><TD>&nbsp;&nbsp;</TD><TD>Ververs de actieve tabel.</TD>" +				
 				"</TR>" +
 				"<TR>" +
 				"<TD>F8</TD><TD>&nbsp;&nbsp;</TD><TD>Toon of verberg de tooltips in de tabellen.</TD>" +				

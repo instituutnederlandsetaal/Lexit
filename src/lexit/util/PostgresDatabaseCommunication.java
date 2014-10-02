@@ -2,6 +2,7 @@ package lexit.util;
 
 
 
+import lexit.resources.Constants;
 import lexit.resources.DbResponseObject;
 
 import java.sql.Connection;
@@ -49,7 +50,7 @@ public class PostgresDatabaseCommunication {
 		// location		
 		String location = "jdbc:postgresql://"+host+":5432/"+db;
 		
-		System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
+		if (Constants.debug) System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
 		
         // checks if the class exists (implicitly if the library is there)
         try {
@@ -72,14 +73,16 @@ public class PostgresDatabaseCommunication {
         }
 
         if (this.db == null)
-            System.out.println("Failed to make connection!");
+        {
+        	if (Constants.debug) System.out.println("Failed to make connection!");
+        }
 		
 	}
 	
 	
 	public ResultSet sendQuery(String query) 
 	{
-		System.out.println(query);
+		if (Constants.debug) System.out.println(query);
 		
 		// Get the results
 		ResultSet rs = null;
@@ -105,7 +108,7 @@ public class PostgresDatabaseCommunication {
 	 */
 	public ResultSet sendQueryWithTimeout(String query, int timeLimitInMilliseconds) 
 	{
-		System.out.println(query);
+		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
 		
 		// Get the results
@@ -127,13 +130,13 @@ public class PostgresDatabaseCommunication {
 		}
 		catch (SQLException e)
 		{
-			System.out.println("Exception "+e.getMessage());
+			if (Constants.debug) System.out.println("Exception "+e.getMessage());
 			if (e.getMessage().toLowerCase().contains("timeout"))
 			{
 				// show a message but throw no exception
 				// so time out will return null
 				long timeAfterQuery = new Date().getTime();
-				System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
+				if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
 			}
 			else
 			{
@@ -162,7 +165,7 @@ public class PostgresDatabaseCommunication {
 
 	public void sendUpdate(String query) 
 	{
-		System.out.println(query);
+		if (Constants.debug) System.out.println(query);
 		
 		Statement stmt = null;
 		try
@@ -188,8 +191,11 @@ public class PostgresDatabaseCommunication {
 		query = qo.getQuery();
 		args = qo.getArgs();
 		
-		System.out.println(query);
-		System.out.println(Util.join(args, ", "));
+		if (Constants.debug)
+		{
+			System.out.println(query);
+			System.out.println(Util.join(args, ", "));
+		}
 		
 		// Get the results
 		ResultSet rs = null;
@@ -200,8 +206,6 @@ public class PostgresDatabaseCommunication {
 			prest = this.db.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-			// debug
-			//System.out.println(query);
 			for (int i=0; i<args.length; i++)
 			{
 				String oneArg = args[i];
@@ -235,8 +239,11 @@ public class PostgresDatabaseCommunication {
 		args = qo.getArgs();
 		ato = qo.getAto();
 		
-		System.out.println(query);
-		System.out.println(Util.join(args, ", "));
+		if (Constants.debug)
+		{
+			System.out.println(query);
+			System.out.println(Util.join(args, ", "));
+		}
 		
 		// Get the results
 		ResultSet rs = null;
@@ -306,8 +313,11 @@ public class PostgresDatabaseCommunication {
 		args = qo.getArgs();
 		ato = qo.getAto();
 		
-		System.out.println(query);
-		System.out.println(Util.join(args, ", "));
+		if (Constants.debug)
+		{			
+			System.out.println(query);
+			System.out.println(Util.join(args, ", "));
+		}
 		
 		PreparedStatement prest;
 		
@@ -354,7 +364,7 @@ public class PostgresDatabaseCommunication {
 				
 				
 				String showArg = oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
-				System.out.println(i+1+" -> "+showArg+" "+oneType);
+				if (Constants.debug) System.out.println(i+1+" -> "+showArg+" "+oneType);
 			}
 			
 			

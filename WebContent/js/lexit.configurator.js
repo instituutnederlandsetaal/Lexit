@@ -73,7 +73,10 @@ conf.getColumnsList = function(oTableConfig){
 
 // retrieve the name of a table from its config
 conf.getTableName = function(oTableConfig){
-	if (typeof oTableConfig["table_name"] == 'undefined')
+	if (oTableConfig == null  // if a table is visible but has no configuration, this is null!
+			||
+		typeof oTableConfig["table_name"] == 'undefined'
+			)
 		return null;
 	return oTableConfig["table_name"];
 };
@@ -340,12 +343,19 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 	var aColumnList = conf.getColumnsList(oTableConfig);
 	var aSortingColumnsList = new Array();
 	
+	var sTableName = conf.getTableName(oTableConfig);
+	
 	for (var i=0; i<aColumnList.length; i++){
 		var sColName = aColumnList[i];
 		var aColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
 		
 		if (typeof aColumnConfig["colsort"] != 'undefined')
-			aSortingColumnsList.push(sColName);		
+			{
+			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
+				aSortingColumnsList.push(sColName);
+			else
+				alert("Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
+			}
 	}	
 	return aSortingColumnsList;
 };

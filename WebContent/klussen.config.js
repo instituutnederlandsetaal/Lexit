@@ -1,7 +1,7 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
 oShowOnlyTables = ["anw_postags_corrigeren",
-                   "antilliaans",
+                   
                    "lexiconexport1", 
                    "lexiconexport2", 
                    "lexiconexport3", 
@@ -21,6 +21,11 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "logfiles_worktable_verbs", 
                    "logfiles_worktable_nouns", 
                    "logfiles_worktable_rest",
+                   
+                   "paradigmauitbr_oktober_2014_verbs",
+                   "paradigmauitbr_oktober_2014_nouns",
+                   "paradigmauitbr_oktober_2014_rest",
+                   
                    
                    "non_homonyms_worktable_verbs", 
                    "non_homonyms_worktable_nouns", 
@@ -226,7 +231,67 @@ var oNonHomonymsWorktableSettings = {
 
 // table general settings
 
+var oParadigmaUitbreidingOkt2014Settings = {
+		
+		button_0: {
+			
+			"name": "Voeg woordvorm toe voor het geselecteerde lemma",
+			"click": function(t){					
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();					
+				
+				// get all needed data to copy
+				var nSelectedNode = fn.getFirstSelectedRowFrom(t);
+				var sLemmaId = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_id");
+				var sModernLemma = fn.getDataFromCellInRowNode(t, nSelectedNode, "modern_lemma");				
+				var sLemmaGigpos = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_gigpos");
+				 
+							
+				fn.insertIntoDatabase(t, 
+					{
+					"lemma_id": sLemmaId,						
+					"modern_lemma": sModernLemma,					
+					"lemma_gigpos": sLemmaGigpos,
+					"wordform": "-",
+					"wordform_corr": "-",
+					"wordform_gigpos": "-",
+					"verified_by": sUserName,					
+					"opmerkingen": "-"
+					}, 
+					"unique_id", 
+					false, 
+					function(){
+						
+						// make sure the row that has been added gets selected
+						fn.refreshTable(t,
+								function(){
+							
+							var sIdOfInsertedRecord = fn.getLastDbResponse();
+							var nNodeOfAddedRecord = fn.getNodeWhereIdIs(t, sIdOfInsertedRecord);
+							var iIndexOfAddedRecord = fn.getRowNumberOnScreen(t, nNodeOfAddedRecord);									
+							
+							fn.unselectAllRows(t);									
+							kf.setActiveRowNumber(iIndexOfAddedRecord);
+						});
+					});	
+				
+			}
+			
+		},
+		
+		"size": "80%"
+};
+
 oTableSettingsList = {
+		
+		paradigmauitbr_oktober_2014_verbs: oParadigmaUitbreidingOkt2014Settings,
+		
+		paradigmauitbr_oktober_2014_nouns: oParadigmaUitbreidingOkt2014Settings,
+		
+		paradigmauitbr_oktober_2014_rest: oParadigmaUitbreidingOkt2014Settings,
+		
+		
 		
 		anw_nieuwe_correctieronde_sept_2014: {
 			"size": "80%",
@@ -635,6 +700,84 @@ var oNonHomonymsWorkTableConfig = {
 		
 	};
 
+
+
+var oParadigmaUitbreidingOkt2014 = {
+
+	unique_id: {				
+		"visible": false
+	},
+	lemma_id: {				
+		"visible": false
+	},
+	modern_lemma: {
+		"colsort": "asc", // [sort field #1]
+		"cell_tooltip": "Klik om lemma te kopiëren",
+		"click": function(t, n){
+			var sLemmaToCopy = fn.getDataFromCellNode(t, n);
+			fn.putDataIntoCell(t, fn.getRowNode(n), "wordform_corr", sLemmaToCopy);
+		}
+	},
+	lemma_gigpos: {
+		"colsort": "asc" // [sort field #2]
+	},
+	rang: {
+		"visible": false,
+		"colsort": "asc" // [sort field #3]
+	},
+	"wordform": {
+		"colsort": "asc", // [sort field #4]
+		"cell_tooltip": "Klik om woordvorm te kopiëren",
+		"click": function(t, n){
+			var sWordformToCopy = fn.getDataFromCellNode(t, n);
+			fn.putDataIntoCell(t, fn.getRowNode(n), "wordform_corr", sWordformToCopy);
+		}
+	},
+	opmerkingen:{	
+		"bgcolor": "#D8F6CE",
+		"editable": true,
+		"editcallback": function(t, n, value){
+			
+			// log the user 
+			var sUserName = fn.getCurrentUser();
+			fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+		}
+	},
+	wordform_corr: {	
+		"bgcolor": "#D8F6CE",
+		"editable": true,
+		"editcallback": function(t, n, value){
+			
+			// log the user 
+			var sUserName = fn.getCurrentUser();
+			fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+		}
+	},
+	wordform_gigpos: {	
+		"bgcolor": "#D8F6CE",
+		"editable": true,
+		"editcallback": function(t, n, value){
+			
+			// log the user 
+			var sUserName = fn.getCurrentUser();
+			fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+		}
+	},
+	verwijderen: {	
+		"cell_tooltip": "Vink aan als deze woordvorm weg moet",
+		"bgcolor": "#D8F6CE",
+		"editable": true,
+		"editcallback": function(t, n, value){
+			
+			// log the user 
+			var sUserName = fn.getCurrentUser();
+			fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+		}
+	},
+	verified_by: {
+		"visible": false
+	}
+};
 
 
 
@@ -1053,6 +1196,10 @@ oTableConfigurationList = {
 				"editable": true
 			}
 		},
+		
+		paradigmauitbr_oktober_2014_verbs: oParadigmaUitbreidingOkt2014,
+		paradigmauitbr_oktober_2014_nouns: oParadigmaUitbreidingOkt2014,
+		paradigmauitbr_oktober_2014_rest: oParadigmaUitbreidingOkt2014,
 
 		antilliaans: {
 			

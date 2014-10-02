@@ -4,7 +4,7 @@ oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_v
 
 
 
-fn.setProjectTitle("GigantMolex Productie Intern");
+fn.setProjectTitle("GigantMolex development", "yellow");
 
 // remember chosen parent
 
@@ -397,10 +397,10 @@ oTableConfigurationList = {
 			"wordform":{	
 				"editable": true
 			},
-//			"wordform_corr":{	
-//				"bgcolor": "#E0F8EC",
-//				"editable": true
-//			},
+			"wordform_corr":{	
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
 			"wordform_afbr":{				
 				"editable": true
 			},

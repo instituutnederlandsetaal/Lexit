@@ -78,7 +78,7 @@ public class TableResources extends Application  {
 	@Produces({MediaType.TEXT_PLAIN})
 	public Response getJsConfigFile(@QueryParam("db_name") String dbName){
 		
-		System.out.println("Load config file...");
+		if (Constants.debug) System.out.println("Load config file...");
 		
 		String fileToSend = null;
 		try {
@@ -121,7 +121,7 @@ public class TableResources extends Application  {
 			) throws IOException {
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Clean cache of "+tableName);
+		if (Constants.debug) System.out.println("### Clean cache of "+tableName);
 		
 		DbResponseObject dro = new DbResponseObject();
 		
@@ -150,7 +150,7 @@ public class TableResources extends Application  {
 			) throws IOException {
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get Columns from "+tableName);
+		if (Constants.debug) System.out.println("### Get Columns from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -172,7 +172,7 @@ public class TableResources extends Application  {
 			  @QueryParam("column_name") String columnName)
 	  {
 	    tableName = tableName.replaceAll("__", ".");
-	    System.out.println("### Get unique values for column " + columnName + " in " + tableName);
+	    if (Constants.debug) System.out.println("### Get unique values for column " + columnName + " in " + tableName);
 	    
 	    String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -200,7 +200,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get row number for "+tableName);
+		if (Constants.debug) System.out.println("### Get row number for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -239,7 +239,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### SetValue for "+tableName);
+		if (Constants.debug) System.out.println("### SetValue for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
@@ -291,7 +291,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get id from record in "+tableName);
+		if (Constants.debug) System.out.println("### Get id from record in "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -322,7 +322,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get record from "+tableName);
+		if (Constants.debug) System.out.println("### Get record from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -346,7 +346,7 @@ public class TableResources extends Application  {
 			@QueryParam("db_name") String dbName
 			){
 		
-		System.out.println("### Call function "+functionName);
+		if (Constants.debug) System.out.println("### Call function "+functionName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
@@ -378,7 +378,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Update record without id in "+tableName);
+		if (Constants.debug) System.out.println("### Update record without id in "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
@@ -414,13 +414,13 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Insert record into "+tableName);
+		if (Constants.debug) System.out.println("### Insert record into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
-		System.out.println("'"+returningField+"'");
+		if (Constants.debug) System.out.println("'"+returningField+"'");
 		
 		DbResponseObject dro = new DbResponseObject(); 
 				
@@ -461,7 +461,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Insert modified record into "+tableName);
+		if (Constants.debug) System.out.println("### Insert modified record into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
@@ -500,7 +500,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Insert modified record without id into "+tableName);
+		if (Constants.debug) System.out.println("### Insert modified record without id into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
@@ -535,7 +535,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Delete record from "+tableName);
+		if (Constants.debug) System.out.println("### Delete record from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
@@ -565,7 +565,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Delete record(s) (without ids) from "+tableName);
+		if (Constants.debug) System.out.println("### Delete record(s) (without ids) from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
@@ -591,7 +591,7 @@ public class TableResources extends Application  {
 			@Context SecurityContext sc,
 			@QueryParam("db_name") String dbName) throws IOException {
 		
-		System.out.println("We are running Java version " +
+		if (Constants.debug) System.out.println("We are running Java version " +
 				System.getProperty("java.version") +
 				" from "+
 				System.getProperty("java.vendor"));
@@ -857,7 +857,7 @@ public class TableResources extends Application  {
 		
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get table "+tableName);
+		if (Constants.debug) System.out.println("### Get table "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
@@ -1083,7 +1083,7 @@ public class TableResources extends Application  {
 	private Map getCountOfTable(String dbName, String tableName) throws IOException{
 		
 		tableName = tableName.replaceAll("__", ".");
-		System.out.println("### Get total count of "+tableName);
+		if (Constants.debug) System.out.println("### Get total count of "+tableName);
 		
 		return getDatabaseObject(dbName).getQuickCountOfAllTableRecords(dbName, tableName);
 	}
@@ -1166,7 +1166,7 @@ public class TableResources extends Application  {
 	 */
 	public String readJsConfigFile(String dbName) throws IOException{
 		
-		System.out.println("Read javascript configuration file '"+dbName+".config.js"+"'...");
+		if (Constants.debug) System.out.println("Read javascript configuration file '"+dbName+".config.js"+"'...");
 		
 		String fileName = dbName+".config.js";
 		
@@ -1175,7 +1175,7 @@ public class TableResources extends Application  {
 		filepath = filepath.replace(
 				File.separatorChar+"lexit"+File.separator+fileName, 
 				File.separatorChar+"lexit_config"+File.separator+fileName);
-		System.out.println("File: "+filepath);
+		if (Constants.debug) System.out.println("File: "+filepath);
 		
 		StringBuilder sb = new StringBuilder();
 		

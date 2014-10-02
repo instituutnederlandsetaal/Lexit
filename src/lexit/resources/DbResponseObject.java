@@ -21,7 +21,9 @@ public class DbResponseObject {
 		return this.resp;
 	}
 	public void setResponse(String resp){
-		System.out.println("!!! Response was set to '"+resp+"'");
+		
+		if (Constants.debug)
+			System.out.println("!!! Response was set to '"+resp+"'");
 		this.resp = resp;
 	}
 

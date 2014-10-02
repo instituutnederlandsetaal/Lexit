@@ -25,4 +25,7 @@ public class Constants {
 	
 	// neutral separator, if needed
 	public final String NEUTRAL_SEPARATOR = "nEuTrAlSePaRaToR";
+	
+	// are we debugging?
+	public final static boolean debug = false;
 }
