@@ -5,6 +5,11 @@
 var conf = {};
 
 
+// global variable for storage of restore objects
+// (restore objects are shallow copies of the tables configurations, meant to be
+//  able to restore those when the user requires Lex'it to)
+var aRestoreObjects = new Array();
+
 
 // modify the value of a configuration setting
 conf.changeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName, value){
@@ -57,6 +62,7 @@ conf.getTableConfig = function(sTablename){
 		}
 	return null;
 };
+
 
 
 // retrieve the list of configured columns of a given table
@@ -354,7 +360,7 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
 				aSortingColumnsList.push(sColName);
 			else
-				alert("Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
+				fn.message("Configuratieprobleem", "Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
 			}
 	}	
 	return aSortingColumnsList;
@@ -731,6 +737,69 @@ conf.activeContextMenusForColumns = function(sSomeTablename){
 };
 
 
+
+
+/********************************************************************
+ *                         RESTORE OBJECT                           *
+ ********************************************************************/ 
+
+
+
+//make a copy of the visibility config or order setting of the table columns
+//we need this to restore the original table settings when the user requires Lex'it to 
+conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
+	
+	// if we already have a restore object, don't make it again
+	// (Which would be wrong anyway: because we can only make such a object
+	//  at initialisation time, when tables are still in their original state.
+	//  When this function is called again, it is by definition because
+	//  the table is being rebuilt as the configuration was manually modified
+	//  by the user, so the table is not in its original state anymore!)
+	if (typeof aRestoreObjects[sTablename] != 'undefined')
+		return true;
+	
+	// new restore object
+	aRestoreObjects[sTablename] = new Array();	
+	
+	// save original column visibility
+	
+	// get table config object to get column config from
+	var oTableConfig = conf.getTableConfig(sTablename);
+	
+	aRestoreObjects[sTablename]["columns"] = new Array();
+	
+	for (var i=0; i<aAllColumns.length; i++){
+		
+		var sColName = aAllColumns[i];
+		var aColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
+		var bVisible = conf.getVisibility(aColumnConfig);
+		
+		aRestoreObjects[sTablename]["columns"][sColName] = {"visible": bVisible};		
+		}
+	
+	// save original columns
+	
+	aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aAllColumns);
+};
+
+conf.getOriginalColumnList = function(sTablename){
+	
+	return aRestoreObjects[sTablename]["list_of_columns"];
+};
+
+
+conf.getOriginalVisibility = function(sTablename, sColumnName){
+	
+	if (typeof aRestoreObjects[sTablename]["columns"][sColumnName] == 'undefined')
+		return true; // visible is default
+	return aRestoreObjects[sTablename]["columns"][sColumnName]["visible"];
+	
+};
+
+
+
+
+
 /********************************************************************
  *                      TABLE GENERAL SETTINGS                      *
  ********************************************************************/ 
@@ -842,7 +911,7 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 };
 conf.getHeaderButtonFunction = function(aButtonSettings){
 	if (typeof aButtonSettings["click"] == 'undefined')
-		return function(){alert("No function assigned.");};
+		return function(){fn.message("Configuratieprobleem", "Aan deze button is geen functie toegekend.");};
 	return aButtonSettings["click"];
 };
 

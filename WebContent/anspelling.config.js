@@ -6,7 +6,7 @@ oShowOnlyTables = [];
 
 // corpus URL
 
-var sCorpusUrl = "http://surinaams.corpus.taalbanknederlands.inl.nl/searchsurinaams/page/search";
+var sCorpusUrl = "http://antilliaans.corpus.taalbanknederlands.inl.nl/searchantilliaans/page/search";
 
 
 // table general settings

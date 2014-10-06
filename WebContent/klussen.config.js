@@ -18,6 +18,8 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "logfiles_090514_pos",
                    "logfiles_pos_and_afbr_together",
                    
+                   "lemmata_en_afbreking",
+                   
                    "logfiles_worktable_verbs", 
                    "logfiles_worktable_nouns", 
                    "logfiles_worktable_rest",
@@ -1201,18 +1203,30 @@ oTableConfigurationList = {
 		paradigmauitbr_oktober_2014_nouns: oParadigmaUitbreidingOkt2014,
 		paradigmauitbr_oktober_2014_rest: oParadigmaUitbreidingOkt2014,
 
-		antilliaans: {
+		lemmata_en_afbreking: {
 			
-			id: {"visible": false},
-			lemma: {"colsort": "asc"},
-			corrected_lemma: {"editable": true, "bgcolor": "#D8F6CE"},
-			pos: {},
-			corrected_pos: { "editable": true, "bgcolor": "#D8F6CE"},
-			opmerkingen: {"editable": true, "bgcolor": "#D8D8D8"},
-			frequentie: {},
-			an_score: {},
-			typisch_an: {"editable": true, "bgcolor": "#D8F6CE"},
-			weg: {"editable": true, "bgcolor": "#D8D8D8"}
+			"unique_id":{
+				"visible": false
+			},
+			"lemma": {
+				"cell_tooltip": "Klik om te kopiëren naar 'afbreking_corr'",
+				"click": function(t, n){
+					var sLemma = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "afbreking_corr", sLemma);
+				}
+			},
+			"afbreking": {
+				"cell_tooltip": "Klik om te kopiëren naar 'afbreking_corr'",
+				"click": function(t, n){
+					var sAfbreking = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "afbreking_corr", sAfbreking);
+				}
+			},
+			"afbreking_corr": {
+				"bgcolor": "#D8D8D8",
+				"editable": true
+			}
+			
 		},
 		
 		anw_nieuwe_correctieronde_sept_2014: {

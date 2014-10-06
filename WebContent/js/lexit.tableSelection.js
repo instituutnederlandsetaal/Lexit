@@ -20,7 +20,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 				dataType: "xml",
 				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 				success: function(xml) {ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);},
-				error: function(jqXHR, textStatus, errorThrown){alert("XML laden mislukt: "+textStatus+" "+errorThrown);}
+				error: function(jqXHR, textStatus, errorThrown){fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);}
 			});
 	
 };
@@ -192,7 +192,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 		else
 			{
 			removeSpinner();
-			alert("Deze tabel is al geladen");
+			fn.message("Let op", "Deze tabel is al geladen");
 			return true;
 			}
 			

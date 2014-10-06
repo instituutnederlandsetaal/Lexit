@@ -201,13 +201,13 @@ un.undoEvent = function(sSomeTableName){
 		 			}
 		 		else
 		 			{
-		 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+		 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 		 			}
 		 		},
 			"error": function(jqXHR, textStatus, errorThrown){
 				gui.refreshTable(sSomeTableName);
 				mt.getDataTableObjectOf(sSomeTableName).fnDraw();
-				alert("Er is een fout opgetreden: "+
+				fn.message("Fout", "Er is een fout opgetreden: "+
 					textStatus+" "+errorThrown);
 				}
 			} );

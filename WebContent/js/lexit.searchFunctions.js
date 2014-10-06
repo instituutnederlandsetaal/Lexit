@@ -70,7 +70,7 @@ sf.goTo = function(sSomeTablename){
 	
 	if (sColumnName=="")
 		{
-		alert("Tik een zoekterm in een zoekbox boven een kolom, en klik dan pas op 'Ga naar'!");
+		fn.message("Let op", "Tik een zoekterm in een zoekbox boven een kolom, en klik dan pas op 'Ga naar'!");
 		return true;
 		}
 	
@@ -106,7 +106,7 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, sSortColum
 	
 	if (sSortColumn == null || sSortColumn == "")
 		{
-		alert("De tabel is niet gesorteerd op een kolom. De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
+		fn.message("Let op", "De tabel is niet gesorteerd op een kolom. De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
 		return;
 		}
 	
@@ -137,7 +137,7 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, sSortColum
 					},
 				error: function(jqXHR, textStatus, errorThrown){
 					gui.removeProcessingMsg(sSomeTablename);
-					alert("XML laden mislukt: "+textStatus+" "+errorThrown);
+					fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);
 					}
 			});
 };

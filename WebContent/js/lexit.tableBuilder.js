@@ -11,6 +11,7 @@ var tb = {};
 tb.loadTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	// NB: at this point the table record is already created in the multitables namespace
+	//     but beware: it has no column list yet
 	
 	// make sure oExtraTableSettings can't cause a crash because of null value
 	if (oExtraTableSettings == null) 
@@ -33,6 +34,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var bTableIsaView = (asTableTypes[$.inArray(sSomeTableName, asTableNames)] == "view");
 	var bIgnoreInitialisationFilters = false;
 	
+	
+	// view type
 	var sViewtype = oExtraTableSettings["viewtype"] != null ? oExtraTableSettings["viewtype"] :
 		(aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
 	mt.setViewType(sSomeTableName, sViewtype);

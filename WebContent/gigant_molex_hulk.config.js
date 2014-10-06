@@ -1,6 +1,8 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", "paradigma_view", "inputtable", "hulk_test_view", "hulkfunction_view"];
+oShowOnlyTables = ["lemmata_view", "paradigma_view", "inputtable", 
+                   "hulk_test_view", "hulkfunction_view", "corrected_wordforms",
+                   "wordforms"];
 
 
 
@@ -14,6 +16,37 @@ var sChosenParentId = null;
 
 // table general settings
 oTableSettingsList = {
+		
+		wordforms:{
+			
+			"button_2": {
+				
+				"name": "Voeg wordform toe",
+				"click": function(t){
+					
+					
+				}
+			},
+			
+			"button_0": {
+				
+				"name": "Voeg als verkeerde vorm toe",
+				"click": function(t){
+					
+					if ( !fn.tableExists("corrected_wordforms"))
+						{
+						fn.message("Fout", "U moet wel eerst de 'corrected_wordforms'-tabel openen!");
+						}
+					else
+						{
+						var aRows = fn.getSelectedRowsFrom("wordforms");
+						if (aRows != null)
+							{}
+						}
+				}
+			}
+			
+		},
 		
 		hulk_test_view: {
 			
@@ -89,49 +122,15 @@ oTableSettingsList = {
 			"size": "90%",
 			
 			"button_0":{
-				"name": "Voeg lemma toe",
-				"click": function(confTable){
+				"name": "RESET",
+				"click": function(t){
 					
-					fn.prompt("Geef een lemma", 
-							["modern_lemma", "lemma_gigpos"], 
-							["", ""], 
-							function(){
-						
-						var sLemma = fn.getPromptUserInput("modern_lemma");
-						var sLemmaPos = fn.getPromptUserInput("lemma_gigpos");
-						
-						fn.callFunction("insert_lemma", 
-								[sLemma, sLemmaPos], 
-								null, null, null, null, function(){
-							fn.refreshTable(confTable);
+					fn.updateDatabaseGivenFieldValues("lemmata", {"doet_mee": true}, {"doet_mee": false}, false, function(){
+						fn.refreshTable(t);
+						fn.updateDatabaseGivenFieldValues("analyzed_wordforms", {"doet_mee": true}, {"doet_mee": false}, false, function(){
+							alert("U kunt weer lemmata uitkiezen voor de test.");
 						});
 					});
-				}
-			},
-			"button_1":{
-				"name": "Verwijder selectie",
-				"click": function(confTable){
-					
-					var answer = confirm("Weet u het zeker?");
-					
-					if (answer){
-						
-						var aRows = fn.getSelectedRowsFrom(confTable);
-						aRows.each(function(){
-							
-							var bLastRow = fn.isLastNodeOf(this, aRows);
-							var sLemmaId = fn.getDataFromCellNamed(confTable, this, "pkid");
-							
-							fn.removeFromDatabaseGivenFieldValues("lemmata", 
-									{"lemma_id": sLemmaId}, 
-									false,
-									function(){
-										if (bLastRow) fn.refreshTable(confTable);
-									});
-							
-						});
-					}
-					
 				}
 			}
 
@@ -147,6 +146,8 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		
 		
 		
 		morphological_view: {
@@ -172,6 +173,14 @@ oTableConfigurationList = {
 		
 
 		lemmata_view: {
+			
+			"doet_mee":{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", {"lemma_id": sLemmaId}, {"doet_mee": true});
+				}
+			},
 			
 			"source_molex_hom": { "visible": false },			
 			"source_molex_nw_lem": { "visible": false },
@@ -260,6 +269,9 @@ oTableConfigurationList = {
 		},
 		
 		paradigma_view: {
+			"doet_mee":{
+				"editable": true
+			},
 			"pkid":{				
 				"visible": false
 			},

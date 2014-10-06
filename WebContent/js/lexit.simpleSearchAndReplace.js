@@ -349,12 +349,12 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
-			 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+			 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
 					gui.refreshTable(sSomeTablename);
-					alert("Er is een fout opgetreden: "+
+					fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
 					// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
@@ -384,12 +384,12 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
-			 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+			 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
 					gui.refreshTable(sSomeTablename);
-					alert("Er is een fout opgetreden: "+
+					fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
 					// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");

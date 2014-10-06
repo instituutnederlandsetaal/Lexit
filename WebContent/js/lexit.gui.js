@@ -373,7 +373,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
 				// callcack function, if it is set in configuration
 				if (fnEditCallback!=null)
-					alert("Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
+					fn.message("Configuratieprobleem", "Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
 							"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
 							"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
 									"in uw configuratiebestand.");
@@ -421,13 +421,13 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			}
 				 		else
 				 			{
-				 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+				 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 				 			}
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
 						gui.refreshTable(sSomeTablename);
 						mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-						alert("Er is een fout opgetreden: "+
+						fn.message("Fout", "Er is een fout opgetreden: "+
 							textStatus+" "+errorThrown);
 						}
 					} );
@@ -561,7 +561,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			
 			// callcack function, if it is set in configuration
 			if (fnEditCallback!=null)
-				alert("Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
+				fn.message("Configuratieprobleem", "Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
 						"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
 						"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
 								"in uw configuratiebestand.");
@@ -600,7 +600,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			 		conf.refreshTables(oColumnConfig);
 			 		
 			 	},
-				"error": function(jqXHR, textStatus, errorThrown){alert("Er is een fout opgetreden: "+
+				"error": function(jqXHR, textStatus, errorThrown){fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);}
 				} );			
 			}
@@ -728,13 +728,13 @@ gui.makeTableEditable = function(sSomeTablename){
 							 			}
 							 		else
 							 			{
-							 			alert("Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+							 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 							 			}
 							 		},
 								"error": function(jqXHR, textStatus, errorThrown){
 									gui.refreshTable(sSomeTablename);
 									mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-									alert("Er is een fout opgetreden: "+
+									fn.message("Fout", "Er is een fout opgetreden: "+
 										textStatus+" "+errorThrown);
 									}
 								} );

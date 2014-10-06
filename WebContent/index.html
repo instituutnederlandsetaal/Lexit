@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2014.10.02
+	v2014.10.06
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -218,7 +218,7 @@
 							});
 					})
 				.fail(function(jqxhr, settings, exception){
-					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+					fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
 					});
 				}
 			
@@ -248,7 +248,7 @@
 							});
 					},
 					"error": function(jqxhr, settings, exception){
-					alert("Het configuratiebestand '"+paramsHash.get("db")+"' bestaat niet of het bevat fouten.\n\nFout: ["+exception+"]");
+						fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
 					}
 				});
 				}
@@ -344,7 +344,7 @@
 			$("#page").append(docClosed);
 			}
 		else
-			alert("Geen toegang");
+			fn.message("Fout", "Geen toegang");
 		
 	}
 		

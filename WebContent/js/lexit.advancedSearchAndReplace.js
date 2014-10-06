@@ -422,7 +422,7 @@ asr.alterTable = function(sSomeTablename, addOrReplaceMode, bReallyChange){
 					gui.removeProcessingMsg(sSomeTablename);		 			
 		 			// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
-					alert("Er is een fout opgetreden: "+
+		 			fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
 					}
 				} );
@@ -456,7 +456,7 @@ asr.alterTable = function(sSomeTablename, addOrReplaceMode, bReallyChange){
 					gui.removeProcessingMsg(sSomeTablename);		 			
 		 			// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
-					alert("Er is een fout opgetreden: "+
+		 			fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
 					}
 				} );
