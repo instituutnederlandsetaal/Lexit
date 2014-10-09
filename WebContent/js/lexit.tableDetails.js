@@ -27,7 +27,7 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 					td.processColumnResponse(xml, sSomeTableName, fnFunction, oExtraTableSettings);
 					},
 				error: function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);
+					fn.message("Fout in tabel '"+sSomeTableName+"'", "XML laden mislukt: "+textStatus+" "+errorThrown);
 					}
 			});
 	
@@ -91,7 +91,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 			 		conf.changeTableConfigValue(sSomeTableName, sCurrentColumnName, "choosefrom", td._getUniqueValues(xml));
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout", "Er is een fout opgetreden tijdens het opbouwen van de zoekbox '"+sColumnName+"': "+
+					fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden tijdens het opbouwen van de zoekbox '"+sColumnName+"': "+
 						textStatus+" "+errorThrown);
 					}
 				} );
@@ -100,7 +100,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	});
 	
 	
-	// now we have a column list, so we are able to 
+	// we have a column list now, so we are able to 
 	// make a shallow copy of the original config, so we can restore it when needed
 	conf.makeRestoreCopyOfTableConfig(sSomeTableName, aAllColumns);
 	
@@ -108,7 +108,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	// DEAL WITH SAVED CONFIG
 	
 	// adapt the configuration to custom user config (saved during some previous session)
-	var sChosenColumns = $.cookie(sSomeTableName+"_columns");
+	var sChosenColumns = $.cookie(fn.getCurrentProject()+"_"+sSomeTableName+"_columns");
 	
 	
 	
@@ -175,7 +175,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 					"aantal kolommen verschilt (database stuurt "+aAllColumns.length+
 					" kolommen, configuratie noemt "+aColumnOrder.length+" kolommen)" 
 					: "kolomnamen verschillen";
-			fn.message("Fout", "De lijst kolommen in \"column_order\" (in de configuratie) " +
+			fn.message("Fout in tabel '"+sSomeTableName+"'", "De lijst kolommen in \"column_order\" (in de configuratie) " +
 					"komt niet overeen met de werkelijke kolommen [oorzaak: "+sCause+"].");
 			}
 		}
@@ -376,7 +376,7 @@ td.selectColumns = function(sSomeTablename){
 	                    				{
 	                    				// the cookie contains a comma separated list of columns with their visibility settings and in the right order
 		                				// like this:  col1:true,col2:false,...
-	                    				$.cookie(sSomeTablename+"_columns", sChosenColumns, { expires: 365, path: '/' });	                    				
+	                    				$.cookie(fn.getCurrentProject()+"_"+sSomeTablename+"_columns", sChosenColumns, { expires: 365, path: '/' });	                    				
 	                    				}
 	                    			
 	                    			// tell the function we're done with restoring
@@ -552,7 +552,7 @@ td.selectColumns = function(sSomeTablename){
 	
 	// if the user changed the table configuration before, 
 	// add a button offering the possibility to restore the default config
-	var sSavedCookie = $.cookie(sSomeTablename+"_columns");
+	var sSavedCookie = $.cookie(fn.getCurrentProject()+"_"+sSomeTablename+"_columns");
 	
 	if ( typeof sSavedCookie != 'undefined' )
 		aButtonsArray.push({
@@ -599,7 +599,7 @@ td.selectColumns = function(sSomeTablename){
 	                			});
 	                				
 	                			// remove the custom configuration, as we just restored the default
-	                			$.removeCookie(sSomeTablename+"_columns", { path: '/' });	                			
+	                			$.removeCookie(fn.getCurrentProject()+"_"+sSomeTablename+"_columns", { path: '/' });	                			
 	                			
 	                			
 	                			// tell this function we are restoring the original config

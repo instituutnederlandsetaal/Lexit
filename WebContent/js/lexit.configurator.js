@@ -360,7 +360,7 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
 				aSortingColumnsList.push(sColName);
 			else
-				fn.message("Configuratieprobleem", "Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
+				fn.message("Fout in configuratie van tabel '"+sTableName+"'", "Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
 			}
 	}	
 	return aSortingColumnsList;

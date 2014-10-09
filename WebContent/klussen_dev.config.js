@@ -52,6 +52,10 @@ var oKeySettings = {
 
 oTableSettingsList = {
 		
+		lemmata_en_afbreking: {
+			"size": "80%"
+		},
+		
 		flexievormen_molex2gigp_vrb_a: oKeySettings,
 		
 		flexievormen_molex2gigp_type_a: oKeySettings,
@@ -67,6 +71,40 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		lemmata_en_afbreking: {
+			
+			"unique_id":{
+				"visible": false
+			},
+			"lemma_id":{
+				"visible": false
+			},
+			"lemma": {
+				"cell_tooltip": "Klik om te kopiëren naar 'afbreking_corr'",
+				"click": function(t, n){
+					var sLemma = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "afbreking_corr", sLemma);
+				}
+			},
+			"afbreking": {
+				"cell_tooltip": "Klik om te kopiëren naar 'afbreking_corr'",
+				"click": function(t, n){
+					var sAfbreking = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "afbreking_corr", sAfbreking);
+				}
+			},
+			"afbreking_corr": {
+				"bgcolor": "#D8D8D8",
+				"editable": true
+			},
+			"opmerkingen": {
+				"bgcolor": "#F2F2F2",
+				"editable": true
+			}
+			
+			
+		},
 		
 		antilliaans: {
 			

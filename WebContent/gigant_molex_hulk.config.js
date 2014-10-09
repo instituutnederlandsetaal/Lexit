@@ -1,7 +1,7 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
 oShowOnlyTables = ["lemmata_view", "paradigma_view", "inputtable", 
-                   "hulk_test_view", "hulkfunction_view", "corrected_wordforms",
+                   "hulk_test_view", "hulkfunction_view", "wrong_to_correct_view",
                    "wordforms"];
 
 
@@ -17,32 +17,91 @@ var sChosenParentId = null;
 // table general settings
 oTableSettingsList = {
 		
-		wordforms:{
+		wrong_to_correct_view : {
 			
-			"button_2": {
-				
-				"name": "Voeg wordform toe",
-				"click": function(t){
-					
-					
-				}
-			},
+			"size": "60%",
 			
 			"button_0": {
 				
-				"name": "Voeg als verkeerde vorm toe",
+				"name": "Voer koppeling in",
 				"click": function(t){
 					
-					if ( !fn.tableExists("corrected_wordforms"))
+					var aRows = fn.getAllRows(t);
+					
+					var sSpellingVersion = ( $.isEmptyObject(aRows) ) ?
+							fn.getDataFromCellNamed(t, aRows[0], "spelling_version_id") : 1;
+					
+					
+					fn.prompt("Voer koppeling in", 
+							["wrong_wordform", "correct_wordform"], 
+							["", ""], 
+							function(){
+						
+						var sWrong = fn.getPromptUserInput("wrong_wordform");
+						var sCorrect = fn.getPromptUserInput("correct_wordform");
+						
+						
+						fn.callFunction("insert_wrong_to_correct", 
+								[fn.quote(sWrong), fn.quote(sCorrect), sSpellingVersion], null, null, null, null, 
+								function(){
+							fn.refreshTable(t);
+						});
+					});
+				}
+			},
+			"button_1": {
+				"name": "Verwijder koppeling",
+				"click": function(t){
+					
+					var answer = confirm("Weet u het zeker?");
+					
+					if (answer)
 						{
-						fn.message("Fout", "U moet wel eerst de 'corrected_wordforms'-tabel openen!");
+						var aRows = fn.getSelectedRowsFrom(t);
+						aRows.each(function(){
+							
+							var bLastRow = fn.isLastNodeOf(this, aRows);
+							var sWrongId = fn.getDataFromCellNamed(t, this, "wrong_wordform_id");
+							var sCorrectId = fn.getDataFromCellNamed(t, this, "correct_wordform_id");
+							var sSpellingVersion = fn.getDataFromCellNamed(t, this, "spelling_version_id");
+							fn.removeFromDatabaseGivenFieldValues("corrected_wordforms", 
+									{
+									"wrong_wordform_id": sWrongId,
+									"correct_wordform_id": sCorrectId,
+									"spelling_version_id": sSpellingVersion
+									}, false, function(){
+										
+										if (bLastRow)
+											fn.refreshTable(t);
+									});
+							});
 						}
-					else
-						{
-						var aRows = fn.getSelectedRowsFrom("wordforms");
-						if (aRows != null)
-							{}
-						}
+					
+					
+				}
+			}
+			
+		},
+		
+		wordforms:{
+			
+			"button_0": {
+				
+				"name": "Voeg woordvorm toe",
+				"click": function(t){
+					
+					fn.prompt("Nieuwe woordvorm", ["woordvorm"], [""], 
+							function(){
+						
+						var sWordform = fn.getPromptUserInput("woordvorm");
+						fn.insertIntoDatabase(t, 
+								{
+								"wordform": sWordform,
+								"wordform_lowercase": sWordform.toLowerCase()
+								}, 
+								null, false, function(){fn.refreshTable(t);});
+					});
+					
 				}
 			}
 			
@@ -122,13 +181,39 @@ oTableSettingsList = {
 			"size": "90%",
 			
 			"button_0":{
-				"name": "RESET",
+				"name": "ALLES UIT",
 				"click": function(t){
 					
+					fn.showProcessingMsg(t);
 					fn.updateDatabaseGivenFieldValues("lemmata", {"doet_mee": true}, {"doet_mee": false}, false, function(){
-						fn.refreshTable(t);
+						
+						fn.showProcessingMsg(t);
+						fn.showProcessingMsg("paradigma_view");
 						fn.updateDatabaseGivenFieldValues("analyzed_wordforms", {"doet_mee": true}, {"doet_mee": false}, false, function(){
-							alert("U kunt weer lemmata uitkiezen voor de test.");
+							fn.refreshTable("paradigma_view");
+							fn.refreshTable(t);
+							alert("Alle lemmata zijn nu uitgevinkt. U kunt weer lemmata uitkiezen voor de test.");
+							fn.removeProcessingMsg("paradigma_view");
+							fn.removeProcessingMsg(t);
+						});
+					});
+				}
+			},
+			"button_1":{
+				"name": "ALLES AAN",
+				"click": function(t){
+					
+					fn.showProcessingMsg(t);
+					fn.updateDatabaseGivenFieldValues("lemmata", {"doet_mee": false}, {"doet_mee": true}, false, function(){
+												
+						fn.showProcessingMsg(t);
+						fn.showProcessingMsg("paradigma_view");
+						fn.updateDatabaseGivenFieldValues("analyzed_wordforms", {"doet_mee": false}, {"doet_mee": true}, false, function(){
+							fn.refreshTable("paradigma_view");
+							fn.refreshTable(t);
+							alert("Alle lemmata doen nu mee.");
+							fn.removeProcessingMsg("paradigma_view");
+							fn.removeProcessingMsg(t);
 						});
 					});
 				}
@@ -138,7 +223,74 @@ oTableSettingsList = {
 		},
 		paradigma_view: {
 			
-			"size": "90%"
+			"size": "90%",
+			"button_0":{
+				"name": "Voeg woordvorm toe",
+				"click": function(confTable){
+					
+					var wordform = fn.prompt("Geef een woordvorm", 
+							["woordvorm", "wordform_gigpos"], 
+							["", ""], 
+							function(){
+						
+						var sWordform = fn.getPromptUserInput("woordvorm");
+						var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
+
+						var aAllRows;
+						var sLemmaId;
+						
+						// is there is no paradigm yet, get the lemma id from the lemma table
+						if (fn.tableIsEmpty(confTable))
+							{
+							aAllRows = fn.getSelectedRowsFrom("lemmata_view");
+							sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+							
+							}
+						// otherwise just read it from the current table
+						else
+							{
+							aAllRows = fn.getAllRows(confTable);
+							sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+							
+							}
+						
+						
+						
+						fn.callFunction("insert_wordform", 
+								[sLemmaId, sWordform, sWordformPos], 
+								null, null, null, null, function(){
+							fn.refreshTable(confTable);
+						});
+					});
+				}
+			},
+			"button_1":{
+				
+				"name": "Verwijder selectie",
+				"click": function(confTable){
+					
+					var answer = confirm("Weet u het zeker?");
+					
+					if (answer){
+						
+						var aRows = fn.getSelectedRowsFrom(confTable);
+						aRows.each(function(){
+							
+							var bLastRow = fn.isLastNodeOf(this, aRows);
+							var sAnalyzedWfId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							
+							fn.removeFromDatabaseGivenFieldValues("analyzed_wordforms", 
+									{"analyzed_wordform_id": sAnalyzedWfId}, 
+									false,
+									function(){
+										if (bLastRow) fn.refreshTable(confTable);
+									});
+							
+						});
+					}
+					
+				}
+			}
 
 		}
 };
@@ -147,7 +299,34 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
-		
+		wrong_to_correct_view:{
+			
+			pkid: {
+				"visible": false
+			},
+			spelling_version_id:{
+				"visible": false
+			},
+			spellingname: {
+				"editable": true
+			},
+			
+			judgement: {
+				"editable": true
+			},
+			wrong_wordform: {
+				"editable": true
+			},
+			correct_wordform: {
+				"editable": true
+			},
+			wrong_wordform_id:{
+				"visible": false
+			},
+			correct_wordform_id:{
+				"visible": false
+			}
+		},
 		
 		
 		morphological_view: {
@@ -211,8 +390,7 @@ oTableConfigurationList = {
 			"th_lemma": {			
 			},
 			"keurmerk": {				
-				"visible": false,
-				"flexible_visibility": false
+				"editable": true
 			},
 			"sublemma_type": {				
 			},
@@ -303,6 +481,7 @@ oTableConfigurationList = {
 				
 			},
 			"keurmerk":{
+				"editable": true
 			},
 			"comment": {
 				
@@ -310,3 +489,20 @@ oTableConfigurationList = {
 			
 		}
 };
+
+
+
+fn.callDatabase("lemmata_view", null, function(){
+	fn.callDatabase("paradigma_view", null, function(){
+		fn.callDatabase("inputtable", null, function(){
+			fn.callDatabase("wrong_to_correct_view", null, function(){
+				fn.alignTables("inputtable", "wrong_to_correct_view", function(){
+					fn.callDatabase("hulkfunction_view", null, function(){
+						fn.pileupTables("inputtable", "hulkfunction_view");
+					});
+					
+				});
+			});
+		});
+	});
+});

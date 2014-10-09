@@ -287,6 +287,10 @@ var oParadigmaUitbreidingOkt2014Settings = {
 
 oTableSettingsList = {
 		
+		lemmata_en_afbreking: {
+			"size": "80%"
+		},
+		
 		paradigmauitbr_oktober_2014_verbs: oParadigmaUitbreidingOkt2014Settings,
 		
 		paradigmauitbr_oktober_2014_nouns: oParadigmaUitbreidingOkt2014Settings,
@@ -1208,6 +1212,9 @@ oTableConfigurationList = {
 			"unique_id":{
 				"visible": false
 			},
+			"lemma_id":{
+				"visible": false
+			},
 			"lemma": {
 				"cell_tooltip": "Klik om te kopiëren naar 'afbreking_corr'",
 				"click": function(t, n){
@@ -1224,6 +1231,10 @@ oTableConfigurationList = {
 			},
 			"afbreking_corr": {
 				"bgcolor": "#D8D8D8",
+				"editable": true
+			},
+			"opmerkingen": {
+				"bgcolor": "#F2F2F2",
 				"editable": true
 			}
 			

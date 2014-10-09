@@ -373,7 +373,8 @@ gui.makeTableEditable = function(sSomeTablename){
 				conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
 				// callcack function, if it is set in configuration
 				if (fnEditCallback!=null)
-					fn.message("Configuratieprobleem", "Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
+					fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", 
+							"Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
 							"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
 							"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
 									"in uw configuratiebestand.");
@@ -421,13 +422,13 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			}
 				 		else
 				 			{
-				 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+				 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 				 			}
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
 						gui.refreshTable(sSomeTablename);
 						mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-						fn.message("Fout", "Er is een fout opgetreden: "+
+						fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 							textStatus+" "+errorThrown);
 						}
 					} );
@@ -561,7 +562,8 @@ gui.makeTableEditable = function(sSomeTablename){
 			
 			// callcack function, if it is set in configuration
 			if (fnEditCallback!=null)
-				fn.message("Configuratieprobleem", "Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
+				fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", 
+						"Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
 						"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
 						"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
 								"in uw configuratiebestand.");
@@ -600,7 +602,8 @@ gui.makeTableEditable = function(sSomeTablename){
 			 		conf.refreshTables(oColumnConfig);
 			 		
 			 	},
-				"error": function(jqXHR, textStatus, errorThrown){fn.message("Fout", "Er is een fout opgetreden: "+
+				"error": function(jqXHR, textStatus, errorThrown){
+					fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);}
 				} );			
 			}
@@ -728,13 +731,13 @@ gui.makeTableEditable = function(sSomeTablename){
 							 			}
 							 		else
 							 			{
-							 			fn.message("Fout", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+							 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
 							 			}
 							 		},
 								"error": function(jqXHR, textStatus, errorThrown){
 									gui.refreshTable(sSomeTablename);
 									mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-									fn.message("Fout", "Er is een fout opgetreden: "+
+									fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 										textStatus+" "+errorThrown);
 									}
 								} );
@@ -808,13 +811,6 @@ gui.getDbResponse = function(xml){
 };
 
 
-
-
-//get the selected nodes
-gui.fnGetAllRows = function( oSomeTable ){
-	
-	return oSomeTable.$('tr');
-};
 
 
 // get the value of a checkbox, according to its data type

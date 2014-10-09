@@ -406,7 +406,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback){
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			fn.refreshTable(sSomeTablename);
-			fn.message("Fout", "Er is een fout opgetreden: "+
+			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -556,8 +556,11 @@ fn.getAllRows = function(sSomeTable){
 
 	if (typeof sSomeTable == 'string')
 		sSomeTable = mt.getDataTableObjectOf(sSomeTable);
-
-	return gui.fnGetAllRows(sSomeTable);
+	
+	// This might return an empty object
+	// which is ok, since it allows a call like (fn.getAllRows(t)).each(function(){..});
+	// to work properly. So we mustn't return null;
+	return sSomeTable.$('tr');
 };
 
 // get the id of a row containing a given node
@@ -1231,7 +1234,7 @@ fn.putDataIntoCell = function(sSomeTable, nNode, sColumnName, sContent){
 	
 	if ( fn.isCellNode(nNode) )
 		{
-		fn.message("Configuratieprobleem", "Let op: fn.putDataIntoCell() is aangeroepen met een cell node, terwijl de functie " +
+		fn.message("Fout in configuratie van tabel '"+sSomeTable+"'", "Let op: fn.putDataIntoCell() is aangeroepen met een cell node, terwijl de functie " +
 				"een row node vereist.");
 		return;
 		}
@@ -1239,7 +1242,7 @@ fn.putDataIntoCell = function(sSomeTable, nNode, sColumnName, sContent){
 	var sNodeId = fn.getNodeId(nNode);	
 	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
 		{
-		fn.message("Fout", "Tabel '"+sSomeTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
+		fn.message("Fout in tabel '"+sSomeTable+"'", "Tabel '"+sSomeTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId omdat de tabel geen primary key noch pkid-veld heeft]");
 		return;
 		}
@@ -1290,14 +1293,14 @@ fn.updateDatabaseGivenANode = function(sSomeTablename, nNode, aColumnNames, aCol
 	
 	if ( isArray(aColumnNames) && (aColumnNames.length != aColumnValues.length) )
 		{
-		fn.message("Configuratieprobleem", "Fout: fn.updateDatabaseGivenANode is aangeroepen met een verschillend aantal kolomnamen en kolomwaarden (de aantallen horen gelijk te zijn).");
+		fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", "Fout: fn.updateDatabaseGivenANode is aangeroepen met een verschillend aantal kolomnamen en kolomwaarden (de aantallen horen gelijk te zijn).");
 		return;
 		}
 	
 	var sNodeId = fn.getNodeId(nNode);	
 	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
 		{
-		fn.message("Fout", "Tabel '"+sSomeTablename+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
+		fn.message("Fout in tabel '"+sSomeTablename+"'", "Tabel '"+sSomeTablename+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId omdat de tabel geen primary key noch pkid-veld heeft]");
 		return;
 		}
@@ -1343,7 +1346,7 @@ fn.updateDatabaseGivenANode = function(sSomeTablename, nNode, aColumnNames, aCol
 		 		},
 			"error": function(jqXHR, textStatus, errorThrown){
 				fn.refreshTable(sSomeTablename);
-				fn.message("Fout", "Er is een fout opgetreden: "+
+				fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 					textStatus+" "+errorThrown);
 				}
 			} );		
@@ -1388,13 +1391,13 @@ fn.updateDatabaseGivenANode = function(sSomeTablename, nNode, aColumnNames, aCol
 		 		},
 			"error": function(jqXHR, textStatus, errorThrown){
 				fn.refreshTable(sSomeTablename);
-				fn.message("Fout", "Er is een fout opgetreden: "+
+				fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 					textStatus+" "+errorThrown);
 				}
 			} );
 		}
 	else {
-		fn.message("Configuratieprobleem", "De argumenten bij fn.updateDatabaseGivenANode() zijn niet correct opgegeven. " +
+		fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", "De argumenten bij fn.updateDatabaseGivenANode() zijn niet correct opgegeven. " +
 				"Controleer het configuratiebestand.");
 	}
 };
@@ -1460,7 +1463,7 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -1521,7 +1524,7 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -1568,7 +1571,7 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues){
 	 		return (resp == "null" ? null : resp);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -1591,7 +1594,7 @@ fn.removeFromDatabaseGivenANode = function(sSomeTablename, nNode, redrawTable, f
 	var sNodeId = fn.getNodeId(nNode);	
 	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
 		{
-		fn.message("Fout", "Tabel '"+sSomeTablename+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
+		fn.message("Fout in tabel '"+sSomeTablename+"'", "Tabel '"+sSomeTablename+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId omdat de tabel geen primary key noch pkid-veld heeft]");
 		return;
 		}
@@ -1622,7 +1625,7 @@ fn.removeFromDatabaseGivenANode = function(sSomeTablename, nNode, redrawTable, f
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -1674,7 +1677,7 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -1709,7 +1712,7 @@ fn.getRecord = function(sSomeTablename, sRecordId){
 	 		return fn._getRecord(xml);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			return new Array();
 			}
@@ -1795,7 +1798,7 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 	 				var aValuesForTable = sValueForTable.split(ARG_INTERNAL_SEPARATOR);
 	 				if (aValuesForTable.length != fn.getCurrentDisplayLength(sSomeTableName))
 	 					{
-	 					fn.message("Fout", "Het aantal rijen dat de functie '"+sSomeFunctionName+"' teruggeeft, komt niet overeen met het aantal getoonde rijen op het scherm.");
+	 					fn.message("Fout in tabel '"+sSomeTableName+"'", "Het aantal rijen dat de functie '"+sSomeFunctionName+"' teruggeeft, komt niet overeen met het aantal getoonde rijen op het scherm.");
 	 					}
 	 				else
 	 					{
@@ -1815,7 +1818,7 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 	 		if (fnCallback!=null) fnCallback();
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);			
 			}
 		} );
@@ -1857,7 +1860,7 @@ fn.callRecord = function(sSomeTablename, nNode, sRecordId, aColumnsToUpdate, fnC
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", "Er is een fout opgetreden: "+
+	 		fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -2518,6 +2521,12 @@ fn.removeHighlight = function(sString){
 // get the user name (of user which has logged in)
 fn.getCurrentUser = function(){
 	return USERNAME;
+};
+
+
+// get current project
+fn.getCurrentProject = function(){
+	return getHttpParams().get("db");
 };
 
 // set the user name (the name of the user who has logged in is normally got from webservice

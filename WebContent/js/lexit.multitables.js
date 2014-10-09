@@ -198,7 +198,6 @@ mt.removeAllTableRecords = function(){
 	hsaListOfTypesOfVisibleColumns = new Hashtable();
 	hsaListOfAllowedValuesPerColumn = new Hashtable();
 	hsaListOfAllowedValuesPerVisibleColumn = new Hashtable();
-	hNumberOfSelectedRows = new Hashtable();
 	hSearchBoxThatHasFocus = new Hashtable();
 	undoStacks = new Hashtable();
 	undoTooltips = new Hashtable();
@@ -257,7 +256,6 @@ mt.removeTableRecord = function(sSomeTablename){
 	hsaListOfTypesOfVisibleColumns.remove(sSomeTablename);
 	hsaListOfAllowedValuesPerColumn.remove(sSomeTablename);
 	hsaListOfAllowedValuesPerVisibleColumn.remove(sSomeTablename);
-	hNumberOfSelectedRows.remove(sSomeTablename);
 	hSearchBoxThatHasFocus.remove(sSomeTablename);
 	undoStacks.remove(sSomeTablename);
 	undoTooltips.remove(sSomeTablename);
