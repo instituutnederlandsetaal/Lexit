@@ -280,6 +280,25 @@ oTableSettingsList = {
 oTableConfigurationList = {
 		
 		
+		modified_lemmata_view: {
+			"modification_date":{
+				"colsort": "desc" // sort #1
+			},
+			"modification_time": {
+				"colsort": "desc" // sort #2
+			}
+		},
+		
+		modified_paradigm_view: {
+			"modification_date":{
+				"colsort": "desc" // sort #1
+			},
+			"modification_time": {
+				"colsort": "desc" // sort #2
+			}
+		},
+		
+		
 		morphological_view: {
 			
 			morphological_analysis_id: {
@@ -370,12 +389,24 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"homo":{
-				"visible": false
+				
 			},
-			"weg":{
+			"weg": {
 				"editable": true
 			},
-			"uitspraak":{
+			"uitspraak": {
+				"editable": true
+			},
+			"status": {
+				"editable": true
+			},
+			"nuanc_opm": {
+				"editable": true
+			},
+			"taalvariant": {
+				"editable": true
+			},
+			"herkomst": {
 				"editable": true
 			}
 			

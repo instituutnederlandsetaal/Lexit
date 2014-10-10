@@ -7,9 +7,6 @@ oShowOnlyTables = ["lemmata_view", "paradigma_view", "inputtable",
 
 
 
-
-
-
 // remember chosen parent
 
 var sChosenParentId = null;
