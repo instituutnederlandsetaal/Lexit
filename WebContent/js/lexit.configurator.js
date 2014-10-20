@@ -778,8 +778,14 @@ conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
 		}
 	
 	// save original columns
+	var oTableSettings = conf.getTableSettings(sTablename);
+	var aColumnOrder = conf.getColumnOrder(oTableSettings);
 	
-	aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aAllColumns);
+	// of course, give priority to the column order explicitly set in the configuration 
+	if (aColumnOrder == null)
+		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aAllColumns);
+	else
+		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aColumnOrder);
 };
 
 conf.getOriginalColumnList = function(sTablename){

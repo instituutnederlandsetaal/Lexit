@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2014.10.09
+	v2014.10.20
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -147,7 +147,8 @@
 	var USER_DEFINED = "USER-DEFINED";
 	// Name of user that has logged in. This is set by fn.setCurrentUser() at initialization
 	var USERNAME = null; 
-	
+	// INL Home url
+	var INL_HOMEURL = "gtb.dev.inl.loc";
 	
 	
 	$(document).ready(function() {	
@@ -302,7 +303,7 @@
 		var sCurrentURL = document.URL;
 		
 		// keep this list private to internal environment
-		if ( sCurrentURL.indexOf("lex-it.inl.nl")<0 )
+		if ( sCurrentURL.indexOf( INL_HOMEURL )>-1 )
 			{
 			$("#indicator").empty().append(
 					$("<span></span>")

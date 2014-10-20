@@ -1818,7 +1818,9 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 	 		if (fnCallback!=null) fnCallback();
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden: "+
+	 		fn.message("Fout bij aanroep van functie '" + sSomeFunctionName + "'"+
+	 				(sSomeTableName != null ? " in tabel '" + sSomeTableName + "'": "" ), 
+	 				"Er is een fout opgetreden: "+
 				textStatus+" "+errorThrown);			
 			}
 		} );
@@ -1908,14 +1910,18 @@ fn._callRecord = function(sSomeTablename, nNode, aColumnsToUpdate, xml, fnCallba
  *           INTERACTION               *
  ***************************************/
 
+
+// equivalent of js native 'alert'
+
 fn.message = function(sTitle, sMessage){
 	
 	var sP = $("<p></p>").html(sMessage);
-	var sDiv = $("<div></div>").attr("id", "dialog-message").attr("title", sTitle).append(sP);
+	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
 	
 	$(document.body).append(sDiv);
 	
-	$( "#dialog-message" ).dialog({
+	$( "#"+dialogDivId ).dialog({
 		modal: true,
 		buttons: {
 			Ok: function() {
@@ -1925,6 +1931,35 @@ fn.message = function(sTitle, sMessage){
 		}
 	});
 };
+
+
+// equivalent of js native 'confirm'
+
+fn.confirm = function(sTitle, sMessage, fnFunction){
+	
+	var sP = $("<p></p>").html(sMessage);
+	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
+	
+	$(document.body).append(sDiv);
+	
+	$( "#"+dialogDivId ).dialog({
+		modal: true,
+		buttons: {
+			Ok: function() {
+				$( this ).dialog( "close" );
+				$( this ).remove();
+				fnFunction( true );
+				},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+				$( this ).remove();
+				fnFunction( false );
+				}
+		}
+	});
+};
+
 
 // Generate a prompt pop-up, requesting some input from the user
 // The output can be retrieved by using fn.getPromptUserInput()

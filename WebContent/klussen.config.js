@@ -2,6 +2,10 @@
 oHiddenTablesList = [];
 oShowOnlyTables = ["anw_postags_corrigeren",
                    
+                   "anw_paradigma_verbs",
+                   "anw_paradigma_nouns",
+                   "anw_paradigma_rest",
+                   
                    "lexiconexport1", 
                    "lexiconexport2", 
                    "lexiconexport3", 
@@ -285,7 +289,18 @@ var oParadigmaUitbreidingOkt2014Settings = {
 		"size": "80%"
 };
 
+var oAnwParadigma = {
+	
+		"column_order": ["unique_id", "lemma_id", "modern_lemma", "afbr", "lemma_gigpos", 
+		                 "rank", "wordform", "wordform_corr", "wordform_gigpos", "opmerkingen", "verwijderen", 
+		                 "source", "verified_by"  ]
+};
+
 oTableSettingsList = {
+		
+		anw_paradigma_verbs: oAnwParadigma,
+		anw_paradigma_nouns: oAnwParadigma,
+		anw_paradigma_rest: oAnwParadigma,
 		
 		lemmata_en_afbreking: {
 			"size": "80%"
@@ -885,7 +900,110 @@ var oSpellingKlusRik2 = {
 		
 	};
 
+
+
+var oAnwParadigmaWorkTableConfig = {
+		
+		"unique_id": {
+			"visible": false
+		},
+		"lemma_id": {
+			"visible": false
+		},
+		"modern_lemma": {
+			"colsort": "asc" // [sort field #1]
+		},
+
+		"lemma_gigpos": {
+			"colsort": "asc" // [sort field #2]
+		},
+		  
+		"wordform_gigpos": {
+			"bgcolor": "#E0F8EC",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+				
+			}
+		},
+		"afbr": {
+			"bgcolor": "#E0F8EC",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+			}
+		},
+		
+		"rank": {
+			"visible": false,
+			"colsort": "asc" // [sort field #3]
+		},
+		"wordform": {
+			"colsort": "asc", // [sort field #4]
+			"cell_tooltip": "Klik om woordvorm te kopiëren",
+			"click": function(t, n){
+				var sWordformToCopy = fn.getDataFromCellNode(t, n);
+				fn.putDataIntoCell(t, fn.getRowNode(n), "wordform_corr", sWordformToCopy);
+			}
+		},
+		
+		"wordform_corr": {
+			"bgcolor": "#E0F8EC",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+			}
+		},
+		
+		"opmerkingen": {
+			"bgcolor": "#E0F8EC",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+			}
+		},
+		 
+		"verwijderen": {
+			"bgcolor": "#E0F8EC",
+			"cell_tooltip": "Vink aan als deze woordvorm weg moet",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+			}
+		},
+		"source": {
+			
+		},
+		"verified_by": {
+			"visible": false
+		}
+		
+	};
+
 oTableConfigurationList = {
+		
+		anw_paradigma_verbs: oAnwParadigmaWorkTableConfig,
+		
+		anw_paradigma_nouns: oAnwParadigmaWorkTableConfig,
+		
+		anw_paradigma_rest: oAnwParadigmaWorkTableConfig,
+		
+		
 		
 		logfiles_pos_and_afbr_together: {
 			

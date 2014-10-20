@@ -59,7 +59,7 @@ $(document).on(
                             }));
                         },
                         "error": function(jqXHR, textStatus, errorThrown){
-        					alert("Er is een fout opgetreden: "+
+        					fn.message("Fout", "Er is een fout opgetreden: "+
         						textStatus+" "+errorThrown);
         					}
                     });
@@ -118,7 +118,7 @@ oTableSettingsList = {
 					
 					if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 						{
-						alert("Kies een document!");
+						fn.message("Let op", "Kies een document!");
 						}
 					else
 						{
@@ -140,7 +140,10 @@ oTableSettingsList = {
 								"crossDomain": true,
 							 	"dataType": "json",
 							 	"success": function(data) {
-							 		alert(data.message);
+							 		
+							 		// commented out, because the windows downlaod dialog causes strange behaviour  
+							 		//fn.message("Resultaatbestand", data.message);
+							 		
 							 		fn.removeProcessingMsg(t);
 							 		fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
 							 		fn.refreshTable(t, function(){window.open(data.link);});
@@ -149,7 +152,7 @@ oTableSettingsList = {
 								"error": function(jqXHR, textStatus, errorThrown){
 									fn.removeProcessingMsg(t);
 									fn.setCustomButtonCss(t, 0, "background-color", sOriginalColor);
-									alert("Er is een fout opgetreden: "+
+									fn.message("Resultaatbestand", "Er is een fout opgetreden: "+
 										textStatus+" "+errorThrown);
 									}
 								
@@ -185,7 +188,7 @@ oTableSettingsList = {
 					
 					if (typeof aRow == 'undefined' || aRow == null || fn.getNumberOfSelectedRows(t)>1)
 						{
-						alert("U moet exact één rij selecteren, niet meer, niet minder!");
+						fn.message("Let op", "U moet exact één rij selecteren, niet meer, niet minder!");
 						}
 					else
 						{
@@ -209,48 +212,53 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var answer = confirm("Weet u het zeker? Dit kan niet ongedaan worden gemaakt.");
-					var aRows = fn.getSelectedRowsFrom(t);
-					if (answer)
-						{
+					fn.confirm("Let op", "Weet u het zeker? Dit kan niet ongedaan worden gemaakt.",
+							function(answer){
 						
-						var bRemoveIsAllowed = true;
-						aRows.each(function(){
-							
-							var nCurrentRow = this;
-							
-							var bAddedByUser = fn.getDataFromCellNamed(t, nCurrentRow, "added_by_editor");
-							if (bAddedByUser == 'f' || bAddedByUser == false)
-								bRemoveIsAllowed = false;
-							
-						});
-						
-						if ( !bRemoveIsAllowed)
+						var aRows = fn.getSelectedRowsFrom(t);
+						if (answer)
 							{
-							alert("U kunt alleen rijen verwijderen die u zelf aangemaakt heeft.");
-							}
-						else
-							{
+							
+							var bRemoveIsAllowed = true;
 							aRows.each(function(){
 								
 								var nCurrentRow = this;
 								
-								var sJudgementId = fn.getDataFromCellNamed(t, nCurrentRow, "judgement_id");
-																
-								fn.removeFromDatabaseGivenFieldValues(
-										"judgements", 
-										{
-											"judgement_id": sJudgementId
-										}, 
-										false, 
-										function(){									
-											fn.refreshTable(t);											
-										});
+								var bAddedByUser = fn.getDataFromCellNamed(t, nCurrentRow, "added_by_editor");
+								if (bAddedByUser == 'f' || bAddedByUser == false)
+									bRemoveIsAllowed = false;
+								
+							});
+							
+							if ( !bRemoveIsAllowed)
+								{
+								fn.message("Let op", "U kunt alleen rijen verwijderen die u zelf aangemaakt heeft.");
+								}
+							else
+								{
+								aRows.each(function(){
+									
+									var nCurrentRow = this;
+									
+									var sJudgementId = fn.getDataFromCellNamed(t, nCurrentRow, "judgement_id");
+																	
+									fn.removeFromDatabaseGivenFieldValues(
+											"judgements", 
+											{
+												"judgement_id": sJudgementId
+											}, 
+											false, 
+											function(){									
+												fn.refreshTable(t);											
+											});
 
-								});
+									});
+								}
+							
 							}
 						
-						}					
+					});
+					
 				}
 			}
 		}
@@ -545,6 +553,8 @@ function putExportToGigantButton(t){
 					.html("Exporteer naar Gigant-lexicon")
 					.bind("click", function(){
 						
+						$("#export_to_gigant_div button").prop("disabled", true);
+						
 						doExport(t);
 						})
 					)
@@ -560,14 +570,17 @@ function doExport(t){
 	
 	if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 		{
-		alert("Kies een document!");
+		fn.message("Let op", "Kies een document!");
+		$("#export_to_gigant_div button").removeAttr("disabled");
 		}
 	else
 		{
 		fn.addFilters(t, {"hulk_oordeel": ""});
 		
 		fn.refreshTable(t, function(){
+			
 			var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+			fn.showProcessingMsg(t);
 			
 			$.ajax({
 				
@@ -577,13 +590,15 @@ function doExport(t){
 				"crossDomain": true,
 			 	"dataType": "json",
 			 	"success": function(data) {
-			 		alert(data.message);
+			 		fn.message("Gelukt!", data.message);
 			 		fn.removeProcessingMsg(t);
+			 		$("#export_to_gigant_div button").removeAttr("disabled");
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.removeProcessingMsg(t);
-					alert("Er is een fout opgetreden: "+
+					fn.removeProcessingMsg(t);					
+					fn.message("Fout", "Er is een fout opgetreden: "+
 						textStatus+" "+errorThrown);
+					$("#export_to_gigant_div button").removeAttr("disabled");
 					}
 				
 			});

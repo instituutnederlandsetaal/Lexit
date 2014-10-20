@@ -10,38 +10,38 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-09-29                                        **
+// **      2014-10-20                                        **
 // **                                                        **
 // ************************************************************
 
 
 
 // remember chosen parent
-
 var sChosenParentId = null;
+
+// column not allowed in this installation
+var sColumnCheck = "opmerking_intern";
 
 // table general settings
 oTableSettingsList = {
 		
 
 		lemmata_en_paradigma_view: {
-			"size": "80%"
-//				,
-//		
-//			"callback": function(t){
-//
-//			var aRows = fn.getAllRows(t);
-//
-//			aRows.each(function(){
-//
-//			var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
-//
-//			if (sAwfId != null && sAwfId != '')
-//				(fn.getCellElement(t, this, "comment")).css("background-color", "white");
-//				
-//				});
-//			},
-//			"repeat_callback": true
+			
+			"size": "80%",
+			
+			// column check
+			"callback": function(t){
+				
+				if ($.inArray(sColumnCheck, mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1)
+					{
+					$("#container").empty();
+					fn.message("Let op", "Illegale kolom in deze installatie");
+					}					
+					
+			},
+			"repeat_callback": true
+
 		},
 		
 		lemmata_view: {
@@ -72,6 +72,25 @@ oTableSettingsList = {
 			
 			"callback": function(t){
 				
+				// column check
+				if ($.inArray(sColumnCheck, mt.getListOfColumnsOf("lemmata_view"))>-1)
+					{
+					$("#container").empty();
+					fn.message("Let op", "Illegale kolom in deze installatie");
+					}
+				
+				
+				// keep color of all buttons uptodate
+				var filterValues = t.fnFilterGet();
+				fn.setCustomButtonCss(t, 0, "background-color", (filterValues["source_gb05"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 1, "background-color", (filterValues["source_molex_hom"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 2, "background-color", (filterValues["source_logfiles"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 3, "background-color", (filterValues["source_molex_nw_lem"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 4, "background-color", (filterValues["source_molex_niet_hom"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 5, "background-color", (filterValues["source_anw"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
+				fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
+				
 				// we need to disable the checkbox of 
 				var aRows = fn.getAllRows(t);
 				aRows.each(function(){
@@ -85,7 +104,9 @@ oTableSettingsList = {
 			},
 			"repeat_callback": true,
 			
+			
 			"size": "90%",
+			
 			
 			// we need buttons to choose the sources we are interested in
 			"button_0":{
@@ -275,6 +296,14 @@ oTableConfigurationList = {
 			},
 			"opmerking": {
 				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			"opmerking_intern": {
+				// BEWARE, DON'T REMOVE THIS PART
+				// ------------------------------
+				"flexible_visibility": false,
+				"visible": (document.URL.indexOf( "gtb.dev.inl.loc" )>-1),
+				// ------------------------------
 				"editable": true
 			},
 			"gloss": {				

@@ -333,7 +333,7 @@ oTableConfigurationList = {
 			},
 			"modern_lemma": {		
 				"colsort": "asc",
-				"editable": true				
+				"editable": true
 			},
 			"th_lemma": {				
 				"editable": true				
@@ -344,7 +344,15 @@ oTableConfigurationList = {
 			"sublemma_type": {				
 				"editable": true				
 			},
-			"opmerking": {
+			"opmerking": {				
+				"editable": true
+			},
+			"opmerking_intern": {
+				// BEWARE, DON'T REMOVE THIS PART
+				// ------------------------------
+				"flexible_visibility": false,
+				"visible": (document.URL.indexOf( "gtb.dev.inl.loc" )>-1),
+				// ------------------------------
 				"editable": true
 			},
 			"gloss": {				
@@ -392,6 +400,9 @@ oTableConfigurationList = {
 				
 			},
 			"weg": {
+				"editable": true
+			},
+			"taaladvies": {
 				"editable": true
 			},
 			"uitspraak": {
