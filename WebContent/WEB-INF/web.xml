@@ -43,6 +43,9 @@ id="WebApp_ID" version="2.5">
 	  	<!-- roles required to access the application -->
 	  	<auth-constraint>
 	  		<role-name>ambiguplus_all</role-name>
+			<role-name>anspelling_all</role-name>
+			<role-name>anspelling_write</role-name>
+			<role-name>anspelling_read</role-name>
 	  		<role-name>gigantmolex_write</role-name>
 	  		<role-name>hulk_all</role-name>
 	  		<role-name>klussen_all</role-name>	  			  		

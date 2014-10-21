@@ -589,16 +589,16 @@ function doExport(t){
 				
 				"crossDomain": true,
 			 	"dataType": "json",
-			 	"success": function(data) {
-			 		fn.message("Gelukt!", data.message);
+			 	"success": function(data) {			 		
 			 		fn.removeProcessingMsg(t);
 			 		$("#export_to_gigant_div button").removeAttr("disabled");
+			 		setTimeout(function(){fn.message("Gelukt!", data.message);}, 500);
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.removeProcessingMsg(t);					
-					fn.message("Fout", "Er is een fout opgetreden: "+
-						textStatus+" "+errorThrown);
+					fn.removeProcessingMsg(t);
 					$("#export_to_gigant_div button").removeAttr("disabled");
+					setTimeout(function(){fn.message("Fout", "Er is een fout opgetreden: "+
+							textStatus+" "+errorThrown);}, 500);
 					}
 				
 			});
