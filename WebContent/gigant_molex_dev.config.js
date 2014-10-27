@@ -1,18 +1,7 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view"];
+oShowOnlyTables = ["lemmata_view", "modified_lemmata_view"];
 
-
-
-
-
-// ************************************************************
-// **                                                        **
-// **      Gigant Molex for Spellingcommission               **
-// **                                                        **
-// **      2014-08-19                                        **
-// **                                                        **
-// ************************************************************
 
 
 
@@ -22,6 +11,33 @@ var sChosenParentId = null;
 
 // table general settings
 oTableSettingsList = {
+		
+		
+		modified_lemmata_view: {
+			
+			"button_0":{
+				"name": "Lemma en paradigma herstellen",
+				"click": function(confTable){
+					
+					fn.confirm("Zeker weten?", "Weet u het zeker? Als de log groot is, kan deze operatie enige tijd kosten.", 
+							function(){
+						
+						var aRowSelection = fn.getSelectedRowsFrom(confTable);
+						
+						aRowSelection.each(function(){
+							
+							var nCurrentNode = this;
+							var sLemmaId = fn.getDataFromCellNamed(confTable, nCurrentNode, "lemma_id");
+							fn.callFunction("restore_lemma_and_paradigm_and_ids", [sLemmaId], null, null, null, null, 
+									function(){
+										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
+											fn.refreshTable(confTable);
+							});
+						});
+					});
+				}
+			}
+		},
 		
 
 		

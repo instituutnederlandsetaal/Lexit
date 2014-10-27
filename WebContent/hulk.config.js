@@ -108,6 +108,14 @@ oTableSettingsList = {
 						);				
 			},
 			
+			"column_order": ["pkid", "hulkable_word_id", "spelling_version_id", 
+			                 "judgement_id", "document_id", "document", "wordform_id", "lemma", 
+			                 "correction",  
+			                 "wv", "en", "afke", "ok", 
+			                 "gloss", "remarks",
+			                 "hulk_oordeel", "uploader_part_of_speech", 
+			                 "uploader_gloss", "name", "verified_date", "added_by_editor"],
+			
 			
 			"button_0":{
 				"name": "Genereer resultaatbestand",
@@ -303,7 +311,7 @@ oTableConfigurationList = {
 							["correction", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], false,
 							function(){fn.refreshTable(t);});
-					if (value == 'NOK')
+					if (value != '')
 						{
 						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);
 						var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
