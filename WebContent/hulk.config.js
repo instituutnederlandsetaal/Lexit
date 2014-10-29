@@ -88,6 +88,8 @@ oTableSettingsList = {
 		
 		hulk_worktable:{
 			
+			"viewtype_button": false,
+			
 			"callback": function(t){
 				buildDocumentSelector(t);
 				showStatistics(t);
@@ -102,7 +104,7 @@ oTableSettingsList = {
 				conf.changeTableConfigValue(fn.getTableName(t), "document", "keepfilter", false);
 				
 				fn.addFilters(t, 
-						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "!^OK"),
+						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "^UNK"),
 						 "document": sDefaultDocumentWaarde
 						 }
 						);				
@@ -177,7 +179,7 @@ oTableSettingsList = {
 				"click": function(t){
 					bToonAlleHulkOordelen = !bToonAlleHulkOordelen;
 					
-					var hulkOordeelToLookFor = bToonAlleHulkOordelen ? "" : "!^OK";
+					var hulkOordeelToLookFor = bToonAlleHulkOordelen ? "" : "^UNK";
 					
 					fn.addFilters(t, {"hulk_oordeel": hulkOordeelToLookFor});
 					fn.putDataIntoFilterBox(t, "hulk_oordeel", hulkOordeelToLookFor);
@@ -274,7 +276,6 @@ oTableSettingsList = {
 
 
 
-
 // configuration at column level
 oTableConfigurationList = {
 		
@@ -298,7 +299,7 @@ oTableConfigurationList = {
 				"visible": false
 				},
 			hulk_oordeel: {
-				"filter": "!^OK", // default start setting				
+				"filter": "^UNK", // default start setting				
 				"sortable": false
 				},
 			correction: {
@@ -307,18 +308,26 @@ oTableConfigurationList = {
 				"bgcolor": "#CECEF6",
 				"textcolor": "blue",
 				"editfunc": function(t, n, value){
-					fn.updateDatabaseGivenANode(t, n, 
-							["correction", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], false,
-							function(){fn.refreshTable(t);});
+
 					if (value != '')
 						{
-						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);
+						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);						
+						
 						var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
 						fn.updateDatabaseGivenFieldValues("judgements", 
 								{"hulkable_word_id": sHulkableWordId}, 
 								{"judgement": "NOK"});
 						}
+					
+					fn.updateDatabaseGivenANode(t, n, 
+							["correction", "name", "verified_date"], 
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
+							false,
+							function(){
+								// we need a time out, otherwise the refresh happens too soon (?!)
+								setTimeout(function(){fn.refreshTable(t);}, 200);
+							});
+					
 				}
 			},
 			uploader_gloss: {
@@ -383,10 +392,20 @@ oTableConfigurationList = {
 				"editable": true,				
 				"bgcolor": "#E0F8E0",
 				"editfunc": function(t, n, value){
-					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);
+					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);					
 					fn.updateDatabaseGivenANode(t, n, 
 							["wv", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
+					// Clicking upon a checkbox must empty the correction box
+					// (as the editor must choose between a text correction OR a checkbox option)
+					// Except of course when the checkbox is being unchecked: a text correction
+					// mustn't be removed than.
+					if (value == true)
+						{
+						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
+						}
+						
 					}
 				},
 			en: {
@@ -398,7 +417,12 @@ oTableConfigurationList = {
 					fn.updateDatabaseGivenANode(t, n, 
 							["en", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
-					
+					// see comment at 'wv'
+					if (value == true)
+						{
+						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
+						}				
 					}
 				},
 			afke: {
@@ -410,6 +434,12 @@ oTableConfigurationList = {
 					fn.updateDatabaseGivenANode(t, n, 
 							["afke", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
+					// see comment at 'wv'
+					if (value == true)
+						{
+						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
+						}
 					}
 				},
 			ok: {
@@ -420,7 +450,13 @@ oTableConfigurationList = {
 					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
 					fn.updateDatabaseGivenANode(t, n, 
 							["ok", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);	
+					// see comment at 'wv'
+					if (value == true)
+						{
+						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
+						}
 					}
 				},
 			name: {
