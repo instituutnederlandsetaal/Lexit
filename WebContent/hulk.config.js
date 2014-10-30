@@ -15,7 +15,16 @@ var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
 // this url will deliver us autocomplete information
 var sAutoCompleteUrl = "http://svowhu02.inl.loc/ws/autocomplete-lemmata/";
 
-fn.setProjectTitle("HulK", "#088A08");
+
+
+// //////////////////////////////////////////////
+//
+// Test servers:
+// for uploaders       http://hulk.ato.inl.nl
+// for administrators  http://svowhu02.inl.loc
+//
+// //////////////////////////////////////////////
+
 
 
 // default document choice
@@ -27,8 +36,13 @@ var sDefaultDocumentWaarde = "even_een_onzin_waarde";
 //          TABLE CONFIGURATION
 // *******************************************
 
+
+// show only one table and hide the others
+// (beware: Lex'it system global variable)
 oShowOnlyTables = ["hulk_worktable"];
 
+
+fn.setProjectTitle("HulK", "#088A08");
 
 
 // Autocomplete configuration
@@ -84,6 +98,7 @@ var bToonAlleHulkOordelen = false;
 
 
 // table general settings
+// (beware: Lex'it system global variable)
 oTableSettingsList = {
 		
 		hulk_worktable:{
@@ -132,7 +147,13 @@ oTableSettingsList = {
 						}
 					else
 						{
+						// make sure we have at least one line in the table, 
+						// otherwise we won't be able to read the document_id!
 						fn.addFilters(t, {"hulk_oordeel": ""});
+						
+						// the show HulK-oordelen button must change accordingly
+						bToonAlleHulkOordelen = true;
+						putRightHulkOordeelButton(t);
 						
 						fn.refreshTable(t, function(){
 							
@@ -277,6 +298,7 @@ oTableSettingsList = {
 
 
 // configuration at column level
+// (beware: Lex'it system global variable)
 oTableConfigurationList = {
 		
 		hulk_worktable: {
@@ -346,7 +368,7 @@ oTableConfigurationList = {
 			lemma: {
 				"textstyle": "oblique",
 				"textcolor": "brown",
-				"sortable": false,
+				//"sortable": false,
 				"colsort": "asc",				// sort #1
 				"click": function(t, n){
 					var sLemma = fn.getDataFromCellNode(t, n);
@@ -619,7 +641,14 @@ function doExport(t){
 		}
 	else
 		{
+		// make sure we have at least one line in the table, 
+		// otherwise we won't be able to read the document_id!
 		fn.addFilters(t, {"hulk_oordeel": ""});
+		
+		// the show HulK-oordelen button must change accordingly
+		bToonAlleHulkOordelen = true;
+		putRightHulkOordeelButton(t);
+		
 		
 		fn.refreshTable(t, function(){
 			

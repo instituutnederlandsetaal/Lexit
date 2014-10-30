@@ -300,7 +300,59 @@ var oAnwParadigma = {
 		                 "source", "verified_by"  ]
 };
 
-var oSurinaamsParadigma = {};
+var oSurinaamsParadigma = {
+		
+		button_0: {
+			
+			"name": "Voeg woordvorm toe voor het geselecteerde lemma",
+			"click": function(t){					
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();					
+				
+				// get all needed data to copy
+				var nSelectedNode = fn.getFirstSelectedRowFrom(t);
+				var sSnLemmaId = fn.getDataFromCellInRowNode(t, nSelectedNode, "sn_lemma_id");
+				var sModernLemma = fn.getDataFromCellInRowNode(t, nSelectedNode, "modern_lemma");				
+				var sLemmaGigpos = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_gigpos");
+				 
+							
+				fn.insertIntoDatabase(t, 
+					{
+					"sn_lemma_id": sSnLemmaId,						
+					"modern_lemma": sModernLemma,					
+					"lemma_gigpos": sLemmaGigpos,
+					"afbr": "-",
+					"wordform": "-",					
+					"wordform_gigpos": "-",
+					
+					"wordform_corr": "-",
+					"verified_by": sUserName,					
+					"opmerkingen": "-"
+					}, 
+					"unique_id", 
+					false, 
+					function(){
+						
+						// make sure the row that has been added gets selected
+						fn.refreshTable(t,
+								function(){
+							
+							var sIdOfInsertedRecord = fn.getLastDbResponse();
+							var nNodeOfAddedRecord = fn.getNodeWhereIdIs(t, sIdOfInsertedRecord);
+							var iIndexOfAddedRecord = fn.getRowNumberOnScreen(t, nNodeOfAddedRecord);									
+							
+							fn.unselectAllRows(t);									
+							kf.setActiveRowNumber(iIndexOfAddedRecord);
+						});
+					});	
+				
+			}
+			
+		},
+		
+		"size": "80%"
+};
 
 oTableSettingsList = {
 		
