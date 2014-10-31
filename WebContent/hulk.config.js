@@ -147,13 +147,18 @@ oTableSettingsList = {
 						}
 					else
 						{
+						
 						// make sure we have at least one line in the table, 
 						// otherwise we won't be able to read the document_id!
-						fn.addFilters(t, {"hulk_oordeel": ""});
+						if (fn.getNumberOfVisibleRows(t) == 0)
+							{							
+							fn.addFilters(t, {"hulk_oordeel": ""});
+							
+							// the show HulK-oordelen button must change accordingly
+							bToonAlleHulkOordelen = true;
+							putRightHulkOordeelButton(t);
+							}
 						
-						// the show HulK-oordelen button must change accordingly
-						bToonAlleHulkOordelen = true;
-						putRightHulkOordeelButton(t);
 						
 						fn.refreshTable(t, function(){
 							
@@ -643,12 +648,14 @@ function doExport(t){
 		{
 		// make sure we have at least one line in the table, 
 		// otherwise we won't be able to read the document_id!
-		fn.addFilters(t, {"hulk_oordeel": ""});
-		
-		// the show HulK-oordelen button must change accordingly
-		bToonAlleHulkOordelen = true;
-		putRightHulkOordeelButton(t);
-		
+		if (fn.getNumberOfVisibleRows(t) == 0)
+			{
+			fn.addFilters(t, {"hulk_oordeel": ""});
+			
+			// the show HulK-oordelen button must change accordingly
+			bToonAlleHulkOordelen = true;
+			putRightHulkOordeelButton(t);
+			}		
 		
 		fn.refreshTable(t, function(){
 			
