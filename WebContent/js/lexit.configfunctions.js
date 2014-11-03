@@ -1985,11 +1985,11 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback){
 		var label = $("<label></label>")
 			.attr("for", fieldLC)
 			.text($.trim(aFieldNames[i]));
-		var input = $("<input></input>")
+		var input = $("<textarea></textarea>")
 			.attr("type", "text")
 			.attr("name", fieldLC)			
 			.attr("id", "prompt_"+fieldLC)
-			.attr("value", aValues!=null ? aValues[i]: ""); // preset the input value, if available
+			.text(aValues!=null ? aValues[i]: ""); // preset the input value, if available
 		promptFieldSet.append(label);
 		promptFieldSet.append($("<br/>"));
 		promptFieldSet.append(input);

@@ -144,7 +144,46 @@ head.showNameOfTheTable = function(sSomeTablename){
 		.text(sNameToShow+":")
 		.css("font-weight", "bold")
 		.css("color", "#A4A4A4")
-		.attr("id", sSomeTablename+"_tablename");
+		.attr("id", sSomeTablename+"_tablename")		
+		.click(function(){
+			
+			var sOldTableComment = mt.getAvailableTableDetails(sSomeTablename)[2];
+			
+			fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], function(){
+				
+				var sNewTableComment = fn.getPromptUserInput("Notities");
+				
+				// update the database
+				var url = "../lexit/lexit/table/setcomment"; 
+				$.ajax( {
+					"type": "GET",
+					"url": url,
+					"data": {
+						"db_name": getHttpParams().get("db"),
+						"table_name": sSomeTablename,
+						"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
+						"new_comment": sNewTableComment,
+						"dummy": getUniqueNumber()
+						},
+				 	"dataType": "xml", // get response as xml
+				 	"success": function(xml) {
+				 		fn.message("Gelukt!", "De notitie is toegevoegd.");
+				 		
+				 		// update table details
+				 		var aTableDetails = mt.getAvailableTableDetails(sSomeTablename);
+				 		aTableDetails = [aTableDetails[0], aTableDetails[1], sNewTableComment];
+				 		mt.addAvailableTableDetails(sSomeTablename, aTableDetails);
+
+				 		},
+					"error": function(jqXHR, textStatus, errorThrown){
+						fn.refreshTable(sSomeTablename);
+						fn.message("Fout bij het instellen van een notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
+							textStatus+" "+errorThrown);
+						}
+					} );
+			});
+		});
+	
 	$("#"+sSomeTablename+"_info").before(
 			$("<div></div>")
 			.attr("id", sSomeTablename+"_table_name")

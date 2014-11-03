@@ -100,6 +100,17 @@ var hbSelectionAllowed = new Hashtable();
 
 
 
+// details of all available tables
+// this consists of description, type (table/view), comment
+var haAvailableTableDetails = new Hashtable();
+
+mt.addAvailableTableDetails = function(sTableName, aDetails){
+	haAvailableTableDetails.put(sTableName, aDetails);
+};
+
+mt.getAvailableTableDetails = function(sTableName){
+	return haAvailableTableDetails.get(sTableName);
+};
 
 
 

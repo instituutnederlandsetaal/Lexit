@@ -277,6 +277,36 @@ public class TableResources extends Application  {
 	
 	
 	
+	// .../lexit/lexit/table/setcomment
+
+	@Path("setcomment")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject setComment(
+			@Context SecurityContext sc,
+			@QueryParam("table_name") String tableName,
+			@QueryParam("new_comment") String newComment,
+			@QueryParam("table_type") String tableType,
+			@QueryParam("db_name") String dbName
+			){
+		
+		tableName = tableName.replaceAll("__", ".");
+		if (Constants.debug) System.out.println("### SetComment for "+tableName);
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		DbResponseObject dro = new DbResponseObject(); 
+		
+		getDatabaseObject(dbName).updateComment(getDbName(dbName), tableName, tableType, newComment, dro);
+				
+		
+		return dro;
+	}
+	
+	
+	
 	// .../lexit/lexit/table/get_id_of_record
 	// get the id of a row, given some values to match in records
 	@Path("get_id_of_record")

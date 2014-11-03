@@ -916,6 +916,43 @@ public class Database {
 		}
 	}
 	
+	
+	// update the comment of a table
+	// like:
+	// COMMENT ON TABLE mytable IS 'This is my table.';
+	public void updateComment(String dbName, String tableName, String tableType,
+			String newComment, DbResponseObject dro){
+		
+		// remove suspicious sql
+		newComment = Util.removeSuspiciousSql( new String[]{newComment} )[0];
+		
+		String schema = getSchema(dbName, tableName);
+		
+		PostgresDatabaseCommunication dc = connectDatabase(dbName);	
+		
+		String setComment = 
+			"COMMENT ON " + tableType +" "+ 
+			getSafeTableName(tableName, schema) + " " +
+			" IS '" + newComment.replace("'", "''") + // single quote espace is quote doubling
+			"';";
+		
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			
+			dc.sendUpdate(setComment);
+		}
+		catch (Exception e) {
+			dro.setResponse("Error while executing query "+setComment);
+			throw new RuntimeException("Error while executing query "+setComment, e);
+		}
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+	}
+	
 	/**
 	 * Update one or more columns in one single record of a table
 	 * @param tableName

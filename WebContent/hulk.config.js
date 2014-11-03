@@ -335,26 +335,36 @@ oTableConfigurationList = {
 				"bgcolor": "#CECEF6",
 				"textcolor": "blue",
 				"editfunc": function(t, n, value){
+					
+					var updateFunc = function(){
+						fn.updateDatabaseGivenANode(t, n, 
+								["correction", "name", "verified_date"], 
+								[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
+								false,
+								function(){
+									fn.refreshTable(t);
+								});
+					};
 
 					if (value != '')
 						{
-						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"]);						
-						
-						var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
-						fn.updateDatabaseGivenFieldValues("judgements", 
-								{"hulkable_word_id": sHulkableWordId}, 
-								{"judgement": "NOK"});
-						}
-					
-					fn.updateDatabaseGivenANode(t, n, 
-							["correction", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
-							false,
+						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"],
 							function(){
-								// we need a time out, otherwise the refresh happens too soon (?!)
-								setTimeout(function(){fn.refreshTable(t);}, 200);
-							});
-					
+							
+							var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
+							fn.updateDatabaseGivenFieldValues("judgements", 
+									{"hulkable_word_id": sHulkableWordId}, 
+									{"judgement": "NOK"}, false,
+									function(){
+										updateFunc();
+										});
+							});				
+						
+						}
+					else
+						{
+						updateFunc();
+						}
 				}
 			},
 			uploader_gloss: {
@@ -427,6 +437,7 @@ oTableConfigurationList = {
 					// (as the editor must choose between a text correction OR a checkbox option)
 					// Except of course when the checkbox is being unchecked: a text correction
 					// mustn't be removed than.
+					
 					if (value == true)
 						{
 						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
@@ -445,6 +456,7 @@ oTableConfigurationList = {
 							["en", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					// see comment at 'wv'
+					
 					if (value == true)
 						{
 						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
@@ -462,6 +474,7 @@ oTableConfigurationList = {
 							["afke", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
 					// see comment at 'wv'
+					
 					if (value == true)
 						{
 						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
@@ -479,6 +492,7 @@ oTableConfigurationList = {
 							["ok", "name", "verified_date"], 
 							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);	
 					// see comment at 'wv'
+					
 					if (value == true)
 						{
 						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);

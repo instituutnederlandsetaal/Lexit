@@ -163,6 +163,9 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 					.attr("title", asTableComments[i])
 			);
 		
+		mt.addAvailableTableDetails(asTableNames[i], 
+				[ asTableDescriptions[i], asTableTypes[i], asTableComments[i] ]);
+		
 		}
 	
 	formTagToAdd.append(selectTagToAdd);
