@@ -917,9 +917,16 @@ public class Database {
 	}
 	
 	
-	// update the comment of a table
-	// like:
-	// COMMENT ON TABLE mytable IS 'This is my table.';
+	/**
+	 * update the comment of a table
+	 * like:
+	 * COMMENT ON TABLE mytable IS 'This is my table.';
+	 * @param dbName
+	 * @param tableName
+	 * @param tableType
+	 * @param newComment
+	 * @param dro
+	 */
 	public void updateComment(String dbName, String tableName, String tableType,
 			String newComment, DbResponseObject dro){
 		
@@ -952,6 +959,67 @@ public class Database {
 		}
 		
 	}
+	
+	
+	/**
+	 * getComment
+	 * Get the comment on a table
+	 * @param dbName
+	 * @param tableName
+	 * @param tableType
+	 * @return
+	 */
+	public  String getComment(String dbName, String tableName, String tableType){
+		
+		String sTableComment = "";
+		String schema = getSchema(dbName, tableName);				
+		
+		ArrayList<String[]> res;
+		
+		// set arguments
+		String[] args = new String[]{schema, tableName};	
+		
+		String getIdQuery = 
+			"SELECT n.nspname AS \"schema\", "+
+			"c.relname AS \"table\", "+
+			"obj_description(c.oid, 'pg_class') AS \"comment\" "+
+			"FROM pg_catalog.pg_class c "+
+			"FULL JOIN pg_catalog.pg_index i ON i.indexrelid = c.oid "+
+			"FULL JOIN pg_catalog.pg_class c2 ON i.indrelid = c2.oid "+
+			"FULL JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "+
+			"WHERE (c.relkind = 'r' OR c.relkind = 'v') "+
+			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "+
+			"AND n.nspname != 'information_schema' "+
+			"AND n.nspname = ? " + // schema
+			"AND c.relname = ? " + // table
+			"ORDER BY 1,2;";	
+		
+		
+		PostgresDatabaseCommunication dc = connectDatabase(dbName);
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			
+			ResultSet rs = dc.sendPreparedQuery(getIdQuery, args);
+			
+			res = getResultsInAList(rs, new String[]{"comment"});
+			if (res.size()>0)
+				sTableComment = res.get(0)[0];
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getIdQuery, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+		return sTableComment;	
+	}
+	
+	
+	
+	
 	
 	/**
 	 * Update one or more columns in one single record of a table

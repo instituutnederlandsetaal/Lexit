@@ -152,7 +152,10 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 		var oTableSettings = conf.getTableSettings(asTableNames[i]);
 		var sNiceName = conf.getNiceName(oTableSettings);
 		if (sNiceName != null)
-			asTableDescriptions[i] = sNiceName;		
+			asTableDescriptions[i] = sNiceName;
+		
+		// outside home environment, showing table comments is not allowed
+		var bShowTableComments = ( (document.URL).indexOf( INL_HOMEURL )>-1 );
 		
 		// append visible table names
 		selectTagToAdd.append(
@@ -160,7 +163,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 					.attr("value", asTableNames[i] )
 					.text( asTableDescriptions[i] )	
 					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
-					.attr("title", asTableComments[i])
+					.attr("title", bShowTableComments ? asTableComments[i] : "")
 			);
 		
 		mt.addAvailableTableDetails(asTableNames[i], 

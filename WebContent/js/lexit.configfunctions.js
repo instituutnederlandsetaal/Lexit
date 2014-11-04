@@ -1964,7 +1964,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction){
 // Generate a prompt pop-up, requesting some input from the user
 // The output can be retrieved by using fn.getPromptUserInput()
 
-fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback){
+fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, aColsAndRows){
 	
 	fn._clearUserInput();
 	
@@ -1987,9 +1987,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback){
 			.text($.trim(aFieldNames[i]));
 		var input = $("<textarea></textarea>")
 			.attr("type", "text")
-			.attr("name", fieldLC)			
+			.attr("name", fieldLC)
 			.attr("id", "prompt_"+fieldLC)
 			.text(aValues!=null ? aValues[i]: ""); // preset the input value, if available
+		
+		// if cols and rows are given, set them!
+		if (aColsAndRows!= null && aColsAndRows.length ==2)
+			{
+			input.attr("cols", aColsAndRows[0]);
+			input.attr("rows", aColsAndRows[1]);
+			}
+		
 		promptFieldSet.append(label);
 		promptFieldSet.append($("<br/>"));
 		promptFieldSet.append(input);

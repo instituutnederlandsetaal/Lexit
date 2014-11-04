@@ -278,7 +278,7 @@ public class TableResources extends Application  {
 	
 	
 	// .../lexit/lexit/table/setcomment
-
+	// set the comment of a table or view
 	@Path("setcomment")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -291,7 +291,7 @@ public class TableResources extends Application  {
 			){
 		
 		tableName = tableName.replaceAll("__", ".");
-		if (Constants.debug) System.out.println("### SetComment for "+tableName);
+		if (Constants.debug) System.out.println("### Set comment for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
@@ -301,6 +301,35 @@ public class TableResources extends Application  {
 		
 		getDatabaseObject(dbName).updateComment(getDbName(dbName), tableName, tableType, newComment, dro);
 				
+		
+		return dro;
+	}
+	
+	
+	// .../lexit/lexit/table/get_comment
+	// get the comment of a table or view
+	@Path("get_comment")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject getComment(
+			@Context SecurityContext sc,
+			@QueryParam("table_name") String tableName,
+			@QueryParam("table_type") String tableType,
+			@QueryParam("db_name") String dbName
+			){
+		
+		tableName = tableName.replaceAll("__", ".");
+		if (Constants.debug) System.out.println("### Get comment on "+tableName);
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		DbResponseObject dro = new DbResponseObject(); 
+		
+		// put id of record in response object
+		String comment = getDatabaseObject(dbName).getComment(dbName, tableName, tableType);
+		dro.setResponse(comment);
 		
 		return dro;
 	}

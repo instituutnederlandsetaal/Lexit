@@ -147,41 +147,71 @@ head.showNameOfTheTable = function(sSomeTablename){
 		.attr("id", sSomeTablename+"_tablename")		
 		.click(function(){
 			
-			var sOldTableComment = mt.getAvailableTableDetails(sSomeTablename)[2];
-			
-			fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], function(){
+			// clicking on the table name gives the possibility to
+			// add notes or comments to a table
+
+			// keep this list private to internal environment
+			if ( (document.URL).indexOf( INL_HOMEURL )>-1 )
+				{
 				
-				var sNewTableComment = fn.getPromptUserInput("Notities");
-				
-				// update the database
-				var url = "../lexit/lexit/table/setcomment"; 
 				$.ajax( {
 					"type": "GET",
-					"url": url,
+					"url": "../lexit/lexit/table/get_comment",
 					"data": {
-						"db_name": getHttpParams().get("db"),
+						"db_name": getHttpParams().get("db"),						
 						"table_name": sSomeTablename,
-						"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
-						"new_comment": sNewTableComment,
+						"table_type": mt.getAvailableTableDetails(sSomeTablename)[1],
 						"dummy": getUniqueNumber()
 						},
 				 	"dataType": "xml", // get response as xml
 				 	"success": function(xml) {
-				 		fn.message("Gelukt!", "De notitie is toegevoegd.");
-				 		
-				 		// update table details
-				 		var aTableDetails = mt.getAvailableTableDetails(sSomeTablename);
-				 		aTableDetails = [aTableDetails[0], aTableDetails[1], sNewTableComment];
-				 		mt.addAvailableTableDetails(sSomeTablename, aTableDetails);
 
+				 		var sOldTableComment = fn.getDbResponse(xml);
+				 		
+				 		fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], function(){
+							
+							var sNewTableComment = fn.getPromptUserInput("Notities");
+							
+							// update the database							 
+							$.ajax( {
+								"type": "GET",
+								"url": "../lexit/lexit/table/setcomment",
+								"data": {
+									"db_name": getHttpParams().get("db"),
+									"table_name": sSomeTablename,
+									"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
+									"new_comment": sNewTableComment,
+									"dummy": getUniqueNumber()
+									},
+							 	"dataType": "xml", // get response as xml
+							 	"success": function(xml) {
+							 		fn.message("Gelukt!", "De notitie is toegevoegd.");
+							 		
+							 		// update table details
+							 		var aTableDetails = mt.getAvailableTableDetails(sSomeTablename);
+							 		aTableDetails = [aTableDetails[0], aTableDetails[1], sNewTableComment];
+							 		mt.addAvailableTableDetails(sSomeTablename, aTableDetails);
+
+							 		},
+								"error": function(jqXHR, textStatus, errorThrown){
+									fn.refreshTable(sSomeTablename);
+									fn.message("Fout bij het instellen van een notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
+										textStatus+" "+errorThrown);
+									}
+								} );
+				 			},
+				 			[35,7]); // set minimal size of prompt
+				 		
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
-						fn.refreshTable(sSomeTablename);
-						fn.message("Fout bij het instellen van een notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
+						fn.message("Fout bij het opvragen van de notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
 							textStatus+" "+errorThrown);
 						}
 					} );
-			});
+				
+				}
+			
+			
 		});
 	
 	$("#"+sSomeTablename+"_info").before(
