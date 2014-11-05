@@ -373,6 +373,9 @@ oTableConfigurationList = {
 			"opmerking": {				
 				"editable": true
 			},
+			"notitie": {				
+				"editable": true
+			},
 			"opmerking_intern": {
 				// BEWARE, DON'T REMOVE THIS PART
 				// ------------------------------
@@ -383,6 +386,9 @@ oTableConfigurationList = {
 			},
 			"gloss": {				
 				"editable": true				
+			},
+			"kapstok": {				
+				"editable": true
 			},
 			"lemma_gigpos": {				
 				"editable": true				

@@ -513,8 +513,13 @@ public class Database {
 		{
 			for (int i=0; i<argumentTypes.length; i++)
 			{
-			if (argumentTypes[i].equals("text") && !(args[i].startsWith("'") && args[i].endsWith("'")) )
-				args[i] = "'"+args[i]+"'";
+			if (argumentTypes[i].equals("text") 
+					&& !(args[i].startsWith("'") && args[i].endsWith("'")) )
+				{
+				args[i] = "'" +				
+				(args[i]).replace("'", "''") // escape quote in strings like in "zzp'er" 
+				+ "'";
+				}
 			}
 		}
 		

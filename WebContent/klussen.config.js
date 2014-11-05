@@ -407,7 +407,168 @@ var oParadigmaUitbreidingOkt2014Settings = {
 
 var oAnwParadigma = {
 	
-		"column_order": ["unique_id", "lemma_id", "modern_lemma", "afbr", "lemma_gigpos", 
+		button_0: {
+			
+			"name": "Voeg lemma toe (kopieer geselecteerde vorm)",
+			"bgcolor": "green",
+			"click": function(t){					
+				
+				var sCurrentTableName = kf.getActiveTable();
+				fn.callFunction("get_max_lemma_id_of_table", [sCurrentTableName], 
+						null, null, null, null,
+						
+						function(){
+					
+							// We need a high new id for the new lemma (to make sure we won't overwrite old lemmata
+							//  when loading the job back into gigant_molex)
+							// We need to define a different minimal value for the three tables using this function 
+							// otherwise we'll have three series of overlapping lemma_id's
+					
+							var aMinValues = {
+									'anw_paradigma_verbs': 500000,									
+									'anw_paradigma_rest':  520000,
+									'anw_paradigma_nouns': 510000
+									};
+					
+							var iMinValueForCurrentTable = aMinValues[sCurrentTableName];
+							
+							// Malfunction? 
+							// (we need to have a correct table identified, otherwise we'll get 
+							//  a wrong lemma_id!)
+							
+							if ( // paranoid #1
+									typeof aMinValues[sCurrentTableName] == 'undefined'
+										
+									||
+									
+								 // paranoid #2
+								 // make sure the active table was correctly set right from the beginning
+								 // (with JS you never know with latency)
+									kf.getActiveTable() != sCurrentTableName) 
+								{
+								fn.message("FOUT!", "De actieve table is verkeerde geïdentificeerd ["+sCurrentTableName+"]");
+								}
+							
+							
+							// Everything goes well 
+							else
+								{
+								var iNewLemmaId = parseInt(fn.getFunctionOutput()[0]);
+								
+								//console.log(sCurrentTableName);
+								//console.log(iNewLemmaId);
+								//console.log(aMinValues[sCurrentTableName]);
+								
+								// Now make sure we'll get a correct new lemma_id
+								
+								// 1. Take care of minimal value requirement
+								if (iNewLemmaId < aMinValues[sCurrentTableName])
+									iNewLemmaId = aMinValues[sCurrentTableName];
+								// 2. And increase by one, as we need a new lemma_id!
+								iNewLemmaId = iNewLemmaId + 1;
+								
+								//console.log(iNewLemmaId);
+								
+								// log the user 
+								var sUserName = fn.getCurrentUser();				
+								
+								// get all needed data to copy
+								var nSelectedNode = fn.getFirstSelectedRowFrom(t);
+								var sModernLemma = fn.getDataFromCellInRowNode(t, nSelectedNode, "modern_lemma");				
+								var sLemmaGigpos = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_gigpos");
+								 
+											
+								fn.insertIntoDatabase(t, 
+									{
+									"lemma_id": iNewLemmaId,						
+									"modern_lemma": sModernLemma,					
+									"lemma_gigpos_corr": sLemmaGigpos, // the gigpos is copied to correction field as this is a new lemma!
+									"wordform": "-",
+									"wordform_corr": "-",
+									"wordform_gigpos": "-",
+									"verified_by": sUserName,					
+									"opmerkingen": "-",
+									"source": "ANW_PARADIGMAKLUS_ADDED_BY_"+sUserName
+									}, 
+									"unique_id", 
+									false, 
+									function(){
+										
+										// make sure the row that has been added gets selected
+										fn.refreshTable(t,
+												function(){
+											
+											var sIdOfInsertedRecord = fn.getLastDbResponse();
+											var nNodeOfAddedRecord = fn.getNodeWhereIdIs(t, sIdOfInsertedRecord);
+											var iIndexOfAddedRecord = fn.getRowNumberOnScreen(t, nNodeOfAddedRecord);									
+											
+											fn.unselectAllRows(t);									
+											kf.setActiveRowNumber(iIndexOfAddedRecord);
+										});
+									});	
+								
+								}						
+							
+							
+				});
+				
+			}
+			
+		},
+		
+		button_1: {
+			
+			"name": "Voeg woordvorm toe voor het geselecteerde lemma",
+			"click": function(t){					
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();					
+				
+				// get all needed data to copy
+				var nSelectedNode = fn.getFirstSelectedRowFrom(t);
+				var sLemmaId = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_id");
+				var sModernLemma = fn.getDataFromCellInRowNode(t, nSelectedNode, "modern_lemma");				
+				var sLemmaGigpos = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_gigpos");
+				var sLemmaGigposCorr = fn.getDataFromCellInRowNode(t, nSelectedNode, "lemma_gigpos_corr");
+				 
+							
+				fn.insertIntoDatabase(t, 
+					{
+					"lemma_id": sLemmaId,						
+					"modern_lemma": sModernLemma,					
+					"lemma_gigpos": sLemmaGigpos,
+					"afbr": "-", // filled only for lemmata
+					"lemma_gigpos_corr": sLemmaGigposCorr,
+					"wordform": "-",
+					"wordform_corr": "-",
+					"wordform_gigpos": "-",
+					"verified_by": sUserName,					
+					"opmerkingen": "-",
+					"source": "ANW_PARADIGMAKLUS_ADDED_BY_"+sUserName
+					}, 
+					"unique_id", 
+					false, 
+					function(){
+						
+						// make sure the row that has been added gets selected
+						fn.refreshTable(t,
+								function(){
+							
+							var sIdOfInsertedRecord = fn.getLastDbResponse();
+							var nNodeOfAddedRecord = fn.getNodeWhereIdIs(t, sIdOfInsertedRecord);
+							var iIndexOfAddedRecord = fn.getRowNumberOnScreen(t, nNodeOfAddedRecord);									
+							
+							fn.unselectAllRows(t);									
+							kf.setActiveRowNumber(iIndexOfAddedRecord);
+						});
+					});	
+				
+			}
+			
+		},
+		
+		"column_order": ["unique_id", "lemma_id", "modern_lemma", "afbr", "lemma_gigpos",
+		                 "lemma_gigpos_corr",
 		                 "rank", "wordform", "wordform_corr", "wordform_gigpos", "opmerkingen", "verwijderen", 
 		                 "source", "verified_by"  ]
 };
@@ -1103,6 +1264,18 @@ var oAnwParadigmaWorkTableConfig = {
 
 		"lemma_gigpos": {
 			"colsort": "asc" // [sort field #2]
+		},
+		
+		"lemma_gigpos_corr":{
+			"bgcolor": "#E0F8EC",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				
+				// log the user 
+				var sUserName = fn.getCurrentUser();
+				fn.updateDatabaseGivenANode(t, n, ["verified_by"], [sUserName]);
+				
+			}
 		},
 		  
 		"wordform_gigpos": {
