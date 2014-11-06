@@ -1,17 +1,206 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
+oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 
 
 
 fn.setProjectTitle("GigantMolex SURINAAMS");
 
 
+//remember chosen parent
+
+var sChosenParentId = null;
 
 // table general settings
 oTableSettingsList = {
 		
-		
+lemmata_view: {
+			
+			"prereset_callback": function(confTable){
+				
+				fn.addFilters(confTable, {"homo": ""});
+				
+				sChosenParentId = null;
+				fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+				
+			},
+	
+			"keyup" : {
+				
+				
+				"f9": function(confTable){
+					
+					var nNode = fn.getFirstSelectedRowFrom(confTable);
+					var sLemmaId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
+					fn.callDatabase("paradigma_view", {"lemma_id": sLemmaId});
+				}
+			},
+			
+			"size": "90%",
+			"button_0":{
+				"name": "Voeg lemma toe",
+				"click": function(confTable){
+					
+					var wordform = fn.prompt("Geef een lemma", 
+							["modern_lemma", "lemma_gigpos"], 
+							["", ""], 
+							function(){
+						
+						var sLemma = fn.getPromptUserInput("modern_lemma");
+						var sLemmaPos = fn.getPromptUserInput("lemma_gigpos");
+						
+						fn.callFunction("insert_lemma", 
+								[sLemma, sLemmaPos], 
+								null, null, null, null, function(){
+							fn.refreshTable(confTable);
+						});
+					});
+				}
+			},
+			"button_1":{
+				"name": "Verwijder selectie",
+				"click": function(confTable){
+					
+					var answer = confirm("Weet u het zeker?");
+					
+					if (answer){
+						
+						var aRows = fn.getSelectedRowsFrom(confTable);
+						aRows.each(function(){
+							
+							var bLastRow = fn.isLastNodeOf(this, aRows);
+							var sLemmaId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							
+							fn.removeFromDatabaseGivenFieldValues("lemmata", 
+									{"lemma_id": sLemmaId}, 
+									false,
+									function(){
+										if (bLastRow) fn.refreshTable(confTable);
+									});
+							
+						});
+					}
+					
+				}
+			},
+			"button_2":{
+				"name": "Gekozen ouder:",
+				"bgcolor":"yellow",
+				"textcolor": "red",
+				"click": function(confTable){
+					
+					var nNode = fn.getFirstSelectedRowFrom(confTable);
+					
+					if (nNode != null)
+						{
+						// remember chosen parent, and show it on the screen
+						var sLemId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
+						var sLemma = fn.getDataFromCellNamed(confTable, nNode, "modern_lemma");
+						
+						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:<b>"+sLemma+"</b>");
+						sChosenParentId = sLemId;
+						}
+
+				}
+			},
+			"button_3":{
+				"name": "Link ouder & kind",
+				"bgcolor":"red",
+				"textcolor": "yellow",
+				"click": function(confTable){
+					
+					if (sChosenParentId != null)
+						{
+						var oNodes = fn.getSelectedRowsFrom(confTable);
+						if (oNodes != null)
+							{
+							
+							oNodes.each(function(){
+								
+								var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
+								var bLastNode = fn.isLastNodeOf(this, oNodes);
+								fn.updateDatabaseGivenFieldValues("lemmata", 
+										{"lemma_id": sLemId}, 
+										{"parent_id": sChosenParentId}, 
+										false,
+										function(){
+											if (bLastNode)
+												{
+												fn.refreshTable(confTable);
+												// reset: no chosen parent
+												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+												sChosenParentId = null;
+												}
+										});
+							});
+							
+							
+							}
+						else
+							{
+							alert("Kies een of meerdere sublemmata!");
+							}
+						
+						
+						}
+					else
+						{
+						alert("Kies eerst een parent lemma!");
+						}
+				}
+			},
+			"button_4": {
+				
+				"name": "Unlink ouder",
+				"bgcolor":"red",
+				"textcolor": "yellow",
+				"click": function(confTable){
+					
+					var oNodes = fn.getSelectedRowsFrom(confTable);
+					if (oNodes != null)
+						{
+						oNodes.each(function(){
+							var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							var bLastNode = fn.isLastNodeOf(this, oNodes);
+							fn.updateDatabaseGivenFieldValues("lemmata", 
+									{"lemma_id": sLemId}, 
+									{"parent_id": 0}, 
+									false,
+									function(){
+										if (bLastNode)
+											{
+											fn.refreshTable(confTable);
+											// reset: no chosen parent
+											fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+											sChosenParentId = null;
+											}
+									});
+							});
+						}
+					else
+						{
+						alert("Kies een of meerdere sublemmata!");
+						}
+					
+					
+				}
+			},
+			"button_5": {
+			
+				"name": "Homo's only",
+				"bgcolor":"green",
+				"textcolor": "white",
+				"click": function(confTable){
+					
+					fn.addFilters(confTable, {"homo": true});
+					fn.refreshTable(confTable);
+					//fn.callDatabase(confTable, {"homo": true});
+					
+				}
+				
+			}
+			
+		}
 	
 		
 };
@@ -230,6 +419,117 @@ oTableConfigurationList = {
 			
 			"rang":{			
 				"colsort": "asc",
+				"visible": false
+			}
+			
+		},
+		
+		lemmata_en_paradigma_view: {
+			
+			
+			"analyzed_wordform_id":{				
+				"visible": false
+			},
+			
+			"modern_lemma": {				
+				"colsort": "asc"				
+			},
+			"th_lemma": {
+				"visible": false
+			},
+			"keurmerk": {
+				"visible": false,
+				"flexible_visibility": false
+			},
+			"sublemma_type": {		
+				"visible": false // ?
+			},
+			"opmerking": {
+				"visible": false
+			},
+			"gloss": {				
+			},
+			"lemma_gigpos": {				
+			},	
+			"gb_id":{				
+				"visible": false
+			},
+			"gb_wrdcat": {
+				"visible": false // ?
+			},
+			"gb_znwlid": {
+				"visible": false // ?
+			},
+			"lidw": {
+				"visible": false
+			},
+			"geslacht": {
+				"visible": false
+			},			
+	
+			
+			"trademark": {
+				"visible": false
+			},
+			"gedrukt":{
+				"editable": true
+			},
+			
+			"lemma_id":{				
+				"visible": false
+			},
+			"wordform_id":{				
+				"visible": false
+			},
+			"wordform":{	
+			},
+
+			"wordform_afbr":{				
+				
+			},
+			"th_wordform": {				
+				"visible": false				
+			},
+			"th_wordform_afbr": {				
+				"visible": false				
+			},
+			"wordform_gigpos":{				
+				
+			},
+
+			"comment": {
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+					// if we have an awf-id
+					// update this 'view' but also the analyzed_wordforms table
+					if (sAwfId != null && sAwfId != '')
+						fn.updateDatabaseGivenFieldValues(t, 
+								{"analyzed_wordform_id": sAwfId}, 
+								{"comment": value}, 
+								false, 
+								function(){
+									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+											{"analyzed_wordform_id": sAwfId}, 
+											{"comment": value});
+									fn.refreshTable(t);
+									});
+					else
+						fn.refreshTable(t);
+				}
+			},
+			
+			"rang":{			
+				"colsort": "asc",
+				"visible": false
+			},
+			"autom_wf":{
+				"visible": false
+			},
+			"wordform_source":{
 				"visible": false
 			}
 			
