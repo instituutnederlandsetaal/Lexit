@@ -1949,12 +1949,11 @@ fn.confirm = function(sTitle, sMessage, fnFunction){
 			Ok: function() {
 				$( this ).dialog( "close" );
 				$( this ).remove();
-				fnFunction( true );
+				fnFunction();
 				},
 			Cancel: function() {
 				$( this ).dialog( "close" );
 				$( this ).remove();
-				fnFunction( false );
 				}
 		}
 	});
@@ -1964,7 +1963,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction){
 // Generate a prompt pop-up, requesting some input from the user
 // The output can be retrieved by using fn.getPromptUserInput()
 
-fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, aColsAndRows){
+fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
 	
@@ -1985,17 +1984,20 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, aColsAndRows){
 		var label = $("<label></label>")
 			.attr("for", fieldLC)
 			.text($.trim(aFieldNames[i]));
-		var input = $("<textarea></textarea>")
-			.attr("type", "text")
+		
+		var sInputType = bTextarea ? "textarea" : "input";
+		var input = $("<"+sInputType+"></"+sInputType+">")
+			.attr("type", "text" )
 			.attr("name", fieldLC)
 			.attr("id", "prompt_"+fieldLC)
 			.text(aValues!=null ? aValues[i]: ""); // preset the input value, if available
 		
 		// if cols and rows are given, set them!
-		if (aColsAndRows!= null && aColsAndRows.length ==2)
+		if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)
 			{
 			input.attr("cols", aColsAndRows[0]);
 			input.attr("rows", aColsAndRows[1]);
+			input.css("overflow", "hidden");
 			}
 		
 		promptFieldSet.append(label);

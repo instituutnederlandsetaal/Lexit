@@ -942,11 +942,15 @@ public class Database {
 		
 		PostgresDatabaseCommunication dc = connectDatabase(dbName);	
 		
+		// single quote escape is quote doubling 
+		newComment = newComment.replace("'", "''");
+		// backslash escape is backslash doubling 
+		newComment = newComment.replace("\\", "\\\\");
+		
 		String setComment = 
-			"COMMENT ON " + tableType +" "+ 
+			"COMMENT ON " + tableType + " " + 
 			getSafeTableName(tableName, schema) + " " +
-			" IS '" + newComment.replace("'", "''") + // single quote espace is quote doubling
-			"';";
+			" IS '" + newComment + "';";
 		
 		
 		try {

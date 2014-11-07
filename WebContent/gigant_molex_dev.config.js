@@ -257,8 +257,7 @@ oTableConfigurationList = {
 			"th_lemma": {			
 			},
 			"keurmerk": {				
-				"visible": false,
-				"flexible_visibility": false
+
 			},
 			"sublemma_type": {				
 			},
@@ -338,8 +337,7 @@ oTableConfigurationList = {
 				
 			},
 			"keurmerk":{				
-				"visible": false,
-				"flexible_visibility": false
+				
 			},
 			"comment": {
 				

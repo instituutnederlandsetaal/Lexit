@@ -200,7 +200,10 @@ head.showNameOfTheTable = function(sSomeTablename){
 									}
 								} );
 				 			},
-				 			[35,7]); // set minimal size of prompt
+				 			true,  // textarea
+				 			[35,7] // set minimal size of prompt
+				 			
+				 		);
 				 		
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){

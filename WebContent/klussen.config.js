@@ -6,6 +6,8 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "anw_paradigma_nouns",
                    "anw_paradigma_rest",
                    
+                   "molex_zonder_keurmerk",
+                   
                    "lexiconexport1", 
                    "lexiconexport2", 
                    "lexiconexport3", 
@@ -36,6 +38,7 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "paradigmauitbr_surinaams_nouns",
                    "paradigmauitbr_surinaams_rest",
                    
+                   "verkleinwoorden_correctie",
                    
                    "non_homonyms_worktable_verbs", 
                    "non_homonyms_worktable_nouns", 
@@ -628,6 +631,16 @@ var oSurinaamsParadigma = {
 };
 
 oTableSettingsList = {
+		
+		molex_zonder_keurmerk: {
+			
+			"size": "60%"
+		},
+		
+		verkleinwoorden_correctie: {
+			
+			"size": "45%"
+		},
 		
 		paradigmauitbr_surinaams_verbs: oSurinaamsParadigma,
         paradigmauitbr_surinaams_nouns: oSurinaamsParadigma,
@@ -1448,6 +1461,55 @@ var oSurinaamsParadigmaConfig = {
 };
 
 oTableConfigurationList = {
+		
+		verkleinwoorden_correctie: {
+			
+			lemma_id: {},
+			modern_lemma: {},
+			frank_code: {
+				"visible": false
+			},
+			verkleinwoord: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			opmerkingen:{
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			}
+		},
+		
+		molex_zonder_keurmerk: {
+			
+			lemma_id: {
+				
+			},
+			modern_lemma: {
+				"colsort": "asc",
+				"click": function(t, n){
+					
+					var sLemma = fn.getDataFromCellNode(t, n);
+					fn.putDataIntoCell(t, fn.getRowNode(n), "lemma_correctie", sLemma);
+				}
+			},
+			lemma_gigpos: {
+				
+			},
+			keurmerk:{
+				"visible": false
+			},
+			source:{
+				"visible": false
+			},
+			lemma_correctie: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			hulk_oordeel: {
+				
+			}
+			
+		},
 		
 		paradigmauitbr_surinaams_verbs: oSurinaamsParadigmaConfig,
         paradigmauitbr_surinaams_nouns: oSurinaamsParadigmaConfig,

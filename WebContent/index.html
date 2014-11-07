@@ -148,7 +148,7 @@
 	// Name of user that has logged in. This is set by fn.setCurrentUser() at initialization
 	var USERNAME = null; 
 	// INL Home url
-	var INL_HOMEURL = "gtb.dev.inl.loc";
+	var INL_HOMEURL = "localhost"; //"gtb.dev.inl.loc";
 	
 	
 	$(document).ready(function() {	
@@ -164,6 +164,11 @@
 		
 		// set current user name
 		fn.setCurrentUser();
+		
+		if (INL_HOMEURL != "gtb.dev.inl.loc")
+			{
+			fn.message("Waarschuwing", "Als HOME-URL is nu ingesteld: "+INL_HOMEURL);
+			}
 		
 		// generate unique id for this page
 		// we will need this to detect page focus/blur in a reliable way
