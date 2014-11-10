@@ -950,7 +950,7 @@ public class Database {
 		String setComment = 
 			"COMMENT ON " + tableType + " " + 
 			getSafeTableName(tableName, schema) + " " +
-			" IS '" + newComment + "';";
+			" IS E'" + newComment + "';";
 		
 		
 		try {
@@ -1013,7 +1013,9 @@ public class Database {
 			
 			res = getResultsInAList(rs, new String[]{"comment"});
 			if (res.size()>0)
-				sTableComment = res.get(0)[0];
+				{
+				sTableComment = res.get(0)[0];				
+				}
 			
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getIdQuery, e);

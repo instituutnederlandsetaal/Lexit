@@ -1997,7 +1997,6 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
 			{
 			input.attr("cols", aColsAndRows[0]);
 			input.attr("rows", aColsAndRows[1]);
-			input.css("overflow", "hidden");
 			}
 		
 		promptFieldSet.append(label);

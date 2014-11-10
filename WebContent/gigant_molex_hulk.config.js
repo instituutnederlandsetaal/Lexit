@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
+oShowOnlyTables = ["lemmata_view"];
 
 
 
@@ -13,31 +13,7 @@ var sChosenParentId = null;
 // table general settings
 oTableSettingsList = {
 		
-		modified_lemmata_view: {
-			
-			"button_0":{
-				"name": "Lemma en paradigma herstellen",
-				"click": function(confTable){
-					
-					fn.confirm("Zeker weten?", "Weet u het zeker? Als de log groot is, kan deze operatie enige tijd kosten.", 
-							function(){
-						
-						var aRowSelection = fn.getSelectedRowsFrom(confTable);
-						
-						aRowSelection.each(function(){
-							
-							var nCurrentNode = this;
-							var sLemmaId = fn.getDataFromCellNamed(confTable, nCurrentNode, "lemma_id");
-							fn.callFunction("restore_lemma_and_paradigm_and_ids", [sLemmaId], null, null, null, null, 
-									function(){
-										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
-											fn.refreshTable(confTable);
-							});
-						});
-					});
-				}
-			}
-		},
+
 		
 
 		lemmata_view: {
@@ -108,122 +84,6 @@ oTableSettingsList = {
 					}
 					
 				}
-			},
-			"button_2":{
-				"name": "Gekozen ouder:",
-				"bgcolor":"yellow",
-				"textcolor": "red",
-				"click": function(confTable){
-					
-					var nNode = fn.getFirstSelectedRowFrom(confTable);
-					
-					if (nNode != null)
-						{
-						// remember chosen parent, and show it on the screen
-						var sLemId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
-						var sLemma = fn.getDataFromCellNamed(confTable, nNode, "modern_lemma");
-						
-						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:<b>"+sLemma+"</b>");
-						sChosenParentId = sLemId;
-						}
-
-				}
-			},
-			"button_3":{
-				"name": "Link ouder & kind",
-				"bgcolor":"red",
-				"textcolor": "yellow",
-				"click": function(confTable){
-					
-					if (sChosenParentId != null)
-						{
-						var oNodes = fn.getSelectedRowsFrom(confTable);
-						if (oNodes != null)
-							{
-							
-							oNodes.each(function(){
-								
-								var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
-								var bLastNode = fn.isLastNodeOf(this, oNodes);
-								fn.updateDatabaseGivenFieldValues("lemmata", 
-										{"lemma_id": sLemId}, 
-										{"parent_id": sChosenParentId}, 
-										false,
-										function(){
-											if (bLastNode)
-												{
-												fn.refreshTable(confTable);
-												// reset: no chosen parent
-												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-												sChosenParentId = null;
-												}
-										});
-							});
-							
-							
-							}
-						else
-							{
-							alert("Kies een of meerdere sublemmata!");
-							}
-						
-						
-						}
-					else
-						{
-						alert("Kies eerst een parent lemma!");
-						}
-				}
-			},
-			"button_4": {
-				
-				"name": "Unlink ouder",
-				"bgcolor":"red",
-				"textcolor": "yellow",
-				"click": function(confTable){
-					
-					var oNodes = fn.getSelectedRowsFrom(confTable);
-					if (oNodes != null)
-						{
-						oNodes.each(function(){
-							var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
-							var bLastNode = fn.isLastNodeOf(this, oNodes);
-							fn.updateDatabaseGivenFieldValues("lemmata", 
-									{"lemma_id": sLemId}, 
-									{"parent_id": 0}, 
-									false,
-									function(){
-										if (bLastNode)
-											{
-											fn.refreshTable(confTable);
-											// reset: no chosen parent
-											fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-											sChosenParentId = null;
-											}
-									});
-							});
-						}
-					else
-						{
-						alert("Kies een of meerdere sublemmata!");
-						}
-					
-					
-				}
-			},
-			"button_5": {
-			
-				"name": "Homo's only",
-				"bgcolor":"green",
-				"textcolor": "white",
-				"click": function(confTable){
-					
-					fn.addFilters(confTable, {"homo": true});
-					fn.refreshTable(confTable);
-					//fn.callDatabase(confTable, {"homo": true});
-					
-				}
-				
 			}
 			
 		},
@@ -305,24 +165,7 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
-		
-		modified_lemmata_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
-		},
-		
-		modified_paradigm_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
-		},
+	
 		
 		
 		morphological_view: {
@@ -347,9 +190,13 @@ oTableConfigurationList = {
 		lemmata_view: {
 			
 			"pkid":{				
-//				"visible": false
+				"visible": false
+			},
+			"parent_id":{				
+				"visible": false
 			},
 			"parent":{
+				"visible": false,
 				"cell_tooltip": "Toon alle lemmata behorend bij dit superlemma",
 				"click": function(t, n){
 					var sLemma = fn.getDataFromCellNode(t, n);
@@ -359,19 +206,23 @@ oTableConfigurationList = {
 			},
 			"modern_lemma": {		
 				"colsort": "asc",
-				"editable": true
+				"editable": true				
 			},
 			"th_lemma": {				
-				"editable": true				
+				"editable": true,
+				"visible": false
 			},
 			"keurmerk": {				
 				"editable": true				
 			},
 			"sublemma_type": {				
-				"editable": true				
+				"editable": true,
+				"visible": false
 			},
 			"opmerking": {				
-				"editable": true
+				"editable": true,
+				"flexible_visibility": false,
+				"visible": false
 			},
 			"opmerking_intern": {
 				// BEWARE, DON'T REMOVE THIS PART
@@ -391,10 +242,12 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"gb_wrdcat": {
-				"editable": true
+				"editable": true,
+				"visible": false
 			},
 			"gb_znwlid": {
-				"editable": true
+				"editable": true,
+				"visible": false
 			},
 			"lidw": {
 				"editable": true,
@@ -411,7 +264,8 @@ oTableConfigurationList = {
 					fn.callDatabase("paradigma_view", {"lemma_id": lemma_id});
 				}
 			},
-			"toon_morfologie":{				
+			"toon_morfologie":{
+				"visible": false,
 				"button": "Morfologie",
 				"click": function( confTable, confNode){					
 					var lemma_id = fn.getDataFromSiblingNode(confTable, confNode, "pkid");
@@ -423,28 +277,49 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"homo":{
-				
+				"visible": false,
+				"flexible_visibility": false
 			},
 			"weg": {
-				"editable": true
+				"visible": false,
+				"editable": true,
+				"flexible_visibility": false
 			},
 			"taaladvies": {
+				"visible": false,
 				"editable": true
 			},
 			"uitspraak": {
+				"visible": false,
 				"editable": true
 			},
 			"status": {
+				"visible": false,
 				"editable": true
 			},
 			"nuanc_opm": {
-				"editable": true
+				"visible": false,
+				"editable": true,
+				"flexible_visibility": false
 			},
 			"taalvariant": {
+				"visible": false,
 				"editable": true
 			},
 			"herkomst": {
+				"visible": false,
 				"editable": true
+			},
+			"gedrukt":{
+				"visible": false
+			},
+			"verdacht":{
+				"visible": false,
+				"flexible_visibility": false
+			},
+			"source":{
+				"visible": false,
+				"flexible_visibility": false
 			}
 			
 		},
@@ -488,12 +363,18 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"comment": {
-				"editable": true
+				"editable": true,
+				"visible": false,
+				"flexible_visibility": false
 			},
 			
 			"rang":{			
 				"colsort": "asc",
 				"visible": false
+			},
+			"source":{
+				"visible": false,
+				"flexible_visibility": false
 			}
 			
 		}

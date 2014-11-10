@@ -66,9 +66,20 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		// register each table details
 		asTableNames.push( sTableName );
 		asTableDescriptions.push( sTableDescription );
-		asTableComments.push(sTableComment);
+		asTableComments.push( sTableComment );
 		asTableTypes.push( sTableType.toLowerCase() );
 		abTableVisible.push( bTableVisible );
+		
+		
+		// register table details
+		// (this must happen here, as later on we'll only deal with visible
+		//  tables, whereas we need details about all tables, since some might
+		//  not be called from the dropdown menu, but with the fn.callDatabase function
+		//  which doesn't require a table to be visible in the dropdown menu)
+		mt.addAvailableTableDetails( sTableName, 
+				[ sTableDescription, sTableType.toLowerCase(), sTableComment ]
+		);
+		
 		
 		// if a table must be hidden (as stated in config file) then we skip it
 		if ( !bTableVisible )
@@ -165,10 +176,6 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
 					.attr("title", bShowTableComments ? asTableComments[i] : "")
 			);
-		
-		mt.addAvailableTableDetails(asTableNames[i], 
-				[ asTableDescriptions[i], asTableTypes[i], asTableComments[i] ]);
-		
 		}
 	
 	formTagToAdd.append(selectTagToAdd);

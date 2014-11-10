@@ -144,7 +144,9 @@ head.showNameOfTheTable = function(sSomeTablename){
 		.text(sNameToShow+":")
 		.css("font-weight", "bold")
 		.css("color", "#A4A4A4")
-		.attr("id", sSomeTablename+"_tablename")		
+		.attr("id", sSomeTablename+"_tablename")
+		.attr("title", ( (document.URL).indexOf( INL_HOMEURL )>-1 ) ? "Klik om notitie toe te voegen":"" )
+		.addClass( ( (document.URL).indexOf( INL_HOMEURL )>-1 ) ? "tooltip":"" )
 		.click(function(){
 			
 			// clicking on the table name gives the possibility to
