@@ -166,7 +166,7 @@ oTableConfigurationList = {
 				
 			},
 			"gedrukt":{
-				"editable": true
+				
 			},
 			"herkomst": {
 				
@@ -190,6 +190,24 @@ oTableConfigurationList = {
 			"wordform":{	
 				
 			},
+			"typisch_sn":{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "pkid");
+					
+					// if we have an awf-id
+					// update also the lemmata_en_paradigma_view table
+					if (sAwfId != null && sAwfId != '')
+						fn.updateDatabaseGivenFieldValues("lemmata_en_paradigma_view", 
+								{"analyzed_wordform_id": sAwfId}, 
+								{"typisch_sn": value}, 
+								false);
+				}
+			},
+			"taalvariant":{
+				
+			},
 			"wordform_afbr":{				
 				
 			},
@@ -209,7 +227,19 @@ oTableConfigurationList = {
 				
 			},
 			"comment": {
-				"editable": true
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "pkid");
+					
+					// if we have an awf-id
+					// update also the lemmata_en_paradigma_view table
+					if (sAwfId != null && sAwfId != '')
+						fn.updateDatabaseGivenFieldValues("lemmata_en_paradigma_view", 
+								{"analyzed_wordform_id": sAwfId}, 
+								{"comment": value}, 
+								false);
+				}
 			},			
 			"rang":{			
 				"colsort": "asc",
@@ -226,7 +256,7 @@ oTableConfigurationList = {
 			},
 			
 			"modern_lemma": {				
-				"colsort": "asc"				
+				"colsort": "asc"			// sort #1	
 			},
 			"th_lemma": {
 				"visible": false
@@ -234,6 +264,50 @@ oTableConfigurationList = {
 			"keurmerk": {
 				"visible": false,
 				"flexible_visibility": false
+			},
+			"typisch_sn":{
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+					// if we have an awf-id
+					// update this 'view' but also the analyzed_wordforms table
+					if (sAwfId != null && sAwfId != '')
+						fn.updateDatabaseGivenFieldValues(t, 
+								{"analyzed_wordform_id": sAwfId}, 
+								{"typisch_sn": value}, 
+								false, 
+								function(){
+									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+											{"analyzed_wordform_id": sAwfId}, 
+											{"typisch_sn": value});
+									});
+					else
+						fn.refreshTable(t);
+				}
+			},
+			"taalvariant":{
+//				"editable": true,
+//				"editfunc": function(t, n, value){
+//					
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					
+//					// if we have an awf-id
+//					// update this 'view' but also the analyzed_wordforms table
+//					if (sAwfId != null && sAwfId != '')
+//						fn.updateDatabaseGivenFieldValues(t, 
+//								{"analyzed_wordform_id": sAwfId}, 
+//								{"taalvariant": value}, 
+//								false, 
+//								function(){
+//									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//											{"analyzed_wordform_id": sAwfId}, 
+//											{"taalvariant": value});
+//									});
+//					else
+//						fn.refreshTable(t);
+//				}
 			},
 			"sublemma_type": {		
 				"visible": false 
@@ -288,7 +362,7 @@ oTableConfigurationList = {
 				"visible": false				
 			},
 			"wordform_gigpos":{				
-				
+				"colsort": "asc"	// sort #2
 			},
 
 			"comment": {
@@ -309,7 +383,6 @@ oTableConfigurationList = {
 									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
 											{"analyzed_wordform_id": sAwfId}, 
 											{"comment": value});
-									fn.refreshTable(t);
 									});
 					else
 						fn.refreshTable(t);

@@ -490,7 +490,7 @@ oTableConfigurationList = {
 				}
 			},
 			"sublemma_type": {		
-				"visible": false // ?
+				"visible": false 
 			},
 			"opmerking": {
 				"visible": false
