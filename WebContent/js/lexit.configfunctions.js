@@ -882,12 +882,34 @@ fn.uncheckCheckboxes = function(oTable, nNode, aListOfColumns, fnCallback){
 			// focus is needed for the checkbox handler, which need to know
 			// if the checkbox was clicked, or only the surrounding cell
 			eCellSelector.focus();
-			eCellSelector.click();			
+			eCellSelector.click();
+			eCellSelector.blur();	
 			}
 		}
 	
 	if (fnCallback!=null)
 			fnCallback();
+};
+
+
+// simulate a click on a checkbox
+fn.toggleCheckbox = function(someTable, nNode, sColumnName, fnCallback){
+	
+	if (typeof someTable == 'string')
+		someTable = mt.getDataTableObjectOf(someTable);
+	
+	var eCellSelector = (fn.getCellElement(someTable, nNode, "keurmerk")).find("input").eq(0);
+	
+	// we need to get focus onto the checkbox, otherwise the click
+	// action we be seen as cell click instead of checkbox click (and thus ignored!)
+	eCellSelector.focus();
+	eCellSelector.click();
+	
+	// release focus
+	eCellSelector.blur();
+	
+	if (fnCallback!=null)
+		fnCallback();
 };
 
 

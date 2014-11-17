@@ -22,6 +22,19 @@ var sChosenParentId = null;
 // column not allowed in this installation
 var sColumnCheck = "opmerking_intern";
 
+
+
+
+
+// warn if some accesses this by mistakes
+if ( document.URL.indexOf( INL_HOMEURL )>-1 ){
+
+	fn.message("Let op", "Dit is de testversie van Productie EXTERN");
+}
+
+
+
+
 // table general settings
 oTableSettingsList = {
 		

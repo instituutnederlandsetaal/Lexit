@@ -44,7 +44,9 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "non_homonyms_worktable_nouns", 
                    "non_homonyms_worktable_rest",
                    "klus_verwijslemmata", 
-                   "anw_nieuwe_correctieronde_sept_2014"];
+                   "anw_nieuwe_correctieronde_sept_2014",
+                   
+                   "featuretoekenning"];
 
 
 
@@ -631,6 +633,10 @@ var oSurinaamsParadigma = {
 };
 
 oTableSettingsList = {
+		
+		featuretoekenning:{
+			"size": "60%"
+		},
 		
 		molex_zonder_keurmerk: {
 			
@@ -1883,11 +1889,47 @@ oTableConfigurationList = {
 					var sLemma = fn.getDataFromCellNode(t, n);
 					fn.putDataIntoCell(t, fn.getRowNode(n), "lemma_corr", sLemma);
 				}
-		},
+			},
 			lemma_corr : {"editable": true, "bgcolor": "#D8F6CE"},
 			
 			pos_corr : {"editable": true, "bgcolor": "#D8F6CE"},
 			opmerkingen : {"editable": true, "bgcolor": "#D8D8D8"}
+		},
+		
+		
+		
+		featuretoekenning:{
+			
+			unique_id:{
+				"visible": false
+			},
+			frank_code:{
+				"visible": false
+			},
+			lemma_id:{
+				
+			},
+			modern_lemma:{
+				
+			},
+			lemma_gigpos:{
+				
+			},
+			lemma_splitup:{
+				"visible": false
+			},
+
+			reverse_lemma:{
+				"colsort": "asc"
+			},
+			lemma_analysis:{
+				"visible": false
+			},
+			
+			new_gigpos:{
+				"bgcolor": "#D8F6CE",
+				"editable": true
+			}
 		},
 
                klus_verwijslemmata:

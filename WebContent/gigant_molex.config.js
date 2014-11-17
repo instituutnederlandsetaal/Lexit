@@ -1,7 +1,10 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
-
+oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
+                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
+	:
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -10,8 +13,47 @@ fn.setProjectTitle("GigantMolex Productie Intern");
 
 var sChosenParentId = null;
 
+
+
+// function needed in 'keurmerk_checklist' table
+var fnArrowFunction = function(t){
+	
+	var n = fn.getFirstSelectedRowFrom(t);
+	
+	var iAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+	var iLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+	
+	fn.callDatabase("paradigma_view", {"lemma_id": iLemmaId});
+};
+
+
 // table general settings
 oTableSettingsList = {
+		
+		gemiste_paradigma_correcties: {
+			
+			"callback": function(t){
+				
+				conf.changeTableConfigValue("paradigma_view", "source", "visible", false);
+				conf.changeTableConfigValue("paradigma_view", "flex", "visible", false);
+				fn.callDatabase("paradigma_view", {}, null, {"displaylength": "50"});
+			}
+			
+		},
+		
+		keurmerk_checklist: {
+			"size": "80%",
+			
+			"keyup" : {				
+				
+				"uparrow": function(t){
+					fnArrowFunction(t);
+				},
+				"downarrow": function(t){
+					fnArrowFunction(t);
+				}
+			}
+		},
 		
 		modified_lemmata_view: {
 			
@@ -126,6 +168,13 @@ oTableSettingsList = {
 						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:<b>"+sLemma+"</b>");
 						sChosenParentId = sLemId;
 						}
+					
+					// press shift + click to cancel parent selection 
+					if (kf._getPressedKey() == 'shift')
+					{
+					fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+					sChosenParentId = null;
+					}
 
 				}
 			},
@@ -153,9 +202,10 @@ oTableSettingsList = {
 											if (bLastNode)
 												{
 												fn.refreshTable(confTable);
-												// reset: no chosen parent
-												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-												sChosenParentId = null;
+												// reset: no chosen parent, to prevent accidental linking
+												// [commented out, because Katrien doesn't like this]
+												//fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+												//sChosenParentId = null;
 												}
 										});
 							});
@@ -228,6 +278,66 @@ oTableSettingsList = {
 			
 		},
 		paradigma_view: {
+			
+			"repeat_callback": true,
+			
+			"callback": function(t){
+				
+				var aRows = fn.getAllRows(t);
+				var sTableName = fn.getTableName(t);
+				
+				// If the LM'er is working with the keurmerk_checklist
+				// we need to highlight some lines (= show relevant lines).
+				// Otherwise, we don't need to.
+				if (fn.tableExists("keurmerk_checklist"))
+					{
+					
+					aRows.each(function(){
+						
+						var sSource = fn.getDataFromCellNamed(t, this, "source");
+						
+						if (sSource == 'niet-homoniemen Molex')
+							{
+							var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+							for (var i=0; i<aColList.length; i++)
+								{
+								var sColName = aColList[i];
+								(fn.getCellElement(t, this, sColName)).css("color", "red");
+								
+								}
+							
+							
+							}
+						
+						});
+					}
+				
+			},
+			
+			"keyup" : {	
+				
+				"ctrl": function(t){
+					
+					// if the LM'er is working with the keurmerk_checklist
+					// we need him/her to be able to toggle keurmerk checkbox
+					// in paradigma view with the ctrl button.
+					// Otherwise, we don't need this.
+					if (fn.tableExists("keurmerk_checklist"))
+					{
+						var n = fn.getFirstSelectedRowFrom(t);
+						
+						//fn.toggleCheckbox(t, n, "keurmerk");
+						
+						// Lex'it engine not updated yet, so use 
+						// fn.toggleCheckbox function code instead of true function
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).focus();
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).click();
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).blur();
+					}
+					
+					
+				}
+			},
 			
 			"size": "90%",
 			"button_0":{
@@ -501,6 +611,124 @@ oTableConfigurationList = {
 				"colsort": "asc",
 				"visible": false
 			}
+			
+		},
+		
+		
+		gemiste_paradigma_correcties: {
+			
+			unique_id: {
+				"visible": false
+			},
+			lemma_id: {
+				"click": function(t, n){
+					
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					fn.callDatabase("paradigma_view", 
+							{"lemma_id": sLemmaId});
+				}
+			},
+			modern_lemma: {
+				"colsort": "asc" // sort #1
+			}, 
+			analyzed_wordform_id: {
+				"visible": false
+			}, 
+			wordform_gigpos: {
+				"colsort": "asc", // sort #2
+				"click": function(t, n){
+					
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+
+					fn.callDatabase("paradigma_view", 
+							{"lemma_id": sLemmaId},
+							function(){
+								
+								var nRow = fn.getNodeWhere("paradigma_view", 
+										{"pkid": sAwfId});								
+								var iRowNumber = fn.getRowNumberOnScreen("paradigma_view", nRow);
+								if (iRowNumber>-1)
+									fn.selectRow("paradigma_view", iRowNumber);
+							});
+					
+				}
+			}, 
+			vermoedelijk_fout: {
+				"bgcolor": "#F5D0A9"
+			}, 
+			correctie: {
+				"bgcolor": "#BCF5A9"
+			}, 
+			ok: {
+				"button": "OK",
+				"click": function( t, n ){
+					
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					var sCorrection = fn.getDataFromCellNamed(t, n, "correctie");
+					
+					fn.updateDatabaseGivenFieldValues("paradigma_view", 
+							{"pkid": sAwfId}, 
+							{"wordform": sCorrection}, false, function(){
+								
+								fn.removeFromDatabaseGivenANode(t, n, true);
+								fn.callDatabase("paradigma_view", 
+										{"lemma_id": sLemmaId},
+										function(){
+											
+											var nRow = fn.getNodeWhere("paradigma_view", 
+													{"pkid": sAwfId});								
+											var iRowNumber = fn.getRowNumberOnScreen("paradigma_view", nRow);
+											if (iRowNumber>-1)
+												fn.selectRow("paradigma_view", iRowNumber);
+										});
+								
+							});
+				}
+			}, 
+			gooiweg: {
+				"button": "Weg ermee!",
+				"click": function( t, n ){
+					
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+					fn.removeFromDatabaseGivenANode(t, n, true);	
+					fn.callDatabase("paradigma_view", 
+							{"lemma_id": sLemmaId});
+				}
+			}
+			
+		},
+		
+		keurmerk_checklist:{
+			
+			lemma_id: {
+				"colsort": "asc"
+			}, 
+			modern_lemma: {
+				
+			}, 
+			analyzed_wordform_id: {
+				
+			}, 
+			wordform: {
+				"bgcolor": "#E0F8EC",
+				"click": function( t, n ){
+					
+					var iAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					var iLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					
+					fn.callDatabase("paradigma_view", {"lemma_id": iLemmaId});
+					
+					
+				}
+			}, 
+			keurmerk: {
+				"visible": false 
+			}
+			
 			
 		}
 };

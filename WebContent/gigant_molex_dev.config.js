@@ -1,9 +1,18 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", 
-                   "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties"];
+oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
+                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
+	:
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
 
+
+		
+// warn if some accesses this by mistakes
+if ( document.URL.indexOf( INL_HOMEURL )>-1 ){
+
+	fn.message("Let op", "Dit is een testversie");
+}
 
 
 // remember chosen parent
@@ -11,6 +20,9 @@ oShowOnlyTables = ["lemmata_view", "modified_lemmata_view",
 var sChosenParentId = null;
 
 
+
+
+// function needed in 'keurmerk_checklist' table
 var fnArrowFunction = function(t){
 	
 	var n = fn.getFirstSelectedRowFrom(t);
@@ -162,6 +174,12 @@ oTableSettingsList = {
 						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:<b>"+sLemma+"</b>");
 						sChosenParentId = sLemId;
 						}
+					
+					if (kf._getPressedKey() == 'shift')
+						{
+						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+						sChosenParentId = null;
+						}
 
 				}
 			},
@@ -189,9 +207,11 @@ oTableSettingsList = {
 											if (bLastNode)
 												{
 												fn.refreshTable(confTable);
-												// reset: no chosen parent
-												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-												sChosenParentId = null;
+												
+												// reset: no chosen parent, to prevent accidental linking
+												// [commented out, because Katrien doesn't like this]
+												//fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+												//sChosenParentId = null;
 												}
 										});
 							});
@@ -272,33 +292,56 @@ oTableSettingsList = {
 				var aRows = fn.getAllRows(t);
 				var sTableName = fn.getTableName(t);
 				
-				aRows.each(function(){
+				// if the LM'er is working with the keurmerk_checklist
+				// we need to highlight some lines (show relevant lines)
+				// otherwise, we don't need to.
+				if (fn.tableExists("keurmerk_checklist"))
+					{
 					
-					var sSource = fn.getDataFromCellNamed(t, this, "source");
-					
-					if (sSource == 'niet-homoniemen Molex')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName)
-						for (var i=0; i<aColList.length; i++)
+					aRows.each(function(){
+						
+						var sSource = fn.getDataFromCellNamed(t, this, "source");
+						
+						if (sSource == 'niet-homoniemen Molex')
 							{
-							var sColName = aColList[i];
-							(fn.getCellElement(t, this, sColName)).css("color", "red");
+							var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+							for (var i=0; i<aColList.length; i++)
+								{
+								var sColName = aColList[i];
+								(fn.getCellElement(t, this, sColName)).css("color", "red");
+								
+								}
+							
 							
 							}
 						
-						
-						}
-					
-				});
+						});
+					}
+				
 			},
 			
 			"keyup" : {	
 				
 				"ctrl": function(t){
 					
-					var n = fn.getFirstSelectedRowFrom(t);
+					// if the LM'er is working with the keurmerk_checklist
+					// we need him/her to be able to toggle keurmerk checkbox
+					// in paradigma view with the ctrl button.
+					// Otherwise, we don't need this.
+					if (fn.tableExists("keurmerk_checklist"))
+					{
+						var n = fn.getFirstSelectedRowFrom(t);
+						
+						//fn.toggleCheckbox(t, n, "keurmerk");
+						
+						// Lex'it engine not updated yet, so use 
+						// fn.toggleCheckbox function code instead of true function
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).focus();
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).click();
+						(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).blur();
+					}
 					
-					(fn.getCellElement(t, n, "keurmerk")).find("input").eq(0).click();
+					
 				}
 			},
 			
@@ -669,8 +712,12 @@ oTableConfigurationList = {
 			lemma_id: {
 				"colsort": "asc"
 			}, 
-			modern_lemma: {}, 
-			analyzed_wordform_id: {}, 
+			modern_lemma: {
+				
+			}, 
+			analyzed_wordform_id: {
+				
+			}, 
 			wordform: {
 				"bgcolor": "#E0F8EC",
 				"click": function( t, n ){
