@@ -114,6 +114,26 @@ oTableSettingsList = {
 						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
 						}
 				});
+				
+				
+				
+				// give parent other color (so they are recognizable)
+				var sTableName = fn.getTableName(t);
+				
+				var aRows = fn.getAllRows(t);
+				aRows.each(function(){
+					
+					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");
+					if (bIsParent == 't')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
+							}
+						}										
+					});
 			},
 			"repeat_callback": true,
 			
@@ -283,6 +303,9 @@ oTableConfigurationList = {
 			"source_gb05": { "visible": false },
 			
 			"pkid":{				
+				"visible": false
+			},
+			"is_parent": {				
 				"visible": false
 			},
 			"parent_id":{				

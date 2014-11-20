@@ -1048,10 +1048,21 @@ fn.getDataFromCellNamed = function(someTable, nNode, sColumnName){
 	// get column number given column name	
 	var colNr = $.inArray(sColumnName, mt.getListOfColumnsOf(someTable));
 	
-	// make sure we have a row node (if we got a cell node)
-	var nNode = fn.getRowNode(nNode);
+	if (colNr<0)
+		{
+		fn.message("Fout", "fn.getDataFromCellNamed('"+someTable+"') " +
+				"is aangeroepen voor een niet bestaand kolom '"+sColumnName+"'.");
+		
+		return "";
+		}
+	else
+		{
+		// make sure we have a row node (if we got a cell node)
+		var nNode = fn.getRowNode(nNode);
+		
+		return mt.getDataTableObjectOf(someTable).fnGetData(nNode, colNr);
+		}	
 	
-	return mt.getDataTableObjectOf(someTable).fnGetData(nNode, colNr);
 };
 
 

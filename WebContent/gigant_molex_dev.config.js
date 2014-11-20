@@ -4,7 +4,7 @@ oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
                    "keurmerk_checklist", "gemiste_paradigma_correcties"]
 	:
-		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
+		["lemmata_view_intern", "modified_lemmata_view", "modified_paradigm_view"];
 
 
 		
@@ -88,14 +88,38 @@ oTableSettingsList = {
 		},
 		
 
-		lemmata_view: {
+		lemmata_view_intern: {
 			
 			"prereset_callback": function(confTable){
 				
-				fn.addFilters(confTable, {"homo": ""});
+				//fn.addFilters(confTable, {"homo": ""});
 				
 				sChosenParentId = null;
 				fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+				
+			},
+			
+			"repeat_callback": true,
+			
+			"callback": function(t){
+				
+				// give parent other color (so they are recognizable)
+				var sTableName = fn.getTableName(t);
+				
+				var aRows = fn.getAllRows(t);
+				aRows.each(function(){
+					
+					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");					
+					if (bIsParent == 't')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
+							}
+						}							
+					});
 				
 			},
 	
@@ -206,12 +230,16 @@ oTableSettingsList = {
 										function(){
 											if (bLastNode)
 												{
-												fn.refreshTable(confTable);
-												
 												// reset: no chosen parent, to prevent accidental linking
 												// [commented out, because Katrien doesn't like this]
 												//fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
 												//sChosenParentId = null;
+												
+												fn.updateDatabaseGivenFieldValues("lemmata", 
+														{"lemma_id": sChosenParentId}, 
+														{"is_parent": true}, 
+														false, 
+														function(){fn.refreshTable(confTable);});
 												}
 										});
 							});
@@ -364,8 +392,8 @@ oTableSettingsList = {
 						// is there is no paradigm yet, get the lemma id from the lemma table
 						if (fn.tableIsEmpty(confTable))
 							{
-							aAllRows = fn.getSelectedRowsFrom("lemmata_view");
-							sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+							aAllRows = fn.getSelectedRowsFrom("lemmata_view_intern");
+							sLemmaId = fn.getDataFromCellNamed("lemmata_view_intern", aAllRows[0], "pkid");
 							
 							}
 						// otherwise just read it from the current table
@@ -460,10 +488,13 @@ oTableConfigurationList = {
 
 		
 
-		lemmata_view: {
+		lemmata_view_intern: {
 			
 			"pkid":{				
 //				"visible": false
+			},
+			"is_parent":{				
+				"visible": false
 			},
 			"parent":{
 				"cell_tooltip": "Toon alle lemmata behorend bij dit superlemma",
@@ -487,6 +518,9 @@ oTableConfigurationList = {
 				"editable": true				
 			},
 			"opmerking": {				
+				"editable": true
+			},
+			"opmerking_extern": {				
 				"editable": true
 			},
 			"notitie": {				

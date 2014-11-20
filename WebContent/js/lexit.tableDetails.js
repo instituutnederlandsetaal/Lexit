@@ -119,15 +119,29 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		var aCustomColumnOrder = new Array();
 		var aChosenColumns = sChosenColumns.split(",");
 		
-		for (var i=0; i<aChosenColumns.length; i++)
+		// if the number of saved columns in the cookie is the same as
+		// the number of columns of the table, we can use the cookie
+		// (we need this check, as some database update could cause some table or view
+		//  to have more/less columns that before, so its number of columns won't
+		//  match the number of columns in the cookie, causing an error)
+		if (aChosenColumns.length == aAllColumns.length)
 			{
-			var sColumnName = aChosenColumns[i].split(":")[0];
-			aCustomColumnOrder.push(sColumnName);
-			
-			var sColumnVisibility = aChosenColumns[i].split(":")[1];						
-			conf.changeTableConfigValue(sSomeTableName, sColumnName, "visible", sColumnVisibility=='true');
+			for (var i=0; i<aChosenColumns.length; i++)
+				{
+				var sColumnName = aChosenColumns[i].split(":")[0];
+				aCustomColumnOrder.push(sColumnName);
+				
+				var sColumnVisibility = aChosenColumns[i].split(":")[1];						
+				conf.changeTableConfigValue(sSomeTableName, sColumnName, "visible", sColumnVisibility=='true');
+				}
+			conf.changeTableSettingValue(sSomeTableName, "column_order", aCustomColumnOrder);
 			}
-		conf.changeTableSettingValue(sSomeTableName, "column_order", aCustomColumnOrder);
+		
+		// if the test hereabove fails, remove the cookie, as it is incompatible now
+		else 
+			{
+			$.removeCookie(fn.getCurrentProject()+"_"+sSomeTableName+"_columns", { path: '/' });	
+			}
 		}
 	
 	

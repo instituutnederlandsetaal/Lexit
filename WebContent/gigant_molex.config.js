@@ -92,9 +92,33 @@ oTableSettingsList = {
 				fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
 				
 			},
-	
-			"keyup" : {
+			
+			"repeat_callback": true,
+			
+			"callback": function(t){				
 				
+				// give parent other color (so they are recognizable)
+				var sTableName = fn.getTableName(t);
+				
+				var aRows = fn.getAllRows(t);
+				aRows.each(function(){
+					
+					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");					
+					if (bIsParent == 't')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
+							}
+						}							
+					});
+				
+			},			
+			
+	
+			"keyup" : {				
 				
 				"f9": function(confTable){
 					
@@ -201,11 +225,17 @@ oTableSettingsList = {
 										function(){
 											if (bLastNode)
 												{
-												fn.refreshTable(confTable);
+												
 												// reset: no chosen parent, to prevent accidental linking
 												// [commented out, because Katrien doesn't like this]
 												//fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
 												//sChosenParentId = null;
+												
+												fn.updateDatabaseGivenFieldValues("lemmata", 
+														{"lemma_id": sChosenParentId}, 
+														{"is_parent": true}, 
+														false, 
+														function(){fn.refreshTable(confTable);});
 												}
 										});
 							});
@@ -459,6 +489,9 @@ oTableConfigurationList = {
 			"pkid":{				
 //				"visible": false
 			},
+			"is_parent":{				
+				"visible": false
+			},
 			"parent":{
 				"cell_tooltip": "Toon alle lemmata behorend bij dit superlemma",
 				"click": function(t, n){
@@ -481,6 +514,9 @@ oTableConfigurationList = {
 				"editable": true				
 			},
 			"opmerking": {				
+				"editable": true
+			},
+			"opmerking_extern": {				
 				"editable": true
 			},
 			"notitie": {				
