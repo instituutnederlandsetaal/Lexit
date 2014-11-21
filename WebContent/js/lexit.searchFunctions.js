@@ -39,7 +39,23 @@ sf.goTo = function(sSomeTablename){
 		var sCurrentColumnName = $('#'+sSomeTablename+' thead th').eq(i).text();
 		var sCurrentColumnValue = $.trim(searchBoxSelector.val());
 		
-		if ( sCurrentColumnValue != "" ) 
+		// for checkboxes, we need to recompute the value
+		var bCurrentColumnIsACheckBox = fn.getTypeOfFilterBox(sSomeTablename, sCurrentColumnName) == 'checkbox';
+		if (bCurrentColumnIsACheckBox)
+			{
+			var iCycleValue = searchBoxSelector.attr("cycle_value");		
+			var sVisibleColumnNumber = $.inArray(sCurrentColumnName, mt.getListOfVisibleColumnsOf(sSomeTablename));
+			var sCurrentColumnValue = sf.buildCorrectCheckboxFilterValue(sSomeTablename, sVisibleColumnNumber, iCycleValue);			
+			}
+		
+		
+		// if we have any value, use it
+		if ( (!bCurrentColumnIsACheckBox && 
+				sCurrentColumnValue != "")
+				||
+			 ( bCurrentColumnIsACheckBox && 
+			    iCycleValue != 0) // somehow needed as false and "" are mixed
+		   ) 
 			{
 			
 			var bThisBoxHasFocus = 

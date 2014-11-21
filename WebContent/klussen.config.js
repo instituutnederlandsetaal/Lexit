@@ -635,7 +635,7 @@ var oSurinaamsParadigma = {
 oTableSettingsList = {
 		
 		featuretoekenning:{
-			"size": "60%"
+			"size": "80%"
 		},
 		
 		molex_zonder_keurmerk: {
@@ -645,7 +645,7 @@ oTableSettingsList = {
 		
 		verkleinwoorden_correctie: {
 			
-			"size": "45%"
+			"size": "55%"
 		},
 		
 		paradigmauitbr_surinaams_verbs: oSurinaamsParadigma,
@@ -1471,7 +1471,9 @@ oTableConfigurationList = {
 		verkleinwoorden_correctie: {
 			
 			lemma_id: {},
-			modern_lemma: {},
+			modern_lemma: {
+				"colsort": "asc"
+			},
 			frank_code: {
 				"visible": false
 			},
@@ -1916,17 +1918,21 @@ oTableConfigurationList = {
 				
 			},
 			lemma_splitup:{
-				"visible": false
+				
 			},
 
 			reverse_lemma:{
 				"colsort": "asc"
 			},
 			lemma_analysis:{
-				"visible": false
+				
 			},
 			
 			new_gigpos:{
+				"bgcolor": "#D8F6CE",
+				"editable": true
+			},
+			opmerking:{
 				"bgcolor": "#D8F6CE",
 				"editable": true
 			}

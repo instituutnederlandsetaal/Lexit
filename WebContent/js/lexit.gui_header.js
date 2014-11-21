@@ -27,7 +27,7 @@ head.setHeaderSensitivity = function(sSomeTableName){
 		// BEWARE: we only select a row if none is selected yet.
 		// We do so to prevent a given rows selection from getting currupted (as some new row 
 		// would be unpredictably added to the selection than)
-		if (fn.getNumberOfSelectedRows(sSomeTableName) == 0)
+		if (fn.getNumberOfSelectedRows(sSomeTableName) == 0 && iRowToSetActive>-1)
 			fn.selectRow(sSomeTableName, iRowToSetActive);
 		
 	});
