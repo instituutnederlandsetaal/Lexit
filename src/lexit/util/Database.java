@@ -493,6 +493,81 @@ public class Database {
 	
 	
 	/**
+	 * Get a table record, given a table name and some values to match
+	 * @param dbName
+	 * @param tableName
+	 * @param columnNamesToMatch
+	 * @param valuesToMatch
+	 * @return
+	 */
+	public  TableRecordObject getRecordWithoutId(String dbName, String tableName, 
+			String[] columnNamesToMatch, String[] valuesToMatch){
+		
+		TableRecordObject tro = new TableRecordObject();
+		String schema = getSchema(dbName, tableName);		
+		
+		ArrayList<String[]> res;
+		
+		// set datatypes of arguments
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
+		String[] valueTypes = getTypesOfColumns(dbName, tableName, columnNamesToMatch);
+		for (int i = 0; i<columnNamesToMatch.length; i++)
+		{
+			ato.setType(i, valueTypes[i]);
+		}			
+		// set arguments
+		String[] args = valuesToMatch;
+		
+		// matching pairs with suitable operator
+		String[] matchingPairs = new String[columnNamesToMatch.length];
+		for (int i=0; i<columnNamesToMatch.length; i++)
+		{
+			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+		}			
+		
+		String getRecord = 
+			"SELECT * " +
+			"FROM " + getSafeTableName(tableName, schema) + " " +				
+			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
+		
+		
+		PostgresDatabaseCommunication dc = connectDatabase(dbName);
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			
+			ResultSet rs = dc.sendPreparedQuery(getRecord, args);
+			
+			String[] columnsNames = getColumnNames(dbName, tableName);			
+			res = getResultsInAList(rs, columnsNames);	
+			
+			if (res.size()>0)
+			{
+				String[] recordCell = res.get(0);
+				
+				if (recordCell != null)
+				{
+					for (int i =0; i<columnsNames.length; i++)
+					{
+						tro.addColumnAndValue(columnsNames[i], recordCell[i]);
+					}
+				}
+			}				
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecord, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+		return tro;
+	}
+	
+	
+	/**
 	 * Call a database function, given its name and a list of arguments
 	 * @param dbName
 	 * @param functionName
@@ -1548,6 +1623,15 @@ public class Database {
 			String[] aSortCol, String[] aSortDir){
 	
 		String schema = getSchema(dbName, tableName);
+		
+		// test hashmap behaviour amoung sessions
+//		System.out.println("tableNameToCount contains:");
+//		for (String oneKey : tableNameToCount.keySet())
+//		{
+//			System.out.println(oneKey + " -> "+ tableNameToCount.get(oneKey) );
+//		}
+//		System.out.println("-------\n\n");
+	
 		
 		// get table content		
 		

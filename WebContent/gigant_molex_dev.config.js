@@ -4,7 +4,9 @@ oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
                    "keurmerk_checklist", "gemiste_paradigma_correcties"]
 	:
-		["lemmata_view_intern", "modified_lemmata_view", "modified_paradigm_view"];
+		[//"lemmata_view_intern", "modified_lemmata_view", "modified_paradigm_view",
+		 "lemmata_view", 
+		 "lemmata_en_paradigma_view", "paradigma_view", "analyzed_wordforms", "lemmata"];
 
 
 		
@@ -35,6 +37,44 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		
+		lemmata_en_paradigma_view:{
+			
+			"button_0":{
+				"name": "Voeg woordvorm toe",
+				"click": function(t){
+					
+					var aAllRows = fn.getSelectedRowsFrom(t);
+					
+					if (aAllRows.length>0)
+						{
+						
+						var sLemmaId = fn.getDataFromCellNamed(t, aAllRows[0], "pkid");
+						
+						fn.prompt("Geef een woordvorm", 
+								["woordvorm", "wordform_gigpos"], 
+								["", ""], 
+								function(){
+							
+							var sWordform = fn.getPromptUserInput("woordvorm");
+							var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
+							
+							// @@@
+//							fn.callFunction("insert_wordform", 
+//									[sLemmaId, sWordform, sWordformPos],  
+//									null, null, null, null, function(){
+//								fn.refreshTable(confTable);
+//							});
+						});
+						}
+					else
+						{
+						fn.message("Kies een lemma", "Selecteer het lemma waar een woordvorm aan moet worden toegevoegd.");
+						}
+				}
+			}
+		},
 		
 		gemiste_paradigma_correcties: {
 			
@@ -88,7 +128,7 @@ oTableSettingsList = {
 		},
 		
 
-		lemmata_view_intern: {
+		lemmata_view: {
 			
 			"prereset_callback": function(confTable){
 				
@@ -378,40 +418,51 @@ oTableSettingsList = {
 				"name": "Voeg woordvorm toe",
 				"click": function(confTable){
 					
-					var wordform = fn.prompt("Geef een woordvorm", 
-							["woordvorm", "wordform_gigpos"], 
-							["", ""], 
-							function(){
+					var aAllRows;
+					var sLemmaId;
+					var sLemma = null;
+					
+					// is there is no paradigm yet, get the lemma id from the lemma table
+					if (fn.tableIsEmpty(confTable))
+						{
+						aAllRows = fn.getSelectedRowsFrom("lemmata_view");
+						sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+						sLemma =  fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "modern_lemma");
+						}
+					// otherwise just read it from the current table
+					else
+						{
+						aAllRows = fn.getAllRows(confTable);
+						sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+						// in this particular case, sLemma will be
+						// requested by following fn.getRecord call
+						}
+					
+					
+					
+					fn.getRecord("lemmata", sLemmaId, function(response){
+					
+						// if we don't have a modern_lemma to show, get it
 						
-						var sWordform = fn.getPromptUserInput("woordvorm");
-						var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
-
-						var aAllRows;
-						var sLemmaId;
+						if (sLemma == null)
+							sLemma =  response["modern_lemma"];						
 						
-						// is there is no paradigm yet, get the lemma id from the lemma table
-						if (fn.tableIsEmpty(confTable))
-							{
-							aAllRows = fn.getSelectedRowsFrom("lemmata_view_intern");
-							sLemmaId = fn.getDataFromCellNamed("lemmata_view_intern", aAllRows[0], "pkid");
+						fn.prompt("Geef woordvorm voor '"+sLemma+"'", 
+								["woordvorm", "wordform_gigpos"], 
+								["", ""], 
+								function(){
 							
-							}
-						// otherwise just read it from the current table
-						else
-							{
-							aAllRows = fn.getAllRows(confTable);
-							sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+								var sWordform = fn.getPromptUserInput("woordvorm");
+								var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
 							
-							}
-						
-						
-						
-						fn.callFunction("insert_wordform", 
-								[sLemmaId, sWordform, sWordformPos], 
-								null, null, null, null, function(){
-							fn.refreshTable(confTable);
-						});
-					});
+								fn.callFunction("insert_wordform", 
+										[sLemmaId, sWordform, sWordformPos], 
+										null, null, null, null, function(){
+									fn.refreshTable(confTable);
+								});
+							});
+							
+						});	
 				}
 			},
 			"button_1":{
@@ -448,6 +499,174 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		
+		lemmata_en_paradigma_view: {
+			
+			unique_id:{
+				"visible": false
+			},
+			analyzed_wordform_id:{
+				"visible": false
+			}, 
+			lemma_id:{
+				"visible": false
+			}, 
+			wordform_id:{
+				"visible": false
+			},
+			modern_lemma:{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// update the lemmata
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					fn.updateDatabaseGivenFieldValues("lemmata", 
+							{"lemma_id": sLemmaId}, 
+							{"modern_lemma": value},
+							false,
+							function(){
+								
+								fn.updateDatabaseGivenFieldValues(t, 
+										{"lemma_id": sLemmaId}, 
+										{"modern_lemma": value}, 
+										false, function(){
+											fn.refreshTable(t);
+										});
+							});
+					
+					
+				},
+				"colsort": "asc"    // sort #1
+			}, 
+			lemma_gigpos:{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// update the lemmata
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					fn.updateDatabaseGivenFieldValues("lemmata", 
+							{"lemma_id": sLemmaId}, 
+							{"lemma_gigpos": value},
+							false,
+							function(){
+								
+								fn.updateDatabaseGivenFieldValues(t, 
+										{"lemma_id": sLemmaId}, 
+										{"lemma_gigpos": value}, 
+										false, function(){
+											fn.refreshTable(t);
+										});
+								
+							});
+				}
+			}, 
+			lem_keurmerk:{
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// update the lemmata
+					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+					fn.updateDatabaseGivenFieldValues("lemmata", 
+							{"lemma_id": sLemmaId}, 
+							{"keurmerk": value},
+							false,
+							function(){
+								
+								fn.updateDatabaseGivenFieldValues(t, 
+										{"lemma_id": sLemmaId}, 
+										{"lem_keurmerk": value}, 
+										false, function(){
+											fn.refreshTable(t);
+										});
+								
+							})
+				}
+				
+			},
+			lem_source:{
+				"visible": false
+			},
+			wordform:{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					fn.callFunction("modify_wordform", [sAwfId, value]);
+					
+				}
+			}, 
+			wordform_gigpos:{
+				"editable": true,
+				"editcallback": function(t, n, value){					
+					
+					var value = fn.escapeRegexChars(value);
+					
+					fn.getRecordGivenFieldValues("pos_to_rang", {"pos": value}, 
+							function(record){
+							
+								var sRangvalue = record["rang"];								
+								var iRankvalue = (typeof sRangvalue != 'undefined') ? parseInt(sRangvalue) : 0;
+								
+								fn.updateDatabaseGivenANode(t, n, ["rank"], [iRankvalue], false, function(){
+									
+									// update the analyzed_wordforms
+									var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+											{"analyzed_wordform_id": sAwfId}, 
+											{"wordform_gigpos": value, "rank": iRankvalue},
+											false,
+											function(){
+												fn.refreshTable(t);
+											});
+									
+								});
+
+								
+								
+								
+								
+						});					
+					
+				}
+			}, 
+			wf_keurmerk:{
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				
+				// update the analyzed_wordforms
+				"editcallback": function(t, n, value){
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+							{"analyzed_wordform_id": sAwfId}, 
+							{"keurmerk": value});
+				}
+			}, 
+			rank:{
+				"visible": false,
+				"colsort": "asc"    // sort #2
+			},
+			comment:{
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// update the analyzed_wordforms
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+							{"analyzed_wordform_id": sAwfId}, 
+							{"comment": value});
+				}
+			}, 
+			wf_source:{
+				"visible": false
+			}, 
+			autom_wf:{
+				"visible": false
+			}
+			
+		},
 		
 		
 		modified_lemmata_view: {
@@ -488,7 +707,7 @@ oTableConfigurationList = {
 
 		
 
-		lemmata_view_intern: {
+		lemmata_view: {
 			
 			"pkid":{				
 //				"visible": false

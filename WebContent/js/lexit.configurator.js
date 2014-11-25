@@ -358,9 +358,19 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 		if (typeof aColumnConfig["colsort"] != 'undefined')
 			{
 			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
+				{
 				aSortingColumnsList.push(sColName);
+				}
 			else
-				fn.message("Fout in configuratie van tabel '"+sTableName+"'", "Kolom '"+sColName+"' van tabel '"+ sTableName + "' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. Verwijder deze kolom uit het configuratiebestand (config.js).");
+				{
+				var hParamsHash = getHttpParams();
+				var sDbName = hParamsHash.get("db");
+				fn.message("Fout in configuratie van tabel '"+sTableName+"'",				
+					"Kolom '"+sColName+"' van tabel '"+ sTableName + 
+					"' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. " +
+					"Verwijder deze kolom uit het configuratiebestand " +
+					"("+ sDbName +".config.js).");
+				}
 			}
 	}	
 	return aSortingColumnsList;

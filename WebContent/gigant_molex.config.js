@@ -1,8 +1,12 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
+oShowOnlyTables = (
+					fn.getCurrentUser() == 'boukje' ||
+					fn.getCurrentUser() == 'marjolijn' ||
+					fn.getCurrentUser() == 'wil'
+					) ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
+                   "keurmerk_checklist", "gemiste_paradigma_correcties", "boukje_feestje"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
 
@@ -29,6 +33,10 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		boukje_feestje: {
+			"size": "40%"
+		},
 		
 		gemiste_paradigma_correcties: {
 			
@@ -374,40 +382,52 @@ oTableSettingsList = {
 				"name": "Voeg woordvorm toe",
 				"click": function(confTable){
 					
-					var wordform = fn.prompt("Geef een woordvorm", 
-							["woordvorm", "wordform_gigpos"], 
-							["", ""], 
-							function(){
+					var aAllRows;
+					var sLemmaId;
+					var sLemma = null;
+					
+					// is there is no paradigm yet, get the lemma id from the lemma table
+					if (fn.tableIsEmpty(confTable))
+						{
+						aAllRows = fn.getSelectedRowsFrom("lemmata_view");
+						sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+						sLemma =  fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "modern_lemma");
+						}
+					// otherwise just read it from the current table
+					else
+						{
+						aAllRows = fn.getAllRows(confTable);
+						sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+						// in this particular case, sLemma will be
+						// requested by following fn.getRecord call
+						}
+					
+					
+					
+					fn.getRecord("lemmata", sLemmaId, function(response){
+					
+						// if we don't have a modern_lemma to show, get it
 						
-						var sWordform = fn.getPromptUserInput("woordvorm");
-						var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
-
-						var aAllRows;
-						var sLemmaId;
+						if (sLemma == null)
+							sLemma =  response["modern_lemma"];						
 						
-						// is there is no paradigm yet, get the lemma id from the lemma table
-						if (fn.tableIsEmpty(confTable))
-							{
-							aAllRows = fn.getSelectedRowsFrom("lemmata_view");
-							sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+						fn.prompt("Geef woordvorm voor '"+sLemma+"'", 
+								["woordvorm", "wordform_gigpos"], 
+								["", ""], 
+								function(){
 							
-							}
-						// otherwise just read it from the current table
-						else
-							{
-							aAllRows = fn.getAllRows(confTable);
-							sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+								var sWordform = fn.getPromptUserInput("woordvorm");
+								var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
 							
-							}
-						
-						
-						
-						fn.callFunction("insert_wordform", 
-								[sLemmaId, sWordform, sWordformPos], 
-								null, null, null, null, function(){
-							fn.refreshTable(confTable);
-						});
-					});
+								fn.callFunction("insert_wordform", 
+										[sLemmaId, sWordform, sWordformPos], 
+										null, null, null, null, function(){
+									fn.refreshTable(confTable);
+								});
+							});
+							
+						});					
+					
 				}
 			},
 			"button_1":{
@@ -766,5 +786,11 @@ oTableConfigurationList = {
 			}
 			
 			
+		},
+		
+		boukje_feestje: {
+			"modern_lemma": {
+				"colsort": "asc"				
+			}
 		}
 };

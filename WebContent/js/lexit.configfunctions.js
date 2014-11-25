@@ -1770,7 +1770,7 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
  *  and return it in an array                    *
  *************************************************/
 
-fn.getRecord = function(sSomeTablename, sRecordId){
+fn.getRecord = function(sSomeTablename, sRecordId, fnCallback){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -1788,22 +1788,68 @@ fn.getRecord = function(sSomeTablename, sRecordId){
 			"dummy": getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
-	 	"success": function(xml) {
-	 		return fn._getRecord(xml);
+	 	"success": function(xml) {	 		
+	 		var recordOutput = fn._getRecordFromXmlResponse(xml);
+	 		if (fnCallback != null)
+	 			fnCallback(recordOutput);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		fn.message("Fout", 
 	 			"Fout bij aanroep van fn.getRecord('"+sSomeTablename+"'): "+
 				textStatus+" "+errorThrown);
-			return new Array();
 			}
 		} );
 	
 };
 
-// this is a subroutine of fn.getRecord and fn.callFunction
+
+fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	var aColNamesToMatch = new Array();
+	var aValuesToMatch = new Array();
+	
+	for (var sFieldName in aFieldsAndValuesToMatch)
+		{
+		aColNamesToMatch.push(sFieldName);
+		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
+		}
+	
+	var url = "../lexit/lexit/table/get_record_without_id";
+	
+	$.ajax( {
+		"type": "GET",
+		"url": url,
+		"async": false, // needed to block code execution while awaiting the server response
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sSomeTablename,
+			"column_name_to_match": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
+			"value_to_match": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR),
+			"dummy": getUniqueNumber() 
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {	 		
+	 		var recordOutput = fn._getRecordFromXmlResponse(xml);
+	 		if (fnCallback != null)
+	 			fnCallback(recordOutput);
+	 		},
+	 	"error": function(jqXHR, textStatus, errorThrown){
+	 		fn.message("Fout", 
+	 			"Fout bij aanroep van fn.getRecord('"+sSomeTablename+"'): "+
+				textStatus+" "+errorThrown);
+			}
+		} );
+	
+};
+
+
+
+// this is a subroutine of fn.getRecord, fn.getRecordGivenFieldValues and fn.callFunction
 // read the response from the database, and put the record value into an array
-fn._getRecord = function(xml){
+fn._getRecordFromXmlResponse = function(xml){
 	
 	var record = new Array();
 	
@@ -1856,7 +1902,7 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 	 	"success": function(xml) {
 	 		
 	 		// get function output from xml
- 			var oFieldsAndValues = fn._getRecord(xml);
+ 			var oFieldsAndValues = fn._getRecordFromXmlResponse(xml);
 	 		// check what the return column name is: we will use it to access
 	 		// the returned table value from the associative array.
  			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName.toLowerCase());

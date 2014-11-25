@@ -8,12 +8,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -44,12 +46,15 @@ import com.sun.jersey.spi.container.servlet.PerSession;
  *
  */
 
-// This will extend the life-cycle of the webservice to a session (instead of a request)
+// PerSession will extend the life-cycle of the webservice to a session (instead of a request)
+// This requires implementation of Serializable
+// see: https://jersey.java.net/apidocs/1.18/jersey/com/sun/jersey/spi/container/servlet/PerSession.html
+// and  http://stackoverflow.com/questions/2294551/java-io-writeabortedexception-writing-aborted-java-io-notserializableexception
 @PerSession
 
 //Will map the resource to the tables URL 
 @Path("/table")
-public class TableResources extends Application  {
+public class TableResources extends Application implements Serializable  {
 	
 		
 	
@@ -78,7 +83,7 @@ public class TableResources extends Application  {
 	@Produces({MediaType.TEXT_PLAIN})
 	public Response getJsConfigFile(@QueryParam("db_name") String dbName){
 		
-		if (Constants.debug) System.out.println("Load config file...");
+		if (Constants.debug) System.out.println("Loading config file...");
 		
 		String fileToSend = null;
 		try {
@@ -388,6 +393,35 @@ public class TableResources extends Application  {
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		TableRecordObject tro = getDatabaseObject(dbName).getRecord(getDbName(dbName), tableName, id);
+				
+		return tro;
+	}
+	
+	
+	// .../lexit/lexit/table/get_record_without_id
+	// get a record, given its id
+	@Path("get_record_without_id")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public TableRecordObject getRecordWithoutId(
+			@Context SecurityContext sc,
+			@QueryParam("table_name") String tableName,
+			@QueryParam("column_name_to_match") String columnNameToMatch,
+			@QueryParam("value_to_match") String valueToMatch,
+			@QueryParam("db_name") String dbName
+			){
+		
+		tableName = tableName.replaceAll("__", ".");
+		if (Constants.debug) System.out.println("### Get record without id from "+tableName);
+		
+		String[] columnNamesToMatch = columnNameToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		String[] valuesToMatch = valueToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		TableRecordObject tro = getDatabaseObject(dbName).getRecordWithoutId(getDbName(dbName), tableName, columnNamesToMatch, valuesToMatch);
 				
 		return tro;
 	}
@@ -911,8 +945,18 @@ public class TableResources extends Application  {
 			@DefaultValue("") @FormParam("sSearch_106") String sSearch106,
 			@DefaultValue("") @FormParam("sSearch_107") String sSearch107,
 			@DefaultValue("") @FormParam("sSearch_108") String sSearch108,
-			@DefaultValue("") @FormParam("sSearch_109") String sSearch109
+			@DefaultValue("") @FormParam("sSearch_109") String sSearch109,
+			@Context HttpServletRequest req
 			) throws IOException {
+		
+		
+//		 System.out.println("Session ID in Request: " +
+//				 req.getRequestedSessionId());
+//		 System.out.println("<br>Session ID in Request from Cookie: " +
+//				 req.isRequestedSessionIdFromCookie());
+//		 
+//		 System.out.println("Session ID: " +
+//				 req.getSession().getId() );
 		
 		
 		tableName = tableName.replaceAll("__", ".");
@@ -1166,6 +1210,13 @@ public class TableResources extends Application  {
 	 * @return
 	 */
 	private Database getDatabaseObject(String dbName){
+		
+//		System.out.println("nameToDatabaseObject contains:");
+//		for (String oneKey : nameToDatabaseObject.keySet())
+//		{
+//			System.out.println(oneKey + " -> "+ nameToDatabaseObject.get(oneKey) );
+//		}
+//		System.out.println("-------\n\n");
 		
 		if ( !nameToDatabaseObject.containsKey(dbName) )
 			{			
