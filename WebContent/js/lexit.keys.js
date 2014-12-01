@@ -309,7 +309,7 @@ kf.addKeyFunctions = function(){
 		
 		var bSearchboxOfActiveTableHasFocus = $(".dataTables_wrapper div div input").is(":focus");
 		
-		var bSomeDialogBoxIsOpen = $(".ui-dialog").elementExists();
+		var bSomeDialogBoxIsOpen = $("div.ui-dialog").elementExists();
 		
 		
 		// register which key was pressed
@@ -527,7 +527,7 @@ kf.addKeyFunctions = function(){
 //			}
 		
 		// switch table
-		if (kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus)
+		if (kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus && !bSomeDialogBoxIsOpen)
 			{	
 			
 			var sActiveTable = kf.getActiveTable();

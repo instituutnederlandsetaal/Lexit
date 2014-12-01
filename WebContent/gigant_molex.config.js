@@ -6,7 +6,7 @@ oShowOnlyTables = (
 					fn.getCurrentUser() == 'wil'
 					) ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties", "boukje_feestje"]
+                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
 
@@ -34,9 +34,6 @@ var fnArrowFunction = function(t){
 // table general settings
 oTableSettingsList = {
 		
-		boukje_feestje: {
-			"size": "40%"
-		},
 		
 		gemiste_paradigma_correcties: {
 			
@@ -786,11 +783,5 @@ oTableConfigurationList = {
 			}
 			
 			
-		},
-		
-		boukje_feestje: {
-			"modern_lemma": {
-				"colsort": "asc"				
-			}
 		}
 };

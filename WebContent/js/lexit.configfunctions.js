@@ -2069,26 +2069,35 @@ fn.message = function(sTitle, sMessage){
 
 fn.confirm = function(sTitle, sMessage, fnFunction){
 	
-	var sP = $("<p></p>").html(sMessage);
-	var dialogDivId = "dialog-message"+getUniqueNumber();
-	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
-	
-	$(document.body).append(sDiv);
-	
-	$( "#"+dialogDivId ).dialog({
-		modal: true,
-		buttons: {
-			Ok: function() {
-				$( this ).dialog( "close" );
-				$( this ).remove();
-				fnFunction();
-				},
-			Cancel: function() {
-				$( this ).dialog( "close" );
-				$( this ).remove();
-				}
+	if (fnFunction == null)
+		{
+		fn.message("Fout", "Illegale aanroep van fn.confirm(sTitle, sMessage, fnFunction). Parameter fnFunction is niet gedefinieerd.");
 		}
-	});
+	else
+		{
+		var sP = $("<p></p>").html(sMessage);
+		var dialogDivId = "dialog-message"+getUniqueNumber();
+		var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
+		
+		$(document.body).append(sDiv);
+		
+		$( "#"+dialogDivId ).dialog({
+			modal: true,
+			buttons: {
+				Ok: function() {
+					$( this ).dialog( "close" );
+					$( this ).remove();
+					fnFunction();
+					},
+				Cancel: function() {
+					$( this ).dialog( "close" );
+					$( this ).remove();
+					}
+			}
+		});
+		}
+	
+	
 };
 
 

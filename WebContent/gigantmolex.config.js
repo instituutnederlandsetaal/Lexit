@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-10-20                                        **
+// **      2014-11-27                                        **
 // **                                                        **
 // ************************************************************
 
@@ -104,16 +104,18 @@ oTableSettingsList = {
 				fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
 				fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
 				
-				// we need to disable the checkbox of 
-				var aRows = fn.getAllRows(t);
-				aRows.each(function(){
-					var bSourceContainsTelwoorden = (fn.getDataFromCellNamed(t, this, "source")).indexOf("TELWOORDEN")>-1;
-					
-					if (bSourceContainsTelwoorden)
-						{				
-						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
-						}
-				});
+				// we need to disable the checkbox of telwoorden
+				// CANCELED on 20141127 [required by KatrienD]
+				//
+//				var aRows = fn.getAllRows(t);
+//				aRows.each(function(){
+//					var bSourceContainsTelwoorden = (fn.getDataFromCellNamed(t, this, "source")).indexOf("TELWOORDEN")>-1;
+//					
+//					if (bSourceContainsTelwoorden)
+//						{				
+//						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
+//						}
+//				});
 				
 				
 				
@@ -375,6 +377,10 @@ oTableConfigurationList = {
 			},
 			"trademark": {
 				"visible": false
+			},
+			"notitie":{
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			},
 			"gedrukt":{
 				"editable": true

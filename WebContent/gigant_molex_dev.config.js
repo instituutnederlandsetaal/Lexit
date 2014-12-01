@@ -4,9 +4,12 @@ oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
                    "keurmerk_checklist", "gemiste_paradigma_correcties"]
 	:
-		[//"lemmata_view_intern", "modified_lemmata_view", "modified_paradigm_view",
+		[
+		 //"lemmata_view_intern", 
+		 "modified_lemmata_view", "modified_paradigm_view",
 		 "lemmata_view", 
-		 "lemmata_en_paradigma_view", "paradigma_view", "analyzed_wordforms", "lemmata"];
+		 "lemmata_en_paradigma_view", "paradigma_view", "analyzed_wordforms", "lemmata"
+		 ];
 
 
 		
@@ -41,6 +44,23 @@ oTableSettingsList = {
 		
 		lemmata_en_paradigma_view:{
 			
+			"repeat_callback": true,
+			
+			"callback": function(t){
+				
+				(fn.getAllRows(t)).each(function(){
+					
+					var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
+					if (sAwfId == '')
+						{
+						fn.getCellElement(t, this, "wordform").hide();
+						fn.getCellElement(t, this, "wordform_gigpos").hide();
+						fn.getCellElement(t, this, "wf_keurmerk").hide();
+						fn.getCellElement(t, this, "comment").hide();
+						}
+				});
+			},
+			
 			"button_0":{
 				"name": "Voeg woordvorm toe",
 				"click": function(t){
@@ -50,28 +70,54 @@ oTableSettingsList = {
 					if (aAllRows.length>0)
 						{
 						
-						var sLemmaId = fn.getDataFromCellNamed(t, aAllRows[0], "pkid");
+						var sLemmaId = fn.getDataFromCellNamed(t, aAllRows[0], "lemma_id");
+						var sModLemma = fn.getDataFromCellNamed(t, aAllRows[0], "modern_lemma");
 						
-						fn.prompt("Geef een woordvorm", 
+						fn.prompt("Geef woordvorm voor '"+sModLemma+"'", 
 								["woordvorm", "wordform_gigpos"], 
 								["", ""], 
 								function(){
 							
-							var sWordform = fn.getPromptUserInput("woordvorm");
-							var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
-							
-							// @@@
-//							fn.callFunction("insert_wordform", 
-//									[sLemmaId, sWordform, sWordformPos],  
-//									null, null, null, null, function(){
-//								fn.refreshTable(confTable);
-//							});
-						});
+									var sWordform = fn.getPromptUserInput("woordvorm");
+									var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
+									
+									// wordform is being added to the wordforms and analyzed_wordforms tables
+									// and the view is refreshed
+									fn.callFunction("insert_wordform", 
+											[sLemmaId, sWordform, sWordformPos], 
+											null, null, null, null, function(){
+										fn.refreshTable(t);
+									});
+								});
 						}
 					else
 						{
 						fn.message("Kies een lemma", "Selecteer het lemma waar een woordvorm aan moet worden toegevoegd.");
 						}
+				}
+			},
+			"button_1":{
+				
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						
+						aRows.each(function(){
+							
+							var bLastRow = fn.isLastNodeOf(this, aRows);
+							
+							fn.removeFromDatabaseGivenANode(t, this, false, function(){
+								if (bLastRow) fn.refreshTable(t);
+							});							
+							
+						});
+						
+					});
+					
+					
 				}
 			}
 		},
@@ -170,7 +216,7 @@ oTableSettingsList = {
 					
 					var nNode = fn.getFirstSelectedRowFrom(confTable);
 					var sLemmaId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
-					fn.callDatabase("paradigma_view", {"lemma_id": sLemmaId});
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": sLemmaId});
 				}
 			},
 			
@@ -498,8 +544,7 @@ oTableSettingsList = {
 
 
 // configuration at column level
-oTableConfigurationList = {
-		
+oTableConfigurationList = {		
 		
 		lemmata_en_paradigma_view: {
 			
@@ -516,73 +561,13 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			modern_lemma:{
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the lemmata
-					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
-					fn.updateDatabaseGivenFieldValues("lemmata", 
-							{"lemma_id": sLemmaId}, 
-							{"modern_lemma": value},
-							false,
-							function(){
-								
-								fn.updateDatabaseGivenFieldValues(t, 
-										{"lemma_id": sLemmaId}, 
-										{"modern_lemma": value}, 
-										false, function(){
-											fn.refreshTable(t);
-										});
-							});
-					
-					
-				},
+				
 				"colsort": "asc"    // sort #1
 			}, 
 			lemma_gigpos:{
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the lemmata
-					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
-					fn.updateDatabaseGivenFieldValues("lemmata", 
-							{"lemma_id": sLemmaId}, 
-							{"lemma_gigpos": value},
-							false,
-							function(){
-								
-								fn.updateDatabaseGivenFieldValues(t, 
-										{"lemma_id": sLemmaId}, 
-										{"lemma_gigpos": value}, 
-										false, function(){
-											fn.refreshTable(t);
-										});
-								
-							});
-				}
+
 			}, 
 			lem_keurmerk:{
-				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the lemmata
-					var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
-					fn.updateDatabaseGivenFieldValues("lemmata", 
-							{"lemma_id": sLemmaId}, 
-							{"keurmerk": value},
-							false,
-							function(){
-								
-								fn.updateDatabaseGivenFieldValues(t, 
-										{"lemma_id": sLemmaId}, 
-										{"lem_keurmerk": value}, 
-										false, function(){
-											fn.refreshTable(t);
-										});
-								
-							})
-				}
 				
 			},
 			lem_source:{
@@ -621,11 +606,7 @@ oTableConfigurationList = {
 												fn.refreshTable(t);
 											});
 									
-								});
-
-								
-								
-								
+								});								
 								
 						});					
 					
@@ -644,8 +625,8 @@ oTableConfigurationList = {
 				}
 			}, 
 			rank:{
-				"visible": false,
-				"colsort": "asc"    // sort #2
+				"colsort": "asc",    // sort #2
+				"visible": false
 			},
 			comment:{
 				"bgcolor": "#E0F8EC",
@@ -667,6 +648,8 @@ oTableConfigurationList = {
 			}
 			
 		},
+		
+		
 		
 		
 		modified_lemmata_view: {
@@ -783,7 +766,7 @@ oTableConfigurationList = {
 				"button": "Paradigma",
 				"click": function( confTable, confNode){					
 					var lemma_id = fn.getDataFromSiblingNode(confTable, confNode, "pkid");
-					fn.callDatabase("paradigma_view", {"lemma_id": lemma_id});
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemma_id});
 				}
 			},
 			"toon_morfologie":{				
