@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-11-27                                        **
+// **      2014-12-02                                        **
 // **                                                        **
 // ************************************************************
 
@@ -21,6 +21,7 @@ var sChosenParentId = null;
 
 // column not allowed in this installation
 var sColumnCheck = "opmerking_intern";
+var sColumnCheck2 = "comment_intern";
 
 
 
@@ -46,7 +47,9 @@ oTableSettingsList = {
 			// column check
 			"callback": function(t){
 				
-				if ($.inArray(sColumnCheck, mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1)
+				if (	$.inArray(sColumnCheck,  mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1 ||
+						$.inArray(sColumnCheck2, mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1	
+						)
 					{
 					$("#container").empty();
 					fn.message("Let op", "Illegale kolom in deze installatie");

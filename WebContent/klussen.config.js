@@ -5,6 +5,7 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "anw_paradigma_verbs",
                    "anw_paradigma_nouns",
                    "anw_paradigma_rest",
+                   "anw_paradigma_rest_extended",
                    
                    "molex_zonder_keurmerk",
                    
@@ -655,6 +656,7 @@ oTableSettingsList = {
 		anw_paradigma_verbs: oAnwParadigma,
 		anw_paradigma_nouns: oAnwParadigma,
 		anw_paradigma_rest: oAnwParadigma,
+		anw_paradigma_rest_extended: oAnwParadigma,
 		
 		lemmata_en_afbreking: {
 			"size": "80%"
@@ -1527,7 +1529,7 @@ oTableConfigurationList = {
 		anw_paradigma_verbs: oAnwParadigmaWorkTableConfig,		
 		anw_paradigma_nouns: oAnwParadigmaWorkTableConfig,		
 		anw_paradigma_rest: oAnwParadigmaWorkTableConfig,
-		
+		anw_paradigma_rest_extended: oAnwParadigmaWorkTableConfig,
 		
 		
 		logfiles_pos_and_afbr_together: {

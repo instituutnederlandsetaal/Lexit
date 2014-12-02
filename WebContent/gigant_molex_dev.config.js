@@ -555,23 +555,41 @@ oTableConfigurationList = {
 				"visible": false
 			}, 
 			lemma_id:{
-				"visible": false
+				"visible": false,
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
+				}
 			}, 
 			wordform_id:{
 				"visible": false
 			},
 			modern_lemma:{
 				
-				"colsort": "asc"    // sort #1
+				"colsort": "asc",    // sort #1
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
+				}
 			}, 
 			lemma_gigpos:{
-
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
+				}
 			}, 
 			lem_keurmerk:{
-				
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
+				}
 			},
 			lem_source:{
-				"visible": false
+				"visible": false,
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
+				}
 			},
 			wordform:{
 				"editable": true,
@@ -628,6 +646,7 @@ oTableConfigurationList = {
 				"colsort": "asc",    // sort #2
 				"visible": false
 			},
+			
 			comment:{
 				"bgcolor": "#E0F8EC",
 				"editable": true,
@@ -639,7 +658,26 @@ oTableConfigurationList = {
 							{"analyzed_wordform_id": sAwfId}, 
 							{"comment": value});
 				}
-			}, 
+			},
+			comment_intern: {
+				
+				// BEWARE, DON'T REMOVE THIS PART
+				// ------------------------------
+				"flexible_visibility": false,
+				"visible": (document.URL.indexOf( "gtb.dev.inl.loc" )>-1),
+				// ------------------------------
+				
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// update the analyzed_wordforms
+					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+							{"analyzed_wordform_id": sAwfId}, 
+							{"comment_intern": value});
+				}
+			},
 			wf_source:{
 				"visible": false
 			}, 
@@ -821,14 +859,10 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"wordform":{	
-				"editable": true
+				"editable": false //true
 			},
-//			"wordform_corr":{	
-//				"bgcolor": "#E0F8EC",
-//				"editable": true
-//			},
 			"wordform_afbr":{				
-				"editable": true
+				"editable": false //true
 			},
 			"th_wordform": {				
 				"visible": false				
@@ -837,16 +871,16 @@ oTableConfigurationList = {
 				"visible": false				
 			},
 			"wordform_gigpos":{				
-				"editable": true
+				"editable": false //true
 			},
 			"flex":{				
-				"editable": true
+				"editable": false //true
 			},
 			"keurmerk":{				
-				"editable": true
+				"editable": false //true
 			},
 			"comment": {
-				"editable": true
+				"editable": false //true
 			},
 			
 			"rang":{			

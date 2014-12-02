@@ -1007,7 +1007,7 @@ fn.getDataFromSiblingNode = function(confTable, confNode, sOtherColumnName){
 	var sTablename;
 	if (typeof confTable == 'string')
 		{
-		sTablename = confTable;
+		sTablename = confTable+""; // trick to prevent copy by reference
 		confTable = mt.getDataTableObjectOf(sTablename);
 		}
 	else
@@ -1018,7 +1018,16 @@ fn.getDataFromSiblingNode = function(confTable, confNode, sOtherColumnName){
 	var rowNumber = confTable.fnGetPosition(confNode)[0];
 	var colNr = $.inArray(sOtherColumnName, mt.getListOfColumnsOf(sTablename));
 	
-	return confTable.fnGetData(rowNumber, colNr);
+	if (colNr<0)
+		{
+		fn.message("Fout", "fn.getDataFromSiblingNode('"+sTablename+"') " +
+				"is aangeroepen met een niet bestaande kolomnaam: '"+sOtherColumnName+"'.");
+		return "";
+		}
+	else
+		{
+		return confTable.fnGetData(rowNumber, colNr);
+		}	
 };
 
 
@@ -1051,7 +1060,7 @@ fn.getDataFromCellNamed = function(someTable, nNode, sColumnName){
 	if (colNr<0)
 		{
 		fn.message("Fout", "fn.getDataFromCellNamed('"+someTable+"') " +
-				"is aangeroepen voor een niet bestaand kolom '"+sColumnName+"'.");
+				"is aangeroepen met een niet bestaande kolomnaam: '"+sColumnName+"'.");
 		
 		return "";
 		}
