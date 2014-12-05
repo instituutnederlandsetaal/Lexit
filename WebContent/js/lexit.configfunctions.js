@@ -1892,78 +1892,98 @@ fn.getFunctionOutput = function(){
 };
 
 fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
-		sSomeTableName, nNode, sCellName, sResultColumnName, fnCallback){
+		sSomeTableName, nNode, sCellName, sResultColumnName, fnCallback){	
 	
-	var url = "../lexit/lexit/table/call_function";
+	// special case: if we call the function only with the 3 key parameters
+	//   like fn.callFunction(sSomeFunctionName, aFunctionArguments, fnCallback)
 	
-	 
-	$.ajax( {
-		"type": "GET",
-		"url": url,
-		"async": false, // needed to block code execution while awaiting the server response
-		"data": {
-			"db_name": getHttpParams().get("db"),
-			"function_name": sSomeFunctionName,
-			"args": aFunctionArguments.join(ARG_INTERNAL_SEPARATOR),
-			"dummy": getUniqueNumber() 
-			},
-	 	"dataType": "xml", // get response as xml
-	 	"success": function(xml) {
-	 		
-	 		// get function output from xml
- 			var oFieldsAndValues = fn._getRecordFromXmlResponse(xml);
-	 		// check what the return column name is: we will use it to access
-	 		// the returned table value from the associative array.
- 			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName.toLowerCase());
- 			
-	 		// if some table name was given as an argument,
-	 		// we will update that table with the output of the function
-	 		if (sSomeTableName != null)
-	 			{	 			
-	 			// get the returned table value 
-	 			var sValueForTable = oFieldsAndValues[sColumnNameToReadFrom];
+	if (typeof sSomeTableName == 'function'
+		&& nNode == null
+		&& sCellName == null
+		&& sResultColumnName == null
+		&& fnCallback == null)
+		{
+		fn.callFunction(sSomeFunctionName, aFunctionArguments, null, null, null, null, sSomeTableName);
+		}
+	
+	// normal case: each parameter if present or, at least, at its expected place
+	//   and some of the final parameters might be left away
+	
+	else
+		{
+		
+		var url = "../lexit/lexit/table/call_function";
+		
+		 
+		$.ajax( {
+			"type": "GET",
+			"url": url,
+			"async": false, // needed to block code execution while awaiting the server response
+			"data": {
+				"db_name": getHttpParams().get("db"),
+				"function_name": sSomeFunctionName,
+				"args": aFunctionArguments.join(ARG_INTERNAL_SEPARATOR),
+				"dummy": getUniqueNumber() 
+				},
+		 	"dataType": "xml", // get response as xml
+		 	"success": function(xml) {
+		 		
+		 		// get function output from xml
+	 			var oFieldsAndValues = fn._getRecordFromXmlResponse(xml);
+		 		// check what the return column name is: we will use it to access
+		 		// the returned table value from the associative array.
+	 			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName.toLowerCase());
 	 			
-	 			// if a node was given, update that node
-	 			if (nNode != null)
-	 				{	 					 		
-			 		fn.putDataIntoCell(sSomeTableName, nNode, sCellName, sValueForTable);
-	 				}
-	 			// if no node was given, update each row
-	 			else
-	 				{
-	 				var aValuesForTable = sValueForTable.split(ARG_INTERNAL_SEPARATOR);
-	 				if (aValuesForTable.length != fn.getCurrentDisplayLength(sSomeTableName))
-	 					{
-	 					fn.message("Fout",
-	 							"Fout bij aanroep van fn.callFunction('"+sSomeFunctionName+"', '"+sSomeTableName+"'). "+
-	 							"Het aantal rijen dat de functie '"+sSomeFunctionName+"' teruggeeft, " +
-	 							"komt niet overeen met het aantal getoonde rijen op het scherm.");
-	 					}
-	 				else
-	 					{
-	 					var aAllRows = fn.getAllRows(sSomeTableName);
-		 				aAllRows.each(function(i){
-		 					fn.putDataIntoCell(sSomeTableName, this, sCellName, aValuesForTable[i]);	 					
-		 					});
-	 					}	 				
-	 				}		 		
-	 			}
-	 		
-	 		// store the output for later retrieval 
-	 		if (typeof oFieldsAndValues[sColumnNameToReadFrom] != 'undefined')
-	 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
-	 			 		
-	 		// if some callback function is given, call it now
-	 		if (fnCallback!=null) fnCallback();
-	 		},
-	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
-	 			"Fout bij aanroep van fn.callFunction('" + sSomeFunctionName + "')"+
-	 			(sSomeTableName != null ? " met tabel '" + sSomeTableName + "'": "" )+
-	 			": "+
-				textStatus+" "+errorThrown);			
-			}
-		} );
+		 		// if some table name was given as an argument,
+		 		// we will update that table with the output of the function
+		 		if (sSomeTableName != null)
+		 			{	 			
+		 			// get the returned table value 
+		 			var sValueForTable = oFieldsAndValues[sColumnNameToReadFrom];
+		 			
+		 			// if a node was given, update that node
+		 			if (nNode != null)
+		 				{	 					 		
+				 		fn.putDataIntoCell(sSomeTableName, nNode, sCellName, sValueForTable);
+		 				}
+		 			// if no node was given, update each row
+		 			else
+		 				{
+		 				var aValuesForTable = sValueForTable.split(ARG_INTERNAL_SEPARATOR);
+		 				if (aValuesForTable.length != fn.getCurrentDisplayLength(sSomeTableName))
+		 					{
+		 					fn.message("Fout",
+		 							"Fout bij aanroep van fn.callFunction('"+sSomeFunctionName+"', '"+sSomeTableName+"'). "+
+		 							"Het aantal rijen dat de functie '"+sSomeFunctionName+"' teruggeeft, " +
+		 							"komt niet overeen met het aantal getoonde rijen op het scherm.");
+		 					}
+		 				else
+		 					{
+		 					var aAllRows = fn.getAllRows(sSomeTableName);
+			 				aAllRows.each(function(i){
+			 					fn.putDataIntoCell(sSomeTableName, this, sCellName, aValuesForTable[i]);	 					
+			 					});
+		 					}	 				
+		 				}		 		
+		 			}
+		 		
+		 		// store the output for later retrieval 
+		 		if (typeof oFieldsAndValues[sColumnNameToReadFrom] != 'undefined')
+		 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
+		 			 		
+		 		// if some callback function is given, call it now
+		 		if (fnCallback!=null) fnCallback();
+		 		},
+		 	"error": function(jqXHR, textStatus, errorThrown){
+		 		fn.message("Fout", 
+		 			"Fout bij aanroep van fn.callFunction('" + sSomeFunctionName + "')"+
+		 			(sSomeTableName != null ? " met tabel '" + sSomeTableName + "'": "" )+
+		 			": "+
+					textStatus+" "+errorThrown);			
+				}
+			} );
+		
+		}
 	
 };
 

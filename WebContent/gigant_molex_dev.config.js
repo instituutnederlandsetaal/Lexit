@@ -1,29 +1,17 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = (fn.getCurrentUser() == 'boukje') ?
-		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
-	:
-		[
-		 //"lemmata_view_intern", 
-		 "modified_lemmata_view", "modified_paradigm_view",
-		 "lemmata_view", 
-		 "lemmata_en_paradigma_view", "paradigma_view", "analyzed_wordforms", "lemmata"
-		 ];
+oShowOnlyTables = ["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view"];
 
 
-		
-// warn if some accesses this by mistakes
+//warn if some accesses this by mistakes
 if ( document.URL.indexOf( INL_HOMEURL )>-1 ){
 
 	fn.message("Let op", "Dit is een testversie");
 }
 
-
 // remember chosen parent
 
 var sChosenParentId = null;
-
 
 
 
@@ -38,89 +26,10 @@ var fnArrowFunction = function(t){
 	fn.callDatabase("paradigma_view", {"lemma_id": iLemmaId});
 };
 
+
 // table general settings
 oTableSettingsList = {
 		
-		
-		lemmata_en_paradigma_view:{
-			
-			"repeat_callback": true,
-			
-			"callback": function(t){
-				
-				(fn.getAllRows(t)).each(function(){
-					
-					var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
-					if (sAwfId == '')
-						{
-						fn.getCellElement(t, this, "wordform").hide();
-						fn.getCellElement(t, this, "wordform_gigpos").hide();
-						fn.getCellElement(t, this, "wf_keurmerk").hide();
-						fn.getCellElement(t, this, "comment").hide();
-						}
-				});
-			},
-			
-			"button_0":{
-				"name": "Voeg woordvorm toe",
-				"click": function(t){
-					
-					var aAllRows = fn.getSelectedRowsFrom(t);
-					
-					if (aAllRows.length>0)
-						{
-						
-						var sLemmaId = fn.getDataFromCellNamed(t, aAllRows[0], "lemma_id");
-						var sModLemma = fn.getDataFromCellNamed(t, aAllRows[0], "modern_lemma");
-						
-						fn.prompt("Geef woordvorm voor '"+sModLemma+"'", 
-								["woordvorm", "wordform_gigpos"], 
-								["", ""], 
-								function(){
-							
-									var sWordform = fn.getPromptUserInput("woordvorm");
-									var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
-									
-									// wordform is being added to the wordforms and analyzed_wordforms tables
-									// and the view is refreshed
-									fn.callFunction("insert_wordform", 
-											[sLemmaId, sWordform, sWordformPos], 
-											null, null, null, null, function(){
-										fn.refreshTable(t);
-									});
-								});
-						}
-					else
-						{
-						fn.message("Kies een lemma", "Selecteer het lemma waar een woordvorm aan moet worden toegevoegd.");
-						}
-				}
-			},
-			"button_1":{
-				
-				"name": "Verwijder selectie",
-				"click": function(t){
-					
-					fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){
-						
-						var aRows = fn.getSelectedRowsFrom(t);
-						
-						aRows.each(function(){
-							
-							var bLastRow = fn.isLastNodeOf(this, aRows);
-							
-							fn.removeFromDatabaseGivenANode(t, this, false, function(){
-								if (bLastRow) fn.refreshTable(t);
-							});							
-							
-						});
-						
-					});
-					
-					
-				}
-			}
-		},
 		
 		gemiste_paradigma_correcties: {
 			
@@ -162,7 +71,7 @@ oTableSettingsList = {
 							
 							var nCurrentNode = this;
 							var sLemmaId = fn.getDataFromCellNamed(confTable, nCurrentNode, "lemma_id");
-							fn.callFunction("restore_lemma_and_paradigm_and_ids", [sLemmaId], null, null, null, null, 
+							fn.callFunction("restore_lemma_and_paradigm_and_ids", [sLemmaId],  
 									function(){
 										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
 											fn.refreshTable(confTable);
@@ -178,7 +87,7 @@ oTableSettingsList = {
 			
 			"prereset_callback": function(confTable){
 				
-				//fn.addFilters(confTable, {"homo": ""});
+				fn.addFilters(confTable, {"homo": ""});
 				
 				sChosenParentId = null;
 				fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
@@ -187,7 +96,7 @@ oTableSettingsList = {
 			
 			"repeat_callback": true,
 			
-			"callback": function(t){
+			"callback": function(t){				
 				
 				// give parent other color (so they are recognizable)
 				var sTableName = fn.getTableName(t);
@@ -207,16 +116,16 @@ oTableSettingsList = {
 						}							
 					});
 				
-			},
+			},			
+			
 	
-			"keyup" : {
-				
+			"keyup" : {				
 				
 				"f9": function(confTable){
 					
 					var nNode = fn.getFirstSelectedRowFrom(confTable);
 					var sLemmaId = fn.getDataFromCellNamed(confTable, nNode, "pkid");
-					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": sLemmaId});
+					fn.callDatabase("paradigma_view", {"lemma_id": sLemmaId});
 				}
 			},
 			
@@ -235,7 +144,7 @@ oTableSettingsList = {
 						
 						fn.callFunction("insert_lemma", 
 								[sLemma, sLemmaPos], 
-								null, null, null, null, function(){
+								function(){
 							fn.refreshTable(confTable);
 						});
 					});
@@ -285,11 +194,12 @@ oTableSettingsList = {
 						sChosenParentId = sLemId;
 						}
 					
+					// press shift + click to cancel parent selection 
 					if (kf._getPressedKey() == 'shift')
-						{
-						fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-						sChosenParentId = null;
-						}
+					{
+					fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+					sChosenParentId = null;
+					}
 
 				}
 			},
@@ -316,6 +226,7 @@ oTableSettingsList = {
 										function(){
 											if (bLastNode)
 												{
+												
 												// reset: no chosen parent, to prevent accidental linking
 												// [commented out, because Katrien doesn't like this]
 												//fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
@@ -357,6 +268,7 @@ oTableSettingsList = {
 						{
 						oNodes.each(function(){
 							var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							var sParentId = fn.getDataFromCellNamed(confTable, this, "parent_id");
 							var bLastNode = fn.isLastNodeOf(this, oNodes);
 							fn.updateDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemId}, 
@@ -365,10 +277,16 @@ oTableSettingsList = {
 									function(){
 										if (bLastNode)
 											{
-											fn.refreshTable(confTable);
-											// reset: no chosen parent
-											fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-											sChosenParentId = null;
+											
+											fn.callFunction("set_parent_to_false", [sParentId],
+													function(){
+												
+												fn.refreshTable(confTable);
+												// reset: no chosen parent
+												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+												sChosenParentId = null;
+												});
+											
 											}
 									});
 							});
@@ -406,9 +324,9 @@ oTableSettingsList = {
 				var aRows = fn.getAllRows(t);
 				var sTableName = fn.getTableName(t);
 				
-				// if the LM'er is working with the keurmerk_checklist
-				// we need to highlight some lines (show relevant lines)
-				// otherwise, we don't need to.
+				// If the LM'er is working with the keurmerk_checklist
+				// we need to highlight some lines (= show relevant lines).
+				// Otherwise, we don't need to.
 				if (fn.tableExists("keurmerk_checklist"))
 					{
 					
@@ -503,12 +421,13 @@ oTableSettingsList = {
 							
 								fn.callFunction("insert_wordform", 
 										[sLemmaId, sWordform, sWordformPos], 
-										null, null, null, null, function(){
+										function(){
 									fn.refreshTable(confTable);
 								});
 							});
 							
-						});	
+						});					
+					
 				}
 			},
 			"button_1":{
@@ -544,150 +463,7 @@ oTableSettingsList = {
 
 
 // configuration at column level
-oTableConfigurationList = {		
-		
-		lemmata_en_paradigma_view: {
-			
-			unique_id:{
-				"visible": false
-			},
-			analyzed_wordform_id:{
-				"visible": false
-			}, 
-			lemma_id:{
-				"visible": false,
-				"click": function(t, n){
-					var sLemmaId = fn.getDataFromCellNode(t, n);
-					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
-				}
-			}, 
-			wordform_id:{
-				"visible": false
-			},
-			modern_lemma:{
-				
-				"colsort": "asc",    // sort #1
-				"click": function(t, n){
-					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
-				}
-			}, 
-			lemma_gigpos:{
-				"click": function(t, n){
-					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
-				}
-			}, 
-			lem_keurmerk:{
-				"click": function(t, n){
-					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
-				}
-			},
-			lem_source:{
-				"visible": false,
-				"click": function(t, n){
-					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					fn.callDatabase("lemmata_view", {"pkid": sLemmaId});
-				}
-			},
-			wordform:{
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.callFunction("modify_wordform", [sAwfId, value]);
-					
-				}
-			}, 
-			wordform_gigpos:{
-				"editable": true,
-				"editcallback": function(t, n, value){					
-					
-					var value = fn.escapeRegexChars(value);
-					
-					fn.getRecordGivenFieldValues("pos_to_rang", {"pos": value}, 
-							function(record){
-							
-								var sRangvalue = record["rang"];								
-								var iRankvalue = (typeof sRangvalue != 'undefined') ? parseInt(sRangvalue) : 0;
-								
-								fn.updateDatabaseGivenANode(t, n, ["rank"], [iRankvalue], false, function(){
-									
-									// update the analyzed_wordforms
-									var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-											{"analyzed_wordform_id": sAwfId}, 
-											{"wordform_gigpos": value, "rank": iRankvalue},
-											false,
-											function(){
-												fn.refreshTable(t);
-											});
-									
-								});								
-								
-						});					
-					
-				}
-			}, 
-			wf_keurmerk:{
-				"bgcolor": "#E0F8EC",
-				"editable": true,
-				
-				// update the analyzed_wordforms
-				"editcallback": function(t, n, value){
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"keurmerk": value});
-				}
-			}, 
-			rank:{
-				"colsort": "asc",    // sort #2
-				"visible": false
-			},
-			
-			comment:{
-				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment": value});
-				}
-			},
-			comment_intern: {
-				
-				// BEWARE, DON'T REMOVE THIS PART
-				// ------------------------------
-				"flexible_visibility": false,
-				"visible": (document.URL.indexOf( "gtb.dev.inl.loc" )>-1),
-				// ------------------------------
-				
-				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment_intern": value});
-				}
-			},
-			wf_source:{
-				"visible": false
-			}, 
-			autom_wf:{
-				"visible": false
-			}
-			
-		},
-		
-		
+oTableConfigurationList = {
 		
 		
 		modified_lemmata_view: {
@@ -804,7 +580,7 @@ oTableConfigurationList = {
 				"button": "Paradigma",
 				"click": function( confTable, confNode){					
 					var lemma_id = fn.getDataFromSiblingNode(confTable, confNode, "pkid");
-					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemma_id});
+					fn.callDatabase("paradigma_view", {"lemma_id": lemma_id});
 				}
 			},
 			"toon_morfologie":{				
@@ -859,10 +635,14 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"wordform":{	
-				"editable": false //true
+				"editable": true
 			},
+//			"wordform_corr":{	
+//				"bgcolor": "#E0F8EC",
+//				"editable": true
+//			},
 			"wordform_afbr":{				
-				"editable": false //true
+				"editable": true
 			},
 			"th_wordform": {				
 				"visible": false				
@@ -871,16 +651,16 @@ oTableConfigurationList = {
 				"visible": false				
 			},
 			"wordform_gigpos":{				
-				"editable": false //true
+				"editable": true
 			},
 			"flex":{				
-				"editable": false //true
+				"editable": true
 			},
 			"keurmerk":{				
-				"editable": false //true
+				"editable": true
 			},
 			"comment": {
-				"editable": false //true
+				"editable": true
 			},
 			
 			"rang":{			
@@ -889,6 +669,7 @@ oTableConfigurationList = {
 			}
 			
 		},
+		
 		
 		gemiste_paradigma_correcties: {
 			

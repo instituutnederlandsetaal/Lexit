@@ -200,6 +200,91 @@ lemmata_view: {
 				
 			}
 			
+		},
+		
+		paradigma_view: {
+			
+			
+			"size": "90%",
+			"button_0":{
+				"name": "Voeg woordvorm toe",
+				"click": function(confTable){
+					
+					var aAllRows;
+					var sLemmaId;
+					var sLemma = null;
+					
+					// is there is no paradigm yet, get the lemma id from the lemma table
+					if (fn.tableIsEmpty(confTable))
+						{
+						aAllRows = fn.getSelectedRowsFrom("lemmata_view");
+						sLemmaId = fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "pkid");
+						sLemma =  fn.getDataFromCellNamed("lemmata_view", aAllRows[0], "modern_lemma");
+						}
+					// otherwise just read it from the current table
+					else
+						{
+						aAllRows = fn.getAllRows(confTable);
+						sLemmaId = fn.getDataFromCellNamed(confTable, aAllRows[0], "lemma_id");
+						// in this particular case, sLemma will be
+						// requested by following fn.getRecord call
+						}
+					
+					
+					
+					fn.getRecord("lemmata", sLemmaId, function(response){
+					
+						// if we don't have a modern_lemma to show, get it
+						
+						if (sLemma == null)
+							sLemma =  response["modern_lemma"];						
+						
+						fn.prompt("Geef woordvorm voor '"+sLemma+"'", 
+								["woordvorm", "wordform_gigpos"], 
+								["", ""], 
+								function(){
+							
+								var sWordform = fn.getPromptUserInput("woordvorm");
+								var sWordformPos = fn.getPromptUserInput("wordform_gigpos");
+							
+								fn.callFunction("insert_wordform", 
+										[sLemmaId, sWordform, sWordformPos], 
+										null, null, null, null, function(){
+									fn.refreshTable(confTable);
+								});
+							});
+							
+						});					
+					
+				}
+			},
+			"button_1":{
+				
+				"name": "Verwijder selectie",
+				"click": function(confTable){
+					
+					var answer = confirm("Weet u het zeker?");
+					
+					if (answer){
+						
+						var aRows = fn.getSelectedRowsFrom(confTable);
+						aRows.each(function(){
+							
+							var bLastRow = fn.isLastNodeOf(this, aRows);
+							var sAnalyzedWfId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							
+							fn.removeFromDatabaseGivenFieldValues("analyzed_wordforms", 
+									{"analyzed_wordform_id": sAnalyzedWfId}, 
+									false,
+									function(){
+										if (bLastRow) fn.refreshTable(confTable);
+									});
+							
+						});
+					}
+					
+				}
+			}
 		}
 	
 		

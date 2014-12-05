@@ -6,9 +6,9 @@ oShowOnlyTables = (
 					fn.getCurrentUser() == 'wil'
 					) ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties"]
+                   "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view"]
 	:
-		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view"];
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -272,6 +272,7 @@ oTableSettingsList = {
 						{
 						oNodes.each(function(){
 							var sLemId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							var sParentId = fn.getDataFromCellNamed(confTable, this, "parent_id");
 							var bLastNode = fn.isLastNodeOf(this, oNodes);
 							fn.updateDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemId}, 
@@ -280,10 +281,13 @@ oTableSettingsList = {
 									function(){
 										if (bLastNode)
 											{
-											fn.refreshTable(confTable);
-											// reset: no chosen parent
-											fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
-											sChosenParentId = null;
+											fn.callFunction("set_parent_to_false", [sParentId], null, null, null, null, function(){
+												
+												fn.refreshTable(confTable);
+												// reset: no chosen parent
+												fn.setCustomButtonName(confTable, 2, "Gekozen ouder:");
+												sChosenParentId = null;
+												});
 											}
 									});
 							});
