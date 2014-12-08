@@ -217,6 +217,10 @@ fn.getSortingDirections = function(sSomeTablename){
 
 
 fn.setSorting = function(sSomeTablename, oSortingColumnsAndDirections){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
 	var aNewSettings = new Array();
 	for (aOnePair in oSortingColumnsAndDirections)
 		{
@@ -1971,8 +1975,9 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 		 		if (typeof oFieldsAndValues[sColumnNameToReadFrom] != 'undefined')
 		 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
 		 			 		
-		 		// if some callback function is given, call it now
-		 		if (fnCallback!=null) fnCallback();
+		 		// if some callback function is given, call it now		 		
+		 		if (fnCallback!=null) 
+		 			fnCallback(oFieldsAndValues);
 		 		},
 		 	"error": function(jqXHR, textStatus, errorThrown){
 		 		fn.message("Fout", 
@@ -2159,8 +2164,13 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
 		var input = $("<"+sInputType+"></"+sInputType+">")
 			.attr("type", "text" )
 			.attr("name", fieldLC)
-			.attr("id", "prompt_"+fieldLC)
-			.text(aValues!=null ? aValues[i]: ""); // preset the input value, if available
+			.attr("id", "prompt_"+fieldLC);
+		
+		// preset the input value, if available
+		if (bTextarea)
+			input.text(aValues!=null ? aValues[i]: "");  // textarea
+		else
+			input.val(aValues!=null ? aValues[i]: "");   // input
 		
 		// if cols and rows are given, set them!
 		if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)

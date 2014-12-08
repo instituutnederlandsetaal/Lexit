@@ -148,7 +148,7 @@ $.fn.dataTableExt.oApi.fnGlobalFilterGet  = function ( oSettings )
 
 
 // Add some filters to existing filters (see fnFilterSet)
-// BEWARE: this function keeps the values op other columns,
+// BEWARE: this function keeps the values of other columns,
 // so to set a filter and automatically remove filters in other columns, use fnFilterSet instead
 $.fn.dataTableExt.oApi.fnFilterAdd  = function ( oSettings, oFilters )
 {	

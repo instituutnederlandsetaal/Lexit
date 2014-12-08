@@ -594,7 +594,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			 		var oTableConfig = conf.getTableConfig(sSomeTablename);		 		
 			 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
 			 		var fnEditCallback = conf.getEditCallback(oColumnConfig);
-
+			 		
 			 		if (fnEditCallback!=null)
 			 			fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, newValue);
 			 							
