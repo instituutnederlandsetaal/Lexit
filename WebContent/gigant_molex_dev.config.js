@@ -923,6 +923,7 @@ oTableConfigurationList = {
 				"visible": false
 			}, 
 			gedrukt:{
+				
 				//"filter": true
 			}
 			
@@ -1086,6 +1087,9 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"herkomst": {
+				"editable": true
+			},
+			"gedrukt": {
 				"editable": true
 			}
 			
