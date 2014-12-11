@@ -1027,7 +1027,7 @@ gui.setSearchboxesCss = function(sSomeTableName){
 		return;
 	
 	// give searchboxes div little bigger width than the table (prevent line break)
-	$("#"+sSomeTableName+"_searchboxes").css("width", (parseInt($("#"+sSomeTableName).css("width"))+500)+"px");
+	$("#"+sSomeTableName+"_searchboxes").css("width", (parseInt($("#"+sSomeTableName).css("width"))+20)+"px");
 	$("#"+sSomeTableName+"_searchboxes").css("height", "25px");
 	
 	

@@ -53,8 +53,11 @@ oTableSettingsList = {
 			
 			"callback": function(t){
 				
+				var sTableName = fn.getTableName(t);
+				
 				(fn.getAllRows(t)).each(function(){
 					
+					// make records with an empty wordform unclickable
 					var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
 					if (sAwfId == '' || sAwfId == null)
 						{
@@ -73,6 +76,18 @@ oTableSettingsList = {
 						
 						fn.getCellElement(t, this, "f_total_rel").editable('disable');
 						fn.getCellElement(t, this, "f_total_rel").css("opacity", "0.5");
+						}
+					
+					// diminutives must be green
+					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
+					if (sVerkleinwoord != '-')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "green");						
+							}
 						}
 				});
 			},			
@@ -295,12 +310,13 @@ oTableSettingsList = {
 			
 			"callback": function(t){				
 				
-				// give parent other color (so they are recognizable)
+				
 				var sTableName = fn.getTableName(t);
 				
 				var aRows = fn.getAllRows(t);
 				aRows.each(function(){
 					
+					// give parent other color (so they are recognizable)
 					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");					
 					if (bIsParent == 't')
 						{
@@ -310,7 +326,19 @@ oTableSettingsList = {
 							var sColName = aColList[i];
 							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
 							}
-						}							
+						}
+					
+					// diminutives must be green
+					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
+					if (sVerkleinwoord != '-')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "green");						
+							}
+						}
 					});
 				
 			},			
@@ -790,9 +818,10 @@ oTableConfigurationList = {
 				"editable": true,
 				"editcallback": function(t, n, value){					
 					
-					var value = fn.escapeRegexChars(value);
-					
-					fn.getRecordGivenFieldValues("pos_to_rang", {"pos": value}, 
+					// get the rank corresponding to this pos
+					// (we need to escape the parenthesis, as Lex'it cannot know those are no
+					//  part of any regex)
+					fn.getRecordGivenFieldValues("pos_to_rang", {"pos": fn.escapeRegexChars(value)}, 
 							function(record){
 							
 								var sRangvalue = record["rang"];								
@@ -925,6 +954,9 @@ oTableConfigurationList = {
 			gedrukt:{
 				
 				//"filter": true
+			},
+			vk_status:{
+				"visible": false
 			}
 			
 		},

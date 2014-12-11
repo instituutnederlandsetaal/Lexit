@@ -14,7 +14,7 @@ var sChosenParentId = null;
 // table general settings
 oTableSettingsList = {
 		
-lemmata_view: {
+		lemmata_view: {
 			
 			"prereset_callback": function(confTable){
 				
@@ -446,6 +446,9 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"status": {
+				"editable": true
+			},
+			"notitie": {
 				"editable": true
 			},
 			"nuanc_opm": {

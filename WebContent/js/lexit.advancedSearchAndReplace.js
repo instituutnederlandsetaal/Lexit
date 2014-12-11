@@ -399,7 +399,7 @@ asr.alterTable = function(sSomeTablename, addOrReplaceMode, bReallyChange){
 				}
 			
 			// update the database
-			var url = "../lexit/lexit/table/setvalue_without_id"; 
+			var url = "../lexit/lexit/table/setvalue_without_id_for_search_and_replace"; 
 			$.ajax( {
 				"type": "GET",
 				"url": url,

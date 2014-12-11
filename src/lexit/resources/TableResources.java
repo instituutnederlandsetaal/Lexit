@@ -491,6 +491,44 @@ public class TableResources extends Application implements Serializable  {
 	}
 	
 	
+	// .../lexit/lexit/table/setvalue_without_id_for_search_and_replace
+	// it is possible to send more row_id's, new_value's and column names as input,
+	// they must be comma-separated
+	// (see explanation in code)
+	@Path("setvalue_without_id_for_search_and_replace")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject setValueWithoutIdForSearchAndReplace(
+			@Context SecurityContext sc,
+			@QueryParam("table_name") String tableName,
+			@QueryParam("column_name_to_match") String columnNameToMatch,
+			@QueryParam("value_to_match") String valueToMatch,
+			@QueryParam("column_name_to_update") String columnNameToUpdate,
+			@QueryParam("value_to_update") String valueToUpdate,
+			@QueryParam("db_name") String dbName
+			){
+		
+		tableName = tableName.replaceAll("__", ".");
+		if (Constants.debug) System.out.println("### Update record (search and replace) without id in "+tableName);
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		DbResponseObject dro = new DbResponseObject(); 
+				
+		String[] columnNamesToMatch = columnNameToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		String[] valuesToMatch = valueToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		String[] columnNamesToUpdate = columnNameToUpdate.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		String[] valuesToUpdate = valueToUpdate.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+				
+		getDatabaseObject(dbName).updateRecordWithoutId_ForSearchAndReplace(getDbName(dbName), tableName, 
+				columnNamesToMatch, valuesToMatch, columnNamesToUpdate, valuesToUpdate, dro);
+		
+		return dro;
+	}
+	
+	
 	
 	// .../lexit/lexit/table/insertvalue
 	// insert a new record into a table

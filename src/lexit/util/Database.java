@@ -1178,6 +1178,85 @@ public class Database {
 		
 		String schema = getSchema(dbName, tableName);
 			
+		// set arguments
+		String[] args = Util.concatArr(valuesToUpdate, valuesToMatch); 
+		
+		// set datatypes of arguments
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
+		String[] valuesToUpdateTypes = getTypesOfColumns(dbName, tableName, columnNamesToUpdate);
+		for (int i = 0; i<columnNamesToUpdate.length; i++)
+		{
+			ato.setType(i, valuesToUpdateTypes[i]);
+		}	
+		
+		// the following argument values must follow the previous ones (speaking of indexes)
+		int countFrom = columnNamesToUpdate.length;
+		
+		String[] valuesToMatchTypes = getTypesOfColumns(dbName, tableName, columnNamesToMatch);
+		for (int i = 0; i<columnNamesToMatch.length; i++)
+		{
+			ato.setType(countFrom + i, valuesToMatchTypes[i]);
+		}	
+				
+		// setting pairs 
+		String[] settingPairs = new String[columnNamesToUpdate.length];
+		for (int i=0; i<columnNamesToUpdate.length; i++)
+		{
+			settingPairs[i] = getSafeFieldName(columnNamesToUpdate[i]) + " = ?";
+		}
+		
+		// matching pairs with suitable operator
+		String[] matchingPairs = new String[columnNamesToMatch.length];
+		for (int i=0; i<columnNamesToMatch.length; i++)
+		{
+			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+		}
+		
+		String updateRecords = 
+			"UPDATE " + getSafeTableName(tableName, schema) + " " +
+			"SET "+ Util.join(settingPairs, ",") + " " +
+			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
+		
+		
+		PostgresDatabaseCommunication dc = connectDatabase(dbName);
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			
+			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+		}
+		catch (Exception e) {
+			dro.setResponse("Error while executing query "+updateRecords);
+			throw new RuntimeException("Error while executing query "+updateRecords, e);
+		}
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+	}
+	
+	
+	
+	/**
+	 * Update a database record within a search&replace action, 
+	 * given some column names and values to match
+	 * @param tableName
+	 * @param columnNamesToMatch
+	 * @param valuesToMatch
+	 * @param columnNamesToUpdate
+	 * @param valuesToUpdate
+	 * @param dro
+	 */
+	public  void updateRecordWithoutId_ForSearchAndReplace(String dbName,
+			String tableName, 
+			String[] columnNamesToMatch, String[] valuesToMatch,
+			String[] columnNamesToUpdate, String[] valuesToUpdate,
+			DbResponseObject dro ){
+		
+		String schema = getSchema(dbName, tableName);
+			
 		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();

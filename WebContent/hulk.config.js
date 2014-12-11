@@ -103,6 +103,8 @@ oTableSettingsList = {
 		
 		hulk_worktable:{
 			
+			"size": "96%",
+			
 			"viewtype_button": false,
 			
 			"callback": function(t){
