@@ -44,6 +44,7 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "non_homonyms_worktable_verbs", 
                    "non_homonyms_worktable_nouns", 
                    "non_homonyms_worktable_rest",
+                   "non_homonyms_worktable_nouns_with_possible_issues",
                    "klus_verwijslemmata", 
                    "anw_nieuwe_correctieronde_sept_2014",
                    
@@ -697,6 +698,8 @@ oTableSettingsList = {
 		non_homonyms_worktable_nouns: oNonHomonymsWorktableSettings,
 		
 		non_homonyms_worktable_rest: oNonHomonymsWorktableSettings,
+		
+		non_homonyms_worktable_nouns_with_possible_issues: oNonHomonymsWorktableSettings,
 		
 		
 		logfiles_pos_and_afbr_together: {
@@ -1567,6 +1570,8 @@ oTableConfigurationList = {
 		non_homonyms_worktable_nouns: oNonHomonymsWorkTableConfig,
 		
 		non_homonyms_worktable_rest: oNonHomonymsWorkTableConfig,
+		
+		non_homonyms_worktable_nouns_with_possible_issues: oNonHomonymsWorkTableConfig,
 		
 		logfiles_090514_pos: {
 			pos: {
