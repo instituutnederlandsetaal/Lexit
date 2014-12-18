@@ -1126,6 +1126,9 @@ oTableConfigurationList = {
 			},
 			"gedrukt": {
 				"editable": true
+			},
+			"verkleinwoord": {
+				"editable": true
 			}
 			
 		},
