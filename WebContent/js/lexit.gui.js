@@ -1027,7 +1027,7 @@ gui.setSearchboxesCss = function(sSomeTableName){
 		return;
 	
 	// give searchboxes div little bigger width than the table (prevent line break)
-	$("#"+sSomeTableName+"_searchboxes").css("width", (parseInt($("#"+sSomeTableName).css("width"))+20)+"px");
+	$("#"+sSomeTableName+"_searchboxes").css("width", (parseInt($("#"+sSomeTableName).css("width"))+500)+"px");
 	$("#"+sSomeTableName+"_searchboxes").css("height", "25px");
 	
 	
@@ -1035,6 +1035,7 @@ gui.setSearchboxesCss = function(sSomeTableName){
 	// We will use the column names in THEAD as a reference for width, because
 	// the THEAD element is always there, even when the table is empty
 	// (on the contrary, the TBODY isn't always there)
+	
 	$("#"+sSomeTableName+" thead tr:eq(0)").find("th").each(function(i){
 		
 		var oTableConfig = conf.getTableConfig(sSomeTableName);
@@ -1090,7 +1091,6 @@ gui.setSearchboxesCss = function(sSomeTableName){
 	
 	// make searchboxes visible, as they are set now
 	$("#"+sSomeTableName+"_searchboxes").css("visibility", "visible");
-	
 };
 
 

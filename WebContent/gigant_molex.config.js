@@ -6,9 +6,11 @@ oShowOnlyTables = (
 					fn.getCurrentUser() == 'wil'
 					) ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
-                   "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view"]
+         "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view",
+         "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht"]
 	:
-		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view"];
+		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
+		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -41,6 +43,16 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		
+		paradigma_telling_check_overzicht:{
+			"size": "60%"
+		},
+		
+		paradigma_telling_check: {
+			"size": "60%",
+			"column_order": ["lemma_id", "modern_lemma", "gigpos", "count", "gedrukt", "gecontroleerd"]
+		},
 		
 		
 		lemmata_en_paradigma_view:{
@@ -1296,6 +1308,43 @@ oTableConfigurationList = {
 			}
 			
 			
+		},
+		
+		paradigma_telling_check: {
+			
+			gigpos: {
+				"choosefrom":[]
+			},
+			lemma_id :{
+				
+				"click": function(t, n){
+					var lemId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemId});
+				}
+			},
+			modern_lemma :{
+				
+				"click": function(t, n){
+					var lemId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemId});
+				}
+			},
+			gecontroleerd: {
+				"editable": true
+			}
+			
+		},
+		missende_afbrekingen:{
+			lemma_id: {
+				"colsort": "asc",
+				"click": function(t, n){
+					var lemId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemId});
+				}
+			},
+			lemma_gigpos: {
+				"choosefrom": []
+			}
 		}
 };
 
