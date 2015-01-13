@@ -48,7 +48,8 @@ oShowOnlyTables = ["anw_postags_corrigeren",
                    "klus_verwijslemmata", 
                    "anw_nieuwe_correctieronde_sept_2014",
                    
-                   "featuretoekenning"];
+                   "featuretoekenning",
+                   "nogwatvormpjesvanfrank"];
 
 
 
@@ -844,7 +845,25 @@ oTableSettingsList = {
 			                "opnemen",
 			                "id",
 			                "alphabetical_order"]
-		}
+		},
+
+                nogwatvormpjesvanfrank :
+                {
+                  "nice_name" : "Nog wat vormpjes van Frank",
+                  "modern_lemma" : {"editable":  true },
+                  "verwijderen": {
+                        "bgcolor": "#E0F8EC",
+                        "cell_tooltip": "Vink aan als deze woordvorm weg moet",
+                        "editable": true,
+                        "editcallback": function(t, n, value){
+
+                                // log the user 
+                                var sUserName = fn.getCurrentUser();
+                                fn.updateDatabaseGivenANode(t, n, ["verwijderen"], [sUserName]);
+                        }
+                    },
+                },
+  
 		
 };
 
@@ -1987,5 +2006,16 @@ oTableConfigurationList = {
 					window.open(url);
 				}
 			}
-              }
+              },
+                nogwatvormpjesvanfrank :
+                {
+                  "wf": { "editable": true },
+                  "comment": { "editable": true },
+                  "wf_afbr": { "editable": true },
+                  "verwijderen": {
+                        "bgcolor": "#E0F8EC",
+                        "cell_tooltip": "Vink aan als deze woordvorm weg moet",
+                        "editable": true,
+                        }
+                },
 };

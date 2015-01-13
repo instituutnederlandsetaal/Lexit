@@ -10,7 +10,7 @@ oShowOnlyTables = (
          "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
-		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht"];
+		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -1047,7 +1047,7 @@ oTableConfigurationList = {
 				"editable": true				
 			},
 			"opmerking": {				
-				"editable": true
+				"visible": false
 			},
 			"opmerking_extern": {				
 				"editable": true

@@ -47,6 +47,25 @@ oTableSettingsList = {
 			// column check
 			"callback": function(t){
 				
+				var sTableName = fn.getTableName(t);
+				
+				(fn.getAllRows(t)).each(function(){					
+					
+					// diminutives must be green
+					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
+					if (sVerkleinwoord != '-')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "green");						
+							}
+						}
+					
+				});
+
+				
 				if (	$.inArray(sColumnCheck,  mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1 ||
 						$.inArray(sColumnCheck2, mt.getListOfColumnsOf("lemmata_en_paradigma_view"))>-1	
 						)
@@ -66,6 +85,7 @@ oTableSettingsList = {
 			"prereset_callback": function(t){
 				
 				// set neutral values for filters
+				/*
 				var filterValues = t.fnFilterGet();
 				filterValues["source_gb05"] = "";
 				filterValues["source_molex_hom"] = "";
@@ -82,7 +102,7 @@ oTableSettingsList = {
 					{
 					fn.setCustomButtonCss(t, i, "background-color", "#FBEFEF");
 					}
-				
+				*/
 				
 			},
 			
@@ -97,6 +117,7 @@ oTableSettingsList = {
 				
 				
 				// keep color of all buttons uptodate
+				/*
 				var filterValues = t.fnFilterGet();
 				fn.setCustomButtonCss(t, 0, "background-color", (filterValues["source_gb05"]?"#F5A9A9":"#FBEFEF"));
 				fn.setCustomButtonCss(t, 1, "background-color", (filterValues["source_molex_hom"]?"#F5A9A9":"#FBEFEF"));
@@ -106,28 +127,15 @@ oTableSettingsList = {
 				fn.setCustomButtonCss(t, 5, "background-color", (filterValues["source_anw"]?"#F5A9A9":"#FBEFEF"));
 				fn.setCustomButtonCss(t, 6, "background-color", (filterValues["source_telw"]?"#F5A9A9":"#FBEFEF"));
 				fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
-				
-				// we need to disable the checkbox of telwoorden
-				// CANCELED on 20141127 [required by KatrienD]
-				//
-//				var aRows = fn.getAllRows(t);
-//				aRows.each(function(){
-//					var bSourceContainsTelwoorden = (fn.getDataFromCellNamed(t, this, "source")).indexOf("TELWOORDEN")>-1;
-//					
-//					if (bSourceContainsTelwoorden)
-//						{				
-//						(fn.getCellElement(t, this, "gedrukt")).find("input").attr("disabled", true);						
-//						}
-//				});
-				
-				
-				
+				*/
+			
 				// give parent other color (so they are recognizable)
 				var sTableName = fn.getTableName(t);
 				
 				var aRows = fn.getAllRows(t);
 				aRows.each(function(){
 					
+					// parents must be redish
 					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");
 					if (bIsParent == 't')
 						{
@@ -137,16 +145,30 @@ oTableSettingsList = {
 							var sColName = aColList[i];
 							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
 							}
-						}										
+						}
+					
+					// diminutives must be green
+					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
+					if (sVerkleinwoord != '-')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "green");						
+							}
+						}
+					
 					});
 			},
 			"repeat_callback": true,
 			
-			
-			"size": "90%",
+			"size": "90%" //,
 			
 			
 			// we need buttons to choose the sources we are interested in
+				
+			/*
 			"button_0":{
 				"name": "GB05",
 				"bgcolor":"#FBEFEF",
@@ -259,7 +281,7 @@ oTableSettingsList = {
 					fn.setCustomButtonCss(t, 7, "background-color", (filterValues["source_chn"]?"#F5A9A9":"#FBEFEF"));
 				}
 			}
-
+*/
 			
 		},
 		paradigma_view: {
@@ -355,8 +377,10 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"gb_wrdcat": {
+				"visible": false
 			},
 			"gb_znwlid": {
+				"visible": false
 			},
 			"lidw": {
 				"visible": false
@@ -371,7 +395,8 @@ oTableConfigurationList = {
 					fn.callDatabase("lemmata_en_paradigma_view", {"lemma_id": lemma_id});
 				}
 			},
-			"toon_morfologie":{				
+			"toon_morfologie":{	
+				"visible": false,
 				"button": "Morfologie",
 				"click": function( confTable, confNode){					
 					var lemma_id = fn.getDataFromSiblingNode(confTable, confNode, "pkid");
@@ -386,56 +411,47 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"gedrukt":{
-				"editable": true
-			}
+//				"editable": true,
+//				"editcallback": function(t, n, value){
+//					
+//					// synchronize lemmata_en_paradigma view
+//					var lemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+//					fn.updateDatabaseGivenFieldValues(
+//							"lemmata_en_paradigma_view", 
+//							{"lemma_id": lemmaId}, 
+//							{"gedrukt": value}, 
+//							false, 
+//							
+//							// finally refresh all tables so effect is visible everywhere
+//							function(){								
+//								fn.refreshTable("lemmata_en_paradigma_view");
+//								}
+//							);
+//				}
+			},
+			"verkleinwoord": {
+				
+			},
+			"f_chn_rel":{
+				"visible": false
+			},
+			"f_wdnlijst_rel":{
+				"visible": false
+			},
+			"f_total_rel":{
+				"visible": false
+			},
+			"source":{
+				"visible": false
+			},
+			"uitspraak":{
+				"visible": false
+			}	
+			
 			
 		},
 		
-//		paradigma_view: {
-//			"pkid":{				
-//				"visible": false
-//			},
-//			"lemma_id":{				
-//				"visible": false
-//			},
-//			"wordform_id":{				
-//				"visible": false
-//			},
-//			"pkid":{				
-//				"visible": false
-//			},
-//			"wordform":{	
-//			},
-//
-//			"wordform_afbr":{				
-//				
-//			},
-//			"th_wordform": {				
-//				"visible": false				
-//			},
-//			"th_wordform_afbr": {				
-//				"visible": false				
-//			},
-//			"wordform_gigpos":{				
-//				
-//			},
-//			"flex":{				
-//				
-//			},
-//			"keurmerk":{				
-//				"visible": false,
-//				"flexible_visibility": false
-//			},
-//			"comment": {
-//				
-//			},
-//			
-//			"rang":{			
-//				"colsort": "asc",
-//				"visible": false
-//			}
-//			
-//		},
+
 		
 		// *****************
 		
@@ -443,6 +459,14 @@ oTableConfigurationList = {
 			
 		
 			"analyzed_wordform_id":{				
+				"visible": false
+			},
+			
+			"is_parent": {
+				"visible": false
+			},
+			
+			"verkleinwoord": {
 				"visible": false
 			},
 			
@@ -457,7 +481,7 @@ oTableConfigurationList = {
 				"flexible_visibility": false
 			},
 			"sublemma_type": {		
-				"visible": false // ?
+				"visible": false 
 			},
 			"opmerking": {
 				"visible": false
@@ -470,10 +494,10 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"gb_wrdcat": {
-				"visible": false // ?
+				"visible": false 
 			},
 			"gb_znwlid": {
-				"visible": false // ?
+				"visible": false 
 			},
 			"lidw": {
 				"visible": false
@@ -487,7 +511,35 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"gedrukt":{
-				"editable": true
+//				"editable": true,
+//				"editcallback": function(t, n, value){
+//					
+//					var lemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+//					// synchronize lemmata table
+//					fn.updateDatabaseGivenFieldValues(
+//							"lemmata", 
+//							{"lemma_id": lemmaId}, 
+//							{"gedrukt": value},
+//							false, 
+//							
+//							// finally refresh table so effect is visible
+//							function(){
+//								fn.refreshTable("lemmata_view");
+//								}
+//							);
+//					// give other records with same lemma_id the same 'gedrukt' value
+//					fn.updateDatabaseGivenFieldValues(
+//							t, 
+//							{"lemma_id": lemmaId}, 
+//							{"gedrukt": value}, 
+//							false, 
+//							
+//							// finally refresh table so effect is visible
+//							function(){
+//								fn.refreshTable(t);
+//								}							
+//							);
+//				}
 			},
 			
 			"lemma_id":{				
@@ -545,6 +597,9 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"wordform_source":{
+				"visible": false
+			},
+			"unique_id": {
 				"visible": false
 			}
 			
