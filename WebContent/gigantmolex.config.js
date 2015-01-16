@@ -573,6 +573,7 @@ oTableConfigurationList = {
 					
 					// if we have an awf-id
 					// update this 'view' but also the analyzed_wordforms table
+					// (but if we have no awf, write nothing here nor in awf table)
 					if (sAwfId != null && sAwfId != '')
 						fn.updateDatabaseGivenFieldValues(t, 
 								{"analyzed_wordform_id": sAwfId}, 

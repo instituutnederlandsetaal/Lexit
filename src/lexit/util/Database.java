@@ -60,6 +60,11 @@ public class Database {
 	// hashmap in which database location, username and password are put
 	public HashMap<String, String> databaseAccessHash = new HashMap<String, String>();
 	
+	// should we use compulsory exact count ?
+	// This can be set to true temporarily by user, but after counting, this will
+	// be automatically set back to false by the getTable() function
+	public boolean bForceExactCount = false; 
+	
 	// Standard value for the maximal allowed cost of a count query
 	// Since the computed cost is generally speaking 25 times higher that the query execution time, 
 	// the maximal allowed cost must be (max allowed duration) x 25. 
@@ -77,6 +82,15 @@ public class Database {
 			throw new RuntimeException("Error while reading the "+dbName+" properties file", e);
 		}
 	};
+	
+	// declare if we must be computing an exact count (default is false,
+	// but this can be set to true by user temporarily if needed)
+	public void setForceExactCount(boolean forceExactCount){
+		this.bForceExactCount = forceExactCount;
+	}
+	public boolean getForceExactCount(){
+		return this.bForceExactCount;
+	}
 	
 	/**
 	 * Delete a record from a table
@@ -1948,6 +1962,9 @@ public class Database {
 			int count = countOfWholeTable;
 			boolean exactCount = getTrueTablesList(dbName).contains(tableName);
 			
+			// does the user requires an exact count just now?
+			boolean bExactCountRequiredByUser = this.getForceExactCount();
+			
 			// the key of the partial count is made up of prepared query string and its values (gives unique string)
 			String queryForCache = countQuery + " ("+ Util.join(args, ",") + ")";
 			
@@ -1962,8 +1979,10 @@ public class Database {
 				boolean recomputeMaxAllowedCost = false;
 				
 				// if the result of this query was cached
-				// read it from the cache
-				if (queryToCount.containsKey(queryForCache))
+				// read it from the cache (except if exact count is required by user just now)
+				
+				if (!bExactCountRequiredByUser && 
+						queryToCount.containsKey(queryForCache))
 				{
 					if (Constants.debug) System.out.println("Query "+queryForCache+" found in cache");
 					count = queryToCount.get(queryForCache);
@@ -1978,9 +1997,10 @@ public class Database {
 					if (Constants.debug) System.out.println("%%% FAST COUNT decision: "+queryCost+ "<"+maxAllowedCost +"?");					
 					
 					// count the normal way, t.i. count(*)
-					if (queryCost < maxAllowedCost)
+					// if it is required by the user just now OR if querycost is low
+					if (bExactCountRequiredByUser || queryCost < maxAllowedCost)
 					{
-						if (Constants.debug) System.out.println("%%% We will count the normal way");
+						if (Constants.debug) System.out.println("%%% We will count the normal way (exact count required by user: "+bExactCountRequiredByUser+")");
 						
 						dc.sendUpdate("SET search_path TO "+schema+"; ");
 						
@@ -2012,7 +2032,8 @@ public class Database {
 						
 					}
 					
-					// if counting the normal way is PREDICTED to be too slow,
+					// if counting the normal way is PREDICTED to be too slow
+					// (and exact count wasn't required by the user just now)
 					// get an estimate count
 					else
 					{
@@ -2077,6 +2098,12 @@ public class Database {
 			dc.sendUpdate("RESET statement_timeout;");
 			closeDatabase(dc);
 		}
+		
+		
+		// We might have been counting with exact count now (if the user required to) 
+		// but now we are done with counting, so set bForceExactCount back to 
+		// its default value (=false, exact count not required)
+		this.setForceExactCount(false);
 		
 		return tableAndCount;
 	}
@@ -3210,10 +3237,13 @@ public class Database {
 		String tableNameOnly = getTableNameOnly(tableName);
 		boolean exactCount = true;
 		Map countAndQuality = new HashMap<String, Object>();
+		boolean bForceExactCount = this.getForceExactCount();
 		
 		// use caching
 		// (if we have looked up the count already, it is stored in a hash)
-		if ( tableNameToCount.containsKey(dbName+schema+tableNameOnly))
+		
+		if ( !bForceExactCount && // of course, don't read the cache if exact count is required
+				tableNameToCount.containsKey(dbName+schema+tableNameOnly))
 			{
 			if (Constants.debug) System.out.println("## Count from cache = "+tableNameToCount.get(dbName+schema+tableNameOnly)+" row(s)");
 			countAndQuality.put("exactCount", tableNameToExactCount.get(dbName+schema+tableNameOnly));
@@ -3242,18 +3272,21 @@ public class Database {
 		
 		if (Constants.debug) System.out.println("## The current table is a "+(currentTableIsATrueTable?" genuine table":"view")+".");
 		
+		
 		// case [1] 
+		// if exact count is required, we must get an true count anyway
+		// OR
 		// if we have a view, get the true count
-		if ( !currentTableIsATrueTable )
+		if ( bForceExactCount || !currentTableIsATrueTable )
 		{
 			count = getTrueCountOfATable(dbName, tableNameOnly);
 		}
 		
 		// case [2]
-		// if we have a table, get a fast estimate count
+		// if we have a table and exact count is not required, get a fast estimate count
 		// OR
 		// if count in case [1] failed (timeout), try this fast estimate count method as well
-		if ( currentTableIsATrueTable || count<0 )
+		if ( ( !bForceExactCount && currentTableIsATrueTable) || count<0 )
 		{
 			exactCount = false;
 			count = getEstimateCount(dbName, "SELECT * FROM "+getSafeTableName(tableNameOnly, schema));

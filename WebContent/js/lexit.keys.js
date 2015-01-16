@@ -364,6 +364,17 @@ kf.addKeyFunctions = function(){
     		fn.refreshTable(sActiveTable);
     		}
     	
+    	// refresh active table AND force exact count
+    	if (kf.isPressed("pause"))
+    		{
+    		// force exact count!
+    		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
+    		bForceExactCount = true; 
+    		// but for now, do a refresh with an exact count
+    		var sActiveTable = kf.getActiveTable();
+    		fn.refreshTable(sActiveTable);
+    		}
+    	
     	
     	// F2 (shortcut for rows selection button)
     	if (kf.isPressed("f2"))

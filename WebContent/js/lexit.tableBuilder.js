@@ -253,6 +253,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			aoData.push( { "name": "sDbName", "value": getHttpParams().get("db") } );
 			aoData.push( { "name": "sTableName", "value": sSomeTableName } );
 			aoData.push( { "name": "sAllColumns", "value": mt.getListOfColumnsOf(sSomeTableName).join(ARG_INTERNAL_SEPARATOR) } );
+			aoData.push( { "name": "bForceExactCount", "value": bForceExactCount } );
 			
 		},
 		
@@ -633,7 +634,10 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 	// put the count string back into place
 	$("#"+sSomeTableName+"_info").text(sSubTotal);
 	
-	
+	// counting is done, so give bForceExactCount its default value (false) back now
+	// (as this might have been set to true by the user by pressing 'pause/break',
+	//  to require an exact count)
+	bForceExactCount = false;
 	
 	// **   reset relevant/visible columns    **
 	// ** (when the table is in optimal mode) **

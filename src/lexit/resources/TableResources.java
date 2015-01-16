@@ -984,17 +984,15 @@ public class TableResources extends Application implements Serializable  {
 			@DefaultValue("") @FormParam("sSearch_107") String sSearch107,
 			@DefaultValue("") @FormParam("sSearch_108") String sSearch108,
 			@DefaultValue("") @FormParam("sSearch_109") String sSearch109,
+			@DefaultValue("") @FormParam("bForceExactCount") String sForceExactCount,
 			@Context HttpServletRequest req
 			) throws IOException {
 		
 		
-//		 System.out.println("Session ID in Request: " +
-//				 req.getRequestedSessionId());
-//		 System.out.println("<br>Session ID in Request from Cookie: " +
-//				 req.isRequestedSessionIdFromCookie());
-//		 
-//		 System.out.println("Session ID: " +
-//				 req.getSession().getId() );
+		
+		// is exact count required by the user?
+		getDatabaseObject(dbName).setForceExactCount( sForceExactCount.equals("true") );
+				
 		
 		
 		tableName = tableName.replaceAll("__", ".");

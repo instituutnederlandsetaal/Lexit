@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2015.01.08
+	v2015.01.16
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -138,6 +138,11 @@
 	
 	// tooltips in table allowed by user or not (default is true)
 	var bTooltipsAllowedInTable = true;
+	
+	// Should we compute quick estimates (for sake of speed) ?
+	// Yes we do, so the value is 'false', 
+	// but this might be temporarily manually set to 'true' by user (for a table refresh)
+	var bForceExactCount = false;
 	
 	// ***** CONSTANTS *****
 	// Argument separator within single string 
