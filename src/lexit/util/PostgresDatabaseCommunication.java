@@ -208,7 +208,9 @@ public class PostgresDatabaseCommunication {
 
 			for (int i=0; i<args.length; i++)
 			{
-				String oneArg = args[i];
+				String oneArg = args[i];				
+				// a string containing 'NULL' must be interpreted as null
+				if (oneArg.equals("NULL")) oneArg = null;
 				
 				if ( Util.isInteger(oneArg))
 					prest.setInt(i+1, Integer.parseInt(oneArg));
@@ -258,6 +260,8 @@ public class PostgresDatabaseCommunication {
 			{
 				String oneArg = args[i];
 				String oneType = ato.getType(i);
+				// a string containing 'NULL' must be interpreted as null
+				if (oneArg.equals("NULL")) oneArg = null;
 						
 				
 				if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
@@ -328,8 +332,10 @@ public class PostgresDatabaseCommunication {
 			
 			for (int i=0; i<args.length; i++)
 			{
-				String oneArg = args[i];						
+				String oneArg = args[i];				
 				String oneType = ato.getType(i);
+				// a string containing 'NULL' must be interpreted as null
+				if (oneArg.equals("NULL")) oneArg = null;
 				
 				
 				
@@ -363,7 +369,7 @@ public class PostgresDatabaseCommunication {
 				}
 				
 				
-				String showArg = oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
+				String showArg = oneArg!=null && oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
 				if (Constants.debug) System.out.println(i+1+" -> "+showArg+" "+oneType);
 			}
 			
@@ -394,7 +400,9 @@ public class PostgresDatabaseCommunication {
 		ArgumentTypesObject ato = qo.getAto();
 		
 		// if current query doesn't contain any null value, leave right away
-		if (Util.getIndexOf(null, args)<0)
+		if (Util.getIndexOf(null, args)<0 && 
+				Util.getIndexOf("null", args)<0 &&
+				Util.getIndexOf("NULL", args)<0)
 			return qo;
 		
 		// Split the query into its elements.
@@ -419,7 +427,7 @@ public class PostgresDatabaseCommunication {
 		
 			
 			// if we have a null value as an argument for the question mark 
-			if (args[i] == null)
+			if (args[i] == null || args[i].toLowerCase().equals("null"))
 			{
 				// we replace the question mark by its value
 				// an remove the corresponding argument
@@ -434,6 +442,9 @@ public class PostgresDatabaseCommunication {
 				if (ato!=null) newAto.setType(newArgsList.size()-1, ato.getType(i));
 			}
 		}
+		
+		if (Constants.debug)
+			System.out.println("rebuiltQuery >> "+rebuiltQuery);
 		
 		// rewrite query, args list, and argument types object				
 		return new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);

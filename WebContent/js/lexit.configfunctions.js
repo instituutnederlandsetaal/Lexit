@@ -1022,7 +1022,13 @@ fn.getDataFromSiblingNode = function(confTable, confNode, sOtherColumnName){
 	var rowNumber = confTable.fnGetPosition(confNode)[0];
 	var colNr = $.inArray(sOtherColumnName, mt.getListOfColumnsOf(sTablename));
 	
-	if (colNr<0)
+	if (  !fn.isCellNode(confNode) )
+		{
+		fn.message("Fout", "fn.getDataFromSiblingNode('"+sTablename+"') " +
+				"is aangeroepen met een row node, maar deze functie werkt met cell nodes.");
+		return "";		
+		}
+	else if (colNr<0)
 		{
 		fn.message("Fout", "fn.getDataFromSiblingNode('"+sTablename+"') " +
 				"is aangeroepen met een niet bestaande kolomnaam: '"+sOtherColumnName+"'.");
@@ -1623,8 +1629,7 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 
 // get the id of a record, given a table and some fields and values to match
 // input	: table name or table object, an associative array of fields and values to match
-// returns	: an id as a string
-fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues){
+fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -1653,9 +1658,11 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues){
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
-	 		// return the returned id
+	 		// use the returned id in the callback 
 	 		var resp = fn.getDbResponse(xml);
-	 		return (resp == "null" ? null : resp);
+	 		if (fnCallback!=null)
+	 			fnCallback(resp);
+	 		
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		fn.message("Fout", 

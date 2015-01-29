@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -69,6 +70,9 @@ public class TableResources extends Application implements Serializable  {
 	
 	// database access objects, needed for caching (for speed)
 	HashMap<String, Database> nameToDatabaseObject = new HashMap<String, Database>();
+	
+	// users access rights
+	HashMap<String, String[]> users2roles = new HashMap<String, String[]>();
 	
 	// sort setting
 	boolean weMustSort = true;
@@ -558,7 +562,7 @@ public class TableResources extends Application implements Serializable  {
 		String[] newValues = newValue.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		String[] columnNames = columnName.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 				
-		if (returningField == null || returningField.equals("null") || returningField.isEmpty())
+		if (returningField == null || returningField.toLowerCase().equals("null") || returningField.isEmpty())
 		{
 			getDatabaseObject(dbName).insertRecord(getDbName(dbName), tableName, columnNames, newValues, dro);
 			
@@ -1276,29 +1280,54 @@ public class TableResources extends Application implements Serializable  {
 	 */
 	private boolean userIsAllowedTo(String dbName, SecurityContext sc, String action){
 		
+		// get the username
+		String username = sc.getUserPrincipal().getName();
+		
 		if (action.equals(Constants.USER_READ_ACCESS))
 		{
 			return 
-			sc.isUserInRole("superuser") || 
-			sc.isUserInRole("superreader") || 
-			sc.isUserInRole(dbName+"_all") || 
-			sc.isUserInRole(dbName+"_write") || 
-			sc.isUserInRole(dbName+"_read");
+			userHasRole(username, "superuser") || 
+			userHasRole(username, "superreader") || 
+			userHasRole(username, dbName+"_all") || 
+			userHasRole(username, dbName+"_write") || 
+			userHasRole(username, dbName+"_read");
 		}
 		else if (action.equals(Constants.USER_WRITE_ACCESS))
 		{
 			return 
-			sc.isUserInRole("superuser") || 
-			sc.isUserInRole(dbName+"_all") || 
-			sc.isUserInRole(dbName+"_write");
+			userHasRole(username, "superuser") || 
+			userHasRole(username, dbName+"_all") || 
+			userHasRole(username, dbName+"_write");
 		}
 		else if (action.equals(Constants.USER_ALL_ACCESS))
 		{
 			return 
-			sc.isUserInRole("superuser") || 
-			sc.isUserInRole(dbName+"_all");
-		}
+			userHasRole(username, "superuser") || 
+			userHasRole(username, dbName+"_all");
+		}	
 		
+		return false;
+	}
+	
+	/**
+	 * check if a given role is part of an array of roles
+	 * (subroutine of userIsAllowedTo function)
+	 * @param username
+	 * @param role
+	 * @return
+	 */
+	private boolean userHasRole(String username, String role){
+
+		String[] roles;
+		
+		try {
+			roles = getUserRoles(username);
+			return Arrays.asList(roles).contains(role);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 	
@@ -1343,6 +1372,64 @@ public class TableResources extends Application implements Serializable  {
 		}
 		
 		return sb.toString();
+	}
+	
+	
+/**
+ * read the users access rights file
+ * @param username
+ * @return String[]
+ * @throws IOException
+ */
+	public String[] getUserRoles(String username) throws IOException{
+		
+		// if the access rights file has already been read,
+		// return relevant content right away
+		
+		if (users2roles.containsKey(username))
+		{
+			if (Constants.debug) System.out.println("Get user access rights from cache");
+			return users2roles.get(username);
+		}			
+		
+		
+		// access rights files hasn't been read yet
+		// do it now
+		
+		if (Constants.debug) System.out.println("Read user access rights...");
+		
+		String fileName = "users_access.rights";		
+		String filepath = context.getRealPath(fileName);
+		
+		filepath = filepath.replace(
+				File.separatorChar+"lexit"+File.separator+fileName, 
+				File.separatorChar+"lexit_config"+File.separator+fileName);
+		
+		if (Constants.debug) System.out.println("File: "+filepath);
+		
+		try{
+			FileInputStream fstream = new FileInputStream(filepath);
+			// Get the object of DataInputStream
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			while ((strLine = br.readLine()) != null) {
+				if (	strLine.indexOf("=")<0  // skip illegal format (we expect key=prop) 
+						|| 
+						strLine.startsWith("#"))// skip comment lines
+					continue;
+				String key = strLine.split("=")[0];
+				String value = strLine.split("=")[1];
+				users2roles.put(key, value.split(","));
+			}
+			br.close();
+			in.close();
+			
+			return users2roles.get(username);
+		}
+		catch (Exception e){//Catch exception if any
+			throw new RuntimeException("Error while reading users access rights file: "+filepath, e);
+		}
 	}
 
 	

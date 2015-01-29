@@ -1237,7 +1237,9 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>Tab</TD><TD>&nbsp;&nbsp;</TD><TD>Switch tussen de tabellen: geef de eerst volgende tabel focus.</TD>" +				
 				"</TR>" +
 				"<TR>" +
-				"<TD>F5</TD><TD>&nbsp;&nbsp;</TD><TD>Ververs de actieve tabel.</TD>" +				
+				"<TD>F5</TD><TD>&nbsp;&nbsp;</TD><TD>Ververs de actieve tabel.</TD>" +	
+				"<TR>" +
+				"<TD>Pause/Break</TD><TD>&nbsp;&nbsp;</TD><TD>Ververs de actieve tabel en vraag exacte telling op (trager).</TD>" +	
 				"</TR>" +
 				"<TR>" +
 				"<TD>F8</TD><TD>&nbsp;&nbsp;</TD><TD>Toon of verberg de tooltips in de tabellen.</TD>" +				

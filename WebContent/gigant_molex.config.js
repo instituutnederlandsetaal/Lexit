@@ -7,10 +7,12 @@ oShowOnlyTables = (
 					) ?
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
          "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view",
-         "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht"]
+         "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht",
+         "lemmatawithgender"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
-		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses"];
+		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses",
+		 "lemmatawithgender"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -43,6 +45,20 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		lemmatawithgender:{
+			
+			"column_order": ["lemma_id",
+			                 "modern_lemma",
+			                 "lemma_gigpos",
+			                 "gb_znwlid",
+			                 "gender",
+			                 "gender_corr",
+			                 "ok",
+			                 "gedrukt",
+			                 "opmerking"
+			                  ]
+		},
 		
 		
 		paradigma_telling_check_overzicht:{
@@ -1047,7 +1063,7 @@ oTableConfigurationList = {
 				"editable": true				
 			},
 			"opmerking": {				
-				"visible": false
+				"visible": false // this column is only for transit of opmerking_extern
 			},
 			"opmerking_extern": {				
 				"editable": true
@@ -1345,6 +1361,20 @@ oTableConfigurationList = {
 			lemma_gigpos: {
 				"choosefrom": []
 			}
+		},
+		
+		
+		"lemmatawithgender": {
+			
+			gender_corr : {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			opmerking : {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			}
+			
 		}
 };
 

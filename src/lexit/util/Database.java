@@ -357,18 +357,28 @@ public class Database {
 		
 		ArrayList<String[]> res;
 		
-		// set arguments
-		String[] args = values;		
+		// beware: 
+		// ------
+		// since this is a read-only command, operators are allowed in the arguments
+		// (operators would of course be too dangerous in write commands)
 		
+		
+		// matching pairs with suitable operator
+		String[] matchingPairs = new String[columnNames.length];
 		for (int i=0; i<columnNames.length; i++)
-		{
-			columnNames[i] = getSafeFieldName(columnNames[i]);
-		}
+		{			
+			matchingPairs[i] = getSafeFieldName(columnNames[i]) + " " + getSuitableOperator(values[i], true) + " ? ";
+			values[i] = removeFrontOperator(values[i]);
+		}	
+		
+		// set arguments
+		String[] args = values;	
+		
 		
 		String getIdQuery = 
 			"SELECT " + idColumn + " " +
 			"FROM " + getSafeTableName(tableName, schema) + " " +
-			"WHERE " + (Util.join(columnNames, " = ? AND ") +" = ? ") + 
+			"WHERE " + Util.join(matchingPairs, " AND ") + 
 			";";	
 		
 		
@@ -456,7 +466,7 @@ public class Database {
 		TableRecordObject tro = new TableRecordObject();
 		String schema = getSchema(dbName, tableName);
 		String idColumn = getPrimaryKeyColumn(dbName, tableName);
-				
+		String idColumnType = getTypeOfColumn(dbName, tableName, idColumn);
 		
 		ArrayList<String[]> res;
 		
@@ -466,7 +476,7 @@ public class Database {
 		String getRecord = 
 			"SELECT * " +
 			"FROM " + getSafeTableName(tableName, schema) + " " +
-			"WHERE " + getSafeFieldName(idColumn) + " = ?;";	
+			"WHERE " + getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
 		
 		
 		PostgresDatabaseCommunication dc = connectDatabase(dbName);
@@ -474,7 +484,10 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = dc.sendPreparedQuery(getRecord, args);
+			ArgumentTypesObject ato = new ArgumentTypesObject();
+			ato.setType(0, idColumnType);
+			
+			ResultSet rs = dc.sendPreparedQuery(getRecord, args, ato);
 			
 			String[] columnsNames = getColumnNames(dbName, tableName);			
 			res = getResultsInAList(rs, columnsNames);	
@@ -529,16 +542,25 @@ public class Database {
 		for (int i = 0; i<columnNamesToMatch.length; i++)
 		{
 			ato.setType(i, valueTypes[i]);
-		}			
-		// set arguments
-		String[] args = valuesToMatch;
+		}	
+		
+		
+		// beware: 
+		// ------
+		// since this is a read-only command, operators are allowed in the arguments
+		// (operators would of course be too dangerous in write commands)
+		
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
 			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+			valuesToMatch[i] = removeFrontOperator(valuesToMatch[i]);
 		}			
+		
+		// set arguments
+		String[] args = valuesToMatch;
 		
 		String getRecord = 
 			"SELECT * " +
@@ -2230,8 +2252,10 @@ public class Database {
 		
 		
 		// always check that one first (to prevent NullPointerException)
-		if (value == null)
-			return " IS ";
+		if (value == null || value.toLowerCase().equals("null") )
+			return " IS ";		
+		if (value.toLowerCase().equals("!null"))
+			return " IS NOT ";
 		
 		// negation operator
 		boolean negation = false;
@@ -3210,6 +3234,7 @@ public class Database {
 		
 		databaseAccessHash = Util.readPropertiesFile(filepath, new HashMap<String, String>());
 	}
+
 	
 	
 	/**
