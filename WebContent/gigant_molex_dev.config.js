@@ -795,22 +795,24 @@ oTableConfigurationList = {
 				"editable": true,
 				"editcallback": function(t, n, value){
 					
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.callFunction("modify_wordform_and_get_id", [sAwfId, value], function(response){
-						
-						// add the wordform_id in the current table too (as it must synchronize)
-						var sWordformId = parseInt(response["modify_wordform_and_get_id"]);
-						fn.updateDatabaseGivenANode(t, n, ["wordform_id"], [sWordformId], false, function(){
-							
-							fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-								
-								processAwfCheck(sAwfId, response);
-							});
-							
-						});
-						
-						
-					});
+					fn.refreshTable(t);
+					
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+//					fn.callFunction("modify_wordform_and_get_id", [sAwfId, value], function(response){						
+//						// add the wordform_id in the current table too (as it must synchronize)
+//						var sWordformId = parseInt(response["modify_wordform_and_get_id"]);
+//						fn.updateDatabaseGivenANode(t, n, ["wordform_id"], [sWordformId], false, function(){
+//							
+//							fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//								
+//								processAwfCheck(sAwfId, response);
+//							});
+//							
+//						});
+//						
+//						
+//					});
 					
 				}
 			}, 
@@ -829,22 +831,25 @@ oTableConfigurationList = {
 								
 								fn.updateDatabaseGivenANode(t, n, ["rank"], [iRankvalue], false, function(){
 									
-									// update the analyzed_wordforms too
+									// update rank in the analyzed_wordforms too
 									var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
 									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
 											{"analyzed_wordform_id": sAwfId}, 
-											{"wordform_gigpos": value, "rank": iRankvalue},
-											false,
-											function(){
-												fn.refreshTable(t, function(){
-													
-													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-														
-														processAwfCheck(sAwfId, response);
-													});
-												});
-												
-											});
+											{//"wordform_gigpos": value, 
+												"rank": iRankvalue},
+											false
+//											,
+//											function(){
+//												fn.refreshTable(t, function(){
+//													
+//													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//														
+//														processAwfCheck(sAwfId, response);
+//													});
+//												});
+//												
+//											}
+												);
 									
 								});								
 								
@@ -853,45 +858,54 @@ oTableConfigurationList = {
 				}
 			}, 
 			wordform_afbr:{				
-				"editable": true,
+				"editable": true
+//				,
+//				
+//				// update the analyzed_wordforms too
+//				"editcallback": function(t, n, value){
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"wordform_afbr": value},
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
+			},
+			online: {
 				
-				// update the analyzed_wordforms too
-				"editcallback": function(t, n, value){
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"wordform_afbr": value},
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+			},
+			publiceren: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			},
 			wf_keurmerk:{
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				
-				// update the analyzed_wordforms too
-				"editcallback": function(t, n, value){
-					
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"keurmerk": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				
+//				// update the analyzed_wordforms too
+//				"editcallback": function(t, n, value){
+//					
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"keurmerk": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			}, 
 			rank:{
 				"colsort": "asc",    // sort #2
@@ -900,23 +914,24 @@ oTableConfigurationList = {
 			
 			comment:{
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms too
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				"editcallback": function(t, n, value){
+//					
+//					// update the analyzed_wordforms too
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"comment": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			},
 			comment_intern: {
 				
@@ -927,23 +942,24 @@ oTableConfigurationList = {
 				// ------------------------------
 				
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms too
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment_intern": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				"editcallback": function(t, n, value){
+//					
+//					// update the analyzed_wordforms too
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"comment_intern": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			},
 			wf_source:{
 				"visible": false
@@ -1022,6 +1038,13 @@ oTableConfigurationList = {
 				"colsort": "asc",
 				"editable": true
 			},
+			online: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			publiceren: {
+				
+			},
 			"th_lemma": {				
 				"editable": true				
 			},
@@ -1032,7 +1055,7 @@ oTableConfigurationList = {
 				"editable": true				
 			},
 			"opmerking": {				
-				"editable": true
+				"visible": false // this column is only for transit of opmerking_extern
 			},
 			"opmerking_extern": {				
 				"editable": true

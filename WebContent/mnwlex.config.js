@@ -64,6 +64,22 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		bronnen_worktable:{
+			
+			unique_id: {
+				"colsort": "asc",
+				"visible": false
+			},
+			van: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			tot: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			}
+		},
 
 		
 		lemmata_and_paradigma: {

@@ -8,11 +8,13 @@ oShowOnlyTables = (
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
          "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view",
          "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht",
-         "lemmatawithgender"]
+         "lemmatawithgender",
+         "raredubbelvormen"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses",
-		 "lemmatawithgender"];
+		 "lemmatawithgender",
+		 "raredubbelvormen"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -860,22 +862,25 @@ oTableConfigurationList = {
 								
 								fn.updateDatabaseGivenANode(t, n, ["rank"], [iRankvalue], false, function(){
 									
-									// update the analyzed_wordforms too
+									// update rank in the analyzed_wordforms too
 									var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
 									fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
 											{"analyzed_wordform_id": sAwfId}, 
-											{"wordform_gigpos": value, "rank": iRankvalue},
-											false,
-											function(){
-												fn.refreshTable(t, function(){
-													
-													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-														
-														processAwfCheck(sAwfId, response);
-													});
-												});
-												
-											});
+											{//"wordform_gigpos": value, 
+												"rank": iRankvalue},
+											false
+//											,
+//											function(){
+//												fn.refreshTable(t, function(){
+//													
+//													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//														
+//														processAwfCheck(sAwfId, response);
+//													});
+//												});
+//												
+//											}
+												);
 									
 								});								
 								
@@ -884,45 +889,47 @@ oTableConfigurationList = {
 				}
 			}, 
 			wordform_afbr:{				
-				"editable": true,
-				
-				// update the analyzed_wordforms too
-				"editcallback": function(t, n, value){
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"wordform_afbr": value},
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				
+//				// update the analyzed_wordforms too
+//				"editcallback": function(t, n, value){
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"wordform_afbr": value},
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			},
 			wf_keurmerk:{
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				
-				// update the analyzed_wordforms too
-				"editcallback": function(t, n, value){
-					
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"keurmerk": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				
+//				// update the analyzed_wordforms too
+//				"editcallback": function(t, n, value){
+//					
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"keurmerk": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			}, 
 			rank:{
 				"colsort": "asc",    // sort #2
@@ -931,23 +938,24 @@ oTableConfigurationList = {
 			
 			comment:{
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms too
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				"editcallback": function(t, n, value){
+//					
+//					// update the analyzed_wordforms too
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"comment": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			},
 			comment_intern: {
 				
@@ -958,23 +966,24 @@ oTableConfigurationList = {
 				// ------------------------------
 				
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					
-					// update the analyzed_wordforms too
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-							{"analyzed_wordform_id": sAwfId}, 
-							{"comment_intern": value}, 
-							false, 
-							function(){
-								
-								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-									
-									processAwfCheck(sAwfId, response);
-								});
-							});
-				}
+				"editable": true
+//				,
+//				"editcallback": function(t, n, value){
+//					
+//					// update the analyzed_wordforms too
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+//					fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+//							{"analyzed_wordform_id": sAwfId}, 
+//							{"comment_intern": value}, 
+//							false, 
+//							function(){
+//								
+//								fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//									
+//									processAwfCheck(sAwfId, response);
+//								});
+//							});
+//				}
 			},
 			wf_source:{
 				"visible": false
