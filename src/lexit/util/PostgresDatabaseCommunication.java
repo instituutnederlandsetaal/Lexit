@@ -369,8 +369,10 @@ public class PostgresDatabaseCommunication {
 				}
 				
 				
-				String showArg = oneArg!=null && oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
-				if (Constants.debug) System.out.println(i+1+" -> "+showArg+" "+oneType);
+				if (Constants.debug) {
+					String showArg = oneArg!=null && oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
+					System.out.println(i+1+" -> "+showArg+" "+oneType);
+				}
 			}
 			
 			

@@ -837,19 +837,20 @@ oTableConfigurationList = {
 											{"analyzed_wordform_id": sAwfId}, 
 											{//"wordform_gigpos": value, 
 												"rank": iRankvalue},
-											false
-//											,
-//											function(){
-//												fn.refreshTable(t, function(){
-//													
-//													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-//														
-//														processAwfCheck(sAwfId, response);
-//													});
-//												});
-//												
-//											}
-												);
+											false,
+											function(){
+												// refresh to make sorting according to 
+												// paradigm position visible 
+												fn.refreshTable(t, function(){
+													
+													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+														
+														processAwfCheck(sAwfId, response);
+													});
+												});
+												
+												}
+											);
 									
 								});								
 								
@@ -1040,7 +1041,14 @@ oTableConfigurationList = {
 			},
 			online: {
 				"bgcolor": "#E0F8EC",
-				"editable": true
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					if (value == false)
+						{						
+						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["gedrukt"], [value], true);
+						}
+				} 
 			},
 			publiceren: {
 				
