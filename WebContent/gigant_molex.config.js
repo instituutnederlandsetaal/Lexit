@@ -828,22 +828,24 @@ oTableConfigurationList = {
 				"editable": true,
 				"editcallback": function(t, n, value){
 					
-					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
-					fn.callFunction("modify_wordform_and_get_id", [sAwfId, value], function(response){
+					fn.refreshTable(t);
 						
-						// add the wordform_id in the current table too (as it must synchronize)
-						var sWordformId = parseInt(response["modify_wordform_and_get_id"]);
-						fn.updateDatabaseGivenANode(t, n, ["wordform_id"], [sWordformId], false, function(){
-							
-							fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-								
-								processAwfCheck(sAwfId, response);
-							});
-							
-						});
+//					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
 						
-						
-					});
+//					fn.callFunction("modify_wordform_and_get_id", [sAwfId, value], function(response){						
+//						// add the wordform_id in the current table too (as it must synchronize)
+//						var sWordformId = parseInt(response["modify_wordform_and_get_id"]);
+//						fn.updateDatabaseGivenANode(t, n, ["wordform_id"], [sWordformId], false, function(){
+//							
+//							fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+//								
+//								processAwfCheck(sAwfId, response);
+//							});
+//							
+//						});
+//						
+//						
+//					});
 					
 				}
 			}, 
@@ -868,18 +870,19 @@ oTableConfigurationList = {
 											{"analyzed_wordform_id": sAwfId}, 
 											{//"wordform_gigpos": value, 
 												"rank": iRankvalue},
-											false
-//											,
-//											function(){
-//												fn.refreshTable(t, function(){
-//													
-//													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
-//														
-//														processAwfCheck(sAwfId, response);
-//													});
-//												});
-//												
-//											}
+											false,
+											function(){
+												// refresh to make sorting according to 
+												// paradigm position visible 
+												fn.refreshTable(t, function(){
+													
+													fn.callFunction("check_analyzedwordforms", [sAwfId], function(response){
+														
+														processAwfCheck(sAwfId, response);
+													});
+												});
+												
+												}
 												);
 									
 								});								
@@ -907,6 +910,13 @@ oTableConfigurationList = {
 //								});
 //							});
 //				}
+			},
+			online: {
+				
+			},
+			publiceren: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			},
 			wf_keurmerk:{
 				"bgcolor": "#E0F8EC",
@@ -1062,6 +1072,20 @@ oTableConfigurationList = {
 				"colsort": "asc",
 				"editable": true
 			},
+			"online": {
+				"bgcolor": "#E0F8EC",
+				"editable": true,
+				"editcallback": function(t, n, value){
+					// setting online=false automatically means gedrukt=false
+					if (value == false)
+						{						
+						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["gedrukt"], [value], true);
+						}
+				} 
+			},
+			"publiceren": {
+				
+			},
 			"th_lemma": {				
 				"editable": true				
 			},
@@ -1162,7 +1186,14 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"gedrukt": {
-				"editable": true
+				"editable": true,
+				"editcallback": function(t, n, value){
+					// setting gedrukt=true automatically means online=true
+					if (value == true)
+						{						
+						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["online"], [value], true);
+						}
+				}
 			},
 			"verkleinwoord": {
 				"editable": true

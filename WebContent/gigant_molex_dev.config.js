@@ -1039,18 +1039,18 @@ oTableConfigurationList = {
 				"colsort": "asc",
 				"editable": true
 			},
-			online: {
+			"online": {
 				"bgcolor": "#E0F8EC",
 				"editable": true,
 				"editcallback": function(t, n, value){
-					
+					// setting online=false automatically means gedrukt=false
 					if (value == false)
 						{						
 						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["gedrukt"], [value], true);
 						}
 				} 
 			},
-			publiceren: {
+			"publiceren": {
 				
 			},
 			"th_lemma": {				
@@ -1150,10 +1150,17 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"herkomst": {
-				"editable": true
+				"editable": true				
 			},
 			"gedrukt": {
-				"editable": true
+				"editable": true,
+				"editcallback": function(t, n, value){
+					// setting gedrukt=true automatically means online=true
+					if (value == true)
+						{						
+						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["online"], [value], true);
+						}
+				}
 			},
 			"verkleinwoord": {
 				"editable": true
