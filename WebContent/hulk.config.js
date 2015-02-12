@@ -7,21 +7,21 @@
 
 
 // this url will be called for the generation of the 'customer result file'
-var sHulKUrlServer = "http://svowhu02.inl.loc/ws/kick-result/";
+var sHulKUrlServer = "http://hulk.inl.loc/ws/kick-result/";
 
 // this url will be called to export the data to the Gigant-spelling database
-var sHulKExportUrl = "http://svowhu02.inl.loc/ws/kick-export/";
+var sHulKExportUrl = "http://hulk.inl.loc/ws/kick-export/";
 
 // this url will deliver us autocomplete information
-var sAutoCompleteUrl = "http://svowhu02.inl.loc/ws/autocomplete-lemmata/";
+var sAutoCompleteUrl = "http://hulk.inl.loc/ws/autocomplete-lemmata/";
 
 
 
 // //////////////////////////////////////////////
 //
 // Test servers:
-// for uploaders       http://hulk.ato.inl.nl
-// for administrators  http://svowhu02.inl.loc
+// for uploaders       http://hulk.inl.nl
+// for administrators  http://hulk.inl.loc
 //
 // //////////////////////////////////////////////
 
