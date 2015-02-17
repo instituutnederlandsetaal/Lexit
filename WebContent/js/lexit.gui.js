@@ -659,6 +659,15 @@ gui.makeTableEditable = function(sSomeTablename){
 							return true;
 							}
 						
+						// if SHIFT wasn't pressed, that means selection might
+						// have happened by accident, so cancel						
+						
+						if (kf._getPressedKey()!='shift')
+							{					
+							// put back original value and leave
+							var backValue = (this.revert != value) ? this.revert : value;
+							return backValue;
+							}
 						
 						// current node 
 						var nCurrentNode = this;
@@ -721,8 +730,9 @@ gui.makeTableEditable = function(sSomeTablename){
 							 	"success": function(xml) {
 							 		gui.removeProcessingMsg(sSomeTablename);
 							 		if (gui.getDbResponse(xml))
-							 			{				 			
+							 			{
 							 			mt.getDataTableObjectOf(sSomeTablename).fnUpdate( value, aPos[0], aPos[2], false );
+							 			
 							 			// callcack function, if it is set in configuration
 							 			if (fnEditCallback!=null)
 											fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
@@ -763,7 +773,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						     },
 							"height": "14px",
 					        "width": "100%",
-					        "tooltip": "Klik om te bewerken",
+					        "tooltip": "Klik en druk op Shift om te bewerken",
 					        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
 					}
 				); // end of jEditable for select boxes
@@ -790,10 +800,10 @@ gui._closeJEditable = function(editor, value){
 
 
 // for jEditable with selectbox input, we need to build an associative array
-// of 'select text' tot 'select values' to be set as options in the select box
+// of 'select text' to 'select values' to be set as options in the select box
 gui._buildDataArrayForJEditable = function(sSomeTableName, aAllowedValues, sValueOfThisCell){
 	
-	var aNewArray = Array();
+	var aNewArray = new Array();
 	for (var i=0; i<aAllowedValues.length; i++)
 		{
 		aNewArray[aAllowedValues[i]] = aAllowedValues[i];

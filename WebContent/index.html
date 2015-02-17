@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2015.02.10
+	v2015.02.13
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -110,7 +110,6 @@
 	<script type="text/javascript" language="javascript" src="js/lexit.tableBuilder.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.undo.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.contextMenus.js"></script>
-	<script type="text/javascript" language="javascript" src="projects_overview.js"></script>
 	<script type="text/javascript" language="javascript" src="language.js"></script>
 	
 	
@@ -155,10 +154,62 @@
 	// INL Home url
 	var INL_HOMEURL = "gtb.dev.inl.loc";
 	
+	// http parameters	
+	var paramsHash;
+	
+	// test mode?
+	var bTest;
+	
 	
 	$(document).ready(function() {	
 		
-		initialize();
+		// get http parameters
+		paramsHash = getHttpParams();
+		
+		// read project overview
+		
+		// are we in development (test) mode?
+		// if so, load the file from webcontent
+		// if not, load the file from the configuration directory
+		
+		bTest = (paramsHash!=null &&
+				paramsHash.get("test")!=null && 
+				paramsHash.get("test")=='true');
+		
+		// test mode (development)
+		if (bTest)
+			{
+			$.getScript("projects_overview.js")
+			.done(function(){				
+				initialize();
+				})
+			.fail(function(jqxhr, settings, exception){
+				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+				});
+			}
+		
+		// normal mode (production)
+		else
+			{
+			var url = "../lexit/lexit/table/get_projects_overview"; 			
+			
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"dataType": "script",
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"success": function(){					
+					initialize();
+				},
+				"error": function(jqxhr, settings, exception){
+					fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+				}
+				});
+			}
+		
+		
 					
 	});	 // end of document ready
 	
@@ -186,8 +237,7 @@
 				.html("Kies een tabel: <I>(+ CTRL om tabel toe te voegen) (+ SHIFT voor nieuwe tab)</I>")
 				);
 		
-		// get url parameters
-		var paramsHash = getHttpParams();
+		// get url parameters		
 		if (paramsHash == null || paramsHash.get("db") == null)
 			{
 			showListOfProjects();
@@ -198,19 +248,12 @@
 			// This needs to be called here because it has global scope
 			// and recalling it at each new table creation will alter other key functions 
 			// which than malfunction (because of unbinds)
-			kf.addKeyFunctions();
-			
+			kf.addKeyFunctions();			
 			
 			
 			// load the specific client configuration file for the required database
 			// and get the list of tables (getScript never reads this file from cache)
 			
-			
-			// are we in development (test) mode?
-			// if so, load the file from webcontent
-			// if not, load the file from the configuration directory
-			
-			var bTest = (paramsHash.get("test")!=null && paramsHash.get("test")=='true');
 			
 			// test mode (development)
 			if (bTest)
@@ -261,7 +304,7 @@
 					"error": function(jqxhr, settings, exception){
 						fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
 					}
-				});
+					});
 				}
 			
 			
@@ -269,7 +312,19 @@
 			// show the project name at the top of the screen
 			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
 			
-			fn.setProjectTitle(sProjectName);		
+			fn.setProjectTitle(sProjectName);
+			
+			// show message or warning for this project, if available
+			var oProjectObject = getProjectObject(paramsHash.get("db"));
+			if (typeof oProjectObject != 'undefined')
+				{
+				if (typeof oProjectObject["message"] != 'undefined')
+					{
+					var sWarning = oProjectObject["message"];
+					if (sWarning != '')
+						fn.message(paramsHash.get("db"), sWarning);
+					}
+				}		
 			}
 		
 	};
@@ -357,6 +412,27 @@
 		else
 			fn.message("Fout", "Geen toegang");
 		
+	}
+	
+	
+	// get all the properties belonging to the description of a project
+	function getProjectObject(sProjectName){
+		
+		var oObjectToReturn;
+		
+		for (var i=0; i<aProjectList.length; i++)
+		{
+			if (aProjectList[i]["config_filename"] != sProjectName)
+				{
+				continue;
+				}
+			else
+				{
+				oObjectToReturn = new cloneObject(aProjectList[i]);
+				break;
+				}
+		}
+		return oObjectToReturn;
 	}
 		
 	</script>

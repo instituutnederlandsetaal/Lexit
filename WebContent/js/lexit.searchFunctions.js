@@ -288,7 +288,21 @@ sf.enableSearchFields = function(someTablename){
 			if (aColumnSelectionBox == null)
 				{
 				aListOfOptions = cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(someTablename)[i]);
-				aListOfOptions.unshift(""); // empty value as neutral choice
+				
+				// empty value as neutral choice
+				aListOfOptions.unshift("");
+				
+				// 'ALLES' value to be able to choose everything
+				var sAllOptions = "";
+				var aAllAllowedValues = new Array(); 
+				for (var j=0; j<aListOfOptions.length; j++)
+					{
+					if (aListOfOptions[j] != '' && aListOfOptions[j] != '-')
+						{
+						aAllAllowedValues.push(aListOfOptions[j]);
+						}
+					}
+				sAllOptions = "^("+aAllAllowedValues.join("|")+")$";				
 				}
 			
 			
@@ -308,6 +322,12 @@ sf.enableSearchFields = function(someTablename){
 							.text( aListOfOptions[j] )
 					);
 				}
+			// finally add the 'ALLES' option
+			inputTag.append(
+					$("<option></option>")							
+						.attr("value", sAllOptions )
+						.text( "ALLES" )
+				);
 			}
 		
 		// 2. checkbox
@@ -761,6 +781,7 @@ sf.isCheckboxFalseValue = function(sValue){
 
 // give search values the right shape
 // t.i. values of select boxes must start with 'exact:' (except when value is empty)
+// [which allow the resulting query to be very fast (as exact: will force use of '=' operator)]
 // and other values remain unchanged
 sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 
@@ -773,7 +794,7 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	var isASelectBox = conf.getSelectionBox(oColumnConfig) != null || mt.getListOfColumnTypesOf(sTableName)[iColumnIndex]==USER_DEFINED;
 	
 	if (isASelectBox && 
-			( sValue != '' && !$.startsWith(sValue, "exact:") ) 
+			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") ) 
 		)
 		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
 	

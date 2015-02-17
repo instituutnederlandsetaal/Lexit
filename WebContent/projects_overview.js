@@ -5,38 +5,38 @@
 var aProjectList =
 	[
 	{
-		name: "GB-GiGp",
-		config_filename: "gb_gigp",
-		description: "GB-GiGp",
-		closed: true
+			name: "GB-GiGp",
+			config_filename: "gb_gigp",
+			description: "GB-GiGp",
+			closed: true
 	},
 	{
-		name: "GiGp spelling",
-		config_filename: "gigp_spelling",
-		description: "GiGp spellinginterface",
-		closed: true
+			name: "GiGp spelling",
+			config_filename: "gigp_spelling",
+			description: "GiGp spellinginterface",
+			closed: true
 	},
 	 {
-		name: "Gigant",
-		config_filename: "gigant",
-		description: "Oude Gigantlexicon-interface (test)",
-		closed: true
+			name: "Gigant",
+			config_filename: "gigant",
+			description: "Oude Gigantlexicon-interface (test)",
+			closed: true
 	 },
 	 {
-		name: "Hulk (oud)",
-		description: "Databaseinhoud van de oude Hulk",
-		config_filename: "oudehulk",
-		closed: true
+		 	name: "Hulk (oud)",
+		 	description: "Databaseinhoud van de oude Hulk",
+		 	config_filename: "oudehulk",
+		 	closed: true
 	 },
 	 {
-		name: "Hulk (nieuwe versie van Michel)",
-		description: "De nieuwe HulK-database van Michel",
-		config_filename: "nieuwehulk"
+		 	name: "Hulk (nieuwe versie van Michel)",
+		 	description: "De nieuwe HulK-database van Michel",
+		 	config_filename: "nieuwehulk"
 	 },
 	 {
-		name: "Hulk (2014)",
-		description: "HulK 2014",
-		config_filename: "hulk"
+		 	name: "Hulk (2014)",
+		 	description: "HulK 2014",
+		 	config_filename: "hulk"
 	 },
 	 {
 			name: "Klussen",
@@ -44,25 +44,26 @@ var aProjectList =
 			config_filename: "klussen"
 	 },
 	 {
-		name: "Leximerge",
-		config_filename: "leximerge",
-		description: "Vergelijkingstabellen Jvklex, GB05, Wnt enz",
-		closed: true
+		 	name: "Leximerge",
+		 	config_filename: "leximerge",
+		 	description: "Vergelijkingstabellen Jvklex, GB05, Wnt enz",
+		 	closed: true
 	 },
 	 {
-		name: "Lexitest",
-		config_filename: "lexitest",
-		description: "Het nieuwste historische lexicon, gegenereerd d.m.v. scripts"
+		 	name: "Lexitest",
+		 	config_filename: "lexitest",
+		 	description: "Het nieuwste historische lexicon, gegenereerd d.m.v. scripts"
 	 },
 	 {
-		name: "Metadata",
-		config_filename: "metadata",
-		description: "CHN release 2 - metadata"
+		 	name: "Metadata",
+		 	config_filename: "metadata",
+		 	description: "CHN release 2 - metadata"
 	 },
 	 {
 			name: "Gigant MoLex (development - test)",
 			config_filename: "gigant_molex_dev",
-			description: "Gigant Modern lexicon, voor test"
+			description: "Gigant Modern lexicon, voor test",
+			message: "LET OP: Dit is een testversie"
 	 },
 	 {
 			name: "Gigant MoLex (productie intern)",
@@ -70,77 +71,89 @@ var aProjectList =
 			description: "Gigant Modern lexicon"
 	 },
 	 {
-		name: "MNW2013",
-		config_filename: "mnw2013",
-		description: "MNW Postprocessing"
+		 	name: "Gigant MoLex (productie extern - testversie)",
+		 	description: "Gigant Modern lexicon, voor test",
+		 	config_filename: "gigantmolex",
+		 	message: "LET OP: Dit is de testversie van Productie EXTERN"
 	 },
 	 {
-		 name: "Molex Builder",
-		 config_filename: "molexbuilder",
-		 description: "",
-		 closed: true
+		 	name: "Gigant MoLex Surinaams (productie extern - testversie)",
+		 	description: "Gigant Modern lexicon Surinaams, voor test",
+		 	config_filename: "gigantmolex_surinaams",
+		 	message: "LET OP: Dit is de testversie van Productie EXTERN"
 	 },
 	 {
-		 name: "Molex Prepare",
-		 config_filename: "molexprepare",
-		 description: "Desambiguëren van Molexlemmata",
-		 closed: true
+		 	name: "MNW2013",
+		 	config_filename: "mnw2013",
+		 	description: "MNW Postprocessing"
 	 },
 	 {
-		 name: "Molex Glossen",
-		 config_filename: "molex_glossen",
-		 description: "Bewerken van glossen in Molex",
-		 closed: true
+		 	name: "Molex Builder",
+		 	config_filename: "molexbuilder",
+		 	description: "",
+		 	closed: true
 	 },
 	 {
-		 name: "Monele",
-		 description: "Middelnederlandse lemmata koppelen aan moderne lemmata",
-		 closed: true,
-		 config_filename: "monele"
+		 	name: "Molex Prepare",
+		 	config_filename: "molexprepare",
+		 	description: "Desambiguëren van Molexlemmata",
+		 	closed: true
 	 },
 	 {
-		name: "Monele tmp",
-		description: "Data afgeleid van Monele",
-		config_filename: "monele_tmp"
+		 	name: "Molex Glossen",
+		 	config_filename: "molex_glossen",
+		 	description: "Bewerken van glossen in Molex",
+		 	closed: true
 	 },
 	 {
-		name: "Multilex",
-		description: "Vergelijking spellingdatabase, Jvklex en Anw",
-		config_filename: "multilex",
-		closed: true
+		 	name: "Monele",
+		 	description: "Middelnederlandse lemmata koppelen aan moderne lemmata",
+		 	closed: true,
+		 	config_filename: "monele"
 	 },
 	 {
-		name: "Namescape",
-		config_filename: "namescape",
-		closed: true
+		 	name: "Monele tmp",
+		 	description: "Data afgeleid van Monele",
+		 	config_filename: "monele_tmp"
 	 },
 	 {
-		name: "Nieuw Groen Boekje",
-		config_filename: "nieuw_gb",
-		description: "Groen Boekje met Gigant tags"
+		 	name: "Multilex",
+		 	description: "Vergelijking spellingdatabase, Jvklex en Anw",
+		 	config_filename: "multilex",
+		 	closed: true
 	 },
 	 {
-		name: "Papiamentu",
-		config_filename: "papiamentu",
-		closed: true
+		 	name: "Namescape",
+		 	config_filename: "namescape",
+		 	closed: true
 	 },
 	 {
-		name: "Sonar",
-		config_filename: "sonar"
+		 	name: "Nieuw Groen Boekje",
+		 	config_filename: "nieuw_gb",
+		 	description: "Groen Boekje met Gigant tags"
 	 },
 	 {
-		name: "Spelling lexical_tmp",
-		config_filename: "lexical_tmp",
-		description: "Ontwikkeltabellen voor spelling e.d."
+		 	name: "Papiamentu",
+		 	config_filename: "papiamentu",
+		 	closed: true
 	 },
 	 {
-		name: "Spelling lexicalsources",
-		config_filename: "lexicalsources",
-		description: "Lexicon waar de spellingdatabase op gebaseerd is"
+		 	name: "Sonar",
+		 	config_filename: "sonar"
 	 },
 	 {
-		name: "Spelling database",
-		config_filename: "spelling",
-		description: "De spelling database, gegenereerd d.w.v. lexicalsources"
+		 	name: "Spelling lexical_tmp",
+		 	config_filename: "lexical_tmp",
+		 	description: "Ontwikkeltabellen voor spelling e.d."
+	 },
+	 {
+		 	name: "Spelling lexicalsources",
+		 	config_filename: "lexicalsources",
+		 	description: "Lexicon waar de spellingdatabase op gebaseerd is"
+	 },
+	 {
+		 	name: "Spelling database",
+		 	config_filename: "spelling",
+		 	description: "De spelling database, gegenereerd d.w.v. lexicalsources"
 	 }
 	];

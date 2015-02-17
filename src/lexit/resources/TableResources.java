@@ -85,13 +85,36 @@ public class TableResources extends Application implements Serializable  {
 	@Path("get_configfile")
 	@GET
 	@Produces({MediaType.TEXT_PLAIN})
-	public Response getJsConfigFile(@QueryParam("db_name") String dbName){
+	public Response getConfigJsFile(@QueryParam("db_name") String dbName){
 		
 		if (Constants.debug) System.out.println("Loading config file...");
 		
 		String fileToSend = null;
 		try {
-			fileToSend = readJsConfigFile(dbName);
+			fileToSend = readConfigJsFile(dbName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
+	}
+	
+	
+	
+	// get the javascript projects overview file from the configuration directory
+	// call:
+	// .../lexit/lexit/table/get_projects_overview
+	@Path("get_projects_overview")
+	@GET
+	@Produces({MediaType.TEXT_PLAIN})
+	public Response getProjectsOverviewJsFile(){
+		
+		if (Constants.debug) System.out.println("Loading projects overview file...");
+		
+		String fileToSend = null;
+		try {
+			fileToSend = readProjectsOverviewFile();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1339,7 +1362,7 @@ public class TableResources extends Application implements Serializable  {
 	 * @return
 	 * @throws IOException
 	 */
-	public String readJsConfigFile(String dbName) throws IOException{
+	public String readConfigJsFile(String dbName) throws IOException{
 		
 		if (Constants.debug) System.out.println("Read javascript configuration file '"+dbName+".config.js"+"'...");
 		
@@ -1369,6 +1392,43 @@ public class TableResources extends Application implements Serializable  {
 		}
 		catch (Exception e){//Catch exception if any
 			throw new RuntimeException("Error while reading the "+filepath+" configuration file", e);
+		}
+		
+		return sb.toString();
+	}
+	
+	
+	// same as readConfigJsFile, but specialize for the projects overview file
+	public String readProjectsOverviewFile() throws IOException{
+		
+		if (Constants.debug) System.out.println("Read javascript projects overview file...");
+		
+		String fileName = "projects_overview.js";
+		
+		String filepath = context.getRealPath(fileName);
+		
+		filepath = filepath.replace(
+				File.separatorChar+"lexit"+File.separator+fileName, 
+				File.separatorChar+"lexit_config"+File.separator+fileName);
+		if (Constants.debug) System.out.println("File: "+filepath);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		try{
+			FileInputStream fstream = new FileInputStream(filepath);
+			// Get the object of DataInputStream
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			while ((strLine = br.readLine()) != null) {				
+				sb.append(strLine);
+				sb.append("\n");
+			}
+			br.close();
+			in.close();
+		}
+		catch (Exception e){//Catch exception if any
+			throw new RuntimeException("Error while reading the "+filepath+" file", e);
 		}
 		
 		return sb.toString();
