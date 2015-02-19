@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2014-12-02                                        **
+// **      2015-02-17                                        **
 // **                                                        **
 // ************************************************************
 
@@ -400,23 +400,7 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"gedrukt":{
-//				"editable": true,
-//				"editcallback": function(t, n, value){
-//					
-//					// synchronize lemmata_en_paradigma view
-//					var lemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
-//					fn.updateDatabaseGivenFieldValues(
-//							"lemmata_en_paradigma_view", 
-//							{"lemma_id": lemmaId}, 
-//							{"gedrukt": value}, 
-//							false, 
-//							
-//							// finally refresh all tables so effect is visible everywhere
-//							function(){								
-//								fn.refreshTable("lemmata_en_paradigma_view");
-//								}
-//							);
-//				}
+
 			},
 			"verkleinwoord": {
 				
@@ -500,35 +484,7 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			"gedrukt":{
-//				"editable": true,
-//				"editcallback": function(t, n, value){
-//					
-//					var lemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-//					// synchronize lemmata table
-//					fn.updateDatabaseGivenFieldValues(
-//							"lemmata", 
-//							{"lemma_id": lemmaId}, 
-//							{"gedrukt": value},
-//							false, 
-//							
-//							// finally refresh table so effect is visible
-//							function(){
-//								fn.refreshTable("lemmata_view");
-//								}
-//							);
-//					// give other records with same lemma_id the same 'gedrukt' value
-//					fn.updateDatabaseGivenFieldValues(
-//							t, 
-//							{"lemma_id": lemmaId}, 
-//							{"gedrukt": value}, 
-//							false, 
-//							
-//							// finally refresh table so effect is visible
-//							function(){
-//								fn.refreshTable(t);
-//								}							
-//							);
-//				}
+
 			},
 			
 			"lemma_id":{				
@@ -559,6 +515,12 @@ oTableConfigurationList = {
 				"editfunc": function(t, n, value){
 					
 					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+					
+					// BEWARE:
+					// in external installation, the synchronizing function is removed
+					// so we need this piece of code (even though it was removed
+					// from the internal installation, where the synchronizing function
+					// does the job)
 					
 					// if we have an awf-id
 					// update this 'view' but also the analyzed_wordforms table

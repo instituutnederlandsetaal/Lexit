@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2015.02.13
+	v2015.02.19
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -314,6 +314,7 @@
 			
 			fn.setProjectTitle(sProjectName);
 			
+			
 			// show message or warning for this project, if available
 			var oProjectObject = getProjectObject(paramsHash.get("db"));
 			if (typeof oProjectObject != 'undefined')
@@ -321,7 +322,14 @@
 				if (typeof oProjectObject["message"] != 'undefined')
 					{
 					var sWarning = oProjectObject["message"];
-					if (sWarning != '')
+					var bPrivate = (typeof oProjectObject["private"] != 'undefined') ?
+						oProjectObject["private"] : true; // default is 'true' 						
+						 
+					// show warning message if available
+					if (	sWarning != '' &&   
+							// except if it should be kept private to home
+							!(bPrivate && (document.URL).indexOf( INL_HOMEURL )<0 ) 
+						)
 						fn.message(paramsHash.get("db"), sWarning);
 					}
 				}		
