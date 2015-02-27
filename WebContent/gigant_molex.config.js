@@ -9,12 +9,16 @@ oShowOnlyTables = (
          "keurmerk_checklist", "gemiste_paradigma_correcties", "lemmata_en_paradigma_view",
          "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht",
          "lemmatawithgender",
-         "raredubbelvormen"]
+         "raredubbelvormen", "sterke_werkwoorden",
+         "surinaams_and_antilliaans_commissions_selections",
+		 "homonyms_to_check"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses",
 		 "lemmatawithgender",
-		 "raredubbelvormen"];
+		 "raredubbelvormen",
+		 "surinaams_and_antilliaans_commissions_selections",
+		 "homonyms_to_check"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");

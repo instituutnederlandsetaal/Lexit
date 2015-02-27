@@ -2,7 +2,8 @@
 oHiddenTablesList = [];
 oShowOnlyTables = ["lemmata_view", 
                    "modified_lemmata_view", "modified_paradigm_view", 
-                   "lemmata_en_paradigma_view"];
+                   "lemmata_en_paradigma_view",
+                   "surinaams_and_antilliaans_commissions_selections"];
 
 
 // remember chosen parent
@@ -1158,6 +1159,12 @@ oTableConfigurationList = {
 			},
 			"verkleinwoord": {
 				"editable": true
+			},
+			"anc": {
+				
+			},
+			"snc": {
+				
 			}
 			
 		},
