@@ -115,6 +115,19 @@ oTableSettingsList = {
 						fn.getCellElement(t, this, "f_total_rel").css("opacity", "0.5");
 						}
 					
+					
+					// gedrukt must be blue
+					var bIsGedrukt = fn.getDataFromCellNamed(t, this, "gedrukt");
+					if (bIsGedrukt == 't')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "blue");						
+							}
+						}
+					
 					// diminutives must be green
 					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
 					if (sVerkleinwoord != '-')
@@ -353,6 +366,18 @@ oTableSettingsList = {
 				var aRows = fn.getAllRows(t);
 				aRows.each(function(){
 					
+					// gedrukt must be blue
+					var bIsGedrukt = fn.getDataFromCellNamed(t, this, "gedrukt");
+					if (bIsGedrukt == 't')
+						{
+						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
+						for (var i=0; i<aColList.length; i++)
+							{
+							var sColName = aColList[i];
+							(fn.getCellElement(t, this, sColName)).css("color", "blue");						
+							}
+						}
+					
 					// give parent other color (so they are recognizable)
 					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");					
 					if (bIsParent == 't')
@@ -363,7 +388,7 @@ oTableSettingsList = {
 							var sColName = aColList[i];
 							(fn.getCellElement(t, this, sColName)).css("color", "salmon");						
 							}
-						}							
+						}								
 					
 					// diminutives must be green
 					var sVerkleinwoord = fn.getDataFromCellNamed(t, this, "verkleinwoord");
@@ -376,6 +401,8 @@ oTableSettingsList = {
 							(fn.getCellElement(t, this, sColName)).css("color", "green");						
 							}
 						}
+					
+					
 					});
 				
 			},			
@@ -1078,14 +1105,14 @@ oTableConfigurationList = {
 			},
 			"online": {
 				"bgcolor": "#E0F8EC",
-				"editable": true,
-				"editcallback": function(t, n, value){
-					// setting online=false automatically means gedrukt=false
-					if (value == false)
-						{						
-						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["gedrukt"], [value], true);
-						}
-				} 
+				"editable": true //,
+//				"editcallback": function(t, n, value){
+//					// setting online=false automatically means gedrukt=false
+//					if (value == false)
+//						{						
+//						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), ["gedrukt"], [value], true);
+//						}
+//				} 
 			},
 			"publiceren": {
 				
@@ -1190,7 +1217,7 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"gedrukt": {
-				"editable": true,
+				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
 				"editcallback": function(t, n, value){
 					// setting gedrukt=true automatically means online=true
 					if (value == true)
@@ -1201,6 +1228,26 @@ oTableConfigurationList = {
 			},
 			"verkleinwoord": {
 				"editable": true
+			},
+			"anc":{
+//				"editable": true,
+//				"editcallback": function(t, n, value){
+//					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+//					fn.updateDatabaseGivenFieldValues(
+//							"surinaams_and_antilliaans_commissions_selections", 
+//							{"lemma_id": sLemmaId}, 
+//							{"anc": value});
+//				}
+			},
+			"snc":{
+//				"editable": true,
+//				"editcallback": function(t, n, value){
+//					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+//					fn.updateDatabaseGivenFieldValues(
+//							"surinaams_and_antilliaans_commissions_selections", 
+//							{"lemma_id": sLemmaId}, 
+//							{"snc": value});
+//				}
 			}
 			
 		},

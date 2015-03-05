@@ -948,9 +948,12 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 // (that is: remove html element, datatables object, buttons, everything)
 tb.destroyTable = function(sSomeTablename, fnFunction, bRemoveContainerDiv){
 	
-	// remove config functions
+	// Remove config functions
 	// (since they are assigned with jQuery "live", they would keep alive otherwise)
-	conf.deactivateConfigFunctions(sSomeTablename);
+	// We use off() instead of conf.deactivateConfigFunctions()
+	// since the last function appeared not to work properly in this case
+	$('#'+sSomeTablename+'_dynamic').off();
+
 	
 	// resizable needed to be destroyed, otherwise it won't work when table is re-created
 	$("#"+sSomeTablename+"_dynamic")

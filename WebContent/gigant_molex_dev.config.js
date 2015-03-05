@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["lemmata_view", 
+oShowOnlyTables = ["export_versions", "lemmata_view", 
                    "modified_lemmata_view", "modified_paradigm_view", 
                    "lemmata_en_paradigma_view",
                    "surinaams_and_antilliaans_commissions_selections"];
@@ -33,6 +33,49 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		export_versions:{
+			
+			"size": "80%",
+			
+			"button_0":{
+				"name": "Voeg export-record toe",
+				"click": function(t){
+					
+					fn.prompt("Geef record-info", ["recipient", "comment"], ["", ""], 
+							function(){
+								var sRecipient = fn.getPromptUserInput("recipient");
+								var sComment = fn.getPromptUserInput("comment");
+								
+								fn.insertIntoDatabase(t, 
+										{
+										"recipient": sRecipient,
+										"comment": sComment
+										}, null, true);
+					});
+				}
+			},
+			"button_1":{
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					fn.confirm("Let op", "Weet u het zeker?", function(){
+						
+						var aNodes = fn.getSelectedRowsFrom(t);
+						
+						aNodes.each(function(){
+							var nCurrentNode = this;
+							
+							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
+							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
+							});
+					});
+					
+					
+					
+				}
+			}
+		},
 		
 		
 		lemmata_en_paradigma_view:{
@@ -1160,11 +1203,25 @@ oTableConfigurationList = {
 			"verkleinwoord": {
 				"editable": true
 			},
-			"anc": {
-				
+			"anc":{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"anc": value});
+				}
 			},
-			"snc": {
-				
+			"snc":{
+				"editable": true,
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"snc": value});
+				}
 			}
 			
 		},
@@ -1300,6 +1357,22 @@ oTableConfigurationList = {
 					fn.callDatabase("paradigma_view", 
 							{"lemma_id": sLemmaId});
 				}
+			}
+			
+		},
+		
+		export_versions:{
+			"id":{
+				"colsort": "desc"
+			},
+			"recipient": {
+				"editable": true
+			},
+			"comment": {
+				"editable": true
+			},
+			"export_type":{
+				"editable": true
 			}
 			
 		},
