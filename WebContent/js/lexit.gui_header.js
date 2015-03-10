@@ -944,15 +944,15 @@ head.putHelpButton = function(sSomeTablename){
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>+</I></CENTER></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>&eacute;&eacute;n of meer (letters)</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>&eacute;&eacute;n of meer keer het voorgaande (teken)</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>*</I></CENTER></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>nul of meer (letters)</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>nul of meer keer het voorgaande (teken)</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>?</I></CENTER></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>de voorafgaande letter is optioneel</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>het voorafgaande teken is optioneel</TD>" +
 				"</TR>" +
 				"</TABLE>" +
 				"<BR>" +
@@ -962,6 +962,11 @@ head.putHelpButton = function(sSomeTablename){
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^hoofd</I></TD>" +
 				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar woorden die met '<I>hoofd</I>' beginnen</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^hoofd.+</I></TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar woorden die met '<I>hoofd</I>' beginnen, " +
+				"gevolgd door een willekeurige tekenreeks</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>hoofd$</I></TD>" +

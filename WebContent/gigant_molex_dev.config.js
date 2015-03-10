@@ -42,17 +42,23 @@ oTableSettingsList = {
 				"name": "Voeg export-record toe",
 				"click": function(t){
 					
-					fn.prompt("Geef record-info", ["recipient", "comment"], ["", ""], 
+					fn.prompt("Geef record-info", 
+							["major", "minor", "recipient", "comment"], 
+							[0, 0, "", ""], 
 							function(){
+								var iMajor = fn.getPromptUserInput("major");
+								var iMinor = fn.getPromptUserInput("minor");
 								var sRecipient = fn.getPromptUserInput("recipient");
 								var sComment = fn.getPromptUserInput("comment");
 								
 								fn.insertIntoDatabase(t, 
 										{
+										"major": iMajor,
+										"minor": iMinor,
 										"recipient": sRecipient,
 										"comment": sComment
 										}, null, true);
-					});
+							});
 				}
 			},
 			"button_1":{
@@ -1371,7 +1377,10 @@ oTableConfigurationList = {
 			"comment": {
 				"editable": true
 			},
-			"export_type":{
+			"major":{
+				"editable": true
+			},
+			"minor":{
 				"editable": true
 			}
 			

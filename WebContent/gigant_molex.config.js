@@ -11,14 +11,14 @@ oShowOnlyTables = (
          "lemmatawithgender",
          "raredubbelvormen", "sterke_werkwoorden",
          "surinaams_and_antilliaans_commissions_selections",
-		 "homonyms_to_check"]
+         "export_versions", "homonyms_to_check"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses",
 		 "lemmatawithgender",
 		 "raredubbelvormen",
 		 "surinaams_and_antilliaans_commissions_selections",
-		 "homonyms_to_check"];
+		 "export_versions", "homonyms_to_check"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -51,6 +51,55 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+export_versions:{
+			
+			"size": "80%",
+			
+			"button_0":{
+				"name": "Voeg export-record toe",
+				"click": function(t){
+					
+					fn.prompt("Geef record-info", 
+							["major", "minor", "recipient", "comment"], 
+							[0, 0, "", ""], 
+							function(){
+								var iMajor = fn.getPromptUserInput("major");
+								var iMinor = fn.getPromptUserInput("minor");
+								var sRecipient = fn.getPromptUserInput("recipient");
+								var sComment = fn.getPromptUserInput("comment");
+								
+								fn.insertIntoDatabase(t, 
+										{
+										"major": iMajor,
+										"minor": iMinor,
+										"recipient": sRecipient,
+										"comment": sComment
+										}, null, true);
+					});
+				}
+			},
+			"button_1":{
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					fn.confirm("Let op", "Weet u het zeker?", function(){
+						
+						var aNodes = fn.getSelectedRowsFrom(t);
+						
+						aNodes.each(function(){
+							var nCurrentNode = this;
+							
+							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
+							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
+							});
+					});
+					
+					
+					
+				}
+			}
+		},
 		
 		lemmatawithgender:{
 			
@@ -1463,6 +1512,25 @@ oTableConfigurationList = {
 			},
 			opmerking : {
 				"bgcolor": "#E0F8EC",
+				"editable": true
+			}
+			
+		},
+		
+		export_versions:{
+			"id":{
+				"colsort": "desc"
+			},
+			"recipient": {
+				"editable": true
+			},
+			"comment": {
+				"editable": true
+			},
+			"major":{
+				"editable": true
+			},
+			"minor":{
 				"editable": true
 			}
 			
