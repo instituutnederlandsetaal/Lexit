@@ -278,6 +278,33 @@ oTableSettingsList = {
 					sf.putCurrentValueInAllSearchBoxes(fn.getTableName(t));
 					
 				}
+			},
+			
+			"button_3":{
+				
+				"name": "AA opblazen",
+				"click": function(t){
+					
+					var aRows = fn.getSelectedRowsFrom(t);
+					
+					var nNode = aRows[0];
+					
+					var pos = fn.getDataFromCellNamed(t,nNode, "wordform_gigpos");
+					
+					if ( pos != 'AA(degree=pos)' )
+						{
+						fn.message("Niet toegestaan!", "Let op: AA's opblazen is alleen mogelijk op basis van AA(degree=pos)");
+						}
+					else
+						{
+						var sAwfId = fn.getDataFromCellNamed(t, nNode, "analyzed_wordform_id");
+						
+						fn.callFunction("add_missing_comps_and_sups", [sAwfId], function(){
+							fn.refreshTable(t);
+							});
+						}					
+					
+				}
 			}
 		},
 		

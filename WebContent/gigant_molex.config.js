@@ -333,6 +333,33 @@ export_versions:{
 					sf.putCurrentValueInAllSearchBoxes(fn.getTableName(t));
 					
 				}
+			},
+			
+			"button_3":{
+				
+				"name": "AA opblazen",
+				"click": function(t){
+					
+					var aRows = fn.getSelectedRowsFrom(t);
+					
+					var nNode = aRows[0];
+					
+					var pos = fn.getDataFromCellNamed(t,nNode, "wordform_gigpos");
+					
+					if ( pos != 'AA(degree=pos)' )
+						{
+						fn.message("Niet toegestaan!", "Let op: AA's opblazen is alleen mogelijk op basis van AA(degree=pos)");
+						}
+					else
+						{
+						var sAwfId = fn.getDataFromCellNamed(t, nNode, "analyzed_wordform_id");
+						
+						fn.callFunction("add_missing_comps_and_sups", [sAwfId], function(){
+							fn.refreshTable(t);
+							});
+						}					
+					
+				}
 			}
 		},
 		
@@ -1279,24 +1306,24 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"anc":{
-//				"editable": true,
-//				"editcallback": function(t, n, value){
-//					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
-//					fn.updateDatabaseGivenFieldValues(
-//							"surinaams_and_antilliaans_commissions_selections", 
-//							{"lemma_id": sLemmaId}, 
-//							{"anc": value});
-//				}
+				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"anc": value});
+				}
 			},
 			"snc":{
-//				"editable": true,
-//				"editcallback": function(t, n, value){
-//					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
-//					fn.updateDatabaseGivenFieldValues(
-//							"surinaams_and_antilliaans_commissions_selections", 
-//							{"lemma_id": sLemmaId}, 
-//							{"snc": value});
-//				}
+				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"snc": value});
+				}
 			}
 			
 		},
