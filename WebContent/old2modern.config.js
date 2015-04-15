@@ -43,6 +43,26 @@ oTableSettingsList = {
 							}
 						}
 					
+					// add tooltip on lemmaforms
+					var sTooltip1 = fn.getDataFromCellNamed(t, nNode, "noor_modlem_onw");
+					var sTooltip2 = fn.getDataFromCellNamed(t, nNode, "noor_modlem_vmnw");
+					var sTooltip3 = fn.getDataFromCellNamed(t, nNode, "noor_modlem_mnw");
+					var sTooltip4 = fn.getDataFromCellNamed(t, nNode, "noor_modlem_wnt");
+					var sTooltip = 	"<span style='font-family:Courier'>" +
+					"ONW : " + sTooltip1.replace(" ", "&nbsp;") + "<br>" +
+					"VMNW: " + sTooltip2.replace(" ", "&nbsp;") + "<br>" +
+					"MNW : " + sTooltip3.replace(" ", "&nbsp;") + "<br>" +
+					"WNT : " + sTooltip4.replace(" ", "&nbsp;") +
+					"</span>";
+					var eLem1 = fn.getCellElement(t, nNode, "histlem_mnw");
+					var eLem2 = fn.getCellElement(t, nNode, "histlem_wnt");
+					var eLem3 = fn.getCellElement(t, nNode, "noor_modlem_mnw");
+					var eLem4 = fn.getCellElement(t, nNode, "noor_modlem_wnt");
+					$(eLem1).attr("title", sTooltip);
+					$(eLem2).attr("title", sTooltip);
+					$(eLem3).attr("title", sTooltip);
+					$(eLem4).attr("title", sTooltip);
+					
 				});
 			},
 			
@@ -441,6 +461,12 @@ oTableConfigurationList = {
 			},
 			histlem_wnt:{
 				"bgcolor": "#CEECF5"
+			},
+			noor_modlem_onw: {
+				"visible": false
+			},
+			noor_modlem_vmnw: {
+				"visible": false
 			},
 			noor_modlem_mnw:{
 				"bgcolor": "#F3E2A9",

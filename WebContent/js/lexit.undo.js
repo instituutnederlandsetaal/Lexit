@@ -205,11 +205,17 @@ un.undoEvent = function(sSomeTableName){
 		 			}
 		 		},
 			"error": function(jqXHR, textStatus, errorThrown){
-				gui.refreshTable(sSomeTableName);
-				mt.getDataTableObjectOf(sSomeTableName).fnDraw();
-				fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden: "+
-					textStatus+" "+errorThrown);
+				
+				fn.message("Fout in tabel '"+sSomeTableName+"'", 
+						"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+						function(){
+							gui.refreshTable(sSomeTableName);
+							//mt.getDataTableObjectOf(sSomeTableName).fnDraw();
+							}
+					); 
 				}
+		 		
+		 		
 			} );
 		}
 	

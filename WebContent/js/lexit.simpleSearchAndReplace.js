@@ -353,9 +353,13 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					gui.refreshTable(sSomeTablename);
-					fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-						textStatus+" "+errorThrown);
+					
+					fn.message("Fout in tabel '"+sSomeTablename+"'", 
+							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+							function(){
+								gui.refreshTable(sSomeTablename);
+							}
+					);
 					// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
 					}
@@ -388,9 +392,13 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					gui.refreshTable(sSomeTablename);
-					fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-						textStatus+" "+errorThrown);
+					
+					fn.message("Fout in tabel '"+sSomeTablename+"'", 
+							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+							function(){
+								gui.refreshTable(sSomeTablename);
+								}
+					);
 					// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
 					}

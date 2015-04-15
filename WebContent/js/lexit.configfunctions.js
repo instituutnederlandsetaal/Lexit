@@ -2086,7 +2086,7 @@ fn._callRecord = function(sSomeTablename, nNode, aColumnsToUpdate, xml, fnCallba
 
 // equivalent of js native 'alert'
 
-fn.message = function(sTitle, sMessage){
+fn.message = function(sTitle, sMessage, fnFunction){
 	
 	var sP = $("<p></p>").html(sMessage);
 	var dialogDivId = "dialog-message"+getUniqueNumber();
@@ -2095,14 +2095,26 @@ fn.message = function(sTitle, sMessage){
 	$(document.body).append(sDiv);
 	
 	$( "#"+dialogDivId ).dialog({
-		modal: true,
-		buttons: {
+		modal: true,	
+		buttons: {			
 			Ok: function() {
 				$( this ).dialog( "close" );
-				$( this ).remove();
-				}
+				$( this ).remove();	
+				
+				if (fnFunction != null)
+					{
+					fnFunction();
+					}
+			}
 		}
 	});
+	
+	// remove focus from buttons, 
+	// to make sure OK won't be triggered 
+	// when Enter was pressed just before 
+	// in another context (like validating input in cell)
+	$('.ui-dialog :button').blur();
+	
 };
 
 
@@ -2134,10 +2146,15 @@ fn.confirm = function(sTitle, sMessage, fnFunction){
 					$( this ).dialog( "close" );
 					$( this ).remove();
 					}
-			}
-		});
+				}
+			});
+		
+		// remove focus from buttons, 
+		// to make sure OK won't be triggered 
+		// when Enter was pressed just before 
+		// in another context (like validating input in cell)
+		$('.ui-dialog :button').blur();
 		}
-	
 	
 };
 

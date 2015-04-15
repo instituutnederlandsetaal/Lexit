@@ -18,7 +18,9 @@ oShowOnlyTables = (
 		 "lemmatawithgender",
 		 "raredubbelvormen",
 		 "surinaams_and_antilliaans_commissions_selections",
-		 "export_versions", "homonyms_to_check"];
+		 "export_versions", "homonyms_to_check",
+		 "gb05_not_in_gigmol", "gb05_not_in_gigmol_lemmaforms",
+		 "gb05_not_in_gigmol_v2"];
 
 
 fn.setProjectTitle("GigantMolex Productie Intern");
@@ -1561,6 +1563,22 @@ oTableConfigurationList = {
 				"editable": true
 			}
 			
+		},
+		
+		gb05_not_in_gigmol_v2: {
+			
+			lemma_id: {
+				"bgcolor": "#CECEF6"
+			},
+			modern_lemma: {
+				"bgcolor": "#CECEF6"
+			},
+			lemma_gigpos: {
+				"bgcolor": "#CECEF6"
+			},
+			gb_id: {
+				"bgcolor": "#CECEF6"
+			}
 		}
 };
 

@@ -406,9 +406,10 @@ gui.makeTableEditable = function(sSomeTablename){
 						},
 				 	"dataType": "xml", // get response as xml
 				 	"success": function(xml) {
+				 		
 				 		gui.removeProcessingMsg(sSomeTablename);
 				 		if (gui.getDbResponse(xml))
-				 			{				 			
+				 			{
 				 			
 				 			// callcack function, if it is set in configuration
 				 			if (fnEditCallback!=null)
@@ -422,15 +423,22 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			}
 				 		else
 				 			{
-				 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+				 			fn.message("Fout in tabel '"+sSomeTablename+"'", 
+				 					"Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]"
+				 					);
 				 			}
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
-						gui.refreshTable(sSomeTablename);
-						mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-						fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-							textStatus+" "+errorThrown);
+						
+						fn.message("Fout in tabel '"+sSomeTablename+"'", 
+								"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+								function(){
+									gui.refreshTable(sSomeTablename);
+									//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+									}
+							);
 						}
+				 		
 					} );
 				}			
 						
@@ -491,7 +499,7 @@ gui.makeTableEditable = function(sSomeTablename){
 	    	
 	    	if (event.which == 13)
         	{
-	    		$(this).closest('form').submit();
+	    		$(this).closest('form').submit();	    		
         	}
 	            
 	    });
@@ -603,8 +611,14 @@ gui.makeTableEditable = function(sSomeTablename){
 			 		
 			 	},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-						textStatus+" "+errorThrown);}
+					fn.message("Fout in tabel '"+sSomeTablename+"'", 
+							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+							function(){
+								gui.refreshTable(sSomeTablename);
+								//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+								}
+						);
+					}
 				} );			
 			}
 		
@@ -741,15 +755,26 @@ gui.makeTableEditable = function(sSomeTablename){
 							 			}
 							 		else
 							 			{
-							 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+							 			fn.message("Fout in tabel '"+sSomeTablename+"'", 
+							 					"Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]",
+							 					function(){
+													gui.refreshTable(sSomeTablename);
+													//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+												}
+							 				);
 							 			}
 							 		},
 								"error": function(jqXHR, textStatus, errorThrown){
-									gui.refreshTable(sSomeTablename);
-									mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-									fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-										textStatus+" "+errorThrown);
+									
+									fn.message("Fout in tabel '"+sSomeTablename+"'", 
+											"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+											function(){
+												gui.refreshTable(sSomeTablename);
+												//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+												}
+										);
 									}
+							 		
 								} );
 							}			
 						
@@ -758,7 +783,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						
 					// parameters
 					// NOTE:
-					// we added a callback as we need to put the choosen value into the jeditable internal settings
+					// we added a callback as we need to put the chosen value into the jeditable internal settings
 					// in such a way, that jeditable knows that value should be shown as 'selected'
 					{
 						    "data": gui._buildDataArrayForJEditable(sSomeTablename, aAllowedValues, sValueOfThisCell ),

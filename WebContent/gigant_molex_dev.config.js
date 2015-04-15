@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["export_versions", "lemmata_view", 
+oShowOnlyTables = ["export_versions", "lemmata_view", "locks_view",
                    "modified_lemmata_view", "modified_paradigm_view", 
                    "lemmata_en_paradigma_view",
                    "surinaams_and_antilliaans_commissions_selections"];
@@ -33,6 +33,11 @@ var fnArrowFunction = function(t){
 
 // table general settings
 oTableSettingsList = {
+		
+		locks_view: {
+			
+			
+		},
 		
 		export_versions:{
 			
@@ -1088,7 +1093,64 @@ oTableConfigurationList = {
 		},
 		
 
-		
+		locks_view:{
+			
+			lemma_id :{"editable": false},
+			  parent_id :{"editable": true},
+			  gb_superid :{"editable": false},
+			  is_multiple :{"editable": true},
+			  modern_lemma :{"editable": true},
+			  th_lemma :{"editable": true},
+			  sublemma_type :{"editable": true},
+			  gloss :{"editable": true},
+			  gb_id :{"editable": false},
+			  lemma_gigpos :{"editable": true},
+			  gb_wrdcat :{"editable": false},
+			  gb_znwlid :{"editable": false},
+			  lidw :{"editable": false},
+			  geslacht :{"editable": false},
+			  ne_label :{"editable": true},
+			  language_id :{"editable": true},
+			  lang_variant :{"editable": true},
+			  lang_orig :{"editable": true},
+			  keurmerk :{"editable": true},
+			  trademark :{"editable": true},
+			  uitspraak :{"editable": true},
+			  source :{"editable": true},
+			  opmerking :{"editable": true},
+			  homo :{"editable": true},
+			  gedrukt :{"editable": true},
+			  source_gb05 :{"editable": false},
+			  source_molex_hom :{"editable": false},
+			  source_logfiles :{"editable": false},
+			  source_molex_nw_lem :{"editable": false},
+			  source_molex_niet_hom :{"editable": false},
+			  source_anw :{"editable": false},
+			  source_telw :{"editable": false},
+			  source_chn :{"editable": false},
+			  verdacht :{"editable": true},
+			  weg :{"editable": true},
+			  creation_date :{"editable": false},
+			  creation_time :{"editable": false},
+			  taalvariant :{"editable": true},
+			  herkomst :{"editable": true},
+			  nuanc_opm :{"editable": true},
+			  status :{"editable": true},
+			  taaladvies :{"editable": true},
+			  opmerking_intern :{"editable": true},
+			  notitie :{"editable": true},
+			  kapstok :{"editable": true},
+			  opmerking_extern :{"editable": true},
+			  is_parent :{"editable": true},
+			  verkleinwoord :{"editable": true},
+			  tmp_f_total_rel :{"editable": false},
+			  notitie_extern :{"editable": true},
+			  online :{"editable": true},
+			  parent_attention :{"editable": true},
+			  anc :{"editable": false},
+			  snc :{"editable": false}
+
+		},
 
 		lemmata_view: {
 			
