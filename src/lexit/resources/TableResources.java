@@ -67,6 +67,7 @@ public class TableResources extends Application implements Serializable  {
 	Request request;
 	@Context 
 	ServletContext context;
+	@Context SecurityContext sc;
 	
 	// database access objects, needed for caching (for speed)
 	HashMap<String, Database> nameToDatabaseObject = new HashMap<String, Database>();
@@ -131,7 +132,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("get_username")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject showResource(@Context SecurityContext sc) throws IOException {
+	public DbResponseObject showResource() throws IOException {
 		
 		DbResponseObject response = new DbResponseObject();
 		response.setResponse(sc.getUserPrincipal().getName());
@@ -146,8 +147,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("cleancache")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject cleanCache( 
-			@Context SecurityContext sc,
+	public DbResponseObject cleanCache(
 			@QueryParam("table_name") String tableName,
 			@QueryParam("db_name") String dbName
 			) throws IOException {
@@ -158,7 +158,7 @@ public class TableResources extends Application implements Serializable  {
 		DbResponseObject dro = new DbResponseObject();
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		getDatabaseObject(dbName).cleanCache(dbName, tableName);
@@ -176,7 +176,6 @@ public class TableResources extends Application implements Serializable  {
 	// .../lexit/lexit/table/getcolumns?table=....
 	@Path("getcolumns")
 	public TableMetadataInspector showResource( 
-			@Context SecurityContext sc,
 			@DefaultValue("lemmata") @QueryParam("table") String tableName,
 			@QueryParam("db_name") String dbName
 			) throws IOException {
@@ -185,7 +184,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get Columns from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 	return new TableMetadataInspector(getDatabaseObject(dbName), getDbName(dbName), tableName);
@@ -198,7 +197,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public UniqueValuesObject getUniqueValues(
-			  @Context SecurityContext sc,
 			  @QueryParam("db_name") String dbName, 
 			  @QueryParam("table_name") String tableName, 
 			  @QueryParam("column_name") String columnName)
@@ -207,7 +205,7 @@ public class TableResources extends Application implements Serializable  {
 	    if (Constants.debug) System.out.println("### Get unique values for column " + columnName + " in " + tableName);
 	    
 	    String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 
 	    return getDatabaseObject(dbName).getUniqueValues(dbName, tableName, columnName);
@@ -220,7 +218,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject getRowNumber(
-			@Context SecurityContext sc,
 			@QueryParam("db_name") String dbName,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
@@ -235,7 +232,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get row number for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject();
@@ -262,7 +259,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValue(
-			@Context SecurityContext sc,
 			@QueryParam("row_id") String rowId,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
@@ -274,7 +270,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### SetValue for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -315,7 +311,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setComment(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("new_comment") String newComment,
 			@QueryParam("table_type") String tableType,
@@ -326,7 +321,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Set comment for "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -344,7 +339,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject getComment(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("table_type") String tableType,
 			@QueryParam("db_name") String dbName
@@ -354,7 +348,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get comment on "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -374,7 +368,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject getIdOfRecord(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
 			@QueryParam("value") String value,
@@ -385,7 +378,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get id from record in "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -406,7 +399,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TableRecordObject getRecord(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("id") String id,
 			@QueryParam("db_name") String dbName
@@ -416,7 +408,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get record from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		TableRecordObject tro = getDatabaseObject(dbName).getRecord(getDbName(dbName), tableName, id);
@@ -431,7 +423,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TableRecordObject getRecordWithoutId(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name_to_match") String columnNameToMatch,
 			@QueryParam("value_to_match") String valueToMatch,
@@ -445,7 +436,7 @@ public class TableResources extends Application implements Serializable  {
 		String[] valuesToMatch = valueToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		TableRecordObject tro = getDatabaseObject(dbName).getRecordWithoutId(getDbName(dbName), tableName, columnNamesToMatch, valuesToMatch);
@@ -460,7 +451,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TableRecordObject callFunction(
-			@Context SecurityContext sc,
 			@QueryParam("function_name") String functionName,
 			@QueryParam("args") String args,
 			@QueryParam("db_name") String dbName
@@ -469,7 +459,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Call function "+functionName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		TableRecordObject tro = 
@@ -488,7 +478,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValueWithoutId(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name_to_match") String columnNameToMatch,
 			@QueryParam("value_to_match") String valueToMatch,
@@ -501,7 +490,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Update record without id in "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -526,7 +515,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValueWithoutIdForSearchAndReplace(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name_to_match") String columnNameToMatch,
 			@QueryParam("value_to_match") String valueToMatch,
@@ -539,7 +527,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Update record (search and replace) without id in "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -563,7 +551,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject insertRecord(
-			@Context SecurityContext sc,
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
 			@QueryParam("value") String newValue,
@@ -575,7 +562,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Insert record into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		if (Constants.debug) System.out.println("'"+returningField+"'");
@@ -607,8 +594,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("insertmodified")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject insertRecordModified(	
-			@Context SecurityContext sc,
+	public DbResponseObject insertRecordModified(
 			@QueryParam("table_name") String tableName,
 			@QueryParam("filter_column_name") String filterColumnName,
 			@QueryParam("filter_value") String filterValue,
@@ -622,7 +608,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Insert modified record into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -646,8 +632,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("insertmodified_without_id")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject insertRecordModifiedWithoutId(		
-			@Context SecurityContext sc,
+	public DbResponseObject insertRecordModifiedWithoutId(
 			@QueryParam("table_name") String tableName,
 			@QueryParam("filter_column_name") String filterColumnName,
 			@QueryParam("filter_value") String filterValue,
@@ -661,7 +646,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Insert modified record without id into "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_WRITE_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -685,8 +670,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("delete_row")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject deleteRecord(	
-			@Context SecurityContext sc,
+	public DbResponseObject deleteRecord(
 			@QueryParam("table_name") String tableName,
 			@QueryParam("row_id") String rowId,
 			@QueryParam("db_name") String dbName
@@ -696,7 +680,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Delete record from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		DbResponseObject dro = new DbResponseObject(); 
@@ -714,8 +698,7 @@ public class TableResources extends Application implements Serializable  {
 	@Path("delete_row_without_id")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public DbResponseObject deleteRecordWithoutId(	
-			@Context SecurityContext sc,
+	public DbResponseObject deleteRecordWithoutId(
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
 			@QueryParam("value") String value,
@@ -726,7 +709,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Delete record(s) (without ids) from "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_ALL_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		String[] values = value.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
@@ -746,7 +729,6 @@ public class TableResources extends Application implements Serializable  {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TablesListObject getTables(
-			@Context SecurityContext sc,
 			@QueryParam("db_name") String dbName) throws IOException {
 		
 		if (Constants.debug) System.out.println("We are running Java version " +
@@ -755,7 +737,7 @@ public class TableResources extends Application implements Serializable  {
 				System.getProperty("java.vendor"));
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		TablesListObject listOfTables = new TablesListObject();
@@ -767,9 +749,7 @@ public class TableResources extends Application implements Serializable  {
 	
 	// .../lexit/lexit/table/gettable
 	@Path("gettable")
-	public TableDataInspector getTable( 
-			
-			@Context SecurityContext sc,
+	public TableDataInspector getTable(
 			@DefaultValue("") @FormParam("sDbName") String dbName,
 			@DefaultValue("") @FormParam("sTableName") String tableName,
 			
@@ -1026,7 +1006,7 @@ public class TableResources extends Application implements Serializable  {
 		if (Constants.debug) System.out.println("### Get table "+tableName);
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(dbName, sc, Constants.USER_READ_ACCESS))
+		if ( !userIsAllowedTo(dbName, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		String[] columnsArr = new String[]{
@@ -1283,7 +1263,7 @@ public class TableResources extends Application implements Serializable  {
 		
 		if ( !nameToDatabaseObject.containsKey(dbName) )
 			{			
-			Database newDbObj = new Database(dbName, context);
+			Database newDbObj = new Database(dbName, context, sc);
 			nameToDatabaseObject.put(dbName, newDbObj);			
 			}
 		
@@ -1301,7 +1281,7 @@ public class TableResources extends Application implements Serializable  {
 	 * @param action
 	 * @return
 	 */
-	private boolean userIsAllowedTo(String dbName, SecurityContext sc, String action){
+	private boolean userIsAllowedTo(String dbName, String action){
 		
 		// get the username
 		String username = sc.getUserPrincipal().getName();

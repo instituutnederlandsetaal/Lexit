@@ -153,10 +153,13 @@ export_versions:{
 						fn.getCellElement(t, this, "wordform").editable('disable');
 						fn.getCellElement(t, this, "wordform").css("opacity", "0.5");
 						
+						fn.getCellElement(t, this, "afbr_auto").find("input").attr("disabled", "disabled");
+						fn.getCellElement(t, this, "afbr_auto").css("opacity", "0.5");
+						
 						fn.getCellElement(t, this, "wordform_gigpos").editable('disable');
 						fn.getCellElement(t, this, "wordform_gigpos").css("opacity", "0.5");
 						
-						fn.getCellElement(t, this, "wf_keurmerk").editable('disable');
+						fn.getCellElement(t, this, "wf_keurmerk").find("input").attr("disabled", "disabled");
 						fn.getCellElement(t, this, "wf_keurmerk").css("opacity", "0.5");
 						
 						fn.getCellElement(t, this, "comment").editable('disable');
@@ -253,8 +256,21 @@ export_versions:{
 												[sLemmaId, sWordform, sWordformPosToAdd], 
 												function(){
 											
+											// when the end of the list of wordforms to add
+											// has be reached, refresh the table to make those
+											// visible
 											if ( wi == (iNumberToBeAdded-1) )
-												fn.refreshTable(confTable);
+												{			
+												// clean cache to make sure
+												// newly added forms at tail of the wordform list
+												// won't be hidden because of a old table count
+												// having a too little number of rows
+												fn.cleanTableCache(fn.getTableName(confTable), function(){
+													fn.refreshTable(confTable);
+														}
+													);												
+												}
+											
 											});
 										
 										}
@@ -1020,6 +1036,9 @@ oTableConfigurationList = {
 //							});
 //				}
 			},
+			afbr_auto:{
+				"editable": true
+			},
 			online: {
 				
 			},
@@ -1295,7 +1314,7 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"gedrukt": {
-				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
+				"editable": (fn.getCurrentUser()=='katrien' || fn.getCurrentUser()=='katrienvp'), // only Katrien is entitled to change that
 				"editcallback": function(t, n, value){
 					// setting gedrukt=true automatically means online=true
 					if (value == true)
@@ -1578,6 +1597,17 @@ oTableConfigurationList = {
 			},
 			gb_id: {
 				"bgcolor": "#CECEF6"
+			},
+			opmerking: {
+				"bgcolor": "#CEF6D8",
+				"editable": true
+			},
+			unique_id: {
+				"colsort": "asc",
+				"visible": false
+			},
+			id: {
+				"visible": false
 			}
 		}
 };

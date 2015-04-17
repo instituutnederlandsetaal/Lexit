@@ -391,6 +391,9 @@ fn.resetTable = function(sSomeTablename, fnCallback){
 // request webservice to clean its counter cache etc for a given table
 fn.cleanTableCache  = function(sSomeTablename, fnCallback){
 	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
 	// force webservice to clean its counter cache etc
 	// update the database
 	var url = "../lexit/lexit/table/cleancache"; 

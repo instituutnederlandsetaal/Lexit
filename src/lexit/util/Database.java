@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.core.SecurityContext;
 
 /*
  * This class contains all the queries needed to read from or write into
@@ -43,6 +44,7 @@ public class Database {
 	
 	// servlet context
 	ServletContext context;
+	SecurityContext sc;
 	
 	// hashed for caching
 	public HashMap<String, String> tableAndColumnNameToTypes = new HashMap<String, String>(); 
@@ -73,10 +75,11 @@ public class Database {
 	
 	
 	// constructor
-	public Database(String dbName, ServletContext context){
+	public Database(String dbName, ServletContext context, SecurityContext sc){
 		
 		try {
 			this.context = context;
+			this.sc = sc;
 			readPropertiesFile(dbName);
 		} catch (IOException e) {
 			throw new RuntimeException("Error while reading the "+dbName+" properties file", e);
@@ -3190,7 +3193,23 @@ public class Database {
 		String user = databaseAccessHash.get("user");
 		String pass = databaseAccessHash.get("pass");
 		
-		PostgresDatabaseCommunication postgresDc = new PostgresDatabaseCommunication();
+		// Special setting for cases in which the database server needs to know
+		// which tomcat user is active (e.g. because some database trigger function
+		// must behave differently for one user or another).
+		String sendTomcatUserInfoToDb = 
+			databaseAccessHash.get("send_tomcat_username_to_db");
+				
+		// compute the right value: default is 'false'.
+		boolean bSendTomcatUserInfoToDb = 
+			(sendTomcatUserInfoToDb == null) ? false : 
+				(sendTomcatUserInfoToDb.toLowerCase().trim().equals("true") ?
+						true : false);		
+		
+		
+		// connect to db (we give the tomcat info as arguments, so it might be
+		// used if needed)
+		PostgresDatabaseCommunication postgresDc = 
+			new PostgresDatabaseCommunication(this.sc, bSendTomcatUserInfoToDb);
 		
 		postgresDc.connectTo(host, db, user, pass);
 		
@@ -3216,6 +3235,9 @@ public class Database {
 			
 			return databaseAccessHash.get("schema");
 	}
+	
+	
+
 	
 	
 	public void readPropertiesFile(String dbName) throws IOException{

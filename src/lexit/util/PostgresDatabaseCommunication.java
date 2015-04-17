@@ -17,17 +17,29 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.servlet.ServletContext;
+import javax.ws.rs.core.SecurityContext;
+
 
 
 public class PostgresDatabaseCommunication {
 
-	public PostgresDatabaseCommunication() {
+	public PostgresDatabaseCommunication(SecurityContext sc, boolean sendTomcatUserInfoToDb) {	
+		
+		// get the tomcat server context
+		// allowing us to get the active tomcat user name etc
+		this.sc = sc;
+		this.sendTomcatUserInfoToDb = sendTomcatUserInfoToDb;
 	}	
 	
 	/**
 	 * Database connection
+	 *  and tomcat server SecurityContext as well
 	 */
 	private Connection db;
+	private SecurityContext sc;
+	private boolean activeTomcatUserTableIsThere = false; 
+	private boolean sendTomcatUserInfoToDb = false;
 	
 	
 	/**
@@ -80,9 +92,57 @@ public class PostgresDatabaseCommunication {
 	}
 	
 	
+	private void SendUserIdentityToDatabaseServer(){
+		
+		// if the configuration tells us to send the tomcat username
+		// to the database server
+		// AND
+		// it hasn't been done yet, then:
+		//
+		// create a temporary table in which the tomcat username will be put,
+		// and call this table 'active_user';
+		// this temporary table is only visible within the user's session,
+		// so multiple active users will have their name stored in as many 
+		// temporary tables with the same name, but invisible to each other, 
+		// so no name conflict will occur, so I tested.
+		//
+		// The active username stored in the 'active_user' temporary table 
+		// can be read by trigger functions etc, by reading the 'username' field
+		// from the temporary table.
+		
+		
+		if ( sendTomcatUserInfoToDb &&
+				!activeTomcatUserTableIsThere)
+		{
+			Statement stmt = null;
+			String query = "CREATE TEMPORARY TABLE active_user AS "+
+				"SELECT '"+sc.getUserPrincipal().getName()+"'::text AS username;";
+			
+			try
+			{
+				// Create a Statement object
+				stmt = this.db.createStatement();
+				stmt.executeUpdate(query);
+				
+				activeTomcatUserTableIsThere = true;
+			}
+			catch (SQLException e)
+			{
+				throw new RuntimeException("Error while executing query "+query, e);
+			}			
+			
+		}
+		
+		
+		
+	}
+	
+	
 	public ResultSet sendQuery(String query) 
 	{
 		if (Constants.debug) System.out.println(query);
+		
+		SendUserIdentityToDatabaseServer();
 		
 		// Get the results
 		ResultSet rs = null;
@@ -110,6 +170,8 @@ public class PostgresDatabaseCommunication {
 	{
 		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
+		
+		SendUserIdentityToDatabaseServer();
 		
 		// Get the results
 		ResultSet rs = null;
@@ -167,6 +229,8 @@ public class PostgresDatabaseCommunication {
 	{
 		if (Constants.debug) System.out.println(query);
 		
+		SendUserIdentityToDatabaseServer();
+		
 		Statement stmt = null;
 		try
 		{
@@ -196,6 +260,8 @@ public class PostgresDatabaseCommunication {
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
+		
+		SendUserIdentityToDatabaseServer();
 		
 		// Get the results
 		ResultSet rs = null;
@@ -246,6 +312,8 @@ public class PostgresDatabaseCommunication {
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
+		
+		SendUserIdentityToDatabaseServer();
 		
 		// Get the results
 		ResultSet rs = null;
@@ -322,6 +390,8 @@ public class PostgresDatabaseCommunication {
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
+		
+		SendUserIdentityToDatabaseServer();
 		
 		PreparedStatement prest;
 		

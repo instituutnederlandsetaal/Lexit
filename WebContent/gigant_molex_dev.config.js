@@ -114,10 +114,13 @@ oTableSettingsList = {
 						fn.getCellElement(t, this, "wordform").editable('disable');
 						fn.getCellElement(t, this, "wordform").css("opacity", "0.5");
 						
+						fn.getCellElement(t, this, "afbr_auto").find("input").attr("disabled", "disabled");
+						fn.getCellElement(t, this, "afbr_auto").css("opacity", "0.5");
+												
 						fn.getCellElement(t, this, "wordform_gigpos").editable('disable');
 						fn.getCellElement(t, this, "wordform_gigpos").css("opacity", "0.5");
 						
-						fn.getCellElement(t, this, "wf_keurmerk").editable('disable');
+						fn.getCellElement(t, this, "wf_keurmerk").find("input").attr("disabled", "disabled");
 						fn.getCellElement(t, this, "wf_keurmerk").css("opacity", "0.5");
 						
 						fn.getCellElement(t, this, "comment").editable('disable');
@@ -201,8 +204,19 @@ oTableSettingsList = {
 												[sLemmaId, sWordform, sWordformPosToAdd], 
 												function(){
 											
+											// when the end of the list of wordforms to add
+											// has be reached, refresh the table to make those
+											// visible
 											if ( wi == (iNumberToBeAdded-1) )
-												fn.refreshTable(confTable);
+												{
+												
+												fn.cleanTableCache(fn.getTableName(confTable), function(){
+													fn.refreshTable(confTable);
+														}
+													);
+												
+												}
+												
 											});
 										
 										}
@@ -953,6 +967,9 @@ oTableConfigurationList = {
 //								});
 //							});
 //				}
+			},
+			afbr_auto:{
+				"editable": true
 			},
 			online: {
 				
