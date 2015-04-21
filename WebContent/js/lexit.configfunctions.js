@@ -852,6 +852,27 @@ fn.getCellElement = function(someTable, nNode, sColumnName){
 };
 
 
+// get the type of a cell
+// possible output: text, checkbox, selectbox
+//
+fn.getCellType = function(someTable, nNode, sColumnName){
+	
+	if (typeof someTable == 'object')
+		someTable = fn.getTableName(someTable);
+	
+	var eCell = fn.getCellElement(someTable, nNode, sColumnName);
+	
+	if (eCell.hasClass("editable_text") || eCell.hasClass("not_editable_text"))
+		return "text";
+	else if (eCell.hasClass("editable_checkbox") || eCell.hasClass("not_editable_checkbox"))
+		return "checkbox";
+	else if (eCell.hasClass("editable_selectbox") || eCell.hasClass("not_editable_selectbox"))
+		return "selectbox";
+	
+	return "unknown";
+};
+
+
 //check of a node is an editable cell
 fn.isEditableNode = function(sSomeTableName, nNode){
 	

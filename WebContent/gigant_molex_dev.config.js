@@ -404,7 +404,9 @@ oTableSettingsList = {
 				var sTableName = fn.getTableName(t);
 				
 				var aRows = fn.getAllRows(t);
+				
 				aRows.each(function(){
+					
 					
 					// give parent other color (so they are recognizable)
 					var bIsParent = fn.getDataFromCellNamed(t, this, "is_parent");					
@@ -430,6 +432,74 @@ oTableSettingsList = {
 							}
 						}
 					});
+				
+				
+				// apply locks
+				
+				var aLemmaIdsArr = new Array();
+				aRows.each(function(i){
+					
+					aLemmaIdsArr[i] = this.id;					
+				});
+				
+				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+					
+					var aLocksPerRow = (fn.getFunctionOutput()[0]).split("|");
+					
+					aRows.each(function(i){
+						
+						console.log("ID "+this.id);
+						
+						var nThisRow = this;
+						
+						// get the locks per cell from the function output
+						var aLocksPerCell = (aLocksPerRow[i]).split(" ");
+						
+						var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+						
+						// set the locks per cell now
+						for (var j=0; j<aLocksPerCell.length; j++)
+							{
+							
+							// value 0 means not locked
+							var bLocked = (aLocksPerCell[j] != '0');
+							var sCurrentColumnName = mt.getListOfColumnsOf(fn.getTableName(t))[j];
+							
+							// if this column is visible, and it should be locked,
+							// lock it!
+							if ( $.inArray( sCurrentColumnName, aVisibleCells ) &&
+									bLocked )
+								{
+								var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
+								var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
+								
+								console.log("lock "+sCellType+ " cell "+sCurrentColumnName);
+								
+								if (sCellType == 'text')
+									{									
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'checkbox')
+									{
+									eCell.find("input").attr("disabled", "disabled");
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'selectbox')
+									{
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								
+								}
+							
+							} // end of cells loop
+					});
+					
+
+						
+					
+				}); // end of function call
 				
 			},			
 			
