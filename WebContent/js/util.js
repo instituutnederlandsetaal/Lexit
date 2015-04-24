@@ -331,6 +331,16 @@ function sortArrayOfArray(myArray){
 
 
 
+// make sure an array only contains unique values
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
+function getOnlyUniqueValues(array){
+	return array.filter( onlyUnique );
+}
+
+
 
 //*******************************************************
 

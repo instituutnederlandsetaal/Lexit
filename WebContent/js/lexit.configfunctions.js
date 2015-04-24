@@ -2471,6 +2471,74 @@ fn.getCustomButtonCss = function(sTableName, iButtonNumber, sProperty){
 	
 };
 
+// get the index of a button having a given name
+fn.getIndexOfButtonNamed = function(sTableName, sName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var aTableSettings = conf.getTableSettings(sTableName);	
+	
+	for (sOneSetting in aTableSettings)
+		{
+		// if we found a button and it has the required name, return its index
+		if ( $.startsWith(sOneSetting, "button") && 
+				aTableSettings[sOneSetting]["name"] == sName)
+			return parseInt(sOneSetting.replace("button_", ""));
+		}
+	
+	// no button found with this name
+	return -1;
+};
+
+// add a custom button after initialisation time
+fn.addCustomButton = function(sSomeTableName, oButtonConfig){
+	
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+		
+	// get the table settings and the current number of custom buttons
+	var aTableSettings = conf.getTableSettings(sSomeTableName);	
+	var iNumberOfCustomButtons = conf.getNumberOfHeaderButtons(aTableSettings);
+	var iIndexOfNewButton = iNumberOfCustomButtons;
+	
+	// put the new button config into the table settings array
+	// with the right index
+	aTableSettings["button_"+iIndexOfNewButton] = oButtonConfig;
+	
+	// now we can access the new button configuration exactly in the same 
+	// way as the configuration of other buttons
+	var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, iIndexOfNewButton);
+	var sButtonName = conf.getHeaderButtonName(aButtonSettings);
+	var sButtonBgColor = conf.getHeaderButtonBgColor(aButtonSettings);
+	var sButtonTextColor = conf.getHeaderButtonTextColor(aButtonSettings);
+	var sToolTip = conf.getHeaderButtonToolTip(aButtonSettings);
+	
+	var customButton = $("<button/>")
+	.attr("id", sSomeTableName+"_button_"+iIndexOfNewButton)
+	.attr("type", "button")
+	.css("background-color", sButtonBgColor)
+	.css("color", sButtonTextColor)
+	.addClass("header_button")
+	.attr("name", iIndexOfNewButton) // give button its number as name attribute
+	.html(sButtonName)
+	.bind("click", function(){
+		// retrieve button function by its button number
+		var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, $(this).attr("name"));
+		var fnButtonFunction = conf.getHeaderButtonFunction(aButtonSettings);
+		// execute the function
+		fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
+	});
+	
+	// add tooltip
+	if (sToolTip != null)
+		customButton.attr("title", sToolTip).addClass("tooltip");
+
+	$("#"+sSomeTableName+"_filter").append(
+		$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+iIndexOfNewButton).css("display", "inline").append(customButton)
+		);
+};
+
 
 
 

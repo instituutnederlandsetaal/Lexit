@@ -895,7 +895,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 					"aTargets": [ i ],
 					"sClass": columnEditable ?
 							sClassPrefix + "editable_text" 
-							: sClassPrefix + "not_editable",
+							: sClassPrefix + "not_editable_text",
 					"bVisible": columnVisible,
 					"bSortable": columnVisible && columnHasDataType ? columnSortable : false
 						} 
@@ -910,7 +910,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 					"aTargets": [ i ],
 					"sClass": columnEditable ?
 							sClassPrefix + "editable_text" 
-							: sClassPrefix + "not_editable",
+							: sClassPrefix + "not_editable_text",
 					"bVisible": columnVisible,
 					"bSortable": false,
 					"mRender": function ( data, type, full ){		

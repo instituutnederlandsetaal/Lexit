@@ -31,6 +31,21 @@ var fnArrowFunction = function(t){
 };
 
 
+
+var aCurrentLemmaViewLocks = new Array();
+var aCurrentParadigmaViewLocks = new Array();
+
+
+
+// function returns true if current user is a superuser
+function superUser(){
+	return (fn.getCurrentUser() == 'katrien' || 
+			fn.getCurrentUser() == 'katrienvp' ||
+			fn.getCurrentUser() == 'mathieu' ||
+			fn.getCurrentUser() == 'jesse');
+};
+
+
 // table general settings
 oTableSettingsList = {
 		
@@ -104,7 +119,46 @@ oTableSettingsList = {
 				
 				var sTableName = fn.getTableName(t);
 				
-				(fn.getAllRows(t)).each(function(){
+				
+				// build the UNlock button if it doesn't exist yet
+				if ( superUser() && fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
+					{
+					fn.addCustomButton(t, {
+						"name": "(Un)lock",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							var aSelectedRows = fn.getSelectedRowsFrom(t);
+							
+							aSelectedRows.each(function(){
+								
+								var sLemmaId = fn.getDataFromCellNamed(t, this, "lemma_id");
+								var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+								
+								if ($.inArray( sLemmaId, aCurrentParadigmaViewLocks ) >-1)
+									{
+									fn.callFunction("unlock_lemma", [sLemmaId], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								else
+									{
+									fn.callFunction("lock_lemma", [sLemmaId], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								
+							});
+							
+						}
+					});
+					}
+				
+				var aRows = fn.getAllRows(t);
+				
+				aRows.each(function(){
 					
 					// make records with an empty wordform unclickable
 					var sAwfId = fn.getDataFromCellNamed(t, this, "analyzed_wordform_id");
@@ -142,6 +196,60 @@ oTableSettingsList = {
 							}
 						}
 				});
+				
+				
+				// apply locks
+				
+				var aLemmaIdsArr = new Array();
+				aRows.each(function(i){
+					
+					aLemmaIdsArr[i] = fn.getDataFromCellNamed(t, this, "lemma_id");			
+				});
+				aLemmaIdsArr = getOnlyUniqueValues(aLemmaIdsArr);
+				
+				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+					
+					aCurrentParadigmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
+					
+					aRows.each(function(i){
+						
+						var nThisRow = this;
+						var sLemmaId = fn.getDataFromCellNamed(t, nThisRow, "lemma_id");	
+						
+						if ( $.inArray( sLemmaId, aCurrentParadigmaViewLocks ) >-1 )
+							{
+							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+							
+							for (var j=0; j<aVisibleCells.length; j++)
+								{
+								var sCurrentColumnName = aVisibleCells[j];
+								
+								var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
+								var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
+								
+								if (sCellType == 'text')
+									{									
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'checkbox')
+									{
+									eCell.find("input").attr("disabled", "disabled");
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'selectbox')
+									{
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								}					
+							
+							}						
+						
+					});						
+					
+				}); // end of function call
+				
 			},			
 			"button_0":{
 				"name": "Voeg woordvorm toe",
@@ -325,6 +433,7 @@ oTableSettingsList = {
 					
 				}
 			}
+			
 		},
 		
 		
@@ -403,6 +512,43 @@ oTableSettingsList = {
 				
 				var sTableName = fn.getTableName(t);
 				
+				// build the UNlock button if it doesn't exist yet
+				if ( superUser() && fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
+					{										
+					fn.addCustomButton(sTableName, {
+						"name": "(Un)lock",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							var aSelectedRows = fn.getSelectedRowsFrom(t);
+							
+							aSelectedRows.each(function(){
+								
+								var sLemmaId = fn.getRowId(this);
+								var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+								
+								if ($.inArray( sLemmaId, aCurrentLemmaViewLocks ) >-1)
+									{
+									fn.callFunction("unlock_lemma", [sLemmaId], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								else
+									{
+									fn.callFunction("lock_lemma", [sLemmaId], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								
+							});
+							
+						}
+					});
+					}
+				
+				
 				var aRows = fn.getAllRows(t);
 				
 				aRows.each(function(){
@@ -439,41 +585,27 @@ oTableSettingsList = {
 				var aLemmaIdsArr = new Array();
 				aRows.each(function(i){
 					
-					aLemmaIdsArr[i] = this.id;					
+					aLemmaIdsArr[i] = fn.getRowId(this);					
 				});
 				
 				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
 					
-					var aLocksPerRow = (fn.getFunctionOutput()[0]).split("|");
+					aCurrentLemmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
 					
 					aRows.each(function(i){
 						
-						console.log("ID "+this.id);
-						
 						var nThisRow = this;
 						
-						// get the locks per cell from the function output
-						var aLocksPerCell = (aLocksPerRow[i]).split(" ");
-						
-						var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
-						
-						// set the locks per cell now
-						for (var j=0; j<aLocksPerCell.length; j++)
+						if ( $.inArray( fn.getRowId(nThisRow), aCurrentLemmaViewLocks ) >-1 )
 							{
+							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
 							
-							// value 0 means not locked
-							var bLocked = (aLocksPerCell[j] != '0');
-							var sCurrentColumnName = mt.getListOfColumnsOf(fn.getTableName(t))[j];
-							
-							// if this column is visible, and it should be locked,
-							// lock it!
-							if ( $.inArray( sCurrentColumnName, aVisibleCells ) &&
-									bLocked )
+							for (var j=0; j<aVisibleCells.length; j++)
 								{
+								var sCurrentColumnName = aVisibleCells[j];
+								
 								var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
 								var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
-								
-								console.log("lock "+sCellType+ " cell "+sCurrentColumnName);
 								
 								if (sCellType == 'text')
 									{									
@@ -490,10 +622,10 @@ oTableSettingsList = {
 									eCell.editable('disable');
 									eCell.css("opacity", "0.5");
 									}
-								
-								}
+								}					
 							
-							} // end of cells loop
+							}						
+						
 					});
 					
 
@@ -741,6 +873,7 @@ oTableSettingsList = {
 					
 				}
 			}
+			
 			
 		},
 		paradigma_view: {
