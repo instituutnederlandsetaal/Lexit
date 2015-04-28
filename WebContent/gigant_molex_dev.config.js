@@ -488,6 +488,32 @@ oTableSettingsList = {
 			}
 		},
 		
+		modified_paradigm_view:{
+			
+			"button_0":{
+				"name": "Woordvorm herstellen",
+				"click": function(confTable){
+					
+					fn.confirm("Zeker weten?", "Weet u het zeker?", 
+							function(){
+						
+						var aRowSelection = fn.getSelectedRowsFrom(confTable);
+						
+						aRowSelection.each(function(){
+							
+							var nCurrentNode = this;
+							var sAwfId = fn.getDataFromCellNamed(confTable, nCurrentNode, "analyzed_wordform_id");
+							fn.callFunction("restore_wordform", [sAwfId],  
+									function(){
+										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
+											fn.refreshTable(confTable);
+							});
+						});
+					});
+				}
+			}
+		},
+		
 
 		lemmata_view: {
 			
