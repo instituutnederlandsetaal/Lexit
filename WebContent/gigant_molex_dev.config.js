@@ -3,7 +3,9 @@ oHiddenTablesList = [];
 oShowOnlyTables = ["export_versions", "lemmata_view", "locks_view",
                    "modified_lemmata_view", "modified_paradigm_view", 
                    "lemmata_en_paradigma_view",
-                   "surinaams_and_antilliaans_commissions_selections"];
+                   "surinaams_and_antilliaans_commissions_selections",
+                   "wordforms_spelling_differences",
+                   "lemmata_spelling_differences"];
 
 
 // remember chosen parent
@@ -1720,6 +1722,18 @@ oTableConfigurationList = {
 			}
 			
 		},
+		
+		wordforms_spelling_differences: {
+			"wordform": {
+				"colsort": "asc"
+			}
+		},
+		
+        lemmata_spelling_differences: {
+        	"modern_lemma": {
+				"colsort": "asc"
+			}
+        },
 		
 		keurmerk_checklist:{
 			

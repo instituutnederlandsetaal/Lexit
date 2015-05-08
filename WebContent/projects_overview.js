@@ -66,6 +66,12 @@ var aProjectList =
 			message: "LET OP: Dit is een testversie"
 	 },
 	 {
+			name: "Jesse's Gigant MoLex (development - test)",
+			config_filename: "gigant_molex_dev_jesse",
+			description: "Gigant Modern lexicon, van Jesse voor testdoeleinden",
+			message: "LET OP: Dit is een testversie"
+	 },
+	 {
 			name: "Gigant MoLex (productie intern)",
 			config_filename: "gigant_molex",
 			description: "Gigant Modern lexicon"

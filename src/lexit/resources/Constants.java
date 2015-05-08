@@ -10,7 +10,7 @@ public class Constants {
 	
 	// separator for arguments within a single string
 	// this must be the same as in the Javascript part (same variable name)
-	public final static String ARG_INTERNAL_SEPARATOR = "@@@"; 
+	public final static String ARG_INTERNAL_SEPARATOR = "ArGsEpArAtOr"; 
 
 	// users rights
 	public final static String USER_ALL_ACCESS = "all";     // read, write, delete
