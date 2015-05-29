@@ -1965,9 +1965,23 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 		 		
 		 		// get function output from xml
 	 			var oFieldsAndValues = fn._getRecordFromXmlResponse(xml);
-		 		// check what the return column name is: we will use it to access
+	 			
+		 		// Check what the return column name is: we will use it to access
 		 		// the returned table value from the associative array.
-	 			var sColumnNameToReadFrom = (sResultColumnName != null ? sResultColumnName : sSomeFunctionName.toLowerCase());
+	 			// It might be a column name, but if it has value NULL, 
+	 			// we use the function name as return column name (as Postgres does the same)
+	 			var sColumnNameToReadFrom = 
+	 				(sResultColumnName != null ? 
+	 						sResultColumnName 
+	 						: 
+	 						// if function name contains schema name, remove schema part 
+	 						(sSomeFunctionName.indexOf(".")>-1 ?
+	 								sSomeFunctionName.toLowerCase().substring(sSomeFunctionName.indexOf(".")+1)
+	 								:
+	 								sSomeFunctionName.toLowerCase()
+	 						)
+	 								
+	 				);
 	 			
 		 		// if some table name was given as an argument,
 		 		// we will update that table with the output of the function

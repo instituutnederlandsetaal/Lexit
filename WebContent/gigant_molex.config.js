@@ -1490,7 +1490,8 @@ oTableConfigurationList = {
 				"editable": true				
 			},	
 			"gb_id":{				
-				"visible": false
+				"visible": false,
+				"editable": superUser()
 			},
 			"gb_wrdcat": {
 				"editable": true

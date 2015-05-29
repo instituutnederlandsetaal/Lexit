@@ -5,7 +5,12 @@ oShowOnlyTables = ["export_versions", "lemmata_view", "locks_view",
                    "lemmata_en_paradigma_view",
                    "surinaams_and_antilliaans_commissions_selections",
                    "wordforms_spelling_differences",
-                   "lemmata_spelling_differences"];
+                   "lemmata_spelling_differences",
+                   "gb2gigmol_all",
+                   "what_happened_to_gb",
+				   "what_happened_to_gb_old",
+				   "gb_splitup_v4",
+				   "verwijderde_gb_ids"];
 
 
 // remember chosen parent
@@ -209,7 +214,7 @@ oTableSettingsList = {
 				});
 				aLemmaIdsArr = getOnlyUniqueValues(aLemmaIdsArr);
 				
-				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
 					
 					aCurrentParadigmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
 					
@@ -616,7 +621,7 @@ oTableSettingsList = {
 					aLemmaIdsArr[i] = fn.getRowId(this);					
 				});
 				
-				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
 					
 					aCurrentLemmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
 					
@@ -1763,6 +1768,113 @@ oTableConfigurationList = {
 			}
 			
 			
+		},
+		
+		gb2gigmol_all:{
+			
+			commentaar : {
+				"choosefrom": []
+			}
+		},
+		
+		what_happened_to_gb:{
+			
+			lem05: {
+				"colsort": ["asc"],
+				"click": function(t, n){
+					var sLem = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata_view", {"modern_lemma": "exact:"+sLem});
+				}
+			},
+			gb05_id: {				
+				"click": function(t, n){
+					var iGbId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("gb_splitup_v4", {"gb05_id": iGbId});
+				}
+			},
+			homonym: {
+				"visible": false
+			},
+			lower_lem05: {
+				"visible": false
+			},
+			short_gigpos: {
+				"visible": false
+			},
+			volgnr05: {
+				"visible": false
+			},
+			wrdcat05: {
+				"visible": false
+			},
+			commentaar : {
+				"choosefrom": []
+			},
+			opmerking: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			unique_id: {
+				"visible": false
+			}
+		},
+		
+		what_happened_to_gb_old:{
+			
+			lem05: {
+				"colsort": ["asc"],
+				"click": function(t, n){
+					var sLem = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata_view", {"modern_lemma": "exact:"+sLem});
+				}
+			},
+			gb05_id: {				
+				"click": function(t, n){
+					var iGbId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("gb_splitup_v4", {"gb05_id": iGbId});
+				}
+			},
+			homonym: {
+				"visible": false
+			},
+			lower_lem05: {
+				"visible": false
+			},
+			short_gigpos: {
+				"visible": false
+			},
+			volgnr05: {
+				"visible": false
+			},
+			wrdcat05: {
+				"visible": false
+			},
+			commentaar : {
+				"choosefrom": []
+			},
+			opmerking: {
+				"bgcolor": "#E0F8EC"
+			},
+			unique_id: {
+				"visible": false
+			}
+		},
+		
+		verwijderde_gb_ids: {
+			commentaar: {
+				"colsort" : "asc", // sort #1
+				"choosefrom": []
+			},
+			lem05: {
+				"colsort" : "asc" // sort #2
+			},
+			opmerking: {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			unique_id: {
+				"visible": false
+			}
 		}
 };
 
