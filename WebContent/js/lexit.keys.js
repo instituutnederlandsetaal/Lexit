@@ -309,8 +309,13 @@ kf.addKeyFunctions = function(){
 		
 		var bSearchboxOfActiveTableHasFocus = $(".dataTables_wrapper div div input").is(":focus");
 		
-		var bSomeDialogBoxIsOpen = $("div.ui-dialog").elementExists();
+		// detect if some dialog box is open or some autocomplete pulldown
+		// (as we need to prevent scrolling down the table rows when the
+		//  user actually means to scroll within a box of pulldown menu)
 		
+		var bSomeDialogBoxIsOpen = 	$("div.ui-dialog").elementExists() ||
+									$(".ui-autocomplete-input").elementExists();
+				
 		
 		// register which key was pressed
 		kf.registerPressedKey(e);

@@ -714,6 +714,10 @@ head.putSelectionButton = function(sSomeTablename){
 
 // add a help button
 head.putHelpButton = function(sSomeTablename){
+	
+	// is this button allowed according to configuration?
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	if ( !conf.getHelpButton(aTableSettings)) return true;
 			
 	var helpButton = $("<button/>")
 		.attr("type", "button")

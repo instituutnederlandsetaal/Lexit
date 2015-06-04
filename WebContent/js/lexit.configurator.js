@@ -1077,6 +1077,16 @@ conf.getGoToButton = function(aTableSettings){
 	return aTableSettings["goto_button"];
 };
 
+//retrieve help button settings
+//default is true
+
+conf.getHelpButton = function(aTableSettings){
+	
+	if (typeof aTableSettings["help_button"] == 'undefined')
+		return true;
+	return aTableSettings["help_button"];
+};
+
 //retrieve main search function settings
 //default is true
 

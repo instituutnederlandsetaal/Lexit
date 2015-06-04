@@ -7,11 +7,12 @@ oShowOnlyTables = ["celexieklus"];
 
 $(document).on(
         "focus", 
-        ".selectionbox", 
+        "#selection_box", 
         function(event) {
         	
         	$(event.target).autocomplete({ 
         		
+        		delay: 500,
                 minLength: 2,
                 source: function(request, response){
                 	
@@ -43,16 +44,17 @@ oTableSettingsList = {
 		
 		celexieklus:{
 			
+			"size": "70%"
 		}
 		
 };
 
 
-
-var iStart;
-var iEnd;
-var sWord;
-var sSmallerWordForSearch;
+// globals:
+// iStart-iEnd are the indexes of the old lemma part in the analysis
+// which has to be replaced by the new lemma selected in 'selectionbox'
+var iStart = 0;
+var iEnd = 0;
 
 
 // configuration at column level
@@ -60,6 +62,10 @@ oTableConfigurationList = {
 		
 		celexieklus:{
 			
+			opmerking: {
+				"bgcolor": "#E0F8E0",
+				"editable": true
+			},	
 			gb: {
 				"visible": false
 			},
@@ -74,7 +80,15 @@ oTableConfigurationList = {
 			},
 			analysis:{
 				
+				// the user can click on a (faulty) part of the analysis
+				// so as to be able to choose another lemma for that part.
+				// Choosing happens within a pulldown list in the 'selectionbox' column
+				
 				"mouseup": function(t, n){
+					
+					// first make sure highlight is removed from each line
+					removeHighlightEveryWhere(t);
+					
 					
 					// do we have a text selection?
 					var oSelectedText = fn.getSelectedTextInNode(t, n);
@@ -91,48 +105,213 @@ oTableConfigurationList = {
 					if (oSelectedText.text!='' && oSelectedText.reliable)
 						{
 						
-						// get the current screen selection
+						// get the selection start and end indexes
 						iStart = parseInt(oSelectedText.start);
 						iEnd = parseInt(oSelectedText.end);
+						
+						
+						// highlight the chosen word						
+						var sAnalysis = fn.getDataFromCellNode(t, n);						
+						fn.putDataIntoCell(t, fn.getRowNode(n), 
+								"analysis", fn.getHighlight(sAnalysis, [[iStart, iEnd]], "yellow"));
+						
+						
+						// the word is the part preceeding the slash
 						sWord = (oSelectedText.text).substring(0, (oSelectedText.text).indexOf("/"));
-						sSmallerWordForSearch = sWord.substring(0, 2*(sWord.length/3));
+						
+						// take only the first letters of the word, to allow a broader list of choose from
+						var iPrefixLength = 2*(sWord.length/3);
+						if (iPrefixLength<2) iPrefixLength = 2;
+						var sSmallerWordForSearch = sWord.substring(0, iPrefixLength);
 						
 						
-						// trigger cell click and fill that with a selected word
-						var eSelectionBox = fn.getCellElement(t, n, "selectionbox");
-						
-						eSelectionBox.click();
-						eSelectionBox.focus();
-						eSelectionBox.find("textarea").val(sSmallerWordForSearch);
-						
-						// open autocomplete by triggering key strike
-						var e = $.Event('keydown');
-						e.which = 35;
-						eSelectionBox.find("textarea").trigger(e);
-						
+						createSelectionBox(t, n, sSmallerWordForSearch);
 						
 						
 						}
 				}
 			},
 			analysis_ids:{
-				"visible": false
+				//"visible": false
 			},
 			selectionbox: {
-				"editable": true,
-				"editfunc": function(t, n, value){
-					
-					var sWord = value.split(":")[0];
-					var iLemmaId = value.split(":")[1];
-					
-					var sAnalysis = fn.getDataFromCellNamed(t, n, "analysis");
-					var sNewAnalysis = sAnalysis.substring(0, iStart) + sWord + sAnalysis.substring(iEnd);
-					
-					fn.putDataIntoCell(t, fn.getRowNode(n), "analysis", sNewAnalysis);
-					setTimeout( function(){fn.putDataIntoCell(t, fn.getRowNode(n), "selectionbox", "");}, 100); 	
-				}
+				"visible": false
+//				"editable": true,
+//				"editfunc": function(t, n, value){
+//					
+//					// if no part was clicked on in analysis
+//					if (iEnd == 0)
+//						{
+//						fn.message("Illegale handeling", 
+//								"Kies eerst het deel van een analyse dat u wilt wijzigen. Dan pas hoort u hier een lemma te kiezen!", 
+//								function(){									
+//									fn.putDataIntoCell(t, fn.getRowNode(n), "selectionbox", "");
+//								}
+//							);
+//						}
+//					else
+//						{
+//						removeHighlightEveryWhere(t);
+//						
+//						var sWord = value.split(":")[0];
+//						var iLemmaId = value.split(":")[1];
+//						
+//						// Replace the old lemma part by the newly selected lemma.
+//						// The new lemma is 'sWord' (extracted from value) and this has to be put between
+//						// the start and end positions of the old lemma (iStart-iEnd)
+//						var sAnalysis =  fn.getDataFromCellNamed(t, n, "analysis");
+//						
+//						
+//						var sNewAnalysis = sAnalysis.substring(0, iStart) + sWord + sAnalysis.substring(iEnd);
+//						
+//						// compute the index of the modified part 
+//						// (t.i. part number in array of parts)
+//						var str = (sAnalysis.substring(0, iStart));
+//						var iIndex = ( str.match(/\+/g) || []).length;
+//						
+//						// now we'll change the id of the corresponding part
+//						// in the array of id's
+//						var sAnalysisIds = fn.getDataFromCellNamed(t, n, "analysis_ids");
+//						var aIds = sAnalysisIds.split("+");
+//						aIds[iIndex] = iLemmaId;
+//						var sNewAnalysisIds = aIds.join("+");
+//						
+//						// reset the globals right away
+//						iStart = 0;
+//						iEnd = 0;
+//						
+//						// update the modified analysis (and corresponding id's)
+//						// in the database, and refresh the view to show the result
+//						
+//						fn.updateDatabaseGivenANode(t, n, 
+//								["analysis", "analysis_ids"], 
+//								[sNewAnalysis, sNewAnalysisIds], 
+//								false, function(){
+//							
+//									fn.refreshTable(t);
+//								}
+//							);
+//						
+//						//fn.putDataIntoCell(t, fn.getRowNode(n), "analysis", sNewAnalysis);						
+//						//setTimeout( function(){
+//						//	fn.putDataIntoCell(t, fn.getRowNode(n), "selectionbox", "");
+//						//	}, 100);
+//						}
+//					
+//						
+//				}
 			}
 			
 		}
 
 };
+
+
+
+function createSelectionBox(t, n, sSmallerWordForSearch ){
+	
+	var eSelectionBox = $("<div></div>")
+		.css("position", "relative")
+		.css("top", "20px")
+		.css("left", "100px")
+		.attr("id", "selection_box");
+	var eTextArea = $("<textarea></textarea>")
+		.css("width", "200px")
+		.css("height", "20px")
+		.keydown( function(e){
+			
+			
+			if (e.which == 13)
+				{
+				
+				removeHighlightEveryWhere(t);
+				
+				// get the selected value
+				var value = $(this).val();				
+				
+				$("#selection_box").remove();
+				
+				var sWord = value.split(":")[0];
+				var iLemmaId = value.split(":")[1];
+				
+				// Replace the old lemma part by the newly selected lemma.
+				// The new lemma is 'sWord' (extracted from value) and this has to be put between
+				// the start and end positions of the old lemma (iStart-iEnd)
+				var sAnalysis =  fn.getDataFromCellNamed(t, n, "analysis");
+				
+				
+				var sNewAnalysis = sAnalysis.substring(0, iStart) + sWord + sAnalysis.substring(iEnd);
+				
+				// compute the index of the modified part 
+				// (t.i. part number in array of parts)
+				var str = (sAnalysis.substring(0, iStart));
+				var iIndex = ( str.match(/\+/g) || []).length;
+				
+				// now we'll change the id of the corresponding part
+				// in the array of id's
+				var sAnalysisIds = fn.getDataFromCellNamed(t, n, "analysis_ids");
+				var aIds = sAnalysisIds.split("+");
+				aIds[iIndex] = iLemmaId;
+				var sNewAnalysisIds = aIds.join("+");
+				
+				// reset the globals right away
+				iStart = 0;
+				iEnd = 0;
+				
+				// update the modified analysis (and corresponding id's)
+				// in the database, and refresh the view to show the result
+				
+				fn.updateDatabaseGivenANode(t, n, 
+						["analysis", "analysis_ids"], 
+						[sNewAnalysis, sNewAnalysisIds], 
+						false, function(){
+					
+							fn.refreshTable(t);
+						}
+					);
+				
+				
+				}
+			
+		});
+	
+	eSelectionBox.append(eTextArea);
+	
+	fn.getCellElement(t, n, "analysis").append(eSelectionBox);
+	
+	eSelectionBox.find("textarea").click();
+	eSelectionBox.find("textarea").focus();
+	eSelectionBox.find("textarea").val(sSmallerWordForSearch);
+	
+	// open autocomplete by triggering key strike
+	var e = $.Event('keydown');
+	e.which = 35;
+	eSelectionBox.find("textarea").trigger(e);
+	
+}
+
+
+// make sure we can leave the autocomplete with ESC
+$(document).keydown(function(e){
+	
+	if (e.which == 27)
+		{
+		removeHighlightEveryWhere("celexieklus");
+		
+		$("#selection_box").remove();
+		}
+});
+
+
+function removeHighlightEveryWhere(t){
+	
+	(fn.getAllRows(t)).each(function(){
+		
+		var sAnalysis = fn.getDataFromCellNamed(t, this, "analysis");
+		
+		if (sAnalysis.indexOf("background")>-1)
+			fn.putDataIntoCell(t, fn.getRowNode(this), "analysis", fn.removeHighlight(sAnalysis));
+		
+	});
+	
+}
