@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["celexieklus"];
+oShowOnlyTables = ["celexieklus", "lemmata"];
 
 
 
@@ -12,7 +12,7 @@ $(document).on(
         	
         	$(event.target).autocomplete({ 
         		
-        		delay: 500,
+        		delay: 350,
                 minLength: 2,
                 source: function(request, response){
                 	
@@ -44,7 +44,7 @@ oTableSettingsList = {
 		
 		celexieklus:{
 			
-			"size": "70%"
+			
 		}
 		
 };
@@ -62,6 +62,18 @@ oTableConfigurationList = {
 		
 		celexieklus:{
 			
+			lemma: {
+				"bgcolor": "#E0F8E0",
+				"editable": true
+			},
+			lemma_id: {
+				"click": function(t, n){
+					
+					var iLemmaId = fn.getDataFromCellNode(t, n);
+					if (iLemmaId != '')
+						fn.callDatabase("lemmata", {"lemma_id": iLemmaId});
+				}
+			},
 			opmerking: {
 				"bgcolor": "#E0F8E0",
 				"editable": true
@@ -102,7 +114,11 @@ oTableConfigurationList = {
 						}
 					
 					// if we have a selection now, process it
-					if (oSelectedText.text!='' && oSelectedText.reliable)
+					if (oSelectedText.text!='' && oSelectedText.reliable
+							&& oSelectedText.text != '['
+							&& oSelectedText.text != '+'
+							&& oSelectedText.text != ']'
+							&& oSelectedText.text.indexOf("]")<0 )
 						{
 						
 						// get the selection start and end indexes
@@ -132,7 +148,28 @@ oTableConfigurationList = {
 				}
 			},
 			analysis_ids:{
-				//"visible": false
+
+				"mouseup": function(t, n){
+					
+								
+					
+					// do we have a text selection?
+					var oSelectedText = fn.getSelectedTextInNode(t, n);
+					
+					// if selection is empty, that means that we've clicked on an id
+					// without selecting it manually.
+					// In this case, try to select the id that was clicked upon
+					if (oSelectedText.text == '' && oSelectedText.reliable)
+						{						
+						oSelectedText = fn.getWordClickedUponInNode(t, n);						
+						}
+					
+					// if we have a selection now, process it
+					if (oSelectedText.text!='' && oSelectedText.reliable)
+						{						
+						fn.callDatabase("lemmata", {"lemma_id": oSelectedText.text});
+						}
+				}
 			},
 			selectionbox: {
 				"visible": false
@@ -216,7 +253,7 @@ function createSelectionBox(t, n, sSmallerWordForSearch ){
 		.css("left", "100px")
 		.attr("id", "selection_box");
 	var eTextArea = $("<textarea></textarea>")
-		.css("width", "200px")
+		.css("width", "400px")
 		.css("height", "20px")
 		.keydown( function(e){
 			
@@ -250,9 +287,9 @@ function createSelectionBox(t, n, sSmallerWordForSearch ){
 				// now we'll change the id of the corresponding part
 				// in the array of id's
 				var sAnalysisIds = fn.getDataFromCellNamed(t, n, "analysis_ids");
-				var aIds = sAnalysisIds.split("+");
+				var aIds = sAnalysisIds.split(" + ");
 				aIds[iIndex] = iLemmaId;
-				var sNewAnalysisIds = aIds.join("+");
+				var sNewAnalysisIds = aIds.join(" + ");
 				
 				// reset the globals right away
 				iStart = 0;
@@ -299,6 +336,7 @@ $(document).keydown(function(e){
 		removeHighlightEveryWhere("celexieklus");
 		
 		$("#selection_box").remove();
+		$(".ui-autocomplete").remove();
 		}
 });
 

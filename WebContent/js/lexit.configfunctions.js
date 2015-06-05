@@ -1203,6 +1203,7 @@ fn.getWordClickedUponInNode = function(someTable, nNode){
         priorRange.setEnd(range.startContainer, range.startOffset);
         start = priorRange.toString().regexLastIndexOf(/(\s|\.|,|;|:|\(|\[|'|"|„|”)/)+1;
         end   = wholeRange.toString().regexIndexOf(/(\s|\?|!|\.|,|;|:|\)|\]|'|"|„|”)/, start+1);
+        if (end<0) end = wholeRange.toString().length;        
         text  = wholeRange.toString().substring(start, end);
     } 
     
@@ -1218,6 +1219,7 @@ fn.getWordClickedUponInNode = function(someTable, nNode){
         priorRange.setEndPoint("EndToStart", range);
         start = priorRange.text.regexLastIndexOf(/\s|\.|,|;|:|\(|\[/)+1;
         end   = wholeRange.text.regexIndexOf(/(\s|\?|!|\.|,|;|:|\)|\])/, start+1);
+        if (end<0) end = wholeRange.toString().length;
         text  = wholeRange.text.substring(start, end);
     }
     
