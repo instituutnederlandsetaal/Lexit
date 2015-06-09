@@ -12,7 +12,7 @@ $(document).on(
         	
         	$(event.target).autocomplete({ 
         		
-        		delay: 350,
+        		delay: 750,
                 minLength: 2,
                 source: function(request, response){
                 	
@@ -35,8 +35,16 @@ $(document).on(
     );
 
 
-
-
+$(document).on(
+		"blur",
+		"#selection_box",
+		function(){
+	
+			removeHighlightEveryWhere("celexieklus");
+			
+			$("#selection_box").remove();
+			$(".ui-autocomplete").remove();
+});
 
 
 // table general settings
@@ -44,7 +52,130 @@ oTableSettingsList = {
 		
 		celexieklus:{
 			
+			"callback": function(t){
+				
+				var aRows = fn.getAllRows(t);
+				
+				aRows.each(function(){
+					
+					var nCurrentRecord = this;
+					
+					var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRecord, "lemma_id");
+					if (sLemmaId != '')
+						{
+						fn.getCellElement(t, nCurrentRecord, "lemma").editable('disable');
+						fn.getCellElement(t, nCurrentRecord, "lemma").css("opacity", "0.5");
+						}
+				});
+				
+			},
 			
+			"repeat_callback": true,
+			
+			"button_0":{
+				
+				"name": "Is al goed!",
+				"click": function(t){
+					
+					var aRows = fn.getSelectedRowsFrom(t);
+					
+					aRows.each(function(){
+						
+						var nCurrentRecord = this;
+						
+						var sIds = fn.getDataFromCellNamed(t, nCurrentRecord, "analysis_ids");
+						
+						// split the ids and, when we have a list of alternatives
+						// for one single position, keep only the first alternative
+						// (as the lemma in the 'analysis' field must correspond
+						//  to the first id)
+						var aIds = sIds.split(" + ");
+						
+						for (var i = 0; i < aIds.length; i++)
+							{							
+							if ( (aIds[i]).indexOf("/") > 0 )
+								{
+								aIds[i] = (aIds[i]).split("/")[0];   
+								}							
+							}
+						sIds = aIds.join(" + "); 
+						
+						fn.updateDatabaseGivenANode(t, nCurrentRecord, 
+								["analysis_ids"], [sIds], true);
+						
+					});
+				}
+			}
+			
+			
+//			"button_0":{
+//				"name": "Dupliceer selectie",
+//				"click": function(t){
+//					
+//					var aRows = fn.getSelectedRowsFrom(t);
+//					
+//					aRows.each(function(){
+//						
+//						var nCurentNode = this;
+//						
+//						var iHiddenId = fn.getDataFromCellNamed(t, nCurentNode, "hidden_id");
+//						var iCelexieId = fn.getDataFromCellNamed(t, nCurentNode, "celexie_id");
+//						var iGb = fn.getDataFromCellNamed(t, nCurentNode, "gb");
+//						var sLemma = fn.getDataFromCellNamed(t, nCurentNode, "lemma");
+//						var iLemmaId = fn.getDataFromCellNamed(t, nCurentNode, "lemma_id");
+//						
+//						
+//						fn.prompt("Geef een nieuwe analyse", ["Geef analyse"], [""], function(){
+//							
+//							var sAnalyse = fn.getPromptUserInput("Geef analyse");
+//							
+//							
+//							
+//							var aData = {
+//									"hidden_id": iHiddenId,
+//									"celexie_id": iCelexieId,
+//									"gb": iGb,
+//									"lemma": sLemma,								
+//									"analysis": sAnalyse
+//									};
+//							
+//							if (iLemmaId !='')
+//								aData["lemma_id"] = iLemmaId;
+//							
+//							
+//							
+//							if (sAnalyse.indexOf("+")>=0 && sAnalyse.indexOf(" + ")<0)
+//								{
+//								sAnalyse = sAnalyse.replace(/\+/g, " + ");
+//								}
+//							
+//							fn.insertIntoDatabase(t, 
+//									aData, null, true);
+//						});
+//						
+//						
+//						
+//					});
+//
+//				}
+//			},
+//			"button_1":{
+//				"name": "Verwijder selectie",
+//				"click": function(t){
+//					
+//					fn.confirm("Let op", "Weet u het zeker?", function(){
+//						
+//						var aNodes = fn.getSelectedRowsFrom(t);
+//						
+//						aNodes.each(function(){
+//							var nCurrentNode = this;
+//							
+//							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
+//							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
+//							});
+//					});
+//				}
+//			}
 		}
 		
 };
@@ -64,7 +195,8 @@ oTableConfigurationList = {
 			
 			lemma: {
 				"bgcolor": "#E0F8E0",
-				"editable": true
+				"editable": true,
+				"colsort": "asc"    // sort #1
 			},
 			lemma_id: {
 				"click": function(t, n){
@@ -78,16 +210,24 @@ oTableConfigurationList = {
 				"bgcolor": "#E0F8E0",
 				"editable": true
 			},	
+			bespreken:{
+				"editable": true				
+			},
+			
 			gb: {
 				"visible": false
 			},
 			hidden_id:{
-				"visible": false
+				"visible": false,
+				"colsort": "asc"   // sort #2
 			},
 			unique_id:{
 				"visible": false
 			},
 			celexie_id:{
+				"visible": false
+			},
+			original_analysis:{
 				"visible": false
 			},
 			analysis:{
@@ -171,6 +311,37 @@ oTableConfigurationList = {
 						}
 				}
 			},
+			
+			back:{
+				"button": "Herstel",
+				"click": function(t, n){
+					
+					
+					fn.confirm("Zeker weten?", 
+							"De oorspronkelijke analyse zal nu worden hersteld. " +
+							"Weet u zeker dat u dat wilt?", 
+							function(){
+						
+								var sAnalysisBak = fn.getDataFromSiblingNode(t, n, "analysis_bak");
+								var sAnalysisIdsBak = fn.getDataFromSiblingNode(t, n, "analysis_ids_bak");
+								
+								fn.updateDatabaseGivenANode(t, 
+										fn.getRowNode(n), 
+										["analysis", "analysis_ids"], 
+										[sAnalysisBak, sAnalysisIdsBak], 
+										true);
+						
+					});					
+					
+				}
+			},
+			analysis_bak:{
+				"visible": false
+			},
+			analysis_ids_bak:{
+				"visible": false
+			},
+			
 			selectionbox: {
 				"visible": false
 //				"editable": true,

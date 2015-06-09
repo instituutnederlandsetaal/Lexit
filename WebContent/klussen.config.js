@@ -861,8 +861,8 @@ oTableSettingsList = {
                                 var sUserName = fn.getCurrentUser();
                                 fn.updateDatabaseGivenANode(t, n, ["verwijderen"], [sUserName]);
                         }
-                    },
-                },
+                    }
+                }
   
 		
 };
@@ -2015,7 +2015,7 @@ oTableConfigurationList = {
                   "verwijderen": {
                         "bgcolor": "#E0F8EC",
                         "cell_tooltip": "Vink aan als deze woordvorm weg moet",
-                        "editable": true,
+                        "editable": true
                         }
-                },
+                }
 };
