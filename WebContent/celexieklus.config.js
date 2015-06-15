@@ -1,6 +1,6 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["celexieklus", "lemmata"];
+oShowOnlyTables = ["celexieklus", "lemmata_view"];
 
 
 
@@ -203,7 +203,7 @@ oTableConfigurationList = {
 					
 					var iLemmaId = fn.getDataFromCellNode(t, n);
 					if (iLemmaId != '')
-						fn.callDatabase("lemmata", {"lemma_id": iLemmaId});
+						fn.callDatabase("lemmata_view", {"pkid": iLemmaId});
 				}
 			},
 			opmerking: {
@@ -307,7 +307,7 @@ oTableConfigurationList = {
 					// if we have a selection now, process it
 					if (oSelectedText.text!='' && oSelectedText.reliable)
 						{						
-						fn.callDatabase("lemmata", {"lemma_id": oSelectedText.text});
+						fn.callDatabase("lemmata_view", {"pkid": oSelectedText.text});
 						}
 				}
 			},
