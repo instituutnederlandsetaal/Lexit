@@ -176,6 +176,21 @@ oTableSettingsList = {
 //					});
 //				}
 //			}
+		},
+		
+		
+		lemmata_view: {
+			"column_order": ["pkid", "is_parent", "parent", "parent_id", 
+			                 "modern_lemma", "keurmerk", "sublemma_type", 
+			                 "gloss", "lemma_gigpos", "kapstok", "taalvariant", 
+			                 "herkomst", "status", "opmerking", "opmerking_extern",
+			                 "notitie", "homo", "gedrukt", "online", "verdacht", 
+			                 "weg", "taaladvies", "th_lemma", "nuanc_opm", 
+			                 "gb_id", "gb_wrdcat", "gb_znwlid", "lidw", "geslacht", 
+			                 "toon_paradigma", "trademark", "toon_morfologie", 
+			                 "uitspraak", "source", "opmerking_intern", 
+			                 "tmp_f_total_rel", "verkleinwoord", "anc", "snc", 
+			                 "parent_attention"]
 		}
 		
 };
