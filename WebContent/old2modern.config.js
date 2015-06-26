@@ -3,10 +3,16 @@ oHiddenTablesList = [];
 oShowOnlyTables = [];
 
 
+// database generation:
+// N:\databaseproject\Koppelingdatabase_IKEA\2015_database
+
+
 // table general settings
 oTableSettingsList = {
 		
 		mnw_wnt_differences:{
+			
+			//"size": "110%",
 			
 			"callback": function(t){
 				
@@ -183,7 +189,7 @@ oTableSettingsList = {
 						var mnwId = fn.getDataFromCellNamed(t, nNode, "original_mnw_id");
 						fn.updateDatabaseGivenANode(t, nNode, ["mnw_id"], [mnwId], false, function(){
 							
-							fn.getIdFromDatabase("marijke_spelling", {"hist_lemma_id": "^MNW"+mnwId}, function(id){
+							fn.getIdFromDatabase("marijke_spelling", {"hist_lemma_id": "^MNW"+mnwId+"$"}, function(id){
 								
 								fn.getRecord("marijke_spelling", id, function(r){
 									
@@ -212,7 +218,7 @@ oTableSettingsList = {
 						var wntId = fn.getDataFromCellNamed(t, nNode, "original_wnt_id");
 						fn.updateDatabaseGivenANode(t, nNode, ["wnt_id"], [wntId], false, function(){
 							
-							fn.getIdFromDatabase("marijke_spelling", {"hist_lemma_id": "^WNT"+wntId}, function(id){
+							fn.getIdFromDatabase("marijke_spelling", {"hist_lemma_id": "^WNT"+wntId+"$"}, function(id){
 								
 								fn.getRecord("marijke_spelling", id, function(r){
 									
@@ -366,6 +372,10 @@ function openBothWntAndMnw(t, n){
 oTableConfigurationList = {
 		
 		mnw_wnt_differences:{
+			
+			niet_in_lex: {
+				"editable": true
+			},
 			
 			clone: {
 				"visible": false

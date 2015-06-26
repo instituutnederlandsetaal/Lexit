@@ -59,56 +59,11 @@ oTableSettingsList = {
 			}
 		}
 		
-		
-		
 };
 
 
 // configuration at column level
 oTableConfigurationList = {
-		
-		posmapping2:{
-			
-			posto : {
-				"editable": true,
-				"bgcolor": "#E0F8EC"
-				}, 
-			posfrom : {
-				"colsort": "asc"
-			},
-			dummy1 : {
-				"visible": false
-				},
-			dummy2 : {
-				
-				},
-			dummy3 : {
-				
-				},
-			dummy4 : {
-				"click": function(t,n){
-					
-					var iPersistentId = fn.getDataFromCellNode(t, n);
-					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=WNT&id="+iPersistentId);
-					
-				}
-				},
-			dummy5 : {
-				
-				},
-			dummy6 : {
-				
-				},
-			dummy7 : {
-				"visible": false
-				},
-			dummy8 : {
-				"visible": false
-				},
-			unique_id : {
-				"visible": false
-				}
-		},
 		
 		bronnen_worktable:{
 			
@@ -130,15 +85,27 @@ oTableConfigurationList = {
 		lemmata_and_paradigma: {
 			
 			modern_lemma: {
-				"colsort": "asc" // sort #1
+				"colsort": "asc", // sort #1
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callFunction("api.alter_modern_lemma", 
+							[sLemmaId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
 			},
 			persistent_id: {
 				"colsort": "asc", // sort #2
-				"cell_tooltip": "Open WNT",
+				"cell_tooltip": "Open MNW",
 				"click": function(t,n){
 					
 					var iPersistentId = fn.getDataFromCellNode(t, n);
-					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=WNT&id="+iPersistentId);
+					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+iPersistentId);
 					
 				}
 			},
@@ -171,15 +138,61 @@ oTableConfigurationList = {
 				}
 			},
 			wordform: {
-				"colsort": "asc" // sort #4
+				"colsort": "asc", // sort #4
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+					fn.callFunction("api.alter_wordform", [sAwfId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+			},
+			
+			lemma_part_of_speech: {
+				
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callFunction("api.alter_lemma_part_of_speech", 
+							[sLemmaId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+			},
+			part_of_speech: {
+				
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+					fn.callFunction("api.alter_wordform_part_of_speech", 
+							[sAwfId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+				
+			},
+			unique_id:{
+				"visible": false
 			}
 		},
 		
 		token_attestations: {
 			
-//			quotation_section_id: {
-//				"colsort": "asc"
-//			},
+			quotation_section_id: {
+				"colsort": "asc"
+			},
 			document_id: {
 				"cell_tooltip": "Toon bron",
 				"click": function(t,n){
@@ -195,9 +208,9 @@ oTableConfigurationList = {
 			attestation_id: {
 				"visible": false
 			},
-//			quotation_section_id: {
-//				"colsort": "asc"
-//			},
+			quotation_section_id: {
+				"colsort": "asc"
+			},
 			onsetoffset: {
 				"visible": false
 			},
@@ -377,8 +390,7 @@ oTableConfigurationList = {
 			},
 			quote: {
 				
-				"colsort": "asc",
-//				sortable: false,
+				sortable: false,
 				"cell_tooltip": "Klik om woorden te (de)highlighten",
 				"mouseup": function(t, n){
 					
