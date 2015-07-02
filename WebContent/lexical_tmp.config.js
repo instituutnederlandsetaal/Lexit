@@ -357,11 +357,16 @@ oTableConfigurationList = {
 				"editable": false,
 				"cell_tooltip": "Klik om dit te kopiëren naar de correctie-kolom",
 				"click": function(t, n){
-					var inhoud = fn.getDataFromCellNode(t, n);
-					fn.updateDatabaseGivenANode(t, fn.getRowNode(n), 
-							["correctie"], [inhoud], 
-							false, function(){fn.refreshTable(t);});
-					//fn.putDataIntoCell(t, fn.getRowNode(n), "correctie", inhoud);
+					
+					if (kf.isPressed("ctrl"))
+						{
+						var inhoud = fn.getDataFromCellNode(t, n);
+						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), 
+								["correctie"], [inhoud], 
+								false, function(){fn.refreshTable(t);});
+						//fn.putDataIntoCell(t, fn.getRowNode(n), "correctie", inhoud);
+						}		
+					
 				}
 			},
 			correctie: {

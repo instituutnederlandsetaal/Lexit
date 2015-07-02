@@ -895,7 +895,7 @@ export_versions:{
 							var bLastNode = fn.isLastNodeOf(this, oNodes);
 							fn.updateDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemId}, 
-									{"parent_id": 0}, 
+									{"parent_id": 'NULL'}, 
 									false,
 									function(){
 										if (bLastNode)
@@ -1375,6 +1375,10 @@ oTableConfigurationList = {
 			},
 			vk_status:{
 				"visible": false
+			},
+			th_wordform_afbr:{
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			}
 			
 		},

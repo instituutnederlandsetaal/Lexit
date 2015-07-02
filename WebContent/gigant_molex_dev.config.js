@@ -214,7 +214,7 @@ oTableSettingsList = {
 				});
 				aLemmaIdsArr = getOnlyUniqueValues(aLemmaIdsArr);
 				
-				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
 					
 					aCurrentParadigmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
 					
@@ -621,7 +621,7 @@ oTableSettingsList = {
 					aLemmaIdsArr[i] = fn.getRowId(this);					
 				});
 				
-				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+				fn.callFunction("get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
 					
 					aCurrentLemmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
 					
@@ -822,7 +822,7 @@ oTableSettingsList = {
 							var bLastNode = fn.isLastNodeOf(this, oNodes);
 							fn.updateDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemId}, 
-									{"parent_id": 0}, 
+									{"parent_id": 'NULL'}, 
 									false,
 									function(){
 										if (bLastNode)
@@ -1303,6 +1303,10 @@ oTableConfigurationList = {
 			},
 			vk_status:{
 				"visible": false
+			},
+			th_wordform_afbr:{
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			}
 			
 		},

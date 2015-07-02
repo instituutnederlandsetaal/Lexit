@@ -21,6 +21,64 @@ oTableSettingsList = {
 			
 		},
 		
+		lemmata_removed: {
+			
+			"button_0":{
+				"name": "Hestel selectie",
+				"click": function(t){
+					
+					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						aRows.each(function(){
+							var n = this;
+							
+							var sLemId = fn.getDataFromCellNamed(t, n, "lemma_id");
+							fn.callFunction("api.restore_lemma", [sLemId], function(){
+								
+								if (fn.isLastNodeOf(n, aRows))
+									{
+									fn.refreshTable(t);
+									fn.refreshTable("lemmata_and_paradigma");
+									}
+							});
+						});
+						
+					});
+					
+				}
+			}
+		},
+		
+		analyzed_wordforms_removed: {
+			
+			"button_0":{
+				"name": "Hestel selectie",
+				"click": function(t){
+					
+					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						aRows.each(function(){
+							var n = this;
+							
+							var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+							fn.callFunction("api.restore_paradigm", [sAwfId], function(){
+								
+								if (fn.isLastNodeOf(n, aRows))
+									{
+									fn.refreshTable(t);
+									fn.refreshTable("lemmata_and_paradigma");
+									}
+							});
+						});
+						
+					});
+					
+				}
+			}
+		},
+		
 		lemmata_and_paradigma: {
 			
 			callback: function(t){
@@ -205,7 +263,7 @@ oTableConfigurationList = {
 		
 		token_attestations_worktable: {
 			
-			attestation_id: {
+			attestation_ids: {
 				"visible": false
 			},
 			quotation_section_id: {
@@ -215,6 +273,9 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			wordform: {
+				"visible": false
+			},
+			analyzed_wordform_ids: {
 				"visible": false
 			},
 			group_id: {
@@ -235,156 +296,158 @@ oTableConfigurationList = {
 				
 				sortable: false,
 				"button": "Doorvoeren",
+				"button_tooltip": "Gewijzigde attestatie verwerken in het lexicon",
 				"click": function(t,n){
 					
-					fn.showProcessingMsg(t);
-					
-					// first we need to set the wordform according to the clicked words
-					// from the quote
-					
-					// so remove the highlight (which is html code nested into quote string)
-					// and only then, gather the string parts corresponding to the indexes (start - end)
-					var aWordarray = new Array();
-					var aIndexesArray = ( fn.getDataFromSiblingNode(t, n, "onsetoffset") ).split("\|");
-					var sQuote = fn.removeHighlight(fn.getDataFromSiblingNode(t, n, "quote"));
-					for (var i=0; i<aIndexesArray.length; i++)
-						{
-						var sIndexes = aIndexesArray[i];
-						var iStartIndex = sIndexes.split(",")[0];
-						var iEndIndex   = sIndexes.split(",")[1];
-						aWordarray.push( (sQuote.substring(iStartIndex, iEndIndex)).toLowerCase() );
-						}
-					// parts need to be sorted (just as in the rest of the table)
-					aWordarray.sort();
-					var sNewWordform = aWordarray.join(",");
-					
-					// write this into the right column (both onto screen as into database)
-					fn.updateDatabaseGivenANode(t, n, ["wordform"], [sNewWordform]);
-					fn.putDataIntoCell(t, fn.getRowNode(n), "wordform", sNewWordform);
-					
-					
-					// Now find other rows than the current one, having the
-					// same wordform and lemma_id
-					// If it exists, we can take over the analyzed_wordform_id and group_id
-					// from such a row 
-					var sWordformConcat = fn.getDataFromSiblingNode(t, n, "wordform");
-					var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					var iMultiLemAnalysisId = fn.getDataFromSiblingNode(t, n, "multiple_lemmata_analysis_id");
-					var sCurrentRowId = fn.getDataFromSiblingNode(t, n, "attestation_ids");
-					
-					iLemmaId = (iLemmaId == '') ? "NULL" : iLemmaId;
-					iMultiLemAnalysisId = (iMultiLemAnalysisId == '') ? "NULL" : iMultiLemAnalysisId;
-		
-					fn.getIdFromDatabase(t, 
-							{
-							"lemma_id": iLemmaId,
-							"multiple_lemmata_analysis_id": iMultiLemAnalysisId,
-							"wordform": sWordformConcat,
-							"attestation_ids": "!"+"^"+sCurrentRowId+"$",
-							"group_id": (sWordformConcat.indexOf(",")>-1) ? "!NULL" : "NULL"
-							}, 
-							function(id){								
-								
-								// there is no record with these wordform and lemma_id
-								// so we have to create it ourself
-								if (id == '')
-									{
-									var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
-									
-									fn.callFunction("create_analyzed_wordform", 
-											[iLemmaId, iMultiLemAnalysisId, sNewWordform], 
-											function(response){
-										
-												var aAwfIdsAndGroupId = (response["create_analyzed_wordform"]).split("\|");	
+					fn.confirm("Attestatie verwerken", 
+							"Weet u zeker dat u de gewijzigde attestatie nu in het lexicon wilt verwerken? "+
+							"<br><br>" +
+							"(Doe dit pas als in de citaat de correcte tokens geselecteerd zijn)", 
+							function(){
+						
+						fn.showProcessingMsg(t);
+						
 												
-												// put the analyzed_wordform_ids and group_id
-												// corresponding to the current token_attestation records
-												// into this same record
-												fn.updateDatabaseGivenANode(t, n, 
-														["analyzed_wordform_ids", "group_id"], 
-														aAwfIdsAndGroupId, 
-														null, 
+						// job [1]
+						// Some words have been selected manually in the quote, causing some
+						// onsets and offsets to be saved into the onsetoffset column.
+						//
+						// Now the 'Doorvoeren' button has been clicked on,
+						// we need to rebuild the other fields content accordingly:
+						//
+						// - get the wordforms, in the same order als the their onsets (=keep relation!) 
+						// - at the same time get alphabetically sorted copy of the wordforms
+						//   so as to be able to compare it with other records [meaning: does the 
+						// word(group) exist aready, or do we have to create it, in the form of analyzed wordforms]
+						
+						// Later on we will process the data of this table back into
+						// the native token_attestations table 		
+						
+						
+						
+						
+						// first we need to set the wordform according to the clicked words
+						// from the quote
+						
+						// so remove the highlight (which is html code nested into quote string)
+						// and only then, gather the string parts corresponding to the indexes (start - end)
+						
+						var aWordAndIndexesArray = new Array();
+						var aIndexesArray = ( fn.getDataFromSiblingNode(t, n, "onsetoffset") ).split("\|");
+						var sQuote = fn.removeHighlight(fn.getDataFromSiblingNode(t, n, "quote"));
+						for (var i=0; i<aIndexesArray.length; i++)
+							{
+							var sIndexes = aIndexesArray[i];
+							var iStartIndex = sIndexes.split(",")[0];
+							var iEndIndex   = sIndexes.split(",")[1];
+							var sWordform = (sQuote.substring(iStartIndex, iEndIndex)).toLowerCase();
+							aWordAndIndexesArray.push( [sWordform, sIndexes] );
+							}
+						
+						// sort the wordforms by their index
+						
+						aWordAndIndexesArray.sort( function(a, b){
+							if (a[1] > b[1]) return 1;
+							if (a[1] < b[1]) return -1;
+							return 0;
+						});
+						var aWordArray = new Array();
+						var aIndexesArray = new Array();
+						
+						// not get wordforms and indexes back into separate arrays
+						
+						for (var i=0; i<aWordAndIndexesArray.length; i++)
+						{
+							aWordArray[i] = aWordAndIndexesArray[i][0];
+							aIndexesArray[i] = aWordAndIndexesArray[i][1];
+						}
+						var sNewWordform = aWordArray.join(",");
+						var sNewSortedIndexes = aIndexesArray.join("|");
+						
+						
+						// also get an aphabetically sorted copy of the wordforms
+						
+						var aAlphabeticWordArray = cloneArray(aWordArray);
+						aAlphabeticWordArray.sort();
+						var sNewAlphabeticWordform = aAlphabeticWordArray.join(",");
+						
+						// Write these into the right columns (both onto screen as into database)		
+						
+						fn.updateDatabaseGivenANode(t, n, ["wordform"], [sNewWordform]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "wordform", sNewWordform);						
+						fn.updateDatabaseGivenANode(t, n, ["onsetoffset"], [sNewSortedIndexes]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "onsetoffset", sNewSortedIndexes);
+						fn.updateDatabaseGivenANode(t, n, ["wordform_alphabetic"], [sNewAlphabeticWordform]);
+						fn.putDataIntoCell(t, fn.getRowNode(n), "wordform_alphabetic", sNewAlphabeticWordform);
+						
+						
+						// job [2]
+						// Now get the analyzed_wordform_ids corresponding to 
+						// the current lemma_id and wordforms (it might mean we need to create some
+						// analyzed wordforms if those do not exist yet).
+						//
+						// We also have to make sure the analyzed_wordform_ids are sorted
+						// in the same order as the wordforms and onsets/offsets, to keep
+						// the relation between those, of course.
+						
+						// Gather the data we'll try to find
+						// We already have wordforms and indexes, but we also need (multi)lemma_id
+						var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+						var iMultiLemAnalysisId = fn.getDataFromSiblingNode(t, n, "multiple_lemmata_analysis_id");
+						var sCurrentRowId = fn.getDataFromSiblingNode(t, n, "attestation_ids");
+						
+						iLemmaId = (iLemmaId == '') ? "NULL" : iLemmaId;
+						iMultiLemAnalysisId = (iMultiLemAnalysisId == '') ? "NULL" : iMultiLemAnalysisId;
+						
+						
+						
+						// Create a new analyzed_wordform
+						// and retrieve its analyzed_wordform_id (plus group_id if available)
+						fn.callFunction("api.create_analyzed_wordform", 
+								
+								[iLemmaId, 
+								 iMultiLemAnalysisId, 
+								 fn.quote(sNewWordform),
+								 fn.quote(sNewSortedIndexes),
+								 fn.quote(sNewAlphabeticWordform)], 
+								 
+								function(response){
+							
+									var aAwfIdsAndGroupId = (response["create_analyzed_wordform"]).split("\|");	
+									
+									// Put the analyzed_wordform_ids and group_id
+									// corresponding to the current token_attestation records
+									// into this same record
+									fn.updateDatabaseGivenANode(t, n, 
+											["analyzed_wordform_ids", "group_id"], 
+											aAwfIdsAndGroupId, 
+											null, 
+											function(){
+										
+												// we're done with the worktable, now we need to update
+												// the true token_attestations table
+										
+												var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
+												
+												fn.callFunction("api.process_new_token_attestations", [fn.quote(sOldAttIds)], 
+														
 														function(){
 													
-															// we're done with the worktable, now we need to update
-															// the true token_attestations table													
+															// refresh to see result
+															fn.refreshTable(t);
 															
-															fn.callFunction("insert_new_token_attestations", [sOldAttIds], 
-																	
-																	function(response){
-																
-																		// finally put the generated attestation_ids into the worktable
-																		var sNewAttIds = response["insert_new_token_attestations"];
-																		fn.updateDatabaseGivenANode(t, n, 
-																				["attestation_ids"], 
-																				[sNewAttIds], null, function(){
-																			
-																			// refresh to see result
-																			fn.refreshTable(t);
-																			// refresh paradigm view as well
-																			// since we've created new wordform
-																			fn.refreshTable("lemmata_and_paradigma");
-																		});
-																	});
-															
-															
+															// refresh paradigm view as well
+															// since we've created new wordform
+															fn.refreshTable("lemmata_and_paradigma");
 														});
-										});
-									}
-								
-								
-								// we have found a record with the same wordform and lemma_id
-								else
-									{
-									
-									var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
-																		
-									// retrieve the record given its id
-									fn.getRecord(t, id, function(record){										
-										
-										var sAwfIds = record["analyzed_wordform_ids"];
-										var sGroupId = record["group_id"];
-										
-										if (sGroupId.trim() == '')
-											sGroupId = 'NULL';
-										
-										// put the analyzed_wordform_ids and group_id
-										// corresponding to the current token_attestation records
-										// into this same record
-										fn.updateDatabaseGivenANode(t, n, 
-												["analyzed_wordform_ids", "group_id"], 
-												[sAwfIds, sGroupId], 
-												null, 
-												function(){													
-											
-													// we're done with the worktable, now we need to update
-													// the true token_attestations table								
-													
-													fn.callFunction("insert_new_token_attestations", [sOldAttIds], 
-															function(response){
-														
-																// finally put the generated attestation_ids into the worktable
-																var sNewAttIds = response["insert_new_token_attestations"];
-																fn.updateDatabaseGivenANode(t, n, 
-																		["attestation_ids"], 
-																		[sNewAttIds], null, function(){
-																	
-																	// refresh to see result
-																	fn.refreshTable(t);
-																});
-															});
-												});
-										
-										}); // end of getRecord
-									
-									}
-								
-								
-								// get the record having the found id
-								
-								
-								
-							}); // end of get id from database
+												
+												
+											});
+							});
+						
+						
+					}); // end of function
+					
 					
 				} // end of click event
 			},
@@ -432,7 +495,7 @@ oTableConfigurationList = {
 						// otherwise add the selected token(s)
 						else
 							{
-							// remove the tokens that are within the selection
+							// remove the tokens that are within the selection (=overlap)
 							// and add the selection as a whole after that
 							
 							var bAddSelection = true;
