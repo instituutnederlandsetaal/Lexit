@@ -259,8 +259,37 @@ fn.getCurrentDisplayStart = function(sSomeTablename){
 //
 // input	: table name or table object, an associative array of fields and values to match,
 //			  fnFunction is a function to be called once the table has been loaded
-// returns	: n.a., builds a datatable on the screen 
+// returns	: n.a., builds a datatable on the screen
+
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+	
+	// In some rare cases, when a config.js-file calls a table straight
+	// at initialisation time, the function competes with the normal initialisation 
+	// functions, so some general data (tables list and types, etc.) are loaded too late,
+	// t.i. after the current function call. To prevent this, we check here if
+	// the normal initialisation is finished, and if it is not, we call setTimeout
+	
+	// Trick to do that:
+	// asTableTypes mustn't be undefinied. If it is, the initialisation is not
+	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
+	
+    if( (typeof asTableTypes[$.inArray(sSomeTablename, asTableNames)]) !== "undefined"){ 
+    	
+    	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
+    }
+    else{
+        setTimeout(function(){
+        	
+        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
+        	
+        }, 250);
+    }
+	
+};
+
+// subroutine of fn.callDatabase
+fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+	
 	
 	// the content to match must be at least an empty array
 	if (aContentToMatch == null)
@@ -298,6 +327,8 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	}
 	
 };
+
+
 
 // this is a subroutine of fn.callDatabase
 fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
