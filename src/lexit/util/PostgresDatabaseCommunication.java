@@ -353,6 +353,14 @@ public class PostgresDatabaseCommunication {
 					else 
 						prest.setInt(i+1, Integer.parseInt(oneArg));
 				}
+				else if (oneType.endsWith("[]")) // array
+				{
+					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
+					if (oneType.equals("_int4[]"))
+						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
+					else
+						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
+				}
 				else
 				{
 					if (oneArg == null) 
@@ -429,6 +437,14 @@ public class PostgresDatabaseCommunication {
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
 						prest.setInt(i+1, Integer.parseInt(oneArg));
+				}
+				else if (oneType.endsWith("[]")) // array
+				{
+					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
+					if (oneType.equals("_int4[]"))
+						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
+					else
+						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
 				}
 				else
 				{

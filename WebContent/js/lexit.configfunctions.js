@@ -2829,6 +2829,31 @@ fn.escapeRegexChars = function(str){
 	//return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
+// convert a string containing an array reliably to an array
+fn.stringToArray = function(str){
+	
+	// remove curly brackets
+	if (str.match("^(\{)(.+)(\})$"))
+		str = str.replace(/^(\{)(.+)(\})$/, '$2');
+	
+	// conversion
+	// trick: http://stackoverflow.com/questions/13272406/javascript-string-to-array-conversion
+	return JSON.parse("[" + str + "]");
+};
+
+// convert an array to a string
+fn.arrayToString = function(arr, bCurlyBrackets){
+	
+	// conversion
+	var str = (JSON.stringify(arr, null));
+	
+	// do we want curly brackets instead? 
+	if (bCurlyBrackets)
+		str = str.replace('\[', '{', 'g').replace('\]', '}', 'g');
+	
+	return str;
+};
+
 //highlight some part of a string
 fn.getHighlight = function(sString, aaIndexes, sColor){
 	

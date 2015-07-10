@@ -17,8 +17,127 @@ oTableSettingsList = {
 			callback: function(t){
 				highlightAllQuotes(t);
 			},
-			repeat_callback: true
+			repeat_callback: true,
 			
+			
+			"button_0": {
+				
+				"name": "Koppel aan lemma",
+				"click": function(t){
+					
+					// get the selected lemma from the lemmata and paradigma table
+					
+					var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
+					var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
+					var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
+					
+					// warn the user he/she is about to assign some attestations
+					// to another lemma 
+					
+					fn.confirm("Let op", 
+							"De geselecteerde attestaties zullen gekoppeld worden aan lemma '"+sLemma+"'.<br>" +
+							"Weet u zeker dat u dat wilt?", function(){
+						
+								// process each selected attestation now
+						
+								var aSelectedAtts = fn.getSelectedRowsFrom(t);
+								aSelectedAtts.each(function(){
+									
+									var nCurrentNode = this;
+									
+									// get the ids of the analyzed_wordforms which 
+									// must be assigned this lemma_id
+									
+									var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids_arr");
+									var aAnalyzedWordformIds = fn.stringToArray(sAnalyzedWordformIds);
+									
+									// assign the lemma_id to each single analyzed_wordform
+									
+									for (var i=0; i<aAnalyzedWordformIds.length; i++)
+										{
+										var sAnalyzedWordformId = aAnalyzedWordformIds[i];
+										fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
+												{"analyzed_wordform_id": sAnalyzedWordformId}, 
+												{"lemma_id": sLemId});
+										}									
+									
+									// assign the lemma_id to each single attestation
+									
+									var bLastRow = fn.isLastNodeOf(nCurrentNode, aSelectedAtts);
+									fn.updateDatabaseGivenANode(t, nCurrentNode, ["lemma_id"], [sLemId], false,
+											function(){
+												if (bLastRow)
+													{
+													fn.refreshTable(t);
+													fn.refreshTable("lemmata_and_paradigma");
+													}												
+									});
+								});
+						
+					});
+					
+				}
+				
+			}
+			
+		},
+		
+		lemmata_removed: {
+			
+			"button_0":{
+				"name": "Hestel selectie",
+				"click": function(t){
+					
+					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						aRows.each(function(){
+							var n = this;
+							
+							var sLemId = fn.getDataFromCellNamed(t, n, "lemma_id");
+							fn.callFunction("api.restore_lemma", [sLemId], function(){
+								
+								if (fn.isLastNodeOf(n, aRows))
+									{
+									fn.refreshTable(t);
+									fn.refreshTable("lemmata_and_paradigma");
+									}
+							});
+						});
+						
+					});
+					
+				}
+			}
+		},
+		
+		analyzed_wordforms_removed: {
+			
+			"button_0":{
+				"name": "Hestel selectie",
+				"click": function(t){
+					
+					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						aRows.each(function(){
+							var n = this;
+							
+							var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+							fn.callFunction("api.restore_paradigm", [sAwfId], function(){
+								
+								if (fn.isLastNodeOf(n, aRows))
+									{
+									fn.refreshTable(t);
+									fn.refreshTable("lemmata_and_paradigma");
+									}
+							});
+						});
+						
+					});
+			
+				}
+			}
 		},
 		
 		lemmata_and_paradigma: {
@@ -29,6 +148,32 @@ oTableSettingsList = {
 			repeat_callback: true,
 			
 			"button_0":{
+				
+				"name": "Maak lemma aan",
+				"click": function(t){
+					
+					fn.prompt("Nieuw lemma", 
+							["modern_lemma", "part_of_speech", "persistent_id"], 
+							["", "", ""], function(){
+						
+								var sLemma = fn.quote( fn.getPromptUserInput("modern_lemma") );
+								var sPos = fn.quote( fn.getPromptUserInput("part_of_speech") );
+								var sPersistentId = fn.quote( fn.getPromptUserInput("persistent_id") );
+						
+								fn.callFunction("api.create_new_lemma", 
+										[sLemma, sPos, sPersistentId], 
+										function(){
+									
+											fn.refreshTable(t);
+									
+								});
+						
+					});
+				}
+				
+			},
+			
+			"button_1":{
 				
 				"name": "Verwijder selectie",
 				"click": function(t){
@@ -41,15 +186,29 @@ oTableSettingsList = {
 							
 							var bLastRow = fn.isLastNodeOf(n, aRows);
 							var iAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
+							var iLemId = fn.getDataFromCellNamed(t, n, "lemma_id");
 							
+							if (iAwfId != '')
+								{
 							fn.removeFromDatabaseGivenFieldValues("analyzed_wordforms", 
 									{"analyzed_wordform_id": iAwfId}, 
 									null, 
 									function(){	
-										fn.removeFromDatabaseGivenANode(t, n, false, function(){
-											if (bLastRow) fn.refreshTable(t);
+											if (bLastRow) 
+												fn.refreshTable(t);
 										});
+								}
+							else if (iLemId != '')
+								{
+								fn.removeFromDatabaseGivenFieldValues("lemmata", 
+										{"lemma_id": iLemId}, 
+										null, 
+										function(){	
+											if (bLastRow) 
+												fn.refreshTable(t);
 									});
+								}
+							
 						});	
 						
 					});					
@@ -58,8 +217,6 @@ oTableSettingsList = {
 				}
 			}
 		}
-		
-		
 		
 };
 
@@ -130,7 +287,19 @@ oTableConfigurationList = {
 		lemmata_and_paradigma: {
 			
 			modern_lemma: {
-				"colsort": "asc" // sort #1
+				"colsort": "asc", // sort #1
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callFunction("api.alter_modern_lemma", 
+							[sLemmaId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
 			},
 			persistent_id: {
 				"colsort": "asc", // sort #2
@@ -158,7 +327,9 @@ oTableConfigurationList = {
 				"click": function(t,n){
 					
 					var iAwfId = fn.getDataFromCellNode(t, n);
-					fn.callDatabase("token_attestations_worktable", {"analyzed_wordform_ids": "\\y"+iAwfId+"\\y"});
+					var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("token_attestations_worktable", 
+							{"analyzed_wordform_ids_arr": "{"+iAwfId+"}", "lemma_id": iLemmaId});
 				}
 			},
 			group_id: {
@@ -167,11 +338,59 @@ oTableConfigurationList = {
 				"click": function(t,n){
 					
 					var iGroupId = fn.getDataFromCellNode(t, n);
-					fn.callDatabase("token_attestations_worktable", {"group_id": iGroupId});
+					var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callDatabase("token_attestations_worktable", 
+							{"group_id": iGroupId, "lemma_id": iLemmaId});
 				}
 			},
 			wordform: {
-				"colsort": "asc" // sort #4
+				"colsort": "asc", // sort #4
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+					fn.callFunction("api.alter_wordform", [sAwfId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+			},
+			
+			lemma_part_of_speech: {
+				
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callFunction("api.alter_lemma_part_of_speech", 
+							[sLemmaId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+			},
+			part_of_speech: {
+				
+				"editable": true,
+				"editfunc": function(t, n, value){
+					
+					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+					fn.callFunction("api.alter_wordform_part_of_speech", 
+							[sAwfId, fn.quote(value)], 
+							function(){
+						
+								fn.refreshTable(t);
+						});
+					
+				}
+				
+			},
+			unique_id:{
+				"visible": false
 			}
 		},
 		
@@ -204,6 +423,18 @@ oTableConfigurationList = {
 			wordform: {
 				"visible": false
 			},
+			// column wordform_alphabetic is used by a database for comparing a newly manually built attestation
+			// which pre-existing attestation of the same lemma, so as to be able to decide wether a new set of
+			// analyzed wordforms needs to be constructed or not.
+			wordform_alphabetic: {
+				"visible": false
+			},
+			analyzed_wordform_ids: {
+				"visible": false
+			},
+			analyzed_wordform_ids_arr: {
+				"visible": false
+			},
 			group_id: {
 				"visible": false
 			},
@@ -222,156 +453,111 @@ oTableConfigurationList = {
 				
 				sortable: false,
 				"button": "Doorvoeren",
+				"button_tooltip": "Gewijzigde attestatie verwerken in het lexicon",
 				"click": function(t,n){
 					
-					fn.showProcessingMsg(t);
+					fn.confirm("Attestatie verwerken", 
+							"Weet u zeker dat u de gewijzigde attestatie nu in het lexicon wilt verwerken? "+
+							"<br><br>" +
+							"(Doe dit pas als in de citaat de correcte tokens geselecteerd zijn)", 
 					
-					// first we need to set the wordform according to the clicked words
-					// from the quote
+						function(){
 					
-					// so remove the highlight (which is html code nested into quote string)
-					// and only then, gather the string parts corresponding to the indexes (start - end)
-					var aWordarray = new Array();
-					var aIndexesArray = ( fn.getDataFromSiblingNode(t, n, "onsetoffset") ).split("\|");
-					var sQuote = fn.removeHighlight(fn.getDataFromSiblingNode(t, n, "quote"));
-					for (var i=0; i<aIndexesArray.length; i++)
-						{
-						var sIndexes = aIndexesArray[i];
-						var iStartIndex = sIndexes.split(",")[0];
-						var iEndIndex   = sIndexes.split(",")[1];
-						aWordarray.push( (sQuote.substring(iStartIndex, iEndIndex)).toLowerCase() );
-						}
-					// parts need to be sorted (just as in the rest of the table)
-					aWordarray.sort();
-					var sNewWordform = aWordarray.join(",");
-					
-					// write this into the right column (both onto screen as into database)
-					fn.updateDatabaseGivenANode(t, n, ["wordform"], [sNewWordform]);
-					fn.putDataIntoCell(t, fn.getRowNode(n), "wordform", sNewWordform);
+							fn.showProcessingMsg(t);
 					
 					
-					// Now find other rows than the current one, having the
-					// same wordform and lemma_id
-					// If it exists, we can take over the analyzed_wordform_id and group_id
-					// from such a row 
-					var sWordformConcat = fn.getDataFromSiblingNode(t, n, "wordform");
-					var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
-					var iMultiLemAnalysisId = fn.getDataFromSiblingNode(t, n, "multiple_lemmata_analysis_id");
-					var sCurrentRowId = fn.getDataFromSiblingNode(t, n, "attestation_ids");
+							// First: remember the current analyzed_wordform_ids and group_id
+							// as we will need to remove records having these ids
+							// from analyzed_wordforms in case they is no corresponding
+							// attestation left after the following process (as there mustn't be
+							// wordforms without attestations)
 					
-					iLemmaId = (iLemmaId == '') ? "NULL" : iLemmaId;
-					iMultiLemAnalysisId = (iMultiLemAnalysisId == '') ? "NULL" : iMultiLemAnalysisId;
+							var sOriginalAwfIds = fn.getDataFromCellNamed(t, n, "analyzed_wordform_ids");
+							var sOriginalGroupId = fn.getDataFromCellNamed(t, n, "group_id");
 		
-					fn.getIdFromDatabase(t, 
-							{
-							"lemma_id": iLemmaId,
-							"multiple_lemmata_analysis_id": iMultiLemAnalysisId,
-							"wordform": sWordformConcat,
-							"attestation_ids": "!"+"^"+sCurrentRowId+"$",
-							"group_id": (sWordformConcat.indexOf(",")>-1) ? "!NULL" : "NULL"
-							}, 
-							function(id){								
-								
-								// there is no record with these wordform and lemma_id
-								// so we have to create it ourself
-								if (id == '')
-									{
-									var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
-									
-									fn.callFunction("create_analyzed_wordform", 
-											[iLemmaId, iMultiLemAnalysisId, sNewWordform], 
-											function(response){
 										
-												var aAwfIdsAndGroupId = (response["create_analyzed_wordform"]).split("\|");	
+							// Some words have been selected manually in the quote, causing new
+							// onsets and offsets to be saved into the onsetoffset column.
+							//
+							// Now the 'Doorvoeren' button has been clicked on,
+							// we need to rebuild the other fields content accordingly:
 												
-												// put the analyzed_wordform_ids and group_id
-												// corresponding to the current token_attestation records
-												// into this same record
-												fn.updateDatabaseGivenANode(t, n, 
-														["analyzed_wordform_ids", "group_id"], 
-														aAwfIdsAndGroupId, 
-														null, 
-														function(){
+							// [1] in a first step we gather the highlight wordforms
+							//     and put those in the same order als the their onsets (=keep relation!) 
 													
-															// we're done with the worktable, now we need to update
-															// the true token_attestations table													
+							computeWordsFromIndexes(t, n);
 															
-															fn.callFunction("insert_new_token_attestations", [sOldAttIds], 
 																	
-																	function(response){
+							// [2] in a second step, we will look up analyzed_wordforms for those
+							//     words (or create them if they don't exist yet) and also put
+							//     those analyzed_wordforms in the same order as the wordforms  
+							//   
+							// N.B.: Sorting both wordform and analyzed_wordforms by onsets
+							//       is needed to keep the relation between those three components, 
+							//       since we will later on process these data back into the native 
+							//       token_attestations table: this consists of separate records for each 
+							//       analyzed_wordform, which of course needs to refer to the
+							//       correct wordform and onset (word position) in the quote.
+							//       (see final step, calling api.process_new_token_attestations)
 																
-																		// finally put the generated attestation_ids into the worktable
-																		var sNewAttIds = response["insert_new_token_attestations"];
-																		fn.updateDatabaseGivenANode(t, n, 
-																				["attestation_ids"], 
-																				[sNewAttIds], null, function(){
 																			
-																			// refresh to see result
-																			fn.refreshTable(t);
-																			// refresh paradigm view as well
-																			// since we've created new wordform
-																			fn.refreshTable("lemmata_and_paradigma");
-																		});
-																	});
 															
+							// Look up of create (a) new analyzed_wordform(s) for the attestation words							
 															
-														});
-										});
-									}
+							var aDataForAnalyzedWordforms = getArgumentsForFindingOrCreatingAnalyzedWordform(t, n);
 								
+							fn.callFunction("api.create_analyzed_wordform_for_attestation", 
 								
-								// we have found a record with the same wordform and lemma_id
-								else
-									{
+									aDataForAnalyzedWordforms, 
 									
-									var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
+									function(response){
 																		
-									// retrieve the record given its id
-									fn.getRecord(t, id, function(record){										
+										// Retrieve the analyzed_wordform_id(s)
+										// plus group_id if available,
+										// and put those back into the current record
 										
-										var sAwfIds = record["analyzed_wordform_ids"];
-										var sGroupId = record["group_id"];
+										var aAwfIdsAndGroupId = (response["create_analyzed_wordform_for_attestation"]).split("\|");	
 										
-										if (sGroupId.trim() == '')
-											sGroupId = 'NULL';
-										
-										// put the analyzed_wordform_ids and group_id
-										// corresponding to the current token_attestation records
-										// into this same record
 										fn.updateDatabaseGivenANode(t, n, 
 												["analyzed_wordform_ids", "group_id"], 
-												[sAwfIds, sGroupId], 
+												aAwfIdsAndGroupId, 
 												null, 
 												function(){													
 											
-													// we're done with the worktable, now we need to update
-													// the true token_attestations table								
+													// [3]
+													// we're done with the worktable, we now need to update
+													// the native token_attestations table
 													
-													fn.callFunction("insert_new_token_attestations", [sOldAttIds], 
-															function(response){
+													var sOldAttIds = fn.getDataFromSiblingNode(t, n, "attestation_ids");
 														
-																// finally put the generated attestation_ids into the worktable
-																var sNewAttIds = response["insert_new_token_attestations"];
-																fn.updateDatabaseGivenANode(t, n, 
-																		["attestation_ids"], 
-																		[sNewAttIds], null, function(){
+													fn.callFunction("api.process_new_token_attestations", 															
+															[fn.quote(sOldAttIds)],															
+															function(){
 																	
-																	// refresh to see result
+																// clean up paradigm and refresh it
+																
+																if (sOriginalGroupId == '')
+																	sOriginalGroupId = "NULL";
+																
+																fn.callFunction("api.cleanup_paradigm",																		
+																		[fn.quote(sOriginalAwfIds), fn.quote(sOriginalGroupId)],																		
+																		function(){
+																	
+																			// refresh to see the results!
+																			fn.refreshTable("lemmata_and_paradigma");
 																	fn.refreshTable(t);
+																	
 																});
-															});
+																
 												});
 										
-										}); // end of getRecord
 									
-									}
+												});
+								});
 								
 								
-								// get the record having the found id
+						}); // end of function
 								
-								
-								
-							}); // end of get id from database
 					
 				} // end of click event
 			},
@@ -420,7 +606,7 @@ oTableConfigurationList = {
 						// otherwise add the selected token(s)
 						else
 							{
-							// remove the tokens that are within the selection
+							// remove the tokens that are within the selection (=overlap)
 							// and add the selection as a whole after that
 							
 							var bAddSelection = true;
@@ -472,6 +658,88 @@ oTableConfigurationList = {
 // start with the main table
 
 fn.callDatabase("lemmata_and_paradigma");
+
+
+
+function computeWordsFromIndexes(t, n){
+	
+	// first we need to set the wordform according to the clicked words
+	// from the quote. Those clicked words are highlight.
+	
+	// remove the words highlights (which is html code nested into quote string)
+	// so as to get the clean quote
+		
+	var aWordAndIndexesArray = new Array();
+	var aIndexesArray = ( fn.getDataFromSiblingNode(t, n, "onsetoffset") ).split("\|");
+	var sQuote = fn.removeHighlight(fn.getDataFromSiblingNode(t, n, "quote"));
+	
+	// Now, gather the string parts from the quote
+	// corresponding to the indexes (start - end) of the words the user clicked on.
+	// Put these parts into a two-dimensional array [i -> [sWordform, sIndexes] ]
+	
+	for (var i=0; i<aIndexesArray.length; i++)
+		{
+		var sIndexes = aIndexesArray[i];
+		var iStartIndex = sIndexes.split(",")[0];
+		var iEndIndex   = sIndexes.split(",")[1];
+		var sWordform = (sQuote.substring(iStartIndex, iEndIndex)).toLowerCase();
+		aWordAndIndexesArray.push( [sWordform, sIndexes] );
+		}
+	
+	// As words and their indexes are now grouped as single objects
+	// We can easily sort the words by their index
+	
+	aWordAndIndexesArray.sort( function(a, b){
+		if (a[1] > b[1]) return 1;
+		if (a[1] < b[1]) return -1;
+		return 0;
+	});
+	var aWordArray = new Array();
+	var aIndexesArray = new Array();
+	
+	// now put wordforms and indexes back into separate arrays
+	
+	for (var i=0; i<aWordAndIndexesArray.length; i++)
+	{
+		aWordArray[i] = aWordAndIndexesArray[i][0];
+		aIndexesArray[i] = aWordAndIndexesArray[i][1];
+	}
+	var sNewWordform = aWordArray.join(",");
+	var sNewIndexes = aIndexesArray.join("|");
+	
+	
+	// Write these into the right columns (both onto screen as into database)		
+	
+	fn.updateDatabaseGivenANode(t, n, ["wordform"], [sNewWordform]);
+	fn.putDataIntoCell(t, fn.getRowNode(n), "wordform", sNewWordform);						
+	fn.updateDatabaseGivenANode(t, n, ["onsetoffset"], [sNewIndexes]);
+	fn.putDataIntoCell(t, fn.getRowNode(n), "onsetoffset", sNewIndexes);
+}
+
+
+
+function getArgumentsForFindingOrCreatingAnalyzedWordform(t, n){
+	
+	var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+	iLemmaId = (iLemmaId == '') ? "NULL" : iLemmaId;
+	
+	var iMultiLemAnalysisId = fn.getDataFromSiblingNode(t, n, "multiple_lemmata_analysis_id");
+	iMultiLemAnalysisId = (iMultiLemAnalysisId == '') ? "NULL" : iMultiLemAnalysisId;
+	
+	var sNewWordform = fn.getDataFromSiblingNode(t, n, "wordform");
+	var sNewIndexes = fn.getDataFromSiblingNode(t, n, "onsetoffset");
+	
+	return [iLemmaId, 
+			 iMultiLemAnalysisId, 
+			 fn.quote(sNewWordform),
+			 fn.quote(sNewIndexes)];
+}
+
+
+
+
+
+
 
 
 

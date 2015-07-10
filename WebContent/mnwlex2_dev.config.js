@@ -48,8 +48,8 @@ oTableSettingsList = {
 									// get the ids of the analyzed_wordforms which 
 									// must be assigned this lemma_id
 									
-									var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids");
-									var aAnalyzedWordformIds = sAnalyzedWordformIds.split(",");
+									var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids_arr");
+									var aAnalyzedWordformIds = fn.stringToArray(sAnalyzedWordformIds);
 									
 									// assign the lemma_id to each single analyzed_wordform
 									
@@ -286,7 +286,7 @@ oTableConfigurationList = {
 					var iAwfId = fn.getDataFromCellNode(t, n);
 					var iLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
 					fn.callDatabase("token_attestations_worktable", 
-							{"analyzed_wordform_ids": "\\y"+iAwfId+"\\y", "lemma_id": iLemmaId});
+							{"analyzed_wordform_ids_arr": "{"+iAwfId+"}", "lemma_id": iLemmaId});
 				}
 			},
 			group_id: {
@@ -387,6 +387,9 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			analyzed_wordform_ids: {
+				"visible": false
+			},
+			analyzed_wordform_ids_arr: {
 				"visible": false
 			},
 			group_id: {

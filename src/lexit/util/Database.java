@@ -1670,6 +1670,10 @@ public class Database {
 		if (value == null)
 			return true;
 		
+		// array
+		if (value.startsWith("{") && value.endsWith("}") && columnType.endsWith("[]"))
+			return true;
+		
 		// booleans
 		if (value.matches("true|false") && columnType.equals("boolean"))
 			return true;
@@ -2265,6 +2269,10 @@ public class Database {
 		if (value.startsWith("!"))
 			negation = true;
 		
+		// array search
+		if (value.startsWith("{") && value.endsWith("}"))
+			return "@>";
+		
 		// inequality operators
 		if (value.startsWith("<=") || value.startsWith(">="))
 			return value.substring(0,2);		
@@ -2393,7 +2401,8 @@ public class Database {
 			}
 		
 		// use COALESCE to prevent datatype from being NULL
-		String typeQuery = "SELECT COALESCE(data_type||'('||character_maximum_length||')', data_type) AS type "+
+		String typeQuery = 
+			"SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
 			"FROM information_schema.columns " +
 			"WHERE table_name = ? " +
 			"AND column_name = ? ;";
@@ -2446,7 +2455,7 @@ public class Database {
 		
 		// this query will be used to query the column type one column at the time
 		// use COALESCE to prevent datatype from being NULL
-		String typeQuery = "SELECT COALESCE(data_type||'('||character_maximum_length||')', data_type) AS type "+
+		String typeQuery = "SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
 			"FROM information_schema.columns " +
 			"WHERE table_name = ? " +
 			"AND column_name = ? ;";
