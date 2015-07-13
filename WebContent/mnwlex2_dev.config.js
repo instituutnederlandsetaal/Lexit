@@ -26,55 +26,73 @@ oTableSettingsList = {
 				"click": function(t){
 					
 					// get the selected lemma from the lemmata and paradigma table
-					
-					var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
-					var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
-					var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
-					
-					// warn the user he/she is about to assign some attestations
-					// to another lemma 
-					
-					fn.confirm("Let op", 
-							"De geselecteerde attestaties zullen gekoppeld worden aan lemma '"+sLemma+"'.<br>" +
-							"Weet u zeker dat u dat wilt?", function(){
+										
+					if (	fn.getNumberOfSelectedRows("lemmata_and_paradigma") == 0 ||
+							fn.getNumberOfSelectedRows(t) == 0)
+						{
+						fn.message("Let op", "U moet wel een attestatie én een lemma kiezen!");						
+						}
+					else
+						{
+						var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
+						var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
+						var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
 						
-								// process each selected attestation now
+						// warn the user he/she is about to assign some attestations
+						// to another lemma 
 						
-								var aSelectedAtts = fn.getSelectedRowsFrom(t);
-								aSelectedAtts.each(function(){
-									
-									var nCurrentNode = this;
-									
-									// get the ids of the analyzed_wordforms which 
-									// must be assigned this lemma_id
-									
-									var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids_arr");
-									var aAnalyzedWordformIds = fn.stringToArray(sAnalyzedWordformIds);
-									
-									// assign the lemma_id to each single analyzed_wordform
-									
-									for (var i=0; i<aAnalyzedWordformIds.length; i++)
-										{
-										var sAnalyzedWordformId = aAnalyzedWordformIds[i];
-										fn.updateDatabaseGivenFieldValues("analyzed_wordforms", 
-												{"analyzed_wordform_id": sAnalyzedWordformId}, 
-												{"lemma_id": sLemId});
-										}									
-									
-									// assign the lemma_id to each single attestation
-									
-									var bLastRow = fn.isLastNodeOf(nCurrentNode, aSelectedAtts);
-									fn.updateDatabaseGivenANode(t, nCurrentNode, ["lemma_id"], [sLemId], false,
-											function(){
-												if (bLastRow)
-													{
-													fn.refreshTable(t);
-													fn.refreshTable("lemmata_and_paradigma");
-													}												
+						fn.confirm("Let op", 
+								"De geselecteerde attestaties zullen gekoppeld worden aan lemma '"+sLemma+"' " +
+								"met ID "+sLemId+".<br>" +
+								"Weet u zeker dat u dat wilt?", function(){
+							
+									// process each selected attestation now
+							
+									var aSelectedAtts = fn.getSelectedRowsFrom(t);
+									aSelectedAtts.each(function(){
+										
+										var nCurrentNode = this;
+										
+										// get the ids of the analyzed_wordforms which 
+										// must be assigned this lemma_id
+										
+										var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids");
+										
+										
+										// assign the lemma_id to each single analyzed_wordform
+										
+										fn.callFunction("api.copy_set_of_analyzed_wordforms_to_lemma", 
+												[fn.quote(sAnalyzedWordformIds), sLemId], 
+												function(response){
+											
+													var aNewAwfIdsAndGroupId = (response["copy_set_of_analyzed_wordforms_to_lemma"]).split("\|");
+													var sNewAwfIds =   aNewAwfIdsAndGroupId[0];
+													var sNewGroupIds = aNewAwfIdsAndGroupId[1];
+													
+													// assign the lemma_id, awf_ids and group_id to each single attestation
+													
+													var bLastRow = fn.isLastNodeOf(nCurrentNode, aSelectedAtts);
+													fn.updateDatabaseGivenANode(t, nCurrentNode, 
+															["lemma_id", "analyzed_wordform_ids", "group_id"], 
+															[sLemId, sNewAwfIds, sNewGroupIds], false,
+															function(){
+																if (bLastRow)
+																	{
+																	fn.refreshTable(t);
+																	fn.refreshTable("lemmata_and_paradigma");
+																	}												
+													});
+											
+										});									
+										
+										
 									});
-								});
+							
+							});
 						
-					});
+						}
+					
+					
 					
 				}
 				

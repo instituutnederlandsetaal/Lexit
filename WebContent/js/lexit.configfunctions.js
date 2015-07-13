@@ -842,10 +842,12 @@ fn.getNumberOfSelectedRows = function(sSomeTable){
 	
 	var aRows = sSomeTable.fnGetNodes();
 	var iNumberSelected = 0;
-	var i =0;
+	var i = 0;
 	while (i<aRows.length){
 		if ( $(aRows[i]).hasClass('row_selected') )
+			{
 			iNumberSelected++;
+			}
 		i++;
 	}
 	return iNumberSelected;
