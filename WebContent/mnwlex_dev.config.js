@@ -23,6 +23,7 @@ oTableSettingsList = {
 			"button_0": {
 				
 				"name": "Koppel aan lemma",
+				"tooltip": "Koppel de geselecteerde attestatie aan het in 'lemmata_and_paradigma' geselecteerde lemma",
 				"click": function(t){
 					
 					// get the selected lemma from the lemmata and paradigma table
@@ -46,12 +47,25 @@ oTableSettingsList = {
 								"met ID "+sLemId+".<br>" +
 								"Weet u zeker dat u dat wilt?", function(){
 							
+									var aOriginalAwfIdsAndGroupId = new Array();
+									
 									// process each selected attestation now
 							
 									var aSelectedAtts = fn.getSelectedRowsFrom(t);
 									aSelectedAtts.each(function(){
 										
 										var nCurrentNode = this;
+										
+										// Remember the current analyzed_wordform_ids and group_id
+										// as we will need to remove records having these ids
+										// from analyzed_wordforms in case they is no corresponding
+										// attestation left after the following process (as there mustn't be
+										// wordforms without attestations)
+										
+										var sOriginalAwfIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids");
+										var sOriginalGroupId = fn.getDataFromCellNamed(t, nCurrentNode, "group_id");
+										aOriginalAwfIdsAndGroupId.push( [sOriginalAwfIds, sOriginalGroupId] );
+										
 										
 										// get the ids of the analyzed_wordforms which 
 										// must be assigned this lemma_id
@@ -78,8 +92,29 @@ oTableSettingsList = {
 															function(){
 																if (bLastRow)
 																	{
-																	fn.refreshTable(t);
-																	fn.refreshTable("lemmata_and_paradigma");
+																	
+																	
+																	// clean up paradigm and refresh it
+																	aOriginalAwfIdsAndGroupId = getOnlyUniqueValues(aOriginalAwfIdsAndGroupId);
+																	for (var i=0; i<aOriginalAwfIdsAndGroupId.length; i++)
+																		{
+																		sOriginalAwfIds  = aOriginalAwfIdsAndGroupId[i][0];
+																		sOriginalGroupId = aOriginalAwfIdsAndGroupId[i][1];
+																		
+																		if (sOriginalGroupId == '')
+																			sOriginalGroupId = "NULL";
+																		
+																		fn.callFunction("api.cleanup_paradigm",																		
+																				[fn.quote(sOriginalAwfIds), fn.quote(sOriginalGroupId)],																		
+																				function(){
+																			
+																					// refresh to see the results!
+																					fn.refreshTable("lemmata_and_paradigma");
+																					fn.refreshTable(t);
+																			
+																			});
+																		}							
+																	
 																	}												
 													});
 											
@@ -206,6 +241,7 @@ oTableSettingsList = {
 							var iAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");
 							var iLemId = fn.getDataFromCellNamed(t, n, "lemma_id");
 							
+							// If we have a paradigm, remove the rows given their awf_id
 							if (iAwfId != '')
 								{
 								fn.removeFromDatabaseGivenFieldValues("analyzed_wordforms", 
@@ -216,6 +252,8 @@ oTableSettingsList = {
 												fn.refreshTable(t);
 										});
 								}
+							// In some rare cases, we don't have any paradigm, but just a lemma
+							// In such cases, we have no option but to delete the lemma
 							else if (iLemId != '')
 								{
 								fn.removeFromDatabaseGivenFieldValues("lemmata", 
@@ -319,18 +357,18 @@ oTableConfigurationList = {
 				}
 			},
 			wordform: {
-				"colsort": "asc", // sort #4
-				"editable": true,
-				"editfunc": function(t, n, value){
-					
-					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
-					fn.callFunction("api.alter_wordform", [sAwfId, fn.quote(value)], 
-							function(){
-						
-								fn.refreshTable(t);
-						});
-					
-				}
+				"colsort": "asc" // sort #4
+//				"editable": true,
+//				"editfunc": function(t, n, value){
+//					
+//					var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+//					fn.callFunction("api.alter_wordform", [sAwfId, fn.quote(value)], 
+//							function(){
+//						
+//								fn.refreshTable(t);
+//						});
+//					
+//				}
 			},
 			
 			lemma_part_of_speech: {
@@ -477,7 +515,7 @@ oTableConfigurationList = {
 							
 							
 							
-							// Look up of create (a) new analyzed_wordform(s) for the attestation words							
+							// Look up or create (a) new analyzed_wordform(s) for the attestation words							
 							
 							var aDataForAnalyzedWordforms = getArgumentsForFindingOrCreatingAnalyzedWordform(t, n);
 							

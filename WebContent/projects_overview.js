@@ -136,7 +136,7 @@ var aProjectList =
 	 {
 		 	name: "Nieuw Groen Boekje",
 		 	config_filename: "nieuw_gb",
-		 	description: "Groen Boekje met Gigant tags"
+		 	description: "Groen Boekje met Gigant tags (gb_splitup_v4)"
 	 },
 	 {
 		 	name: "Papiamentu",
@@ -161,5 +161,15 @@ var aProjectList =
 		 	name: "Spelling database",
 		 	config_filename: "spelling",
 		 	description: "De spelling database, gegenereerd d.w.v. lexicalsources"
+	 },
+	 {
+		 name: "MNW lexicon 2015",
+		 config_filename: "mnwlex_dev",
+		 description: "Ontwikkelversie van de GUI op het MNW-lexicon"
+	 },
+	 {
+		 name: "WNT lexicon 2015",
+		 config_filename: "wntlex_dev",
+		 description: "Ontwikkelversie van de GUI op het WNT-lexicon"
 	 }
 	];
