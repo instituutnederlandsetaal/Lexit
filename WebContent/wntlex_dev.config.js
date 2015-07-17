@@ -38,16 +38,25 @@ oTableSettingsList = {
 					var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
 					var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
 					var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
+					var sMultiLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "multiple_lemmata_analysis_id");
 					
 					// warn the user he/she is about to assign some attestations
 					// to another lemma 
 					
 					fn.confirm("Let op", 
 								"De geselecteerde attestaties zullen gekoppeld worden aan lemma '"+sLemma+"' " +
-								"met ID "+sLemId+".<br>" +
+								"met ID " + (sLemId != '' ? sLemId : sMultiLemId) + ".<br>" +
 							"Weet u zeker dat u dat wilt?", function(){
 						
-									var aOriginalAwfIdsAndGroupId = new Array();
+								// make sure we have null values where needed
+								if (sLemId == '')
+									sLemId = 'NULL';
+								if (sMultiLemId == '')
+									sMultiLemId = 'NULL';
+						
+								
+								
+								var aOriginalAwfIdsAndGroupId = new Array();
 									
 								// process each selected attestation now
 						
@@ -76,7 +85,7 @@ oTableSettingsList = {
 									// assign the lemma_id to each single analyzed_wordform
 									
 										fn.callFunction("api.copy_set_of_analyzed_wordforms_to_lemma", 
-												[fn.quote(sAnalyzedWordformIds), sLemId], 
+												[fn.quote(sAnalyzedWordformIds), fn.quote(sLemId), fn.quote(sMultiLemId)], 
 												function(response){
 											
 													var aNewAwfIdsAndGroupId = (response["copy_set_of_analyzed_wordforms_to_lemma"]).split("\|");
@@ -85,13 +94,15 @@ oTableSettingsList = {
 									
 													// assign the lemma_id, awf_ids and group_id to each single attestation
 									
-									var bLastRow = fn.isLastNodeOf(nCurrentNode, aSelectedAtts);
+													var bLastRow = fn.isLastNodeOf(nCurrentNode, aSelectedAtts);
+													
 													fn.updateDatabaseGivenANode(t, nCurrentNode, 
-															["lemma_id", "analyzed_wordform_ids", "group_id"], 
-															[sLemId, sNewAwfIds, sNewGroupIds], false,
-											function(){
-												if (bLastRow)
-													{
+															["lemma_id", "multiple_lemmata_analysis_id", "analyzed_wordform_ids", "group_id"], 
+															[sLemId, sMultiLemId, sNewAwfIds, sNewGroupIds], 
+															false,
+															function(){
+																if (bLastRow)
+																	{
 																	
 																	
 																	// clean up paradigm and refresh it
@@ -110,13 +121,13 @@ oTableSettingsList = {
 																			
 																					// refresh to see the results!
 																					fn.refreshTable("lemmata_and_paradigma");
-													fn.refreshTable(t);
+																					fn.refreshTable(t);
 																			
 																			});
 																		}							
 																	
-													}												
-									});
+																	}												
+													});
 											
 										});									
 										
