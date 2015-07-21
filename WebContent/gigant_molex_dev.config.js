@@ -53,6 +53,38 @@ function superUser(){
 };
 
 
+// link with diminutives
+
+var sVerkleinwoord = "";
+var sPartLemma = "";
+var sVerkleinwoordId = "";
+var sPartLemmaId = "";
+function getVerkleinwoord(){
+	return "<b>Kies&nbsp;verkleinwoord</b>" +
+	( sVerkleinwoord != "" ? 
+			"<br>&nbsp;&nbsp;&nbsp;&nbsp;(<i>Gekozen:"+sVerkleinwoord+"/"+sVerkleinwoordId+"</i>)" : 
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+}
+function  getPartLemma(){
+	return "<b>Kies&nbsp;deeltje</b>" +
+	( sPartLemma != "" ? 
+			"<br>&nbsp;&nbsp;&nbsp;&nbsp;(<i>Gekozen:"+sPartLemma+"/"+sPartLemmaId+"</i>)" : 
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+
+				"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+}
+function setContextMenuOptions(key, options){
+	
+	$("ul.context-menu-list li:eq(0)").html('<span>'+getVerkleinwoord()+'</span>');
+	options.items[key].name = getVerkleinwoord();
+	$("ul.context-menu-list li:eq(1)").html('<span>'+getPartLemma()+'</span>');
+	options.items[key].name = getPartLemma();
+
+}
+
+
 // table general settings
 oTableSettingsList = {
 		
@@ -905,7 +937,82 @@ oTableSettingsList = {
 					sf.putCurrentValueInAllSearchBoxes(fn.getTableName(t));
 					
 				}
-			}
+			},
+			
+			
+			"contextmenu": {
+				
+                // here the structure of the contextmenu is given
+                "items": {
+                    "verkleinwoord": {"name": getVerkleinwoord()},
+                    "partlemma": {"name": getPartLemma()},
+                    "link": {"name": "<b>Maak link aan</b>"},
+                    "unlink": {"name": "<b>Unlink</b>"}
+                },
+                // callback function called after the user has chosen an option in the context menu
+                "callback": function(confTable, confNode, key, options) {
+ 
+                    // key indicates the option the user has chosen
+                    if (key == 'verkleinwoord')
+                        {
+                    	sVerkleinwoord = fn.getDataFromCellNamed(confTable, confNode, "modern_lemma");
+                    	sVerkleinwoordId = fn.getDataFromCellNamed(confTable, confNode, "pkid");
+
+                    	setContextMenuOptions(key, options);
+                        }
+                    else if (key == 'partlemma')
+                        {                       
+                    	sPartLemma  = fn.getDataFromCellNamed(confTable, confNode, "modern_lemma");
+                    	sPartLemmaId = fn.getDataFromCellNamed(confTable, confNode, "pkid");
+                    	
+                    	setContextMenuOptions(key, options);
+                        }
+                    else if (key == 'link')
+                    {
+                    	if (sVerkleinwoordId == "" || sPartLemmaId == "")
+                		{
+                		fn.message("Let op", "Kies eerst een verkleinwoord én een deeltje");
+                		}
+                	else
+                		{
+                		fn.callFunction("link_verkleinwoord", [sVerkleinwoordId, sPartLemmaId], function(){
+                    		
+                    		sVerkleinwoord = "";
+                    		sPartLemma = "";
+                    		sVerkleinwoordId = "";
+                    		sPartLemmaId = "";
+                    		
+                    		setContextMenuOptions(key, options);
+                    		
+                    		fn.refreshTable(confTable);
+                    		});
+                		}
+                    	
+                    }
+                    else if (key == 'unlink')
+                    {
+                    	if (sVerkleinwoordId == "")
+                    		{
+                    		fn.message("Let op", "Kies eerst een verkleinwoord");
+                    		}
+                    	else
+                    		{
+                    		fn.callFunction("unlink_verkleinwoord", [sVerkleinwoordId], function(){
+                        		
+                        		sVerkleinwoord = "";
+                        		sPartLemma = "";
+                        		sVerkleinwoordId = "";
+                        		sPartLemmaId = "";
+                        		
+                        		setContextMenuOptions(key, options);
+                        		
+                        		fn.refreshTable(confTable);
+                        		});
+                    		}
+                    	
+                    }
+                }
+            }
 			
 			
 		},

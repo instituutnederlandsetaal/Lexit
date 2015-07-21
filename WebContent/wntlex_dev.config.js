@@ -35,36 +35,38 @@ oTableSettingsList = {
 						}
 					else
 						{
-					var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
-					var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
-					var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
-					var sMultiLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "multiple_lemmata_analysis_id");
-					
-					// warn the user he/she is about to assign some attestations
-					// to another lemma 
-					
-					fn.confirm("Let op", 
+						var nSelectedLemma = fn.getFirstSelectedRowFrom("lemmata_and_paradigma");
+						var sLemma = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "modern_lemma");
+						var sLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "lemma_id");
+						var sMultiLemId = fn.getDataFromCellNamed("lemmata_and_paradigma", nSelectedLemma, "multiple_lemmata_analysis_id");
+						
+						// warn the user he/she is about to assign some attestations
+						// to another lemma 
+						
+						fn.confirm("Let op", 
 								"De geselecteerde attestaties zullen gekoppeld worden aan lemma '"+sLemma+"' " +
 								"met ID " + (sLemId != '' ? sLemId : sMultiLemId) + ".<br>" +
-							"Weet u zeker dat u dat wilt?", function(){
-						
-								// make sure we have null values where needed
-								if (sLemId == '')
-									sLemId = 'NULL';
-								if (sMultiLemId == '')
-									sMultiLemId = 'NULL';
-						
-								
-								
-								var aOriginalAwfIdsAndGroupId = new Array();
+								"Weet u zeker dat u dat wilt?", function(){
+							
+									fn.showProcessingMsg(t);
+							
+									// make sure we have null values where needed
+									if (sLemId == '')
+										sLemId = 'NULL';
+									if (sMultiLemId == '')
+										sMultiLemId = 'NULL';
+							
 									
-								// process each selected attestation now
-						
-								var aSelectedAtts = fn.getSelectedRowsFrom(t);
-								aSelectedAtts.each(function(){
 									
-									var nCurrentNode = this;
-									
+									var aOriginalAwfIdsAndGroupId = new Array();
+										
+									// process each selected attestation now
+							
+									var aSelectedAtts = fn.getSelectedRowsFrom(t);
+									aSelectedAtts.each(function(){
+										
+										var nCurrentNode = this;
+										
 										// Remember the current analyzed_wordform_ids and group_id
 										// as we will need to remove records having these ids
 										// from analyzed_wordforms in case they is no corresponding
@@ -75,15 +77,15 @@ oTableSettingsList = {
 										var sOriginalGroupId = fn.getDataFromCellNamed(t, nCurrentNode, "group_id");
 										aOriginalAwfIdsAndGroupId.push( [sOriginalAwfIds, sOriginalGroupId] );
 										
+											
+										// get the ids of the analyzed_wordforms which 
+										// must be assigned this lemma_id
 										
-									// get the ids of the analyzed_wordforms which 
-									// must be assigned this lemma_id
-									
 										var sAnalyzedWordformIds = fn.getDataFromCellNamed(t, nCurrentNode, "analyzed_wordform_ids");
+											
 										
-									
-									// assign the lemma_id to each single analyzed_wordform
-									
+										// assign the lemma_id to each single analyzed_wordform
+										
 										fn.callFunction("api.copy_set_of_analyzed_wordforms_to_lemma", 
 												[fn.quote(sAnalyzedWordformIds), fn.quote(sLemId), fn.quote(sMultiLemId)], 
 												function(response){
@@ -128,15 +130,15 @@ oTableSettingsList = {
 																	
 																	}												
 													});
+												
+											});									
 											
-										});									
-										
-										
-								});
+											
+									});
+							
+							});
 						
-					});
-					
-				}
+						}
 				
 					
 					
@@ -290,6 +292,26 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		lemmata_removed: {
+			
+			modification_date: {
+				"colsort": "desc"  // sort #1
+			},
+			modification_time: {
+				"colsort": "desc"  // sort #2
+			}
+		},
+
+		analyzed_wordforms_removed: {
+			
+			modification_date: {
+				"colsort": "desc"  // sort #1
+			},
+			modification_time: {
+				"colsort": "desc"  // sort #2
+			}
+		},
 		
 		posmapping2:{
 			

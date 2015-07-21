@@ -48,6 +48,8 @@ oTableSettingsList = {
 								"met ID " + (sLemId != '' ? sLemId : sMultiLemId) + ".<br>" +
 								"Weet u zeker dat u dat wilt?", function(){
 							
+									fn.showProcessingMsg(t);
+							
 									// make sure we have null values where needed
 									if (sLemId == '')
 										sLemId = 'NULL';
@@ -289,6 +291,26 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		lemmata_removed: {
+			
+			modification_date: {
+				"colsort": "desc"  // sort #1
+			},
+			modification_time: {
+				"colsort": "desc"  // sort #2
+			}
+		},
+
+		analyzed_wordforms_removed: {
+			
+			modification_date: {
+				"colsort": "desc"  // sort #1
+			},
+			modification_time: {
+				"colsort": "desc"  // sort #2
+			}
+		},
 		
 		bronnen_worktable:{
 			
