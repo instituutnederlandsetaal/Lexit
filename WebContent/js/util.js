@@ -373,7 +373,12 @@ function escapeRegexChars(str){
 // compute the true start and end indexes in the same string containing html entitie 
 function getTrueIndexes(mainString, selection, selectionStartIndex){
 	
-	// first change all html-entitie names into tags, so we will only have to deal with taglike things
+	// First change all html-entitie names into tags, so we will only have to deal with taglike things
+	
+	// This changes  Hij heet Napol&eacute;on
+	//         into  hij heet napolD<~~~~~>on
+	// so each character keeps its original position in the string
+	
 	mainString = mainString.toLowerCase().replace( /(&)(ldquor|rdquo|mdash|quot|apos|amp|lt|gt|nbsp|iexcl|cent|pound|curren|yen|brvbar|sect|uml|copy|ordf|laquo|not|shy|reg|macr|deg|plusmn|sup2|sup3|acute|micro|para|middot|cedil|sup1|ordm|raquo|frac14|frac12|frac34|iquest|times|divide|thorn|szlig|agrave|aacute|acirc|aelig|atilde|auml|aring|aelig|ccedil|egrave|eacute|ecirc|euml|igrave|iacute|icirc|iuml|eth|ntilde|ograve|oacute|ocirc|oelig|otilde|ouml|oslash|ugrave|uacute|ucirc|uuml|yacute|thorn|yuml|rdquo|ldquo)(;)/gi, 
 			function ($0, $1, $2, $3) {
 	    return "D<" + (new Array($2.length).join("~")) + ">" ;

@@ -10,7 +10,8 @@ oShowOnlyTables = ["export_versions", "lemmata_view", "locks_view",
                    "what_happened_to_gb",
 				   "what_happened_to_gb_old",
 				   "gb_splitup_v4",
-				   "verwijderde_gb_ids"];
+				   "verwijderde_gb_ids",
+				   "nuancerende_opmerkingen"];
 
 
 // remember chosen parent
@@ -23,6 +24,45 @@ var sChosenParentId = null;
 //        2: sort by freq
 var bGedruktModeOfLemmata = 0;
 var bGedruktModeOfParadigm = 0; 
+
+
+
+
+
+//Autocomplete configuration
+//see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
+//   http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
+var sAutoCompleteSelector = ".nuanc_opm";
+
+$(document).on(
+        "focus", 
+        sAutoCompleteSelector, 
+        function(event) {
+        	
+        	$(event.target).autocomplete({
+            	
+        		delay: 500,
+                minLength: 2,
+	        	source: function(request, response){
+	            	
+	            	fn.callFunction("get_nuance_opm", ["'"+request.term+"'"], 
+	            			function(func_resp){  
+	            		
+	            		var aSuggestionsArr = 
+	            			(func_resp["get_nuance_opm"]).split("|");
+	            		
+	            		response($.map(aSuggestionsArr, function (item) {
+	                        return {
+	                            label: item.split(":::")[0],
+	                            value: item.split(":::")[1]
+	                        };
+	                    }));
+	            	});
+	            }
+            });
+            
+        }
+    );
 
 
 
@@ -87,6 +127,53 @@ function setContextMenuOptions(key, options){
 
 // table general settings
 oTableSettingsList = {
+		
+		
+		nuancerende_opmerkingen:{
+			
+			"size": "80%",
+			
+			"button_0":{
+				"name": "Voeg opmerking toe",
+				"click": function(t){
+					
+					fn.prompt("Voer opmerking in", 
+							["short_code", "nuancerende_opmerking"], 
+							["", ""], 
+							function(){
+								var sShortCode = fn.getPromptUserInput("short_code");
+								var sNuanceOpm = fn.getPromptUserInput("nuancerende_opmerking");
+								
+								fn.insertIntoDatabase(t, 
+										{
+										"short_code": sShortCode,
+										"nuancerende_opmerking": sNuanceOpm
+										}, null, true);
+							});
+				}
+			},
+			"button_1":{
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					fn.confirm("Let op", "Weet u het zeker?", function(){
+						
+						var aNodes = fn.getSelectedRowsFrom(t);
+						
+						aNodes.each(function(){
+							var nCurrentNode = this;
+							
+							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
+							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
+							});
+					});
+					
+					
+					
+				}
+			}
+			
+		},
 		
 		locks_view: {
 			
@@ -1179,6 +1266,19 @@ function putRightSortButtonName(t, iButtonNumber, bGedruktMode){
 // configuration at column level
 oTableConfigurationList = {
 		
+
+		nuancerende_opmerkingen:{
+			
+			short_code:{
+				"colsort": "asc",
+				"editable": true
+			},
+			nuancerende_opmerking:{
+				"editable": true
+				
+			}	
+		},
+		
 		lemmata_en_paradigma_view: {
 			
 			unique_id:{
@@ -1641,7 +1741,12 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"nuanc_opm": {
-				"editable": true
+				"editable": true,
+				"dblclick": function(t, n){
+					
+					var sNuancOpm = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("nuancerende_opmerkingen", {"short_code": "exact:"+sNuancOpm});
+				}
 			},
 			"taalvariant": {
 				"editable": true
