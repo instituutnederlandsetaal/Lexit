@@ -2306,7 +2306,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
                 					// fieldname
                 					$.trim(aFieldNames[i]),
                 					// value for this field, entered by the user
-                					$("#prompt_"+fieldLC).val(), 
+                					$("#"+promptDivId+" #prompt_"+fieldLC).val(), 
                 					// index of this field/value 
                 					i
                 					);

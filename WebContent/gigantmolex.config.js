@@ -10,7 +10,7 @@ oShowOnlyTables = ["lemmata_view", "lemmata_en_paradigma_view"];
 // **                                                        **
 // **      Gigant Molex for Spellingcommission               **
 // **                                                        **
-// **      2015-02-17                                        **
+// **      2015-07-24                                        **
 // **                                                        **
 // ************************************************************
 
@@ -348,7 +348,8 @@ oTableConfigurationList = {
 			},
 			"opmerking": {
 				"bgcolor": "#E0F8EC",
-				"editable": true
+				"visible": false,
+				"editable": false //true
 			},
 			"opmerking_intern": {
 				// BEWARE, DON'T REMOVE THIS PART
@@ -356,7 +357,8 @@ oTableConfigurationList = {
 				"flexible_visibility": false,
 				"visible": (document.URL.indexOf( "gtb.dev.inl.loc" )>-1),
 				// ------------------------------
-				"editable": true
+				"visible": false,
+				"editable": false // true
 			},
 			"gloss": {				
 			},
@@ -397,7 +399,9 @@ oTableConfigurationList = {
 			},
 			"notitie":{
 				"bgcolor": "#E0F8EC",
-				"editable": true
+				"visible": false,
+				"editable": false //true
+				
 			},
 			"gedrukt":{
 
@@ -511,7 +515,8 @@ oTableConfigurationList = {
 
 			"comment": {
 				"bgcolor": "#E0F8EC",
-				"editable": true,
+				"editable": false, //true,
+				"visible": false,
 				"editfunc": function(t, n, value){
 					
 					var sAwfId = fn.getDataFromCellNamed(t, n, "analyzed_wordform_id");

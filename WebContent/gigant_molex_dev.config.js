@@ -32,7 +32,7 @@ var bGedruktModeOfParadigm = 0;
 //Autocomplete configuration
 //see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
 //   http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
-var sAutoCompleteSelector = ".nuanc_opm";
+var sAutoCompleteSelector = "#lemmata_view .nuanc_opm";
 
 $(document).on(
         "focus", 
@@ -41,7 +41,7 @@ $(document).on(
         	
         	$(event.target).autocomplete({
             	
-        		delay: 500,
+        		delay: 750,
                 minLength: 2,
 	        	source: function(request, response){
 	            	
@@ -139,7 +139,7 @@ oTableSettingsList = {
 					
 					fn.prompt("Voer opmerking in", 
 							["short_code", "nuancerende_opmerking"], 
-							["", ""], 
+							["", ""],
 							function(){
 								var sShortCode = fn.getPromptUserInput("short_code");
 								var sNuanceOpm = fn.getPromptUserInput("nuancerende_opmerking");
@@ -149,7 +149,9 @@ oTableSettingsList = {
 										"short_code": sShortCode,
 										"nuancerende_opmerking": sNuanceOpm
 										}, null, true);
-							});
+							}, 
+							true, 
+							[37,3]);
 				}
 			},
 			"button_1":{
