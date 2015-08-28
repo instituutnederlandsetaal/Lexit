@@ -11,7 +11,7 @@ oShowOnlyTables = (
          "lemmatawithgender",
          "raredubbelvormen", "sterke_werkwoorden",
          "surinaams_and_antilliaans_commissions_selections",
-         "export_versions", "homonyms_to_check"]
+         "export_versions", "homonyms_to_check", "nuancerende_opmerkingen"]
 	:
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "paradigma_telling_check", "missende_afbrekingen", "paradigma_telling_check_overzicht", "separabilityglosses",
@@ -1474,6 +1474,10 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			th_wordform_afbr:{
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			th_wordform:{
 				"bgcolor": "#E0F8EC",
 				"editable": true
 			}
