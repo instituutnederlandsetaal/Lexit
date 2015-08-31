@@ -368,6 +368,23 @@ function escapeRegexChars(str){
 
 
 
+// Make sure an array contains no null values or convert those into strings 'NULL'.
+// We need this function in our ajax calls, as we otherwise can't use 'join' to 
+// concat arguments values into one string (sent by ajax),
+// so such values need to be converted into strings (the webservice will
+// those back into true NULL values afterwards)
+// NB: this type of conversion is not needed for true/false, as join can deal with those values as wished.
+function convertNullToString(arr){
+	
+	for (var i=0; i<arr.length; i++)
+		{
+		if (arr[i] == null)
+			arr[i] = 'NULL';
+		}
+	return arr;
+}
+
+
 
 // given a main string in which a substring was found at a given index
 // compute the true start and end indexes in the same string containing html entitie 

@@ -6,6 +6,10 @@ oHiddenTablesList = [];
 
 
 
+// Array to store the locked celexiewerk records of the current view
+// This array gets updated at each table draw
+var aCurrentCelexiewerkLocks = new Array();
+
 oTableSettingsList = {
 		
 		celexiewerk: {
@@ -23,7 +27,119 @@ oTableSettingsList = {
 			          "goed",
 			          "opmerking",
 
-			          ]
+			          ],
+			          
+			          
+			          "repeat_callback": true,
+						
+			          "callback": function(t){
+						
+						var sTableName = fn.getTableName(t);
+						
+						// build the UNlock button if it doesn't exist yet
+						
+						if ( //$.inArray(fn.getCurrentUser(), ['adrienne', 'mathieu', 'katrien'])>-1 
+							 //&& 
+							 fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
+							{
+							fn.addCustomButton(t, {
+								"name": "(Un)lock",
+								"bgcolor": "#F5D0A9",
+								"click": function(t){
+									
+									var aSelectedRows = fn.getSelectedRowsFrom(t);
+									
+									aSelectedRows.each(function(){
+										
+										var sHiddenId = fn.getDataFromCellNamed(t, this, "hidden_id");
+										var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+										
+										if ($.inArray( sHiddenId, aCurrentCelexiewerkLocks ) >-1)
+											{
+											fn.callFunction("lexical_tmp.unlock_record_in_celexiewerk", 
+													[sHiddenId], function(){
+														if(bLastRow) fn.refreshTable(t);
+													}
+												);
+											}
+										else
+											{
+											fn.callFunction("lexical_tmp.lock_record_in_celexiewerk", 
+													[sHiddenId], function(){
+														if(bLastRow) fn.refreshTable(t);
+													}
+												);
+											}
+										
+										});
+									
+									}
+								});
+							}
+						
+						var aRows = fn.getAllRows(t);						
+						
+						
+						// apply locks
+						
+						var aHiddenIdsArr = new Array();
+						
+						aRows.each(function(i){							
+							aHiddenIdsArr[i] = fn.getDataFromCellNamed(t, this, "hidden_id");			
+						});
+						aHiddenIdsArr = getOnlyUniqueValues(aHiddenIdsArr);
+						
+						// get the list of locked records
+						// and modify the rows accordingly
+						fn.callFunction("lexical_tmp.get_locks_of_celexiewerk", [ "'"+aHiddenIdsArr.join("|")+"'" ], function(){
+							
+							aCurrentCelexiewerkLocks = (fn.getFunctionOutput()[0]).split("|");
+							
+							aRows.each(function(i){
+								
+								var nThisRow = this;
+								var sHiddenId = fn.getDataFromCellNamed(t, nThisRow, "hidden_id");	
+								
+								if ( $.inArray( sHiddenId, aCurrentCelexiewerkLocks ) >-1 )
+									{
+									var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+									
+									for (var j=0; j<aVisibleCells.length; j++)
+										{
+										var sCurrentColumnName = aVisibleCells[j];
+										
+										// we mustn't lock the opmerking field
+										if (sCurrentColumnName == 'opmerking')
+											continue;
+										
+										// make sure we can't edit the locked records
+										var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
+										var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
+										
+										if (sCellType == 'text')
+											{									
+											eCell.editable('disable');
+											eCell.css("opacity", "0.5");
+											}
+										else if (sCellType == 'checkbox')
+											{
+											eCell.find("input").attr("disabled", "disabled");
+											eCell.css("opacity", "0.5");
+											}
+										else if (sCellType == 'selectbox')
+											{
+											eCell.editable('disable');
+											eCell.css("opacity", "0.5");
+											}
+										}					
+									
+									}						
+								
+							});						
+							
+						}); // end of function call
+						
+					}
 		},
 		
 //		molex_homonyms_2014:{

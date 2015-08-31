@@ -129,6 +129,36 @@ function setContextMenuOptions(key, options){
 oTableSettingsList = {
 		
 		
+		wordforms_spelling_differences : {
+			
+			"size": "90%",
+			
+			"keyup" : {				
+				
+				"f1": function(t){
+					
+					var nNode = fn.getSelectedRowsFrom(t);
+					fn.toggleCheckbox(t, nNode, "goed");
+				}
+			}
+		},
+		
+		lemmata_spelling_differences:{
+			
+			"size": "90%",
+			
+			"keyup" : {				
+				
+				"f1": function(t){
+					
+					var nNode = fn.getSelectedRowsFrom(t);
+					fn.toggleCheckbox(t, nNode, "goed");
+				}
+			}
+			
+		},
+		
+		
 		nuancerende_opmerkingen:{
 			
 			"size": "80%",
@@ -943,7 +973,7 @@ oTableSettingsList = {
 							var bLastNode = fn.isLastNodeOf(this, oNodes);
 							fn.updateDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemId}, 
-									{"parent_id": 'NULL'}, 
+									{"parent_id": null}, 
 									false,
 									function(){
 										if (bLastNode)
@@ -1516,6 +1546,10 @@ oTableConfigurationList = {
 			th_wordform_afbr:{
 				"bgcolor": "#E0F8EC",
 				"editable": true
+			},
+			th_wordform:{
+				"bgcolor": "#E0F8EC",
+				"editable": true
 			}
 			
 		},
@@ -1948,13 +1982,29 @@ oTableConfigurationList = {
 		
 		wordforms_spelling_differences: {
 			"wordform": {
-				"colsort": "asc"
+				"colsort": "asc"        // sort #1
+			},
+			"goed": {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			"unique_id": {
+				"visible": false,
+				"colsort": "asc"        // sort #2
 			}
 		},
 		
         lemmata_spelling_differences: {
         	"modern_lemma": {
-				"colsort": "asc"
+				"colsort": "asc"       // sort #1
+			},
+			"goed": {
+				"bgcolor": "#E0F8EC",
+				"editable": true
+			},
+			"unique_id": {
+				"visible": false,
+				"colsort": "asc"        // sort #2
 			}
         },
 		

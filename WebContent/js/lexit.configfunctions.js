@@ -959,7 +959,7 @@ fn.toggleCheckbox = function(someTable, nNode, sColumnName, fnCallback){
 	if (typeof someTable == 'string')
 		someTable = mt.getDataTableObjectOf(someTable);
 	
-	var eCellSelector = (fn.getCellElement(someTable, nNode, "keurmerk")).find("input").eq(0);
+	var eCellSelector = (fn.getCellElement(someTable, nNode, sColumnName)).find("input").eq(0);
 	
 	// we need to get focus onto the checkbox, otherwise the click
 	// action we be seen as cell click instead of checkbox click (and thus ignored!)
@@ -1472,6 +1472,10 @@ fn.updateDatabaseGivenANode = function(sSomeTablename, nNode, aColumnNames, aCol
 		
 		// update the database
 		var url = "../lexit/lexit/table/setvalue"; 
+		
+		// make sure we send no null values, as join can't deal with it
+		aColumnValues = convertNullToString(aColumnValues);
+		
 		$.ajax( {
 			"type": "GET",
 			"url": url,
@@ -1589,6 +1593,11 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 	
 	// update the database
 	var url = "../lexit/lexit/table/setvalue_without_id"; 
+	
+	// make sure we send no null values, as join can't deal with it
+	aValuesToMatch = convertNullToString(aValuesToMatch);
+	aValuesToUpdate = convertNullToString(aValuesToUpdate);
+	
 	$.ajax( {
 		"type": "GET",
 		"url": url,
@@ -1648,6 +1657,10 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	
 	// insert record into the database
 	var url = "../lexit/lexit/table/insertvalue"; 
+	
+	// make sure we send no null values, as join can't deal with it
+	aValuesToAdd = convertNullToString(aValuesToAdd);
+	
 	$.ajax( {
 		"type": "GET",
 		"async": false,
@@ -1704,6 +1717,10 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback){
 	
 	// insert record into the database
 	var url = "../lexit/lexit/table/get_id_of_record"; 
+	
+	// make sure we send no null values, as join can't deal with it
+	aValuesToMatch = convertNullToString(aValuesToMatch);
+	
 	$.ajax( {
 		"type": "GET",
 		"async": false, // needed to block code execution while awaiting the server response
@@ -1812,6 +1829,9 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 	
 	// delete record from the database
 	var url = "../lexit/lexit/table/delete_row_without_id";
+	
+	// make sure we send no null values, as join can't deal with it
+	aValuesToMatch = convertNullToString(aValuesToMatch);
  
 	$.ajax( {
 		"type": "GET",
@@ -1897,6 +1917,9 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 		}
 	
 	var url = "../lexit/lexit/table/get_record_without_id";
+	
+	// make sure we send no null values, as join can't deal with it
+	aValuesToMatch = convertNullToString(aValuesToMatch);
 	
 	$.ajax( {
 		"type": "GET",
@@ -1984,6 +2007,8 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 		
 		var url = "../lexit/lexit/table/call_function";
 		
+		// make sure the function arguments contain no null value, as join can't deal with it		
+		aFunctionArguments = convertNullToString(aFunctionArguments);		
 		 
 		$.ajax( {
 			"type": "GET",
