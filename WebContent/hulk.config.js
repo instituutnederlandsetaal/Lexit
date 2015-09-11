@@ -9,7 +9,8 @@
 // this url will be called for the generation of the 'customer result file'
 var sHulKUrlServer = "http://hulk.inl.loc/ws/kick-result/";
 
-// this url will be called to export the data to the Gigant-spelling database
+// this url will be called to export the data to the HulK dedicated Gigant-spelling database
+// (not the main Gigant-spelling database, which is kind of holy ground!)
 var sHulKExportUrl = "http://hulk.inl.loc/ws/kick-export/";
 
 // this url will deliver us autocomplete information
@@ -152,7 +153,7 @@ oTableSettingsList = {
 						
 						// make sure we have at least one line in the table, 
 						// otherwise we won't be able to read the document_id!
-						if (fn.getNumberOfVisibleRows(t) == 0)
+						if (fn.getNumberOfVisibleRows(t) <=1)
 							{							
 							fn.addFilters(t, {"hulk_oordeel": ""});
 							
@@ -328,8 +329,8 @@ oTableConfigurationList = {
 				"visible": false
 				},
 			hulk_oordeel: {
-				"filter": "^UNK", // default start setting				
-				"sortable": false
+				"filter": "^UNK" // default start setting				
+				
 				},
 			correction: {
 				"sortable": false,

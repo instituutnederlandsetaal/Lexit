@@ -628,7 +628,7 @@ public class Database {
 			for (int i=0; i<argumentTypes.length; i++)
 			{
 			if (argumentTypes[i].equals("text")
-					&&  args[i] != "NULL"  // exclude null, which must be interpreted as a null value further on
+					&& !args[i].equals("NULL") // exclude null, which must be interpreted as a null value further on
 						                   // so it must be printed without quotes!
 					&& !(args[i].startsWith("'") && args[i].endsWith("'")) )
 				{

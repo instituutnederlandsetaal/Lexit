@@ -379,7 +379,7 @@ function convertNullToString(arr){
 	for (var i=0; i<arr.length; i++)
 		{
 		if (arr[i] == null)
-			arr[i] = 'NULL';
+			arr[i] = 'NULL'; // beware: it must be uppercase, as the webservice expects that!
 		}
 	return arr;
 }

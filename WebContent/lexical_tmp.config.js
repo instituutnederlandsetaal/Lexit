@@ -29,60 +29,49 @@ oTableSettingsList = {
 
 			          ],
 			          
+			          "button_0":{
+							"name": "(Un)lock",
+							"bgcolor": "#F5D0A9",
+							"click": function(t){
+								
+								var aSelectedRows = fn.getSelectedRowsFrom(t);
+								
+								aSelectedRows.each(function(){
+									
+									var sHiddenId = fn.getDataFromCellNamed(t, this, "hidden_id");
+									var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+									
+									if ($.inArray( sHiddenId, aCurrentCelexiewerkLocks ) >-1)
+										{
+										fn.callFunction("lexical_tmp.unlock_record_in_celexiewerk", 
+												[sHiddenId], function(){
+													if(bLastRow) fn.refreshTable(t);
+												}
+											);
+										}
+									else
+										{
+										fn.callFunction("lexical_tmp.lock_record_in_celexiewerk", 
+												[sHiddenId], function(){
+													if(bLastRow) fn.refreshTable(t);
+												}
+											);
+										}
+									
+									});
+							}
+						},
+			          
 			          
 			          "repeat_callback": true,
 						
 			          "callback": function(t){
 						
-						var sTableName = fn.getTableName(t);
-						
-						// build the UNlock button if it doesn't exist yet
-						
-						if ( //$.inArray(fn.getCurrentUser(), ['adrienne', 'mathieu', 'katrien'])>-1 
-							 //&& 
-							 fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
-							{
-							fn.addCustomButton(t, {
-								"name": "(Un)lock",
-								"bgcolor": "#F5D0A9",
-								"click": function(t){
-									
-									var aSelectedRows = fn.getSelectedRowsFrom(t);
-									
-									aSelectedRows.each(function(){
-										
-										var sHiddenId = fn.getDataFromCellNamed(t, this, "hidden_id");
-										var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
-										
-										if ($.inArray( sHiddenId, aCurrentCelexiewerkLocks ) >-1)
-											{
-											fn.callFunction("lexical_tmp.unlock_record_in_celexiewerk", 
-													[sHiddenId], function(){
-														if(bLastRow) fn.refreshTable(t);
-													}
-												);
-											}
-										else
-											{
-											fn.callFunction("lexical_tmp.lock_record_in_celexiewerk", 
-													[sHiddenId], function(){
-														if(bLastRow) fn.refreshTable(t);
-													}
-												);
-											}
-										
-										});
-									
-									}
-								});
-							}
-						
-						var aRows = fn.getAllRows(t);						
-						
-						
 						// apply locks
 						
 						var aHiddenIdsArr = new Array();
+						
+						var aRows = fn.getAllRows(t);
 						
 						aRows.each(function(i){							
 							aHiddenIdsArr[i] = fn.getDataFromCellNamed(t, this, "hidden_id");			
@@ -139,7 +128,7 @@ oTableSettingsList = {
 							
 						}); // end of function call
 						
-					}
+					} // end of callback
 		},
 		
 //		molex_homonyms_2014:{
@@ -474,7 +463,9 @@ oTableConfigurationList = {
 				"cell_tooltip": "Klik om dit te kopiëren naar de correctie-kolom",
 				"click": function(t, n){
 					
-					if (kf.isPressed("ctrl"))
+					var sHiddenId = fn.getDataFromCellNamed(t, n, "hidden_id");	
+					
+					if ( $.inArray( sHiddenId, aCurrentCelexiewerkLocks )<0 && kf.isPressed("ctrl" ) )
 						{
 						var inhoud = fn.getDataFromCellNode(t, n);
 						fn.updateDatabaseGivenANode(t, fn.getRowNode(n), 
