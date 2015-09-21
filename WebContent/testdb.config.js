@@ -104,9 +104,16 @@ oTableSettingsList = {
 				"name": "getIdFromDb",
 				"click": function(t){
 					
-					fn.message("Job", "wat doen we hier?", function(){
+					var iRandomNr = Math.floor(Math.random()*(aForenames.length));
+					var sRandomName = aForenames[iRandomNr];
+					
+					fn.message("Job", "Verkrijg ID van mensen die '"+sRandomName+"' heten en leeftijd=NULL hebben", function(){
 						
-						var aRows = fn.getSelectedRowsFrom(t);
+						fn.getIdFromDatabase(t, {"voornaam": sRandomName, "leeftijd": null}, function(id){
+							
+							fn.message("Hier is het ID", "ID:"+id);
+							
+						});
 						
 					});
 					

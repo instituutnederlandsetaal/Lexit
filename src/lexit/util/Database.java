@@ -1016,7 +1016,8 @@ public class Database {
 		
 		
 		String updateRecords = 
-			"UPDATE " + getSafeTableName(tableName, schema) + " SET "+ getSafeFieldName(columnName) +" = ? " +
+			"UPDATE " + getSafeTableName(tableName, schema) + " " + 
+			"SET "+ getSafeFieldName(columnName) +" = ? " +
 			"WHERE "+ getSafeFieldName(idColumn) +" = ? ;";	
 		
 				
@@ -1721,6 +1722,7 @@ public class Database {
 	// do we have a reserved sql keyword?
 	public boolean isReservedSqlWord(String word){
 		
+		// The following regex matches exact words only (no partial match)
 		// (get the list: SELECT STRING_AGG(word, '|') FROM pg_get_keywords() WHERE catdesc = 'reserved')
 		return (word.matches("all|analyse|analyze|and|any|array|as|asc|asymmetric|" +
 				"both|case|cast|check|collate|column|constraint|create|current_catalog|" +
@@ -2337,12 +2339,11 @@ public class Database {
 			"pg_attribute.attname, " +
 			"format_type(pg_attribute.atttypid, pg_attribute.atttypmod) " +
 			"FROM pg_index, pg_class, pg_attribute " +
-			"WHERE " +
-			" pg_class.oid = ?::regclass AND " +
-			" indrelid = pg_class.oid AND " +
-			" pg_attribute.attrelid = pg_class.oid AND " +
-			" pg_attribute.attnum = any(pg_index.indkey) " +
-			" AND indisprimary ";	
+			"WHERE pg_class.oid = ?::regclass " +
+			"AND indrelid = pg_class.oid " +
+			"AND pg_attribute.attrelid = pg_class.oid " +
+			"AND pg_attribute.attnum = any(pg_index.indkey) " +
+			"AND indisprimary ";	
 		
 		
 		
@@ -2350,8 +2351,8 @@ public class Database {
 		
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");
-						
-			String[] args = new String[]{ getSafeTableNameOnly(tableName) };			
+			
+			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };			
 			
 			ResultSet rs = dc.sendPreparedQuery(getPK, args);
 			
@@ -2407,7 +2408,8 @@ public class Database {
 			"SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
 			"FROM information_schema.columns " +
 			"WHERE table_name = ? " +
-			"AND column_name = ? ;";
+			"AND column_name = ? " +
+			"AND table_schema = ? ;";
 		
 			
 		PostgresDatabaseCommunication dc = connectDatabase(dbName);
@@ -2415,7 +2417,7 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			String[] args = new String[]{tableNameOnly, columnName};		
+			String[] args = new String[]{tableNameOnly, columnName, schema};		
 			
 			ResultSet rs = dc.sendPreparedQuery(typeQuery, args);
 			
@@ -2460,7 +2462,8 @@ public class Database {
 		String typeQuery = "SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
 			"FROM information_schema.columns " +
 			"WHERE table_name = ? " +
-			"AND column_name = ? ;";
+			"AND column_name = ? " +
+			"AND table_schema = ? ;";
 		
 		String schema = getSchema(dbName, tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
@@ -2492,7 +2495,7 @@ public class Database {
 				// (and put result in cache for later call)
 				else
 				{
-					String[] args = new String[]{tableNameOnly, columns[i]};		
+					String[] args = new String[]{tableNameOnly, columns[i], schema};		
 					
 					ResultSet rs = dc.sendPreparedQuery(typeQuery, args);				
 					ArrayList<String[]> res = getResultsInAList(rs, new String[]{"type"});						
@@ -2600,14 +2603,29 @@ public class Database {
 			"FROM pg_proc p, pg_type t, pg_namespace n, pg_language l "+
 			"WHERE p.prorettype = t.oid and p.pronamespace = n.oid "+
 			"AND p.prolang = l.oid "+
-			"AND p.proname = ? ;";
+			"AND p.proname = ? " +  // function name
+			"AND n.nspname = ? ;";  // schema name
 		
 		
-		if ( functionNameToTypes.containsKey(dbName+functionName) )
-		{
-			if (Constants.debug) System.out.println("## Function arg types from cache");
-		return functionNameToTypes.get(dbName+functionName);
-		}
+		// if the function name contains a schema name (like 'api.blah'), extract it
+		String schemaName = "public";
+		if (functionName.indexOf(".")>0)
+			{
+				schemaName = functionName.split("\\.")[0];
+				functionName = functionName.split("\\.")[1];
+			}
+		
+		
+		if ( functionNameToTypes.containsKey(dbName+schemaName+functionName) )
+			{
+				if (Constants.debug) 
+					{
+					System.out.println("## Function args types from cache: ");
+					System.out.println( Arrays.toString(functionNameToTypes.get(dbName+schemaName+functionName)) );
+					}
+				
+				return functionNameToTypes.get(dbName+schemaName+functionName);
+			}
 		
 		
 		String[] argumentTypes = null;
@@ -2619,7 +2637,7 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			String[] args = new String[]{functionName};		
+			String[] args = new String[]{functionName, schemaName};		
 			
 			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"argument_types"});
@@ -2633,7 +2651,7 @@ public class Database {
 				{
 					argumentTypes[i] = argumentTypes[i].trim();
 				}
-				functionNameToTypes.put(dbName+functionName, argumentTypes);
+				functionNameToTypes.put(dbName+schemaName+functionName, argumentTypes);
 			}			
 			
 		} 
@@ -2645,6 +2663,14 @@ public class Database {
 		finally {
 			closeDatabase(dc);
 		}
+			
+		if (Constants.debug)
+		{
+			System.out.println("## Function args types: ");
+			System.out.println(Arrays.toString(argumentTypes));
+		}
+		
+
 		
 		return argumentTypes;
 	}
@@ -2753,9 +2779,10 @@ public class Database {
 		String query = "SELECT udt_name AS custom_type "+
 			"FROM information_schema.COLUMNS "+
 			"WHERE table_name  = ? "+
-			"AND column_name = ? ;";
+			"AND column_name = ? " +
+			"AND table_schema = ? ;";
 		
-		String[] args = new String[]{tableName, columnName};
+		String[] args = new String[]{tableName, columnName, schema};
 		
 		PostgresDatabaseCommunication dc = connectDatabase(dbName);
 		
@@ -2796,8 +2823,8 @@ public class Database {
 			"FROM   pg_catalog.pg_type t "+
 			"JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace "+
 			"JOIN   pg_catalog.pg_enum e ON t.oid = e.enumtypid "+
-			"WHERE  t.typname = ? "+
-			"AND n.nspname = ? ;";
+			"WHERE  t.typname = ? "+ // type name
+			"AND n.nspname = ? ;"; // schema name
 		
 		String[] args = new String[]{typeName, schema};
 		

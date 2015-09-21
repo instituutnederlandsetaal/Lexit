@@ -168,6 +168,34 @@ public class TableResources extends Application implements Serializable  {
 		return dro;
 	}
 	
+	
+	// turn debug mode on/off
+	// call:
+	// .../lexit/lexit/table/debug?mode=....
+	@Path("debug")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject debugMode(
+			@DefaultValue("off") @QueryParam("mode") String debugMode
+			) throws IOException {
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo("RaNdOm", Constants.USER_ALL_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		if (debugMode.equals("on"))
+			Constants.debug = true;
+		else
+			Constants.debug = false;
+		
+		System.out.println("### Debug mode is now turned "+(Constants.debug ? "ON":"OFF") );
+	
+		DbResponseObject dro = new DbResponseObject();
+		dro.setResponse("OK");
+		
+		return dro;
+	}
+	
 
 
 	// get the list of columns of a table and their type 
@@ -1136,22 +1164,22 @@ public class TableResources extends Application implements Serializable  {
 		ArrayList<String> tmpSortDir = new ArrayList<String>();
 		tmpSortCol.add( columnsArr[iSortCol_0] );
 		tmpSortDir.add(sSortDir_0);
-		if (iSortCol_1 >-1)
+		if (iSortCol_1 >-1 && sSortDir_1.toLowerCase().matches("asc|desc"))
 		{
 			tmpSortCol.add( columnsArr[iSortCol_1] );
 			tmpSortDir.add(sSortDir_1);
 		}
-		if (iSortCol_2 >-1)
+		if (iSortCol_2 >-1 && sSortDir_2.toLowerCase().matches("asc|desc"))
 		{
 			tmpSortCol.add( columnsArr[iSortCol_2] );
 			tmpSortDir.add(sSortDir_2);
 		}
-		if (iSortCol_3 >-1)
+		if (iSortCol_3 >-1 && sSortDir_3.toLowerCase().matches("asc|desc"))
 		{
 			tmpSortCol.add( columnsArr[iSortCol_3] );
 			tmpSortDir.add(sSortDir_3);
 		}
-		if (iSortCol_4 >-1)
+		if (iSortCol_4 >-1 && sSortDir_4.toLowerCase().matches("asc|desc"))
 		{
 			tmpSortCol.add( columnsArr[iSortCol_4] );
 			tmpSortDir.add(sSortDir_4);

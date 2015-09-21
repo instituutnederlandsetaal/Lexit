@@ -423,6 +423,9 @@ oTableConfigurationList = {
 //					
 //						
 //				}
+			}, 
+			"job":{
+				"choosefrom": []
 			}
 			
 		}
