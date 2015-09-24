@@ -878,13 +878,13 @@ gui.showProcessingMsg = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	$("#"+sSomeTablename+"_wrapper .dataTables_processing").css('visibility','visible');
-	$("html, body").css("cursor", "progress");
+	$("*").css("cursor", "progress");
 };
 gui.removeProcessingMsg = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	$("#"+sSomeTablename+"_wrapper .dataTables_processing").css('visibility','hidden');	
-	$("html, body").css("cursor", "auto");
+	$("*").css("cursor", "auto");
 };
 
 

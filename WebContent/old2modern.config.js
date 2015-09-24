@@ -14,6 +14,25 @@ oTableSettingsList = {
 			
 			//"size": "110%",
 			
+			"column_order": ["aangepast",
+			                 "mnw_id",
+			                 "wnt_id",
+			                 "histlem_mnw",
+			                 "histlem_wnt",
+			                 "noor_modlem_mnw",
+			                 "noor_modlem_wnt",
+			                 "noor_modlem_onw",
+			                 "noor_modlem_vmnw",
+			                 "wdb",
+			                 "pos_mnw",
+			                 "pos_wnt",
+			                 "clone",
+			                 "verwijder",
+			                 "unique_id",
+			                 "original_mnw_id",
+			                 "original_wnt_id",
+			                 "niet_in_lex"],
+			
 			"callback": function(t){
 				
 				var aN = fn.getAllRows(t);
@@ -254,7 +273,7 @@ function putSearchInterface(){
 	$("#mnw_wnt_differences_dynamic").append(
 			$("<div></div>").html(
 					'<form id="gtb_form" name="gtb_form" onsubmit="search();return false">'+
-					'ID: <input title="Tik het GTB ID in dat u wilt opzoeken" type="text" id="id_query" name="id_query">'+					
+					'ID: <input title="Tik het GTB ID in dat u wilt opzoeken (gebruik wel ONW of VMNW als prefix voor deze 2 woordenboeken; niet nodig voor MNW of WNT)" type="text" id="id_query" name="id_query">'+					
 					'Modern lemma: <input type="text" title="Tik het moderne lemma in dat u wilt opzoeken" id="word_query" name="word_query">'+ 
 					'Historisch lemma: <input type="text" title="Tik het historische lemma in dat u wilt opzoeken" id="oldword_query" name="oldword_query">'+
 					'<input type="button" title="Klik hier om te zoeken in de GTB" value="Zoeken" onclick="search()">'+
@@ -473,10 +492,12 @@ oTableConfigurationList = {
 				"bgcolor": "#CEECF5"
 			},
 			noor_modlem_onw: {
-				"visible": false
+				"editable": true
+				//"visible": false
 			},
 			noor_modlem_vmnw: {
-				"visible": false
+				"editable": true
+				//"visible": false
 			},
 			noor_modlem_mnw:{
 				"bgcolor": "#F3E2A9",
@@ -629,7 +650,19 @@ function cleanGTBwindow(){
 // open an article in the GTB, given a dictionary and an article id
 function OpenRightGTBpage(idString){
 	
-	var wdb = idString.match("^[A-Z].+") ? "WNT":"MNW";
+	var special_wdb = "";
+	if (idString.match("^VMNWID"))
+		{
+		special_wdb = "VMNW";
+		idString = idString.replace(/^VMNWID/, "ID");
+		}
+	else if (idString.match("^ONWID"))
+		{
+		special_wdb = "ONW";
+		idString = idString.replace(/^ONWID/, "ID");
+		}
+	
+	var wdb = idString.match("^[A-Z].+") ? ( idString.match("^ID") ? special_wdb : "WNT" ) : "MNW";
 	
 	var url = encodeURI("http://gtb.inl.nl/iWDB/search?actie=article&wdb="+wdb+"&id=" + idString);
 	
@@ -698,7 +731,7 @@ function GetGTBlist(wordString, isAnOldword){
 				url: url,
 				data: {
 					"word": wordString, 
-					"wdb": "MNW,WNT", 
+					"wdb": "ONW,VMNW,MNW,WNT", 
 					"isold": isAnOldword,
 					"dummy": getUniqueNumber()
 					},

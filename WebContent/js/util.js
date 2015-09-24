@@ -263,7 +263,7 @@ function cloneArray(arr){
 
 // clone an object
 // USE: var newObj = new cloneObject(oldObj)
-//                ===
+//                   ===
 function cloneObject(source) {
  for (i in source) {
      if (typeof source[i] == 'source') {

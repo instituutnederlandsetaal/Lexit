@@ -2076,9 +2076,21 @@ fn.callFunction = function(sSomeFunctionName, aFunctionArguments,
 		 				}		 		
 		 			}
 		 		
-		 		// store the output for later retrieval 
+		 		// store the output for later retrieval
+		 		
+		 		// [1] single return value
+		 		// (in that case, the key is the function name)
 		 		if (typeof oFieldsAndValues[sColumnNameToReadFrom] != 'undefined')
+		 			{
 		 			functionCallOuput = oFieldsAndValues[sColumnNameToReadFrom].split(ARG_INTERNAL_SEPARATOR);
+		 			}
+		 		
+		 		// [2] more return values
+		 		// (in that case, the keys are the returned columns names)
+		 		else if (countProperties(oFieldsAndValues)>1)
+		 			{
+		 			functionCallOuput = new cloneObject(oFieldsAndValues);
+		 			}
 		 			 		
 		 		// if some callback function is given, call it now		 		
 		 		if (fnCallback!=null) 
@@ -2218,7 +2230,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 
 // equivalent of js native 'confirm'
 
-fn.confirm = function(sTitle, sMessage, fnFunction){
+fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
 	if (fnFunction == null)
 		{
@@ -2235,14 +2247,16 @@ fn.confirm = function(sTitle, sMessage, fnFunction){
 		$( "#"+dialogDivId ).dialog({
 			modal: true,
 			buttons: {
-				Ok: function() {
+				Ja: function() {
 					$( this ).dialog( "close" );
 					$( this ).remove();
 					fnFunction();
 					},
-				Cancel: function() {
+				Nee: function() {
 					$( this ).dialog( "close" );
 					$( this ).remove();
+					if (fnCancelFunction!=null)
+						fnCancelFunction();
 					}
 				}
 			});

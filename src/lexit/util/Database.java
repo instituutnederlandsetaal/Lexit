@@ -50,6 +50,7 @@ public class Database {
 	public HashMap<String, String> tableAndColumnNameToTypes = new HashMap<String, String>(); 
 	public HashMap<String, String> tableAndColumnNameToCustomTypesValues = new HashMap<String, String>();
 	public HashMap<String, String[]> functionNameToTypes = new HashMap<String, String[]>();
+	public HashMap<String, String> functionNameToReturnType = new HashMap<String, String>();
 	public HashMap<String, String> tableNameToPrimaryKey = new HashMap<String, String>();
 	public HashMap<String, String[]> tableNameToColumnNames = new HashMap<String, String[]>();
 
@@ -620,6 +621,7 @@ public class Database {
 		
 		// get the function argument types
 		String[] argumentTypes = getFunctionTypes(dbName, functionName);
+		String returnType = getFunctionReturnType(dbName, functionName);
 		
 		// process the argument list according to the type
 		// (t.i. add quotes for text args)
@@ -643,7 +645,9 @@ public class Database {
 				
 		ArrayList<String[]> res;
 		
-		String getRecord = 
+		String getRecord = returnType.equals("record") ? 
+			"SELECT (" + functionName + "("+Util.join(args, ",")+")).*;" 
+			:
 			"SELECT " + functionName + "("+Util.join(args, ",")+");";	
 		
 		
@@ -2601,7 +2605,8 @@ public class Database {
 			"p.proname AS function_name, " +
 			"pg_catalog.oidvectortypes(p.proargtypes) AS argument_types "+
 			"FROM pg_proc p, pg_type t, pg_namespace n, pg_language l "+
-			"WHERE p.prorettype = t.oid and p.pronamespace = n.oid "+
+			"WHERE p.prorettype = t.oid " +
+			"AND p.pronamespace = n.oid "+
 			"AND p.prolang = l.oid "+
 			"AND p.proname = ? " +  // function name
 			"AND n.nspname = ? ;";  // schema name
@@ -2673,6 +2678,88 @@ public class Database {
 
 		
 		return argumentTypes;
+	}
+	
+	
+	
+	/**
+	 * get the return type of a function
+	 * @param dbName
+	 * @param functionName
+	 * @return
+	 */
+	public String getFunctionReturnType(String dbName, String functionName){
+		
+		// (see: http://www.varlena.com/GeneralBits/39.php)
+		String functionDetailsQuery = "SELECT " +
+			"t.typname AS return_type, " +
+			"p.proname AS function_name " +			
+			"FROM pg_proc p, pg_type t, pg_namespace n, pg_language l "+
+			"WHERE p.prorettype = t.oid " +
+			"AND p.pronamespace = n.oid "+
+			"AND p.prolang = l.oid "+
+			"AND p.proname = ? " +  // function name
+			"AND n.nspname = ? ;";  // schema name
+		
+		
+		// if the function name contains a schema name (like 'api.blah'), extract it
+		String schemaName = "public";
+		if (functionName.indexOf(".")>0)
+			{
+				schemaName = functionName.split("\\.")[0];
+				functionName = functionName.split("\\.")[1];
+			}
+		
+		
+		if ( functionNameToReturnType.containsKey(dbName+schemaName+functionName) )
+			{
+				if (Constants.debug) 
+					{
+					System.out.println("## Function return type from cache: ");
+					System.out.println(functionNameToReturnType.get(dbName+schemaName+functionName));
+					}
+				
+				return functionNameToReturnType.get(dbName+schemaName+functionName);
+			}
+		
+		
+		String returnType = null;
+		
+		String schema = getSchemaName(dbName);
+		
+		PostgresDatabaseCommunication dc = connectDatabase(dbName);
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			
+			String[] args = new String[]{functionName, schemaName};		
+			
+			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
+			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"return_type"});
+			
+			if (res.size()>0)
+			{
+				returnType = res.get(0)[0];
+				functionNameToReturnType.put(dbName+schemaName+functionName, returnType);
+			}			
+			
+		} 
+		catch (Exception e) 
+		{
+			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+			
+		if (Constants.debug)
+		{
+			System.out.println("## Function return type: ");
+			System.out.println(returnType);
+		}
+		
+		return returnType;
 	}
 	
 	

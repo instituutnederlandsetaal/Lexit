@@ -802,11 +802,70 @@ oTableSettingsList = {
 						var sLemma = fn.getPromptUserInput("modern_lemma");
 						var sLemmaPos = fn.getPromptUserInput("lemma_gigpos");
 						
-						fn.callFunction("api.insert_lemma", 
+						// check first if this lemma existed in the past and was removed
+						
+						fn.showProcessingMsg(confTable);
+						
+						fn.callFunction("api.find_removed_lemma", 
 								[sLemma, sLemmaPos], 
 								function(){
-							fn.refreshTable(confTable);
+							
+							fn.removeProcessingMsg(confTable);
+							
+							var aColumns = fn.getFunctionOutput();
+							
+							// If some identical lemma existed in the past,
+							// give the user the possibility to restore it
+							if (aColumns["lemma_id"] != '')
+								{
+								fn.confirm("Let op!", 
+										"Op "+aColumns["modification_date"]+ " is het lemma "+
+										aColumns["modern_lemma"]+"/"+aColumns["lemma_gigpos"]+ " " +
+										(aColumns["gloss"]!='' ? "("+aColumns["gloss"]+") ":"") +
+										"met ID "+aColumns["lemma_id"]+ " verwijderd. "+
+										"<br><br>Wilt u dit lemma herstellen?", 
+										function(){
+									
+											fn.showProcessingMsg(confTable);
+									
+											// user chosed to re-use the id
+											fn.callFunction("api.restore_lemma_and_paradigm_and_ids", 
+													[parseInt(aColumns["lemma_id"])], 
+													function(){
+														fn.refreshTable(confTable);
+													});
+											
+										},
+										function(){
+											
+											fn.showProcessingMsg(confTable);
+											
+											// user chosed to create a new lemma 
+											fn.callFunction("api.insert_lemma", 
+													[sLemma, sLemmaPos], 
+													function(){
+												fn.refreshTable(confTable);
+											});
+											
+										});
+								}
+							
+							// default behaviour: 
+							// no such lemma was removed before: lemma must be new
+							else
+								{
+								
+								fn.showProcessingMsg(confTable);
+								
+								fn.callFunction("api.insert_lemma", 
+										[sLemma, sLemmaPos], 
+										function(){
+									fn.refreshTable(confTable);
+								});
+							}
 						});
+						
+						
 					});
 				}
 			},
