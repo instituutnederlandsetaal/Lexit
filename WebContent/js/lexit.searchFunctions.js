@@ -32,8 +32,8 @@ sf.goTo = function(sSomeTablename){
 		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
 		
 		// determine right selector for searchbox (input or select type)
-		var searchBoxSelector = 
-			(oColumnSelectionBox!=null || mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename)[i]==USER_DEFINED) ? 
+		var bCurrentColumnIsASelectBox = (oColumnSelectionBox!=null || mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename)[i]==USER_DEFINED);
+		var searchBoxSelector = bCurrentColumnIsASelectBox ? 
 				$(this).find("select") : $(this).find("input");
 		
 		var sCurrentColumnName = $('#'+sSomeTablename+' thead th').eq(i).text();
@@ -48,6 +48,13 @@ sf.goTo = function(sSomeTablename){
 			var sCurrentColumnValue = sf.buildCorrectCheckboxFilterValue(sSomeTablename, sVisibleColumnNumber, iCycleValue);			
 			}
 		
+		// selectboxes need 'exact:' in front, otherwise preset-values containing regex chars will be
+		// interpreted as regexes, which we don't want
+		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="")
+			{
+			sCurrentColumnValue = "exact:"+sCurrentColumnValue;
+			}
+				
 		
 		// if we have any value, use it
 		if ( (!bCurrentColumnIsACheckBox && 

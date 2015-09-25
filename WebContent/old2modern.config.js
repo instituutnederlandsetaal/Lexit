@@ -392,6 +392,15 @@ oTableConfigurationList = {
 		
 		mnw_wnt_differences:{
 			
+			aangepast:{
+
+				"click": function(t, n){
+					
+					var wntId = fn.getDataFromCellNamed(t, n, "wnt_id");
+					//fn.callDatabase("", aContentToMatch, fnFunction, oExtraSettings)
+				}
+			},
+			
 			niet_in_lex: {
 				"editable": true
 			},

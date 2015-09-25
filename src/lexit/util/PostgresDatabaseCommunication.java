@@ -332,7 +332,21 @@ public class PostgresDatabaseCommunication {
 				if (oneArg.equals("NULL")) oneArg = null;
 						
 				
-				if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
+				if (oneType.equals("date"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
+				}
+				else if (oneType.startsWith("time"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
+				}
+				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
 				{
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
@@ -417,7 +431,21 @@ public class PostgresDatabaseCommunication {
 				
 				
 				
-				if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
+				if (oneType.equals("date"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
+				}
+				else if (oneType.startsWith("time"))
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.OTHER);
+					else 
+						prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
+				}
+				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
 				{
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);

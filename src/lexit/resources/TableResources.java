@@ -180,7 +180,7 @@ public class TableResources extends Application implements Serializable  {
 			) throws IOException {
 		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo("RaNdOm", Constants.USER_ALL_ACCESS))
+		if ( !userIsAllowedTo("RaNdOmDaTaBaSe", Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
 		if (debugMode.equals("on"))
