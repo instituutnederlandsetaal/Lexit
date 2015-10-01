@@ -2,6 +2,21 @@
 oHiddenTablesList = ["spelling", "opzoek_view"];
 
 oTableSettingsList = {
+		
+		mnw_verwijslemmata:{
+			
+			"column_order": ["id",
+			                 "lemma",
+			                 "modlem",			                 
+			                 "status",
+			                 "kopje",
+			                 "verwijst_naar_id",
+			                 "verwijst_naar_histlem",
+			                 "verwijst_naar_modlem",			                 
+			                 "opmerking",
+			                 "auto_lem",
+			                 "unique_id"]
+		}
 };
 
 // container object for the configuration of each table
@@ -111,6 +126,45 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": ["#CECEF6", "#F2EFFB"]
 			}
+		},
+		
+		mnw_verwijslemmata:{
+			
+			"id": {
+				"click": function(t, n){
+					var id = fn.getDataFromCellNode(t, n);
+					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+id+"&content-type=text/html; charset=utf-8";
+					window.open(url);
+				}
+			},
+			"lemma" : {
+				"colsort": "asc"
+			},
+			"modlem": {
+				"editable": true,
+				"bgcolor": "#CECEF6"
+			},               
+			"status": {"choosefrom": []},
+			"kopje": {},
+			"verwijst_naar_id": {
+				"click": function(t, n){
+					var id = fn.getDataFromCellNode(t, n);
+					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+id+"&content-type=text/html; charset=utf-8";
+					window.open(url);
+				}
+			},
+			"verwijst_naar_histlem": {},
+			"verwijst_naar_modlem": {},			                 
+			"opmerking": {
+				"editable": true,
+				"bgcolor": "#CECEF6"
+			},
+			"auto_lem": {},
+			"unique_id": {
+				"visible": false
+				
+			}
+			
 		}
 };
 

@@ -1,7 +1,12 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = [];
+oShowOnlyTables = ["^neologismen"]; // only show tables whose name starts with 'neologismen'
 
+
+// prevent single table to open automatically at startup
+// as this will prevent this table to get its configuration dynamically
+// (which this file should take care of)
+fn.preventAutomaticStartup();
 
 var oTableSettingsList = [];
 var oTableConfigurationList = [];

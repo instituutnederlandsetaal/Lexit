@@ -389,6 +389,14 @@ fn._getBaseUrl = function(){
  *             GENERAL TABLE FUNCTIONS                           *
  *****************************************************************/
 
+// In case only one single table is available to the user to choose from,
+// this table will normally be opened automatically. But in
+// projects in which this behaviour is not desired, it can be switched off 
+// by calling this function at the beginning of the config.js file
+fn.preventAutomaticStartup = function(){
+	bOpenSingleTableAtStartup = false;
+};
+
 // refresh a table
 fn.refreshTable = function(sSomeTablename, fnCallback){
 	

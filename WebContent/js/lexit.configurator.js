@@ -39,9 +39,12 @@ conf.isHiddenTable = function(sTablename){
 	
 	// if the oShowOnlyTables list was set in the configuration, check that list first
 	if (typeof oShowOnlyTables != 'undefined' && countProperties(oShowOnlyTables)>0)
-		return $.inArray(sTablename, oShowOnlyTables)<0;
+		{
+		return $.inArrayRegEx(sTablename, oShowOnlyTables)<0;
+		}
+		
 	// otherwise check the oHiddenTablesList
-	return $.inArray(sTablename, oHiddenTablesList)>-1;
+	return $.inArrayRegEx(sTablename, oHiddenTablesList)>-1;
 };
 
 

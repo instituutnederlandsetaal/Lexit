@@ -73,6 +73,43 @@ $.fn.preBind = function (type, data, fn) {
 
 
 
+
+// inArray function supporting regex
+// (improved version of: 
+//  http://stackoverflow.com/questions/23447021/can-i-use-a-regular-expression-within-jquery-inarray)
+
+$.inArrayRegEx = function(value, array, start) {
+    if (!array) return -1;
+    start = start || 0;
+    for (var i = start; i < array.length; i++) {
+    	
+    	// if the array element is a regex
+    	if ( !isRegex(value) && isRegex(array[i]) )
+    		{
+    		if ( new RegExp(array[i]).test(value)) 
+                return i;
+    		}
+    	// or if the value argument is a regex
+    	else if ( isRegex(value) && !isRegex(array[i]) )
+    		{
+    		if ( new RegExp(value).test(array[i])) 
+                return i;
+    		}
+    	// otherwise do strict equality test
+    	else
+    		{
+    		if (value == array[i])
+    			return i;
+    		}        
+    }
+    return -1;
+};
+
+
+
+
+
+
 // prevent or allow text selection
 jQuery.fn.extend({ 
         disableSelection : function() {
@@ -262,7 +299,7 @@ function cloneArray(arr){
 }
 
 // clone an object
-// USE: var newObj = new cloneObject(oldObj)
+// USE: var newObj = NEW cloneObject(oldObj)
 //                   ===
 function cloneObject(source) {
  for (i in source) {
@@ -365,6 +402,15 @@ function escapeRegexChars(str){
 	var specials = new RegExp("[.*+?|()\\[\\]{}\\\\]", "g"); // .*+?|()[]{}\
 	return str.replace(specials, "\\$&");
 };
+
+
+
+// check whether a string is a regex or not
+function isRegex(str){
+	if (str.indexOf("^")>-1 || str.indexOf("$")>-1)
+		return true;
+	return (str != escapeRegexChars(str));
+}
 
 
 

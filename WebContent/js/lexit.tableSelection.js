@@ -32,12 +32,6 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 
 // process list of tables and views obtained from the database
 
-var asTableNames = new Array();
-var asTableDescriptions = new Array();
-var asTableComments = new Array();
-var asTableTypes = new Array();
-var abTableVisible = new Array();
-
 ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings , xml){
 	
 	var iNumberOfVisibleTables = 0;
@@ -103,8 +97,9 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	ts.buildListOfTables(haTableFilters, haTableSettings);
 	
 	// if we have only one table to choose from
-	// load that table automatically
-	if (iNumberOfVisibleTables==1)
+	// load that table automatically (at least if default behaviour,
+	// as stated in bOpenSingleTableAtStartup variable, wasn't turned off in config.js file)
+	if (iNumberOfVisibleTables==1 && bOpenSingleTableAtStartup)
 		{
 		var iIndexOfFirstVisibleTable = $.inArray(true, abTableVisible, 1);
 		$("#selected_source").val(asTableNames[iIndexOfFirstVisibleTable]).change();

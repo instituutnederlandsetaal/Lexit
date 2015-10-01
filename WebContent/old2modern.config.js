@@ -393,12 +393,7 @@ oTableConfigurationList = {
 		mnw_wnt_differences:{
 			
 			aangepast:{
-
-				"click": function(t, n){
-					
-					var wntId = fn.getDataFromCellNamed(t, n, "wnt_id");
-					//fn.callDatabase("", aContentToMatch, fnFunction, oExtraSettings)
-				}
+				
 			},
 			
 			niet_in_lex: {
@@ -495,10 +490,27 @@ oTableConfigurationList = {
 				}
 			},
 			histlem_mnw:{
-				"bgcolor": "#CEECF5"				
+				"bgcolor": "#CEECF5",
+				"click": function(t, n){
+					
+					var histlemmnw = fn.getDataFromCellNamed(t, n, "histlem_mnw");					
+					if (histlemmnw.indexOf(".")>-1)
+						histlemmnw = histlemmnw.substring(0, wntId.indexOf("."));
+					if (histlemmnw.indexOf(",")>-1)
+						histlemmnw = histlemmnw.substring(0, wntId.indexOf(","));
+					fn.callDatabaseInNewTab("spelling_alles", {"hist_lemma": "^"+histlemmnw}, null, "spellingklus_marijke");
+					
+				}
 			},
 			histlem_wnt:{
-				"bgcolor": "#CEECF5"
+				"bgcolor": "#CEECF5",
+				"click": function(t, n){
+					
+					var wntId = fn.getDataFromCellNamed(t, n, "wnt_id");
+					if (wntId.indexOf(".")>-1)
+						wntId = wntId.substring(0, wntId.indexOf("."));
+					fn.callDatabaseInNewTab("spelling_alles", {"hist_lemma_id": "^WNT"+wntId}, null, "spellingklus_marijke");
+				}
 			},
 			noor_modlem_onw: {
 				"editable": true

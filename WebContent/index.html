@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2015.09.25
+	v2015.10.01
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -129,9 +129,10 @@
 	// about the database
 	var asTableNames = new Array();			// list of database tables names	
 	var asTableDescriptions = new Array();	// list of database tables descriptions (visible to user)
+	var asTableComments = new Array();      // list of database tables comments
 	var asTableTypes = new Array();			// list of database tables types ('base table', 'view')
 	var abTableVisible = new Array();		// list of database tables visibility (available to user)
-	
+		
 	// state variables
 	var originalBgColor;
 	
@@ -142,6 +143,11 @@
 	// Yes we do, so the value is 'false', 
 	// but this might be temporarily manually set to 'true' by user (for a table refresh)
 	var bForceExactCount = false;
+	
+	// In case only one single table is available to the user to choose from,
+	// this table will be opened automatically (default value 'true')
+	// This behaviour can be switched off by calling fn.preventAutomaticStartup() in config.js file
+	var bOpenSingleTableAtStartup = true;
 	
 	// ***** CONSTANTS *****
 	// Argument separator within single string 
