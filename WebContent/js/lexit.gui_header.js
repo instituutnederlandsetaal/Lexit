@@ -261,25 +261,72 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		{
 		var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, i);
 		var sButtonName = conf.getHeaderButtonName(aButtonSettings);
+		var aButtonMenu = conf.getHeaderButtonMenu(aButtonSettings);
 		var sButtonBgColor = conf.getHeaderButtonBgColor(aButtonSettings);
 		var sButtonTextColor = conf.getHeaderButtonTextColor(aButtonSettings);
 		var sToolTip = conf.getHeaderButtonToolTip(aButtonSettings);
 		
-		var customButton = $("<button/>")
-		.attr("id", sSomeTableName+"_button_"+i)
-		.attr("type", "button")
-		.css("background-color", sButtonBgColor)
-		.css("color", sButtonTextColor)
-		.addClass("header_button")
-		.attr("name", i) // give button its number as name attribute
-		.html(sButtonName)
-		.bind("click", function(){
-			// retrieve button function by its button number
-			var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, $(this).attr("name"));
-			var fnButtonFunction = conf.getHeaderButtonFunction(aButtonSettings);
-			// execute the function
-			fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
-		});
+		var customButton;
+		
+		// normal button
+		if (aButtonMenu == null)
+			{
+			customButton = $("<button/>")
+			.attr("id", sSomeTableName+"_button_"+i)
+			.attr("type", "button")
+			.css("background-color", sButtonBgColor)
+			.css("color", sButtonTextColor)
+			.addClass("header_button")
+			.attr("name", i) // give button its number as name attribute
+			.html(sButtonName)
+			.bind("click", function(){
+				// retrieve button function by its button number
+				var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, $(this).attr("name"));
+				var fnButtonFunction = conf.getHeaderButtonFunction(aButtonSettings);
+				// execute the function
+				fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
+				});
+			}
+		// menu button
+		else {
+			customButton = $("<select/>")
+			.attr("id", sSomeTableName+"_button_"+i)
+			.css("background-color", sButtonBgColor)
+			.css("color", sButtonTextColor)			
+			.attr("name", i) // give button its number as name attribute
+			.addClass("header_button");
+			customButton.append(
+					$("<option></option>")							
+						.attr("value", sButtonName )
+						.text( sButtonName )
+				);
+			for (sOneOption in aButtonMenu)
+			{
+				customButton.append(
+					$("<option></option>")							
+						.attr("value", sOneOption )
+						.text( sOneOption )
+				);
+			}
+			customButton.bind("change", function(){
+				
+				var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, $(this).attr("name"));
+				var sChosenOption = $(this).val();
+				
+				if (sChosenOption != sButtonName)
+					{
+					// retrieve menu option function by its button number
+					
+					var aButtonMenu = conf.getHeaderButtonMenu(aButtonSettings);
+					// bind callback to be called for each possible menu option
+					aButtonMenu[sChosenOption](mt.getDataTableObjectOf(sSomeTableName));
+					}				
+				$(this).blur();
+				var sButtonName = conf.getHeaderButtonName(aButtonSettings);
+				$(this).val(sButtonName);
+			});
+		}
+		
 		
 		// add tooltip
 		if (sToolTip != null)

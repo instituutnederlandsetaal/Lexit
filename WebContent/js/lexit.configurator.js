@@ -908,6 +908,12 @@ conf.getHeaderButtonNr = function(aTableSettings, iButtonNumber){
 	return new Object();
 };
 
+
+conf.getHeaderButtonMenu = function(aButtonSettings){
+	if (typeof aButtonSettings["menu"] == 'undefined')
+		return null;
+	return aButtonSettings["menu"];
+};
 conf.getHeaderButtonToolTip = function(aButtonSettings){
 	if (typeof aButtonSettings["tooltip"] == 'undefined')
 		return null;

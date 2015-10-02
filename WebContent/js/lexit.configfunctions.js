@@ -1143,7 +1143,6 @@ fn.getDataFromCellNamed = function(someTable, nNode, sColumnName){
 		{
 		// make sure we have a row node (if we got a cell node)
 		var nNode = fn.getRowNode(nNode);
-		
 		return mt.getDataTableObjectOf(someTable).fnGetData(nNode, colNr);
 		}	
 	

@@ -19,7 +19,47 @@ fn.setProjectTitle("Gig-pro!!!!!!!!");
 //remember chosen parent
 var sChosenParentId = null;
 
+// should the paradigm be shown in readable mode (= split up into parts)
+var bReadableParadigmMode = false;
 
+
+// this function will be called when we need to generate a neat and readable paradigm view
+function generateParadigmView(){
+	
+	// draw the table
+	// in such a way that the paradigm is split up in a few parts
+	var aRows = fn.getAllRows("lemmata_en_paradigma_view");
+	aRows.each(function(){
+		var nCurrentRow = this;
+		var sWordformGigpos = fn.getDataFromCellNamed("lemmata_en_paradigma_view", nCurrentRow, "wordform_gigpos");
+		
+		if (new RegExp("finiteness=inf").test(sWordformGigpos)
+				||
+			new RegExp("PA=(1|3)").test(sWordformGigpos)
+			)
+			{
+			for (var i=0; i<mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view").length; i++)
+				{
+				var sColumnName = mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view")[i];
+				
+				var sBorderStyle = (new RegExp("(NA=sg,PA=3|NA=pl,PA=1)").test(sWordformGigpos)) ?
+						"dotted" : "solid";		
+				var sBorderType = (new RegExp("PA=1").test(sWordformGigpos)) ?
+						"top" : "bottom";
+				
+				fn.getCellElement("lemmata_en_paradigma_view", nCurrentRow, sColumnName)
+				.css("border-"+sBorderType, "black "+sBorderStyle+" 1px")
+				.css("padding-"+sBorderType, "15px");
+				}
+				
+			}
+			
+	});
+	
+	fn.setCustomButtonName("lemmata_en_paradigma_view", 4, "Paradigma_view AAN");
+	fn.setCustomButtonCss("lemmata_en_paradigma_view", 4, "textcolor", "red");
+	
+}
 
 
 
@@ -27,6 +67,8 @@ var sChosenParentId = null;
 //see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
 // http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
 var sAutoCompleteSelector = "#lemmata_view .nuanc_opm";
+
+var sAutoCompleteSelector2 = "#lemmata_view .lemma_gigpos";
 
 $(document).on(
       "focus", 
@@ -57,6 +99,36 @@ $(document).on(
           
       }
   );
+
+$(document).on(
+	      "focus", 
+	      sAutoCompleteSelector2, 
+	      function(event) {
+	      	
+	      	$(event.target).autocomplete({
+	          	
+	      		delay: 750,
+	              minLength: 2,
+		        	source: function(request, response){
+		            	
+		            	fn.callFunction("api.get_lemma_gigpos", ["'"+request.term+"'"], 
+		            			function(func_resp){  
+		            		
+		            		var aSuggestionsArr = 
+		            			(func_resp["get_lemma_gigpos"]).split("|");
+		            		
+		            		response($.map(aSuggestionsArr, function (item) {
+		                        return {
+		                            label: item.split(":::")[0],
+		                            value: item.split(":::")[1]
+		                        };
+		                    }));
+		            	});
+		            }
+	          });
+	          
+	      }
+	  );
 
 
 
@@ -232,6 +304,9 @@ oTableSettingsList = {
 			"repeat_callback": true,
 			
 			"callback": function(t){
+				
+				if (bReadableParadigmMode)
+					generateParadigmView();
 				
 				var sTableName = fn.getTableName(t);
 				
@@ -555,6 +630,51 @@ oTableSettingsList = {
 									
 					
 				}
+			},
+			"button_4":{
+				
+				"name": "Paradigma_view UIT",
+				"bgcolor": "yellow",
+				"textcolor": "black",
+				"click": function(t){
+					
+					bReadableParadigmMode = !bReadableParadigmMode;					
+										
+					if (bReadableParadigmMode)
+						{
+						var nNode = mt.getDataTableObjectOf(fn.getTableName(t)).fnGetNodes();
+						var sLemmaId = fn.getDataFromCellNamed(t, nNode[0], "lemma_id");
+						
+						tb.destroyTable("lemmata_en_paradigma_view", function(){
+							
+							conf.changeTableConfigValue("lemmata_en_paradigma_view", "modern_lemma", "visible", false);
+							conf.changeTableConfigValue("lemmata_en_paradigma_view", "lemma_gigpos", "visible", false);
+							conf.changeTableConfigValue("lemmata_en_paradigma_view", "lem_keurmerk", "visible", false);
+							conf.changeTableConfigValue("lemmata_en_paradigma_view", "gedrukt", "visible", false);
+							conf.changeTableConfigValue("lemmata_en_paradigma_view", "online", "visible", false);
+							
+							fn.callDatabase(
+									"lemmata_en_paradigma_view", 
+									{"lemma_id": sLemmaId}, 
+									function(){
+										generateParadigmView();										
+									}, 
+									{"displaylength":"50"}
+									);
+							});
+						}
+					else
+						{
+						fn.setCustomButtonName(t, 4, "Paradigma_view UIT");
+						fn.setCustomButtonCss(t, 4, "textcolor", "black");
+
+						fn.refreshTable(t);
+						}
+					
+										
+					
+				}
+				
 			}
 		},
 		
@@ -1000,7 +1120,68 @@ oTableSettingsList = {
 					
 				}
 			},
-		
+			"button_5": {
+				
+				"name": "Paradigmaview",
+				"bgcolor": "white",
+				"textcolor": "black",
+				"menu": {
+					
+					"VRB tegen. tijd": function(t){
+						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+						fn.callDatabase("lemmata_en_paradigma_view", 
+								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=pres"},
+								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+					},
+					"VRB verl.tijd": function(t){
+						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+						fn.callDatabase("lemmata_en_paradigma_view", 
+								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=past"},
+								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+					},
+					"VRB inf en part": function(t){
+						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+						fn.callDatabase("lemmata_en_paradigma_view", 
+								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=(inf|part)"},
+								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+					}
+				}
+			},
+			"button_6":{
+				
+				"name": "Paradigma_view",
+				"bgcolor": "yellow",
+				"textcolor": "black",
+				"click": function(t){
+					
+					bReadableParadigmMode = true;							
+					
+					tb.destroyTable("lemmata_en_paradigma_view", function(){
+						
+						var sLemmaId = fn.getDataFromCellNamed(t, fn.getFirstSelectedRowFrom(t), "pkid");
+						
+						conf.changeTableConfigValue("lemmata_en_paradigma_view", "modern_lemma", "visible", false);
+						conf.changeTableConfigValue("lemmata_en_paradigma_view", "lemma_gigpos", "visible", false);
+						conf.changeTableConfigValue("lemmata_en_paradigma_view", "lem_keurmerk", "visible", false);
+						conf.changeTableConfigValue("lemmata_en_paradigma_view", "gedrukt", "visible", false);
+						conf.changeTableConfigValue("lemmata_en_paradigma_view", "online", "visible", false);
+						
+						fn.callDatabase(
+								"lemmata_en_paradigma_view", 
+								{"lemma_id": sLemmaId}, 
+								function(){
+									generateParadigmView();									
+								}, 
+								{"displaylength":"50"}
+								);
+						});
+					
+				}
+				
+			},
 			
 			"contextmenu": {
 				
@@ -1238,6 +1419,9 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			
+			flex: {
+				
+			},
 						
 			// quality status
 			gedrukt:{
@@ -1355,7 +1539,7 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"lemma_gigpos": {				
-				"editable": true				
+				"editable": true		
 			},
 			"sublemma_type": {				
 				"editable": true				
