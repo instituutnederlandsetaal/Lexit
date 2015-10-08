@@ -300,6 +300,8 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 						.attr("value", sButtonName )
 						.text( sButtonName )
 				);
+			
+			// append all the options
 			for (sOneOption in aButtonMenu)
 			{
 				customButton.append(
@@ -308,20 +310,23 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 						.text( sOneOption )
 				);
 			}
+			// button behaviour
 			customButton.bind("change", function(){
 				
 				var aButtonSettings = conf.getHeaderButtonNr(aTableSettings, $(this).attr("name"));
 				var sChosenOption = $(this).val();
 				
-				if (sChosenOption != sButtonName)
+				// menu option has been clicked upon (as it's not the button name, which is visible by default)
+				if (sChosenOption != sButtonName) 
 					{
-					// retrieve menu option function by its button number
-					
+					// retrieve menu option function 					
 					var aButtonMenu = conf.getHeaderButtonMenu(aButtonSettings);
-					// bind callback to be called for each possible menu option
+					// bind callback to be called for this particular option
 					aButtonMenu[sChosenOption](mt.getDataTableObjectOf(sSomeTableName));
 					}				
-				$(this).blur();
+				$(this).blur();				
+				
+				// button name must keep visible after a choice was name
 				var sButtonName = conf.getHeaderButtonName(aButtonSettings);
 				$(this).val(sButtonName);
 			});
