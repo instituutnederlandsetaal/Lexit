@@ -13,7 +13,7 @@ $(document).on(
         	$(event.target).autocomplete({ 
         		
         		delay: 750,
-                minLength: 2,
+                minLength: 1,
                 source: function(request, response){
                 	
                 	fn.callFunction("api.get_lemmata", ["'"+request.term+"'"], 

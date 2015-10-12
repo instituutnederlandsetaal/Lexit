@@ -434,7 +434,7 @@ oTableSettingsList = {
 					var sLemmaId;
 					var sLemma = null;
 					
-					// is there is no paradigm yet, get the lemma id from the lemma table
+					// if there is no paradigm yet, get the lemma id from the lemma table
 					if (fn.tableIsEmpty(confTable))
 						{
 						aAllRows = fn.getSelectedRowsFrom("lemmata_view");

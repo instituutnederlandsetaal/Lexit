@@ -10,10 +10,23 @@ oShowOnlyTables = (
 	:
 		["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "surinaams_and_antilliaans_commissions_selections",
-		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank"];
+		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "test2"];
 
 
 fn.setProjectTitle("Gig-pro!!!!!!!!");
+
+
+
+function extractFeature(tag, pattern){
+	var re = new RegExp(pattern);
+	var m = re.exec(tag);
+	if (m == null) {
+		return "";
+	}
+	else {
+		return m.join("");
+	}
+};
 
 
 //remember chosen parent
@@ -29,35 +42,97 @@ function generateParadigmView(){
 	// draw the table
 	// in such a way that the paradigm is split up in a few parts
 	var aRows = fn.getAllRows("lemmata_en_paradigma_view");
-	aRows.each(function(){
+	
+	var sPreviousVerbFiniteness;
+	var sPreviousVerbNumber;
+	var sPreviousVerbTense;
+	var sPreviousAdjectiveDegree;
+	
+	aRows.each(function(j){
 		var nCurrentRow = this;
 		var sWordformGigpos = fn.getDataFromCellNamed("lemmata_en_paradigma_view", nCurrentRow, "wordform_gigpos");
 		
-		if (new RegExp("finiteness=inf").test(sWordformGigpos)
-				||
-			new RegExp("PA=(1|3)").test(sWordformGigpos)
+		// extract features so we can detect if one of them has changed
+		// (if it is the case, we need to put a mark in the paradigm)
+		
+		var sVerbFiniteness = extractFeature(sWordformGigpos, 'finiteness=[a-z]+');
+		var sVerbNumber = extractFeature(sWordformGigpos, 'NA=[a-z]+');
+		var sVerbTense = extractFeature(sWordformGigpos, 'tense=[a-z]+');
+		var sAdjectiveDegree = extractFeature(sWordformGigpos, 'degree=[a-z]+');
+		
+		// verb
+		
+		if ($.startsWith(sWordformGigpos, "VRB"))
+			{
+			var sBgColor;
+			for (var i=0; i<mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view").length; i++)
+				{
+				var sColumnName = mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view")[i];
+				
+				if ( (sVerbFiniteness == 'finiteness=fin' && sVerbTense == 'tense=pres') ||
+						sVerbFiniteness == 'finiteness=part')
+					sBgColor = "#08088A";
+				else
+					sBgColor = "#8A084B";
+				
+				fn.getCellElement("lemmata_en_paradigma_view", nCurrentRow, sColumnName)
+				.css("color", sBgColor);
+				}
+			}				
+		
+		if ($.startsWith(sWordformGigpos, "VRB")
+				&&
+				(sPreviousVerbFiniteness != sVerbFiniteness	||
+						sPreviousVerbNumber != sVerbNumber ||
+				 		(sPreviousVerbTense != sVerbTense && !sVerbFiniteness == 'finiteness=part'))
 			)
 			{
 			for (var i=0; i<mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view").length; i++)
 				{
 				var sColumnName = mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view")[i];
 				
-				var sBorderStyle = (new RegExp("(NA=sg,PA=3|NA=pl,PA=1)").test(sWordformGigpos)) ?
-						"dotted" : "solid";		
-				var sBorderType = (new RegExp("PA=1").test(sWordformGigpos)) ?
-						"top" : "bottom";
+				var sBorderStyle;				
+				if (sPreviousVerbFiniteness != sVerbFiniteness || sPreviousVerbTense != sVerbTense)
+					sBorderStyle = "solid";
+				else if (sPreviousVerbNumber != sVerbNumber) 
+					sBorderStyle = "dotted";
 				
 				fn.getCellElement("lemmata_en_paradigma_view", nCurrentRow, sColumnName)
-				.css("border-"+sBorderType, "black "+sBorderStyle+" 1px")
-				.css("padding-"+sBorderType, "15px");
+				.css("border-top", "black "+sBorderStyle+" 1px")
+				.css("padding-top", "15px");
 				}
 				
 			}
+		
+		// adjective
+		
+		else if ($.startsWith(sWordformGigpos, "AA")
+				&&
+				(sPreviousAdjectiveDegree != sAdjectiveDegree)
+				)
+			{
+			for (var i=0; i<mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view").length; i++)
+				{
+				var sColumnName = mt.getListOfVisibleColumnsOf("lemmata_en_paradigma_view")[i];
+				
+				// soft division when lots parts belonging together can somehow be split into smaller groups
+				var sBorderStyle = "dotted";	
+				
+				fn.getCellElement("lemmata_en_paradigma_view", nCurrentRow, sColumnName)
+				.css("border-top", "black "+sBorderStyle+" 1px")
+				.css("padding-top", "15px");
+				}
+			}
+		
+		sPreviousVerbFiniteness = sVerbFiniteness;
+		sPreviousVerbNumber = sVerbNumber;
+		sPreviousVerbTense = sVerbTense;
+		sPreviousAdjectiveDegree = sAdjectiveDegree;
 			
 	});
 	
-	fn.setCustomButtonName("lemmata_en_paradigma_view", 4, "Paradigma_view AAN");
-	fn.setCustomButtonCss("lemmata_en_paradigma_view", 4, "textcolor", "red");
+	fn.setCustomButtonName("lemmata_en_paradigma_view", 5, "Paradigma_view AAN");
+	fn.setCustomButtonCss("lemmata_en_paradigma_view", 5, "textcolor", "red");
 	
 }
 
@@ -298,15 +373,17 @@ oTableSettingsList = {
 			
 			"prereset_callback": function(t){
 				
-				fn.addFilters(t, {"gedrukt": "", "f_total_rel": ""});				
+				fn.addFilters(t, {"gedrukt": "", "f_total_rel": ""});
+				
+				// reset means paradigm view is turned off
+				bReadableParadigmMode = false;
+				fn.setCustomButtonName(t, 5, "Paradigma_view UIT");
+				fn.setCustomButtonCss(t, 5, "textcolor", "black");
 			},
 			
 			"repeat_callback": true,
 			
 			"callback": function(t){
-				
-				if (bReadableParadigmMode)
-					generateParadigmView();
 				
 				var sTableName = fn.getTableName(t);
 				
@@ -367,11 +444,11 @@ oTableSettingsList = {
 						fn.getCellElement(t, this, "wf_keurmerk").find("input").attr("disabled", "disabled");
 						fn.getCellElement(t, this, "wf_keurmerk").css("opacity", "0.5");
 						
-						fn.getCellElement(t, this, "comment").editable('disable');
-						fn.getCellElement(t, this, "comment").css("opacity", "0.5");
+						fn.getCellElement(t, this, "opmerking_intern").editable('disable');
+						fn.getCellElement(t, this, "opmerking_intern").css("opacity", "0.5");
 						
-						fn.getCellElement(t, this, "f_total_rel").editable('disable');
-						fn.getCellElement(t, this, "f_total_rel").css("opacity", "0.5");
+						fn.getCellElement(t, this, "opmerking_extern").editable('disable');
+						fn.getCellElement(t, this, "opmerking_extern").css("opacity", "0.5");
 						}
 					
 					
@@ -429,7 +506,7 @@ oTableSettingsList = {
 								var sCurrentColumnName = aVisibleCells[j];
 								
 								// we mustn't lock the comment field
-								if (sCurrentColumnName == 'comment_intern')
+								if (sCurrentColumnName == 'opmerking_intern')
 									continue;
 								
 								// make sure we can't edit the locked lemmata
@@ -457,7 +534,14 @@ oTableSettingsList = {
 						
 					});						
 					
-				}); // end of function call
+				}); // end of row loop
+				
+				
+				// finish with thie paradigm view, as it should overrule 
+				// some things done by the previous loop (like font color)
+				
+				if (bReadableParadigmMode)
+					generateParadigmView();
 				
 			},			
 			"button_0":{
@@ -468,7 +552,7 @@ oTableSettingsList = {
 					var sLemmaId;
 					var sLemma = null;
 					
-					// is there is no paradigm yet, get the lemma id from the lemma table
+					// if there is no paradigm yet, get the lemma id from the lemma table
 					if (fn.tableIsEmpty(confTable))
 						{
 						aAllRows = fn.getSelectedRowsFrom("lemmata_view");
@@ -553,6 +637,7 @@ oTableSettingsList = {
 			"button_1":{
 				
 				"name": "Verwijder selectie",
+				"bgcolor": "salmon",
 				"click": function(t){
 					
 					fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){
@@ -575,63 +660,81 @@ oTableSettingsList = {
 				}
 			},
 			
-			
 			"button_2":{
-				
-				"name": "AA opblazen",
+				"name": "Rij dupliceren",
+				"bgcolor": "lightblue",
 				"click": function(t){
 					
-					var aRows = fn.getSelectedRowsFrom(t);
+					fn.confirm("Rij dupliceren", "Weet u het zeker?", function(){
+						
+						var aRows = fn.getSelectedRowsFrom(t);
+						if (aRows.length>0)
+							{
+							var nNode = aRows[0];
+							var iAwfId = fn.getDataFromCellNamed(t, nNode, "analyzed_wordform_id");
+							fn.callFunction("api.clone_analyzed_wordform", [iAwfId], function(){
+								fn.refreshTable(t);
+								});
+							}
+						else
+							{
+							fn.message("Let op", "Kies de rij die gedupliceerd moet worden");
+							}
+						
+					});					
 					
-					var nNode = aRows[0];
+				}
+			},
+			
+			
+			"button_3":{
+				
+				"name": "Bouw Paradigma",
+				"click": function(t){
 					
-					var pos = fn.getDataFromCellNamed(t,nNode, "wordform_gigpos");
+					// get the selected row, so we can define which paradigm we will extend
+					var nAwfNode = fn.getFirstSelectedRowFrom(t);
+					var nLemNode = fn.getFirstSelectedRowFrom("lemmata_view");
 					
-					if ( pos != 'AA(degree=pos)' )
+					
+					if ( nLemNode == null && nAwfNode == null )
 						{
-						fn.message("Niet toegestaan!", "Let op: AA's opblazen is alleen mogelijk op basis van AA(degree=pos)");
+						fn.message("Let op!", "Kies een lemma of een woordvorm!");
 						}
 					else
 						{
-						var sAwfId = fn.getDataFromCellNamed(t, nNode, "analyzed_wordform_id");
+						var sAwfId = null, sLemId = null;
 						
-						fn.callFunction("api.add_missing_comps_and_sups", [sAwfId], function(){
-							fn.refreshTable(t);
-							});
+						// do we have a lemma or a wordform?
+						if (nAwfNode == null)
+							{
+							sLemId = fn.getDataFromCellNamed("lemmata_view", nLemNode, "pkid");
+							}
+						else 
+							{
+							sAwfId = fn.getDataFromCellNamed(t, nAwfNode, "analyzed_wordform_id");
+							}
+						
+						// if we have some selection to work with,
+						// call the paradigm extension function
+						if (sLemId != null || sAwfId != null)
+							{
+							fn.callFunction("api.add_missing_paradigm", [sLemId, sAwfId], function(){
+								fn.refreshTable(t);
+								});
+							}
+						
 						}					
 					
 				}
 			},
 			
-			"button_3":{
-				
-				"name": "VRB uitbr.",
-				"click": function(t){
-					
-					var aRows = fn.getSelectedRowsFrom(t);
-					
-					var nNode = aRows[0];
-					
-					var pos = fn.getDataFromCellNamed(t,nNode, "wordform_gigpos");
-					
-					if ( !($.startsWith(pos, 'VRB')) )
-						{
-						fn.message("Let op!", "Let op: selecteer een werkwoord!");
-						}
-					else
-						{
-						var sAwfId = fn.getDataFromCellNamed(t, nNode, "analyzed_wordform_id");
-						
-						fn.callFunction("api.add_missing_verb_paradigm", [sAwfId], function(){
-							fn.refreshTable(t);
-							});	
-						}
-					
-									
-					
-				}
-			},
 			"button_4":{
+				
+				"name": "Dummy"
+
+			},
+			"button_5":{
 				
 				"name": "Paradigma_view UIT",
 				"bgcolor": "yellow",
@@ -665,8 +768,8 @@ oTableSettingsList = {
 						}
 					else
 						{
-						fn.setCustomButtonName(t, 4, "Paradigma_view UIT");
-						fn.setCustomButtonCss(t, 4, "textcolor", "black");
+						fn.setCustomButtonName(t, 5, "Paradigma_view UIT");
+						fn.setCustomButtonCss(t, 5, "textcolor", "black");
 
 						fn.refreshTable(t);
 						}
@@ -995,11 +1098,49 @@ oTableSettingsList = {
 					
 					fn.confirm("Let op", "Weet u het zeker?", function(){
 						
+						fn.showProcessingMsg(confTable);
+						
 						var aRows = fn.getSelectedRowsFrom(confTable);
 						aRows.each(function(){
 							
 							var bLastRow = fn.isLastNodeOf(this, aRows);
 							var sLemmaId = fn.getDataFromCellNamed(confTable, this, "pkid");
+							
+							// extra job:
+							
+							// if this lemma has a diminutive derived from it,
+							// we need to delete the diminutive as well, so check
+							// if it exists.
+							
+							fn.callFunction("api.find_diminutive_lemma", 
+									[sLemmaId], 
+									function(){								
+								
+								var aColumns = fn.getFunctionOutput();					
+								
+								// we found a morphological analysis of a diminutives
+								// constructed with this lemma
+								
+								if (aColumns["morphological_analysis_id"] != '')
+								{
+									
+									// remove diminutive and associated morphological analysis
+									
+									fn.removeFromDatabaseGivenFieldValues("morphological_analyses", 
+											{"morphological_analysis_id": aColumns["morphological_analysis_id"]}, 
+											false, 
+											function(){
+												
+												fn.removeFromDatabaseGivenFieldValues(t, 
+														{"lemma_id": aColumns["verkleinwoord_lemma_id"]});
+											});
+								
+								}
+								
+							});
+							
+							
+							// main job: remove the lemma
 							
 							fn.removeFromDatabaseGivenFieldValues("lemmata", 
 									{"lemma_id": sLemmaId}, 
@@ -1007,6 +1148,7 @@ oTableSettingsList = {
 									function(){
 										if (bLastRow) fn.refreshTable(confTable);
 									});
+							
 							
 						});
 						
@@ -1441,12 +1583,12 @@ oTableConfigurationList = {
 			}, 
 			
 			// comments
-			comment:{
+			opmerking_extern:{
 				"bgcolor": "#E0F8EC",
 				"editable": true
 
 			},
-			comment_intern: {
+			opmerking_intern: {
 				
 				// BEWARE, DON'T REMOVE THIS PART
 				// ------------------------------
@@ -1651,6 +1793,26 @@ oTableConfigurationList = {
 			
 			"verkleinwoord": {
 				"editable": true
+			},
+			"anc":{
+				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"anc": value});
+				}
+			},
+			"snc":{
+				"editable": fn.getCurrentUser()=='katrien', // only Katrien is entitled to change that
+				"editcallback": function(t, n, value){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "pkid");
+					fn.updateDatabaseGivenFieldValues(
+							"surinaams_and_antilliaans_commissions_selections", 
+							{"lemma_id": sLemmaId}, 
+							{"snc": value});
+				}
 			}
 			
 		},
