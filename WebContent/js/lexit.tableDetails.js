@@ -66,6 +66,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		
 		// if the current column is set to searchable:false, we have to disable the search field
 		var oColumnConfig = conf.getColumnConfig( oTableConfig, sCurrentColumnName );
+		
 		// do we have a selection box?
 		var aColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
 		
@@ -198,6 +199,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	// assign list of columns names and types to table we're going to build
 	mt.setListOfColumnsOf(sSomeTableName, aAllColumns);
 	mt.setListOfColumnTypesOf(sSomeTableName, aColumnsTypes);
+	// Postgres ENUM type
 	mt.setListOfAllowedValuesInColumnsOf(sSomeTableName, oaAllowedValuesForColumns);
 	
 	removeSpinner('#indicators');

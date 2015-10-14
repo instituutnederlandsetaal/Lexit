@@ -26,7 +26,7 @@ oTableSettingsList = {
 			          "regel_reverse",
 			          "goed",
 			          "opmerking",
-
+			          "job"
 			          ],
 			          
 			          "button_0":{
@@ -494,6 +494,10 @@ oTableConfigurationList = {
 			},
 			opmerking: {
 				"editable": true
+			},
+			job: {
+				"choosefrom": [],
+				"visible": false
 			}
 		},
 		

@@ -32,7 +32,14 @@ sf.goTo = function(sSomeTablename){
 		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
 		
 		// determine right selector for searchbox (input or select type)
-		var bCurrentColumnIsASelectBox = (oColumnSelectionBox!=null || mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename)[i]==USER_DEFINED);
+		var bCurrentColumnIsASelectBox = 
+			(
+			// values set by config
+			 oColumnSelectionBox!=null 
+					||
+			// values set by Postgres ENUM type
+			 mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename)[i]==USER_DEFINED
+			 );
 		var searchBoxSelector = bCurrentColumnIsASelectBox ? 
 				$(this).find("select") : $(this).find("input");
 		
@@ -288,31 +295,33 @@ sf.enableSearchFields = function(someTablename){
 		// 1. selection box
 		if (isASelectBox)
 			{
-			// we have two selection box types
-			// a. set in client configuration (conf.getSelectionBox)
-			// b. set in Postgres database (custom data type)
+			// We have two possible selection box types
+			//    [1] set in client configuration (conf.getSelectionBox)
 			var aListOfOptions = aColumnSelectionBox;
+			// or [2] set in Postgres database (Postgres ENUM type)
 			if (aColumnSelectionBox == null)
 				{
 				aListOfOptions = cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(someTablename)[i]);
 				
 				// empty value as neutral choice
 				aListOfOptions.unshift("");
-				
-				// 'ALLES' value to be able to choose everything
-				var sAllOptions = "";
-				var aAllAllowedValues = new Array(); 
-				for (var j=0; j<aListOfOptions.length; j++)
-					{
-					if (aListOfOptions[j] != '' && aListOfOptions[j] != '-')
-						{
-						aAllAllowedValues.push(aListOfOptions[j]);
-						}
-					}
-				sAllOptions = "^("+aAllAllowedValues.join("|")+")$";				
 				}
 			
+			// add 'ALLES' value to be able to choose everything except neutral value(s)
+			var sAllOptions = "";
+			var aAllAllowedValues = new Array(); 
+			for (var j=0; j<aListOfOptions.length; j++)
+				{
+				if (aListOfOptions[j] != '' && aListOfOptions[j] != '-')
+					{
+					// don't forget to escape the regex chars, otherwise choosing the ALLES option
+					// will sometimes not give the expected results
+					aAllAllowedValues.push( escapeRegexChars(aListOfOptions[j]) );						
+					}
+				}
+			sAllOptions = "^("+aAllAllowedValues.join("|")+")$";
 			
+			// build select tag
 			inputTag =  $("<select/>")
 				.attr("disabled", !columnSearchable);
 			
@@ -330,11 +339,15 @@ sf.enableSearchFields = function(someTablename){
 					);
 				}
 			// finally add the 'ALLES' option
-			inputTag.append(
-					$("<option></option>")							
-						.attr("value", sAllOptions )
-						.text( "ALLES" )
-				);
+			if (sAllOptions != null)
+				{
+				inputTag.append(
+						$("<option></option>")							
+							.attr("value", sAllOptions )
+							.text( "ALLES" )
+					);
+				}
+			
 			}
 		
 		// 2. checkbox

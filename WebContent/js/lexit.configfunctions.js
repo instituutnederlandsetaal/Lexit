@@ -2751,16 +2751,24 @@ fn.getTypeOfFilterBox = function(sSomeTablename, sColumnName){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	var iColumnNameIndex = fn.getColumnNumberOf(sSomeTablename, sColumnName);
-	
 	// checkbox 
+	var iColumnNameIndex = fn.getColumnNumberOf(sSomeTablename, sColumnName);
 	var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[iColumnNameIndex];
 	if ( $.inArray(sColumnType, ["bit varying(1)", "boolean"]) >=0)
 		return "checkbox";
 	
 	// select 
-	var aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTablename)[iColumnNameIndex];
-	if ( aSelectBoxValues.length>1 )
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	var aColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+	//    select values from 'choosefrom' in config.js file,
+	// or select values from Postgres ENUM custom type?
+	//
+	// [1] choosefrom
+	var aSelectBoxValues = conf.getSelectionBox(aColumnConfig);
+	// [2] ENUM
+	if (aSelectBoxValues == null)
+		aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTablename)[iColumnNameIndex];
+	if ( aSelectBoxValues != null && aSelectBoxValues.length>1 )
 		return "select";
 	
 	// default: text

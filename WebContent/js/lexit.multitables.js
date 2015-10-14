@@ -331,8 +331,10 @@ mt.setListOfColumnTypesOf = function(sSomeTablename, aSomeList){
 };
 
 
+// Postgres ENUM types:
 // the allowed values is an array of arrays,
 // mapping a column index to its allowed values (when it's a custom type)
+
 mt.getListOfAllowedValuesInColumnsOf = function(sSomeTablename){
 	
 	var aSomeList = hsaListOfAllowedValuesPerColumn.get(sSomeTablename);
@@ -345,7 +347,7 @@ mt.setListOfAllowedValuesInColumnsOf = function(sSomeTablename, aSomeList){
 };
 
 
-
+// -----------
 
 // functions for lists of visible columns of a table
 // and also for types of those columns
@@ -360,6 +362,9 @@ mt.setListOfVisibleColumnsOf = function(sSomeTablename, aSomeList){
 	
 	hsaListOfVisibleColumns.put(sSomeTablename, aSomeList);
 };
+
+
+// Postgres ENUM types, for visible columns
 
 mt.getListOfAllowedValuesInVisibleColumnsOf = function(sSomeTablename){
 	

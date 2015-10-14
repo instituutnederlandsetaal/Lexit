@@ -638,6 +638,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(sSomeTablename)[i]);
 		var bColumnEditable = conf.getEditability(oColumnConfig);
 		
+		// Postgres ENUM type
 		var aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sSomeTablename)[i];		
 		
 		// if a column has a list allowed values and it is editable

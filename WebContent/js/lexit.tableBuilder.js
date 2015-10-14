@@ -658,11 +658,12 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 			{
 			var sCurrentColumnName = mt.getListOfColumnsOf(sSomeTableName)[i];
 			var bColumnShouldBeVisible = $.inArray(sCurrentColumnName, aRelevantColumns)>-1;
+			conf.changeTableConfigValue(sSomeTableName, sCurrentColumnName, "visible", bColumnShouldBeVisible);
 			if (bColumnShouldBeVisible) 
 				{						
-				aVisibleColumnsTypes.push(mt.getListOfColumnTypesOf(sSomeTableName)[i]);
-				oaVisibleColumnsAllowedTypes.push(mt.getListOfAllowedValuesInColumnsOf(sSomeTableName)[i]);
-				conf.changeTableConfigValue(sSomeTableName, sCurrentColumnName, "visible", bColumnShouldBeVisible);
+				aVisibleColumnsTypes.push(mt.getListOfColumnTypesOf(sSomeTableName)[i]);				
+				// Postgres ENUM values
+				oaVisibleColumnsAllowedTypes.push(mt.getListOfAllowedValuesInColumnsOf(sSomeTableName)[i]);				
 				}
 			
 			var iColumnIndex = fn.getColumnNumberOf(sSomeTableName, sCurrentColumnName);
@@ -671,6 +672,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		
 		mt.setListOfVisibleColumnsOf(sSomeTableName, aRelevantColumns);
 		mt.setListOfTypesOfVisibleColumnsOf(sSomeTableName, aVisibleColumnsTypes);
+		// Postgres ENUM values
 		mt.setListOfAllowedValuesInVisibleColumnsOf(sSomeTableName, oaVisibleColumnsAllowedTypes);
 		
 		// enable searchboxes		
@@ -789,6 +791,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			{
 			aVisibleColumns.push(sNameOfCurrentColumn);
 			aVisibleColumnsTypes.push(mt.getListOfColumnTypesOf(sSomeTableName)[i]);
+			// Postgres ENUM types
 			oaVisibleColumnsAllowedTypes.push(mt.getListOfAllowedValuesInColumnsOf(sSomeTableName)[i]);
 			
 			}
@@ -818,14 +821,18 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		
 		// now set the columns
 		
-		// each column classname must have its number and name in it
+		// Each column classname must have its number and name in it
 		var sClassPrefix = i+" "+sNameOfCurrentColumn+" ";
 		
-		// do we have a checkbox, and with which datatype?
+		// Do we have a checkbox, and with which datatype?
 		var iCheckBoxType = $.inArray(mt.getListOfColumnTypesOf(sSomeTableName)[i], ["bit varying(1)", "boolean"]);
 		
-		// or do we have a select box (user-defined types) ?
-		var aSelectBoxValues = (mt.getListOfAllowedValuesInColumnsOf(sSomeTableName)[i]);
+		// Or do we have a select box?
+		// [1] select values from 'choosefrom' in config.js
+		var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+		// [2] select values from Postgres ENUM type
+		if (aSelectBoxValues == null)
+			aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTableName)[i];
 			
 		// checkbox cell
 		if (iCheckBoxType>=0)
@@ -871,7 +878,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			
 			}
 		// select box cell
-		else if (aSelectBoxValues.length>1)
+		else if (aSelectBoxValues != null && aSelectBoxValues.length>1)
 			{			
 			aColProps.push( { 
 				"mData": sNameOfCurrentColumn, 
@@ -936,6 +943,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 	// (this was set for ALL columns in 'tableDetails')
 	mt.setListOfVisibleColumnsOf(sSomeTableName, aVisibleColumns);
 	mt.setListOfTypesOfVisibleColumnsOf(sSomeTableName, aVisibleColumnsTypes);
+	// Postgres ENUM types
 	mt.setListOfAllowedValuesInVisibleColumnsOf(sSomeTableName, oaVisibleColumnsAllowedTypes);
 	
 	// properties for Datatable object (will be set as soon as this function ends)
