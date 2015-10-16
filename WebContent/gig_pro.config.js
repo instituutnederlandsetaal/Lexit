@@ -39,6 +39,8 @@ var bReadableParadigmMode = false;
 // this function will be called when we need to generate a neat and readable paradigm view
 function generateParadigmView(){
 	
+	$("#lemmata_en_paradigma_view_dynamic").css("height", "765px");
+	
 	// draw the table
 	// in such a way that the paradigm is split up in a few parts
 	var aRows = fn.getAllRows("lemmata_en_paradigma_view");
@@ -131,8 +133,8 @@ function generateParadigmView(){
 			
 	});
 	
-	fn.setCustomButtonName("lemmata_en_paradigma_view", 5, "Paradigma_view AAN");
-	fn.setCustomButtonCss("lemmata_en_paradigma_view", 5, "textcolor", "red");
+	fn.setCustomButtonName("lemmata_en_paradigma_view", 4, "Paradigma_view AAN");
+	fn.setCustomButtonCss("lemmata_en_paradigma_view", 4, "textcolor", "red");
 	
 }
 
@@ -377,8 +379,8 @@ oTableSettingsList = {
 				
 				// reset means paradigm view is turned off
 				bReadableParadigmMode = false;
-				fn.setCustomButtonName(t, 5, "Paradigma_view UIT");
-				fn.setCustomButtonCss(t, 5, "textcolor", "black");
+				fn.setCustomButtonName(t, 4, "Paradigma_view UIT");
+				fn.setCustomButtonCss(t, 4, "textcolor", "black");
 			},
 			
 			"repeat_callback": true,
@@ -729,12 +731,8 @@ oTableSettingsList = {
 				}
 			},
 			
+			
 			"button_4":{
-				
-				"name": "Dummy"
-
-			},
-			"button_5":{
 				
 				"name": "Paradigma_view UIT",
 				"bgcolor": "yellow",
@@ -768,8 +766,8 @@ oTableSettingsList = {
 						}
 					else
 						{
-						fn.setCustomButtonName(t, 5, "Paradigma_view UIT");
-						fn.setCustomButtonCss(t, 5, "textcolor", "black");
+						fn.setCustomButtonName(t, 4, "Paradigma_view UIT");
+						fn.setCustomButtonCss(t, 4, "textcolor", "black");
 
 						fn.refreshTable(t);
 						}
@@ -1131,8 +1129,8 @@ oTableSettingsList = {
 											false, 
 											function(){
 												
-												fn.removeFromDatabaseGivenFieldValues(t, 
-														{"lemma_id": aColumns["verkleinwoord_lemma_id"]});
+												fn.removeFromDatabaseGivenFieldValues(confTable, 
+														{"pkid": aColumns["verkleinwoord_lemma_id"]});
 											});
 								
 								}
@@ -1262,37 +1260,7 @@ oTableSettingsList = {
 					
 				}
 			},
-			"button_5": {
-				
-				"name": "Paradigmaview",
-				"bgcolor": "white",
-				"textcolor": "black",
-				"menu": {
-					
-					"VRB tegen. tijd": function(t){
-						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
-						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
-						fn.callDatabase("lemmata_en_paradigma_view", 
-								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=pres"},
-								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
-					},
-					"VRB verl.tijd": function(t){
-						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
-						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
-						fn.callDatabase("lemmata_en_paradigma_view", 
-								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=past"},
-								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
-					},
-					"VRB inf en part": function(t){
-						var nCurrentRow = fn.getFirstSelectedRowFrom(t);
-						var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
-						fn.callDatabase("lemmata_en_paradigma_view", 
-								{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=(inf|part)"},
-								function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
-					}
-				}
-			},
-			"button_6":{
+			"button_5":{
 				
 				"name": "Paradigma_view",
 				"bgcolor": "yellow",
@@ -1324,6 +1292,37 @@ oTableSettingsList = {
 				}
 				
 			},
+			
+			"button_6": {
+			
+			"name": "deel-paradigma",
+			"bgcolor": "white",
+			"textcolor": "black",
+			"menu": {
+				
+				"VRB tegen. tijd": function(t){
+					var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+					var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+					fn.callDatabase("lemmata_en_paradigma_view", 
+							{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=pres"},
+							function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+				},
+				"VRB verl.tijd": function(t){
+					var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+					var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+					fn.callDatabase("lemmata_en_paradigma_view", 
+							{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=fin.+tense=past"},
+							function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+				},
+				"VRB inf en part": function(t){
+					var nCurrentRow = fn.getFirstSelectedRowFrom(t);
+					var sLemmaId = fn.getDataFromCellNamed(t, nCurrentRow, "pkid");
+					fn.callDatabase("lemmata_en_paradigma_view", 
+							{"lemma_id": sLemmaId, "wordform_gigpos": "VRB.+finiteness=(inf|part)"},
+							function(){ fn.scrollToTable("lemmata_en_paradigma_view");});
+				}
+			}
+		},
 			
 			"contextmenu": {
 				
@@ -1493,7 +1492,37 @@ oTableConfigurationList = {
 				"editable": true,
 				"editcallback": function(t, n, value){
 					
-					fn.refreshTable(t);
+					// if normal mode, just refresh
+					if ( !bReadableParadigmMode )
+						{
+						fn.refreshTable(t);
+						}
+					
+					// but if in 'readable paradigm mode',
+					// call the paradigm building function automatically
+					else
+						{
+						
+						var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+
+						fn.callFunction("api.add_missing_paradigm", 
+								[null, sAwfId], 
+								function(){
+									
+									var aRows = fn.getAllRows(t);
+									aRows.each(function(){
+										
+										var nCurrentRow = this;
+										var sRecordId = fn.getRowId(nCurrentRow);
+										fn.getRecord(t, sRecordId, function(record){
+											
+											fn.putDataIntoCell(t, nCurrentRow, "wordform", record["wordform"]);
+											});										
+										
+										});
+									
+									});
+						}			
 					
 				}
 			},
@@ -1508,7 +1537,42 @@ oTableConfigurationList = {
 				"visible": false
 			},
 			wordform_afbr:{				
-				"editable": true
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// if normal mode, just refresh
+					if ( !bReadableParadigmMode )
+						{
+						fn.refreshTable(t);
+						}
+					
+					// but if in 'readable paradigm mode',
+					// call the paradigm building function automatically
+					else
+						{
+						
+						var sAwfId = fn.getDataFromSiblingNode(t, n, "analyzed_wordform_id");
+
+						fn.callFunction("api.add_missing_paradigm", 
+								[null, sAwfId], 
+								function(){
+									
+									var aRows = fn.getAllRows(t);
+									aRows.each(function(){
+										
+										var nCurrentRow = this;
+										var sRecordId = fn.getRowId(nCurrentRow);
+										fn.getRecord(t, sRecordId, function(record){
+											
+											fn.putDataIntoCell(t, nCurrentRow, "wordform_afbr", record["wordform_afbr"]);
+											});										
+										
+										});
+									
+									});
+						}			
+					
+				}
 
 			},		
 			th_wordform_afbr:{
