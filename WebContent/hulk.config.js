@@ -139,6 +139,7 @@ oTableSettingsList = {
 			
 			"button_0":{
 				"name": "Genereer resultaatbestand",
+				"tooltip": "Resultaat is bestemd voor de klant",
 				"bgcolor": "lightblue",
 				"click": function(t){
 					
@@ -237,7 +238,6 @@ oTableSettingsList = {
 												
 						fn.callFunction("duplicateRow", 
 								[sHulkableWordId, spellingVersionId], 
-								null, null, null, null, 
 								function(){ 
 									fn.refreshTable(t);
 								});
@@ -567,7 +567,7 @@ function showStatistics(t){
 		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
 		
 		if (documentId != '')
-			fn.callFunction("getStatistics", [documentId], null, null, null, null, 
+			fn.callFunction("getstatistics", [documentId], 
 					function(){
 				
 				showStatisticsInHeader(fn.getFunctionOutput()[0]);
@@ -638,7 +638,10 @@ function putExportToGigantButton(t){
 			.append(
 					$("<button></button>")
 					.attr("type", "button")
-					.html("Exporteer naar Gigant-lexicon")
+					.html("Exporteer naar HulK Gigant-lexicon")
+					.addClass("tooltip")
+					.attr("title", "Gebruik dit zodat de door u handmatig aangebrachte " +
+							"oordelen nu ook onderdeel worden van de kennis van de HulK.")
 					.bind("click", function(){
 						
 						$("#export_to_gigant_div button").prop("disabled", true);

@@ -1213,10 +1213,6 @@ head.putHelpButton = function(sSomeTablename){
 				"<BR><BR>" +
 				"<TABLE>" +
 				"<TR>" +
-				"<TD>&nbsp;&nbsp;</TD><TD><I>\"\"</I></TD>" +			
-				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar lege cellen</TD>" +
-				"</TR>" +
-				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^$</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar lege cellen</TD>" +
 				"</TR>" +
