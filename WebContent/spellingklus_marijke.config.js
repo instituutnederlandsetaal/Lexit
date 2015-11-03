@@ -137,7 +137,7 @@ oTableConfigurationList = {
 					window.open(url);
 				}
 			},
-			"lemma" : {
+			"lemma" : {				
 				"colsort": "asc"
 			},
 			"modlem": {
@@ -145,7 +145,9 @@ oTableConfigurationList = {
 				"bgcolor": "#CECEF6"
 			},               
 			"status": {"choosefrom": []},
-			"kopje": {},
+			"kopje": {
+				"editable": true
+			},
 			"verwijst_naar_id": {
 				"click": function(t, n){
 					var id = fn.getDataFromCellNode(t, n);

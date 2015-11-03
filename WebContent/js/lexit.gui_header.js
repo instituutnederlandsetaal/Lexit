@@ -617,7 +617,42 @@ head.putGoToButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 			
-			sf.goTo(sSomeTablename);
+			// special case: shift was pressed
+			if (kf._getPressedKey() == 'shift')
+				{
+				fn.prompt("Ga naar (vul één waarde in):", ["Rijnummer", "Paginanummer"], ["", ""], 
+						function(){
+					
+							var sRowNumber = fn.getPromptUserInput("Rijnummer");
+							var sPageNumber = fn.getPromptUserInput("Paginanummer");
+							var iRowNumber, iPageNumber;
+							
+							try {
+								iRowNumber = (sRowNumber != "") ? parseInt(sRowNumber) : null;
+								iPageNumber = (sPageNumber != "") ? parseInt(sPageNumber) : null;
+								
+								// compute row number when input was page number
+								if (iPageNumber != null)
+									iRowNumber = (iPageNumber-1) * (fn.getCurrentDisplayLength(sSomeTablename));
+								
+								// now go to the right row
+								if (iPageNumber != null || iRowNumber != null)
+									mt.getDataTableObjectOf(sSomeTablename).fnDisplayRow(iRowNumber);								
+							}
+							catch(err)
+							{
+								fn.message("Let op!", "U moet wel een rijnummer of paginanummer invullen! "+
+										"["+err.message+"]");
+							}
+							
+						});
+				}
+			else
+				{
+				// default behaviour
+				sf.goTo(sSomeTablename);
+				}
+			
 			
 		});	
 	
@@ -861,11 +896,15 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD></TD>" +
 				"<TD>" +
 				"Met deze functie kunt u in &eacute;&eacute;n klik een bepaald " +
-				"punt in een tabel opzoeken.<BR>Tik een woord in een zoekvakje " +
+				"punt in een tabel opzoeken. " +
+				"Deze functie is anders dan gewoon zoeken, want er wordt " +
+				"niets weggefilterd. Het is dus geen filterfunctie, maar een navigatiefunctie.<BR><BR>" +
+				"Er bestaan twee werkwijzen:<BR>" +
+				"[1] Tik een woord in een zoekvakje " +
 				"boven een kolom en klik dan op de knop 'Ga naar': het eerste gedeelte van de tabel " +
 				"waarin dit woordt voorkomt wordt dan onmiddellijk opgezocht en getoond.<BR>" +
-				"Deze functie is anders dan gewoon zoeken, want er wordt " +
-				"niets weggefilterd. Het is dus geen filterfunctie, maar een navigatiefunctie." +
+				"[2] Druk bij het aanklikken van deze knop ook op 'shift'. Dan krijgt u de mogelijkheid " +
+				"om een paginanummer of rijnummer in te vullen waar u naartoe wilt. " +
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
