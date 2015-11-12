@@ -89,6 +89,11 @@ var aProjectList =
 		 	message: "LET OP: Dit is de testversie van Productie EXTERN"
 	 },
 	 {
+		 	name: "Marijke spelling",
+		 	config_filename: "spellingklus_marijke",
+		 	description: "Spellingklus van Noor / Marijke spelling"
+	 },
+	 {
 		 	name: "MNW2013",
 		 	config_filename: "mnw2013",
 		 	description: "MNW Postprocessing"

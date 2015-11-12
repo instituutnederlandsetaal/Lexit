@@ -613,7 +613,7 @@ head.putGoToButton = function(sSomeTablename){
 		.attr("type", "button")
 		.css("background-color", "#FF8585")
 		.append($("<span></span>").addClass("ui-icon ui-icon-circle-arrow-e"))
-		.attr("title", "Ga naar").addClass("tooltip")
+		.attr("title", "Ga naar woord<BR>[+Shift: naar pagina]").addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){
 			
