@@ -104,9 +104,9 @@ sf.goTo = function(sSomeTablename){
 		return true;
 		}
 	
-	// find sorting column and direction	
-	var sSortColumn = fn.getSortingColumn(sSomeTablename);
-	var sSortDirection = fn.getSortingDirection(sSomeTablename);
+	// find sorting columns and directions	
+	var aSortColumns = fn.getSortingColumns(sSomeTablename);
+	var aSortDirections = fn.getSortingDirections(sSomeTablename);
 	
 	// gather the compulsory filters 
 	
@@ -125,16 +125,16 @@ sf.goTo = function(sSomeTablename){
 	
 	// now request the corresponding row number
 	// and jump to that position in the table
-	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, sSortColumn, sSortDirection, filterColumnNames, filterValues);
+	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues);
 	
 };
 
 // subroutine van sf.goTo
 // get the row number (!=id) of a record, given some value to match in some table
 // and jump to that position in the table
-sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, sSortColumn, sSortDirection, filterColumnNames, filterValues){
+sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues){
 	
-	if (sSortColumn == null || sSortColumn == "")
+	if ( aSortColumns == null || aSortColumns.length == 0 )
 		{
 		fn.message("Let op", "De tabel '"+sSomeTablename+"' is niet gesorteerd op een kolom. De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
 		return;
@@ -153,8 +153,8 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, sSortColum
 					"table_name": sSomeTablename, 
 					"column_name": sColumnName,
 					"column_value": sColumnValue,
-					"sort_column": sSortColumn,
-					"sort_direction": sSortDirection,
+					"sort_columns": aSortColumns.join(","),
+					"sort_directions": aSortDirections.join(","),
 					"filter_column_names": filterColumnNames.join(ARG_INTERNAL_SEPARATOR),
 					"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR)
 					

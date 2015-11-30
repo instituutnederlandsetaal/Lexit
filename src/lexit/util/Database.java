@@ -206,12 +206,38 @@ public class Database {
 			String[] filterColumns, String[] filterValues){
 		
 		int rowNumber = 0;
-		String schema = getSchema(dbName, tableName);				
-		
+		String schema = getSchema(dbName, tableName);	
 		ArrayList<String[]> res;
 		
+		
+		// *** IF WE HAVE NO SORT COLUMN, WE CAN'T COMPUTE A ROW NUMBER ***
+		//     BECAUSE ROW NUMBER NEEDS A ROW ORDER!
+		// impossible to compute row number, return -1
+		boolean sortByIsEmpty = (sortBy == null || "".equals(sortBy) );
+		if (sortByIsEmpty)
+		{
+			return -1;
+		}
+		
+		
+		// put sort information into arrays
+				
+		String[] aSortBy = sortBy.split(",");
+		String[] aSortDir = sortDir.split(",");		
+		
+		// and build a complete sort string (ORDER BY field1 dir1, field2 dir2, ...) 
+		// with safe field names, meaning quoted when PostgreSql requires that.
+		
+		String[] aSortBySafe = new String[aSortBy.length];
+		for (int i=0; i<aSortBy.length; i++)
+		{
+			aSortBySafe[i] = getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
+		}
+		String bigSortString = Util.join(aSortBySafe, ", ");
+		
+			
 		// set arguments
-		// the value to search, and the filters
+		// the value to search for, and the table filters
 		String[] args = Util.concatArr( new String[]{columnValue}, filterValues );	
 		
 		// set argument types
@@ -226,26 +252,16 @@ public class Database {
 		String getRowNumberQuery = null;
 		
 		
-		
-		// *** IF WE HAVE NO SORT COLUMN, WE CAN'T COMPUTE A ROW NUMBER ***
-		//     BECAUSE ROW NUMBER NEEDS A ROW ORDER!
-		// impossible to compute row number, return -1
-		boolean sortByIsEmpty = (sortBy == null || "".equals(sortBy) );
-		if (sortByIsEmpty)
-		{
-			return -1;
-		}
-		
 		// *** FIRST CASE ***
-		// this query works only if the sorting column is the same as the searched column
+		// this query works only if the main sorting column is the same as the searched column
 		// (if it is not the same, we'll use the next query)
-		else if ( columnName.equals(sortBy) )
+		if ( columnName.equals(aSortBy[0]) )
 		{
 			getRowNumberQuery = 
 				"SELECT COUNT(*) AS rownumber FROM " +
 				"(SELECT * " +
 				" FROM " + getSafeTableName(tableName, schema) + " " +
-				" WHERE " + getSafeFieldName(columnName) + " " + ( sortDir.equalsIgnoreCase("asc")? "<" : ">" ) + " ? ";
+				" WHERE " + getSafeFieldName(columnName) + " " + ( (aSortDir[0]).equalsIgnoreCase("asc")? "<" : ">" ) + " ? ";
 			
 			// if filters are required, add those
 			if (filterColumns!=null)
@@ -260,15 +276,15 @@ public class Database {
 			}
 					
 			getRowNumberQuery +=
-				( sortByIsEmpty ? "" : " ORDER BY "+getSafeFieldName(sortBy)+" "+sortDir ) +
+				( sortByIsEmpty ? "" : " ORDER BY "+bigSortString ) +
 				") AS tmp;";
 		}
 				
 	
 		// *** OTHER CASE ***
-		// if the sorting column is different from the searched column
+		// if the main sorting column is different from the searched column
 		// this query is slow, but reliable! 
-		else if ( !columnName.equals(sortBy) )
+		else if ( !columnName.equals(aSortBy[0]) )
 		{
 			// set arguments
 			args = Util.concatArr( filterValues, new String[]{columnValue} );
@@ -288,7 +304,8 @@ public class Database {
 			// we need to subtract 1 to get a 0-based number in Lex'it
 			getRowNumberQuery = 
 				"SELECT CAST(rownumber AS integer)-1 AS rownumber FROM "+
-				"(SELECT "+getSafeFieldName(columnName)+", row_number() OVER (ORDER BY "+getSafeFieldName(sortBy)+" "+sortDir+") AS rownumber "+
+				"(SELECT "+getSafeFieldName(columnName)+", row_number() OVER " +
+					"(ORDER BY " + bigSortString + ") AS rownumber "+
 				" FROM "+getSafeTableName(tableName, schema)+" ";
 			
 			// if filters are required, add those

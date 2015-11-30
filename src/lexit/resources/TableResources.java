@@ -250,8 +250,8 @@ public class TableResources extends Application implements Serializable  {
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
 			@QueryParam("column_value") String columnValue,
-			@QueryParam("sort_column") String sortColumn,
-			@QueryParam("sort_direction") String sortDirection,
+			@QueryParam("sort_columns") String sortColumns,
+			@QueryParam("sort_directions") String sortDirections,
 			@QueryParam("filter_column_names") String filterColumns,
 			@QueryParam("filter_values") String filterValues
 			){
@@ -271,7 +271,7 @@ public class TableResources extends Application implements Serializable  {
 				null : filterValues.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		
 		String rowNumber = Integer.toString(getDatabaseObject(dbName).getRowNumberOfRecord(dbName, tableName, columnName, columnValue, 
-						sortColumn, sortDirection, 
+						sortColumns, sortDirections, 
 						filterColumnsArr, filterColumnValuesArr
 						));
 		dro.setResponse(rowNumber);

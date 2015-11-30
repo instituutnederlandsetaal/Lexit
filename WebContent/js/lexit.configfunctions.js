@@ -209,7 +209,7 @@ fn.getSortingDirections = function(sSomeTablename){
 	for (var i=0; i<aSortingSettings.length; i++)
 		{
 		var iSortingDir = aSortingSettings[i][1];		
-		iSortingDir.push(sSortColumn);
+		aSortingDirs.push(iSortingDir);
 		}
 	
 	return aSortingDirs;
