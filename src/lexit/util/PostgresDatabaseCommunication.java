@@ -2,23 +2,20 @@ package lexit.util;
 
 
 
-import lexit.resources.Constants;
-import lexit.resources.DbResponseObject;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.SecurityContext;
+
+import lexit.resources.Constants;
+import lexit.resources.DbResponseObject;
 
 
 

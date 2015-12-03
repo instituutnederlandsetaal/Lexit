@@ -6,21 +6,9 @@ package lexit.util;
 
 
 
-import lexit.resources.Constants;
-import lexit.resources.DbResponseObject;
-import lexit.table.TableAndCountObject;
-import lexit.table.TableRecordObject;
-import lexit.table.UniqueValuesObject;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -28,12 +16,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.SecurityContext;
+
+import lexit.resources.Constants;
+import lexit.resources.DbResponseObject;
+import lexit.table.TableAndCountObject;
+import lexit.table.TableRecordObject;
+import lexit.table.UniqueValuesObject;
 
 /*
  * This class contains all the queries needed to read from or write into
@@ -2212,7 +2206,7 @@ public class Database {
 	private String replaceQuestionMarksByArgsInQuery(String query, String[] args){
 		
 		int indexOfQuestionMark = -1;
-		ArrayList<String> arguments = new ArrayList(Arrays.asList(args));
+		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
 		
 		int lastQuestionMarkIndex = 0;
 		while ( (indexOfQuestionMark = query.indexOf("?", lastQuestionMarkIndex) ) > -1 )
@@ -3419,13 +3413,13 @@ public class Database {
 	 * @param tableName
 	 * @return
 	 */
-	public Map getQuickCountOfAllTableRecords(String dbName, String tableName) {
+	public Map<String, Object> getQuickCountOfAllTableRecords(String dbName, String tableName) {
 		
 		if (Constants.debug) System.out.println("## Get quick count of all tables records");
 		String schema = getSchema(dbName, tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
 		boolean exactCount = true;
-		Map countAndQuality = new HashMap<String, Object>();
+		Map<String, Object> countAndQuality = new HashMap<String, Object>();
 		boolean bForceExactCount = this.getForceExactCount();
 		
 		// use caching

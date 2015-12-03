@@ -1,19 +1,16 @@
 package lexit.resources;
 
-import java.awt.List;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +32,6 @@ import lexit.table.TableRecordObject;
 import lexit.table.TablesListObject;
 import lexit.table.UniqueValuesObject;
 import lexit.util.Database;
-
 
 import com.sun.jersey.spi.container.servlet.PerSession;
 
@@ -1154,7 +1150,7 @@ public class TableResources extends Application implements Serializable  {
 		sortingColumn = iSortColName;		
 		
 		// get the count of all records in the table (fast)
-		Map countAndCountQualityOfTable = getCountOfTable(dbName, tableName);
+		Map<String, Object> countAndCountQualityOfTable = getCountOfTable(dbName, tableName);
 		int countOfTable = (Integer) countAndCountQualityOfTable.get("count");
 		boolean countQualityOfTable = (Boolean) countAndCountQualityOfTable.get("exactCount");
 
@@ -1254,7 +1250,7 @@ public class TableResources extends Application implements Serializable  {
 	 * @return
 	 * @throws IOException
 	 */
-	private Map getCountOfTable(String dbName, String tableName) throws IOException{
+	private Map<String, Object> getCountOfTable(String dbName, String tableName) throws IOException{
 		
 		tableName = tableName.replaceAll("__", ".");
 		if (Constants.debug) System.out.println("### Get total count of "+tableName);

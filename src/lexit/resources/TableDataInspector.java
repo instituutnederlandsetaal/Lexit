@@ -2,18 +2,17 @@ package lexit.resources;
 
 
 
-import lexit.table.ResultObject;
-import lexit.util.Database;
-
 import java.util.ArrayList;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
+
+import lexit.table.ResultObject;
+import lexit.util.Database;
 
 /**
  * The TableDataInspector class requests the data
