@@ -7,6 +7,11 @@ oTableSettingsList = {
 		
 // special job!!!
 		
+		
+		jesses_lijstje:{
+			"size": "80%"
+		},
+		
 		new_mnw_wnt_links_view:{
 			
 			callback: function(t){
@@ -777,9 +782,9 @@ oTableConfigurationList = {
 				"cell_tooltip": "Klik om op te zoeken",
 				"click": function(t, n){
 					
-					var iPersistentId = fn.getDataFromCellNode(t, n);
-					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=MWN&id="+iPersistentId);
-					window.open("http://gtb.dev.inl.loc/lexit/?db=wntlex_dev&table=lemmata_and_paradigma&persistent_id="+iPersistentId);
+					var iPersistentId = fn.getDataFromCellNode(t, n);					
+					window.open("http://gtb.dev.inl.loc/lexit/?db=wntlex_dev&table=lemmata_and_paradigma&full_analysis=\\y"+iPersistentId+"\\y");
+					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+iPersistentId);
 						
 				}
 			},
@@ -789,8 +794,8 @@ oTableConfigurationList = {
 				"click": function(t, n){
 					
 					var iPersistentId = fn.getDataFromCellNode(t, n);
+					window.open("http://gtb.dev.inl.loc/lexit/?db=wntlex_dev&table=lemmata_and_paradigma&full_analysis=\\y"+iPersistentId+"\\y");
 					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=WNT&id="+iPersistentId);
-					window.open("http://gtb.dev.inl.loc/lexit/?db=wntlex_dev&table=lemmata_and_paradigma&persistent_id="+iPersistentId);
 						
 				}
 			}
@@ -835,6 +840,87 @@ oTableConfigurationList = {
 						}
 				}
 				
+			}
+			
+		},
+		
+		verwijslemma_to_re_use: {
+			
+			unique_id: {
+				
+				"visible": false
+				
+			},
+			knop1: {
+				"button": "Opzoeken",
+				"click": function(t, n){
+					
+					var sId = fn.getDataFromSiblingNode(t, n, "persistent_ids");
+					var aIds = sId.split(",");
+					
+					var sLem = fn.getDataFromSiblingNode(t, n, "new_lemma");
+					var sPos = fn.getDataFromSiblingNode(t, n, "new_part_of_speech");
+					
+					fn.callDatabase("lemmata_and_paradigma", 
+						{
+						"modern_lemma": "exact:"+sLem,
+						"lemma_part_of_speech": "exact:"+sPos
+						}
+					);
+					
+					for (var i=0; i<aIds.length; i++)
+						{
+						window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+aIds[i]);
+						}
+				}
+			},
+			knop2: {
+				"button": "Gooi weg",
+				"click": function(t, n){
+					
+					fn.confirm("Let op", "Zeker weten?", function(){
+						fn.removeFromDatabaseGivenANode(t, n, true);
+					});
+				}
+			},
+			persistent_ids:{
+				"bgcolor": "#D8F6CE",
+				"editable": true
+			}
+			
+		},
+		
+		
+		jesses_lijstje: {
+			
+			modern_lemma: {
+				"colsort": "asc"
+			},
+			persistent_id: {
+				"editable": true
+			},
+			unique_id: {
+				"visible": false
+			}, 
+			opmerking: {
+				"editable": true
+			},
+			knop: {
+				"button": "Opzoeken",
+				"click": function(t, n){
+					
+					var sId = fn.getDataFromSiblingNode(t, n, "persistent_id");
+					var aIds = sId.split(",");
+					
+					fn.callDatabase("lemmata_and_paradigma", {"full_analysis": "\\y"+aIds+"\\y"});
+					
+					for (var i=0; i<aIds.length; i++){
+						
+						var thisId = (aIds[i]).trim();
+						window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=WNT&id="+thisId);						
+						
+					}
+				}
 			}
 			
 		}

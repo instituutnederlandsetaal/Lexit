@@ -57,22 +57,22 @@ var oStandardConfigurationForMnwTables = {
 			visible: false
 			},
 		lemmatiseren: {
-			sortable: false,
+			//sortable: false,
 			editable: true,
 			bgcolor: "#D8CEF6"
 			},
 		unfortunate: {
-			visible: false,
+			visible: false //,
 			//filter: '1',
-			keepfilter: true				
+			//keepfilter: true				
 		},
 		lemma: {
-			sortable: false,
+			//sortable: false,
 			cell_tooltip: "Klik om MNW te openen",
 			click: function(t,n){openMnw(t,n);}
 		},
 		extern_lem_id: {
-			sortable: false,
+			//sortable: false,
 			cell_tooltip: "Klik om MNW te openen",
 			click: function(t,n){openMnw(t,n);}
 			},

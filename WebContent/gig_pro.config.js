@@ -1352,29 +1352,28 @@ oTableSettingsList = {
                     	setContextMenuOptions(key, options);
                         }
                     else if (key == 'link')
-                    {
+                    	{
                     	if (sVerkleinwoordId == "" || sPartLemmaId == "")
-                		{
-                		fn.message("Let op", "Kies eerst een verkleinwoord én een deeltje");
-			}
-                	else
-                		{
-                		fn.callFunction("api.link_verkleinwoord", [sVerkleinwoordId, sPartLemmaId], function(){
-                    		
-                    		sVerkleinwoord = "";
-                    		sPartLemma = "";
-                    		sVerkleinwoordId = "";
-                    		sPartLemmaId = "";
-                    		
-                    		setContextMenuOptions(key, options);
-                    		
-                    		fn.refreshTable(confTable);
-                    		});
-                		}
-                    	
-                    }
+	                		{
+	                		fn.message("Let op", "Kies eerst een verkleinwoord én een deeltje");
+	                		}
+	                	else
+	                		{
+	                		fn.callFunction("api.link_verkleinwoord", [sVerkleinwoordId, sPartLemmaId], function(){
+	                    		
+	                    		sVerkleinwoord = "";
+	                    		sPartLemma = "";
+	                    		sVerkleinwoordId = "";
+	                    		sPartLemmaId = "";
+	                    		
+	                    		setContextMenuOptions(key, options);
+	                    		
+	                    		fn.refreshTable(confTable);
+	                    		});
+	                		}                    	
+                    	}
                     else if (key == 'unlink')
-                    {
+                    	{
                     	if (sVerkleinwoordId == "")
                     		{
                     		fn.message("Let op", "Kies eerst een verkleinwoord");
@@ -1394,7 +1393,7 @@ oTableSettingsList = {
                         		});
                     		}
                     	
-                    }
+                    	}
                 }
             }
 			
@@ -1500,6 +1499,8 @@ oTableConfigurationList = {
 					
 					// but if in 'readable paradigm mode',
 					// call the paradigm building function automatically
+					// (this will fill in automatically the missing wordforms where they can
+					//  be derived from the wordform just entered by the user) 
 					else
 						{
 						
@@ -1548,6 +1549,8 @@ oTableConfigurationList = {
 					
 					// but if in 'readable paradigm mode',
 					// call the paradigm building function automatically
+					// (this will fill in automatically the missing wordforms abbriviation where they can
+					//  be derived from the abbriviation just entered by the user)
 					else
 						{
 						

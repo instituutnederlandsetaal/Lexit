@@ -20,7 +20,7 @@ var sAutoCompleteUrl = "http://hulk.inl.loc/ws/autocomplete-lemmata/";
 
 // //////////////////////////////////////////////
 //
-// Test servers:
+// Servers:
 // for uploaders       http://hulk.inl.nl
 // for administrators  http://hulk.inl.loc
 //
@@ -63,7 +63,7 @@ $(document).on(
                 	$.ajax({
                         "type": "GET",
                         "crossDomain": true,
-                        "url": sAutoCompleteUrl + request.term,
+                        "url": sAutoCompleteUrl + (request.term).replace("'", "''"),
                         "dataType": "json",
                         "success": function (data){
                         	response($.map(data, function (item) {
@@ -338,36 +338,14 @@ oTableConfigurationList = {
 				"bgcolor": "#CECEF6",
 				"textcolor": "blue",
 				"editfunc": function(t, n, value){
-					
-					var updateFunc = function(){
-						fn.updateDatabaseGivenANode(t, n, 
-								["correction", "name", "verified_date"], 
-								[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
-								false,
-								function(){
-									fn.refreshTable(t);
-								});
-					};
 
-					if (value != '')
-						{
-						fn.uncheckCheckboxes(t, n, ["wv", "en", "afke", "ok"],
-							function(){
-							
-							var sHulkableWordId = fn.getDataFromSiblingNode(t, n, "hulkable_word_id");
-							fn.updateDatabaseGivenFieldValues("judgements", 
-									{"hulkable_word_id": sHulkableWordId}, 
-									{"judgement": "NOK"}, false,
-									function(){
-										updateFunc();
-										});
-							});				
-						
-						}
-					else
-						{
-						updateFunc();
-						}
+					// when filling in a correction, set ALL the checkboxes to false 
+					fn.updateDatabaseGivenANode(t, n, 
+							["wv", "en", "afke", "ok", "correction", "name", "verified_date"], 
+							[false, false, false, false, value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
+							false, function(){						
+								fn.refreshTable(t);
+							});
 				}
 			},
 			uploader_gloss: {
@@ -417,10 +395,14 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#CECEF6",
 				"editfunc": function(t, n, value){
+					
 					fn.updateDatabaseGivenANode(t, n, 
 							["remarks", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], false,
-							function(){fn.refreshTable(t);});					
+							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")], 
+							false,
+							function(){
+								fn.refreshTable(t);
+							});					
 				}
 			},
 			wordform_id: {
@@ -432,21 +414,24 @@ oTableConfigurationList = {
 				"editable": true,				
 				"bgcolor": "#E0F8E0",
 				"editfunc": function(t, n, value){
-					uncheckOtherBoxes(t, n, ["en", "afke", "ok"]);					
-					fn.updateDatabaseGivenANode(t, n, 
-							["wv", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
+					
+					var args = ["en", "afke", "ok", "wv", "name", "verified_date"];
+					var vals = [false, false, false, value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")];
+										
 					// Clicking upon a checkbox must empty the correction box
 					// (as the editor must choose between a text correction OR a checkbox option)
 					// Except of course when the checkbox is being unchecked: a text correction
-					// mustn't be removed than.
+					// mustn't be removed than.	
 					
-					if (value == true)
-						{
-						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
-						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
-						}
-						
+					if (value == true) {
+						args.push("correction");
+						vals.push("");
+					}					
+					
+					fn.updateDatabaseGivenANode(t, n, args, vals, false,
+							function(){
+								fn.refreshTable(t);
+							});						
 					}
 				},
 			en: {
@@ -454,17 +439,21 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editfunc": function(t, n, value){
-					uncheckOtherBoxes(t, n, ["wv", "afke", "ok"]);
-					fn.updateDatabaseGivenANode(t, n, 
-							["en", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
-					// see comment at 'wv'
 					
-					if (value == true)
-						{
-						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
-						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
-						}				
+					var args = ["wv", "afke", "ok", "en", "name", "verified_date"];
+					var vals = [false, false, false, value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")];
+					
+					// see comment at 'wv'					
+					if (value == true) {
+						args.push("correction");
+						vals.push("");
+					}
+					
+					fn.updateDatabaseGivenANode(t, n, args, vals, false,
+							function(){
+								fn.refreshTable(t);
+							});
+									
 					}
 				},
 			afke: {
@@ -472,17 +461,21 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#E0F8E0",
 				"editfunc": function(t, n, value){
-					uncheckOtherBoxes(t, n, ["wv", "en", "ok"]);
-					fn.updateDatabaseGivenANode(t, n, 
-							["afke", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);
-					// see comment at 'wv'
 					
-					if (value == true)
-						{
-						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
-						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
-						}
+					var args = ["wv", "en", "ok", "afke", "name", "verified_date"];
+					var vals = [false, false, false, value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")];
+					
+					// see comment at 'wv'					
+					if (value == true) {
+						args.push("correction");
+						vals.push("");
+					}
+					
+					fn.updateDatabaseGivenANode(t, n, args, vals, false,
+							function(){
+								fn.refreshTable(t);
+							});
+					
 					}
 				},
 			ok: {
@@ -490,17 +483,21 @@ oTableConfigurationList = {
 				"editable": true,
 				"bgcolor": "#A9F5BC",
 				"editfunc": function(t, n, value){
-					uncheckOtherBoxes(t, n, ["wv", "en", "afke"]);
-					fn.updateDatabaseGivenANode(t, n, 
-							["ok", "name", "verified_date"], 
-							[value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")]);	
-					// see comment at 'wv'
 					
-					if (value == true)
-						{
-						fn.updateDatabaseGivenANode(t, n, ["correction"], [""]);
-						fn.putDataIntoCell(t, fn.getRowNode(n), "correction", "");
-						}
+					var args = ["wv", "en", "afke", "ok", "name", "verified_date"];
+					var vals = [false, false, false, value, sUser, fn.getCurrentTimestamp("YYYY-MM-DD HH:MI:SS")];
+					
+					// see comment at 'wv'					
+					if (value == true) {
+						args.push("correction");
+						vals.push("");
+					}
+					
+					fn.updateDatabaseGivenANode(t, n, args, vals, false,
+							function(){
+								fn.refreshTable(t);
+							});	
+					
 					}
 				},
 			name: {
@@ -779,27 +776,3 @@ function putRightHulkOordeelButton(t){
 }
 
 
-
-// *******************************************
-//             CHECKBOXES HANDLER
-// *******************************************
-
-var bPreventEditFuncLoop = false;
-
-function uncheckOtherBoxes(oTable, nNode, aBoxesToUncheck){
-	
-	// when unchecking the checkboxes automatically (simulating a manual click),
-	// we don't want the normal editfunc to be triggerd
-	// as this would cause an infinite loop
-	//(click -> editfunc -> uncheckboxes -> click -> editfunc -> uncheckboxes -> ... )
-	if (bPreventEditFuncLoop)
-		return true;
-	
-	bPreventEditFuncLoop = true;	
-	
-	fn.uncheckCheckboxes(oTable, nNode, aBoxesToUncheck, 
-			function(){
-		bPreventEditFuncLoop = false;
-		});
-	
-}
