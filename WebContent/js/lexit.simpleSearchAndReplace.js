@@ -53,17 +53,28 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 		}
 	
 	// title
-	div.append(
+	
+	var titleAndButtonDiv = $("<div></div>");
+	var titleDiv = $("<div></div>");
+	var buttonDiv = $("<div></div>").css("margin-left", "30px");
+	
+	titleDiv.append(
 			$("<span></span>")
 			.css("font-weight", "bold")
 			.css("font-size", "120%")
 			.text("Zoek & Bewerk ")
 			);
-	div.append(
+	titleDiv.append(
 			$("<span></span>")
-			.text("(veilige modus: bewerking beperkt zich tot de schermgegevens)")
-			.append($("<br/>")).append($("<br/>"))
-			);
+			.text("(veilige modus: bewerking beperkt zich tot de schermgegevens)")			
+			);	
+	buttonDiv.append( ssr.buildSelectionButton(sSomeTablename) );
+	
+	titleAndButtonDiv.append(titleDiv.css("display", "inline-block"));
+	titleAndButtonDiv.append(buttonDiv.css("display", "inline-block"));
+	div.append(titleAndButtonDiv).append($("<br/>"));
+	
+	
 	
 	
 	// column selection part
@@ -188,6 +199,10 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 		mt.putPreviousColumnToAlter(sSomeTablename, $("#"+sSomeTablename+"_selected_column").val());
 		mt.putPreviousActionToPerform(sSomeTablename, $("#"+sSomeTablename+"_selected_action").val());
 		
+		// remove functions for js garbage collector
+		$("#"+sSomeTablename+"_dynamic").off("click", "#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace .functions_sleep");
+		$("#"+sSomeTablename+"_dynamic").off("click", "#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace .functions_awake");
+		
 		$("#"+sSomeTablename+"_search_and_replace").hide("slow");
 		$("#"+sSomeTablename+"_search_and_replace").delay(500).queue( function(){$(this).remove(); $(this).dequeue();} );
 		$("#"+sSomeTablename+"_wrapper div.top").show("slow");
@@ -225,6 +240,74 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 
 
 
+ssr.buildSelectionButton = function(sSomeTablename){
+	
+	// is this button allowed according to configuration?
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	if ( !conf.getSelectionButton(aTableSettings)) return $("<span/>");
+	
+	// what is the current setting of the button?
+	var bRowSelectionAllowed = mt.rowSelectionIsAllowed(sSomeTablename);
+	var sButtonMsg = bRowSelectionAllowed ? "Zet rijselectie UIT [F2]" : "Zet rijselectie AAN [F2]";
+	var sBackgroundColor = bRowSelectionAllowed ? "#EE0000" : "#99CCFF";
+	var sFunctionAwakeOrAsleep = bRowSelectionAllowed ? "functions_sleep" : "functions_awake";
+		
+	
+	// button to activate/deactivate selection mode
+	var eSelectionButton = $("<button/>")
+		.attr("type", "button")
+		.attr("id", "selectionbutton")
+		.css("background-color", sBackgroundColor)
+		.addClass(sFunctionAwakeOrAsleep)		
+		.append($("<span></span>").addClass("ui-icon ui-icon-pin-s"))
+		.attr("title", sButtonMsg).addClass("tooltip");
+	
+	$(".tooltip").tipTip(oTiptipConfig);
+	
+	// functions activation and deactivation, depending on elements clicked on
+	$("#"+sSomeTablename+"_dynamic").on("click", "#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace .functions_awake", 
+			function(){	
+		
+		mt.putRowSelectionIsAllowed(sSomeTablename, true);
+		
+		// disable the checkboxes to make sure those won't be (un)checked during row selection 
+		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", true);
+				
+		// give button the right settings
+		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
+			.css("background-color", "#EE0000")
+			.attr("title", "Zet rijselectie UIT [F2]").addClass("tooltip");
+		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
+			.delay(500).removeClass("functions_awake").addClass("functions_sleep");
+		
+		$(".tooltip").tipTip(oTiptipConfig);
+		
+	});
+	$("#"+sSomeTablename+"_dynamic").on("click", "#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace .functions_sleep", 
+			function(){		
+		
+		mt.putRowSelectionIsAllowed(sSomeTablename, false);
+		
+		// re-enable checkboxes after those have been disabled when selection modus was put on
+		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", false);		
+		
+		// give button the right settings
+		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
+			.css("background-color", "#99CCFF")
+			.attr("title", "Zet rijselectie AAN [F2]").addClass("tooltip");
+		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
+			.delay(500).removeClass("functions_sleep").addClass("functions_awake");
+		
+		$(".tooltip").tipTip(oTiptipConfig);
+		
+		// remove row selection
+		fn.unselectAllRows(sSomeTablename);
+	});
+
+	return eSelectionButton;
+};
+
+
 
 
 
@@ -234,10 +317,10 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 ssr.alterTable = function(sSomeTablename, bReallyChange){
 
 	
-	var sOldString 		= $("#"+sSomeTablename+"_old_string").val();
-	var sNewString 		= $("#"+sSomeTablename+"_new_string").val();
-	var sSelectedColumn	= $("#"+sSomeTablename+"_selected_column").val();
-	var sSelectedAction	= $("#"+sSomeTablename+"_selected_action").val();
+	var sOldString 		= $("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #"+sSomeTablename+"_old_string").val();
+	var sNewString 		= $("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #"+sSomeTablename+"_new_string").val();
+	var sSelectedColumn	= $("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #"+sSomeTablename+"_selected_column").val();
+	var sSelectedAction	= $("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #"+sSomeTablename+"_selected_action").val();
 	
 	
 	// if nor pattern nor replacement string is filled in, stop right away
@@ -307,18 +390,17 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		// (we do it only if the new string doesn't contain backreferences, otherwise it won't work)
 		if (sNewString.indexOf("$")<0)
 			{
-			// Is the modified column a sorting column?
-			// - If so, we need to carry on and modify the filter setting, so the table
-			//   keeps showing the modified content (which doesn't meet the 'old' filter setting). 
-			// - If not, we needn't do anything, as the modified content will not affect the view
-			//   as the table is not sorted by this column.
-			var aSortingColumns = fn.getSortingColumns(sSomeTablename);
-			if ($.inArray(sSelectedColumn, aSortingColumns)>-1)
-				{
-				var filtersToShowChanges = new Array();
-		 		filtersToShowChanges[sSelectedColumn] = sOldString.replace(/(\w+)/i, "($1|"+sNewString+")");
-		 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(filtersToShowChanges);
-				}	 		
+			// modify the filter setting, so the table
+			//   keeps showing the modified content (which doesn't meet the 'old' filter setting).
+			
+//			var aSortingColumns = fn.getSortingColumns(sSomeTablename);
+//			if ($.inArray(sSelectedColumn, aSortingColumns)>-1)
+//				{
+//				}
+			var filtersToShowChanges = new Array();
+	 		filtersToShowChanges[sSelectedColumn] = sOldString.replace(/(\w+)/i, "($1|"+sNewString+")");
+	 		mt.getDataTableObjectOf(sSomeTablename).fnFilterAdd(filtersToShowChanges);
+					 		
 			} 		
 		
 		if (sSelectedAction == 'insert')
@@ -347,6 +429,11 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			 		gui.removeProcessingMsg(sSomeTablename);
 			 		// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
+		 			
+		 			// refresh the table, so the internal table representation is also up-to-date
+		 			// (otherwise a new replacement without refresh will cause a crash)
+		 			gui.refreshTable(sSomeTablename);
+		 			
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
 			 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
@@ -384,8 +471,14 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			 	"dataType": "xml", // get response as xml
 			 	"success": function(xml) {
 			 		gui.removeProcessingMsg(sSomeTablename);
+			 		
 		 			// re-enable close button
 		 			$("#"+sSomeTablename+"_searchandreplace_close_button").removeAttr("disabled");
+		 			
+		 			// refresh the table, so the internal table representation is also up-to-date
+		 			// (otherwise a new replacement without refresh will cause a crash)
+		 			gui.refreshTable(sSomeTablename);
+		 			
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
 			 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");

@@ -934,6 +934,8 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 		return "white";
 	return aButtonSettings["textcolor"];
 };
+
+// this function is called when a button is being clicked upon
 conf.getHeaderButtonFunction = function(aButtonSettings){
 	if (typeof aButtonSettings["click"] == 'undefined')
 		return function(){fn.message("Configuratieprobleem", "Aan deze button is geen functie toegekend.");};

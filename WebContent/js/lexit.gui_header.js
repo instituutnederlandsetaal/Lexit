@@ -681,7 +681,7 @@ head.putSearchAndReplaceButton = function(sSomeTablename){
 		.css("background-color", "#D8F781")
 		.append($("<span></span>").addClass("ui-icon ui-icon-search"))
 		.attr("title", "Zoek & bewerk").addClass("tooltip")
-		.addClass("functions_sleep")
+		//.addClass("functions_sleep")
 		.addClass("header_button")
 		.bind("click", function(){			
 			
@@ -747,9 +747,14 @@ head.putSelectionButton = function(sSomeTablename){
 		.append($("<span></span>").addClass("ui-icon ui-icon-pin-s"))
 		.attr("title", sButtonMsg).addClass("tooltip");
 	
+//	$("#"+sSomeTablename+"_filter").append(
+//			$("<div></div>").css("display", "inline").prepend(makeSelectionButton)
+//			);
+	
 	$("#"+sSomeTablename+"_filter").append(
-			$("<div></div>").css("display", "inline").prepend(makeSelectionButton)
+			$("<div></div>").css("display", "inline").append(makeSelectionButton)
 			);
+	
 	$(".tooltip").tipTip(oTiptipConfig);
 	
 	// functions activation and deactivation, depending on elements clicked on

@@ -384,8 +384,18 @@ kf.addKeyFunctions = function(){
     	// F2 (shortcut for rows selection button)
     	if (kf.isPressed("f2"))
 			{
-    		var sActiveTable = kf.getActiveTable();
-    		$("#"+sActiveTable+"_wrapper #selectionbutton").click();
+    		var sActiveTable = kf.getActiveTable();    		
+    		
+    		// special case: search and replace panel is opened (and table header is hidden)
+    		if ($("#"+sActiveTable+"_search_and_replace").elementExists() )
+    			{
+    			$("#"+sActiveTable+"_wrapper #"+sActiveTable+"_search_and_replace #selectionbutton").click();
+    			}
+    		// normal case: table header is visible
+    		else
+    			{
+    			$("#"+sActiveTable+"_wrapper #selectionbutton").click();
+    			}
 			}
     	
     	
