@@ -160,7 +160,7 @@ un.undoEvent = function(sSomeTableName){
 	// restore the node according to this custom function
 	if ( fnEditFunction != null )
 		{
-		// if can only update the screen cell if the node is still in sight
+		// we can only update the screen cell if the node is still in sight
 		if (nNode != null)
 			{
 			var aPos = mt.getDataTableObjectOf(sSomeTableName).fnGetPosition( nNode );

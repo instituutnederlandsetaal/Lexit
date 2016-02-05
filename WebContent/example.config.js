@@ -10,3 +10,9 @@ oTableSettingsList = {};
 oTableConfigurationList = {
 
 };
+
+
+//warning, so as make sure the user won't work in a development project
+var sCurrentProjectName = paramsHash.get("db");
+if ($.endsWith(sCurrentProjectName, '_dev'))
+	fn.message("Let op", "Dit is een ontwikkelversie. Hier moet u niet in werken.");

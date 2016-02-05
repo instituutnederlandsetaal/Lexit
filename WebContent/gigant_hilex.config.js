@@ -1,9 +1,94 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = [];
+oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
+                   "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
+                   "token_attestations", "token_attestations_worktable", "wordforms",
+                   "modified_lemmata_view", "modified_paradigm_view"];
+
+
+
+// Array's to store the locked lemmata of the current view
+// Those array's get updated at each table draw
+var aCurrentLemmaViewLocks = new Array();
+var aCurrentParadigmaViewLocks = new Array();
+
+
+//function returns true if current user is a superuser
+function superUser(){
+	return (fn.getCurrentUser() == 'katrien' || 
+			fn.getCurrentUser() == 'mathieu' ||
+			fn.getCurrentUser() == 'jesse');
+};
+
+// transform an empty string into a string 'NULL'
+function deEmpty(a){
+	if (a == null || a == '') 
+		return "NULL";
+	return a;
+}
+
+// join two strings comma-separated
+function comma(a, b){
+	return deEmpty(a)+","+deEmpty(b);
+}
+
 
 // table general settings
 oTableSettingsList = {
+		
+		
+		modified_lemmata_view: {
+			
+			"button_0":{
+				"name": "Lemma en paradigma herstellen",
+				"click": function(confTable){
+					
+					fn.confirm("Zeker weten?", "Weet u het zeker? Als de log groot is, kan deze operatie enige tijd kosten.", 
+							function(){
+						
+						var aRowSelection = fn.getSelectedRowsFrom(confTable);
+						
+						aRowSelection.each(function(){
+							
+							var nCurrentNode = this;
+							var sLemmaId = fn.getDataFromCellNamed(confTable, nCurrentNode, "lemma_id");
+							fn.callFunction("api.restore_lemma_and_paradigm_and_ids", [sLemmaId],  
+									function(){
+										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
+											fn.refreshTable(confTable);
+							});
+						});
+					});
+				}
+			}
+		},
+		
+		modified_paradigm_view:{
+			
+			"button_0":{
+				"name": "Woordvorm herstellen",
+				"click": function(confTable){
+					
+					fn.confirm("Zeker weten?", "Weet u het zeker?", 
+							function(){
+						
+						var aRowSelection = fn.getSelectedRowsFrom(confTable);
+						
+						aRowSelection.each(function(){
+							
+							var nCurrentNode = this;
+							var sAwfId = fn.getDataFromCellNamed(confTable, nCurrentNode, "analyzed_wordform_id");
+							fn.callFunction("api.restore_wordform", [sAwfId],  
+									function(){
+										if (fn.isLastNodeOf(nCurrentNode, aRowSelection))
+											fn.refreshTable(confTable);
+							});
+						});
+					});
+				}
+			}
+		},
+
 		
 		
 		lemmata: {
@@ -16,7 +101,7 @@ oTableSettingsList = {
 					(fn.getCellElement(t, n, "lemma_part_of_speech")).click();
 				},
 				
-				"`": function(t){
+				"insert": function(t){
 					
 					var n = fn.getFirstSelectedRowFrom(t);
 					(fn.getCellElement(t, n, "lemma_part_of_speech")).click();
@@ -67,10 +152,126 @@ oTableSettingsList = {
 			},
 			
 			"callback": function(t){
-				fn.callDatabase("token_attestations_worktable", {}, function(){
-					kf.setActiveTable("lemmata");
+				
+				// we need to open the token_attestations_worktable
+				// but the lemma table must get back focus 
+				
+				// (probably temporary)
+				if ( !fn.tableExists("token_attestations_worktable"))
+					{
+					fn.callDatabase("token_attestations_worktable", {}, function(){
+						kf.setActiveTable("lemmata");
+						});
+					}
+				
+				
+				// lemmata locks
+				
+				var sTableName = fn.getTableName(t);
+				
+				// build the UNlock button if it doesn't exist yet
+				// (superuser only)
+				if ( superUser() && fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
+					{										
+					fn.addCustomButton(sTableName, {
+						"name": "(Un)lock",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							var aSelectedRows = fn.getSelectedRowsFrom(t);
+							
+							aSelectedRows.each(function(){
+								
+								var sLemmaId = fn.getRowId(this);
+								var sMultilemmaId = null;
+								var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+								
+								if ($.inArray( comma(sLemmaId, sMultilemmaId), aCurrentLemmaViewLocks ) >-1)
+									{
+									fn.callFunction("api.unlock_lemma", [deEmpty(sLemmaId), deEmpty(sMultilemmaId)], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								else
+									{
+									fn.callFunction("api.lock_lemma", [deEmpty(sLemmaId), deEmpty(sMultilemmaId)], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								
+								});
+							
+							}
+						});
+					}
+			
+				
+				// apply locks
+				
+				var aLemmaIdsArr = new Array();
+				var aRows = fn.getAllRows(t);
+				
+				aRows.each(function(i){					
+					var sLemmaId = fn.getRowId(this);
+					var sMultilemmaId = null;
+					aLemmaIdsArr.push( comma(sLemmaId, sMultilemmaId) );
 				});
-			}
+				
+				// get the list of locked lemmata
+				// and modify the rows accordingly
+				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+					
+					aCurrentLemmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
+					
+					aRows.each(function(i){
+						
+						var nThisRow = this;
+						var sLemmaId = fn.getRowId(nThisRow);
+						var sMultilemmaId = null;
+						
+						if ( $.inArray( comma(sLemmaId, sMultilemmaId), aCurrentLemmaViewLocks ) >-1 )
+							{
+							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+							
+							for (var j=0; j<aVisibleCells.length; j++)
+								{
+								var sCurrentColumnName = aVisibleCells[j];
+								
+								// we mustn't lock the comment field
+								if (sCurrentColumnName == 'opmerking')
+									continue;
+								
+								
+								// make sure we can't edit the locked lemmata
+								var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
+								var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
+								
+								if (sCellType == 'text')
+									{									
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'checkbox')
+									{
+									eCell.find("input").attr("disabled", "disabled");
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'selectbox')
+									{
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								}					
+							
+							}						
+						
+					});
+					
+				}); // end of function call
+			},
+			"repeat_callback": true
 		},
 		
 
@@ -78,18 +279,18 @@ oTableSettingsList = {
 		
 		token_attestations: {
 			
-			callback: function(t){
+			"callback": function(t){
 				_highlightAllQuotes(t);
 			},
-			repeat_callback: true
+			"repeat_callback": true
 		},
 		
 		token_attestations_worktable: {
 			
-			callback: function(t){
+			"callback": function(t){
 				highlightAllQuotes(t);
 			},
-			repeat_callback: true,
+			"repeat_callback": true,
 			
 			
 			"button_0": {
@@ -284,10 +485,121 @@ oTableSettingsList = {
 		
 		lemmata_and_paradigma: {
 			
-			callback: function(t){
+			"callback": function(t){
+				
+				// groups must be easily recognizable
 				highlightGroups(t);
+				
+				
+				// lemmata locks
+				
+				var sTableName = fn.getTableName(t);
+				
+				// build the UNlock button if it doesn't exist yet
+				// (for superusers only)
+				if ( superUser() && fn.getIndexOfButtonNamed(sTableName, "(Un)lock")<0)
+					{										
+					fn.addCustomButton(sTableName, {
+						"name": "(Un)lock",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							var aSelectedRows = fn.getSelectedRowsFrom(t);
+							
+							aSelectedRows.each(function(){
+								
+								var sLemmaId = fn.getDataFromCellNamed(t, this, "lemma_id");
+								var sMultilemmaId = fn.getDataFromCellNamed(t, this, "multiple_lemmata_analysis_id");
+								var bLastRow = fn.isLastNodeOf(this, aSelectedRows);
+								
+								if ($.inArray( comma(sLemmaId, sMultilemmaId), aCurrentParadigmaViewLocks ) >-1)
+									{
+									fn.callFunction("api.unlock_lemma", [deEmpty(sLemmaId), deEmpty(sMultilemmaId)], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								else
+									{
+									fn.callFunction("api.lock_lemma", [deEmpty(sLemmaId), deEmpty(sMultilemmaId)], function(){
+											if(bLastRow) fn.refreshTable(t);
+											}
+										);
+									}
+								
+								});
+							
+							}
+						});
+					}
+				
+				
+				// apply locks
+				
+				var aLemmaIdsArr = new Array();
+				var aRows = fn.getAllRows(t);
+				
+				aRows.each(function(){					
+					var sLemmaId = fn.getDataFromCellNamed(t, this, "lemma_id");
+					var sMultiLemmaId = fn.getDataFromCellNamed(t, this, "multiple_lemmata_analysis_id");
+					aLemmaIdsArr.push( comma(sLemmaId, sMultiLemmaId) );
+				});
+				
+				// get the list of locked lemmata
+				// and modify the rows accordingly
+				fn.callFunction("api.get_locks_of_lemmata", [ "'"+aLemmaIdsArr.join("|")+"'" ], function(){
+					
+					aCurrentParadigmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
+					
+					aRows.each(function(i){
+						
+						var nThisRow = this;
+						var sLemmaId = fn.getDataFromCellNamed(t, nThisRow, "lemma_id");
+						var sMultiLemmaId = fn.getDataFromCellNamed(t, nThisRow, "multiple_lemmata_analysis_id");
+						
+						
+						if ( $.inArray( comma(sLemmaId, sMultiLemmaId), aCurrentParadigmaViewLocks ) >-1 )
+							{
+							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
+							
+							for (var j=0; j<aVisibleCells.length; j++)
+								{
+								var sCurrentColumnName = aVisibleCells[j];
+								
+								// we mustn't lock the comment field
+								if (sCurrentColumnName == 'opmerking')
+									continue;
+								
+								
+								// make sure we can't edit the locked lemmata
+								var sCellType = fn.getCellType(t, nThisRow, sCurrentColumnName);								
+								var eCell = fn.getCellElement(t, nThisRow, sCurrentColumnName);
+								
+								if (sCellType == 'text')
+									{									
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'checkbox')
+									{
+									eCell.find("input").attr("disabled", "disabled");
+									eCell.css("opacity", "0.5");
+									}
+								else if (sCellType == 'selectbox')
+									{
+									eCell.editable('disable');
+									eCell.css("opacity", "0.5");
+									}
+								}					
+							
+							}						
+						
+					});						
+					
+				}); // end of function call
+				
 			},
-			repeat_callback: true,
+			"repeat_callback": true,
 			
 			"button_0":{
 				
@@ -351,19 +663,67 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		modified_lemmata_view: {
+			"modification_date":{
+				"colsort": "desc" // sort #1
+			},
+			"modification_time": {
+				"colsort": "desc" // sort #2
+			}
+		},
+		
+		modified_paradigm_view: {
+			"modification_date":{
+				"colsort": "desc" // sort #1
+			},
+			"modification_time": {
+				"colsort": "desc" // sort #2
+			}
+		},
+		
 		lemmata: {
 			
 			"modern_lemma": {
 				"colsort": "asc",
 				"editable": true,
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					fn.refreshTable(t, function(){
+						
+						// small delay otherwise it won't work
+						$("#"+fn.getTableName(t)).delay(500).queue(function(){
+
+							var n = fn.getFirstSelectedRowFrom(t);
+							var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+							
+							if ( !isNaN(sLemmaId) )
+								{
+								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
+								}						
+
+							$(this).dequeue();
+						});						
+					});
 				}
 			},
 			"lemma_part_of_speech": {
 				"editable": true,
 				"editcallback": function(t, n, value){
-					fn.refreshTable(t);
+					fn.refreshTable(t, function(){
+						
+						// small delay otherwise it won't work
+						$("#"+fn.getTableName(t)).delay(500).queue(function(){
+
+							var n = fn.getFirstSelectedRowFrom(t);
+							var sLemmaId = fn.getDataFromCellNamed(t, n, "lemma_id");
+							
+							if ( !isNaN(sLemmaId) )
+								{
+								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
+								}						
+
+							$(this).dequeue();
+						});
+					});
 				}
 			},
 			"persistent_id": {
@@ -374,25 +734,33 @@ oTableConfigurationList = {
 					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb="+sWdb+"&id="+iPersistentId);
 					
 				}
+			},
+			
+			"opmerking":{
+				"editable": true
+			},
+			
+			"online": {
+				"editable": true				
 			}
 		},
 		
 		lemmata_removed: {
 			
-			modification_date: {
+			"modification_date": {
 				"colsort": "desc"  // sort #1
 			},
-			modification_time: {
+			"modification_time": {
 				"colsort": "desc"  // sort #2
 			}
 		},
 
 		analyzed_wordforms_removed: {
 			
-			modification_date: {
+			"modification_date": {
 				"colsort": "desc"  // sort #1
 			},
-			modification_time: {
+			"modification_time": {
 				"colsort": "desc"  // sort #2
 			}
 		},
@@ -403,15 +771,15 @@ oTableConfigurationList = {
 		
 		lemmata_and_paradigma: {
 			
-			super_lem_id :{
+			"super_lem_id" :{
 				"colsort": "asc" // sort #1
 			},
 			
-			wdb: {
+			"wdb": {
 				"choosefrom": []
 			},
 			
-			modern_lemma: {
+			"modern_lemma": {
 				"colsort": "asc", // sort #2
 				"editable": true,
 				"editcallback": function(t, n){
@@ -422,7 +790,7 @@ oTableConfigurationList = {
 				}
 
 			},
-			persistent_id: {
+			"persistent_id": {
 				"colsort": "asc", // sort #3
 				"cell_tooltip": "Open WDB",
 				"click": function(t,n){
@@ -434,7 +802,7 @@ oTableConfigurationList = {
 				}
 			},
 			
-			multiple_lemmata_analysis_id: {				
+			"multiple_lemmata_analysis_id": {				
 				"cell_tooltip": "Toon details",
 				"click": function(t,n){
 					
@@ -444,7 +812,7 @@ oTableConfigurationList = {
 				}
 			},
 			
-			analyzed_wordform_id: {
+			"analyzed_wordform_id": {
 				"cell_tooltip": "Toon citaten",
 				"click": function(t,n){
 					
@@ -454,7 +822,7 @@ oTableConfigurationList = {
 							{"analyzed_wordform_ids_arr": "{"+iAwfId+"}", "lemma_id": iLemmaId});
 				}
 			},
-			group_id: {
+			"group_id": {
 				"colsort": "asc", // sort #4
 				"cell_tooltip": "Totaal citaten bijbehorend bij groep",
 				"click": function(t,n){
@@ -465,12 +833,12 @@ oTableConfigurationList = {
 							{"group_id": iGroupId, "lemma_id": iLemmaId});
 				}
 			},
-			wordform: {
+			"wordform": {
 				"colsort": "asc" // sort #4
 
 			},
 			
-			lemma_part_of_speech: {
+			"lemma_part_of_speech": {
 				
 				"editable": true,
 				"editcallback": function(t, n){
@@ -481,20 +849,31 @@ oTableConfigurationList = {
 				}
 
 			},
-			part_of_speech: {
+			"part_of_speech": {
 				
 				"editable": true
-
 				
 			},
-			unique_id:{
+			
+			"online": {
+				"editable": true,
+				"editcallback": function(t, n, value){
+					fn.refreshTable(t);
+				}
+			},
+			
+			"opmerking":{
+				"editable": true
+			},
+			
+			"unique_id":{
 				"visible": false
 			}
 		},
 		
 		token_attestations: {
 			
-			document_id: {
+			"document_id": {
 				"cell_tooltip": "Toon bron",
 				"click": function(t,n){
 					
@@ -506,35 +885,35 @@ oTableConfigurationList = {
 		
 		token_attestations_worktable: {
 			
-			attestation_id: {
+			"attestation_id": {
 				"visible": false
 			},
 
-			onsetoffset: {
+			"onsetoffset": {
 				"visible": false
 			},
-			wordform: {
+			"wordform": {
 				"visible": false
 			},
 			// column wordform_alphabetic is used by a database for comparing a newly manually built attestation
 			// which pre-existing attestation of the same lemma, so as to be able to decide wether a new set of
 			// analyzed wordforms needs to be constructed or not.
-			wordform_alphabetic: {
+			"wordform_alphabetic": {
 				"visible": false
 			},
-			analyzed_wordform_ids: {
+			"analyzed_wordform_ids": {
 				"visible": false
 			},
-			analyzed_wordform_ids_arr: {
+			"analyzed_wordform_ids_arr": {
 				"visible": false
 			},
-			group_id: {
+			"group_id": {
 				"visible": false
 			},
-			derivation_ids: {
+			"derivation_ids": {
 				"visible": false
 			},
-			document_id: {
+			"document_id": {
 				"cell_tooltip": "Toon bron",
 				"click": function(t,n){
 					
@@ -542,9 +921,9 @@ oTableConfigurationList = {
 					fn.callDatabase("documents", {"document_id": iDocumentId}, null, {"viewtype": "form"});
 				}
 			},
-			doorvoeren: {
+			"doorvoeren": {
 				
-				sortable: false,
+				"sortable": false,
 				"button": "Doorvoeren",
 				"button_tooltip": "Gewijzigde attestatie verwerken in het lexicon",
 				"click": function(t,n){
@@ -613,7 +992,7 @@ oTableConfigurationList = {
 					
 				} // end of click event
 			},
-			quote: {
+			"quote": {
 				
 				"colsort": "asc",
 				"cell_tooltip": "Klik om woorden te (de)highlighten",

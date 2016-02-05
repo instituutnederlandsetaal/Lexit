@@ -59,6 +59,22 @@ var aProjectList =
 		 	config_filename: "metadata",
 		 	description: "CHN release 2 - metadata"
 	 },
+	 
+	 
+	 {
+		 	name: "Gigant HiLex (development - test)",
+		 	config_filename: "gigant_hilex_dev",
+			description: "Gigant Historisch lexicon, voor test",
+			message: "LET OP: Dit is een testversie"
+
+	 },
+	 {
+		 	name: "Gigant HiLex (productie intern)",
+		 	config_filename: "gigant_hilex",
+			description: "Gigant Historisch lexicon"
+	 },
+	 
+	 
 	 {
 			name: "Gigant MoLex (development - test)",
 			config_filename: "gigant_molex_dev",
@@ -82,6 +98,8 @@ var aProjectList =
 		 	config_filename: "gigantmolex",
 		 	message: "LET OP: Dit is de testversie van Productie EXTERN"
 	 },
+	 
+	 
 	 {
 		 	name: "Gigant MoLex Surinaams (productie extern - testversie)",
 		 	description: "Gigant Modern lexicon Surinaams, voor test",
