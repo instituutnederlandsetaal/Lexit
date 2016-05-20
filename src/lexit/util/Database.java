@@ -1779,6 +1779,24 @@ public class Database {
 		// first locate the primary key
 		String primaryKey = getPrimaryKeyColumn(dbName, tableName);
 		
+		System.out.println(primaryKey);
+		
+		// Speaking about sorting, it is always a good idea
+		// to use the primary key as a secondary sorting column,
+		// because sometimes the primary sorting column chosen
+		// by the user contains doubled values, which are sorted randomly
+		// (as their value is exactly the same). So to prevent this
+		// random sorting, the primary is added as a secondary sorting
+		// column (as very last sorting column).
+		
+		if (primaryKey != null && 
+				Util.getIndexOf(primaryKey, aSortCol)<0)
+		{
+			aSortCol = Util.concatArr(aSortCol, new String[]{primaryKey});	
+			aSortDir = Util.concatArr(aSortDir, new String[]{"ASC"});
+		}
+		
+		
 		// normal query
 		String query = "SELECT "+getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+getSafeTableName(tableName, schema) + " ";
 		// results count query		
@@ -1964,6 +1982,8 @@ public class Database {
 				sortSeparator = ", ";
 			}
 			query += sortPart;
+			
+			System.out.println(sortPart);
 		}
 				
 		
@@ -2373,10 +2393,41 @@ public class Database {
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname", "format_type"});
 			
-			// if there is no primary key, we expect the view to have a pk_id column
-			primaryKeyColumn = (res.size()==0) ? 
-					Constants.PRIMARYKEY_FIELDNAME : (res.get(0)[0].trim().isEmpty() ? 
-							Constants.PRIMARYKEY_FIELDNAME : res.get(0)[0].trim());
+			// do we have an empty result?
+			// than we might have a view, in which case we expect to have a field 'pkid'
+			// which we will use as a primary key
+			
+			if ( res.size() == 0
+				|| 
+				(res.size() != 0 && res.get(0)[0].trim().isEmpty() )
+			   )
+			{
+				// are we dealing with a view or a table here?				
+				ArrayList<String> listOfTrueTables = getTrueTablesList(dbName);
+				boolean currentTableIsaView = !(listOfTrueTables.contains(tableNameOnly));
+				
+				System.out.println("currentTableIsaView="+currentTableIsaView);
+				
+				// we expect a view to have a given column which always 
+				// functions as a primary key 
+				if (currentTableIsaView)
+				{
+					// what are the available columns?
+					String[] availableColumns = getColumnNames(dbName, tableName);
+					
+					// does the view have the needed primary key column
+					if (Util.getIndexOf(Constants.PRIMARYKEY_FIELDNAME, availableColumns)>-1)
+						primaryKeyColumn = Constants.PRIMARYKEY_FIELDNAME;
+					
+					// otherwise primaryKeyColumn keeps the initialisation value
+				}
+			}
+			
+			// if we do have a result, we have a primary key 
+			else 
+			{
+				primaryKeyColumn = res.get(0)[0].trim();
+			}
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getPK, e);
@@ -2387,7 +2438,8 @@ public class Database {
 		}
 		
 		// store the primary key in a hash, for caching (for speed improvement)
-		tableNameToPrimaryKey.put(dbName+schema+tableNameOnly, primaryKeyColumn);
+		if (primaryKeyColumn != null)
+			tableNameToPrimaryKey.put(dbName+schema+tableNameOnly, primaryKeyColumn);
 		
 		if (Constants.debug) System.out.println("PK of "+tableNameOnly+" is "+primaryKeyColumn);
 		

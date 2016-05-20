@@ -426,6 +426,68 @@ oTableConfigurationList = {
 			
 		},
 		
+		celexiewerk_jaarverslag:{
+			hidden_id: {
+				"visible": false
+			},
+			celexie_id: {
+				"visible": false
+			},
+			gb: {
+				"cell_tooltip": "Open Groen Boekje",
+				"click": function(someTable, nNode){
+					var gbId = fn.getDataFromCellNode(someTable, nNode);
+					fn.callDatabaseInNewTab("GB05_2013", {id: gbId}, {viewtype: "form"}, "lexicalsources");
+				}
+			},
+			rbn: {
+				"cell_tooltip": "Open RBN20",
+				"click": function(someTable, nNode){
+					var rbnId = fn.getDataFromCellNode(someTable, nNode);
+					var aRbnId = rbnId.split("_");
+					var tableName = "rbn20_"+aRbnId[0];
+					var word = aRbnId[1];
+					fn.callDatabaseInNewTab(tableName, {id_form: word}, {viewtype: "form"}, "lexicalsources");
+				}
+			},
+			lemma: {
+				"colsort": "asc"
+			},
+			lemma_reverse: {
+				"visible": false
+			},
+			analyse: {
+				"visible": false
+			},
+			correctie: {
+				"bgcolor": "#F8E0EC"
+			},
+			celex_analyse: {
+				"visible": false
+			},
+			regel: {
+				
+			},
+			regel_reverse: {
+				"visible": false
+			},
+			goed: {
+				
+			},
+			opmerking: {
+				
+			},
+			job: {
+				"visible": false
+			},
+			"klaar": {
+				"choosefrom": []
+			},
+			"grof_klaar": {
+				"choosefrom": []
+			}
+		},
+		
 		celexiewerk: {
 			
 			hidden_id: {

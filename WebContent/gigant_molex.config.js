@@ -141,49 +141,49 @@ oTableSettingsList = {
 		
 		nuancerende_opmerkingen:{
 			
-			"size": "80%" //,
+			"size": "80%",
 			
-//			"button_0":{
-//				"name": "Voeg opmerking toe",
-//				"click": function(t){
-//					
-//					fn.prompt("Voer opmerking in", 
-//							["short_code", "nuancerende_opmerking"], 
-//							["", ""],
-//							function(){
-//								var sShortCode = fn.getPromptUserInput("short_code");
-//								var sNuanceOpm = fn.getPromptUserInput("nuancerende_opmerking");
-//								
-//								fn.insertIntoDatabase(t, 
-//										{
-//										"short_code": sShortCode,
-//										"nuancerende_opmerking": sNuanceOpm
-//										}, null, true);
-//							}, 
-//							true, 
-//							[35,3]);
-//				}
-//			},
-//			"button_1":{
-//				"name": "Verwijder selectie",
-//				"click": function(t){
-//					
-//					fn.confirm("Let op", "Weet u het zeker?", function(){
-//						
-//						var aNodes = fn.getSelectedRowsFrom(t);
-//						
-//						aNodes.each(function(){
-//							var nCurrentNode = this;
-//							
-//							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
-//							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
-//							});
-//					});
-//					
-//					
-//					
-//				}
-//			}
+			"button_0":{
+				"name": "Voeg opmerking toe",
+				"click": function(t){
+					
+					fn.prompt("Voer opmerking in", 
+							["short_code", "nuancerende_opmerking"], 
+							["", ""],
+							function(){
+								var sShortCode = fn.getPromptUserInput("short_code");
+								var sNuanceOpm = fn.getPromptUserInput("nuancerende_opmerking");
+								
+								fn.insertIntoDatabase(t, 
+										{
+										"short_code": sShortCode,
+										"nuancerende_opmerking": sNuanceOpm
+										}, null, true);
+							}, 
+							true, 
+							[35,3]);
+				}
+			},
+			"button_1":{
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					fn.confirm("Let op", "Weet u het zeker?", function(){
+						
+						var aNodes = fn.getSelectedRowsFrom(t);
+						
+						aNodes.each(function(){
+							var nCurrentNode = this;
+							
+							var bLastRow = fn.isLastNodeOf(nCurrentNode, aNodes);
+							fn.removeFromDatabaseGivenANode(t, nCurrentNode, bLastRow);	
+							});
+					});
+					
+					
+					
+				}
+			}
 			
 		},
 		
@@ -1341,10 +1341,10 @@ oTableConfigurationList = {
 			
 			short_code:{
 				"colsort": "asc",
-				"editable": false //true
+				"editable": true
 			},
 			nuancerende_opmerking:{
-				"editable": false //true
+				"editable": true
 				
 			}	
 		},

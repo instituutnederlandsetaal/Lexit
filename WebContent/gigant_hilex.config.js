@@ -2,8 +2,9 @@
 oHiddenTablesList = [];
 oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
                    "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
-                   "token_attestations", "token_attestations_worktable", "wordforms",
-                   "modified_lemmata_view", "modified_paradigm_view"];
+                   "token_attestations", "token_attestations_worktable", "wordforms", 
+                   "modified_lemmata_view", "modified_paradigm_view", "mnw_fix_multiple_ws",
+                   "fix_multiple_lemmata_analyses"];
 
 
 
@@ -36,6 +37,26 @@ function comma(a, b){
 // table general settings
 oTableSettingsList = {
 		
+		
+		fix_multiple_lemmata_analyses:{
+			
+			"callback": function(t){
+				highlightMultiLemmataAnalyses(t);
+			},
+			
+			"repeat_callback": true,
+			
+			"size": "80%",
+			
+			"column_order": ["multi_id",
+			                  "multi_part_id", 
+			                  "modern_lemma", 
+			                  "full_analysis",
+			                  "lemma_id", 
+			                  "lemma_part", 
+			                  "lemma_part_pos",
+			                  "knop"]
+		},
 		
 		modified_lemmata_view: {
 			
@@ -663,6 +684,32 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		
+		fix_multiple_lemmata_analyses:{
+			
+			"multi_id":{
+				"colsort": "asc"
+			},
+			"lemma_id": {
+				"bgcolor": "#CEE3F6",
+				"click": function(t, n){
+					
+					var sLemmaId = fn.getDataFromCellNode(t, n);
+					fn.callDatabase("lemmata", {"lemma_id": sLemmaId});
+				}
+			},
+			"knop": {
+				"button": "Bijwerken",
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromSiblingNode(t, n, "lemma_id");
+					fn.callFunction("api.propagate_lemma_modif", [sLemmaId], function(){
+						fn.refreshTable(t);
+					});
+				}
+			}
+			
+		},
+		
 		modified_lemmata_view: {
 			"modification_date":{
 				"colsort": "desc" // sort #1
@@ -698,6 +745,9 @@ oTableConfigurationList = {
 							if ( !isNaN(sLemmaId) )
 								{
 								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
+								
+								if (fn.tableExists("fix_multiple_lemmata_analyses"))
+									fn.refreshTable("fix_multiple_lemmata_analyses");
 								}						
 
 							$(this).dequeue();
@@ -719,6 +769,9 @@ oTableConfigurationList = {
 							if ( !isNaN(sLemmaId) )
 								{
 								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
+								
+								if (fn.tableExists("fix_multiple_lemmata_analyses"))
+									fn.refreshTable("fix_multiple_lemmata_analyses");
 								}						
 
 							$(this).dequeue();
@@ -1355,4 +1408,89 @@ function highlightGroups(t){
 	});
 	
 };
+
+function highlightMultiLemmataAnalyses(t){
+	
+	var aRows = fn.getAllRows(t);
+	
+	var hGroup = new Array();
+	
+	aRows.each(function(){
+		
+		var n = this;		
+		var iMultiLemAnalysisId = fn.getDataFromCellNamed(t, n, "multi_id");
+		
+		if (iMultiLemAnalysisId != '')
+			{
+			if (typeof hGroup[iMultiLemAnalysisId] == 'undefined')
+				hGroup[iMultiLemAnalysisId] = 0;
+			hGroup[iMultiLemAnalysisId] = hGroup[iMultiLemAnalysisId] + 1;
+			
+			}
+	});
+	
+	var iLastMultiLemAnalysisId;
+	var nLastMultiLemAnalysis;
+	var iMultiLemAnalysisIdRowAbove = -1;
+	var sColor = new Array();
+	sColor[1] = "#0B0B3B";
+	sColor[2] = "#0B610B";
+	iColor = 1;
+	
+	aRows.each(function(){
+		
+		var n = this;
+		
+		var iMultiLemAnalysisId = fn.getDataFromCellNamed(t, n, "multi_id");
+		
+		// put a line after the last row of a group
+		// to show where the group ends
+		if (iMultiLemAnalysisId != iLastMultiLemAnalysisId && 
+				iMultiLemAnalysisIdRowAbove == iLastMultiLemAnalysisId)
+			{
+			fn.getCellElement(t, nLastMultiLemAnalysis, "modern_lemma").css("border-bottom", "solid 1px black");
+			fn.getCellElement(t, nLastMultiLemAnalysis, "full_analysis").css("border-bottom", "solid 1px black");
+			fn.getCellElement(t, nLastMultiLemAnalysis, "lemma_id").css("border-bottom", "solid 1px black");
+			fn.getCellElement(t, nLastMultiLemAnalysis, "lemma_part").css("border-bottom", "solid 1px black");
+			fn.getCellElement(t, nLastMultiLemAnalysis, "lemma_part_pos").css("border-bottom", "solid 1px black");			
+			}
+		
+		if (hGroup[iMultiLemAnalysisId]>0) // more than 0 is a group!
+			{
+			// is this the first row of a new group?
+			// if so, choose a new color			
+			if (iMultiLemAnalysisId != iLastMultiLemAnalysisId)
+				{
+				iColor = 1 + (iColor!=2);
+				// also put a line before the group, to show where the group starts
+				// but don't do that if we just added a line in the previous row 
+				// as this would give a thick line as a result
+				if ( !(iMultiLemAnalysisId != iLastMultiLemAnalysisId && 
+						iMultiLemAnalysisIdRowAbove == iLastMultiLemAnalysisId))
+					{
+					fn.getCellElement(t, n, "modern_lemma").css("border-top", "solid 1px black");
+					fn.getCellElement(t, n, "full_analysis").css("border-top", "solid 1px black");
+					fn.getCellElement(t, n, "lemma_id").css("border-top", "solid 1px black");
+					fn.getCellElement(t, n, "lemma_part").css("border-top", "solid 1px black");
+					fn.getCellElement(t, n, "lemma_part_pos").css("border-top", "solid 1px black");				
+					}			
+				}
+	
+			
+			// give the row a color, as the current row is part of a group
+			fn.getCellElement(t, n, "modern_lemma").css("color", sColor[iColor]);
+			fn.getCellElement(t, n, "full_analysis").css("color", sColor[iColor]);
+			fn.getCellElement(t, n, "lemma_id").css("color", sColor[iColor]);
+			fn.getCellElement(t, n, "lemma_part").css("color", sColor[iColor]);
+			fn.getCellElement(t, n, "lemma_part_pos").css("color", sColor[iColor]);
+			
+			nLastMultiLemAnalysis = n;
+			iLastMultiLemAnalysisId = iMultiLemAnalysisId;
+			}	
+		
+		iMultiLemAnalysisIdRowAbove = iMultiLemAnalysisId;
+	});
+	
+};
+
 
