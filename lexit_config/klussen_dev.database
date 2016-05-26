@@ -1,5 +1,0 @@
-db=klussen
-schema=tmp
-host=svowdb02.inl.loc
-user=postgres
-pass=inl

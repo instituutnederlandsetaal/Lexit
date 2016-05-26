@@ -1,5 +1,0 @@
-db=databasename
-schema=public
-host=somehost.inl.loc
-user=postgres
-pass=password
