@@ -166,6 +166,30 @@ public class TableResources {
 	}
 	
 	
+	
+	// reset user rights 
+	// call:
+	// .../table/reset_user_rights
+	@Path("reset_user_rights")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject resetConfig(
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest
+			) throws IOException {
+		
+		DbResponseObject dro = new DbResponseObject();
+				
+		users2roles = new ConcurrentHashMap<String, String[]>();
+	
+		dro.setResponse("OK");
+		
+		return dro;
+	}
+	
+	
+	
 	// turn debug mode on/off
 	// call:
 	// .../table/debug?mode=....
