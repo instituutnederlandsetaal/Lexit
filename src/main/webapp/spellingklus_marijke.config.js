@@ -51,8 +51,8 @@ oTableConfigurationList = {
 				"sortable": false,
 				"click": function(confTable, confNode){
 					var modnedlemma = fn.getDataFromSiblingNode(confNode, "modern_lemma");
-					var nRowNode = fn.getRowNode(confNode);
-					fn.putDataIntoCell(nRowNode, "correctie", modnedlemma);
+					var nRowNode = fn.getRowNode(confNode);					
+					fn.putDataIntoCellNode(nRowNode, "correctie", modnedlemma);
 					fn.updateDatabaseGivenANode(nRowNode, {"correctie": modnedlemma});
 				}
 			},
@@ -102,7 +102,7 @@ oTableConfigurationList = {
 				"click": function(confTable, confNode){
 					var modnedlemma = fn.getDataFromSiblingNode(confNode, "modern_lemma");
 					var nRowNode = fn.getRowNode(confNode);
-					fn.putDataIntoCell(nRowNode, "correctie", modnedlemma);
+					fn.putDataIntoCellNode(nRowNode, "correctie", modnedlemma);
 					fn.updateDatabaseGivenANode(nRowNode, {"correctie": modnedlemma});
 				}
 			},
@@ -132,7 +132,7 @@ oTableConfigurationList = {
 			
 			"id": {
 				"click": function(t, n){
-					var id = fn.getDataFromCellNode(t, n);
+					var id = fn.getDataFromCellNode(n);
 					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+id+"&content-type=text/html; charset=utf-8";
 					window.open(url);
 				}
@@ -150,7 +150,7 @@ oTableConfigurationList = {
 			},
 			"verwijst_naar_id": {
 				"click": function(t, n){
-					var id = fn.getDataFromCellNode(t, n);
+					var id = fn.getDataFromCellNode(n); 
 					var url = "http://gtb.inl.nl/iWDB/search?actie=article&wdb=MNW&id="+id+"&content-type=text/html; charset=utf-8";
 					window.open(url);
 				}
