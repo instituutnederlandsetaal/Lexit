@@ -8,9 +8,9 @@ oShowOnlyTables = (
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
          "lemmata_en_paradigma_view", "nuancerende_opmerkingen"]
 	:
-		["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
+		(fn.getCurrentUser() == 'tanneke' ? ["anw_online"] : ["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "surinaams_and_antilliaans_commissions_selections",
-		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank"];
+		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "anw_online"] );
 
 
 fn.setProjectTitle("Gigant Molex productie 2016");

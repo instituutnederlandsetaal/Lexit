@@ -105,6 +105,17 @@ oTableSettingsList = {
 		}
 	},
 		
+	
+	count_report: {
+		
+		"width": "70%"
+		
+	},
+	
+	changes_report:{
+		
+		"width": "70%"
+	},
 		
 	neologismen : {
 		
@@ -178,6 +189,30 @@ oTableSettingsList = {
 					if (sLemma != sLemmaOrig)
 						$( fx.getCellNode(this, "lemma") ).css("color", "red");
 				});
+				
+				
+				if ( (fn.getCurrentUser() == 'carole' || fn.getCurrentUser() == 'mathieu' || 
+						fn.getCurrentUser() == 'jesse' || fn.getCurrentUser() == 'katrien') 
+					&& 
+					fn.getIndexOfButtonNamed(t, "Rapporten")<0)
+					{
+					fn.addCustomButton(t, 
+						{
+						"name": "Rapporten",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							fn.callDatabase("count_report", null, function(){
+								fn.callDatabase("changes_report",  null, function(){
+									//fn.alignTables("count_report", "changes_report");
+									});
+								});
+							
+							}
+						
+						});
+					}
+				
 			},
 		"repeat_callback": true,
 		
@@ -265,6 +300,42 @@ oTableConfigurationList = {
 		woord: {
 			"visible": false
 		} 
+	},
+	
+	count_report:{
+		
+		datum: {
+			"choosefrom": [],
+			"colsort": "asc"
+		},
+		word_changed: {
+			"bgcolor": "#F6CEEC"
+		},
+		lemma_changed:{
+			"bgcolor": "#A9BCF5"
+		}
+	},
+	
+	changes_report:{
+		
+		datum: {
+			"choosefrom": [],
+			"colsort": "asc"
+		},
+		
+		woord: {
+			"bgcolor": "#F6CEEC"
+		},
+		woord_orig: {
+			"bgcolor": "#F6CEEC"
+		},
+		
+		lemma:{
+			"bgcolor": "#A9BCF5"
+		},
+		lemma_orig:{
+			"bgcolor": "#A9BCF5"
+		}
 	},
 	
 	neologismen : {
