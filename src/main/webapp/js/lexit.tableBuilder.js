@@ -606,10 +606,10 @@ tb.addExportButtons = function(sSomeTableName){
 		            	extend: 'copyHtml5', text: 'Naar clipboard'
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'excelHtml5'
+						extend: 'excelHtml5', text: 'Excel' 
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'pdfHtml5'
+						extend: 'pdfHtml5', text: 'PDF'
 					}),
 					$.extend(true, {}, exportCommonFunction, {
 						extend: 'print', text: 'Afdrukken'

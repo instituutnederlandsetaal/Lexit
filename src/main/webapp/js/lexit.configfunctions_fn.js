@@ -3333,15 +3333,46 @@ fn.getPromptBoxInput = function(sFieldName){
 /**
  * Get the order of the field and values, in case the user changed the order
  * 
- * @returns {Integer[]} An array of integers. Their values represent the original indexes the
+ * @returns {Integer[]} An array of integers. Their values represent the original indexes of
  * the re-ordered elements, but their order in this array is the new order applied by
- * the user.
+ * the user. 
  * 
  * @see fn.promptReorder
+ * @see fn.processPromptBoxOrder
  * @see fn.getNewPositionOfElementAt
  */
 fn.getPromptBoxOrder = function(){
 	return aPromptUserInputFieldOrder;
+};
+
+
+/**
+ * Re-sort the input array, according to the new order defined by the user in fn.promptReorder()
+ * 
+ * @param {Integer[]} aPromptBoxOrder - An array of indexes, like specified as the ouput of fn.getPromptBoxOrder()
+ * @param {String[]} aArrayToResort - An array to resort according to aPromptBoxOrder
+ * @returns {String[]} An array, re-sorted according to input array aPromptBoxOrder
+ * 
+ * @see fn.promptReorder
+ */
+fn.processPromptBoxOrder = function(aPromptBoxOrder, aArrayToResort){
+	
+	if (aPromptBoxOrder.length != aArrayToResort.length)
+		{
+		fn.message("Fout", "fn.processPromptBoxOrder() is aangeroepen met twee arrays van verschillende lengtes.");
+		}
+	else
+		{
+		var aNewArray = new Array();
+		
+		for (var i=0; i<aPromptBoxOrder.length; i++)
+			{
+			aNewArray.push( aArrayToResort[ aPromptBoxOrder[i] ] );
+			}
+		
+		return aNewArray;
+		}
+	
 };
 
 
@@ -3354,6 +3385,7 @@ fn.getPromptBoxOrder = function(){
  * @returns {Integer} The new index of the element after the user re-sorted the array
  * 
  * @see fn.promptReorder
+ * @see fn.processPromptBoxOrder
  * @see fn.getPromptBoxOrder
  */
 fn.getNewPositionOfElementAt = function(iOriginalIndex){

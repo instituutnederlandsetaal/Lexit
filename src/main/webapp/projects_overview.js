@@ -34,8 +34,12 @@
 
 var aProjectList =
 	[
-	 
-	 
+	{
+		name: "vmnw toys",
+		config_filename: "vmnw",
+		description: "Clitics herordenen"
+		
+	},	 
 	 {
 		name: "Gigant MoLex",
 		config_filename: "gig_pro",
@@ -52,8 +56,15 @@ var aProjectList =
 	
 	{
 		name: "Bob's database",
-		config_filename: "bob",
+		config_filename: "bob_dev",
 		description: "Kranten licenties en producten"
+	},
+	
+	{
+		name: "Marijke spelling",
+		config_filename: "spellingklus_marijke",
+		description: "Marijke spelling",
+		production: true
 	},
 		
 	
