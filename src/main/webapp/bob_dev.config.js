@@ -1,5 +1,5 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
-oHiddenTablesList = [];
+oHiddenTablesList = ["Licenties", "Contactpersonen_details"];
 oShowOnlyTables = [];
 
 
@@ -10,6 +10,36 @@ fn.setProjectTitle("Beheer klantenlicenties", "#b75c00");
 
 // table general settings
 oTableSettingsList = {
+		
+		"Contactpersonen": {
+			
+			"button_0":{
+				"name": "Toon organisatie",
+				"click": function(t){
+					
+					var oSelectedRow = fx.getFirstSelectedRowFrom(t);
+					var sKlantcode = fx.getDataFromCellInRow(oSelectedRow, "Klantcode");
+					
+					fn.callDatabase("Klanten", {"Klantcode": sKlantcode}, function(){
+						fn.scrollToTable("Klanten");
+					});
+				}
+				
+			},
+			"button_1":{
+				"name": "Toon details",
+				"click": function(t){
+					
+					var oSelectedRow = fx.getFirstSelectedRowFrom(t);
+					var id = fx.getDataFromCellInRow(oSelectedRow, "pkid");
+					
+					fn.callDatabase("Contactpersonen_details", {"id": id}, function(){
+						fn.scrollToTable("Contactpersonen_details");
+					}, {"viewtype": "form"});
+					
+				}
+			}
+		},
 		
 		"Klanten": {
 			
@@ -111,9 +141,9 @@ oTableSettingsList = {
 					var oKlant = fx.getFirstSelectedRowFrom(t);
 					var sKlantcode = fx.getDataFromCellInRow(oKlant, "Klantcode");
 					
-					fn.callDatabase("Licenties", {"Klantcode": sKlantcode}, function(){
+					fn.callDatabase("Klanten_en_licenties", {"Klantcode": sKlantcode}, function(){
 						
-						fn.scrollToTable("Licenties");
+						fn.scrollToTable("Klanten_en_licenties");
 						
 						});
 					
@@ -126,7 +156,7 @@ oTableSettingsList = {
 		},
 		
 		
-		"Licenties":{
+		"Klanten_en_licenties":{
 			
 			"button_0":{				
 				"name": "Open productenlijst",
@@ -160,13 +190,17 @@ oTableSettingsList = {
 							
 							oRows.every(function(){
 								
-								var oRow = this;
-								var bLastOne = fx.isLastRowOf(oRow, oRows);
-								fx.removeFromDatabaseGivenARow(oRow, function(){
+								var oRow = 		this;
+								var bLastOne =	fx.isLastRowOf(oRow, oRows);								
+								var sRowId = 	fx.getDataFromCellInRow(oRow, "licentie_id");
+								
+								fn.removeFromDatabaseGivenFieldValues("Licenties", // true table
+										{"unique_id": sRowId}, 
+										function(){
 									
-									if (bLastOne)
-										fn.refreshTable(t);	
-									});
+											if (bLastOne)
+												fn.refreshTable(t);	
+										});								
 								
 								});							
 							
@@ -228,8 +262,8 @@ oTableSettingsList = {
 											
 											if (fx.isLastRowOf(oCurrentProduct, oProducten))
 												{
-												fn.refreshTable("Licenties", function(){
-													fn.scrollToTable("Licenties");
+												fn.refreshTable("Klanten_en_licenties", function(){
+													fn.scrollToTable("Klanten_en_licenties");
 													});
 												}
 												
@@ -332,6 +366,33 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		"Contactpersonen": {
+			
+			"pkid": {
+				"visible": false
+			},
+			
+			"Klantcode":{
+				"bgcolor": ["#66cdaa"],
+				"textcolor": "red"
+
+			},
+			
+			"Voornaam":{
+				"editable": true
+			},
+			"Tussennaam":{
+				"editable": true
+			},
+			"Achternaam":{
+				"editable": true
+			},
+			"Email":{
+				"editable": true
+			}
+			
+			
+		},
 		
 		"Klanten": {
 			
@@ -402,16 +463,19 @@ oTableConfigurationList = {
 			}
 		},
 		
-		"Licenties":{
+		"Klanten_en_licenties":{
 			
-			"Klantnummer":{
-				"editable": true,
+			"licentie_id":{
 				"visible": false
 			},
-			"Klanttype":{
+			
+			"Naam":{
 				
 			},
-			"Produktcode":{
+			"Beschrijving":{
+				
+			},
+			"Productcode":{
 				
 			},
 			"Attachment":{
@@ -422,9 +486,6 @@ oTableConfigurationList = {
 			},
 			"Klantcode	": {
 				
-			},
-			"unique_id": {
-				"visible": false
 			}
 		},
 		

@@ -236,6 +236,11 @@ oTableSettingsList = {
 			"name": "ANW voorbewerking [UIT]",
 			"click": function(t){
 				
+				// save position etc, so as to be able to put table back at same position
+				var iCurrentLeft =		$("#"+fn.getTableName(t)+"_dynamic").offset().left;
+         		var iCurrentTop = 		$("#"+fn.getTableName(t)+"_dynamic").offset().top;
+         		var iDisplayLength =	fn.getCurrentDisplayLength(t);
+				
 				anwBewerking = !anwBewerking;
 				$("#neologismen_tableclosebutton button").click();
 				$("#concordanties_tableclosebutton button").click();
@@ -245,13 +250,20 @@ oTableSettingsList = {
 				
 				var oFilters = (anwBewerking ? {"anw": true} : {});
 				
+				
+				
 				fn.callDatabase("neologismen", oFilters, function(){
 					fn.setCustomButtonCss("neologismen", 0, "background-color", (anwBewerking ? "yellow" : "blue") );
 					fn.setCustomButtonCss("neologismen", 0, "color", (anwBewerking ? "black" : "white") );
 					fn.setCustomButtonName("neologismen", 0, "ANW voorbewerking ["+
 							(anwBewerking ? "AAN" : "UIT") + "]");
 				},
-				{"width": (anwBewerking ? "90%" : "80%") });		
+				{
+					"width": (anwBewerking ? "90%" : "80%"),
+					"top": iCurrentTop, 
+ 					"left": iCurrentLeft,
+ 					"displaylength": iDisplayLength
+ 					});		
 				
 				
 				
