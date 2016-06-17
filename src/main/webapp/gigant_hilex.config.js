@@ -1349,6 +1349,7 @@ oTableConfigurationList = {
 			},
 			
 			"analyzed_wordform_id": {
+				"bgcolor": "#F8E0E6",
 				"cell_tooltip": "Toon citaten",
 				"click": function(t, n){
 					
@@ -1426,6 +1427,20 @@ oTableConfigurationList = {
 		},
 		
 		token_attestations_worktable: {
+			
+			"lemma_id": {
+				"click": function(t, n){
+					var sLemmaId = fn.getDataFromCellNode(n);
+					fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId});
+				}
+			},
+			
+			"multiple_lemmata_analysis_id": {
+				"click": function(t, n){
+					var sMultilemId = fn.getDataFromCellNode(n);
+					fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultilemId});
+				}
+			},
 			
 			"attestation_id": {
 				"visible": false
@@ -1621,11 +1636,20 @@ oTableConfigurationList = {
 						if (sTokenIndexesIds == '') 
 							sTokenIndexesIds = "none";
 						
+						fn.showProcessingMsg(t);
+						
 						fx.updateDatabaseGivenACellOrRow(
 								oCell, 
 								{"onsetoffset": sTokenIndexesIds}, 
 								function(){
-									fn.refreshTable(t);
+									fn.showProcessingMsg(t);
+									
+									var oRow = fx.getRowFromCell(oCell);
+									fx.callRecord(oRow, ["quote", "onsetoffset"], function(){
+										putHighlightOnOneRow(oRow);
+										fn.removeProcessingMsg(t);
+									});
+									
 								});
 						
 						

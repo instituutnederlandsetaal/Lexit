@@ -430,11 +430,28 @@ public class Database {
 
 	    // GROUP BY can be faster than DISTINCT
 	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
-	    String query = "SELECT " + getSafeFieldName(columnName) + " " + 
-	      "FROM " + getSafeTableName(tableName, schema) + " " + 
-	      "GROUP BY " + getSafeFieldName(columnName) + " " +
-	      "ORDER BY " + getSafeFieldName(columnName) + ";";
-
+//	    String query = "SELECT " + getSafeFieldName(columnName) + " " + 
+//	      "FROM " + getSafeTableName(tableName, schema) + " " + 
+//	      "GROUP BY " + getSafeFieldName(columnName) + " " +
+//	      "ORDER BY " + getSafeFieldName(columnName) + ";";
+	    
+		
+	    // Quickest lookup, when a table contains a small number of unique values
+		// (which is exactly what we expect when calling this function)
+		// see: http://zogovic.com/post/44856908222/optimizing-postgresql-query-for-distinct-values
+	    String query = "WITH RECURSIVE t(n) AS ("+
+	    	    "  SELECT MIN(" + getSafeFieldName(columnName) + ") "+
+	    	    "  FROM " + getSafeTableName(tableName, schema) + " "+
+	    	    "  UNION "+
+	    	    "  SELECT (SELECT " + getSafeFieldName(columnName) + " " +
+	    	    "          FROM " + getSafeTableName(tableName, schema)+" " +
+	    	    "          WHERE "+getSafeFieldName(columnName)+" > n " +
+	    	    "          ORDER BY "+getSafeFieldName(columnName)+" LIMIT 1) "+
+	    	    "  FROM t WHERE n IS NOT NULL "+
+	    	    ") "+
+	    	    "SELECT n FROM t;";
+	    
+	    
 	    PostgresDatabaseCommunication dc = connectDatabase();
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
@@ -444,7 +461,7 @@ public class Database {
 
 	      ResultSet rs = dc.sendQuery(query);
 
-	       res = getResultsInAList(rs, new String[] { columnName });
+	      res = getResultsInAList(rs, new String[] { "n" });
 	      if (res.size() > 0)
 	      {
 	        for (String[] oneRecord : res)
@@ -1608,8 +1625,13 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			// get the count, but set a time limit 
-			ResultSet rs = dc.sendQueryWithTimeout(getCountQuery, 2000);
+			
+			boolean bForceExactCount = this.getForceExactCount();
+			
+			// Get the count, but set a time limit...
+			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
+			ResultSet rs = bForceExactCount ? 
+					dc.sendQuery(getCountQuery) : dc.sendQueryWithTimeout(getCountQuery, 2000);
 			
 			res = getResultsInAList(rs, new String[]{"rowcount"});
 			// if the time limit was exceeded, we have a null resultset 
@@ -2137,9 +2159,11 @@ public class Database {
 						
 						dc.sendUpdate("SET search_path TO "+schema+"; ");
 						
-						// important here: we set a timeout, to make sure 
-						// that the normal count will never takes too long
-						dc.sendUpdate("SET statement_timeout TO 2000;");
+						// Important here: we set a timeout, to make sure 
+						// that the normal count will never takes too long.
+						// BUT if the user absolutely required an exact count, he/she will have to put up with it...
+						if ( !bExactCountRequiredByUser)
+							dc.sendUpdate("SET statement_timeout TO 2000;");
 						ResultSet rs2;
 						
 						try {

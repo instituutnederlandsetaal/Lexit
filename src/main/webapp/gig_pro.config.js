@@ -1674,7 +1674,7 @@ oTableConfigurationList = {
 												)
 												{
 												aWordformsToLookup.push(sWordform);
-						}			
+												}			
 										});
 										
 										

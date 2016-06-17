@@ -1165,7 +1165,7 @@ public class TableResources {
 				
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
 		
-		// is exact count required by the user?
+		// is exact count required by the user for this call?
 		getDatabaseObject(co).setForceExactCount( sForceExactCount.equalsIgnoreCase("true") );				
 		
 		

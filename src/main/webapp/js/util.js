@@ -343,6 +343,15 @@ function isNonEmptyArrayLike(obj) {
 /*
  * sort array of array
  * 
+ * USE:
+ * var myArray = [
+ *        [1, 'alfred', '...'],
+ *        [23, 'berta', '...'],
+ *        [2, 'zimmermann', '...'],
+ *        [4, 'albert', '...']
+ *        ];
+ * myArray = myArray.sort(Comparator);
+ * 
  * see: http://stackoverflow.com/questions/5435228/sort-an-array-with-arrays-in-it-by-string
  */
 
