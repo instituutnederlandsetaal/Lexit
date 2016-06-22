@@ -438,7 +438,7 @@ function convertNullToString(arr){
 
 // given a main string in which a substring was found at a given index
 // compute the true start and end indexes in the same string containing html entitie 
-function getTrueIndexes(mainString, selection, selectionStartIndex){
+function getTrueIndexes(mainString, selection, selectionStartIndex, bPushWordBoundaries){
 	
 	// First change all html-entitie names into tags, so we will only have to deal with taglike things
 	
@@ -453,6 +453,16 @@ function getTrueIndexes(mainString, selection, selectionStartIndex){
 	
 	var newSelectionStartIndex = computeTrueIndex(mainString, selectionStartIndex);
 	var newSelectionEndIndex   = computeTrueIndex(mainString, selectionStartIndex + (selection.length-1));
+	
+	// if required (it is when a word has been clicked upon, so we search for its boundaries automatically)
+	// check if the word is truely surrounded by spaces or such. If not, look for the true boundaries of the word.
+	// (this is needed, because the selection was obtained by checking the node what was clicked upon; but sometimes
+	//  a word can be spread among several nodes, because of in-between tags for style etc).
+	if (bPushWordBoundaries)
+		{
+		newSelectionStartIndex = getIndexOfPreviousSpace(mainString, newSelectionStartIndex) + 1;
+		newSelectionEndIndex   = getIndexOfFollowingSpace(mainString, newSelectionEndIndex) - 1;
+		}
 	
 	return {
 		"start": newSelectionStartIndex,
@@ -479,7 +489,7 @@ function computeTrueIndex(mainString, incorrectIndex){
 		// if we have reached the expected index, we are finished
 		if (indexWithoutTags >= incorrectIndex &&
 				// withinTag=true can happen when incorrectIndex=0,
-				// that is: when the mainString begint with a tag 
+				// that is: when the mainString begins with a tag 
 				// and the selection starts right after this tag.
 				!withinTag && 
 				// we can't break when we encounter a Dummy
@@ -491,6 +501,63 @@ function computeTrueIndex(mainString, incorrectIndex){
 		}
 	
 	return incorrectIndex + indexCorrection;
+}
+
+
+// Find the first preceding space before a given index.
+// We need this function to solve a particular flow of the fn.getSelectedTextInNode function:
+// Getting the selected text works given a node that has been clicked upon. In most cases,
+// this is good enough. Sadly, in some cases, this method doesn't give the right text boundaries,
+// because a word happens to be broken up in several nodes due to tags assigning style etc.
+// So, to be able to get the true word boundaries, we try to find the surroundin true spaces,
+// meaning that we exclude space within a tag, of course.
+function getIndexOfPreviousSpace(mainString, startIndex){
+	
+	var withinTag = false;
+	
+	for (var i=startIndex; i>=0; i--)
+		{
+		var currentChar = mainString.charAt(i);
+		if (currentChar==">") 
+			withinTag = true;
+		
+		if (currentChar.match(/[\^\$\(\)\[\]\{\}\\\|\.\*\+\?\s'"!:;,&@#%=]/) && !withinTag)
+			return i;
+		
+		if (currentChar=="<") withinTag = false;
+		}
+	
+	// We reach this point when the string part in range [0, startIndex]  
+	// contains no space at all (outside the tags).
+	// In that particular case, strictly speaking, the space preceding
+	// the first letter of the string is at index -1.
+	return -1;
+}
+
+
+// Find the first following space after a given index.
+// See explanation at previous function getIndexOfPreviousSpace()
+function getIndexOfFollowingSpace(mainString, endIndex){
+	
+	var withinTag = false;
+	
+	for (var i=endIndex; i<mainString.length; i++)
+		{
+		var currentChar = mainString.charAt(i);
+		if (currentChar=="<") 
+			withinTag = true;
+		
+		if (currentChar.match(/[\^\$\(\)\[\]\{\}\\\|\.\*\+\?\s'"!:;,&@#%=]/) && !withinTag)
+			return i;
+		
+		if (currentChar==">") withinTag = false;
+		}
+	
+	// We reach this point when the string part in range [endIndex, string-length]
+	// contains no space at all (outside the tags).
+	// In that particular case, the string length value is the index at which
+	// the following space would occur
+	return mainString.length;
 }
 
 

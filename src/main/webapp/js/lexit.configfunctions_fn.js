@@ -1949,7 +1949,8 @@ fn.getWordClickedUponInNode = function(nCell){
     //  in advance, because highlighting tags are no part of the original string
     var oTrueIndexes = getTrueIndexes( 
     		fn.removeHighlight( fn.getDataFromCellNode(nCell) ), 
-    		$.trim(text), start);
+    		$.trim(text), start, 
+    		true); // extra parameter: push word boundaries (see explanation at util.getTrueIndexes)
     
     // return an object with 4 parts: selection start/end indexes, selection text, and reliability
     return {
