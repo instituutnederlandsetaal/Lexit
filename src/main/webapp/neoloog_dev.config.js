@@ -100,13 +100,89 @@ oTableSettingsList = {
 				
 				// query example
 				// https://www.google.nl/?gws_rd=ssl#cr=countryNL&tbs=ctr:countryNL&q=hoi				
-				window.open("https://www.google.nl/#q="+woord+"&cr=countryNL&tbs=ctr:countryNL,lr:lang_1nl&lr=lang_nl");
+				window.open("https://www.google.nl/#q=\""+woord+"\"&cr=countryNL&tbs=ctr:countryNL,lr:lang_1nl&lr=lang_nl");
 			}
 		}
 	},
 		
 		
+	count_report: {
+		
+		"width": "70%"
+		
+	},
+	
+	changes_report:{
+		
+		"width": "70%"
+	},
+		
 	neologismen : {
+		
+//		"keyup": {
+//			
+//			"uparrow": function(t){
+//				
+//				if ( !fn.tableIsEmpty(t))
+//					{
+//					var sTableName = fn.getTableName(t);
+//					
+//					// small delay otherwise it won't work
+//					$("#"+sTableName).delay(500).queue(function(){
+//
+//						var oRow = 	fx.getFirstSelectedRowFrom(t);
+//						var sId =	fx.getDataFromCellInRow(oRow, "id");
+//						
+//						if ( !isNaN(sId) )
+//							{
+//							fn.callDatabase("concordanties", {"id": sId});
+//							}						
+//
+//						$(this).dequeue();
+//						});
+//					}
+//				
+//			},
+//			"downarrow": function(t){
+//				
+//				if ( !fn.tableIsEmpty(t))
+//					{
+//					var sTableName = fn.getTableName(t);
+//					
+//					// small delay otherwise it won't work
+//					$("#"+sTableName).delay(500).queue(function(){
+//
+//						var oRow = 	fx.getFirstSelectedRowFrom(t);
+//						var sId =	fx.getDataFromCellInRow(oRow, "id");
+//						
+//						if ( !isNaN(sId) )
+//						{
+//						fn.callDatabase("concordanties", {"id": sId});
+//						}
+//
+//						$(this).dequeue();
+//						});
+//					}
+//			}
+//			
+//		},
+		
+		"column_order": ["id", 
+		                 "woord",
+		                 "lemma",
+		                 "freq",
+		                 "neo",
+		                 "anw",
+		                 "opn",
+		                 "niet_neo",
+		                 "twijfel",
+		                 "knop",
+		                 "comment",
+		                 "woord_orig",
+		                 "lemma_orig",
+		                 "woordsoort",
+		                 "minidefinitie",
+		                 "datum"],
 		
 		"viewtype_button": false,
 		
@@ -130,6 +206,30 @@ oTableSettingsList = {
 					if (sLemma != sLemmaOrig)
 						$( fx.getCellNode(this, "lemma") ).css("color", "red");
 				});
+				
+				
+				if ( (fn.getCurrentUser() == 'carole' || fn.getCurrentUser() == 'mathieu' || 
+						fn.getCurrentUser() == 'jesse' || fn.getCurrentUser() == 'katrien') 
+					&& 
+					fn.getIndexOfButtonNamed(t, "Rapporten")<0)
+					{
+					fn.addCustomButton(t, 
+						{
+						"name": "Rapporten",
+						"bgcolor": "#F5D0A9",
+						"click": function(t){
+							
+							fn.callDatabase("count_report", null, function(){
+								fn.callDatabase("changes_report",  null, function(){
+									//fn.alignTables("count_report", "changes_report");
+									});
+								});
+							
+							}
+						
+						});
+					}
+				
 			},
 		"repeat_callback": true,
 		
@@ -153,6 +253,11 @@ oTableSettingsList = {
 			"name": "ANW voorbewerking [UIT]",
 			"click": function(t){
 				
+				// save position etc, so as to be able to put table back at same position
+				var iCurrentLeft =		$("#"+fn.getTableName(t)+"_dynamic").offset().left;
+         		var iCurrentTop = 		$("#"+fn.getTableName(t)+"_dynamic").offset().top;
+         		var iDisplayLength =	fn.getCurrentDisplayLength(t);
+				
 				anwBewerking = !anwBewerking;
 				$("#neologismen_tableclosebutton button").click();
 				$("#concordanties_tableclosebutton button").click();
@@ -162,13 +267,20 @@ oTableSettingsList = {
 				
 				var oFilters = (anwBewerking ? {"anw": true} : {});
 				
+				
+				
 				fn.callDatabase("neologismen", oFilters, function(){
 					fn.setCustomButtonCss("neologismen", 0, "background-color", (anwBewerking ? "yellow" : "blue") );
 					fn.setCustomButtonCss("neologismen", 0, "color", (anwBewerking ? "black" : "white") );
 					fn.setCustomButtonName("neologismen", 0, "ANW voorbewerking ["+
 							(anwBewerking ? "AAN" : "UIT") + "]");
 				},
-				{"width": (anwBewerking ? "90%" : "80%") });		
+				{
+					"width": (anwBewerking ? "90%" : "80%"),
+					"top": iCurrentTop, 
+ 					"left": iCurrentLeft,
+ 					"displaylength": iDisplayLength
+ 					});		
 				
 				
 				
@@ -217,6 +329,42 @@ oTableConfigurationList = {
 		woord: {
 			"visible": false
 		} 
+	},
+	
+	count_report:{
+		
+		datum: {
+			"choosefrom": [],
+			"colsort": "asc"
+		},
+		word_changed: {
+			"bgcolor": "#F6CEEC"
+		},
+		lemma_changed:{
+			"bgcolor": "#A9BCF5"
+		}
+	},
+	
+	changes_report:{
+		
+		datum: {
+			"choosefrom": [],
+			"colsort": "asc"
+		},
+		
+		woord: {
+			"bgcolor": "#F6CEEC"
+		},
+		woord_orig: {
+			"bgcolor": "#F6CEEC"
+		},
+		
+		lemma:{
+			"bgcolor": "#A9BCF5"
+		},
+		lemma_orig:{
+			"bgcolor": "#A9BCF5"
+		}
 	},
 	
 	neologismen : {
@@ -269,7 +417,7 @@ oTableConfigurationList = {
 			"editable": true,
 			"editcallback": function(t, n, value){	
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
 		anw:{
@@ -277,23 +425,31 @@ oTableConfigurationList = {
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
-		niet_neo:{
+		opn:{
 			"bgcolor": "#E0F8E0",
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
-		twijfel:{
+		niet_neo:{
 			"bgcolor": "#A9F5BC",
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
+			}
+		},
+		twijfel:{
+			"bgcolor": "#E0F8E0",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				n = fn.getRowNode(n);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},			
 		

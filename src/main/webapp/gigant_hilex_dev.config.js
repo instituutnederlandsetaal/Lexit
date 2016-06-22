@@ -107,6 +107,9 @@ $(document).on(
 // table general settings
 oTableSettingsList = {
 		
+		special_onw_lemmata_worktable: {
+			"size": "60%"
+		},
 		
 		multilemmata: {
 			
@@ -1497,6 +1500,58 @@ oTableConfigurationList = {
 							}, 
 							{"viewtype": "form"});
 				}
+			}
+		},
+		
+		special_onw_lemmata_worktable: {
+			
+			correctie: {
+				"editable": true
+			},
+			opmerkingen: {
+				"editable": true
+			},
+			lemma_id:{
+				"cell_tooltip": "Toon citaten",
+				"click": function(t, n){
+					
+					var sLemId = fn.getDataFromCellNode(n);
+					fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemId});
+					
+				}
+				
+			},
+			overnemen: {
+				"button": "Overnemen",
+				"button_tooltip": "",
+				"click": function(t, n){
+					
+					var sLem = fn.getDataFromSiblingNode(n, "modern_lemma");
+					fn.updateDatabaseGivenANode(n, {"correctie": sLem}, function(){
+						fn.showProcessingMsg(t);
+						
+						fn.callRecord( fn.getRowNode(n), null, function(){
+							fn.removeProcessingMsg(t);
+						} );
+						
+					});
+				}
+			},
+			persistent_id: {
+				
+				"cell_tooltip": "Toon woordenboek-artikel",
+				"colsort": "asc",
+				"click": function(t, n){
+					
+					var oCell = 		fx.getCell(n);
+					var iPersistentId =	fx.getDataFromCell(oCell);
+					
+					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=ONW&id="+iPersistentId);
+					
+				}
+			},
+			id:{
+				"visible": false
 			}
 		},
 		
