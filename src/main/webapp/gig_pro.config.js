@@ -440,64 +440,8 @@ oTableSettingsList = {
 				
 				var oRows = fx.getAllRows(t);
 				
-				oRows.every(function(){
-					
-					var oCurrentRow = this;
-					
-					// make records with an empty wordform unclickable
-					
-					var sAwfId = fx.getDataFromCellInRow(this, "analyzed_wordform_id");
-					if (sAwfId == '' || sAwfId == null)
-						{
-						
-						$(fx.getCellNode(oCurrentRow, "wordform")).editable('disable');
-						$(fx.getCellNode(oCurrentRow, "wordform")).css("opacity", "0.5");
-						
-						$(fx.getCellNode(oCurrentRow, "afbr_auto")).find("input").attr("disabled", "disabled");
-						$(fx.getCellNode(oCurrentRow, "afbr_auto")).css("opacity", "0.5");
-						
-						$(fx.getCellNode(oCurrentRow, "wordform_gigpos")).editable('disable');
-						$(fx.getCellNode(oCurrentRow, "wordform_gigpos")).css("opacity", "0.5");
-						
-						$(fx.getCellNode(oCurrentRow, "wf_keurmerk")).find("input").attr("disabled", "disabled");
-						$(fx.getCellNode(oCurrentRow, "wf_keurmerk")).css("opacity", "0.5");
-						
-						$(fx.getCellNode(oCurrentRow, "opmerking_intern")).editable('disable');
-						$(fx.getCellNode(oCurrentRow, "opmerking_intern")).css("opacity", "0.5");
-						
-						$(fx.getCellNode(oCurrentRow, "opmerking_extern")).editable('disable');
-						$(fx.getCellNode(oCurrentRow, "opmerking_extern")).css("opacity", "0.5");
-						}
-					
-					
-					
-					
-					// gedrukt must be blue
-					var bIsGedrukt =  fx.getDataFromCellInRow(oCurrentRow, "gedrukt");					
-					if (bIsGedrukt == 't')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
-						for (var i=0; i<aColList.length; i++)
-							{
-							var sColName = aColList[i];
-							$(fx.getCellNode(oCurrentRow, sColName)).css("color", "blue");						
-							}
-						}
-					
-					// diminutives must be green
-					var sVerkleinwoord = fx.getDataFromCellInRow(oCurrentRow, "verkleinwoord");
-					if (sVerkleinwoord != '-')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
-						for (var i=0; i<aColList.length; i++)
-							{
-							var sColName = aColList[i];
-							$(fx.getCellNode(oCurrentRow, sColName)).css("color", "green");						
-							}
-						}
-				});
 				
-				// apply locks
+				// apply locks and add colors
 				
 				var aLemmaIdsArr = new Array();
 				oRows.every(function(i){
@@ -505,6 +449,8 @@ oTableSettingsList = {
 					aLemmaIdsArr[i] = fx.getDataFromCellInRow(this, "lemma_id");			
 				});
 				aLemmaIdsArr = getOnlyUniqueValues(aLemmaIdsArr);
+				
+				fn.showProcessingMsg(t);
 				
 				// get the list of locked lemmata
 				// and modify the rows accordingly
@@ -514,41 +460,61 @@ oTableSettingsList = {
 					
 					oRows.every(function(i){
 						
-						var oThisRow = this;						
-						var sLemmaId = fx.getDataFromCellInRow(oThisRow, "lemma_id");	
+						var oThisRow = this;	
 						
+						// make records with an empty wordform unclickable
+						
+						var sAwfId = fx.getDataFromCellInRow(this, "analyzed_wordform_id");
+						if (sAwfId == '' || sAwfId == null)
+							{
+							
+							$(fx.getCellNode(oThisRow, "wordform")).editable('disable');
+							$(fx.getCellNode(oThisRow, "wordform")).css("opacity", "0.5");
+							
+							$(fx.getCellNode(oThisRow, "afbr_auto")).find("input").attr("disabled", "disabled");
+							$(fx.getCellNode(oThisRow, "afbr_auto")).css("opacity", "0.5");
+							
+							$(fx.getCellNode(oThisRow, "wordform_gigpos")).editable('disable');
+							$(fx.getCellNode(oThisRow, "wordform_gigpos")).css("opacity", "0.5");
+							
+							$(fx.getCellNode(oThisRow, "wf_keurmerk")).find("input").attr("disabled", "disabled");
+							$(fx.getCellNode(oThisRow, "wf_keurmerk")).css("opacity", "0.5");
+							
+							$(fx.getCellNode(oThisRow, "opmerking_intern")).editable('disable');
+							$(fx.getCellNode(oThisRow, "opmerking_intern")).css("opacity", "0.5");
+							
+							$(fx.getCellNode(oThisRow, "opmerking_extern")).editable('disable');
+							$(fx.getCellNode(oThisRow, "opmerking_extern")).css("opacity", "0.5");
+							}
+						
+						
+						
+						// gedrukt must be blue
+						var bIsGedrukt =  fx.getDataFromCellInRow(oThisRow, "gedrukt");					
+						if (bIsGedrukt == 't')
+							{
+							var nCellSelector = $( fx.getNode(oThisRow) ).find("td");
+							nCellSelector.css("color", "blue");
+							}
+						
+						// diminutives must be green
+						var sVerkleinwoord = fx.getDataFromCellInRow(oThisRow, "verkleinwoord");
+						if (sVerkleinwoord != '-')
+							{
+							var nCellSelector = $( fx.getNode(oThisRow) ).find("td");
+							nCellSelector.css("color", "green");
+							}
+							
+						
+						// apply locks
+						var sLemmaId = fx.getDataFromCellInRow(oThisRow, "lemma_id");
 						if ( $.inArray( sLemmaId, aCurrentParadigmaViewLocks ) >-1 )
 							{
-							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
-							
-							for (var j=0; j<aVisibleCells.length; j++)
-								{
-								var sCurrentColumnName = aVisibleCells[j];
-								
-								// we mustn't lock the comment field
-								if (sCurrentColumnName == 'opmerking_intern')
-									continue;
-								
-								// make sure we can't edit the locked lemmata
-								var sCellType =	fx.getCellType(oThisRow, sCurrentColumnName);								
-								var nCell = 	fx.getCellNode(oThisRow, sCurrentColumnName);								
-								
-								if (sCellType == 'text')
-									{									
-									$(nCell).editable('disable');
-									$(nCell).css("opacity", "0.5");
-									}
-								else if (sCellType == 'checkbox')
-									{
-									$(nCell).find("input").attr("disabled", "disabled");
-									$(nCell).css("opacity", "0.5");
-									}
-								else if (sCellType == 'selectbox')
-									{
-									$(nCell).editable('disable');
-									$(nCell).css("opacity", "0.5");
-									}
-								}					
+							var nCellSelector = $( fx.getNode(oThisRow) ).find("td:not(.opmerking_intern)");
+							nCellSelector.editable('disable');
+							nCellSelector.css("opacity", "0.5");
+							nCellSelector.find("input").attr("disabled", "disabled")
+							nCellSelector.find("input").css("opacity", "0.5");				
 							
 							}						
 						
@@ -562,6 +528,8 @@ oTableSettingsList = {
 				
 				if (bReadableParadigmMode)
 					generateParadigmView();
+				
+				fn.removeProcessingMsg(t);
 				
 			},			
 			"button_0":{
@@ -780,7 +748,7 @@ oTableSettingsList = {
 									
 									
 									// do the look up now!
-									fn.callService("http://svprre02.inl.loc:8080/Spelling/SpellingServices", 
+									fn.callService("/Spelling/SpellingServices", 
 													{"action": "syllabify", "w": aWordformsToLookup.join(" ")}, 
 													"GET", "json", function(json){
 											
@@ -991,56 +959,17 @@ oTableSettingsList = {
 				
 				var oRows = fx.getAllRows(t);
 				
-				oRows.every(function(){
-					
-					// gedrukt must be blue
-					
-					var bIsGedrukt = fx.getDataFromCellInRow(this, "gedrukt");
-					if (bIsGedrukt == 't')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
-						for (var i=0; i<aColList.length; i++)
-							{
-							var sColName = aColList[i];							
-							$(fx.getCellNode(this, sColName)).css("color", "blue");						
-							}
-						}
-					
-					// give parent other color (so they are recognizable)
-					var bIsParent = fx.getDataFromCellInRow(this, "is_parent");					
-					if (bIsParent == 't')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
-						for (var i=0; i<aColList.length; i++)
-							{
-							var sColName = aColList[i];
-							$(fx.getCellNode(this, sColName)).css("color", "salmon");						
-							}
-						}								
-					
-					// diminutives must be green
-					var sVerkleinwoord = fx.getDataFromCellInRow(this, "verkleinwoord");
-					if (sVerkleinwoord != '-')
-						{
-						var aColList = mt.getListOfVisibleColumnsOf(sTableName);
-						for (var i=0; i<aColList.length; i++)
-							{
-							var sColName = aColList[i];
-							$(fx.getCellNode(this, sColName)).css("color", "green");						
-							}
-						}
-					
-					
-					});
 				
-				
-				// apply locks
+				// apply locks and add colors
 				
 				var aLemmaIdsArr = new Array();
 				oRows.every(function(i){
 					
 					aLemmaIdsArr[i] = fx.getRowId(this);
 				});
+				
+				
+				fn.showProcessingMsg(t);
 				
 				// get the list of locked lemmata
 				// and modify the rows accordingly
@@ -1052,46 +981,44 @@ oTableSettingsList = {
 						
 						var oThisRow = this;
 						
+						var nCellSelector = $( fx.getNode(oThisRow) ).find("td");
+						
+						// gedrukt must be blue
+						
+						var bIsGedrukt = fx.getDataFromCellInRow(this, "gedrukt");
+						if (bIsGedrukt == 't')
+							{
+							nCellSelector.css("color", "blue");	
+							}
+						
+						// give parent other color (so they are recognizable)
+						var bIsParent = fx.getDataFromCellInRow(this, "is_parent");					
+						if (bIsParent == 't')
+							{
+							nCellSelector.css("color", "salmon");
+							}								
+						
+						// diminutives must be green
+						var sVerkleinwoord = fx.getDataFromCellInRow(this, "verkleinwoord");
+						if (sVerkleinwoord != '-')
+							{
+							nCellSelector.css("color", "green");
+							}
+						
+						// apply locks
 						if ( $.inArray( fx.getRowId(oThisRow), aCurrentLemmaViewLocks ) >-1 )
 							{
-							var aVisibleCells = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
-							
-							for (var j=0; j<aVisibleCells.length; j++)
-								{
-								var sCurrentColumnName = aVisibleCells[j];
-								
-								// we mustn't lock the comment field
-								if (sCurrentColumnName == 'opmerking_intern')
-									continue;
-								
-								
-								// make sure we can't edit the locked lemmata
-								var sCellType =	fx.getCellType(oThisRow, sCurrentColumnName);								
-								var nCell =		fx.getCellNode(oThisRow, sCurrentColumnName);
-								
-								if (sCellType == 'text')
-									{									
-									$(nCell).editable('disable');
-									$(nCell).css("opacity", "0.5");
-									}
-								else if (sCellType == 'checkbox')
-									{
-									$(nCell).find("input").attr("disabled", "disabled");
-									$(nCell).css("opacity", "0.5");
-									}
-								else if (sCellType == 'selectbox')
-									{
-									$(nCell).editable('disable');
-									$(nCell).css("opacity", "0.5");
-									}
-								}					
-							
+							var nCellSelector = $( fx.getNode(oThisRow) ).find("td:not(.opmerking_intern)");
+							nCellSelector.editable('disable');
+							nCellSelector.css("opacity", "0.5");
+							nCellSelector.find("input").attr("disabled", "disabled")
+							nCellSelector.find("input").css("opacity", "0.5");							
 							}						
 						
 					});
 					
 
-						
+					fn.removeProcessingMsg(t);
 					
 				}); // end of function call
 				
@@ -1679,7 +1606,7 @@ oTableConfigurationList = {
 										
 										
 										// do the look up now!
-										fn.callService("http://svprre02.inl.loc:8080/Spelling/SpellingServices", 
+										fn.callService("/Spelling/SpellingServices", 
 														{"action": "syllabify", "w": aWordformsToLookup.join(" ")}, 
 														"GET", "json", function(json){
 												
@@ -1937,7 +1864,12 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"lemma_gigpos": {				
-				"editable": true		
+				"editable": true,
+				"editcallback": function(t, n, value){
+					
+					// make sure the menu disappear in IE
+					$(".ui-menu-item").hide();
+				}
 			},
 			"sublemma_type": {				
 				"editable": true,

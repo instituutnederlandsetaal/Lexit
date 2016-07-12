@@ -121,6 +121,9 @@ kf._setPressedKey = function(sKeyName){
 	}
 	else if (sKeyPressed == "escape"){ // ESC
 		row.clearRowSelectionInAllTables();
+		
+		// make sure the autocomplete dropdown menus disappear in IE
+		$(".ui-menu-item").hide();
     }
 };
 
@@ -384,6 +387,10 @@ kf.addKeyFunctions = function(){
     	// refresh active table
     	if (kf.isPressed("f5"))
     		{
+    		// make sure the dropdown menus disappear in IE
+			$(".ui-menu-item").hide();
+			
+			// refresh the active table
     		var sActiveTable = kf.getActiveTable();
     		if (sActiveTable!=null)
     			fn.refreshTable(sActiveTable);
