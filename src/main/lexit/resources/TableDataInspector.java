@@ -4,15 +4,10 @@ package lexit.resources;
 
 import java.util.ArrayList;
 
-
-
 // contained in lib javax.ws.rs-api-2.0.1.jar
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriInfo;
 
 import lexit.table.ResultObject;
 import lexit.util.Database;

@@ -1,5 +1,12 @@
 package lexit.table;
 
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * The ResultObject contains the result of a database query and some more,
  * that is: some table content, the number of results, the number of available records, etc.
@@ -8,14 +15,6 @@ package lexit.table;
 
 import lexit.resources.Constants;
 import lexit.util.Database;
-
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement(name="results")
 public class ResultObject {

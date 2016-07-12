@@ -7,6 +7,21 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>lexit Maven Webapp</name>
   <url>http://maven.apache.org</url>
+  <build>
+  	<plugins>
+		<!-- Compiles Java sources -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.3.2</version>
+			<configuration>
+				<source>1.7</source>
+				<target>1.7</target>
+			</configuration>
+		</plugin>
+  	</plugins>
+    <finalName>lexit2</finalName>
+  </build>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -34,18 +49,16 @@
     	<artifactId>jersey-media-json-processing</artifactId>
     	<version>2.22.1</version>
     </dependency>
-    <dependency>
+	<dependency>
     	<groupId>javax.servlet</groupId>
-    	<artifactId>javax.servlet-api</artifactId>
-    	<version>4.0.0-b01</version>
-    </dependency>
+    	<artifactId>servlet-api</artifactId>
+    	<version>2.5</version>
+    	<scope>provided</scope>
+	</dependency>
     <dependency>
     	<groupId>org.glassfish.jersey.media</groupId>
     	<artifactId>jersey-media-json-jackson</artifactId>
     	<version>2.22.1</version>
     </dependency>
   </dependencies>
-  <build>
-    <finalName>lexit</finalName>
-  </build>
 </project>

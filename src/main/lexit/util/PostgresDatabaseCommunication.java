@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.ws.rs.core.SecurityContext;
-
 import lexit.resources.Constants;
 import lexit.resources.ContextObject;
 import lexit.resources.DbResponseObject;
@@ -75,6 +73,7 @@ public class PostgresDatabaseCommunication {
         	props.setProperty("user", user);
         	props.setProperty("password", password);
         	props.setProperty("charSet", "UTF8");
+        	//props.setProperty("tcpKeepAlive", "true");
         	//props.setProperty("prepareThreshold", "1");
         	this.db = DriverManager.getConnection(location, props);
 

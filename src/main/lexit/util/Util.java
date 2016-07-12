@@ -11,15 +11,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-import nl.inl.util.XmlUtil;
-
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import lexit.resources.Constants;
 import lexit.resources.ContextObject;
@@ -33,11 +28,17 @@ import lexit.resources.ContextObject;
 public class Util {
 	
 	
+	public static String getTime(){
+		
+		return (new Date().getTime())+" millisec since 1/1/1970";
+	
+	}
+	
 	public static void debug(String output){
 		
 		if (Constants.debug) 
 			{
-			System.out.println("---");			
+			System.out.println("--- "+getTime());			
 			System.out.println(output);
 			}
 	}
@@ -46,7 +47,7 @@ public class Util {
 		
 		if (Constants.debug) 
 			{
-			System.out.println("---");
+			System.out.println("--- "+getTime());
 			System.out.print("DB: "+co.getDbName());
 			System.out.print("  ");
 			System.out.println("USER: "+co.getUsername());
@@ -250,28 +251,28 @@ public class Util {
 	}
 
 	
-	/**
-	 * Transform the XML we got from the GTB or ANW webservices into a DOM object
-	 * @param xmlString
-	 * @return
-	 * @throws Exception
-	 */
-	public static Document getDOMfrom(String xmlString) throws Exception{
-		
-	    //Create blank DOM Document
-	    Document doc = null;
-	        
-		try {
-			doc = XmlUtil.parseXml(xmlString);
-			
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException(e);
-		}
-		
-		return doc;
-	}
-	
+//	/**
+//	 * Transform the XML we got from the GTB or ANW webservices into a DOM object
+//	 * @param xmlString
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public static Document getDOMfrom(String xmlString) throws Exception{
+//		
+//	    //Create blank DOM Document
+//	    Document doc = null;
+//	        
+//		try {
+//			doc = XmlUtil.parseXml(xmlString);
+//			
+//		} catch (SAXException e) {
+//			// TODO Auto-generated catch block
+//			throw new RuntimeException(e);
+//		}
+//		
+//		return doc;
+//	}
+//	
 	
 	
 	
