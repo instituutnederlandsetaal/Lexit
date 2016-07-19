@@ -167,6 +167,23 @@ oTableSettingsList = {
 //			
 //		},
 		
+		"column_order": ["id", 
+		                 "woord",
+		                 "lemma",
+		                 "freq",
+		                 "neo",
+		                 "anw",
+		                 "opn",
+		                 "niet_neo",
+		                 "twijfel",
+		                 "knop",
+		                 "comment",
+		                 "woord_orig",
+		                 "lemma_orig",
+		                 "woordsoort",
+		                 "minidefinitie",
+		                 "datum"],
+		
 		"viewtype_button": false,
 		
 		"callback": function(t){
@@ -400,7 +417,7 @@ oTableConfigurationList = {
 			"editable": true,
 			"editcallback": function(t, n, value){	
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
 		anw:{
@@ -408,23 +425,31 @@ oTableConfigurationList = {
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
-		niet_neo:{
+		opn:{
 			"bgcolor": "#E0F8E0",
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},
-		twijfel:{
+		niet_neo:{
 			"bgcolor": "#A9F5BC",
 			"editable": true,
 			"editcallback": function(t, n, value){
 				n = fn.getRowNode(n);
-				fn.callRecord(n, ["neo", "anw", "niet_neo", "twijfel"]);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
+			}
+		},
+		twijfel:{
+			"bgcolor": "#E0F8E0",
+			"editable": true,
+			"editcallback": function(t, n, value){
+				n = fn.getRowNode(n);
+				fn.callRecord(n, ["neo", "anw", "opn", "niet_neo", "twijfel"]);
 			}
 		},			
 		
