@@ -4,7 +4,13 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
                    "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
                    "token_attestations", "token_attestations_worktable", "wordforms", 
                    "modified_lemmata_view", "modified_paradigm_view", "mnw_fix_multiple_ws",
-                   "fix_multiple_lemmata_analyses"];
+                   "fix_multiple_lemmata_analyses", 
+                   "quote_comparison",
+                   "quote_comparison_lemma_change", 
+                   "quote_comparison_lemma_became_multilem",
+                   "quote_comparison_doubled_multilem_quote",
+                   "quote_comparison_doubled_lemma_quote",
+				   "marijke_spelling_giganthilex_differences"];
 
 
 
@@ -42,6 +48,29 @@ function comma(a, b){
 	return deEmpty(a)+","+deEmpty(b);
 }
 
+
+
+
+var quoteConfig = {
+		
+		"attestation_ids_to_keep": {
+			"visible": false
+		},
+		
+		"attestation_ids_to_delete": {
+			"visible": false
+		},
+		
+		"searchstr": {
+			"click": function(t, n){
+				
+				var sSearch = fn.getDataFromCellNode(n);
+				fn.callDatabase("token_attestations_worktable", {"attestation_ids": sSearch}, function(){
+					fn.scrollToTable("token_attestations_worktable");
+				});
+			}
+		}
+	};
 
 
 // Autocomplete configuration
@@ -1503,6 +1532,18 @@ oTableConfigurationList = {
 			}
 		},
 		
+		quote_comparison: quoteConfig,
+		
+		quote_comparison_lemma_change: quoteConfig,
+		
+		quote_comparison_lemma_became_multilem: quoteConfig,
+		
+		quote_comparison_doubled_multilem_quote: quoteConfig,
+		
+		quote_comparison_doubled_lemma_quote: quoteConfig,
+		
+		
+		
 		special_onw_lemmata_worktable: {
 			
 			correctie: {
@@ -1555,6 +1596,31 @@ oTableConfigurationList = {
 			}
 		},
 		
+		marijke_spelling_giganthilex_differences: {
+			
+			marijke_lemma: {
+				"editable": true,
+				"colsort": "asc"
+			},
+			id: {
+				"visible": false
+			},
+			
+			persistent_id: {
+				
+				"click": function(t, n){
+					
+					var sPid = fn.getDataFromCellNode(n);
+					var sWdb = fn.getDataFromSiblingNode(n, "wdb");
+					fn.callDatabase("lemmata_and_paradigma", {"persistent_id": sPid, "wdb": sWdb},
+							function(){
+								fn.scrollToTable("lemmata_and_paradigma");
+							});
+				}
+				
+			}
+		},
+		
 		token_attestations_worktable: {
 			
 			"opmerking": {
@@ -1563,6 +1629,14 @@ oTableConfigurationList = {
 			
 			"wdb": {
 				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
+			},
+			
+			"quotation_section_id_fixed":{
+				"visible": true
+			},
+			
+			"quotation_section_id_was": {
+				"visible": false
 			},
 			
 			"lemma_id": {
@@ -1809,7 +1883,9 @@ oTableConfigurationList = {
 
 // start with the main table
 
-fn.callDatabase("lemmata_and_paradigma");
+//fn.callDatabase("lemmata_and_paradigma");
+
+//fn.callDatabase("quote_comparison");
 
 
 

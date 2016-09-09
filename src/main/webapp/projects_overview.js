@@ -137,6 +137,12 @@ var aProjectList =
 			config_filename: "spy",
 			description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
 			goody: true
+	 },
+	 {
+			name: "Reset user rights",
+			config_filename: "reset_user_rights",
+			description: "Toegangsrechten resetten (klik alleen als het nodig is, geen speelgoed!)",
+			goody: true
 	 }
 	 
 	];

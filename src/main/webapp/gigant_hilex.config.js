@@ -4,7 +4,7 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
                    "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
                    "token_attestations", "token_attestations_worktable", "wordforms", 
                    "modified_lemmata_view", "modified_paradigm_view", "mnw_fix_multiple_ws",
-                   "fix_multiple_lemmata_analyses"];
+                   "fix_multiple_lemmata_analyses", "marijke_spelling_giganthilex_differences"];
 
 
 
@@ -1410,6 +1410,41 @@ oTableConfigurationList = {
 			"unique_id":{
 				"visible": false
 			}
+		},
+		
+		
+		marijke_spelling_giganthilex_differences: {
+			
+			marijke_lemma: {
+				"editable": true,
+				"colsort": "asc",
+				"editcallback": function(t, n, value){
+					
+					var oCell = fx.getCell(n);
+					fx.updateDatabaseGivenACellOrRow(oCell, {"modified": true});
+				}
+			},
+			modified: {
+				"visible": false
+			},
+			id: {
+				"visible": false
+			},
+			
+			persistent_id: {
+				
+				"click": function(t, n){
+					
+					var sPid = fn.getDataFromCellNode(n);
+					var sWdb = fn.getDataFromSiblingNode(n, "wdb");
+					fn.callDatabase("lemmata_and_paradigma", {"persistent_id": sPid, "wdb": sWdb},
+							function(){
+								fn.scrollToTable("lemmata_and_paradigma");
+							});
+				}
+				
+			}
+			
 		},
 		
 		token_attestations: {

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2016.07.08
+	v2016.09.09
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -195,6 +195,9 @@
 	var bTest;
 	// spy mode?
 	var bSpyMode;
+	// reset user rights?
+	var bResetUserRights;
+	
 	
 	
 	$(document).ready(function() {	
@@ -226,6 +229,13 @@
 				paramsHash.get("db")=='spy');
 		
 		
+		// are we resetting the user rights?
+				
+		bResetUserRights = (paramsHash!=null &&
+				paramsHash.get("db")!=null && 
+				paramsHash.get("db")=='reset_user_rights');
+		
+		
 		// test mode (development)
 		if (bTest)
 			{
@@ -243,6 +253,11 @@
 		else if (bSpyMode)
 			{				
 			buildSpy();
+			}
+		
+		else if (bResetUserRights)
+			{				
+			window.open(WEBSERV_URL+"/table/reset_user_rights");
 			}
 		
 		// normal mode (production)
