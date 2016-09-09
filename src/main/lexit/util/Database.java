@@ -54,11 +54,12 @@ public class Database {
 	// be automatically set back to false by the getTable() function
 	public boolean bForceExactCount = false; 
 	
-	// Standard value for the maximal allowed cost of a count query
-	// Since the computed cost is generally speaking 25 times higher that the query execution time, 
-	// the maximal allowed cost must be (max allowed duration) x 25. 
-	int maxDuration = 3000;
-	int maxAllowedCost = maxDuration * 25;
+	// Standard value for the maximal allowed cost of a count query:
+	// Since the computed cost seemed to be (generally speaking on our server) 25 times higher 
+	// than the query execution time, the maximal allowed cost must be (max allowed duration) x 25. 
+	// This is of course just a start value, as this max allowed cost will repeatedly be recomputed.
+	int maxAllowedDuration = 2000; // milliseconds
+	int maxAllowedCost = maxAllowedDuration * 25;
 	
 	
 	// constructor
@@ -1631,7 +1632,7 @@ public class Database {
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
 			ResultSet rs = bForceExactCount ? 
-					dc.sendQuery(getCountQuery) : dc.sendQueryWithTimeout(getCountQuery, 2000);
+					dc.sendQuery(getCountQuery) : dc.sendQueryWithTimeout(getCountQuery, maxAllowedDuration);
 			
 			res = getResultsInAList(rs, new String[]{"rowcount"});
 			// if the time limit was exceeded, we have a null resultset 
@@ -2163,9 +2164,9 @@ public class Database {
 						// that the normal count will never takes too long.
 						// BUT if the user absolutely required an exact count, he/she will have to put up with it...
 						if ( !bExactCountRequiredByUser)
-							dc.sendUpdate("SET statement_timeout TO 2000;");
-						ResultSet rs2;
+							dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 						
+						ResultSet rs2;						
 						try {
 							rs2 = dc.sendPreparedQuery(countQuery, args, ato);	
 							
@@ -2182,6 +2183,10 @@ public class Database {
 								{
 								System.out.println("%%% NORMAL COUNT TIME OUT !!");
 								System.out.println("%%% We will use an estimate count");
+								// if the normal count timed out, we can't recompute the max allowed
+								// cost in a reliable way, because the duration won't relate to the
+								// query cost computed by the database. So, we have to cancel recomputation.
+								recomputeMaxAllowedCost = false;
 								}
 							count = getEstimateCount(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
@@ -2272,12 +2277,20 @@ public class Database {
 	 * There seems to be a sometimes quite constant linear relation between the 
 	 * cost of a count query and the time this query takes to execute:
 	 * 
-	 *     relation = queryCost / timeToExecute
+	 *       relation = queryCost / timeToExecute
 	 *     
-	 * So, given a maximal allowed duration X for a count query,
+	 *     which implies:
+	 *     
+	 *       queryCost = timeToExecute * relation
+	 *     
+	 * So, given a maximal allowed duration 'maxAllowedTime' for a count query,
 	 * we expect the cost of that query not to exceed the value
 	 * 
-	 *     X * relation
+	 *       maxAllowedTime * relation
+	 *     
+	 *     that is:
+	 *     
+	 *       maxAllowedCost <= (maxAllowedTime * relation)
 	 * 
 	 * When recomputing the maximal allowed cost, we first compute this maximal cost
 	 * given the last query, and then compute an average value, given the previous
@@ -2289,16 +2302,20 @@ public class Database {
 	 * @param timeAfterCount
 	 */
 	int numberOfAllowedCostRecomputations = 1;
-	private void recomputeMaxAllowedCost(int queryCost, long timeBeforeCount, long timeAfterCount ){
+	private void recomputeMaxAllowedCost(int queryCost, long timeBeforeCount, long timeAfterCount ){		
 		
+		// compute what the max allowed cost would be given the current
+		// relation between cost and execution time
 		int currentMaxAllowedCost = 
-			(int) (maxDuration * ((float)queryCost / (timeAfterCount - timeBeforeCount) ));
+			(int) (maxAllowedDuration * ((float)queryCost / (timeAfterCount - timeBeforeCount) ));
 		
+		// include this calculation in the average max allowed cost
 		int estimatedTotalOfAllPreviousComputations = numberOfAllowedCostRecomputations * maxAllowedCost;
 		
 		numberOfAllowedCostRecomputations++;		
 		int newTotalOfAllComputations = estimatedTotalOfAllPreviousComputations + currentMaxAllowedCost;
 		
+		// new average
 		maxAllowedCost = newTotalOfAllComputations / numberOfAllowedCostRecomputations; 
 	}
 	

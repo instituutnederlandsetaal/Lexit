@@ -27,11 +27,19 @@ import lexit.resources.ContextObject;
  */
 public class Util {
 	
+	static long lastTimeMilliSec = new Date().getTime();	
 	
 	public static String getTime(){
 		
-		return (new Date().getTime())+" millisec since 1/1/1970";
-	
+		long timeMilliSec = new Date().getTime();
+		
+		String returnString = (timeMilliSec - lastTimeMilliSec)+" millisec since last call";
+		
+		lastTimeMilliSec = timeMilliSec;
+		
+		return returnString;
+		
+			
 	}
 	
 	public static void debug(String output){
