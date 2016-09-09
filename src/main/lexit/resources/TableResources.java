@@ -177,6 +177,11 @@ public class TableResources {
 			@Context HttpServletRequest httpServletRequest
 			) throws IOException {
 		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, "RaNdOmDaTaBaSe");
+		
+		if ( !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
 		DbResponseObject dro = new DbResponseObject();
 				
 		users2roles = new ConcurrentHashMap<String, String[]>();
@@ -576,10 +581,19 @@ public class TableResources {
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
 		Util.debug(co, "### Call function "+functionName);
 		
+		// first check the function operation type (= writing/reading)
+		boolean functionDoesWritingOperations = 
+				getDatabaseObject(co).getFunctionOperationType(functionName).equals("writing");
+		
 		String userName = sc.getUserPrincipal().getName();
-		if ( !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
+		
+		// if we have a writing function, we need to test for full access rights
+		if ( functionDoesWritingOperations && !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
+		// otherwise, we the function is just reading, just test for reading access rights
+		else if (!functionDoesWritingOperations && !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);		
 		
 		TableRecordObject tro = 
 			getDatabaseObject(co).callFunction(functionName, args.split(Constants.ARG_INTERNAL_SEPARATOR, -1));

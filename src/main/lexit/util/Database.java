@@ -37,6 +37,7 @@ public class Database {
 	public ConcurrentHashMap<String, String> tableAndColumnNameToCustomTypesValues = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String[]> functionNameToTypes = new ConcurrentHashMap<String, String[]>();
 	public ConcurrentHashMap<String, String> functionNameToReturnType = new ConcurrentHashMap<String, String>();
+	public ConcurrentHashMap<String, String> functionNameToOperationType = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String> tableNameToPrimaryKey = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String[]> tableNameToColumnNames = new ConcurrentHashMap<String, String[]>();
 
@@ -2850,6 +2851,108 @@ public class Database {
 		return argumentTypes;
 	}
 	
+	
+	/**
+	 * Determine if a function is a writing function (return 'writing')
+	 * or just a reading function  (return 'reading')
+	 * @param functionName
+	 * @return
+	 */
+	public String getFunctionOperationType(String functionName){
+		
+		String projectSchema = getSchemaName(); // get schema of project
+		
+	
+		// (see: http://stackoverflow.com/questions/3524859/how-to-display-full-stored-procedure-code)
+		
+		// does the function contain DELETE, UPDATE or INSERT?
+		
+		// The trick is:  
+		// build a regex pattern like 
+		// .*(update|delete from|insert into) schema_name\.(table1|table2|table3|table_whatever).*
+		// and try to find this pattern in the function body text.
+		// Finally, if it matches, return string 'writing', otherwise string 'reading',
+		// which describes the function operation type.
+		
+		String functionQuery = 		
+			"SELECT CASE (function_txt.fulltext ~ tables.writing_pattern) "+
+			"WHEN true THEN 'writing' ELSE 'reading' END " + 
+			"AS function_operation " +
+			"FROM " +
+			"(SELECT LOWER(regexp_replace(p.prosrc, E'[ \t\n\r]+', ' ', 'g')) AS fulltext " + 
+			"FROM pg_proc p, pg_namespace n " +
+			"WHERE p.proname = ? " +  // function name
+			"AND n.nspname = ?) function_txt, " + // function schema name
+			"(SELECT '.*(update|delete from|insert into) " + projectSchema + 
+			"\\.('||string_agg(c.relname, '|')||').*' AS writing_pattern " +
+			"FROM pg_catalog.pg_class c " +
+			"FULL JOIN pg_catalog.pg_namespace n " + 
+			"ON n.oid = c.relnamespace " +
+			"WHERE c.relkind IN ('r','v','') " +
+			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " + 
+			"AND n.nspname != 'information_schema' " +
+			"AND n.nspname = ? " + // project schema name
+			"ORDER BY 1) tables";
+		
+		// if the function name contains a schema name (like 'api.blah'), extract it
+		String functionSchemaName = "public";
+		if (functionName.indexOf(".")>0)
+			{
+			functionSchemaName = functionName.split("\\.")[0];
+			functionName = functionName.split("\\.")[1];
+			}
+		
+		String cachingKey = functionSchemaName+functionName;
+		if ( functionNameToOperationType.containsKey(cachingKey) )
+			{
+			if (Constants.debug) 
+				{
+				System.out.println("## Function operation type from cache: ");
+				System.out.println(functionNameToOperationType.get(cachingKey));
+				}
+			
+			return functionNameToOperationType.get(cachingKey);
+			}
+		
+		
+		String functionOperationType = "writing";
+		
+		String schema = getSchemaName();
+		
+		PostgresDatabaseCommunication dc = connectDatabase();
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			
+			String[] args = new String[]{functionName, functionSchemaName, projectSchema};		
+			
+			ResultSet rs = dc.sendPreparedQuery(functionQuery, args);				
+			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"function_operation"});
+			
+			if (res.size()>0)
+				{
+				functionOperationType = res.get(0)[0];
+				functionNameToOperationType.put(cachingKey, functionOperationType);
+				}			
+			
+			} 
+		catch (Exception e) 
+			{
+				throw new RuntimeException("Error while executing query "+functionQuery, e);
+			} 
+			
+		finally {
+			closeDatabase(dc);
+		}
+			
+		if (Constants.debug)
+			{
+				System.out.println("## Function operation type: ");
+				System.out.println(functionOperationType);
+			}
+		
+		return functionOperationType;
+	}
 	
 	
 	/**
