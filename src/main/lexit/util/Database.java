@@ -2883,8 +2883,9 @@ public class Database {
 			"FROM pg_proc p, pg_namespace n " +
 			"WHERE p.proname = ? " +  // function name
 			"AND n.nspname = ?) function_txt, " + // function schema name
-			"(SELECT '.*(update|delete from|insert into) " + projectSchema + 
-			"\\.('||string_agg(c.relname, '|')||').*' AS writing_pattern " +
+			"(SELECT '.*(update|delete from|insert into) " + 
+			"(|" + projectSchema + "\\.)" + // the schema name might be omitted here (eg. public)
+			"('||string_agg(c.relname, '|')||').*' AS writing_pattern " +
 			"FROM pg_catalog.pg_class c " +
 			"FULL JOIN pg_catalog.pg_namespace n " + 
 			"ON n.oid = c.relnamespace " +

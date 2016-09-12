@@ -54,6 +54,16 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	asTableTypes.push("none");
 	abTableVisible.push(true);
 	
+	// show error message if configuration tries to call a table that is set to be hidden
+	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) )
+		{
+		fn.message("Fout", "U probeert tabel '"+sTableToCallUponStartUp+"' te openen, " +
+				"maar volgens de configuratie moet deze tabel verborgen blijven. " +
+				"Zie oShowOnlyTables of oHiddenTablesList in " +
+				"het "+getHttpParams().get("db")+".config.js-bestand.");
+		}
+	
+	
 	// process the xml table list
 	$(xml).find("oneTable").each(function(){
 		
