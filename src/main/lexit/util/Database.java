@@ -55,12 +55,9 @@ public class Database {
 	// be automatically set back to false by the getTable() function
 	public boolean bForceExactCount = false; 
 	
-	// Standard value for the maximal allowed cost of a count query:
-	// Since the computed cost seemed to be (generally speaking on our server) 25 times higher 
-	// than the query execution time, the maximal allowed cost must be (max allowed duration) x 25. 
-	// This is of course just a start value, as this max allowed cost will repeatedly be recomputed.
+	// Standard value for the maximal allowed cost of a count query
 	int maxAllowedDuration = 2000; // milliseconds
-	int maxAllowedCost = maxAllowedDuration * 25;
+	int maxAllowedCost = -1; // value will be computed at first call of recomputeMaxAllowedCost()
 	
 	
 	// constructor
@@ -1693,11 +1690,20 @@ public class Database {
 		PostgresDatabaseCommunication dc = connectDatabase();
 		ArrayList<String[]> result = new ArrayList<String[]>();
 		
+		// prepare max allowed cost initialization
+		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, new String[]{schema}));
+		long timeBefore = new Date().getTime();
+		
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			ResultSet rs = dc.sendPreparedQuery(query, new String[]{schema});
 			
+			// compute max allowed cost (initialization)
+			long timeAfter = new Date().getTime();
+			recomputeMaxAllowedCost(queryCost, timeBefore, timeAfter);
+			
+			// get list of tables
 			result = getResultsInAList(rs, new String[]{"table_name", "description", "comment", "type"});		
 			
 		} catch (Exception e) {
@@ -2310,14 +2316,28 @@ public class Database {
 		int currentMaxAllowedCost = 
 			(int) (maxAllowedDuration * ((float)queryCost / (timeAfterCount - timeBeforeCount) ));
 		
-		// include this calculation in the average max allowed cost
-		int estimatedTotalOfAllPreviousComputations = numberOfAllowedCostRecomputations * maxAllowedCost;
+		// if maxAllowedCost was not initialized yet, do it now
+		if ( maxAllowedCost < 0)
+		{
+			numberOfAllowedCostRecomputations = 1;
+			maxAllowedCost = currentMaxAllowedCost;			
+		}
+		// if we already have a maxAllowedCost, recompute it now
+		else
+		{
+			// include this calculation in the average max allowed cost
+			int estimatedTotalOfAllPreviousComputations = numberOfAllowedCostRecomputations * maxAllowedCost;
+			
+			numberOfAllowedCostRecomputations++;		
+			int newTotalOfAllComputations = estimatedTotalOfAllPreviousComputations + currentMaxAllowedCost;
+			
+			// new average
+			maxAllowedCost = newTotalOfAllComputations / numberOfAllowedCostRecomputations; 
+		}
 		
-		numberOfAllowedCostRecomputations++;		
-		int newTotalOfAllComputations = estimatedTotalOfAllPreviousComputations + currentMaxAllowedCost;
 		
-		// new average
-		maxAllowedCost = newTotalOfAllComputations / numberOfAllowedCostRecomputations; 
+		Util.debug(co, ">>>>>> NEW maxAllowedCost = "+maxAllowedCost);
+		
 	}
 	
 	
