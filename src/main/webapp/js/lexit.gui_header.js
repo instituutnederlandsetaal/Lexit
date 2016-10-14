@@ -1384,20 +1384,18 @@ head.putHelpButton = function(sSomeTablename){
 				"<TR>"+
 				"<TD>&copy;</TD>"+
 				"<TD>"+
-				"Instituut voor Nederlandse Lexicologie (INL)"+
+				"<img src='"+BASE_URL+"/images/INT-logo.png' height='60px' width='136px'>"+
 				"</TD>"+
 				"</TR>"+				
 				"<TR>"+
 				"<TD></TD>"+
-				"<TD>"+
-				"Leiden/Antwerpen<BR>"+
-				"</TD>"+
+				"<TD></TD>"+
 				"</TR>"+
 				"<TR><TD></TD><TD>&nbsp;</TD></TR>"+
 				"<TR>"+
 				"<TD></TD>"+
 				"<TD>"+
-				"www.inl.nl"+
+				"www.ivdnt.org"+
 				"</TD>"+
 				"</TR>"+
 				"</TABLE>"+

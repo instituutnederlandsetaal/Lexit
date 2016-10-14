@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2016.09.15
+	v2016.09.27
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -203,7 +203,7 @@
 	$(document).ready(function() {	
 		
 		// put INL logo
-		$("#home_logo").html('<img src="'+BASE_URL+'/images/INL-logo.gif">');
+		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
 		
 		// get http parameters
 		paramsHash = getHttpParams();
@@ -483,23 +483,34 @@
 			
 			
 			// show message or warning for this project, if available
+			
 			var oProjectObject = getProjectObject(paramsHash.get("db"));
 			if (typeof oProjectObject != 'undefined')
 				{
+				
+				// message
 				if (typeof oProjectObject["message"] != 'undefined')
 					{
 					var sWarning = oProjectObject["message"];
 					var bPrivate = (typeof oProjectObject["private"] != 'undefined') ?
-						oProjectObject["private"] : false; // default is 'false' 						
+						oProjectObject["private"] : false; // default is 'false'
+					var fnMsgCallback = (typeof oProjectObject["message_callback"] != 'undefined') ?
+								oProjectObject["message_callback"] : null;
 						 
 					// show warning message if available
 					if (	sWarning != '' &&   
 							// except if it should be kept private to home
 							!(bPrivate && (document.URL).indexOf( INL_HOMEURL )<0 ) 
 						)
-						fn.message(paramsHash.get("db"), sWarning);
+						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
 					}
-				}		
+				
+				// redirect to other URL (rare, but it has been required in the past)
+				if (typeof oProjectObject["redirect"] != 'undefined')
+					{
+					window.location.href = oProjectObject["redirect"];
+					}
+				}
 			}
 		
 	};

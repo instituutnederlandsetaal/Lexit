@@ -1129,7 +1129,7 @@ oTableSettingsList = {
 				"textcolor": "yellow",
 				"click": function(t){
 					
-					fn.confirm("Zeker weten?", "Weet u het zeker?", function(){
+					fn.confirm("Lemma en superlemma linken", "Weet u het zeker?", function(){
 						
 						if (sChosenSuperLemId != null)
 						{
@@ -1173,6 +1173,47 @@ oTableSettingsList = {
 				}
 			},
 			"button_5": {
+				
+				"name": "Unlink superlem",
+				"bgcolor":"red",
+				"textcolor": "yellow",
+				"click": function(t){
+					
+					
+					fn.confirm("Lemma en superlemma unlinken", "Weet u het zeker?", function(){
+						
+						var oRows = fx.getSelectedRowsFrom(t);
+						if (oRows.any())
+							{
+							
+							oRows.every(function(){
+								
+								var sLemId = 	fx.getDataFromCellInRow(this, "lemma_id");
+								var bLastNode =	fx.isLastRowOf(this, oRows);
+								
+								fn.updateDatabaseGivenFieldValues("lemmata", 
+										{"lemma_id": sLemId}, 
+										{"super_lem_id": null}, 
+										
+										function(){
+											
+											if (bLastNode)
+												{												
+												fn.refreshTable(t);
+												}
+										});
+								});
+							}
+						else
+							{
+								fn.message("Let op", "Kies een of meerdere sublemmata!");
+							}
+						
+					});
+					
+				}				
+			},
+			"button_6": {
 				
 				"name": "Multilemmata_builder",
 				"bgcolor": "yellow",
@@ -1224,7 +1265,7 @@ oTableSettingsList = {
 					
 				}
 			},
-			"button_6":{
+			"button_7":{
 				
 				"name": "CLITICS",
 				"bgcolor": "pink",
