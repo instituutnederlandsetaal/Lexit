@@ -1,4 +1,4 @@
-package lexit.util;
+package util;
 
 /*
  * This object is meant to store a query (designed to be used within a prepared statement, containing '?')

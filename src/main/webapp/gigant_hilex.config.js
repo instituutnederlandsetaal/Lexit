@@ -1030,11 +1030,7 @@ oTableSettingsList = {
 							
 							fn.callFunction("api.create_new_super_lem", [sLemmaId], function(){
 								
-								var oRows = fx.getAllRowsWhere(t, {"lemma_id": sLemmaId});
-								
-								oRows.every(function(){
-									fx.callRecord(this, ["superlem", "super_lem_id"]);									
-									});
+								fn.refreshTable(t);
 								
 								});
 							
@@ -1142,17 +1138,15 @@ oTableSettingsList = {
 								var sLemId = 	fx.getDataFromCellInRow(this, "lemma_id");
 								var bLastNode =	fx.isLastRowOf(this, oRows);
 								
-								fn.updateDatabaseGivenFieldValues("lemmata", 
-										{"lemma_id": sLemId}, 
-										{"super_lem_id": null}, 
-										
-										function(){
+								fn.callFunction("api.create_new_super_lem", [sLemId], function(){
 											
 											if (bLastNode)
 												{												
 												fn.refreshTable(t);
 												}
+									
 										});
+							
 								});
 							}
 						else

@@ -1,4 +1,4 @@
-package lexit.table;
+package table;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,8 +13,8 @@ import javax.xml.bind.annotation.XmlTransient;
  * 
  */
 
-import lexit.resources.Constants;
-import lexit.util.Database;
+import resources.Constants;
+import util.Database;
 
 @XmlRootElement(name="results")
 public class ResultObject {

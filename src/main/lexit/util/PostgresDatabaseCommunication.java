@@ -1,4 +1,4 @@
-package lexit.util;
+package util;
 
 
 
@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import lexit.resources.Constants;
-import lexit.resources.ContextObject;
-import lexit.resources.DbResponseObject;
+import resources.Constants;
+import resources.ContextObject;
+import resources.DbResponseObject;
 
 
 

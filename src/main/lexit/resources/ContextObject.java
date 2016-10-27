@@ -1,4 +1,4 @@
-package lexit.resources;
+package resources;
 
 import java.util.Date;
 

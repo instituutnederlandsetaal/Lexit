@@ -1,4 +1,4 @@
-package lexit.resources;
+package resources;
 
 /**
  * This class contains some constants used in this package

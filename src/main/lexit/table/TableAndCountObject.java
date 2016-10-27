@@ -1,4 +1,4 @@
-package lexit.table;
+package table;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;

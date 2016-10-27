@@ -1,4 +1,4 @@
-package lexit.util;
+package util;
 
 
 import java.io.BufferedReader;
@@ -16,8 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lexit.resources.Constants;
-import lexit.resources.ContextObject;
+import resources.Constants;
+import resources.ContextObject;
 
 
 /**

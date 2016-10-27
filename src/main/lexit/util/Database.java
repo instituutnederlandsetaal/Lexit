@@ -1,4 +1,4 @@
-package lexit.util;
+package util;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +14,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lexit.resources.Constants;
-import lexit.resources.ContextObject;
-import lexit.resources.DbResponseObject;
-import lexit.table.TableAndCountObject;
-import lexit.table.TableRecordObject;
-import lexit.table.TableRecordsObject;
-import lexit.table.UniqueValuesObject;
+import resources.Constants;
+import resources.ContextObject;
+import resources.DbResponseObject;
+import table.TableAndCountObject;
+import table.TableRecordObject;
+import table.TableRecordsObject;
+import table.UniqueValuesObject;
 
 /*
  * This class contains all the queries needed to read from or write into

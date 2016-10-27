@@ -1,9 +1,9 @@
-package lexit.resources;
+package resources;
 
 
 
 
-import lexit.util.Database;
+import util.Database;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;

@@ -1,4 +1,4 @@
-package lexit.resources;
+package resources;
 
 import javax.xml.bind.annotation.XmlElement;
 

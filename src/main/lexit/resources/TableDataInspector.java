@@ -1,4 +1,4 @@
-package lexit.resources;
+package resources;
 
 
 
@@ -9,8 +9,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import lexit.table.ResultObject;
-import lexit.util.Database;
+import table.ResultObject;
+import util.Database;
 
 /**
  * The TableDataInspector class requests the data

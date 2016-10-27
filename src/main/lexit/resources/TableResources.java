@@ -1,4 +1,4 @@
-package lexit.resources;
+package resources;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -27,12 +27,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import lexit.table.TableRecordObject;
-import lexit.table.TableRecordsObject;
-import lexit.table.TablesListObject;
-import lexit.table.UniqueValuesObject;
-import lexit.util.Database;
-import lexit.util.Util;
+import table.TableRecordObject;
+import table.TableRecordsObject;
+import table.TablesListObject;
+import table.UniqueValuesObject;
+import util.Database;
+import util.Util;
 
 /**
  * The TableResources class is the main class in a Jersey project

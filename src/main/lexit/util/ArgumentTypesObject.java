@@ -1,4 +1,4 @@
-package lexit.util;
+package util;
 
 import java.util.concurrent.ConcurrentHashMap;
 

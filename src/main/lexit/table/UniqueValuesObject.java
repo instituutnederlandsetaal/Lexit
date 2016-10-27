@@ -1,4 +1,4 @@
-package lexit.table;
+package table;
 
 import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlElement;
