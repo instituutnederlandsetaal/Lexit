@@ -578,12 +578,7 @@ function smoothScroll(div, anchor)
 	var xToGo = (xTtarget-currentXPos);
 	
 	// Go to the anchor by resetting the scrollbar position
-	// But we will scroll horizontally only if the anchor is also horizontally outside the screen
-	// (t.i. not only vertically)
-	if ((xTtarget-currentXPos) > 0 && (xTtarget-currentXPos) < screen.width)
-		$(div).animate({scrollTop:yToGo}, 800);
-	else
-		$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
+	$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
 }
 
 

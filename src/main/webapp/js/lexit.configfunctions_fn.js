@@ -2966,7 +2966,8 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	$(document.body).append(sDiv);
 	
 	$( "#"+dialogDivId ).dialog({
-		modal: true,	
+		modal: true,
+		width: "auto",
 		buttons: {			
 			Ok: function() {
 				$( this ).dialog( "close" );
@@ -3014,6 +3015,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 		
 		$( "#"+dialogDivId ).dialog({
 			modal: true,
+			width: "auto",
 			buttons: {
 				Ja: function() {
 					$( this ).dialog( "close" );
@@ -3116,7 +3118,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: 300,
-        width: 350,
+        width: "auto",
         modal: true,
         buttons: [
                    {
@@ -3243,7 +3245,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 350,
+        width: "auto",
         modal: true,
         buttons: [
                   {

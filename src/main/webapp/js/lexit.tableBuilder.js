@@ -484,6 +484,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// add the name of the table in its top div
 	head.showNameOfTheTable(sSomeTableName);
 	
+	// add click event to row counter, to trigger exact count
+	head.putExactCountEvent(sSomeTableName);
+	
 	// put the datatable object in multitable administration			
 	mt.setDataTableObjectOf(sSomeTableName, oTable);
 	mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
@@ -692,9 +695,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		
 		// now the table info the correctly set, make it visible again
     	$("#"+sSomeTableName+"_info").show();	
-    	
-		
-    	
+    	    	
 	});
 	
 	

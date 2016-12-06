@@ -479,6 +479,7 @@ oTableSettingsList = {
 				
 				var oRows = fx.getAllRows(t);
 				
+				
 				// apply locks and add colors
 				
 				var aLemmaIdsArr = new Array();
@@ -487,6 +488,8 @@ oTableSettingsList = {
 					aLemmaIdsArr[i] = fx.getDataFromCellInRow(this, "lemma_id");			
 				});
 				aLemmaIdsArr = getOnlyUniqueValues(aLemmaIdsArr);
+				
+				fn.showProcessingMsg(t);
 				
 				// get the list of locked lemmata
 				// and modify the rows accordingly
@@ -537,14 +540,13 @@ oTableSettingsList = {
 						var sVerkleinwoord = fx.getDataFromCellInRow(oThisRow, "verkleinwoord");
 						if (sVerkleinwoord != '-')
 							{
-							var nCellSelector = $( fx.getNode(oCurrentRow) ).find("td");
+							var nCellSelector = $( fx.getNode(oThisRow) ).find("td");
 							nCellSelector.css("color", "green");
 							}
 						
 						
 						// apply locks
 						var sLemmaId = fx.getDataFromCellInRow(oThisRow, "lemma_id");	
-						
 						if ( $.inArray( sLemmaId, aCurrentParadigmaViewLocks ) >-1 )
 							{
 							var nCellSelector = $( fx.getNode(oThisRow) ).find("td:not(.opmerking_intern)");
@@ -552,6 +554,7 @@ oTableSettingsList = {
 							nCellSelector.css("opacity", "0.5");
 							nCellSelector.find("input").attr("disabled", "disabled")
 							nCellSelector.find("input").css("opacity", "0.5");							
+							
 							}						
 						
 					});						
@@ -564,6 +567,8 @@ oTableSettingsList = {
 				
 				if (bReadableParadigmMode)
 					generateParadigmView();
+				
+				fn.removeProcessingMsg(t);
 				
 			},			
 			"button_0":{
@@ -951,7 +956,6 @@ oTableSettingsList = {
 			"callback": function(t){				
 				
 				
-				
 				var sTableName = fn.getTableName(t);
 				
 				// build the UNlock button if it doesn't exist yet
@@ -992,14 +996,10 @@ oTableSettingsList = {
 					});
 					}
 				
-				
-				
 				var oRows = fx.getAllRows(t);
 				
 
-				
-				
-				// apply locks
+				// apply locks and add colors
 				
 				var aLemmaIdsArr = new Array();
 				oRows.every(function(i){
@@ -1008,13 +1008,13 @@ oTableSettingsList = {
 				});
 				
 				
+				fn.showProcessingMsg(t);
+				
 				// get the list of locked lemmata
 				// and modify the rows accordingly
 				fn.callFunction("api.get_locks_of_lemmata", [ fn.quote( aLemmaIdsArr.join("|") ) ], function(){
 					
 					aCurrentLemmaViewLocks = (fn.getFunctionOutput()[0]).split("|");
-					
-							
 					
 					oRows.every(function(i){
 						
@@ -1044,6 +1044,7 @@ oTableSettingsList = {
 							nCellSelector.css("color", "green");
 							}
 						
+						// apply locks
 						if ( $.inArray( fx.getRowId(oThisRow), aCurrentLemmaViewLocks ) >-1 )
 							{
 							var nCellSelector = $( fx.getNode(oThisRow) ).find("td:not(.opmerking_intern)");
@@ -1051,14 +1052,12 @@ oTableSettingsList = {
 							nCellSelector.css("opacity", "0.5");
 							nCellSelector.find("input").attr("disabled", "disabled")
 							nCellSelector.find("input").css("opacity", "0.5");
-							
-
-							
 							}						
 						
 					});
 					
 					
+					fn.removeProcessingMsg(t);
 					
 				}); // end of function call
 				
@@ -1904,7 +1903,26 @@ oTableConfigurationList = {
 				"editable": true
 			},
 			"lemma_gigpos": {				
-				"editable": true		
+				"editable": true,
+				"click": function(t, n){
+					
+					var oCell = fx.getCell(n, "modern_lemma");
+					var lemmaform = fx.getDataFromCell(oCell);
+					
+					fn.showProcessingMsg(t);
+					
+					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
+						
+						fn.removeProcessingMsg(t);
+						fn.message("Resultaat", output["get_biggest_final_matcher"]);
+					});
+					
+				},
+				"editcallback": function(t, n, value){
+					
+					// make sure the menu disappear in IE
+					$(".ui-menu-item").hide();
+				}
 			},
 			"sublemma_type": {				
 				"editable": true,
@@ -1937,6 +1955,9 @@ oTableConfigurationList = {
 			
 			// gloss etc
 			"gloss": {				
+				"editable": true				
+			},
+			"gloss_intern": {				
 				"editable": true				
 			},
 			"nuanc_opm": {

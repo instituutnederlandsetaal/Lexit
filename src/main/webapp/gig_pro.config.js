@@ -1833,6 +1833,10 @@ oTableConfigurationList = {
 
 		lemmata_view: {
 			
+            "source": {
+                "editable": superUser()
+            },
+			
 			// lemma_id
 			"pkid":{				
 				"visible": (fn.getCurrentUser() == 'katrien')
@@ -1865,6 +1869,20 @@ oTableConfigurationList = {
 			},
 			"lemma_gigpos": {				
 				"editable": true,
+				"click": function(t, n){
+					
+					var oCell = fx.getCell(n, "modern_lemma");
+					var lemmaform = fx.getDataFromCell(oCell);
+					
+					fn.showProcessingMsg(t);
+					
+					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
+						
+						fn.removeProcessingMsg(t);
+						fn.message("Resultaat", output["get_biggest_final_matcher"]);
+					});
+					
+				},
 				"editcallback": function(t, n, value){
 					
 					// make sure the menu disappear in IE
@@ -1902,6 +1920,9 @@ oTableConfigurationList = {
 			
 			// gloss etc
 			"gloss": {				
+				"editable": true				
+			},
+			"gloss_intern": {				
 				"editable": true				
 			},
 			"nuanc_opm": {

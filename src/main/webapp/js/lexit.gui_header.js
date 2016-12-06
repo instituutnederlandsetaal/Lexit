@@ -239,6 +239,18 @@ head.showNameOfTheTable = function(sSomeTablename){
 
 
 
+head.putExactCountEvent = function(sSomeTableName){
+	
+	// add click event to trigger exact count
+	$("#"+sSomeTableName+"_info").click(function(){
+		// force exact count!
+		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
+		bForceExactCount = true; 
+		// but for now, do a refresh with an exact count
+		fn.refreshTable(sSomeTableName);
+	});
+}
+
 
 
 /********************************

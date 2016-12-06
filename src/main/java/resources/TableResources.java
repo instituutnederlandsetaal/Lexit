@@ -135,7 +135,7 @@ public class TableResources {
 	
 	// clean the cache of some table
 	// call:
-	// .../table/cleancache?table=....
+	// .../webservice/table/cleancache?table_name=...&db_name=...
 	@Path("cleancache")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
