@@ -1,0 +1,47 @@
+#
+# Lex'it users access rights
+#
+# format:
+# username=project1_right,project2_right,etc
+# (with right = {read,write,all} )
+# of
+# username= {superuser,superreader}
+
+adrienne=lexical_tmp_all,klussen_all
+anna=lexicalsources_read,lexical_tmp_all
+arjen=klussen_all
+bob=bob_dev_all,bob_all
+boukje=superuser
+carole=superreader,neoloog_all
+dirk=superuser
+drbanner=bob_dev_all
+frank=superuser
+griet=sonar_read
+hans=metadata_read,nederlab_core_read
+jan=neoloog_dev_all,neoloog_all
+jasmijn=lexicalsources_read,lexical_tmp_all
+jesse=superuser
+karin=bob_dev_all
+karling=superreader
+katrien=superuser
+katrienvp=superuser
+marijke=monele_all,spellingklus_marijke_all
+marjolijn=mnw2013_all,ambiguplus_all,klussen_all,gigp_spelling_dev_all,gigant_molex_all,gig_pro_all,vmnw_all,spelling_dataselectie_selectie_all,gigant_hilex_read
+mathieu=superuser
+noor=spellingklus_all
+paulette=bob_dev_all
+rob=superuser
+robbie=robbie_all,neoloog_all
+tanneke=neoloog_all,morph_all,gig_pro_read
+user1=superreader
+user2=superreader
+user3=superreader
+user4=superreader
+user5=superreader
+user6=superreader
+user7=superreader
+user8=superreader
+user9=superreader
+vincent=superuser
+vivien=neoloog_all
+wil=mnw2013_all,ambiguplus_all,klussen_all,gigp_spelling_dev_all,spellingklus_marijke_all,spellingklus_all,gigant_molex_all,gig_pro_all,vmnw_all,spelling_dataselectie_selectie_all,gigant_hilex_read

@@ -1,0 +1,6 @@
+db=gig_pro_dev
+schema=data
+host=svowdb02.inl.loc
+user=postgres
+pass=inl
+send_tomcat_username_to_db=true
