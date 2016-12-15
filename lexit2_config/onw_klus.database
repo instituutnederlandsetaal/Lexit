@@ -1,6 +1,0 @@
-db=gigant_hilex_onw_klus
-schema=data
-host=svowdb06.inl.loc
-user=fannee
-pass=Cric0topus
-send_tomcat_username_to_db=true

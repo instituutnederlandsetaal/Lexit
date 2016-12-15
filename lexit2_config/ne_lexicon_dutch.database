@@ -1,5 +1,0 @@
-db=ne_lexicon_dutch
-schema=public
-host=svowdb02.inl.loc
-user=postgres
-pass=inl
