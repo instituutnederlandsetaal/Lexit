@@ -7,3 +7,4 @@ target/test-classes
 **/webapp/*.BAK
 **/js/*.bak
 **/js/*.BAK
+/target/
