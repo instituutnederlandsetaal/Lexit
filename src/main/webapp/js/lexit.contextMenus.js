@@ -26,13 +26,14 @@ cm.setContextMenu = function(sSomeTable, sColumnName, oItems, fnCallback){
 	        	
 	        	var oTable = mt.getDataTableObjectOf(sSomeTable);
 	        	
-	        	var oTrParentOfTd = options.$trigger.parent();
+	        	var oTrParentOfTd = options.$trigger.context.parentNode;	        	
 	        	var sTrId = oTrParentOfTd.id;
-	        	var nRow = fn.getRowNodeWhereIdIs(sSomeTable, sTrId);	        	
+	        	
+	        	var nRow = fn.getRowNodeWhereIdIs(sSomeTable, sTrId);
 	            
 	            // if no column name is set, use row nodes
 	            var nMixed = sColumnName != null ?
-	            		fn.getCellInRowNode(nRow, sColumnName) : nRow;	            
+	            		fn.getCellInRowNode(nRow, sColumnName) : nRow;
 	            
 	            // call the user callback with the right table/node and context menu keys/options info
 	        	fnCallback(oTable, nMixed, key, options);
