@@ -1,0 +1,5 @@
+db=nederlab_core_kbkranten
+schema=public
+host=svowdb02.inl.loc
+user=postgres
+pass=inl
