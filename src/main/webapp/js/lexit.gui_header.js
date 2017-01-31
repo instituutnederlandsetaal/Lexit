@@ -150,15 +150,15 @@ head.showNameOfTheTable = function(sSomeTablename){
 		.css("font-weight", "bold")
 		.css("color", "#A4A4A4")
 		.attr("id", sSomeTablename+"_tablename")
-		.attr("title", ( (document.URL).indexOf( INL_HOMEURL )>-1 ) ? "Klik om notitie toe te voegen":"" )
-		.addClass( ( (document.URL).indexOf( INL_HOMEURL )>-1 ) ? "tooltip":"" )
+		.attr("title", ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 ) ? "Klik om notitie toe te voegen":"" )
+		.addClass( ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 ) ? "tooltip":"" )
 		.click(function(){
 			
 			// clicking on the table name gives the possibility to
 			// add notes or comments to a table
 
 			// keep this list private to internal environment
-			if ( (document.URL).indexOf( INL_HOMEURL )>-1 )
+			if ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 )
 				{
 				
 				$.ajax( {

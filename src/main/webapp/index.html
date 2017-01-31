@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2017.01.10
+	v2017.01.31
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -140,8 +140,9 @@
 	
 	// ***** CONSTANTS *****
 	
-	// INL Home url
-	var INL_HOMEURL = "inl.loc";
+	// INL Home url, as a regex like: /(...)/
+	// current value should catch both inl.loc as ivdnt domains
+	var INL_HOMEURL = /(inl\.loc|ivdnt)/;
 	
 	// base url for all http requests
 	var BASE_URL = "../lexit2";
@@ -388,11 +389,6 @@
 		// set current user name
 		fn.setCurrentUser();
 		
-		if (INL_HOMEURL != "inl.loc")
-			{
-			fn.message("Waarschuwing", "Als HOME-URL is nu ingesteld: "+INL_HOMEURL);
-			}
-		
 		// generate unique id for this page
 		// we will need this to detect page focus/blur in a reliable way
 		$("#page_id").attr("name", getUniqueNumber());
@@ -500,7 +496,7 @@
 					// show warning message if available
 					if (	sWarning != '' &&   
 							// except if it should be kept private to home
-							!(bPrivate && (document.URL).indexOf( INL_HOMEURL )<0 ) 
+							!(bPrivate && (document.URL).regexIndexOf( INL_HOMEURL )<0 ) 
 						)
 						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
 					}
@@ -575,7 +571,7 @@
 		var sCurrentURL = document.URL;
 		
 		// keep this list private to internal environment
-		if ( sCurrentURL.indexOf( INL_HOMEURL )>-1 || bTest)
+		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest)
 			{
 			$("#indicator").empty().append(
 					$("<span></span>")
@@ -644,24 +640,37 @@
 						docDevelopment.append(eProjectDiv);
 					}
 				}
-				
+			
+			// make sure each table is still visible, when it's empty 
+							
 			$("#page").append(docOpenTitle);
-			$("#page").append(docOpen);
+			$("#page").append(_deEmptyMenuList(docOpen));
 			$("#page").append($("<br>"));			
 			$("#page").append(goodiesTitle);
-			$("#page").append(goodies);
+			$("#page").append(_deEmptyMenuList(goodies));
 			$("#page").append($("<br>"));
 			$("#page").append(docDevelopmentTitle);
-			$("#page").append(docDevelopment);
+			$("#page").append(_deEmptyMenuList(docDevelopment));
 			$("#page").append($("<br>"));
 			$("#page").append(docClosedTitle);
-			$("#page").append(docClosed);
+			$("#page").append(_deEmptyMenuList(docClosed));
 			
 			}
 		else
 			{
 			fn.message("Fout", "Geen toegang");
 			}
+		
+	}
+	
+	// subroutine: make sure an empty menu list is visible, by addind an empty line
+	function _deEmptyMenuList(docList){
+		
+		var eEmptyCell = "<td style='text-align: right; width: 400px'>&nbsp;</td>"+
+		"<td>&nbsp;</td><td style='text-align: left; width: 700px'>&nbsp;</td>";
+		var eEmptyLine = $("<tr></tr>").html(eEmptyCell);
+		
+		return ( !$(docList).find("tr").length ) ? docList.append(eEmptyLine) : docList;
 		
 	}
 	

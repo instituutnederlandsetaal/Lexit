@@ -178,7 +178,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 			asTableDescriptions[i] = sNiceName;
 		
 		// outside home environment, showing table comments is not allowed
-		var bShowTableComments = ( (document.URL).indexOf( INL_HOMEURL )>-1 );
+		var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );
 		
 		// append visible table names
 		selectTagToAdd.append(
