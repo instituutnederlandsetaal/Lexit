@@ -54,6 +54,15 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	asTableTypes.push("none");
 	abTableVisible.push(true);
 	
+	// temporary sublist of tables which should be 'thrown' to the bottom of the table list
+	// if the user configuration requires that (convenient when one wants to keep some
+	// tables apart as they represent a subset)
+	asTmpTableNames			= new Array();
+	asTmpTableDescriptions	= new Array();
+	asTmpTableComments		= new Array();
+	asTmpTableTypes			= new Array();
+	abTmpTableVisible		= new Array();
+	
 	// show error message if configuration tries to call a table that is set to be hidden
 	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) )
 		{
@@ -64,22 +73,42 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		}
 	
 	
+		
 	// process the xml table list
 	$(xml).find("oneTable").each(function(){
 		
-		var tableItems = $(this).find("item");
-		var sTableName = tableItems.eq(0).text();
-		var sTableDescription = tableItems.eq(1).text();
-		var sTableComment = tableItems.eq(2).text();
-		var sTableType = tableItems.eq(3).text();
-		var bTableVisible = !conf.isHiddenTable(sTableName);
+		var tableItems = 		$(this).find("item");
+		var sTableName = 		tableItems.eq(0).text();
+		var sTableDescription =	tableItems.eq(1).text();
+		var sTableComment = 	tableItems.eq(2).text();
+		var sTableType = 		tableItems.eq(3).text();
+		var bTableVisible =		!conf.isHiddenTable(sTableName);
 		
-		// register each table details
-		asTableNames.push( sTableName );
-		asTableDescriptions.push( sTableDescription );
-		asTableComments.push( sTableComment );
-		asTableTypes.push( sTableType.toLowerCase() );
-		abTableVisible.push( bTableVisible );
+		// register each table details, we have 2 possibilities:
+		// 1 - normal table, register it right now
+		// 2 - distinct table that should be thrown to bottom of list, send to separate list
+		var aTableSettings = conf.getTableSettings(sTableName);
+		var bThrowToBottom = conf.throwToBottom(aTableSettings);
+		
+		// table that should be kept apart?
+		if (bThrowToBottom)
+			{
+			asTmpTableNames.push( sTableName );
+			asTmpTableDescriptions.push( sTableDescription );
+			asTmpTableComments.push( sTableComment );
+			asTmpTableTypes.push( sTableType.toLowerCase() );
+			abTmpTableVisible.push( bTableVisible );
+			}
+		// normal case
+		else
+			{
+			asTableNames.push( sTableName );
+			asTableDescriptions.push( sTableDescription );
+			asTableComments.push( sTableComment );
+			asTableTypes.push( sTableType.toLowerCase() );
+			abTableVisible.push( bTableVisible );
+			}
+		
 		
 		
 		// register table details
@@ -111,6 +140,27 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 			}
 	});	
 	
+	
+	// list if fully processed, concat the normal list and the 'bottom list'
+	if (asTmpTableNames.length>0)
+		{
+		// we first need a separator between main list and bottom list
+		asTableNames.push( "" );
+		asTableDescriptions.push( "_______________________________________" );
+		asTableComments.push( "separator" );
+		asTableTypes.push( "" );
+		abTableVisible.push( true );
+		
+		// add bottom list
+		asTableNames = 			asTableNames.concat(asTmpTableNames);
+		asTableDescriptions =	asTableDescriptions.concat(asTmpTableDescriptions);
+		asTableComments = 		asTableComments.concat(asTmpTableComments);
+		asTableTypes = 			asTableTypes.concat(asTmpTableTypes);
+		abTableVisible = 		abTableVisible.concat(abTmpTableVisible);
+		}
+	
+	
+	// build a selection list now
 	ts.buildListOfTables(haTableFilters, haTableSettings);
 	
 	// if we have only one table to choose from
@@ -187,6 +237,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 					.text( asTableDescriptions[i] )	
 					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
 					.attr("title", bShowTableComments ? asTableComments[i] : "")
+					.attr("disabled", (asTableComments[i] == "separator"))
 			);
 		}
 	

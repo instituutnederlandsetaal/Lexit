@@ -891,6 +891,18 @@ conf.getTableSettings = function(sTablename){
 };
 
 
+
+// should the table be 'thrown' to the bottom of the selection list
+// (when the user wants to keep it distinct from the other tables)
+conf.throwToBottom = function(aTableSettings){
+	
+	if (typeof aTableSettings["throw_to_bottom"] == 'undefined')
+		return false;
+	return aTableSettings["throw_to_bottom"];
+	
+};
+
+
 // setting for advanced search and replace
 // default: not allowed = false
 conf.advancedSearchAndReplaceIsUnlocked = function(aTableSettings){
