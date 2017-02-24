@@ -84,11 +84,42 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		var sTableType = 		tableItems.eq(3).text();
 		var bTableVisible =		!conf.isHiddenTable(sTableName);
 		
+		// get configuration info
+		var aTableSettings = conf.getTableSettings(sTableName);
+		
 		// register each table details, we have 2 possibilities:
 		// 1 - normal table, register it right now
 		// 2 - distinct table that should be thrown to bottom of list, send to separate list
-		var aTableSettings = conf.getTableSettings(sTableName);
 		var bThrowToBottom = conf.throwToBottom(aTableSettings);
+		
+		// if some 'nice table name' was defined in the project configuration
+		// replace the standard table description by this 'nice_name'
+		var sNiceName = conf.getNiceName(aTableSettings);
+		if (sNiceName != null)
+			sTableDescription = sNiceName;
+		
+		
+		
+		// if some extra user info is available in the configuration (like job of table description, creation date)
+		// add it to the table description
+		var aFullDescription = new Array();
+		
+		var sCreationDate = conf.getCreationDate(aTableSettings);
+		if (sCreationDate != null)
+			aFullDescription.push("CREATED "+sCreationDate);
+		var sTableInfo = conf.getTableInfo(aTableSettings);
+		if (sTableInfo != null)
+			aFullDescription.push(sTableInfo);
+		
+		if (aFullDescription.length>0)
+			{
+			// remove '(VIEW)' or '(BASE TABLE)'
+			// and add extra info
+			sTableDescription = sTableDescription.replace(/\([A-Z\s]+\)/, "");
+			sTableDescription += " ("+aFullDescription.join(" - ")+")";
+			}
+		
+		
 		
 		// table that should be kept apart?
 		if (bThrowToBottom)
@@ -219,13 +250,6 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 		// skip invisible tables (hidden for user)
 		if ( !abTableVisible[i] )
 			continue;
-		
-		// if some 'nice table name' was defined in the project configuration
-		// replace the standard table description by this 'nice_name'
-		var oTableSettings = conf.getTableSettings(asTableNames[i]);
-		var sNiceName = conf.getNiceName(oTableSettings);
-		if (sNiceName != null)
-			asTableDescriptions[i] = sNiceName;
 		
 		// outside home environment, showing table comments is not allowed
 		var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );

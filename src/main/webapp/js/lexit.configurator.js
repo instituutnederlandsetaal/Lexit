@@ -903,6 +903,26 @@ conf.throwToBottom = function(aTableSettings){
 };
 
 
+// get creation date
+conf.getCreationDate  = function(aTableSettings){
+	
+	if (typeof aTableSettings["creation_date"] == 'undefined')
+		return null;
+	return aTableSettings["creation_date"];
+	
+};
+
+
+// get table info
+conf.getTableInfo  = function(aTableSettings){
+	
+	if (typeof aTableSettings["info"] == 'undefined')
+		return null;
+	return aTableSettings["info"];
+	
+};
+
+
 // setting for advanced search and replace
 // default: not allowed = false
 conf.advancedSearchAndReplaceIsUnlocked = function(aTableSettings){
