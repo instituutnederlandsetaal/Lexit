@@ -892,13 +892,13 @@ conf.getTableSettings = function(sTablename){
 
 
 
-// should the table be 'thrown' to the bottom of the selection list
-// (when the user wants to keep it distinct from the other tables)
-conf.throwToBottom = function(aTableSettings){
+// Get the name of the group a table belongs to (or 'Default' of none is defined)
+// This will be used to classify tables in the table menu
+conf.getTableGroup = function(aTableSettings){
 	
-	if (typeof aTableSettings["throw_to_bottom"] == 'undefined')
-		return false;
-	return aTableSettings["throw_to_bottom"];
+	if (typeof aTableSettings["group"] == 'undefined')
+		return "Default";
+	return aTableSettings["group"];
 	
 };
 

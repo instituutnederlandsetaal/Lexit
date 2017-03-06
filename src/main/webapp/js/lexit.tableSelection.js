@@ -44,24 +44,27 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	var iNumberOfVisibleTables = 0;
 	
 	// filters or settings to apply to a table being opened upon startup (url parameter table=...)
-	var haTableFilters = new Hashtable();
-	var haTableSettings = new Hashtable();
+	var haTableFilters = 	new Hashtable();
+	var haTableSettings =	new Hashtable();
+	
+	// lists of tables groups
+	// (the array will contain the names of the groups, sorted in order or creation;
+	//  and we will make sure that the group containing the neutral value 'Kies een tabel' is created first!)
+	// (the hash will map a group name to a list of tables belonging to it)
+	var aTableGroups = 		new Array();
+	var haTableGroups =		new Hashtable();
+	
+	// create a neutral nameless group, with the neutral value as its first option
+	aTableGroups.push( "" );
+	haTableGroups.put( "", [neutralValue] );
 	
 	// list of table names and description for the list to choose from
-	asTableNames.push(neutralValue);
+	asTableNames.push( neutralValue );
 	asTableDescriptions.push( neutralValue );
-	asTableComments.push("");
-	asTableTypes.push("none");
-	abTableVisible.push(true);
+	asTableComments.push( "" );
+	asTableTypes.push( "none" );
+	abTableVisible.push( true );
 	
-	// temporary sublist of tables which should be 'thrown' to the bottom of the table list
-	// if the user configuration requires that (convenient when one wants to keep some
-	// tables apart as they represent a subset)
-	asTmpTableNames			= new Array();
-	asTmpTableDescriptions	= new Array();
-	asTmpTableComments		= new Array();
-	asTmpTableTypes			= new Array();
-	abTmpTableVisible		= new Array();
 	
 	// show error message if configuration tries to call a table that is set to be hidden
 	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) )
@@ -87,10 +90,22 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		// get configuration info
 		var aTableSettings = conf.getTableSettings(sTableName);
 		
-		// register each table details, we have 2 possibilities:
-		// 1 - normal table, register it right now
-		// 2 - distinct table that should be thrown to bottom of list, send to separate list
-		var bThrowToBottom = conf.throwToBottom(aTableSettings);
+		// get the name of the group the table belongs to
+		// (or 'default' if the configuration file assigns no group to this table)
+		var sTableGroup = conf.getTableGroup(aTableSettings);
+		
+		
+		// get the list of tables belonging to this group and add the current table to it
+		var aTablesInGroup = haTableGroups.get(sTableGroup);
+		// if this group is not yet defined, create it now
+		if (aTablesInGroup == null) 
+			{
+			aTableGroups.push(sTableGroup);
+			aTablesInGroup = new Array();
+			}
+		aTablesInGroup.push(sTableName);
+		haTableGroups.put(sTableGroup, aTablesInGroup);
+		
 		
 		// if some 'nice table name' was defined in the project configuration
 		// replace the standard table description by this 'nice_name'
@@ -121,25 +136,14 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		
 		
 		
-		// table that should be kept apart?
-		if (bThrowToBottom)
-			{
-			asTmpTableNames.push( sTableName );
-			asTmpTableDescriptions.push( sTableDescription );
-			asTmpTableComments.push( sTableComment );
-			asTmpTableTypes.push( sTableType.toLowerCase() );
-			abTmpTableVisible.push( bTableVisible );
-			}
-		// normal case
-		else
-			{
-			asTableNames.push( sTableName );
-			asTableDescriptions.push( sTableDescription );
-			asTableComments.push( sTableComment );
-			asTableTypes.push( sTableType.toLowerCase() );
-			abTableVisible.push( bTableVisible );
-			}
+		// add table to lists
 		
+		asTableNames.push( sTableName );
+		asTableDescriptions.push( sTableDescription );
+		asTableComments.push( sTableComment );
+		asTableTypes.push( sTableType.toLowerCase() );
+		abTableVisible.push( bTableVisible );
+				
 		
 		
 		// register table details
@@ -172,27 +176,11 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	});	
 	
 	
-	// list if fully processed, concat the normal list and the 'bottom list'
-	if (asTmpTableNames.length>0)
-		{
-		// we first need a separator between main list and bottom list
-		asTableNames.push( "" );
-		asTableDescriptions.push( "_______________________________________" );
-		asTableComments.push( "separator" );
-		asTableTypes.push( "" );
-		abTableVisible.push( true );
-		
-		// add bottom list
-		asTableNames = 			asTableNames.concat(asTmpTableNames);
-		asTableDescriptions =	asTableDescriptions.concat(asTmpTableDescriptions);
-		asTableComments = 		asTableComments.concat(asTmpTableComments);
-		asTableTypes = 			asTableTypes.concat(asTmpTableTypes);
-		abTableVisible = 		abTableVisible.concat(abTmpTableVisible);
-		}
+
 	
 	
 	// build a selection list now
-	ts.buildListOfTables(haTableFilters, haTableSettings);
+	ts.buildListOfTables(haTableFilters, haTableSettings, aTableGroups, haTableGroups);
 	
 	// if we have only one table to choose from
 	// load that table automatically (at least if default behaviour,
@@ -216,18 +204,21 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 
 // build and show list of tables/views
 
-ts.buildListOfTables = function(haTableFilters, haTableSettings){
+ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, haTableGroups){
 			
 	$("#tablechoice").empty();
 	
 	var formTagToAdd = $("<form></form>")
-		.attr("action", "")
-		.attr("id", "source_form");
+		.attr("action", "#");
+	
+	var labelTagToAdd = $("<label></label>")
+		.attr("for", "source_form");
 
 	// action on choosing a table
 	
 	var selectTagToAdd = $("<select></select>")
 		.attr("id", "selected_source")
+		.attr("name", "selected_source")
 		.change(function(){
 			
 			// wrapping needed otherwise IE won't show the spinner
@@ -243,33 +234,57 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings){
 
 		});
 
-	// append the table names to the menu to choose from
-	for (var i=0; i<asTableNames.length; i++)
+	for (var j=0; j<aTablesGroups.length; j++)
 		{
+		// get the name of the group
+		var sOneGroupName = aTablesGroups[j];
 		
-		// skip invisible tables (hidden for user)
-		if ( !abTableVisible[i] )
-			continue;
+		// add an html element for current group 
+		var groupTagToAdd = $("<optgroup></optgroup>")
+			.attr("label", sOneGroupName);
 		
-		// outside home environment, showing table comments is not allowed
-		var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );
+		// get the list of tables belonging to current groupname
+		var aCurrentGroupOfTables = haTableGroups.get(sOneGroupName);
 		
-		// append visible table names
-		selectTagToAdd.append(
-				$("<option></option>")
-					.attr("value", asTableNames[i] )
-					.text( asTableDescriptions[i] )	
-					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
-					.attr("title", bShowTableComments ? asTableComments[i] : "")
-					.attr("disabled", (asTableComments[i] == "separator"))
-			);
+		// append the table names to the menu to choose from
+		for (var i=0; i<asTableNames.length; i++)
+			{
+			
+			// skip invisible tables (hidden for user)
+			if ( !abTableVisible[i] )
+				continue;
+			
+			// skip table that doesn't belong to current group
+			if ($.inArray(asTableNames[i], aCurrentGroupOfTables)<0)
+				continue;
+			
+			// outside home environment, showing table comments is not allowed
+			var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );
+			
+			// append visible table names
+			groupTagToAdd.append(
+					$("<option></option>")
+						.attr("value", asTableNames[i] )
+						.text( asTableDescriptions[i] )	
+						.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
+						.attr("title", bShowTableComments ? asTableComments[i] : "")
+						.attr("disabled", (asTableComments[i] == "separator"))
+				);
+			}
+		
+		// add the group we just built, to the select tag
+		selectTagToAdd.append(groupTagToAdd);
+		
 		}
 	
+	
+	// add the select tag to the form tag	
 	formTagToAdd.append(selectTagToAdd);
 	
 	$("#tablechoice").append(formTagToAdd);
 	
-	
+	// generate select menu
+	$("#source_form").selectmenu();
 	
 };
 
