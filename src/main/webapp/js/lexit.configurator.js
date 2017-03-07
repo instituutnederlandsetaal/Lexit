@@ -912,6 +912,24 @@ conf.getCreationDate  = function(aTableSettings){
 	
 };
 
+//get finished date
+conf.getFinishedDate  = function(aTableSettings){
+	
+	if (typeof aTableSettings["finished_date"] == 'undefined')
+		return null;
+	return aTableSettings["finished_date"];
+	
+};
+
+//get processed date
+conf.getProcessedDate  = function(aTableSettings){
+	
+	if (typeof aTableSettings["processed_date"] == 'undefined')
+		return null;
+	return aTableSettings["processed_date"];
+	
+};
+
 
 // get table info
 conf.getTableInfo  = function(aTableSettings){

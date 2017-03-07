@@ -39,7 +39,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 // process list of tables and views obtained from the database
 // (this is called by the previous function ts.getListOfTables)
 
-ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings , xml){
+ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml){
 	
 	var iNumberOfVisibleTables = 0;
 	
@@ -122,6 +122,16 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		var sCreationDate = conf.getCreationDate(aTableSettings);
 		if (sCreationDate != null)
 			aFullDescription.push("CREATED "+sCreationDate);
+		
+		var sFinishedDate = conf.getFinishedDate(aTableSettings);
+		if (sFinishedDate != null)
+			aFullDescription.push("FINISHED "+sFinishedDate);
+		
+		var sProcessedDate = conf.getProcessedDate(aTableSettings);
+		if (sProcessedDate != null)
+			aFullDescription.push("PROCESSED "+sProcessedDate);
+		
+		
 		var sTableInfo = conf.getTableInfo(aTableSettings);
 		if (sTableInfo != null)
 			aFullDescription.push(sTableInfo);
