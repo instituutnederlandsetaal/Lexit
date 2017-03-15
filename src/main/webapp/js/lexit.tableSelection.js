@@ -48,7 +48,7 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	var haTableSettings =	new Hashtable();
 	
 	// lists of tables groups
-	// (the array will contain the names of the groups, sorted in order or creation;
+	// (the array will contain the names of the groups, sorted in order of creation;
 	//  and we will make sure that the group containing the neutral value 'Kies een tabel' is created first!)
 	// (the hash will map a group name to a list of tables belonging to it)
 	var aTableGroups = 		new Array();
@@ -61,7 +61,7 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	// list of table names and description for the list to choose from
 	asTableNames.push( neutralValue );
 	asTableDescriptions.push( neutralValue );
-	asTableComments.push( "" );
+	asTableComments.push( "" );  // comments, visible through html 'title' attribute
 	asTableTypes.push( "none" );
 	abTableVisible.push( true );
 	

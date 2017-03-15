@@ -6,6 +6,392 @@
 var conf = {};
 
 
+
+// ===== documentation of table settings and config
+
+/**
+ * @enum {string}
+ */
+var oTableSettingsList_example = {
+
+		/**
+		 * @description Als men in het tabellen-menu de tabellen wil groeperen in subcategorieën (bijv. een
+		 * categorie 'klustabellen', een categorie 'opzoektabellen' enz.) dan voldoet het om
+		 * de tabellen in kwestie een 'group' toe te kennen. Alle tabellen die dezelfde groepsnaam
+		 * delen, worden in het tabellen-selectiemenu bij elkaar gevoegd met deze groepsnaam als kop
+		 */
+		"group": "...",
+		
+		/**
+		 * @description Als een tabel een lelijke 'technische' naam heeft, kan die in de interface toch
+		 * met een mooie naam worden weergegeven; geef deze naam op met deze setting.
+		 */
+		"nice_name": "...",      
+		
+		/**
+		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast
+		 */
+		"creation_date": "20 feb 2017",
+		
+		/**
+		 * @description Om in het tabeloverzicht aan te geven wanneer de handmatige bewerking van een tabel af is, 
+		 * legt men het hier vast
+		 */
+		"finished_date": "25 feb 2017",
+		
+		/**
+		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel door scripts e.d. verwerkt is, 
+		 * legt men het hier vast
+		 */
+		"processed_date": "25 feb 2017",
+		
+		/**
+		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast
+		 */
+		"info": "Deze tabel is ....",
+		
+		/** 
+		 * @type {array} 
+		 * @description volgorde waarin de kolommen moeten worden weergegeven,
+		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)
+		 * */
+		"column_order": ["colname1", "colname2"],
+		
+		/**
+		 * @description breedte van tabel
+		 */
+		"size": "60%",                   
+		
+		/**
+		 * @description hoogte van de header boven de tabel; default is 50px
+		 */
+		"header_height": "50px",
+		
+
+		/** 
+		 * @type {function} 
+		 * @description callback bij initialisatie
+		 * */
+		"callback": function(){ doSomething(); },
+		
+		/** 
+		 * @type {boolean} 
+		 * @description herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)
+		 * */
+		"repeat_callback": true,
+		
+		/**
+		 * @description callback die uitgevoerd moet worden bij het aanklikken van de resetknop, maar dan net
+		 * voordat de tabel wordt herladen (zodat bijvoorbeeld filters aangepast kunnen worden enz)
+		 */
+		"prereset_callback": function(){ doSomething(); },
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Toon of verberg de toegang tot de geavanceerde zoek&vervang-functie.
+		 * Dit staat default op 'false' want de geavanceerde zoek&vervang-functie is niet ongevaarlijk
+		 * aangezien die effect heeft op de gehele database!
+		 * */
+		"advanced_search_and_replace": false,
+
+		/** 
+		 * @type {boolean} 
+		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)
+		 * */
+		"get_focus_on_tab": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)
+		 * */
+		"refresh_upon_focus": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "RESET" (default: true)
+		 * */
+		"reset_button": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)
+		 * */
+		"columns_button": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Formulier/Tabel view" (default: true)
+		 * */
+		"viewtype_button": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Ververs" (default: true)
+		 * */
+		"refresh_button": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Zoek & Bewerk" (default: true)
+		 * */
+		"replace_button": true,  
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Selectie" (default: true)
+		 * */
+		"selection_button": true,  
+		
+		/** 
+		 * @type {boolean} 
+		 * @description zet de knop "Selectie" alvast aan/uit (default: false = uit)
+		 * */
+		"selection_button_active": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Ongedaan maken" (default: true)
+		 * */
+		"undo_button": true,     
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "Ga naar" (default: true)
+		 * */
+		"goto_button": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description toon/verberg knop "?" (default: true)
+		 * */
+		"help_button": true,
+
+
+		/** 
+		 * @type {function} 
+		 * @description zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt
+		 * */
+		"contextmenu": function(){doSomething(); },
+		
+		/**
+		 *  @type {function} 
+		 *  @description ken een functie toe aan een toets at keyup
+		 *  */
+		"keyup" : function(confTable){ doSomething(); },
+		
+		/** 
+		 * @type {function} 
+		 * @description ken een functie toe aan een toets at keydown
+		 * */
+		"keydown" : function(confTable){ doSomething(); }
+};
+
+/**
+ * @enum {string}
+ */
+var oTableConfigurationList_example = {
+		
+		/** 
+		 * @type {function} 
+		 * @description Functie die moet worden getriggerd als men in een gegeven kolom klikt e.d.
+
+		 * */
+		"click": function(t){ doSomething(); },
+		
+		/**
+		 * @type {function}
+		 * @description Functie die moet worden getriggerd als men in een gegeven kolom dubbelklikt e.d.
+		 */
+		"dblclick": function(t){ doSomething(); },
+		
+		/**
+		 * @description Achtergrondkleur van de kolom als html kleurcode (zoals "#123ABC"). Als men slechts één 
+		 * kleurcode opgeef, dan berekent Lex'it automatisch een andere nuance van die kleur voor de oneven rijen 
+		 * (het werkt echter niet bij letterlijke kleurnamen (zoals "green"). Het is ook mogelijk om de kleur van 
+		 * zowel de oneven als de even rijen precies op te geven: dan moet men een tweeledige array opgeven, met 
+		 * de twee kleuren achter elkaar: ["#123ABC", "#ABC123"].
+		 */
+		"bgcolor": "",
+		
+		/**
+		 * @description Plaats een button in een kolom, met de als string opgegeven naam. Het is ook mogelijk om 
+		 * de inhoud van de kolom als Button-naam te gebruiken: daartoe moet in de configuratie als naam een lege 
+		 * string worden gegeven ("button": ""). De functionaliteit van de button moet worden opgegeven met 
+		 * parameter 'click'.
+		 */
+		"button": "",
+		
+		/**
+		 * @description Zet een tooltip bij een button, te zien bij mouseover. Dit is handig om de 
+		 * functie van een knop te verklaren als de naam van de knop dat onvoldoende doet (bijv. 
+		 * vanwege een te korte naam).
+		 */
+		"button_tooltip": "",
+		
+		/**
+		 * @description Zet een tooltip bij een cell, te zien bij mouseover. Dit is handig om zichtbaar te 
+		 * maken dat klikken op een cell een functie heeft.
+		 */
+		"cell_tooltip": "",
+		
+		/**
+		 * @description Maak van de zoekbox van betreffende kolom een select-box. De waarden om uit te kiezen 
+		 * kunnen op twee manieren worden opgegeven: 
+		 * [1] Als lege array, in welk geval de tool zelf de verschillende unieke waardes ophaalt in de database 
+		 * (voorbeeld: {"choosefrom": []}). 
+		 * [2] Als een array van stringwaarden. Omdat de select-box als eerste waarde de aansporing "Kiezen" zal 
+		 * hebben, moet "Kiezen" ook een onderliggende waarde hebben. Deze 'neutrale' waarde moet als allereerste 
+		 * lid van eerdergenoemde array worden opgegeven; als daar geen waarde aan toegekend hoeft te worden, dan 
+		 * voldoet een lege string (voorbeeld: {"choosefrom": ["", "1", "2", "3"]}, waarin "" de onderliggende 
+		 * waarde van "Kiezen" zal zijn).
+		 * 	 */
+		"choosefrom": ["val1", "val2"],
+		
+		/**
+		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
+		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
+		 * waarden zijn 'asc', 'desc' of null (default).
+		 */
+		"colsort": "",
+		
+		/**
+		 * @type {object}
+		 * @description Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, 
+		 * zie: http://medialize.github.com/jQuery-contextMenu/docs.html)
+		 */
+		"contextmenu": {},
+		
+		/**
+		 * @type {object}
+		 * @description Als dit true is, dan wordt bij een Zoek&Voegtoe-actie (insert) de inhoud van deze kolom 
+		 * gekopieerd. Kolommen waarbij deze setting op false staat worden juist niet meegenomen in de insert. 
+		 */
+		"copy_upon_insert": {},
+		
+		/**
+		 * @type {boolean}
+		 * @description Bewerkbaarheid van een kolom.
+		 */
+		"editable": true,
+		
+		/**
+		 * @type {function}
+		 * @description Callback functie die aangeroepen moet worden na het editten van een cell door een gebruiker. 
+		 * Let wel: dit is iets anders dan de 'editfunc'. 'editfunc' is bedoeld om de werking van de editfunctie te 
+		 * wijzigen. 'editcallback' wordt als laatste uitgevoerd, na 'editfunc'.
+		 */
+		"editcallback": function(){},
+		
+		/**
+		 * @type {function}
+		 * @description Customfunctie die uitgevoerd moet worden na het editten van een cell. Deze functie is bedoeld om 
+		 * de standaardverwerking van celinvoer te vervangen: normaal zou de software de bewerkte cel in de database direct 
+		 * willen bewerken, maar wanneer de schermtabel een view is, moeten juist andere tabellen worden bewerkt en dat 
+		 * kan in editfunc worden gedeclareerd.
+		 */
+		"editfunc": function(){},
+		
+		/**
+		 * @type {array}
+		 * @description Lijst van tabellen die ververst moeten worden na het editten van een cell.
+		 */
+		"editrefresh": ["table1", "table2"],
+		
+		/**
+		 * @description Regex waarmee de bewerkte cellinhoud mee moet matchen om de 'editfunc' te triggeren. Als 'edittrigger' 
+		 * null is, dan wordt 'editfunc' altijd getriggerd.
+		 */
+		"edittrigger": "",
+		
+		/**
+		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
+		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
+		 */
+		"filter": "",
+		
+		/**
+		 * @type {boolean}
+		 * @description Als dit 'false' is, dan kan een gebruiker de zichtbaarheid van een kolom niet wijzigen (bijv. 
+		 * handig als een verbogen kolom informatie bevat die niet voor de gebruiker bestemd is).
+		 */
+		"flexible_visibility": true,
+		
+		/**
+		 * @type {boolean}
+		 * @description Als dit 'true' is, dan wordt de filter (uit parameter 'filter':...) opnieuw toegepast als men 
+		 * op 'RESET' klikt. Als men wil voorkomen dat de filter tussentijds wordt gewijzigd, moet met dezelfde kolom 
+		 * op "searchable": false zetten. 
+		 */
+		"keepfilter": true,
+		
+		/**
+		 * @type {boolean}
+		 * @description Doorzoekbaarheid van een kolom.
+		 */
+		"searchable": true,
+		
+		/**
+		 * @type {boolean}
+		 * @description Sorteerbaarheid van een kolom.
+		 */
+		"sortable": true,
+		
+		/**
+		 * @type {function}
+		 * @description Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.
+		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
+		 */
+		"searchform": function(){},
+		
+		/**
+		 * @description Kleur die de tekst moet hebben in een gegeven kolom.
+		 */
+		"textcolor": "",
+		
+		/**
+		 * @description Font-family in een gegeven kolom.
+		 */
+		"textfont": "",
+		
+		/**
+		 * @description Font-size in een gegeven kolom.
+		 */
+		"textsize": "",
+		
+		/**
+		 * @description Font-style in een gegeven kolom.
+		 */
+		"textstyle": "",
+		
+		/**
+		 * @description Font-weight in een gegeven kolom. Zie voorbeeld bij 'textstyle'. 
+		 */
+		"textweight": "",
+		
+		/**
+		 * @description Bij het gebruik van selectboxen kan het zijn dat een gebruiker een waarde per ongeluk klikt.
+		 * Om dat te voorkomen, kan men in de configuratie afdwingen dat de gebruiker bij het maken van zijn keuze 
+		 * tegelijkertijd een opgegeven toets indrukt. Wanneer de gebruiker deze toets bij het maken van een keuze 
+		 * in een selectbox niet indrukt, wordt de keuze afgekeurd. Deze validatie-toets kan worden opgegeven als 
+		 * 'validator'. 
+		 */
+		"validator": "",
+		
+		/**
+		 * @type {boolean}
+		 * @description Zichtbaarheid van een kolom. De zichtbaarheid van een kolom kan in de gebruikersinterface 
+		 * door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) 
+		 * moet men ook "flexible_visibility": false instellen.
+		 */
+		"visible": true
+		
+
+		
+};
+
+// ===== end of documentation of table settings and config
+
+
 // global variable for storage of restore objects
 // (restore objects are shallow copies of the tables configurations, meant to be
 //  able to restore those when the user requires Lex'it to)

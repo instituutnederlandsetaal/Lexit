@@ -487,6 +487,7 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 	{
 		// create a table properties record		
 		// we pass a function and its arguments for initial call
+		// (this function can only be called after the table was created, which is why we store it and call it only later)
 		var func = function(){fn._callTableWithFilter(sSomeTablename, aContentToMatch);};
 		var args = [sSomeTablename, aContentToMatch];
 		
@@ -494,7 +495,7 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 		// (which is where we always create a table by calling this function)
 		mt.createTableRecordWithFilter(sSomeTablename, func, args);
 		
-		// and load the table into a html frame
+		// load the table into a html frame, and store its datatables object
 		tb.loadTable(sSomeTablename, fnFunction, oExtraSettings);
 	}	
 	// if the table exists already, just call it with the right settings
