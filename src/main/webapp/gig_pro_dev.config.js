@@ -266,6 +266,8 @@ oTableSettingsList = {
 		
 		nuancerende_opmerkingen:{
 			
+			"group": "Diversen",
+			
 			"size": "80%",
 							
 			"button_0":{
@@ -322,6 +324,8 @@ oTableSettingsList = {
 		},
 		
 		export_versions:{
+			
+			"group": "Niet vergeten",
 			
 			"size": "80%",
 			
@@ -421,6 +425,8 @@ oTableSettingsList = {
 		
 		
 		lemmata_en_paradigma_view:{
+			
+			"group": "Gewone views",
 			
 			"prereset_callback": function(t){
 				
@@ -884,6 +890,12 @@ oTableSettingsList = {
 		
 		modified_lemmata_view: {
 			
+			"info": "Log van de bijgewerkte lemmata",
+			
+			"creation_date": "23 feb 2017",
+			
+			"group": "Gewone views",
+			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
 				"click": function(confTable){
@@ -912,6 +924,8 @@ oTableSettingsList = {
 		
 		modified_paradigm_view:{
 			
+			"group": "Gewone views",
+			
 			"button_0":{
 				"name": "Woordvorm herstellen",
 				"click": function(confTable){
@@ -939,6 +953,12 @@ oTableSettingsList = {
 		
 
 		lemmata_view: {
+			
+			"group": "Gewone views",
+			
+			"info": "De enige echte lemmata-tabel",
+			
+			"creation_date": "24 feb 2017",
 			
 			"prereset_callback": function(confTable){
 				
@@ -1491,6 +1511,9 @@ oTableSettingsList = {
 		},
 		
 		pos_to_rank:{
+			
+			"group": "Diversen",
+			
 			"size": "60%"
 		}
 		
@@ -1993,6 +2016,9 @@ oTableConfigurationList = {
 				"button": "Paradigma",
 				"click": function(t, n){	
 					
+					
+					//@@@
+					
 					var lemma_id = fn.getDataFromSiblingNode(n, "pkid");
 					
 					fn.callDatabase("lemmata_en_paradigma_view", 
@@ -2099,6 +2125,14 @@ oTableConfigurationList = {
 			
 		}
 };
+
+
+function buildForm(formName){ 
+	
+	var formElement = $("<div><\div>").attr("id", formName); 
+	
+};
+
 
 
 // give an error message, if the comparison between the analyzed_wordforms record

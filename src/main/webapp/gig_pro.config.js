@@ -267,7 +267,7 @@ oTableSettingsList = {
 		nuancerende_opmerkingen:{
 			
 			"size": "80%",
-							
+			
 			"button_0":{
 				"name": "Voeg opmerking toe",
 				"click": function(t){
@@ -845,6 +845,8 @@ oTableSettingsList = {
 		
 		modified_lemmata_view: {
 			
+			"group": "log",
+			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
 				"click": function(confTable){
@@ -872,6 +874,8 @@ oTableSettingsList = {
 		},
 		
 		modified_paradigm_view:{
+			
+			"group": "log",
 			
 			"button_0":{
 				"name": "Woordvorm herstellen",

@@ -137,10 +137,15 @@ $(document).on(
 oTableSettingsList = {
 		
 		special_onw_lemmata_worktable: {
+			
+			"group": "klussen tussendoor",
+			
 			"size": "60%"
 		},
 		
 		multilemmata: {
+			
+			"group": "views om in te werken",
 			
 			"button_0":{
 				"name": "Verwijder multilemma",
@@ -186,6 +191,16 @@ oTableSettingsList = {
 		
 		fix_multiple_lemmata_analyses:{
 			
+			"group": "klussen tussendoor",
+			
+			"creation_date": "19 feb 2016",
+			
+			"finished_date": "27 feb 2016",
+			
+			"processed_date": "28 feb 2016",
+			
+			"info": "Niet gesynchroniseerde lemmata-gevallen",
+			
 			"callback": function(t){
 				highlightMultiLemmataAnalyses(t);
 			},
@@ -205,6 +220,8 @@ oTableSettingsList = {
 		},
 		
 		modified_lemmata_view: {
+			
+			"group": "log",
 			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
@@ -235,6 +252,8 @@ oTableSettingsList = {
 		
 		modified_paradigm_view:{
 			
+			"group": "log",
+			
 			"button_0":{
 				"name": "Woordvorm herstellen",
 				"click": function(t){
@@ -257,6 +276,21 @@ oTableSettingsList = {
 					});
 				}
 			}
+		},
+		
+		
+		marijke_spelling_giganthilex_differences: {
+			
+			"group": "klussen tussendoor",
+			
+			"info": "klusje voor Dirk"
+		},
+		
+		mnw_fix_multiple_ws: {
+			
+			"info": "Oplossing van Jesse voor dubbele woordsoorten bij MNW-lemmata",
+			
+			"group": "Nog te verwerken"
 		},
 
 		
@@ -538,6 +572,8 @@ oTableSettingsList = {
 		
 		token_attestations_worktable: {
 			
+			"group": "views om in te werken",
+			
 			"callback": function(t){
 				highlightAllQuotes(t);
 			},
@@ -775,6 +811,8 @@ oTableSettingsList = {
 		
 		lemmata_removed: {
 			
+			"group": "log",
+			
 			"button_0":{
 				"name": "Hestel selectie",
 				"click": function(t){
@@ -815,6 +853,8 @@ oTableSettingsList = {
 		
 		analyzed_wordforms_removed: {
 			
+			"group": "log",
+			
 			"button_0":{
 				"name": "Hestel selectie",
 				"click": function(t){
@@ -849,6 +889,8 @@ oTableSettingsList = {
 		},
 		
 		lemmata_and_paradigma: {
+			
+			"group": "views om in te werken",
 			
 			"columns_order": [
 			                  	"super_lem_id",
