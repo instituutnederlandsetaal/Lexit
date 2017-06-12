@@ -222,15 +222,15 @@ oTableConfigurationList = {
 				"click": function(t, n){
 					
 					var personNameId = fn.getDataFromSiblingNode(n, "personNameID");
+					var personId = fn.getDataFromSiblingNode(n, "personID");
 					
-					fn.callFunction("get_person_details", [personNameId], 
-	    					function(output){
-	    				
-	    				var nederlabId = output["get_person_details"]; 
+					
+					fn.callFunction("get_person_details", [personId, personNameId], 
+	    					function(){
 	    				
 	    				var bTableAlreadyExists = fn.tableExists("NLPerson");
 	    				
-	    				fn.callDatabase("NLPerson", {"nederlabID": nederlabId}, 
+	    				fn.callDatabase("NLPerson", { "nederlabID": personId }, 
 	    						function(){
 	    					
 	    							setTimeout(function(){fn.scrollToTable("NLPerson");}, 200);
@@ -346,6 +346,18 @@ oTableConfigurationList = {
 						fn.refreshTable(t);
 					});
 					
+				}
+			},
+			
+			
+			"personID": {
+				"cell_tooltip": "Toon auteur",
+				"click": function(t, n){
+					
+					var personId = fn.getDataFromCellNode(n);
+					fn.callDatabase("quickview_persons", {"personID": personId}, function(){
+						fn.scrollToTable("quickview_persons");
+					});
 				}
 			}
 			

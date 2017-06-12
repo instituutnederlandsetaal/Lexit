@@ -10,7 +10,10 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
                    "quote_comparison_lemma_became_multilem",
                    "quote_comparison_doubled_multilem_quote",
                    "quote_comparison_doubled_lemma_quote",
-				   "marijke_spelling_giganthilex_differences"];
+				   "marijke_spelling_giganthilex_differences",
+		"citblock_comparison", "citblock_comparison2",
+		"new_token_attestations",
+		"pretei_quotations_extended"];
 
 
 
@@ -135,17 +138,28 @@ $(document).on(
 
 // table general settings
 oTableSettingsList = {
-		
+
+		citblock_comparison:{
+			"group": "Quotes citblock ids"
+		},
+	
+        citblock_comparison2:{
+			"group": "Quotes citblock ids"
+		},
+
+		new_token_attestations:{
+			"group": "Quotes citblock ids"
+		},
+
+		pretei_quotations_extended: {
+			"group": "Quotes citblock ids"
+		},
+	
 		special_onw_lemmata_worktable: {
-			
-			"group": "klussen tussendoor",
-			
 			"size": "60%"
 		},
 		
 		multilemmata: {
-			
-			"group": "views om in te werken",
 			
 			"button_0":{
 				"name": "Verwijder multilemma",
@@ -191,16 +205,6 @@ oTableSettingsList = {
 		
 		fix_multiple_lemmata_analyses:{
 			
-			"group": "klussen tussendoor",
-			
-			"creation_date": "19 feb 2016",
-			
-			"finished_date": "27 feb 2016",
-			
-			"processed_date": "28 feb 2016",
-			
-			"info": "Niet gesynchroniseerde lemmata-gevallen",
-			
 			"callback": function(t){
 				highlightMultiLemmataAnalyses(t);
 			},
@@ -220,8 +224,6 @@ oTableSettingsList = {
 		},
 		
 		modified_lemmata_view: {
-			
-			"group": "log",
 			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
@@ -252,8 +254,6 @@ oTableSettingsList = {
 		
 		modified_paradigm_view:{
 			
-			"group": "log",
-			
 			"button_0":{
 				"name": "Woordvorm herstellen",
 				"click": function(t){
@@ -276,21 +276,6 @@ oTableSettingsList = {
 					});
 				}
 			}
-		},
-		
-		
-		marijke_spelling_giganthilex_differences: {
-			
-			"group": "klussen tussendoor",
-			
-			"info": "klusje voor Dirk"
-		},
-		
-		mnw_fix_multiple_ws: {
-			
-			"info": "Oplossing van Jesse voor dubbele woordsoorten bij MNW-lemmata",
-			
-			"group": "Nog te verwerken"
 		},
 
 		
@@ -572,8 +557,6 @@ oTableSettingsList = {
 		
 		token_attestations_worktable: {
 			
-			"group": "views om in te werken",
-			
 			"callback": function(t){
 				highlightAllQuotes(t);
 			},
@@ -811,8 +794,6 @@ oTableSettingsList = {
 		
 		lemmata_removed: {
 			
-			"group": "log",
-			
 			"button_0":{
 				"name": "Hestel selectie",
 				"click": function(t){
@@ -853,8 +834,6 @@ oTableSettingsList = {
 		
 		analyzed_wordforms_removed: {
 			
-			"group": "log",
-			
 			"button_0":{
 				"name": "Hestel selectie",
 				"click": function(t){
@@ -889,8 +868,6 @@ oTableSettingsList = {
 		},
 		
 		lemmata_and_paradigma: {
-			
-			"group": "views om in te werken",
 			
 			"columns_order": [
 			                  	"super_lem_id",
@@ -1322,6 +1299,57 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+
+
+		citblock_comparison:{
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
+        
+        citblock_comparison2:{
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
 		
 		
 		fix_multiple_lemmata_analyses:{
@@ -1703,6 +1731,16 @@ oTableConfigurationList = {
 			"opmerking": {
 				"editable": true
 			},
+            
+            "citblock_id": {
+                "click": function(t, n){
+
+                    var oCell = 	fx.getCell(n);					
+					var sCitBlockId =	fx.getDataFromCell(oCell);
+					
+					fn.callDatabase("citblock_comparison", {"xml_citblock_id": "exact:"+sCitBlockId});
+                }
+            },
 			
 			"wdb": {
 				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
