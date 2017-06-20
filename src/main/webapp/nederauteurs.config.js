@@ -20,8 +20,7 @@ oTableSettingsList = {
 					if ( oSelectedRows. any() )
 						{
 						
-						fn.confirm("Let op", "De geselecteerde toc-entry zal nu per brief worden opgesplitst, zodat " +
-								"u de juist auteur per brief zult kunnen toekennen. Weet u het zeker?", 
+						fn.confirm("Let op", "De geselecteerde toc-entry zal nu per brief worden opgesplitst. Weet u het zeker?", 
 								function(){
 							
 									oSelectedRows.every(function(){
@@ -63,8 +62,7 @@ oTableSettingsList = {
 					if ( oSelectedRows. any() )
 						{
 						
-						fn.confirm("Let op", "De geselecteerde toc-entries zullen nu worden samengevoegd, omdat zij allemaal door " +
-								"dezelfde auteur zijn geschreven. Weet u het zeker?", 
+						fn.confirm("Let op", "De geselecteerde toc-entries zullen nu worden samengevoegd. Weet u het zeker?", 
 								function(){
 
 									// Gather info about first selected row.
@@ -90,13 +88,15 @@ oTableSettingsList = {
 										var sbriefNr =		fx.getDataFromCellInRow(oRow, "briefnummer");
 										var sTocEntry = 	fx.getDataFromCellInRow(oRow, "toc_entry_name");
 										var sLongName = 	fx.getDataFromCellInRow(oRow, "longname");
-										var bIsLastRow =	fx.isLastRowOf(oRow, oSelectedRows);
 										
 										aBriefnummerArr.push(sbriefNr);
 										
-										if (	sDeelNr != sFirstDeelNr ||
-												sTocEntry != sFirstTocEntry ||
-												sLongName != sFirstLongName)
+										if (	sDeelNr != sFirstDeelNr 
+												||
+												sTocEntry != sFirstTocEntry 
+												//||
+												//sLongName != sFirstLongName
+											)
 											{
 											aBriefnummerArr = new Array();
 											fn.message("Fout", "De geselecteerde records horen niet samen en mogen " +
@@ -124,8 +124,9 @@ oTableSettingsList = {
 											"deelnr": sFirstDeelNr,
 											"toc_entry_name": sFirstTocEntry,
 											"briefnummer": aBriefnummerArr.join(", "),
-											"matches_in_index": sFirstMatchesInIndex,
-											"longname": sFirstLongName
+											"matches_in_index": sFirstMatchesInIndex
+											//,
+											//"longname": sFirstLongName
 											}, null,
 											function(){
 												fn.refreshTable(t);
@@ -147,6 +148,46 @@ oTableSettingsList = {
 						}
 					
 				}
+			},
+			"button_2": {
+				
+				"name": "Leeg maken",
+				"tooltip": "Aangebracht link ongedaan maken",
+				"bgcolor":"yellow",
+				"textcolor": "red",
+				"click": function(t){
+					
+					var oSelectedRows = fx.getSelectedRowsFrom(t);
+					
+					if ( oSelectedRows. any() )
+						{
+						
+						fn.confirm("Let op", "De opgeslagen link zal nu worden verwijderd. Weet u het zeker?", 
+								function(){
+							
+									oSelectedRows.every(function(){
+										
+										var oRow = this;
+										var bLastRow = fx.isLastRowOf(oRow, oSelectedRows);
+										
+										fx.updateDatabaseGivenACellOrRow(this, 
+												{
+												"index_id": null,
+												"longname": null
+												}, 
+												function(){
+													if (bLastRow) {fn.refreshTable(t);}
+											});
+										
+									});
+							
+									
+							
+							});
+						}
+				}
+				
+				
 			}
 		},
 		
@@ -164,15 +205,16 @@ oTableConfigurationList = {
 		
 		toc_entry_namen_totaal:{
 	
-			"deelnr":{
+			"toc_entry_name":{
 				"colsort": "asc"  // sort #1
+			},
+			
+			"deelnr":{
+				"colsort": "asc"  // sort #2
 				//visible: false
 			},
-			"toc_entry_name":{
-				"colsort": "asc"  // sort #2
-			},
+			
 			"briefnummer": {
-				"visible": false
 			},
 			
 			"id":{
@@ -180,10 +222,14 @@ oTableConfigurationList = {
 			},
 			
 			"index_id": {
-				//"visible": false
+				"editable": true
 			},
 			"matches_in_index":{
 				"filter": "!1"
+			},
+			
+			"opmerking": {
+				"editable": true
 			},
 			
 			"zoek": { 
@@ -215,6 +261,7 @@ oTableConfigurationList = {
 			"id":{
 				"visible": false
 			},
+			
 			"ok": {
 				
 				"button": "OK",
