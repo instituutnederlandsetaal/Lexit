@@ -246,6 +246,55 @@ oTableConfigurationList = {
 		},
 		
 		
+		toc_entry_namen_totaal_special:{
+			
+			"toc_entry_name":{
+				"colsort": "asc"  // sort #1
+			},
+			
+			"deelnr":{
+				"colsort": "asc"  // sort #2
+				//visible: false
+			},
+			
+			"briefnummer": {
+			},
+			
+			"id":{
+				"visible": false
+			},
+			
+			"index_id": {
+				"editable": true
+			},
+			"matches_in_index":{
+				"filter": "!1"
+			},
+			
+			"opmerking": {
+				"editable": true
+			},
+			
+			"zoek": { 
+				"visible": false
+			},
+			
+			// new fields compared to other toc_entry_namen_totaal table
+			"first_name": {"editable": true},
+		
+			"infixes": {"editable": true},
+			
+			"last_name": {"editable": true},
+			
+			"first_name_full": {"editable": true},
+			
+			"birth": {"editable": true},
+			
+			"death": {"editable": true}
+			
+		},
+		
+		
 		matchlijst: {
 			
 			"deelnr":{
@@ -344,13 +393,30 @@ oTableConfigurationList = {
 
 
 
-// call needed tables at start up and align them
+// call needed tables at start up 
 
-fn.callDatabase("toc_entry_namen_totaal", null, function(){
-	
-	fn.callDatabase("matchlijst", null, function(){
+if (fn.getCurrentUser() != 'boukje')
+	{
+	fn.callDatabase("toc_entry_namen_totaal_special");
+	}
+
+//call needed tables at start up and align them
+else
+	{
+	fn.callDatabase("toc_entry_namen_totaal", null, function(){
 		
-		fn.alignTables("toc_entry_namen_totaal", "matchlijst");
-		
-	});
-});
+		fn.callDatabase("matchlijst", null, function(){
+			
+			fn.alignTables("toc_entry_namen_totaal", "matchlijst");
+			
+			});
+		});
+	}
+
+
+
+
+
+
+
+

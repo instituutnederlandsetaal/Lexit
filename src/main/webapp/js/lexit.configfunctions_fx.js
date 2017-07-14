@@ -886,7 +886,7 @@ fx.getDataFromCellInRow = function(oRow, sColumnName){
  * http://stackoverflow.com/questions/7991474/calculate-position-of-selected-text-javascript-jquery
  * 
  * @param {API-object-instance} oCell - An API instance of a cell 
- * @returns {String} Selected text
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @example
  * var sel = fx.getSelectedTextInCell(oCell);
@@ -907,16 +907,13 @@ fx.getSelectedTextInCell = function(oCell) {
 	return fn.getSelectedTextInNode(oCell.node());
 };
 
-// Select a word within a cell just by clicking on it, 
-// and also get the start and end positions of the selected word.
-// input : an 
-// returns : string
+
 /**
  * Select a word within a cell just by clicking on it, 
  * and also get the start and end positions of the selected word.
  * 
  * @param {API-object-instance} oCell - An API instance of a cell
- * @returns {String} Selected text
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @see fx.getSelectedTextInCell
  * @see fx.getSelectedTextInSiblingCell
@@ -939,7 +936,8 @@ fx.getWordClickedUponInCell = function(oCell){
  * given an API instance of a cell, and the name of the column in which the text is selected.
  * 
  * @param {API-object-instance} oRow - An API instance of a row
- * @returns {String} Selected text
+ * @param {String} sColumnName - A column name
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @see fx.getSelectedTextInCell
  * @see fx.getWordClickedUponInCell 

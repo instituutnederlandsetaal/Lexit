@@ -11,7 +11,7 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
                    "quote_comparison_doubled_multilem_quote",
                    "quote_comparison_doubled_lemma_quote",
 				   "marijke_spelling_giganthilex_differences",
-		"citblock_comparison", "citblock_comparison2",
+		"citblock_comparison", "citblock_comparison2", "citblock_comparison3",
 		"new_token_attestations",
 		"pretei_quotations_extended"];
 
@@ -144,6 +144,10 @@ oTableSettingsList = {
 		},
 	
         citblock_comparison2:{
+			"group": "Quotes citblock ids"
+		},
+		
+		citblock_comparison3:{
 			"group": "Quotes citblock ids"
 		},
 
@@ -1327,6 +1331,35 @@ oTableConfigurationList = {
 		},
         
         citblock_comparison2:{
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
+		
+		citblock_comparison3:{
+			
+			"sort_column": {
+				"colsort": "asc"
+			},
 
 			"attestation_id": {
 				"visible": false

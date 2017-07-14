@@ -210,6 +210,9 @@ function updateYearOfDeathLabel(t, n, yearOfDeathMin, yearOfDeathMax, yearOfDeat
 // configuration at column level
 oTableConfigurationList = {
 		
+		
+		"":{},
+		
 		"quickview_persons": {
 			
 			"personNameID": {
@@ -370,6 +373,17 @@ oTableConfigurationList = {
 	    
 	    "NLPerson": {
 	    	
+	    	"nederlabID": {
+	    		
+	    		"click": function(t, n){
+	    			
+	    			var nederlabId = fn.getDataFromCellNode(n);
+	    			fn.callDatabase("PersonName", {"personID": nederlabId});
+	    			
+	    		}
+	    		
+	    	},
+	    	
 	    	"yearOfBirthMin": {
 	    		"editable": true,
 	    		"editcallback": function(t, n, value){
@@ -474,9 +488,50 @@ oTableConfigurationList = {
 	    		}
 	    	}
 	    	
-	    } //,
+	    },
 	    
-	    
+	    "PersonName": {
+	    	
+	    	"personID": {
+	    		"click": function(t, n){
+	    			
+	    			var nederlabId = fn.getDataFromCellNode(n);
+	    			fn.callDatabase("NLPerson", {"nederlabID": nederlabId});
+	    			
+	    		}
+	    		
+	    	},
+	    	
+	    	"firstName": {
+	    		"editable": true
+	    	},
+	    	
+	    	"infixes": {
+	    		"editable": true
+	    	},
+	    	
+	    	"lastName": {
+	    		"editable": true
+	    	},
+	    	
+	    	"firstNameFull": {
+	    		"editable": true
+	    	},
+	    	
+	    	"prefixTitle": {
+	    		"editable": true
+	    	},
+	    	
+	    	"additonalTitle": {
+	    		"editable": true
+	    	},
+	    	
+	    	"organisationName": {
+	    		"editable": true
+	    	}
+	    	
+	    	
+	    },
 	    
 	    
 //	    "PersonName": {

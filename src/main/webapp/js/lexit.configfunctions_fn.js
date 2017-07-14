@@ -1824,7 +1824,7 @@ fn.getDataFromColumn = function(sSomeTable, sColumnName){
  * http://stackoverflow.com/questions/7991474/calculate-position-of-selected-text-javascript-jquery
  * 
  * @param {Node} nCell - A cell node 
- * @returns {String} Selected text
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @example
  * var sel = fn.getSelectedTextInNode(node);
@@ -1894,7 +1894,7 @@ fn.getSelectedTextInNode = function(nCell) {
  * [Adapted from fn.getSelectedTextInNode()]
  * 
  * @param {Node} nCell - A cell node
- * @returns {String} Selected text
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @see fn.getSelectedTextInNode
  * @see fn.getSelectedTextInSiblingNode
@@ -1968,7 +1968,8 @@ fn.getWordClickedUponInNode = function(nCell){
  * given a row node, and the name of the column in which the text is selected.
  * 
  * @param {Node} nRow - A row node
- * @returns {String} Selected text
+ * @param {String} sColumnName - A column name
+ * @returns {Object} Selected text, start and end position, reliability
  * 
  * @see fn.getWordClickedUponInNode
  * @see fn.getSelectedTextInNode 

@@ -198,7 +198,7 @@ sf.enableSearchFields = function(someTablename){
 	// now search starts only after pressing enter
 	
 	// main search function
-	$('#'+someTablename+'_filter input').unbind('keyup');
+	$('#'+someTablename+'_filter input').unbind();
 	$('#'+someTablename+'_filter input').bind('keyup', function(e) {		
 		
 		// pressed keys are normally caught by the attached events in kf.addKeyFunctions()
