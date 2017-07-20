@@ -7,8 +7,6 @@ oTableSettingsList = {
 		
 		
 		auteurs_view: {
-            
-            "throw_to_bottom": true,
 			
 			"callback": function(t){
 				
@@ -32,8 +30,6 @@ oTableSettingsList = {
 		},
 		
 		titels_view: {
-            
-            "throw_to_bottom": true,
 			
 			"callback": function(t){
 				
@@ -57,8 +53,6 @@ oTableSettingsList = {
 		},
 		
 		titels_levels_view: {
-            
-            "throw_to_bottom": true,
 			
 			"callback": function(t){
 				
@@ -82,8 +76,6 @@ oTableSettingsList = {
 		},
 		
 		titels_with_text_view: {
-            
-            "throw_to_bottom": true,
 			
 			"callback": function(t){
 				
@@ -107,8 +99,6 @@ oTableSettingsList = {
 		},
 		
 		levels_view: {
-            
-            "throw_to_bottom": true,
 			
 			"callback": function(t){
 				
@@ -129,19 +119,7 @@ oTableSettingsList = {
 			},
 			"repeat_callback": true
 			
-		},
-        
-        externe_referentie_view : {"throw_to_bottom": true},
-        personen_view : {"throw_to_bottom": true},
-        foliaserver_parsed : {"throw_to_bottom": true},
-        titles_which_have_text : {"throw_to_bottom": true},
-        tmp_stukjes_with_text : {"throw_to_bottom": true},
-        tmp_titles_with_text : {"throw_to_bottom": true},
-        tmp_text_and_stukjes_with_text : {"throw_to_bottom": true},
-        tmp_stukjes_concat_authors : {"throw_to_bottom": true},
-        tmp_stukjes_compleet : {"throw_to_bottom": true},
-        tmp_titles_concat_authors : {"throw_to_bottom": true},
-        tmp_titels_with_text_view : {"throw_to_bottom": true}
+		}
 		
 };
 

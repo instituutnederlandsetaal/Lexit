@@ -39,7 +39,20 @@
 
 var aProjectList =
 	[
+    {
+        name: "Nederlab auteurs",
+        description: "Nederlab auteurs bewerken",
+        config_filename: "nederlab_authors",
+        production: true
+    },
+    
 	{
+		name: "Diamant ruw",
+		config_filename: "diamant_ruw_productie",
+		description: "Diamant Ruw Productie",
+		production: true
+	},	 
+    {
 		name: "vmnw toys",
 		config_filename: "vmnw",
 		description: "Clitics herordenen"
@@ -72,8 +85,13 @@ var aProjectList =
 		description: "Marijke spelling",
 		production: true
 	},
-		
-	
+    
+    {
+        name: "Namenlexicon",
+        config_filename: "ne_lexicon_dutch",
+        description: "Named Entities Lexicon"
+        
+    },
 		 
 	{
 			name: "Celexieklus",

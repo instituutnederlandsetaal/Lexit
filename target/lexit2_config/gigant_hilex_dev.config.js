@@ -10,7 +10,10 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
                    "quote_comparison_lemma_became_multilem",
                    "quote_comparison_doubled_multilem_quote",
                    "quote_comparison_doubled_lemma_quote",
-				   "marijke_spelling_giganthilex_differences"];
+				   "marijke_spelling_giganthilex_differences",
+		"citblock_comparison", "citblock_comparison2", "citblock_comparison3",
+		"new_token_attestations",
+		"pretei_quotations_extended"];
 
 
 
@@ -135,7 +138,27 @@ $(document).on(
 
 // table general settings
 oTableSettingsList = {
+
+		citblock_comparison:{
+			"group": "Quotes citblock ids"
+		},
+	
+        citblock_comparison2:{
+			"group": "Quotes citblock ids"
+		},
 		
+		citblock_comparison3:{
+			"group": "Quotes citblock ids"
+		},
+
+		new_token_attestations:{
+			"group": "Quotes citblock ids"
+		},
+
+		pretei_quotations_extended: {
+			"group": "Quotes citblock ids"
+		},
+	
 		special_onw_lemmata_worktable: {
 			"size": "60%"
 		},
@@ -1280,6 +1303,86 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+
+
+		citblock_comparison:{
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
+        
+        citblock_comparison2:{
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
+		
+		citblock_comparison3:{
+			
+			"sort_column": {
+				"colsort": "asc"
+			},
+
+			"attestation_id": {
+				"visible": false
+			},
+			"sort_column": {
+				"visible": false,
+				"colsort": "asc"
+			},
+			"citblock_id": {
+				"bgcolor": "#D0F5A9"
+			},
+			"xml_citblock_id":{
+				"bgcolor": "#D0F5A9"
+			},
+			"eg_id": {
+			},
+			"opmerking": {
+				"editable": true
+			},
+			"id": {
+				"visible": false
+			}
+		},
 		
 		
 		fix_multiple_lemmata_analyses:{
@@ -1661,6 +1764,16 @@ oTableConfigurationList = {
 			"opmerking": {
 				"editable": true
 			},
+            
+            "citblock_id": {
+                "click": function(t, n){
+
+                    var oCell = 	fx.getCell(n);					
+					var sCitBlockId =	fx.getDataFromCell(oCell);
+					
+					fn.callDatabase("citblock_comparison", {"xml_citblock_id": "exact:"+sCitBlockId});
+                }
+            },
 			
 			"wdb": {
 				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
