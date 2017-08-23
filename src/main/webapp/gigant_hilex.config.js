@@ -44,6 +44,29 @@ function comma(a, b){
 
 
 
+
+var quoteConfig = {
+		
+		"attestation_ids_to_keep": {
+			"visible": false
+		},
+		
+		"attestation_ids_to_delete": {
+			"visible": false
+		},
+		
+		"searchstr": {
+			"click": function(t, n){
+				
+				var sSearch = fn.getDataFromCellNode(n);
+				fn.callDatabase("token_attestations_worktable", {"attestation_ids": sSearch}, function(){
+					fn.scrollToTable("token_attestations_worktable");
+				});
+			}
+		}
+	};
+
+
 // Autocomplete configuration
 // see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
 // http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
@@ -60,7 +83,7 @@ $(document).on(
    		minLength: 2,
    		source: function(request, response){
 	    	
-	    	fn.callFunction("api.get_lemmata_from_prefix", ["'"+request.term+"'"], 
+	    	fn.callFunction("api.get_lemmata_from_prefix", [fn.quote(request.term), fn.quote(sWdbForMultilemBuilder)], 
 	    			function(func_resp){  
 	    		
 	    		var aSuggestionsArr = 
@@ -77,6 +100,23 @@ $(document).on(
 	    open: function( event, ui ) {
 	    	$(this).autocomplete('widget').css('z-index', 100000);
 	        return false;
+	    },
+	    select: function( event, ui ) {
+	    	
+	    	// read the dictionary the chosen lemma belongs to
+	    	var sSuggestionWdb = (ui.item["label"]).replace(/.+, .+ \((.+), id:.+$/, '$1');
+	    	
+	    	// if no sWdbForMultilemBuilder-filter was set yet (because multilemmata builder is empty)
+	    	// set it now!
+	    	if (sWdbForMultilemBuilder == '')
+	    		sWdbForMultilemBuilder = sSuggestionWdb;
+	    	
+	    	// check if lemma selection meets the dictionary requirement 
+	    	// (must be the same dictionary as previously chosen lemmata)
+	    	if (sSuggestionWdb != sWdbForMultilemBuilder)
+	    		{
+	    		fn.message("Let op!", "Alle gekozen delen moeten '"+sWdbForMultilemBuilder+"'-lemmata zijn!");
+	    		}
 	    }
 	});
        
@@ -1194,6 +1234,36 @@ oTableSettingsList = {
 								fn.alignTables(sMultiBuilderTable, "lemmata", function(){
 									
 									fn.clickOnButton("lemmata", "selectionbutton");
+									
+									
+									// pre-insert the selected lemma in the multilemmata builder
+									// (do it this late, to make sure the multilemmata builder is already available)
+									
+									var oSelectedLemma = fx.getFirstSelectedRowFrom(t);
+									if (oSelectedLemma.any())
+										{
+										var sLemId = 	fx.getDataFromCellInRow(oSelectedLemma, "lemma_id");
+										var sModLem =	fx.getDataFromCellInRow(oSelectedLemma, "modern_lemma");
+										var sPos = 		fx.getDataFromCellInRow(oSelectedLemma, "lemma_part_of_speech");
+										var sLemWdb =	fx.getDataFromCellInRow(oSelectedLemma, "wdb");
+										
+										fn.insertIntoDatabase(sMultiBuilderTable, 
+											{
+											"lemma_id": sLemId,
+											"modern_lemma": sModLem,
+											"lemma_part_of_speech": sPos,
+											"wdb": sLemWdb
+											}, 
+											null, 
+											function(){												
+												
+												fn.scrollToTable(sMultiBuilderTable);
+												fn.refreshTable(sMultiBuilderTable, function(){
+													fn.setFilters("lemmata", {"wdb": sLemWdb}, true);
+													fn.refreshTable("lemmata");
+												});
+											});
+										}
 								});
 							})
 						});
@@ -1377,7 +1447,7 @@ oTableConfigurationList = {
 			},
 			
 			"wdb": {
-				"choosefrom": []
+				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
 			},
 			
 			"modern_lemma": {
@@ -1412,7 +1482,10 @@ oTableConfigurationList = {
 					var oCell = 	fx.getCell(n);
 					var iMlaId =	fx.getDataFromCell(oCell);
 					
-					fn.callDatabase("multiple_lemmata_analyses_view", {"multiple_lemmata_analysis_id": iMlaId});
+					fn.callDatabase("multiple_lemmata_analyses_view", {"multiple_lemmata_analysis_id": iMlaId},
+							function(){
+						fn.scrollToTable("multiple_lemmata_analyses_view");
+					});
 					
 				}
 			},
@@ -1427,7 +1500,10 @@ oTableConfigurationList = {
 					var iLemmaId =	fx.getDataFromSiblingCell(oCell, "lemma_id");
 					
 					fn.callDatabase("token_attestations_worktable", 
-							{"analyzed_wordform_ids_arr": "{"+iAwfId+"}", "lemma_id": iLemmaId});
+							{"analyzed_wordform_ids_arr": "{"+iAwfId+"}", "lemma_id": iLemmaId},
+							function(){
+								fn.scrollToTable("token_attestations_worktable");
+							});
 				}
 			},
 			"group_id": {
@@ -1440,7 +1516,10 @@ oTableConfigurationList = {
 					var iLemmaId =	fx.getDataFromSiblingCell(oCell, "lemma_id");
 					
 					fn.callDatabase("token_attestations_worktable", 
-							{"group_id": iGroupId, "lemma_id": iLemmaId});
+							{"group_id": iGroupId, "lemma_id": iLemmaId},
+							function(){
+								fn.scrollToTable("token_attestations_worktable");
+							});
 				}
 			},
 			"wordform": {
@@ -1528,24 +1607,61 @@ oTableConfigurationList = {
 					var oCell =			fx.getCell(n);
 					var iDocumentId =	fx.getDataFromCell(oCell);
 					
-					fn.callDatabase("documents", {"document_id": iDocumentId}, null, {"viewtype": "form"});
+					fn.callDatabase("documents", 
+							{"document_id": iDocumentId}, 
+							function(){
+								fn.scrollToTable("documents");
+							}, 
+							{"viewtype": "form"});
 				}
 			}
 		},
 		
 		token_attestations_worktable: {
 			
+			"opmerking": {
+				"editable": true
+			},
+            
+            "citblock_id": {
+                "click": function(t, n){
+
+                    var oCell = 	fx.getCell(n);					
+					var sCitBlockId =	fx.getDataFromCell(oCell);
+					
+					fn.callDatabase("citblock_comparison", {"xml_citblock_id": "exact:"+sCitBlockId});
+                }
+            },
+			
+			"wdb": {
+				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
+			},
+			
+			"quotation_section_id_fixed":{
+				"visible": true
+			},
+			
+			"quotation_section_id_was": {
+				"visible": false
+			},
+			
 			"lemma_id": {
 				"click": function(t, n){
 					var sLemmaId = fn.getDataFromCellNode(n);
-					fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId});
+					fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId},
+							function(){
+								fn.scrollToTable("lemmata_and_paradigma");
+							});
 				}
 			},
 			
 			"multiple_lemmata_analysis_id": {
 				"click": function(t, n){
 					var sMultilemId = fn.getDataFromCellNode(n);
-					fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultilemId});
+					fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultilemId},
+							function(){
+								fn.scrollToTable("lemmata_and_paradigma");
+							});
 				}
 			},
 			
@@ -1584,7 +1700,11 @@ oTableConfigurationList = {
 					var oCell =			fx.getCell(n);
 					var iDocumentId =	fx.getDataFromCell(oCell);
 					
-					fn.callDatabase("documents", {"document_id": iDocumentId}, null, {"viewtype": "form"});
+					fn.callDatabase("documents", {"document_id": iDocumentId}, 
+							function(){
+								fn.scrollToTable("documents");
+							}, 
+							{"viewtype": "form"});
 				}
 			},
 			"doorvoeren": {
@@ -2117,6 +2237,13 @@ function highlightMultiLemmataAnalyses(t){
 // (as the table has a unique, random generated name/id, its configuration has to be linked
 // to it dynamically after the multilemmata builder name creation.
 
+
+// when the builder had some lemmapart chose in it, the dictionary the part comes from is read 
+// and put into this variable, which we then use as a filter to other parts. That way, we prevent
+// the user from choosing parts from other dictionaries (which would result in illegal multi lems,
+// built from lemmata from different dics)
+var sWdbForMultilemBuilder = "";
+
 setTimeout(function(){
 	
 	// register each table details
@@ -2151,6 +2278,16 @@ setTimeout(function(){
 			"tooltip": "Voeg een in de 'lemmata'-tabel gekozen lemma in deze tabel toe",
 			"click": function(t){
 				
+				// check the lemma-part already present in the multiple lemmatabuilder  
+				
+				var iNumberOfPreselectedLemmata = (fx.getAllRows(t)).count();
+				
+				sWdbForMultilemBuilder = (iNumberOfPreselectedLemmata > 0) ?
+					fx.getDataFromCellInRow(fx.getFirstRowFrom(t), "wdb") : "";
+					
+				
+				// get the lemma the user had chosen in the lemmata table 
+					
 				if ( !fn.tableExists("lemmata"))
 					{
 					fn.message("Let op!", "U moest een lemmata in de 'lemmata' tabel selecteren!")
@@ -2164,17 +2301,30 @@ setTimeout(function(){
 						var sLemId = 	fx.getDataFromCellInRow(oLemRow, "lemma_id");
 						var sModLem =	fx.getDataFromCellInRow(oLemRow, "modern_lemma");
 						var sPos = 		fx.getDataFromCellInRow(oLemRow, "lemma_part_of_speech");
+						var sLemWdb =	fx.getDataFromCellInRow(oLemRow, "wdb");
 						
+						if (sWdbForMultilemBuilder== '' || sWdbForMultilemBuilder == sLemWdb)
+							{
 						fn.insertIntoDatabase(t, 
 							{
+									"part_number": iNumberOfPreselectedLemmata+1,
 							"lemma_id": sLemId,
 							"modern_lemma": sModLem,
-							"lemma_part_of_speech": sPos
+									"lemma_part_of_speech": sPos,
+									"wdb": sLemWdb
 							}, 
 							null, 
 							function(){
 								fn.refreshTable(t);
 							});
+						}
+					else
+						{
+							fn.message("Let op!", "De gekozen delen moeten allemaal '"+sWdbForMultilemBuilder+"'-lemmata zijn!");
+							}
+						
+						
+						
 						}
 					else
 						{
@@ -2188,6 +2338,12 @@ setTimeout(function(){
 			"name": "Voeg lemma toe (autocomplete)",
 			"tooltip": "Voeg lemmata in deze tabel toe d.m.v. een autocomplete",
 			"click": function(t){
+				
+				var iNumberOfPreselectedLemmata = (fx.getAllRows(t)).count();
+				
+				sWdbForMultilemBuilder = (iNumberOfPreselectedLemmata > 0) ?
+						fx.getDataFromCellInRow(fx.getFirstRowFrom(t), "wdb") : "";
+
 				
 				fn.prompt("Tik lemmata in", 
 						["lemma 1", "lemma 2", "lemma 3", "lemma 4", "lemma 5"], 
@@ -2205,13 +2361,15 @@ setTimeout(function(){
 							var sLemmaId =	(aInput[i]).replace(/.+, id:(\d+)\)$/, '$1');
 							var sModlem =	(aInput[i]).replace(/^([^,]+), .+$/, '$1');
 							var sPos = 		(aInput[i]).replace(/.+, (.+) \(.+$/, '$1');
+							var sLemWdb =	(aInput[i]).replace(/.+, .+ \((.+), id:.+$/, '$1');
 							
 							fn.insertIntoDatabase(t, 
 								{
-									"part_number": i+1,
+									"part_number": iNumberOfPreselectedLemmata+(i+1),
 									"lemma_id": sLemmaId,
 									"modern_lemma": sModlem,
-									"lemma_part_of_speech": sPos
+									"lemma_part_of_speech": sPos,
+									"wdb": sLemWdb
 								}, 
 								null, 
 								function(){
@@ -2238,6 +2396,10 @@ setTimeout(function(){
 			"click": function(t){
 				
 				fn.callFunction("api.reset_multilemmata_builder", [ fn.quote(sMultiBuilderTable)], function(){
+					
+					// reset the dictionary filter too
+					sWdbForMultilemBuilder = "";
+					
 					fn.refreshTable(t);
 				});
 			}
@@ -2330,7 +2492,9 @@ setTimeout(function(){
 							
 							fn.callDatabase("lemmata_and_paradigma", 
 									{"multiple_lemmata_analysis_id": iMultiLemId},
-									null,
+									function(){
+										fn.scrollToTable("lemmata_and_paradigma");
+									},
 									aPosition);
 						});
 						

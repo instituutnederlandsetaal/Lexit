@@ -209,6 +209,10 @@ oTableSettingsList = {
 		
 		fix_multiple_lemmata_analyses:{
 			
+			"group": "klussen",
+			
+			"processed_date": "19 februari 2016",
+			
 			"callback": function(t){
 				highlightMultiLemmataAnalyses(t);
 			},
@@ -228,6 +232,8 @@ oTableSettingsList = {
 		},
 		
 		modified_lemmata_view: {
+			
+			"group": "log",
 			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
@@ -257,6 +263,8 @@ oTableSettingsList = {
 		},
 		
 		modified_paradigm_view:{
+			
+			"group": "log",
 			
 			"button_0":{
 				"name": "Woordvorm herstellen",
@@ -798,6 +806,8 @@ oTableSettingsList = {
 		
 		lemmata_removed: {
 			
+			"group": "log",
+			
 			"button_0":{
 				"name": "Hestel selectie",
 				"click": function(t){
@@ -837,6 +847,8 @@ oTableSettingsList = {
 		},
 		
 		analyzed_wordforms_removed: {
+			
+			"group": "log",
 			
 			"button_0":{
 				"name": "Hestel selectie",
