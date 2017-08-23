@@ -40,6 +40,7 @@ public class Database {
 	public ConcurrentHashMap<String, String> functionNameToOperationType = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String> tableNameToPrimaryKey = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String[]> tableNameToColumnNames = new ConcurrentHashMap<String, String[]>();
+	public ConcurrentHashMap<String, Boolean> tableAndColumnNameToIndex = new ConcurrentHashMap<String, Boolean>();
 
 	// cache of total and partial counts
 	public ConcurrentHashMap<String, Integer> tableNameToCount = new ConcurrentHashMap<String, Integer>();
@@ -1250,6 +1251,91 @@ public class Database {
 	
 	
 	
+	/**
+	 * checkIfIndexExists
+	 * Check whether some index (even multi-column one) exists or not
+	 * @param tableName
+	 * @param indexedFields
+	 * @return
+	 */
+	public Boolean checkIfIndexExists(String tableName, String[] indexedFields){
+		
+		if (indexedFields.length == 0)
+			return true;
+		
+		boolean indexExists = false;		
+		String schema = getSchema(tableName);
+		ArrayList<String[]> res;
+		
+		// get sorted list of indexedFields
+		// (so we can compare this list with a sorted list from the database indexes)
+		Arrays.sort(indexedFields);
+		String delimiter = ",";
+		String indexedFieldsStr = Util.join(indexedFields, delimiter);
+		
+		// already checked?
+		String key = tableName+schema+indexedFieldsStr;
+		if (tableAndColumnNameToIndex.containsKey(key))
+			return true;
+		
+		// set arguments
+		String[] args = new String[]{schema, tableName, indexedFieldsStr};	
+		
+		String checkExistenceQuery = 
+			"SELECT 1 AS result "+
+			"FROM " +
+			"	( "+
+			"	SELECT " +
+			"	t.relname AS table_name, " +
+			"	i.relname as index_name, " +
+			"	array_to_string(ARRAY(SELECT unnest( array_agg(a.attname) ) ORDER BY 1), '"+delimiter+"') AS column_names " +
+			"	FROM " +
+			"	pg_class t, pg_class i, pg_index ix, pg_attribute a, pg_namespace n " +
+			"	WHERE " +
+			"	t.oid = ix.indrelid " +
+			"	and n.oid = i.relnamespace " +
+			"	and i.oid = ix.indexrelid " +
+			"	and a.attrelid = t.oid " +
+			"	and a.attnum = ANY(ix.indkey) " +
+			"	and t.relkind = 'r' " +
+			"	and n.nspname = ? " + 			// schema
+			"	and t.relname = ? " + 			// table
+			"	group by t.relname, i.relname " +
+			"	order by t.relname, i.relname) x " +
+			"WHERE column_names = ?; "; 		// column names, sorted 
+				
+		
+		
+		PostgresDatabaseCommunication dc = connectDatabase();
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			
+			ResultSet rs = dc.sendPreparedQuery(checkExistenceQuery, args);
+			
+			res = getResultsInAList(rs, new String[]{"result"});
+			
+			indexExists = (res.size()>0);
+			
+			if (indexExists)
+				tableAndColumnNameToIndex.put(key, true);
+			
+			return indexExists;
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+checkExistenceQuery, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * Update one or more columns in one single record of a table
@@ -1859,8 +1945,12 @@ public class Database {
 			ArrayList<Boolean> aCaseSensitiveColumnSearch,
 			boolean weMustSort, 
 			String[] aSortCol, String[] aSortDir){
+		
+		long timeAtVeryStart = new Date().getTime();
 	
 		String schema = getSchema(tableName);
+		
+		boolean indexAvailableForSortCol = checkIfIndexExists(tableName, aSortCol);
 		
 		// test ConcurrentHashMap behaviour amoung sessions
 //		System.out.println("tableNameToCount contains:");
@@ -2273,6 +2363,14 @@ public class Database {
 		// but now we are done with counting, so set bForceExactCount back to 
 		// its default value (=false, exact count not required)
 		this.setForceExactCount(false);
+		
+		long timeAtVeryEnd = new Date().getTime();
+		
+		// if the query execution took more time than allowed,
+		// register if there is an index for the columns now sorted by, as this might be the cause
+		if ((timeAtVeryEnd - timeAtVeryStart) > maxAllowedDuration 
+				&& !indexAvailableForSortCol)
+			tableAndCount.setNeededIndexForSortingColumns(Util.join(aSortCol, ", "));
 		
 		return tableAndCount;
 	}

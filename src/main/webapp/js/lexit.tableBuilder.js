@@ -672,6 +672,18 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		
 		var sSubTotal = $("#"+sSomeTableName+"_info").text();
 		
+		// slow speed because of missing sorting indexes is a bad thing
+		if ( typeof json.sNeededIndexForSortColumns != 'undefined' 
+				&& json.sNeededIndexForSortColumns != '' )
+			{			
+			fn.message("Let op!", "Let op: voor de huidige sorteerkolommen in tabel '"+sSomeTableName+"' " +
+						"is geen index beschikbaar.<BR>" +
+						"Dit vertraagt het werken met de database.<BR><BR>" +
+						"Betroffen kolommen: "+json.sNeededIndexForSortColumns+"<BR><BR>" +
+						"Geef dit door aan de administrator.");			
+			}
+					
+		
 		// pre-processing: if no query was send (so result is whole table), Datatables
 		// actually shows the whole count as if it was an query count. But the
 		// relevent count quality is in this case the total count quality, not the query

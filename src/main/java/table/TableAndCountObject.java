@@ -9,6 +9,14 @@ public class TableAndCountObject {
 	ArrayList<ConcurrentHashMap<String, String>> content = new ArrayList<ConcurrentHashMap<String, String>>();
 	int count = 0;
 	boolean exactCount = false;
+	String neededIndexForSortingColumns = "";
+	
+	public void setNeededIndexForSortingColumns(String indexNeeded){
+		this.neededIndexForSortingColumns = indexNeeded;
+	}
+	public String getNeededIndexForSortingColumns(){
+		return this.neededIndexForSortingColumns;
+	}
 	
 	// get and set the number of records of a table
 	public void setCount(int count){

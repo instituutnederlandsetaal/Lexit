@@ -62,6 +62,17 @@ public class ResultObject {
 	public boolean totalCountIsExact(){return this.bTotalCountIsExact;}
 	public void setTotalCountIsExact(boolean exactCount){this.bTotalCountIsExact = exactCount;}
 	
+	
+	// index for columns sorted by is needed?
+	@XmlElement(name="sNeededIndexForSortColumns")
+	public String sNeededIndexForSortColumns = "";
+	@XmlTransient
+	public String getNeededIndexForSortColumns(){return this.sNeededIndexForSortColumns;}
+	public void setNeededIndexForSortColumns(String neededIndex){this.sNeededIndexForSortColumns = neededIndex;}
+	
+	
+	
+	
 	// table content
 	
 	@XmlElement(name="data")
@@ -108,6 +119,9 @@ public class ResultObject {
 				iDisplayStart, sSearch, 
 				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr,
 				weMustSort, aSortCol, aSortDir);
+		
+		// are the sorting columns indexed?
+		this.setNeededIndexForSortColumns( tableAndCount.getNeededIndexForSortingColumns() );
 		
 		// set content and content count
 		this.setTableContent( tableAndCount.getContent() );
