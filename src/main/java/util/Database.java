@@ -1260,7 +1260,15 @@ public class Database {
 	 */
 	public Boolean checkIfIndexExists(String tableName, String[] indexedFields){
 		
+		// empty fields list makes no sense: we don't lack any index then!
 		if (indexedFields.length == 0)
+			return true;
+		
+		// are we dealing with a view or a table here?				
+		// because views don't have indexes, so it's no use to check indexes!
+		ArrayList<String> listOfTrueTables = getTrueTablesList();
+		boolean currentTableIsaView = !(listOfTrueTables.contains(getTableNameOnly(tableName)));
+		if (currentTableIsaView)
 			return true;
 		
 		boolean indexExists = false;		
