@@ -1331,6 +1331,7 @@ public class TableResources {
 		String[] aSortCol = tmpSortCol.toArray(new String[tmpSortCol.size()]);
 		String[] aSortDir = tmpSortDir.toArray(new String[tmpSortDir.size()]);
 		
+		
 		// return the table		
 		return new TableDataInspector(getDatabaseObject(co),
 				tableName, countOfTable, countQualityOfTable,

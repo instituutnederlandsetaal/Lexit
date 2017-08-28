@@ -1277,9 +1277,10 @@ public class Database {
 		
 		// get sorted list of indexedFields
 		// (so we can compare this list with a sorted list from the database indexes)
-		Arrays.sort(indexedFields);
+		String[] sortedArray = Util.cloneArr(indexedFields);
+		Arrays.sort(sortedArray);
 		String delimiter = ",";
-		String indexedFieldsStr = Util.join(indexedFields, delimiter);
+		String indexedFieldsStr = Util.join(sortedArray, delimiter);
 		
 		// already checked?
 		String key = tableName+schema+indexedFieldsStr;
@@ -1819,7 +1820,7 @@ public class Database {
 
 		String schema = getSchemaName();
 		
-		// BEWARE: the following shorter query seems to not work in Postgres 8 (only 9)
+		// BEWARE: the following shorter query doesn't seem to work in Postgres 8 (only 9)
 		//         so we use a more complex query which is working in all versions (as far as we could test)
 		// 	SELECT table_name, 
 		// 	table_name||' ('||table_type||')' AS description 
@@ -1960,14 +1961,12 @@ public class Database {
 		
 		boolean indexAvailableForSortCol = checkIfIndexExists(tableName, aSortCol);
 		
-		// test ConcurrentHashMap behaviour amoung sessions
-//		System.out.println("tableNameToCount contains:");
-//		for (String oneKey : tableNameToCount.keySet())
-//		{
-//			System.out.println(oneKey + " -> "+ tableNameToCount.get(oneKey) );
-//		}
-//		System.out.println("-------\n\n");
-	
+		if (Constants.debug){
+			System.out.println();
+			System.out.println("Sort (initial):");
+			System.out.println(Util.join(aSortCol, ", "));
+			System.out.println(Util.join(aSortDir, ", "));
+		}
 		
 		
 		// get table content		
@@ -1987,8 +1986,19 @@ public class Database {
 		if (primaryKey != null && 
 				Util.getIndexOf(primaryKey, aSortCol)<0)
 		{
+			if (Constants.debug){
+				System.out.println("'"+primaryKey+"' is no part of "+Util.join(aSortCol, ", "));
+			}
+			
 			aSortCol = Util.concatArr(aSortCol, new String[]{primaryKey});	
 			aSortDir = Util.concatArr(aSortDir, new String[]{"ASC"});
+		}
+		
+		if (Constants.debug){
+			System.out.println();
+			System.out.println("Sort (possibly) enriched:");
+			System.out.println(Util.join(aSortCol, ", "));
+			System.out.println(Util.join(aSortDir, ", "));
 		}
 		
 		

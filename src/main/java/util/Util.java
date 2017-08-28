@@ -336,4 +336,10 @@ public class Util {
 	    return both.toArray(new String[both.size()]);
 	}
 	
+	public static String[] cloneArr(String[] someArray){
+		List<String> newArr = new ArrayList<String>(someArray.length);
+	    Collections.addAll(newArr, someArray);
+	    return newArr.toArray(new String[newArr.size()]);
+	}
+	
 }

@@ -55,7 +55,16 @@ var oTableSettingsList_example = {
 		 * @description volgorde waarin de kolommen moeten worden weergegeven,
 		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)
 		 * */
-		"column_order": ["colname1", "colname2"],
+		"column_order": ["colname1", "colname2", "colnameX"],
+		
+		
+		/** 
+		 * @type {array} 
+		 * @description kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,
+		 * opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}
+		 * */
+		"column_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
+		
 		
 		/**
 		 * @description breedte van tabel
@@ -803,6 +812,25 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 
 	var aColSettings = 		new Array();
 	
+	// check if sorting has been set in the table settings array (preferred) instead of in the configuration array 
+	
+	// [1] sorting was set in the table settings array
+	
+	var oTableSettings = 	conf.getTableSettings(sSomeTablename);
+	var oTsColSettings =	conf.getDefaultSortingFromTableSettings(oTableSettings);
+	if (oTsColSettings != null)
+		{
+		for (colName in oTsColSettings)
+			{
+			var iColIndex = 	$.inArray(colName, mt.getListOfColumnsOf(sSomeTablename));
+			aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
+			}
+		
+		return aColSettings;
+		}
+	
+	// [2] sorting was set in the table configuration array
+	
 	// get the list of sorting columns
 	var oTableConfig = 		conf.getTableConfig(sSomeTablename);
 	var aDefaultSortCols =	conf.getDefaultSortingColumns(oTableConfig);
@@ -813,7 +841,7 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 		var sSortDir  = 	conf.getSortingColumnDirection(conf.getColumnConfig(oTableConfig, sDefaultSortCol));
 		var iColIndex = 	$.inArray(sDefaultSortCol, mt.getListOfColumnsOf(sSomeTablename));
 		
-		aColSettings.push([ iColIndex, sSortDir]);
+		aColSettings.push([ iColIndex, sSortDir ]);
 		}
 	return aColSettings;
 };
@@ -1655,8 +1683,23 @@ conf.getColumnOrder = function(aTableSettings){
 	if (typeof aTableSettings["column_order"] != 'undefined')
 		return aTableSettings["column_order"];
 	
+	// beware: plural -s  is allowed too!
 	else if (typeof aTableSettings["columns_order"] != 'undefined')
 		return aTableSettings["columns_order"];
+	
+	return null;
+};
+
+
+// column_sorting
+conf.getDefaultSortingFromTableSettings = function(aTableSettings){
+	
+	if (typeof aTableSettings["column_sorting"] != 'undefined')
+		return aTableSettings["column_sorting"];
+	
+	// beware: plural -s  is allowed too!
+	else if (typeof aTableSettings["columns_sorting"] != 'undefined')
+		return aTableSettings["columns_sorting"];
 	
 	return null;
 };

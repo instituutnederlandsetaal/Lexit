@@ -652,8 +652,8 @@ tb._rightExportValue = function(sValue){
 
 /***************************************/
 
-
-
+// keep in memory for which missing indexes we already gave a warning
+var aMissingIndexes = new Array();
 
 // read custom param from server response and process them
 tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
@@ -674,13 +674,18 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		
 		// slow speed because of missing sorting indexes is a bad thing
 		if ( typeof json.sNeededIndexForSortColumns != 'undefined' 
-				&& json.sNeededIndexForSortColumns != '' )
+				&& json.sNeededIndexForSortColumns != '' 
+				&& aMissingIndexes.indexOf(sSomeTableName+json.sNeededIndexForSortColumns) <0 // warning wasn't given yet
+				)
 			{			
 			fn.message("Let op!", "Let op: voor de huidige sorteerkolommen in tabel '"+sSomeTableName+"' " +
 						"is geen index beschikbaar.<BR>" +
 						"Dit vertraagt het werken met de database.<BR><BR>" +
 						"Betroffen kolommen: "+json.sNeededIndexForSortColumns+"<BR><BR>" +
-						"Geef dit door aan de administrator.");			
+						"Geef dit door aan de administrator.");		
+			
+			// remember that the warning was already given, so the user won't see it again during the session
+			aMissingIndexes.push(sSomeTableName+json.sNeededIndexForSortColumns);
 			}
 					
 		
