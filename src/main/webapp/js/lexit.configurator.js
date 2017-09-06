@@ -55,7 +55,7 @@ var oTableSettingsList_example = {
 		 * @description volgorde waarin de kolommen moeten worden weergegeven,
 		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)
 		 * */
-		"column_order": ["colname1", "colname2", "colnameX"],
+		"columns_order": ["colname1", "colname2", "colnameX"],
 		
 		
 		/** 
@@ -63,7 +63,7 @@ var oTableSettingsList_example = {
 		 * @description kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,
 		 * opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}
 		 * */
-		"column_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
+		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
 		
 		
 		/**
