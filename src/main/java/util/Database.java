@@ -41,6 +41,7 @@ public class Database {
 	public ConcurrentHashMap<String, String> tableNameToPrimaryKey = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String[]> tableNameToColumnNames = new ConcurrentHashMap<String, String[]>();
 	public ConcurrentHashMap<String, Boolean> tableAndColumnNameToIndex = new ConcurrentHashMap<String, Boolean>();
+	public ConcurrentHashMap<String, ArrayList<String[]>> gotoQueryToResultSet = new ConcurrentHashMap<String, ArrayList<String[]>>();
 
 	// cache of total and partial counts
 	public ConcurrentHashMap<String, Integer> tableNameToCount = new ConcurrentHashMap<String, Integer>();
@@ -188,14 +189,17 @@ public class Database {
 	 * @param tableName
 	 * @param columnName
 	 * @param columnValue
+	 * @param occurenceNr
 	 * @param sortBy
 	 * @param sortDir
 	 * @return a row number
 	 */
 	public  Integer getRowNumberOfRecord(
 			String tableName, String columnName, String columnValue, 
+			int occurenceNr,
 			String sortBy, String sortDir,
-			String[] filterColumns, String[] filterValues){
+			String[] filterColumns, String[] filterValues,
+			int iDisplayLength){
 		
 		int rowNumber = 0;
 		String schema = getSchema(tableName);	
@@ -230,7 +234,8 @@ public class Database {
 			
 		// set arguments
 		// the value to search for, and the table filters
-		String[] args = Util.concatArr( new String[]{columnValue}, filterValues );	
+		// (we have to remove ^ here, as we will be using < and > as operators in first case query)
+		String[] args = Util.concatArr( new String[]{ columnValue.replaceAll("^[\\^]", "")}, filterValues );	
 		
 		// set argument types
 		ArgumentTypesObject ato = new ArgumentTypesObject();
@@ -247,37 +252,44 @@ public class Database {
 		// *** FIRST CASE ***
 		// this query works only if the main sorting column is the same as the searched column
 		// (if it is not the same, we'll use the next query)
-		if ( columnName.equals(aSortBy[0]) )
-		{
-			getRowNumberQuery = 
-				"SELECT COUNT(*) AS rownumber FROM " +
-				"(SELECT * " +
-				" FROM " + getSafeTableName(tableName, schema) + " " +
-				" WHERE " + getSafeFieldName(columnName) + " " + ( (aSortDir[0]).equalsIgnoreCase("asc")? "<" : ">" ) + " ? ";
-			
-			// if filters are required, add those
-			if (filterColumns!=null)
-			{
-				for (int i=0; i<filterColumns.length; i++)
-				{
-					String oneFilterColumn = filterColumns[i];
-					// 
-					getRowNumberQuery += "AND "+getSafeFieldName(oneFilterColumn)+" "+
-						getSuitableOperator(filterValues[i], false)+" ? ";
-				}			
-			}
-					
-			getRowNumberQuery +=
-				( sortByIsEmpty ? "" : " ORDER BY "+bigSortString ) +
-				") AS tmp;";
-		}
-				
-	
-		// *** OTHER CASE ***
-		// if the main sorting column is different from the searched column
-		// this query is slow, but reliable! 
-		else if ( !columnName.equals(aSortBy[0]) )
-		{
+//		if ( 
+//				columnName.equals(aSortBy[0]) 
+//				&&
+//				occurenceNr == 0  // this query won't work when searching for next occurence
+//				)
+//		{
+//			getRowNumberQuery = 
+//				"SELECT COUNT(*) AS rownumber FROM " +
+//				"(SELECT * " +
+//				" FROM " + getSafeTableName(tableName, schema) + " " +
+//				" WHERE " + getSafeFieldName(columnName) + " " + ( (aSortDir[0]).equalsIgnoreCase("asc")? "<" : ">" ) + " ? ";
+//			
+//			// if filters are required, add those
+//			if (filterColumns!=null)
+//			{
+//				for (int i=0; i<filterColumns.length; i++)
+//				{
+//					String oneFilterColumn = filterColumns[i];
+//					// 
+//					getRowNumberQuery += "AND "+getSafeFieldName(oneFilterColumn)+" "+
+//						getSuitableOperator(filterValues[i], false)+" ? ";
+//				}			
+//			}
+//					
+//			getRowNumberQuery +=
+//				( sortByIsEmpty ? "" : " ORDER BY "+bigSortString ) +
+//				") AS tmp;";
+//		}
+//				
+//	
+//		// *** OTHER CASE ***
+//		// if the main sorting column is different from the searched column
+//		// this query is slow, but reliable! 
+//		else if ( !columnName.equals(aSortBy[0]) 
+//				||
+//				occurenceNr > 0 // subcase: if we require for the 'next' occurence 
+//				)
+//		{
 			// set arguments
 			args = Util.concatArr( filterValues, new String[]{columnValue} );
 			
@@ -290,20 +302,38 @@ public class Database {
 				ato.setType(i, valueTypes[i]);
 			}
 			 
-			// query
+			// query 
 			
 			// since the row number is 1-based in Postgres, 
 			// we need to subtract 1 to get a 0-based number in Lex'it
-			getRowNumberQuery = 
-				"SELECT CAST(rownumber AS integer)-1 AS rownumber FROM "+
-				"(SELECT "+getSafeFieldName(columnName)+", row_number() OVER " +
-					"(ORDER BY " + bigSortString + ") AS rownumber "+
-				" FROM "+getSafeTableName(tableName, schema)+" ";
+			getRowNumberQuery =
+					
+				"SELECT rownumber, CAST( (row_number() OVER (ORDER BY rownumber ASC)) AS integer)-1 AS occurence_nr " +
+				
+				// begin of 'all_occurences'
+
+				"FROM ("+ 
+				
+				"	SELECT min(rownumber) AS rownumber, page " +
+				
+				"	FROM ("+
+				
+				// to_be_grouped subquery
+				
+				"		SELECT "+getSafeFieldName(columnName)+", " +
+				"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
+				"		FROM ("+
+				
+				// sort by field part, with row_number  (tmp subquery)
+				
+				"			SELECT "+getSafeFieldName(columnName)+", " +
+				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
+				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
 			
 			// if filters are required, add those
 			if (filterColumns!=null)
 			{
-				getRowNumberQuery += "WHERE ";
+				getRowNumberQuery += "	WHERE ";
 				String[] parts = new String[filterColumns.length];
 				for (int i=0; i<filterColumns.length; i++)
 				{
@@ -313,14 +343,23 @@ public class Database {
 				getRowNumberQuery += Util.join(parts, " AND ");
 			}
 			
-			// final part after the filters:
+			// final part after the filters and numbering part:
 			// the value we need to get to!
 			getRowNumberQuery +=
-				") tmp "+
-				" WHERE "+getSafeFieldName(columnName) + " " + getSuitableOperator(columnValue, false) + " ?; ";
-		}
+				"		) tmp "+
+				"	) to_be_grouped "+
+				"	 WHERE "+getSafeFieldName(columnName) + " " + getSuitableOperator(columnValue, false) + " ? " +
+				"	 GROUP BY page " + 
+				") all_occurences; ";
+			
+//		}  // canceled first query type
 		
 		
+		// build a key for storing the query and the resultset, for the next goto-call
+		
+		String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
+		boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
+			
 		// we have built the right query, now use it to get the row number
 		
 		PostgresDatabaseCommunication dc = connectDatabase();
@@ -328,13 +367,24 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			ResultSet rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+			ResultSet rs;
+			if( alreadyCalled )
+				{
+				res = gotoQueryToResultSet.get(hashKey);
+				}
+			else
+				{
+				rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+				res = getResultsInAList(rs, new String[]{"rownumber"});
+				gotoQueryToResultSet.put(hashKey, res);
+				}
+					 
+			// get row number for the right occurence
 			
-			res = getResultsInAList(rs, new String[]{"rownumber"});
-			if (res.size()>0)
-			{				
-				rowNumber = Integer.parseInt(res.get(0)[0]);
-			}
+			if (res.size() > 0 && occurenceNr < res.size() )
+				{				
+				rowNumber = Integer.parseInt(res.get(occurenceNr)[0]);
+				}
 			
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
@@ -1117,7 +1167,7 @@ public class Database {
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		ato.setType(0, getTypeOfColumn(tableName, columnName));
-		ato.setType(1, getTypeOfColumn(tableName, getPrimaryKeyColumn(tableName)));
+		ato.setType(1, getTypeOfColumn(tableName, idColumn));
 		
 		
 		String updateRecords = 
@@ -1373,7 +1423,7 @@ public class Database {
 			columnNames[i] = getSafeFieldName(columnNames[i]);
 			ato.setType(i, getTypeOfColumn(tableName, oneColumn));
 		}		
-		ato.setType(columnNames.length, getTypeOfColumn(tableName, getPrimaryKeyColumn(tableName)));
+		ato.setType(columnNames.length, getTypeOfColumn(tableName, idColumn));
 		
 		
 		String updateRecords = 
@@ -1959,8 +2009,6 @@ public class Database {
 	
 		String schema = getSchema(tableName);
 		
-		boolean indexAvailableForSortCol = checkIfIndexExists(tableName, aSortCol);
-		
 		if (Constants.debug){
 			System.out.println();
 			System.out.println("Sort (initial):");
@@ -1980,7 +2028,7 @@ public class Database {
 		// because sometimes the primary sorting column chosen
 		// by the user contains doubled values, which are sorted randomly
 		// (as their value is exactly the same). So to prevent this
-		// random sorting, the primary is added as a secondary sorting
+		// random sorting, the primary key is added as a secondary sorting
 		// column (as very last sorting column).
 		
 		if (primaryKey != null && 
@@ -2386,6 +2434,11 @@ public class Database {
 		
 		// if the query execution took more time than allowed,
 		// register if there is an index for the columns now sorted by, as this might be the cause
+		
+		// NB: this function can't be called earlier, as the aSortCol automatically gets the primary key
+		// added as secundary sort column half way the process.
+		boolean indexAvailableForSortCol = checkIfIndexExists(tableName, aSortCol);
+		
 		if ((timeAtVeryEnd - timeAtVeryStart) > maxAllowedDuration 
 				&& !indexAvailableForSortCol)
 			tableAndCount.setNeededIndexForSortingColumns(Util.join(aSortCol, ", "));
@@ -2642,13 +2695,23 @@ public class Database {
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname", "format_type"});
 			
 			
-			// do we have an empty result?
+			// Do we have an empty result?
 			// than we might have a view, in which case we expect to have a field 'pkid'
 			// which we will use as a primary key
+			// Or do we have more than 1 result, which is illegal too as that means we have a multicolumn primary key...
 			
-			if ( res.size() == 0
-				|| 
+			if (
+					
+				// No primary key found!
+				res.size() == 0 
+				||
 				(res.size() != 0 && res.get(0)[0].trim().isEmpty() )
+				|| 
+				
+				// More results means we've found a multicolumns primary key;
+				// sadly this is not supported by Lex'it
+				res.size() > 1  				 
+				
 			   )
 			{
 				// are we dealing with a view or a table here?				

@@ -129,6 +129,8 @@ sf.goTo = function(sSomeTablename){
 	
 };
 
+
+
 // subroutine van sf.goTo
 // get the row number (!=id) of a record, given some value to match in some table
 // and jump to that position in the table
@@ -136,11 +138,30 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 	
 	if ( aSortColumns == null || aSortColumns.length == 0 )
 		{
-		fn.message("Let op", "De tabel '"+sSomeTablename+"' is niet gesorteerd op een kolom. De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
+		fn.message("Let op", "De tabel '"+sSomeTablename+"' is niet gesorteerd op een kolom. " +
+				"De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
 		return;
 		}
 	
 	gui.showProcessingMsg(sSomeTablename);
+	
+	// check if this call is the same as the previous one
+	// (t.i. request for first occurence of word searched for, or some 'next' occurence...
+	
+	var sCurrentCallOfGoTo = getHttpParams().get("db") + sSomeTablename + sColumnName + sColumnValue; // unique key!
+	if (sCurrentCallOfGoTo == mt.getLastGoToCommand(sSomeTablename) )
+		{
+		// same call, so we will ask for the 'next' occurence of the word searched for
+		mt.rememberOccurenceNr( sSomeTablename, mt.getOccurenceNr(sSomeTablename) + 1 );
+		}
+	else
+		{
+		// not the same call, so tell the GoTo memory we have a new table search, starting from occurence #0
+		mt.rememberOccurenceNr( sSomeTablename, 0 );
+		mt.rememberLastGoToCommand( sSomeTablename, sCurrentCallOfGoTo );
+		}
+	
+
 	
 	var url = WEBSERV_URL+"/table/get_row_number";
 	
@@ -153,10 +174,12 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 					"table_name": sSomeTablename, 
 					"column_name": sColumnName,
 					"column_value": sColumnValue,
+					"occurence_nr": mt.getOccurenceNr(sSomeTablename),
 					"sort_columns": aSortColumns.join(","),
 					"sort_directions": aSortDirections.join(","),
 					"filter_column_names": filterColumnNames.join(ARG_INTERNAL_SEPARATOR),
-					"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR)
+					"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR),
+					"display_length": fn.getCurrentDisplayLength(sSomeTablename)
 					
 					},
 				dataType: "xml",
@@ -178,6 +201,18 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 	
 	var sRowNumber = $(xml).find("response").text();
 	var iRowNumber = parseInt(sRowNumber);
+	
+	// if a 'next' occurence has been searched for, but it returned the 1st page of the table,
+	// it is clear the search gave no results, so reset the GoTo-memory!
+	
+	if (	iRowNumber < fn.getCurrentDisplayLength(sSomeTablename) // result is page 1 
+			&& 
+			mt.getOccurenceNr(sSomeTablename) > 0 // it was not the first call
+		)
+		{
+		// reset GoTo memory, so we won't keep requesting 'next' occurences
+		mt.resetGoToMemoryForTable(sSomeTablename);
+		}
 	
 	mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
 };

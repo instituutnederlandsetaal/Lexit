@@ -2103,7 +2103,8 @@ fn.putDataIntoCellNode = function(nRow, sColumnName, sContent){
 				"Tabel '"+sTable+"' heeft geen IDs. " +
 				"Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft]");
+				"omdat de tabel geen primary key noch pkid-veld heeft; " +
+				"LET erop dat multicolumns primary keys niet ondersteund worden]");
 		return;
 		}
 	
@@ -2151,7 +2152,8 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 				"Fout bij aanroep van fn.updateDatabaseGivenANode("+sTable+"). "+
 				"Tabel '"+sTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft]");
+				"omdat de tabel geen primary key noch pkid-veld heeft; " +
+				"LET erop dat multicolumns primary keys niet ondersteund worden]");
 		return;
 		}
 	
@@ -2430,7 +2432,8 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback){
 				"Fout bij aanroep van fn.removeFromDatabaseGivenANode("+sTable+"). "+
 				"Tabel '"+sTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft]");
+				"omdat de tabel geen primary key noch pkid-veld heeft; " +
+				"LET erop dat multicolumns primary keys niet ondersteund worden]");
 		return;
 		}
 	

@@ -65,6 +65,10 @@ var hsaListOfTypesOfVisibleColumns = new Hashtable();
 // from other filters (no focus)
 var hSearchBoxThatHasFocus = new Hashtable();
 
+// remember the last GoTo command for each table
+var hLastGoToForTable = new Hashtable();
+var hOccurenceNrForTable = new Hashtable();
+
 // undo memory stacks 
 var undoStacks = new Hashtable();
 var undoTooltips = new Hashtable();
@@ -203,6 +207,8 @@ mt.removeAllTableRecords = function(){
 	hsaListOfAllowedValuesPerColumn = new Hashtable();
 	hsaListOfAllowedValuesPerVisibleColumn = new Hashtable();
 	hSearchBoxThatHasFocus = new Hashtable();
+	hLastGoToForTable = new Hashtable();
+	hOccurenceNrForTable = new Hashtable();
 	undoStacks = new Hashtable();
 	undoTooltips = new Hashtable();
 	hMaxColumnTitleWidth = new Hashtable();
@@ -261,6 +267,8 @@ mt.removeTableRecord = function(sSomeTablename){
 	hsaListOfAllowedValuesPerColumn.remove(sSomeTablename);
 	hsaListOfAllowedValuesPerVisibleColumn.remove(sSomeTablename);
 	hSearchBoxThatHasFocus.remove(sSomeTablename);
+	hLastGoToForTable.remove(sSomeTablename);
+	hOccurenceNrForTable.remove(sSomeTablename);
 	undoStacks.remove(sSomeTablename);
 	undoTooltips.remove(sSomeTablename);
 	hMaxColumnTitleWidth.remove(sSomeTablename);
@@ -476,6 +484,30 @@ mt.getSearchBoxNameThatHasFocus = function(sTableName){
 	
 	return hSearchBoxThatHasFocus.get(sTableName);
 };
+
+
+//******************** goto function memory ********************************
+
+mt.rememberLastGoToCommand = function(sTableName, sCommand){
+	hLastGoToForTable.put(sTableName, sCommand);
+};
+mt.rememberOccurenceNr = function(sTableName, iOccurenceNr){
+	hOccurenceNrForTable.put(sTableName, iOccurenceNr);
+};
+
+mt.getLastGoToCommand = function(sTableName){
+	return hLastGoToForTable.get(sTableName);
+};
+mt.getOccurenceNr = function(sTableName){
+	return hOccurenceNrForTable.get(sTableName);
+};
+
+mt.resetGoToMemoryForTable = function(sTableName){	
+	hLastGoToForTable.put(sTableName, "");
+	hOccurenceNrForTable.put(sTableName, 0);
+};
+
+
 
 // ************************ undo function *****************************
 

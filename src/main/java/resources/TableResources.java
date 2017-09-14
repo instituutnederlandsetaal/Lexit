@@ -289,10 +289,12 @@ public class TableResources {
 			@QueryParam("table_name") String tableName,
 			@QueryParam("column_name") String columnName,
 			@QueryParam("column_value") String columnValue,
+			@QueryParam("occurence_nr") int occurenceNr,
 			@QueryParam("sort_columns") String sortColumns,
 			@QueryParam("sort_directions") String sortDirections,
 			@QueryParam("filter_column_names") String filterColumns,
 			@QueryParam("filter_values") String filterValues,
+			@QueryParam("display_length") int iDisplayLength,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -313,8 +315,8 @@ public class TableResources {
 		
 		
 		String rowNumber = Integer.toString(getDatabaseObject(co).getRowNumberOfRecord(tableName, columnName, columnValue, 
-						sortColumns, sortDirections, 
-						filterColumnsArr, filterColumnValuesArr
+						occurenceNr, sortColumns, sortDirections, 
+						filterColumnsArr, filterColumnValuesArr, iDisplayLength
 						));
 		dro.setResponse(rowNumber);
 		
