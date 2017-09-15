@@ -150,7 +150,7 @@ fx.getRowId = function(oRow){
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
  * @param {Array} aFieldsAndValues - An associative array of fields and search values
- * @returns {Node} An API instance with the row we searched for, or null if it wasn't found
+ * @returns {API-object-instance} An API instance with the row we searched for, or null if it wasn't found
  * 
  * @see fx.getAllRowsWhere
  */
@@ -184,7 +184,7 @@ fx.getRowWhere = function(sSomeTable, aFieldsAndValues){
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @param {Array} aFieldsAndValues - An associative array of fields and search values
  * @param {Boolean} [bOnlyFirstRow=false] - true if we only want the first row, otherwise false (default)
- * @returns {Node} An API instance with the rows we searched for, or null if it wasn't found
+ * @returns {API-object-instance} An API instance with the rows we searched for, or null if it wasn't found
  * 
  * @see fx.getRowWhere
  */
