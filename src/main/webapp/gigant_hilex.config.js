@@ -1,10 +1,21 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
+oShowOnlyTables = [
+                   // Hilex tables
+                   "analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
                    "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
                    "token_attestations", "token_attestations_worktable", "wordforms", 
-                   "modified_lemmata_view", "modified_paradigm_view", "mnw_fix_multiple_ws",
-                   "fix_multiple_lemmata_analyses", "marijke_spelling_giganthilex_differences"];
+                   "modified_lemmata_view", "modified_paradigm_view", 
+                   
+                   "mnw_fix_multiple_ws",
+                    
+                   "marijke_spelling_giganthilex_differences",
+           			
+                   // klussen
+                   "quotes_to_check",
+                   "quotes_to_check_2",
+                   "fix_multiple_lemmata_analyses"
+                   ];
 
 
 
@@ -544,6 +555,74 @@ oTableSettingsList = {
 			"repeat_callback": true
 		},
 		
+		quotes_to_check: {
+			
+			"group": "klussen",
+			
+			"columns_order": 
+				["modern_lemma", "attestation_ids", 
+				 "attention", "quote", "quotation_section_id", 
+				 "lemma_id", "multiple_lemmata_analysis_id", 
+				 "onsetoffset", "opmerking"],
+			
+			"columns_sorting": {
+				"modern_lemma": "asc", 
+				"quotation_section_id": "asc", 
+				"attestation_ids": "asc"
+					},
+					
+			"size": "80%",
+			
+			"keyup":{
+				
+				"`": function(t){
+					
+					var oRow = fx.getFirstSelectedRowFrom(t);					
+					fx.toggleCheckbox(oRow, "attention");
+				}
+			},
+			
+			"callback": function(t){
+				highlightAllQuotes(t);
+			},
+			"repeat_callback": true
+			
+		},
+		
+		quotes_to_check_2: {
+			
+			"group": "klussen",
+			
+			"columns_order": 
+				["modern_lemma", "attestation_ids", 
+				 "attention", "quote", "quotation_section_id", 
+				 "lemma_id", "multiple_lemmata_analysis_id", 
+				 "onsetoffset", "opmerking"],
+			
+			"columns_sorting": {
+				"modern_lemma": "asc", 
+				"quotation_section_id": "asc", 
+				"attestation_ids": "asc"
+					},
+					
+			"size": "80%",
+			
+			"keyup":{
+				
+				"`": function(t){
+					
+					var oRow = fx.getFirstSelectedRowFrom(t);					
+					fx.toggleCheckbox(oRow, "attention");
+				}
+			},
+			
+			"callback": function(t){
+				highlightAllQuotes(t);
+			},
+			"repeat_callback": true
+			
+		},
+		
 		token_attestations_worktable: {
 			
 			"callback": function(t){
@@ -759,21 +838,29 @@ oTableSettingsList = {
 						}
 					else
 						{
-						oSelection.every(function(){
+						
+						fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){							
 							
-							var oRow = this;
-							var bLastOne = fx.isLastRowOf(oRow, oSelection);
-							
-							fx.removeFromDatabaseGivenARow(oRow, function(){
+							oSelection.every(function(){
 								
-								if (bLastOne)
-									{
-									fn.refreshTable(t);
-									fn.refreshTable("lemmata_and_paradigma");
-									}
+								var oRow = this;
+								var bLastOne = fx.isLastRowOf(oRow, oSelection);
 								
+								fx.removeFromDatabaseGivenARow(oRow, function(){
+									
+									if (bLastOne)
+										{
+										fn.refreshTable(t);
+										fn.refreshTable("lemmata_and_paradigma");
+										}
+									
+									});
 								});
+							
 							});
+						
+						
+						
 						}
 					
 				}
@@ -1086,7 +1173,7 @@ oTableSettingsList = {
 						var sModlem = fx.getDataFromCellInRow(oRow, "modern_lemma");
 						
 						fn.confirm("Maak superlemma aan", "Er zal een nieuw super_lemma_id worden aangemaakt, " +
-								"en daar zal aan het lemma '"+sModlem+"' onder komen te hangen. " +
+								"en daar zal het lemma '"+sModlem+"' onder komen te hangen. " +
 								"Weet u zeker dat u dat wilt?", function(){
 							
 							fn.callFunction("api.create_new_super_lem", [sLemmaId], function(){
@@ -1322,6 +1409,72 @@ oTableConfigurationList = {
 				}
 			}
 			
+		},
+		
+		quotes_to_check:{
+			
+			modern_lemma: {
+				
+			}, 
+			attestation_ids: {
+				"visible": false
+			}, 
+			quote: {
+				
+			},
+			quotation_section_id: {
+				
+			}, 
+			lemma_id: {
+				"visible": false
+			}, 
+			multiple_lemmata_analysis_id: {
+				"visible": false
+			}, 
+			onsetoffset: {
+				"visible": false
+			},
+			attention: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			opmerking: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			}
+		},
+		
+		quotes_to_check_2:{
+			
+			modern_lemma: {
+				
+			}, 
+			attestation_ids: {
+				"visible": false
+			}, 
+			quote: {
+				
+			},
+			quotation_section_id: {
+				
+			}, 
+			lemma_id: {
+				"visible": false
+			}, 
+			multiple_lemmata_analysis_id: {
+				"visible": false
+			}, 
+			onsetoffset: {
+				"visible": false
+			},
+			attention: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			opmerking: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			}
 		},
 		
 		modified_lemmata_view: {
@@ -1889,7 +2042,7 @@ oTableConfigurationList = {
 
 // start with the main table
 
-fn.callDatabase("lemmata_and_paradigma");
+//fn.callDatabase("lemmata_and_paradigma");
 
 
 

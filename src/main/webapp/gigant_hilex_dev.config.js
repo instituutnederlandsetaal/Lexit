@@ -13,7 +13,8 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
 				   "marijke_spelling_giganthilex_differences",
 		"citblock_comparison", "citblock_comparison2", "citblock_comparison3",
 		"new_token_attestations",
-		"pretei_quotations_extended"];
+		"pretei_quotations_extended",
+		"quotes_to_check"];
 
 
 
@@ -235,6 +236,8 @@ oTableSettingsList = {
 			
 			"group": "log",
 			
+			"columns_sorting": {"modification_date": "desc", "modification_time": "desc"},
+			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
 				"click": function(t){
@@ -265,6 +268,8 @@ oTableSettingsList = {
 		modified_paradigm_view:{
 			
 			"group": "log",
+			
+			"columns_sorting": {"modification_date": "desc", "modification_time": "desc"},
 			
 			"button_0":{
 				"name": "Woordvorm herstellen",
@@ -567,6 +572,40 @@ oTableSettingsList = {
 			"repeat_callback": true
 		},
 		
+		quotes_to_check: {
+			
+			"group": "klussen",
+			
+			"columns_order": 
+				["modern_lemma", "attestation_ids", 
+				 "attention", "quote", "quotation_section_id", 
+				 "lemma_id", "multiple_lemmata_analysis_id", 
+				 "onsetoffset", "opmerking"],
+			
+			"columns_sorting": {
+				"modern_lemma": "asc", 
+				"quotation_section_id": "asc", 
+				"attestation_ids": "asc"
+					},
+					
+			"size": "80%",
+			
+			"keyup":{
+				
+				"`": function(t){
+					
+					var oRow = fx.getFirstSelectedRowFrom(t);					
+					fx.toggleCheckbox(oRow, "attention");
+				}
+			},
+			
+			"callback": function(t){
+				highlightAllQuotes(t);
+			},
+			"repeat_callback": true
+			
+		},
+		
 		token_attestations_worktable: {
 			
 			"callback": function(t){
@@ -782,6 +821,9 @@ oTableSettingsList = {
 						}
 					else
 						{
+						
+						fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){							
+							
 						oSelection.every(function(){
 							
 							var oRow = this;
@@ -797,6 +839,11 @@ oTableSettingsList = {
 								
 								});
 							});
+							
+							});
+						
+						
+						
 						}
 					
 				}
@@ -904,6 +951,13 @@ oTableSettingsList = {
 								"opmerking",
 								"online"
 								],
+								
+			"columns_sorting": {
+				"super_lem_id": "asc", 
+				"modern_lemma": "asc", 
+				"persistent_id": "asc", 
+				"group_id": "asc",
+				"wordform": "asc" },
 			
 			"callback": function(t){
 				
@@ -1109,7 +1163,7 @@ oTableSettingsList = {
 						var sModlem = fx.getDataFromCellInRow(oRow, "modern_lemma");
 						
 						fn.confirm("Maak superlemma aan", "Er zal een nieuw super_lemma_id worden aangemaakt, " +
-								"en daar zal aan het lemma '"+sModlem+"' onder komen te hangen. " +
+								"en daar zal het lemma '"+sModlem+"' onder komen te hangen. " +
 								"Weet u zeker dat u dat wilt?", function(){
 							
 							fn.callFunction("api.create_new_super_lem", [sLemmaId], function(){
@@ -1315,6 +1369,40 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		
+		quotes_to_check:{
+			
+			modern_lemma: {
+				
+			}, 
+			attestation_ids: {
+				"visible": false
+			}, 
+			quote: {
+				
+			},
+			quotation_section_id: {
+				
+			}, 
+			lemma_id: {
+				"visible": false
+			}, 
+			multiple_lemmata_analysis_id: {
+				"visible": false
+			}, 
+			onsetoffset: {
+				"visible": false
+			},
+			attention: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			opmerking: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			}
+		},
 
 
 		citblock_comparison:{
@@ -1428,21 +1516,21 @@ oTableConfigurationList = {
 		},
 		
 		modified_lemmata_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
-		},
+			//"modification_date":{
+			//	"colsort": "desc" // sort #1
+			//},
+			//"modification_time": {
+			//	"colsort": "desc" // sort #2
+			//}
+		}, 
 		
 		modified_paradigm_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
+			//"modification_date":{
+			//	"colsort": "desc" // sort #1
+			//},
+			//"modification_time": {
+			//	"colsort": "desc" // sort #2
+			//}
 		},
 		
 		lemmata: {
@@ -1546,7 +1634,7 @@ oTableConfigurationList = {
 		lemmata_and_paradigma: {
 			
 			"super_lem_id" :{
-				"colsort": "asc" // sort #1
+				//"colsort": "asc" // sort #1
 			},
 			
 			"wdb": {
@@ -1554,7 +1642,7 @@ oTableConfigurationList = {
 			},
 			
 			"modern_lemma": {
-				"colsort": "asc", // sort #2
+				//"colsort": "asc", // sort #2				
 				"editable": true,
 				"editcallback": function(t, n){
 					
@@ -1565,7 +1653,7 @@ oTableConfigurationList = {
 
 			},
 			"persistent_id": {
-				"colsort": "asc", // sort #3
+				//"colsort": "asc", // sort #3				
 				"cell_tooltip": "Open WDB",
 				"click": function(t, n){
 					
@@ -1610,7 +1698,7 @@ oTableConfigurationList = {
 				}
 			},
 			"group_id": {
-				"colsort": "asc", // sort #4
+				//"colsort": "asc", // sort #4				
 				"cell_tooltip": "Totaal citaten bijbehorend bij groep",
 				"click": function(t, n){
 					
@@ -1626,8 +1714,7 @@ oTableConfigurationList = {
 				}
 			},
 			"wordform": {
-				"colsort": "asc" // sort #4
-
+				//"colsort": "asc" // sort #4
 			},
 			
 			"lemma_part_of_speech": {
