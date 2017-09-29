@@ -148,7 +148,18 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 	// check if this call is the same as the previous one
 	// (t.i. request for first occurence of word searched for, or some 'next' occurence...
 	
-	var sCurrentCallOfGoTo = getHttpParams().get("db") + sSomeTablename + sColumnName + sColumnValue; // unique key!
+	// we need a unique key!
+	// (this consists of the parameters from which the setting mustn't change if we want
+	//  to navigate through the results of a go-to call; as soon as some of those parameters
+	//  has changed (for example because of a new sorting order set by the user), we have
+	//  to query the database again for the locations of the terms we want to go to!;
+	//  the unique key, which is compared to the one of the previous round, is used for this aim)
+	var sCurrentCallOfGoTo =	getHttpParams().get("db") + 
+								sSomeTablename + 
+								sColumnName + sColumnValue +	
+								(fn.getSortingColumns(sSomeTablename)).join() + 
+								(fn.getSortingDirections(sSomeTablename)).join();
+	
 	if (sCurrentCallOfGoTo == mt.getLastGoToCommand(sSomeTablename) )
 		{
 		// same call, so we will ask for the 'next' occurence of the word searched for

@@ -362,6 +362,8 @@ public class Database {
 			
 		// we have built the right query, now use it to get the row number
 		
+		//System.out.println(getRowNumberQuery);
+		
 		PostgresDatabaseCommunication dc = connectDatabase();
 		
 		try {

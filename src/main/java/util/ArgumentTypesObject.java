@@ -31,5 +31,23 @@ public class ArgumentTypesObject {
 	public String getType(int index){
 		return this.indexToType.get(index);
 	}
+	
+	
+	public int getSize(){
+		return indexToType.size();
+	}
+	
+	
+	public ArgumentTypesObject clone(){
+		
+		ArgumentTypesObject newObject = new ArgumentTypesObject();
+		
+		for (int i =0; i<indexToType.size(); i++)
+		{
+			newObject.setType(i, this.getType(i));
+		}
+		
+		return newObject;
+	}
 
 }

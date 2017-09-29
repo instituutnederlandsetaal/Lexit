@@ -383,6 +383,10 @@ head.putResetButton = function(sSomeTablename){
 			// abort the running database draw
 			mt.getDataTableObjectOf(sSomeTablename).abortCall();
 			
+			// clean the go-to stack
+			mt.rememberOccurenceNr( sSomeTablename, 0 );
+			mt.rememberLastGoToCommand( sSomeTablename, "" );
+			
 			// clean the undo stack
 			un.cleanUndoStack(sSomeTablename);
 			
