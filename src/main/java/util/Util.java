@@ -3,6 +3,7 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,6 +120,34 @@ public class Util {
 		return databaseAccessHash;		
 	}
 	
+	
+	// get list of files
+	public static String getListOfFiles(String path){
+		
+		File folder = new File(path);
+		File[] listOfFiles = folder.listFiles();
+		HashSet<String> hashList = new HashSet<String>();
+		
+		for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile())
+			{
+				String fileName = listOfFiles[i].getName();
+				if (fileName.endsWith(".config.js") || fileName.endsWith(".database") )
+				{
+					fileName = fileName.substring(0, fileName.indexOf("."));
+					hashList.add(fileName);
+				}
+				
+			}
+		}
+		
+		List<String> sortedList = new ArrayList<String>(hashList);
+		Collections.sort(sortedList);
+		
+		return Util.join(sortedList, Constants.ARG_INTERNAL_SEPARATOR);		
+	}
+
+
 	
 	// trim function that can cope with no-breaking space
 	public static String powerTrim(String str){

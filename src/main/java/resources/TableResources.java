@@ -133,6 +133,35 @@ public class TableResources {
 	}
 	
 	
+	// get the name of the user which had logged in
+	// call:
+	// .../table/get_username
+	@Path("get_configfiles_list")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject getListOfConfigFiles(
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest
+			) throws IOException {
+		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, null);
+		
+		// trick to get the path where the other files are
+		String fileName = "projects_overview.js";		
+		String filepath = co.getContext().getRealPath(fileName);
+		
+		filepath = filepath.replace(
+		File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
+		File.separatorChar + Constants.CONFIG_DIR); // remove filename as we only need the path here
+		
+		DbResponseObject response = new DbResponseObject();
+		response.setResponse(Util.getListOfFiles(filepath));
+		
+		return response;
+		}
+	
+	
 	// clean the cache of some table
 	// call:
 	// .../webservice/table/cleancache?table_name=...&db_name=...

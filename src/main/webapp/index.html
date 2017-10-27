@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2017.09.29
+	v2017.10.27
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -172,13 +172,14 @@
 	var oTableSettingsList;
 	var oHiddenTablesList;
 	var oTableConfigurationList;
+	var aFullConfigFilesList = 	new Array(); 	// list of projects config files on server
 	
 	// about the database
 	var asTableNames = 			new Array();	// list of database tables names	
 	var asTableDescriptions =	new Array();	// list of database tables descriptions (visible to user)
 	var asTableComments = 		new Array();    // list of database tables comments
 	var asTableTypes = 			new Array();	// list of database tables types ('base table', 'view')
-	var abTableVisible = 		new Array();	// list of database tables visibility (available to user)
+	var abTableVisible = 		new Array();	// list of database tables visibility (available to user)	
 		
 	// state variables
 	var originalBgColor;
@@ -219,7 +220,10 @@
 		// set neutral internal separator
 		setInternalSeparator();
 		
-		// read project overview
+		// get list of projects from server
+		getConfigFilesList();
+		
+		// read project overview (and add the unknown projects from server to it)
 		
 		// are we in development (test) mode?
 		// if so, load the file from webcontent
@@ -404,7 +408,7 @@
 		// user instruction for accessing tables
 		$("#indicator").empty().append(
 				$("<span></span>")
-				.html("Kies een tabel: <I>(+ CTRL om tabel toe te voegen) (+ SHIFT voor nieuwe tab)</I>")
+				.html("Kies een tabel: <I>(vooraf CTRL ingedrukt houden om tabel toe te voegen, of SHIFT voor tabel in nieuwe tab)</I>")
 				);
 		
 		// get url parameters		
@@ -540,6 +544,29 @@
 	}
 	
 	
+	// get full list of projects config files from server
+	function getConfigFilesList(){
+		
+		var url = WEBSERV_URL+"/table/get_configfiles_list"; 			
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				var sList = fn.getDbResponse(xml);
+				aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message("Fout", "Het ophalen van de list configuratiebestanden is mislukt.<br><br>Fout: ["+exception+"]");
+			}
+		});
+	}
+	
+	
 	// get table filters from url if available (... &filter_a=... & filter_b=...)
 	function getTableFiltersAndSettings(paramsHash){
 		
@@ -605,8 +632,39 @@
 				.css("border", "dotted black 1px")
 				.css("background", "#F8E0E0");
 			
+			var docUnknownTitle = $("<span></span>").html("<b>Onbekend</b>");
+			var docUnknown = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#F2F2F2");
 			
 			
+			// process list of all config files
+			var aKnownConfigFilesList = new Array();
+			
+			for (var i=0; i<aProjectList.length; i++) // get list of known projects in projects overview
+				{
+				aKnownConfigFilesList.push(aProjectList[i]["config_filename"]);				
+				}
+			
+			// now, if some configfile is no part of the projects overview list, 
+			// it will be added to it as part of the 'unknown projects' category
+			// (so it will appear as such in the menu)
+			for (var i=0; i<aFullConfigFilesList.length; i++)
+				{
+				var oneConfigFile = aFullConfigFilesList[i];
+				if (aKnownConfigFilesList.indexOf(oneConfigFile) < 0)
+					{
+					aProjectList.push({
+						"name": oneConfigFile,
+						"config_filename": oneConfigFile,
+						"description": "onbekend",
+						"unknown": true
+				 		});
+					}
+				}
+			
+			
+			// build menu now!
 			for (var i=0; i<aProjectList.length; i++)
 				{
 				var sProjectLinkPart = aProjectList[i]["config_filename"];
@@ -625,22 +683,28 @@
 				
 				// Put the project in the right category:
 				
-				if (typeof aProjectList[i]["goody"]  != 'undefined' && aProjectList[i]["goody"])
+				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"])
 					{
 					goodies.append(eProjectDiv)
 					}
 					
 				// project is closed
-				else if (typeof aProjectList[i]["closed"]  != 'undefined' && aProjectList[i]["closed"])
+				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"])
 					{
 					docClosed.append(eProjectDiv)
+					}
+				
+				// project is unknown
+				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"])
+					{
+					docUnknown.append(eProjectDiv);
 					}
 				
 				// project is open
 				else
 					{
 					// production
-					if (typeof aProjectList[i]["production"]  != 'undefined' && aProjectList[i]["production"])
+					if (typeof aProjectList[i]["production"] != 'undefined' && aProjectList[i]["production"])
 						docOpen.append(eProjectDiv);
 					// development
 					else
@@ -660,7 +724,11 @@
 			$("#page").append(_deEmptyMenuList(docDevelopment));
 			$("#page").append($("<br>"));
 			$("#page").append(docClosedTitle);
-			$("#page").append(_deEmptyMenuList(docClosed));
+			$("#page").append(_deEmptyMenuList(docClosed));	
+			$("#page").append($("<br>"));
+			$("#page").append(docUnknownTitle);
+			$("#page").append(_deEmptyMenuList(docUnknown));
+			
 			
 			}
 		else
