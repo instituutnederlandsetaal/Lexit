@@ -642,8 +642,13 @@ gui.makeTableEditable = function(sSomeTablename){
 		var bColumnEditable =	conf.getEditability(oColumnConfig);
 		var sValidatorKey =		conf.getEditSelectValidator(oColumnConfig);
 		
-		// Postgres ENUM type
-		var aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sSomeTablename)[i];		
+		
+		// [1] select values from 'choosefrom' in config.js
+		var aAllowedValues = conf.getSelectionBox(oColumnConfig);
+		
+		// [2] ELSE  select values from Postgres ENUM type
+		if (aAllowedValues == null)
+			aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sSomeTablename)[i];		
 		
 		// if a column has a list allowed values and it is editable
 		if (aAllowedValues != '' && bColumnEditable)
