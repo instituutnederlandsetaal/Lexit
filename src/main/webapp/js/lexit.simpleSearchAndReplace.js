@@ -266,7 +266,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 		.append($("<span></span>").addClass("ui-icon ui-icon-pin-s"))
 		.attr("title", sButtonMsg).addClass("tooltip");
 	
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	
 	// functions activation and deactivation, depending on elements clicked on
 	$("#"+sSomeTablename+"_dynamic").on("click", 
@@ -285,7 +285,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.delay(500).removeClass("functions_are_awake").addClass("functions_are_asleep");
 		
-		$(".tooltip").tipTip(oTiptipConfig);
+		$(".tooltip").tipTip( gui.getTiptipConfig() );
 		
 	});
 	$("#"+sSomeTablename+"_dynamic").on("click", 
@@ -304,7 +304,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.delay(500).removeClass("functions_are_asleep").addClass("functions_are_awake");
 		
-		$(".tooltip").tipTip(oTiptipConfig);
+		$(".tooltip").tipTip( gui.getTiptipConfig() );
 		
 		// remove row selection
 		fx.unselectAllRows(sSomeTablename);

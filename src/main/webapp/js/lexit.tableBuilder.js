@@ -415,7 +415,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			
 			// activate tipTip jquery plugin for nice cross-browser tooltips
 			// (needs to be reactivated at each draw, so it seeems)
-			$(".tooltip").tipTip(oTiptipConfig);
+			$(".tooltip").tipTip( gui.getTiptipConfig() );
 			
 			// highlight whole column at mouseover
 			// (needs to be reactivated at each draw, so it seeems)

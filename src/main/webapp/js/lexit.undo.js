@@ -12,7 +12,7 @@ var un = {};
 // changing tooltips of the undo button in the header needs reactivation of tipTip
 // on time, t.i. before the user reaches the undo button, when entering the table header.
 $(document).on("mouseenter", "div.top", function(){
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	});
 
 
@@ -36,7 +36,7 @@ un.cleanUndoStack = function(sSomeTableName){
 		.attr("title", sEmptyTooltip).addClass("tooltip");
 	
 	// update the tooltips
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 };
 
 
@@ -96,7 +96,7 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 		.attr("title", sNewTooltip).addClass("tooltip");
 	
 	// update the tooltips
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	
 	// change color of button since the undo button will work now
 	$("#"+sSomeTableName+"_wrapper #"+sSomeTableName+"_undo_button")
@@ -138,7 +138,7 @@ un.undoEvent = function(sSomeTableName){
 	// update the tooltip, t.i. show the previous action that can be undone next.
 	$("#"+sSomeTableName+"_wrapper #"+sSomeTableName+"_undo_button")
 		.attr("title", sCurrentTooltip).addClass("tooltip");
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	
 	// if we have no data to restore, leave right away
 	if (typeof oDataToRestore == 'undefined')

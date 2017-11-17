@@ -8,10 +8,25 @@ var gui = {};
 // We need the edgeOffset to be minimal 10, otherwise it causes
 // some malfunctions where we have mouseenter events, as the appearing of the tooltip
 // causes mouseleave and mouseenter events, so it seems!
-var oTiptipConfig = {
-		defaultPosition: "top", 
-		edgeOffset: 10 // never less than 10! (see above)
-		};
+gui.getTiptipConfig = function(){
+	
+	if (bTooltipsAllowedInTable){
+		return {
+			defaultPosition: "top", 
+			edgeOffset: 10 // never less than 10! (see above)
+			}; 
+	}
+	else {
+		return {
+			activation: "dblclick",  
+			fadeOut: 0, // fade out immediately
+			defaultPosition: "top", 
+			edgeOffset: 10 // never less than 10! (see above)
+			};
+	}
+			
+	
+}
 
 // put the tooltips of the different column buttons in the table
 // if some are set in the config file
@@ -195,8 +210,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	
 	// activate tipTip jquery plugin for nice cross-browser tooltips
-	// (needs to be reactivated at each draw, so it seeems)
-	$(".tooltip").tipTip(oTiptipConfig);	
+	// (needs to be reactivated at each draw, so it seems)
+	$(".tooltip").tipTip( gui.getTiptipConfig() );	
 	
 };
 

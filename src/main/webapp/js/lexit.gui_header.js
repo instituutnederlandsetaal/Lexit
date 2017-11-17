@@ -792,7 +792,7 @@ head.putSelectionButton = function(sSomeTablename){
 			$("<div></div>").css("display", "inline").append(makeSelectionButton)
 			);
 	
-	$(".tooltip").tipTip(oTiptipConfig);
+	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	
 	// functions activation and deactivation, depending on elements clicked on
 	$("#"+sSomeTablename+"_dynamic").on("click", "#"+sSomeTablename+"_wrapper button.functions_are_awake", 
@@ -810,7 +810,7 @@ head.putSelectionButton = function(sSomeTablename){
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
 			.delay(500).removeClass("functions_are_awake").addClass("functions_are_asleep");
 		
-		$(".tooltip").tipTip(oTiptipConfig);
+		$(".tooltip").tipTip( gui.getTiptipConfig() );
 		
 	});
 	$("#"+sSomeTablename+"_dynamic").on("click", "#"+sSomeTablename+"_wrapper button.functions_are_asleep", 
@@ -828,7 +828,7 @@ head.putSelectionButton = function(sSomeTablename){
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
 			.delay(500).removeClass("functions_are_asleep").addClass("functions_are_awake");
 		
-		$(".tooltip").tipTip(oTiptipConfig);
+		$(".tooltip").tipTip( gui.getTiptipConfig() );
 		
 		// remove row selection
 		fx.unselectAllRows(sSomeTablename);
