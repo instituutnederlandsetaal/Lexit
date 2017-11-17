@@ -480,15 +480,7 @@ public class Database {
 		
 		String schema = getSchema(tableName);
 
-	    // GROUP BY can be faster than DISTINCT
-	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
-//	    String query = "SELECT " + getSafeFieldName(columnName) + " " + 
-//	      "FROM " + getSafeTableName(tableName, schema) + " " + 
-//	      "GROUP BY " + getSafeFieldName(columnName) + " " +
-//	      "ORDER BY " + getSafeFieldName(columnName) + ";";
-	    
-		
-	    // Quickest lookup, when a table contains a small number of unique values
+	    // Quickest lookup (most of the time!), when a table contains a small number of unique values
 		// (which is exactly what we expect when calling this function)
 		// see: http://zogovic.com/post/44856908222/optimizing-postgresql-query-for-distinct-values
 	    String query = "WITH RECURSIVE t(n) AS ("+
@@ -508,8 +500,12 @@ public class Database {
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
+	    
 	    try {
 	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+	      
+	      // in some rare cases, the query hereabove will be slow
+	      dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 
 	      ResultSet rs = dc.sendQuery(query);
 
@@ -524,8 +520,13 @@ public class Database {
 	        }
 	      }
 	    }
-	    catch (Exception e) {
-	      throw new RuntimeException("Error while executing query " + query, e);
+	    catch (Exception e) {   
+	    	
+	    	// we might get a time out...
+	    	// try the old style query, which is mostly slow, but in some rare cases it is the fastest...
+	    	
+	    	uvo = getUniqueValues_oldStyle(tableName, columnName);
+	      
 	    }
 	    finally
 	    {
@@ -534,6 +535,53 @@ public class Database {
 
 	    return uvo;
 	  }
+	
+	// see getUniqueValues
+	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName) {
+		
+		String schema = getSchema(tableName);		
+	
+		// GROUP BY can be faster than DISTINCT
+	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
+	    
+    	String query = "SELECT " + getSafeFieldName(columnName) + " AS n " + 
+    			"FROM " + getSafeTableName(tableName, schema) + " " + 
+    			"GROUP BY " + getSafeFieldName(columnName) + " " +
+    			"ORDER BY " + getSafeFieldName(columnName) + ";";
+    	
+    	PostgresDatabaseCommunication dc = connectDatabase();
+
+	    UniqueValuesObject uvo = new UniqueValuesObject();
+	    ArrayList<String[]> res;
+	    
+    	try {
+  	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+  	      
+  	      ResultSet rs = dc.sendQuery(query);
+
+  	      res = getResultsInAList(rs, new String[] { "n" });
+  	      if (res.size() > 0)
+  	      {
+  	        for (String[] oneRecord : res)
+  	        {
+  	          String oneValue = oneRecord[0].trim();
+  	          if (!oneValue.isEmpty())
+  	            uvo.addValue(oneValue);
+  	        }
+  	      }
+  	    }
+    	catch (Exception e) {
+    		throw new RuntimeException("Error while executing query " + query, e);
+    	}
+    	finally
+	    {
+	      closeDatabase(dc);
+	    }
+    	
+    	return uvo;
+    	
+	}
+	
 	
 	
 	/**
