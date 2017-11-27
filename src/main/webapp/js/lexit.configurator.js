@@ -29,6 +29,20 @@ var oTableSettingsList_example = {
 		"nice_name": "...",      
 		
 		/**
+		 * @description By default toont een tabel 10 rijen tegelijk. Dit aantal kan in de GUI door de gebruiker
+		 * handmatig worden gewijzigd. Maar indien men standaard een ander aantal rijen wil zien,
+		 * zonder dat telkens weer handmatig te hoeven instellen, kan men dit aantal met 'displaylength'
+		 * declareren.
+		 */
+		"displaylength": 50,
+		
+		/**
+		 * @description Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).
+		 * Default is 'table'
+		 */
+		"viewtype": "form",
+		
+		/**
 		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast
 		 */
 		"creation_date": "20 feb 2017",
@@ -67,15 +81,31 @@ var oTableSettingsList_example = {
 		
 		
 		/**
-		 * @description breedte van tabel
+		 * @description Breedte van de tabel. Synoniem: "width"
 		 */
-		"size": "60%",                   
+		"size": "60%",
+		
+		/**
+		 * @description Breedte van de tabel. Synoniem: "size"
+		 */
+		"width": "60%",
 		
 		/**
 		 * @description hoogte van de header boven de tabel; default is 50px
 		 */
-		"header_height": "50px",
+		"header_height": "150px",
 		
+		/**
+		 * @description hoogte van de footer onder de tabel; default is 50px
+		 */
+		"footer_height": "30px",
+		
+		/**
+		 * @type {boolean}
+		 * @description Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)
+		 * beschikbaar moet zijn; default is true
+		 */
+		"main_search": true,		
 
 		/** 
 		 * @type {function} 
@@ -181,6 +211,12 @@ var oTableSettingsList_example = {
 		 * @description zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt
 		 * */
 		"contextmenu": function(){doSomething(); },
+		
+		/** 
+		 * @type {array} 
+		 * @description zorg ervoor dat een pulldownmenu verschijnt als een button in de tabelheader wordt aangeklikt
+		 * */
+		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },
 		
 		/**
 		 *  @type {function} 

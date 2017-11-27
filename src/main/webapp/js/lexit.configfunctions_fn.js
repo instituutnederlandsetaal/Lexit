@@ -220,7 +220,8 @@ fn.getTablePosition = function(sSomeTablename){
  * the table back at the very same position and with the same width etc if we want to.
  * 
  *  @param {(String|API-object-instance)} sSomeTablename - Table name or object
- *  @returns {Array} An associative array with the table extra settings {"setting1": ..., "setting2": ..., etc...}
+ *  @returns {Array} An associative array with the table extra settings {"left": ..., "top": ..., "viewtype": ..., 
+ *  "displaylength": ..., "size": ...}
  *  
  *  @see fn.getTablePosition
  *  @see fn.callDatabase
@@ -235,6 +236,15 @@ fn.getTableExtraSettings = function(sSomeTablename){
 	var sViewtype = 		fn.getViewType(sSomeTablename);
 	var iDisplayLength =	fn.getCurrentDisplayLength(sSomeTablename);
 	var iTableWidth = 		$("#"+sSomeTablename+"_dynamic").css("width");
+	
+	var aSettings = new Array();
+	aSettings["left"] = iCurrentLeft;
+	aSettings["top"] = iCurrentTop;
+	aSettings["viewtype"] = sViewtype;
+	aSettings["displaylength"] = iDisplayLength;
+	aSettings["size"] = iTableWidth;
+	
+	return aSettings;
 };
 
 
