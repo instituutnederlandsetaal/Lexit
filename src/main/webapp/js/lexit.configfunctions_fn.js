@@ -1170,7 +1170,7 @@ fn.getSelectedRowNodesFrom = function(someTable){
  */
 fn.getFirstSelectedRowNodeFrom = function(someTable){
 	
-	return fx.getFirstSelectedRowFrom(someTable);
+	return fx.getFirstSelectedRowFrom(someTable).node();
 }
 
 

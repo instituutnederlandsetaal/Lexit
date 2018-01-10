@@ -973,7 +973,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				aColProps.push( {
 					"data": 		sNameOfCurrentColumn, 
 					"searchable":	columnVisible ? columnSearchable : false, 
-					"targets": 		[ i ],
+					"targets": 		[ i ],					
 					"class": 		columnEditable ?
 									sClassPrefix + "editable_text" 
 									: sClassPrefix + "not_editable_text",

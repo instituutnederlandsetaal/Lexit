@@ -7,6 +7,18 @@
 // new functions
 
 
+// when rendering a large amount of text in a cell, limit the output to a certain number of characters
+// see: https://datatables.net/blog/2016-02-26
+
+$.fn.dataTable.render.ellipsis = function ( cutoff ) {
+    return function ( data, type, row ) {
+        return type === 'display' && data.length > cutoff ?
+            data.substr( 0, cutoff ) +'…' :
+            data;
+    }
+};
+
+
 // get the table context of the selected table 
 // (this way, we can access the settings of this particular table)
 
