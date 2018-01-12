@@ -605,7 +605,7 @@ public class Database {
 		String[] columnsNames = getColumnNames(tableName);
 		
 		String getRecord = 
-			"SELECT " + Util.join(columnsNames, ", ") + " " +
+			"SELECT \"" + Util.join(columnsNames, "\", \"") + "\" " + // safe fieldnames
 			"FROM " + getSafeTableName(tableName, schema) + " " +
 			"WHERE " + getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
 		
