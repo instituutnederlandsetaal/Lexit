@@ -4,6 +4,11 @@ oShowOnlyTables = [];
 
 
 
+// on which server are we?
+var sCurrentURL = document.URL;
+var bIntern = (sCurrentURL.indexOf("inl.loc")>-1 || sCurrentURL.indexOf("localhost")>-1);
+
+
 //name of the column in which we need autocomplete
 //(preceeded by a dot, as the column name is used a class name for the column)
 var sAutoCompleteSelectorGrondNaam =	"#namen_stand_vn2 .grondnaam_tanneke";
@@ -75,6 +80,37 @@ $(document).on(
 // table general settings
 oTableSettingsList = {
 		
+		gl_naamparen_vn :{
+			
+			"columns_sorting": {"vpv_id": "asc"},
+			
+			"columns_order": [
+			                  
+				"vpv_id",
+				"sexe",
+				"gelijk_grdnm",
+				"variant1",
+				"grondnaam1",
+				"grdnaam_var_tanneke1",
+				"variant2",
+				"grondnaam2",
+				"grdnaam_var_tanneke2",
+				"lv_afstand",
+				"rel_lv",
+				"r2_aantal_combi",
+				"r2_aantal_voorkomen1",
+				"r2_aantal_voorkomen2",
+				"uniek",
+				"fon_variant1",
+				"fon_variant2",
+				"fon_lv_afstand",
+				"fon_rel_lv",
+				"vn_id1",
+				"vn_id2" 
+				
+				]
+		},
+		
 		standaard_fn : {
 			
 			"group": "werktabellen" 
@@ -120,6 +156,20 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		gl_naamparen_vn :{
+	
+			"grdnaam_var_tanneke1":{
+				"bgcolor": "#E0F8EC",
+				"editable": bIntern,
+				"visible": bIntern
+			} ,
+			"grdnaam_var_tanneke2":{
+				"bgcolor": "#E0F8EC",
+				"editable": bIntern,
+				"visible": bIntern
+			}
+	
+		},		
 		
 		standaard_fn : {
 		
@@ -371,7 +421,7 @@ oTableConfigurationList = {
 			
 		},
 		
-		"namen_stand_vn2": {
+		namen_stand_vn2: {
 			
 			"standaard_tanneke": {
 				"editable": true,

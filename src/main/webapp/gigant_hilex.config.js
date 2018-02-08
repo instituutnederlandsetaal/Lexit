@@ -1,21 +1,10 @@
 // list of tables that must be hidden or visible (don't use both, it's a matter of what's the most convenient)
 oHiddenTablesList = [];
-oShowOnlyTables = [
-                   // Hilex tables
-                   "analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
-                   "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
-                   "token_attestations", "token_attestations_worktable", "wordforms", 
-                   "modified_lemmata_view", "modified_paradigm_view", 
-                   
-                   "mnw_fix_multiple_ws",
-                    
-                   "marijke_spelling_giganthilex_differences",
-           			
-                   // klussen
-                   "quotes_to_check",
-                   "quotes_to_check_2",
-                   "fix_multiple_lemmata_analyses"
-                   ];
+oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_paradigma", "multilemmata",
+				 "marijke_spelling_giganthilex_differences",
+				 "multiple_lemmata_analyses", "multiple_lemmata_analyses_view", "multiple_lemmata_analysis_parts",
+				 "token_attestations", "token_attestations_worktable", "wordforms", 
+				 "modified_lemmata_view", "modified_paradigm_view"];
 
 
 
@@ -25,7 +14,7 @@ var aCurrentLemmaViewLocks = 		new Array();
 var aCurrentParadigmaViewLocks =	new Array();
 
 
-// chose super lemma storage
+// chosen super lemma storage
 var sChosenSuperLemId;
 
 // create a unique multibuilder_id
@@ -53,29 +42,6 @@ function comma(a, b){
 	return deEmpty(a)+","+deEmpty(b);
 }
 
-
-
-
-var quoteConfig = {
-		
-		"attestation_ids_to_keep": {
-			"visible": false
-		},
-		
-		"attestation_ids_to_delete": {
-			"visible": false
-		},
-		
-		"searchstr": {
-			"click": function(t, n){
-				
-				var sSearch = fn.getDataFromCellNode(n);
-				fn.callDatabase("token_attestations_worktable", {"attestation_ids": sSearch}, function(){
-					fn.scrollToTable("token_attestations_worktable");
-				});
-			}
-		}
-	};
 
 
 // Autocomplete configuration
@@ -141,11 +107,6 @@ $(document).on(
 // table general settings
 oTableSettingsList = {
 
-		mnw_fix_multiple_ws: {
-			"group": "klussen"
-		},
-		
-		
 		multilemmata: {
 			
 			"button_0":{
@@ -188,40 +149,12 @@ oTableSettingsList = {
 			
 		},
 
-		marijke_spelling_giganthilex_differences: {
-			
-			"group": "Marijke spelling"
-				
-		},
-		
-		
-		fix_multiple_lemmata_analyses:{
-			
-			"group": "klussen",
-			
-			"processed_date": "19 februari 2016",
-			
-			"callback": function(t){
-				highlightMultiLemmataAnalyses(t);
-			},
-			
-			"repeat_callback": true,
-			
-			"size": "80%",
-			
-			"column_order": ["multi_id",
-			                  "multi_part_id", 
-			                  "modern_lemma", 
-			                  "full_analysis",
-			                  "lemma_id", 
-			                  "lemma_part", 
-			                  "lemma_part_pos",
-			                  "knop"]
-		},
 		
 		modified_lemmata_view: {
 			
 			"group": "log",
+			
+			"columns_sorting": {"modification_date": "desc", "modification_time": "desc"},
 			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
@@ -253,6 +186,8 @@ oTableSettingsList = {
 		modified_paradigm_view:{
 			
 			"group": "log",
+			
+			"columns_sorting": {"modification_date": "desc", "modification_time": "desc"},
 			
 			"button_0":{
 				"name": "Woordvorm herstellen",
@@ -554,74 +489,7 @@ oTableSettingsList = {
 			},
 			"repeat_callback": true
 		},
-		
-		quotes_to_check: {
 			
-			"group": "klussen",
-			
-			"columns_order": 
-				["modern_lemma", "attestation_ids", 
-				 "attention", "quote", "quotation_section_id", 
-				 "lemma_id", "multiple_lemmata_analysis_id", 
-				 "onsetoffset", "opmerking"],
-			
-			"columns_sorting": {
-				"modern_lemma": "asc", 
-				"quotation_section_id": "asc", 
-				"attestation_ids": "asc"
-					},
-					
-			"size": "80%",
-			
-			"keyup":{
-				
-				"`": function(t){
-					
-					var oRow = fx.getFirstSelectedRowFrom(t);					
-					fx.toggleCheckbox(oRow, "attention");
-				}
-			},
-			
-			"callback": function(t){
-				highlightAllQuotes(t);
-			},
-			"repeat_callback": true
-			
-		},
-		
-		quotes_to_check_2: {
-			
-			"group": "klussen",
-			
-			"columns_order": 
-				["modern_lemma", "attestation_ids", 
-				 "attention", "quote", "quotation_section_id", 
-				 "lemma_id", "multiple_lemmata_analysis_id", 
-				 "onsetoffset", "opmerking"],
-			
-			"columns_sorting": {
-				"modern_lemma": "asc", 
-				"quotation_section_id": "asc", 
-				"attestation_ids": "asc"
-					},
-					
-			"size": "80%",
-			
-			"keyup":{
-				
-				"`": function(t){
-					
-					var oRow = fx.getFirstSelectedRowFrom(t);					
-					fx.toggleCheckbox(oRow, "attention");
-				}
-			},
-			
-			"callback": function(t){
-				highlightAllQuotes(t);
-			},
-			"repeat_callback": true
-			
-		},
 		
 		token_attestations_worktable: {
 			
@@ -864,88 +732,37 @@ oTableSettingsList = {
 						}
 					
 				}
+			},
+			
+			"button_3":{
+				
+				"name": "Dupliceer",
+				"click": function(t){
+					
+					var oRow = fx.getFirstSelectedRowFrom(t);
+					
+					if ( oRow.any() )
+						{
+						fn.confirm("Dupliceer citaat", "Weet u het zeker?", function(){
+							
+							fn.showProcessingMsg(t);
+							
+							var sAttIds = fx.getDataFromCellInRow(oRow, "attestation_ids");
+							fn.callFunction('api.copy_attestation', [sAttIds], function(){							
+									fn.refreshTable(t);
+									fn.removeProcessingMsg(t);
+								});
+							
+						});
+						
+						
+						}
+					
+				}
 			}
 			
 		},
 		
-		lemmata_removed: {
-			
-			"group": "log",
-			
-			"button_0":{
-				"name": "Hestel selectie",
-				"click": function(t){
-					
-					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
-						
-						fn.showProcessingMsg(t);
-						
-						var oRows = fx.getSelectedRowsFrom(t);
-						
-						oRows.every(function(){
-							
-							var oCurrentRow = this;
-							
-							// This function doesn't try to assign a new lemma_id
-							// to prevent conflicting ids, as we assume that ids of newly
-							// added lemmata come on top of the existing id-values.
-							// So when some lemma is removed, its id won't be re-used
-							// so it is safe to reload the old lemma with its original id.
-							
-							var sLemId = fx.getDataFromCellInRow(oCurrentRow, "lemma_id");
-							
-							fn.callFunction("api.restore_lemma", [sLemId], function(){
-								
-								if (fx.isLastRowOf(oCurrentRow, oRows))
-									{
-									fn.refreshTable(t);
-									fn.refreshTable("lemmata_and_paradigma");
-									}
-							});
-						});
-						
-					});
-					
-				}
-			}
-		},
-		
-		analyzed_wordforms_removed: {
-			
-			"group": "log",
-			
-			"button_0":{
-				"name": "Hestel selectie",
-				"click": function(t){
-					
-					fn.confirm("Hestel selectie", "Weet u het zeker?", function(){
-						
-						var oRows = fx.getSelectedRowsFrom(t);
-						oRows.every(function(){
-							var oRow = this;
-							
-							// This function doesn't try to assign a new analyzed_wordform_id
-							// to prevent conflicting ids, as we assume that ids of newly
-							// added analyzed_wordforms come on top of the existing id-values.
-							// So when some analyzed_wordform is removed, its id won't be re-used
-							// so it is safe to reload the old analyzed_wordform with its original id.
-							
-							var sAwfId = fx.getDataFromCellInRow(oRow, "analyzed_wordform_id");
-							fn.callFunction("api.restore_paradigm", [sAwfId], function(){
-								
-								if (fx.isLastRowOf(oRow, oRows))
-									{
-									fn.refreshTable(t);
-									fn.refreshTable("lemmata_and_paradigma");
-									}
-							});
-						});
-						
-					});
-			
-				}
-			}
-		},
 		
 		lemmata_and_paradigma: {
 			
@@ -968,6 +785,13 @@ oTableSettingsList = {
 								"opmerking",
 								"online"
 								],
+								
+			"columns_sorting": {
+				"super_lem_id": "asc", 
+				"modern_lemma": "asc", 
+				"persistent_id": "asc", 
+				"group_id": "asc",
+				"wordform": "asc" },
 			
 			"callback": function(t){
 				
@@ -1287,13 +1111,13 @@ oTableSettingsList = {
 								var bLastNode =	fx.isLastRowOf(this, oRows);
 								
 								fn.callFunction("api.create_new_super_lem", [sLemId], function(){
-											
-											if (bLastNode)
-												{												
-												fn.refreshTable(t);
-												}
 									
-										});
+									if (bLastNode)
+										{												
+										fn.refreshTable(t);
+										}
+									
+									});
 							
 								});
 							}
@@ -1366,7 +1190,7 @@ oTableSettingsList = {
 				"click": function(t){
 					
 					fn.clearAllFilters(t);
-					fn.setFilters(t, {"opmerking": "clitics", "wdb": "ONW"}, true);
+					fn.setFilters(t, {"multiple_lemmata_analysis_id": "."}, true);
 					fn.refreshTable(t);
 					
 				}
@@ -1378,121 +1202,15 @@ oTableSettingsList = {
 
 
 // configuration at column level
-oTableConfigurationList = {
-		
-		
-		fix_multiple_lemmata_analyses:{
-			
-			"multi_id":{
-				"colsort": "asc"
-			},
-			"lemma_id": {
-				"bgcolor": "#CEE3F6",
-				"click": function(t, n){
-					
-					var nCell = 	fx.getCell(n);					
-					var sLemmaId =	fx.getDataFromCell(nCell);
-					
-					fn.callDatabase("lemmata", {"lemma_id": sLemmaId});
-				}
-			},
-			"knop": {
-				"button": "Bijwerken",
-				"click": function(t, n){
-					
-					var oCell = 	fx.getCell(n);					
-					var sLemmaId =	fx.getDataFromSiblingCell(oCell, "lemma_id");
-					
-					fn.callFunction("api.propagate_lemma_modif", [sLemmaId], function(){
-						fn.refreshTable(t);
-					});
-				}
-			}
-			
-		},
-		
-		quotes_to_check:{
-			
-			modern_lemma: {
-				
-			}, 
-			attestation_ids: {
-				"visible": false
-			}, 
-			quote: {
-				
-			},
-			quotation_section_id: {
-				
-			}, 
-			lemma_id: {
-				"visible": false
-			}, 
-			multiple_lemmata_analysis_id: {
-				"visible": false
-			}, 
-			onsetoffset: {
-				"visible": false
-			},
-			attention: {
-				"editable": true,
-				"bgcolor": "#E0F8EC"
-			},
-			opmerking: {
-				"editable": true,
-				"bgcolor": "#E0F8EC"
-			}
-		},
-		
-		quotes_to_check_2:{
-			
-			modern_lemma: {
-				
-			}, 
-			attestation_ids: {
-				"visible": false
-			}, 
-			quote: {
-				
-			},
-			quotation_section_id: {
-				
-			}, 
-			lemma_id: {
-				"visible": false
-			}, 
-			multiple_lemmata_analysis_id: {
-				"visible": false
-			}, 
-			onsetoffset: {
-				"visible": false
-			},
-			attention: {
-				"editable": true,
-				"bgcolor": "#E0F8EC"
-			},
-			opmerking: {
-				"editable": true,
-				"bgcolor": "#E0F8EC"
-			}
-		},
+oTableConfigurationList = {		
+
 		
 		modified_lemmata_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
-		},
+			
+		}, 
 		
 		modified_paradigm_view: {
-			"modification_date":{
-				"colsort": "desc" // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc" // sort #2
-			}
+			
 		},
 		
 		lemmata: {
@@ -1513,9 +1231,6 @@ oTableConfigurationList = {
 							if ( !isNaN(sLemmaId) )
 								{
 								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
-								
-								if (fn.tableExists("fix_multiple_lemmata_analyses"))
-									fn.refreshTable("fix_multiple_lemmata_analyses");
 								}						
 
 							$(this).dequeue();
@@ -1538,9 +1253,6 @@ oTableConfigurationList = {
 							if ( !isNaN(sLemmaId) )
 								{
 								fn.callDatabase("token_attestations_worktable", {"lemma_id": sLemmaId});
-								
-								if (fn.tableExists("fix_multiple_lemmata_analyses"))
-									fn.refreshTable("fix_multiple_lemmata_analyses");
 								}						
 
 							$(this).dequeue();
@@ -1568,43 +1280,20 @@ oTableConfigurationList = {
 				"editable": true				
 			}
 		},
-		
-		lemmata_removed: {
-			
-			"modification_date": {
-				"colsort": "desc"  // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc"  // sort #2
-			}
-		},
-
-		analyzed_wordforms_removed: {
-			
-			"modification_date": {
-				"colsort": "desc"  // sort #1
-			},
-			"modification_time": {
-				"colsort": "desc"  // sort #2
-			}
-		},
-		
-
-
+	
 
 		
 		lemmata_and_paradigma: {
 			
 			"super_lem_id" :{
-				"colsort": "asc" // sort #1
+				
 			},
 			
 			"wdb": {
 				"choosefrom": ["", "ONW", "VMNW", "MNW", "WNT"]
 			},
 			
-			"modern_lemma": {
-				"colsort": "asc", // sort #2
+			"modern_lemma": {		
 				"editable": true,
 				"editcallback": function(t, n){
 					
@@ -1614,8 +1303,7 @@ oTableConfigurationList = {
 				}
 
 			},
-			"persistent_id": {
-				"colsort": "asc", // sort #3
+			"persistent_id": {		
 				"cell_tooltip": "Open WDB",
 				"click": function(t, n){
 					
@@ -1659,8 +1347,7 @@ oTableConfigurationList = {
 							});
 				}
 			},
-			"group_id": {
-				"colsort": "asc", // sort #4
+			"group_id": {				
 				"cell_tooltip": "Totaal citaten bijbehorend bij groep",
 				"click": function(t, n){
 					
@@ -1676,7 +1363,6 @@ oTableConfigurationList = {
 				}
 			},
 			"wordform": {
-				"colsort": "asc" // sort #4
 
 			},
 			
@@ -1713,23 +1399,31 @@ oTableConfigurationList = {
 			}
 		},
 		
+		token_attestations: {
+			
+			"document_id": {
+				"cell_tooltip": "Toon bron",
+				"click": function(t,n){
+					
+					var oCell =			fx.getCell(n);
+					var iDocumentId =	fx.getDataFromCell(oCell);
+					
+					fn.callDatabase("documents", 
+							{"document_id": iDocumentId}, 
+							function(){
+								fn.scrollToTable("documents");
+							}, 
+							{"viewtype": "form"});
+				}
+			}
+		},
+		
 		
 		marijke_spelling_giganthilex_differences: {
 			
 			marijke_lemma: {
 				"editable": true,
-				"colsort": "asc",
-				"editcallback": function(t, n, value){
-					
-					var oCell = fx.getCell(n);
-					fx.updateDatabaseGivenACellOrRow(oCell, {"modified": true});
-				}
-			},
-			opmerking: {
-				"editable": true
-			},
-			modified: {
-				"visible": false
+				"colsort": "asc"
 			},
 			id: {
 				"visible": false
@@ -1747,26 +1441,6 @@ oTableConfigurationList = {
 							});
 				}
 				
-			}
-			
-		},
-		
-		token_attestations: {
-			
-			"document_id": {
-				"cell_tooltip": "Toon bron",
-				"click": function(t,n){
-					
-					var oCell =			fx.getCell(n);
-					var iDocumentId =	fx.getDataFromCell(oCell);
-					
-					fn.callDatabase("documents", 
-							{"document_id": iDocumentId}, 
-							function(){
-								fn.scrollToTable("documents");
-							}, 
-							{"viewtype": "form"});
-				}
 			}
 		},
 		
@@ -2044,6 +1718,9 @@ oTableConfigurationList = {
 
 //fn.callDatabase("lemmata_and_paradigma");
 
+//fn.callDatabase("quote_comparison");
+
+
 
 
 
@@ -2220,6 +1897,92 @@ function putHighlightOnOneRow(oRow) {
 	fx.putDataIntoCell(oRow, "quote", sQuote);
 };
 
+
+// [3] highlight in 'token_attestations_comparison' table
+
+function highlightAllQuotesInComparison(t){
+	
+	fn.showProcessingMsg(t); 
+	
+	var aAllRowIds = fx.getAllRows(t);
+	
+	aAllRowIds.every(function(){		
+		putHighlightOnOneRowInComparison(this);		
+	});
+	
+	fn.removeProcessingMsg(t);
+	
+};
+
+
+function putHighlightOnOneRowInComparison(oRow) {
+	
+	var sSummerQuote =	fx.getDataFromCellInRow(oRow, "summer_quote");
+	sSummerQuote =	fn.removeHighlight(sSummerQuote);
+	
+	var sQuote =		fx.getDataFromCellInRow(oRow, "quote");
+	sQuote = 		fn.removeHighlight(sQuote);	
+	
+	
+	// get the position pairs (x,y|x,y|...)
+	var sAllPositionPairsOfSummer =	fx.getDataFromCellInRow(oRow, "summer_onsetoffset");
+	var sAllPositionPairs = 		fx.getDataFromCellInRow(oRow, "onsetoffset");
+	
+	if (sAllPositionPairsOfSummer != "-")
+		{
+				
+		// build array of position pairs
+		var aAllPairs = sAllPositionPairsOfSummer.split("\|");		
+		
+		var aNewPairsArray = new Array();
+		for (var i=0; i<aAllPairs.length; i++)
+			{			
+			var onePair = aAllPairs[i].split(",");
+			
+			var iStartIndex = parseInt(onePair[0]);
+			var iEndIndex   = parseInt(onePair[1]);
+			
+			if (iStartIndex<iEndIndex)
+				aNewPairsArray.push( [iStartIndex, iEndIndex] );
+			}
+		
+		// call the highlight function with the whole array of position pairs
+		if (aNewPairsArray.length>0)
+			sSummerQuote = fn.getHighlight(sSummerQuote, aNewPairsArray, "yellow");
+		}
+	
+	if (sAllPositionPairs != "-")
+		{
+				
+		// build array of position pairs
+		var aAllPairs = sAllPositionPairs.split("\|");		
+		
+		var aNewPairsArray = new Array();
+		for (var i=0; i<aAllPairs.length; i++)
+			{			
+			var onePair = aAllPairs[i].split(",");
+			
+			var iStartIndex = parseInt(onePair[0]);
+			var iEndIndex   = parseInt(onePair[1]);
+			
+			if (iStartIndex<iEndIndex)
+				aNewPairsArray.push( [iStartIndex, iEndIndex] );
+			}
+		
+		// call the highlight function with the whole array of position pairs
+		if (aNewPairsArray.length>0)
+			sQuote = fn.getHighlight(sQuote, aNewPairsArray, "yellow");
+		}
+		
+	// put the string back into the table
+	fx.putDataIntoCell(oRow, "summer_quote", sSummerQuote);
+	fx.putDataIntoCell(oRow, "quote", sQuote);
+};
+
+
+
+
+// ----
 
 function highlightGroups(t){
 	
@@ -2458,21 +2221,21 @@ setTimeout(function(){
 						
 						if (sWdbForMultilemBuilder== '' || sWdbForMultilemBuilder == sLemWdb)
 							{
-						fn.insertIntoDatabase(t, 
-							{
+							fn.insertIntoDatabase(t, 
+									{
 									"part_number": iNumberOfPreselectedLemmata+1,
-							"lemma_id": sLemId,
-							"modern_lemma": sModLem,
+									"lemma_id": sLemId,
+									"modern_lemma": sModLem,
 									"lemma_part_of_speech": sPos,
 									"wdb": sLemWdb
-							}, 
-							null, 
-							function(){
-								fn.refreshTable(t);
-							});
-						}
-					else
-						{
+									}, 
+									null, 
+									function(){
+										fn.refreshTable(t);
+									});
+							}
+						else
+							{
 							fn.message("Let op!", "De gekozen delen moeten allemaal '"+sWdbForMultilemBuilder+"'-lemmata zijn!");
 							}
 						
@@ -2569,7 +2332,7 @@ setTimeout(function(){
 					
 					var sLemId =	fx.getDataFromCellInRow(this, "lemma_id");
 					var sModlem =	fx.getDataFromCellInRow(this, "modern_lemma");
-					var sLemPos =	fx.getDataFromCellInRow(this, "lemma_part_of_speech");
+					var sLemPos =	fx.getDataFromCellInRow(this, "lemma_part_of_speech");					
 					aFieldNames.push(sLemId+" : "+sModlem+", "+sLemPos);
 				});
 				
@@ -2662,4 +2425,8 @@ setTimeout(function(){
 	}
 	
 }, 500);
+
+
+
+fn.setProjectTitle("Hilex productie-test");
 

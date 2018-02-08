@@ -14,7 +14,10 @@ oShowOnlyTables = ["analyzed_wordforms", "documents", "lemmata", "lemmata_and_pa
 		"citblock_comparison", "citblock_comparison2", "citblock_comparison3",
 		"new_token_attestations",
 		"pretei_quotations_extended",
-		"quotes_to_check"];
+		
+		"quotes_to_check_4_from_prod",
+		"quotes_to_check_5",
+		"token_attestations_comparison"];
 
 
 
@@ -139,6 +142,19 @@ $(document).on(
 
 // table general settings
 oTableSettingsList = {
+
+		token_attestations_comparison: {
+			
+			"group": "klussen",
+			
+			"columns_sorting": {"quotation_section_id":"asc", "quote":"asc"},
+			
+			"callback": function(t){
+				highlightAllQuotesInComparison(t);
+			},
+			"repeat_callback": true
+			
+		},
 
 		citblock_comparison:{
 			"group": "Quotes citblock ids"
@@ -606,6 +622,343 @@ oTableSettingsList = {
 			
 		},
 		
+		quotes_to_check_4_from_prod: {
+			
+			"group": "klussen",
+			
+			"columns_order": 
+				["modern_lemma", "attestation_ids", 
+				 "attention", "clitic", "goed", "quote", "quotation_section_id", 
+				 "lemma_id", "multiple_lemmata_analysis_id", 
+				 "onsetoffset", "opmerking", "processed", "old_onsetoffset"],
+
+			
+			"columns_sorting": {
+				"modern_lemma": "asc", 
+				"quotation_section_id": "asc", 
+				"attestation_ids": "asc"
+					},
+					
+			//"size": "80%",
+			
+			"keyup":{
+				
+				"uparrow": function(t){
+					
+					// small delay otherwise it won't work
+					$("#"+t).delay(500).queue(function(){
+
+						var oRow = 			fx.getFirstSelectedRowFrom(t);
+						var sLemmaId =		fx.getDataFromCellInRow(oRow, "lemma_id");
+						var sMultiLemId =	fx.getDataFromCellInRow(oRow, "multiple_lemmata_analysis_id");
+						
+						if ( !isNaN(sLemmaId) && sLemmaId != '')
+							{
+							fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId}, function(){
+								fn.setActiveTable(t);
+								});
+							}
+						if ( !isNaN(sMultiLemId) && sMultiLemId != '')
+							{
+							fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultiLemId}, function(){
+								fn.setActiveTable(t);
+								});
+							}
+
+						$(this).dequeue();
+					});					
+					
+				},
+				"downarrow": function(t){
+					
+					// small delay otherwise it won't work
+					$("#"+t).delay(500).queue(function(){
+
+						var oRow = 			fx.getFirstSelectedRowFrom(t);
+						var sLemmaId =		fx.getDataFromCellInRow(oRow, "lemma_id");
+						var sMultiLemId =	fx.getDataFromCellInRow(oRow, "multiple_lemmata_analysis_id");
+						
+						if ( !isNaN(sLemmaId) && sLemmaId != '')
+							{
+							fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId});
+							}
+						if ( !isNaN(sMultiLemId) && sMultiLemId != '')
+							{
+							fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultiLemId});
+							}
+
+						$(this).dequeue();
+					});
+				}
+			},
+			
+			"callback": function(t){
+				highlightAllQuotes(t);
+			},
+			"repeat_callback": true,
+			
+			
+			
+			"button_0":{
+				
+				"name": "Schoonvegen",
+				"tooltip": "Verwijder alle attestaties uit de citaat",
+				"click": function(t){
+					
+					fn.confirm("Citaat schoonvegen", "Weet u het zeker?", function(){
+						
+						var oRow = fx.getFirstSelectedRowFrom(t);
+						
+						// remove indexes
+						fx.updateDatabaseGivenACellOrRow(oRow, 
+								{ "onsetoffset": "none" }, 
+								function(){
+									fn.refreshTable(t);
+								});
+						
+					});					
+				}
+				
+			},
+			
+			"button_1":{
+				
+				"name": "Kopieer selectie",
+				"click": function(t){
+					
+					var oSelection = fx.getSelectedRowsFrom(t);
+					
+					if (oSelection.count()==0)
+					{
+						fn.message("Let op", "U moet een citaat selecteren!");
+					}
+				else
+					{
+					
+					fn.confirm("Kopieer selectie", "Weet u zeker dat u deze rij(en) wilt verdubbelen?", function(){							
+						
+						oSelection.every(function(){
+							
+							var oRow = this;
+							
+							// get the attestation_id of the current row to be copied,
+							// and generate a NEW attestation_id for the copy
+							
+							var sAttIds = fx.getDataFromCellInRow(oRow, "attestation_ids");
+							var sNewAttIdsArr = sAttIds.split(",");
+							for (var i=0; i<sNewAttIdsArr.length; i++)
+								{
+								sNewAttIdsArr[i] = sNewAttIdsArr[i]+"."+(Date.now());
+								}
+							var sNewAttIds = sNewAttIdsArr.join(",");
+							
+							// now insert the new row
+							
+							var bLastOne = fx.isLastRowOf(oRow, oSelection);
+							
+							fn.callFunction("copy_row_in_klus4", [sAttIds, sNewAttIds], function(){
+								if (bLastOne) 
+									fn.refreshTable(t);
+							});
+													
+							
+						});
+						
+					});						
+					
+					}
+				}
+			},
+			
+			
+			"button_2":{
+				
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					var oSelection = fx.getSelectedRowsFrom(t);
+					
+					if (oSelection.count()==0)
+						{
+						fn.message("Let op", "U moet een citaat selecteren!");
+						}
+					else
+						{
+						
+						fn.confirm("Verwijder selectie", "LET OP:<BR><BR>Weet u zeker dat u deze rijen wilt VERWIJDEREN?", function(){							
+							
+							oSelection.every(function(){
+								
+								var oRow = this;
+								var bLastOne = fx.isLastRowOf(oRow, oSelection);
+								
+								fx.removeFromDatabaseGivenARow(oRow, function(){
+									
+									if (bLastOne)
+										fn.refreshTable(t);										
+									
+								});
+							});
+							
+						});				
+						
+						}
+					
+				}
+			}
+			
+		},
+		
+		quotes_to_check_5: {
+			
+			"group": "klussen",
+			
+			"columns_order": 
+				["modern_lemma", "attestation_ids", 
+				 "quote", "quotation_section_id", "analyzed_wordform_id", "onsetoffset", "onset", "offset", "wordform",
+				 "lemma_id", "multiple_lemmata_analysis_id", "awf_gone", "alt_awf", "alt_att_id", "att_gone", "att_really_gone", "quote_shortened", 
+				 "old_onsetoffset",
+				 "opmerking", "processed", "lem_id_to_assign", "awf_id_to_assign"],
+			
+			"columns_sorting": {
+				"modern_lemma": "asc", 
+				"quotation_section_id": "asc", 
+				"attestation_ids": "asc"
+					},
+					
+			//"size": "80%",
+			
+//			"keyup":{
+//				
+//				"`": function(t){
+//					
+//					var aAllIds = fn.getDataFromColumn(t, "attestation_ids");
+//					var sAllIds = aAllIds.join("~");
+//					
+//					fn.callFunction("put_all_good_v5", [sAllIds], function(){
+//						fn.refreshTable(t);
+//					});
+//					
+//				}
+//			},
+			
+			"callback": function(t){
+				highlightAllQuotes(t);
+			},
+			"repeat_callback": true,
+			
+			
+			
+			"button_0":{
+				
+				"name": "Schoonvegen",
+				"tooltip": "Verwijder alle attestaties uit de citaat",
+				"click": function(t){
+					
+					fn.confirm("Citaat schoonvegen", "Weet u het zeker?", function(){
+						
+						var oRow = fx.getFirstSelectedRowFrom(t);
+						
+						// remove indexes
+						fx.updateDatabaseGivenACellOrRow(oRow, 
+								{ "onsetoffset": "none" }, 
+								function(){
+									fn.refreshTable(t);
+								});
+						
+					});					
+				}
+				
+			},
+			
+			"button_1":{
+				
+				"name": "Kopieer selectie",
+				"click": function(t){
+					
+					var oSelection = fx.getSelectedRowsFrom(t);
+					
+					if (oSelection.count()==0)
+					{
+						fn.message("Let op", "U moet een citaat selecteren!");
+					}
+				else
+					{
+					
+					fn.confirm("Kopieer selectie", "Weet u zeker dat u deze rij(en) wilt verdubbelen?", function(){							
+						
+						oSelection.every(function(){
+							
+							var oRow = this;
+							
+							// get the attestation_id of the current row to be copied,
+							// and generate a NEW attestation_id for the copy
+							
+							var sAttIds = fx.getDataFromCellInRow(oRow, "attestation_ids");
+							var sNewAttIdsArr = sAttIds.split(",");
+							for (var i=0; i<sNewAttIdsArr.length; i++)
+								{
+								sNewAttIdsArr[i] = sNewAttIdsArr[i]+"."+(Date.now());
+								}
+							var sNewAttIds = sNewAttIdsArr.join(",");
+							
+							// now insert the new row
+							
+							var bLastOne = fx.isLastRowOf(oRow, oSelection);
+							
+							fn.callFunction("copy_row_in_klus5", [sAttIds, sNewAttIds], function(){
+								if (bLastOne) 
+									fn.refreshTable(t);
+							});
+													
+							
+						});
+						
+					});						
+					
+					}
+				}
+			},
+			
+			
+			"button_2":{
+				
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					var oSelection = fx.getSelectedRowsFrom(t);
+					
+					if (oSelection.count()==0)
+						{
+						fn.message("Let op", "U moet een citaat selecteren!");
+						}
+					else
+						{
+						
+						fn.confirm("Verwijder selectie", "LET OP:<BR><BR>Weet u zeker dat u deze rijen wilt VERWIJDEREN?", function(){							
+							
+							oSelection.every(function(){
+								
+								var oRow = this;
+								var bLastOne = fx.isLastRowOf(oRow, oSelection);
+								
+								fx.removeFromDatabaseGivenARow(oRow, function(){
+									
+									if (bLastOne)
+										fn.refreshTable(t);										
+									
+								});
+							});
+							
+						});				
+						
+						}
+					
+				}
+			}
+			
+		},
+		
 		token_attestations_worktable: {
 			
 			"callback": function(t){
@@ -824,24 +1177,51 @@ oTableSettingsList = {
 						
 						fn.confirm("Verwijder selectie", "Weet u het zeker?", function(){							
 							
-						oSelection.every(function(){
-							
-							var oRow = this;
-							var bLastOne = fx.isLastRowOf(oRow, oSelection);
-							
-							fx.removeFromDatabaseGivenARow(oRow, function(){
+							oSelection.every(function(){
 								
-								if (bLastOne)
-									{
-									fn.refreshTable(t);
-									fn.refreshTable("lemmata_and_paradigma");
-									}
+								var oRow = this;
+								var bLastOne = fx.isLastRowOf(oRow, oSelection);
 								
+								fx.removeFromDatabaseGivenARow(oRow, function(){
+									
+									if (bLastOne)
+										{
+										fn.refreshTable(t);
+										fn.refreshTable("lemmata_and_paradigma");
+										}
+									
+									});
 								});
-							});
 							
 							});
 						
+						
+						
+						}
+					
+				}
+			},
+			
+			"button_3":{
+				
+				"name": "Dupliceer",
+				"click": function(t){
+					
+					var oRow = fx.getFirstSelectedRowFrom(t);
+					
+					if ( oRow.any() )
+						{
+						fn.confirm("Dupliceer citaat", "Weet u het zeker?", function(){
+							
+							fn.showProcessingMsg(t);
+							
+							var sAttIds = fx.getDataFromCellInRow(oRow, "attestation_ids");
+							fn.callFunction('api.copy_attestation', [sAttIds], function(){							
+									fn.refreshTable(t);
+									fn.removeProcessingMsg(t);
+								});
+							
+						});
 						
 						
 						}
@@ -1370,6 +1750,10 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		token_attestations_comparison: {
+			
+		},
+		
 		
 		quotes_to_check:{
 			
@@ -1401,6 +1785,293 @@ oTableConfigurationList = {
 			opmerking: {
 				"editable": true,
 				"bgcolor": "#E0F8EC"
+			}
+		},
+		
+		quotes_to_check_4_from_prod: {
+			
+			old_onsetoffset: {
+				"visible": false
+			},
+			
+			modern_lemma: {
+				
+				"click": function(t, n){
+
+					var oCell =			fx.getCell(n);
+					var sLemmaId =		fx.getDataFromSiblingCell(oCell, "lemma_id");
+					var sMultiLemId =	fx.getDataFromSiblingCell(oCell, "multiple_lemmata_analysis_id");
+					
+					if ( !isNaN(sLemmaId) && sLemmaId != '')
+						{
+						fn.callDatabase("lemmata_and_paradigma", {"lemma_id": sLemmaId}, function(){
+							fn.setActiveTable(t);
+							});
+						}
+					if ( !isNaN(sMultiLemId) && sMultiLemId != '')
+						{
+						fn.callDatabase("lemmata_and_paradigma", {"multiple_lemmata_analysis_id": sMultiLemId}, function(){
+							fn.setActiveTable(t);
+							});
+						}
+					
+				}
+				
+			}, 
+			attestation_ids: {
+				"visible": false
+			}, 
+			
+			"quote": {
+				
+				"cell_tooltip": "Klik om woorden te (de)highlighten",
+				"mouseup": function(t, n){
+					
+					// do we have a text selection?
+					var oCell = 		fx.getCell(n);
+					var oSelectedText =	fx.getSelectedTextInCell(oCell);
+					
+					
+					// if selection is empty, that means that we've clicked on a word
+					// without selecting it manually.
+					// In this case, try to select the word that was clicked upon
+					if (oSelectedText.text == '' && oSelectedText.reliable)
+						{						
+						oSelectedText = fx.getWordClickedUponInCell(oCell);						
+						}
+					
+					// if we have a selection now, process it
+					if (oSelectedText.text!='' && oSelectedText.reliable)
+						{
+						// get the registered onsets and offsets
+						
+						// put the token indexes string into an array
+						
+						var sTokenIndexesIds = 		fx.getDataFromSiblingCell(oCell, "onsetoffset");
+						var sOldTokenIndexesIds =	sTokenIndexesIds;
+						var aTokenIndexesIds = 		(sTokenIndexesIds!='' && sTokenIndexesIds!= 'none') ?
+													sTokenIndexesIds.split("\|") : new Array();
+												
+						// get the current screen selection
+						var iStart =	parseInt(oSelectedText.start);
+						var iEnd = 		parseInt(oSelectedText.end);
+						
+						
+						// is this selection already part of the registered onsets and offsets?
+						var iIndexOfThisPair = $.inArray(iStart+","+iEnd, aTokenIndexesIds);					
+						
+						// if token was already marked as token, remove it
+						if (iIndexOfThisPair>-1)
+							{
+							aTokenIndexesIds.splice(iIndexOfThisPair, 1);							
+							}
+						// otherwise add the selected token(s)
+						else
+							{
+							// remove the tokens that are within the selection (=overlap)
+							// and add the selection as a whole after that
+							
+							var bAddSelection = true;
+							for (var i=aTokenIndexesIds.length-1; i>=0; i--)
+								{								
+								var sOnePair = aTokenIndexesIds[i];
+								var iOneStart = parseInt(sOnePair.split(",")[0]);
+								var iOneEnd = parseInt(sOnePair.split(",")[1]);
+								
+								// if token is within the selection, remove it
+								if (iStart<=iOneStart && iOneEnd<=iEnd)
+									{
+									aTokenIndexesIds.splice(i, 1);
+									}
+								// if selection is within/overlapping an existing token, do nothing
+								else if ( ( iOneStart<=iStart && iStart<=iOneEnd ) ||
+										  ( iOneStart<=iEnd   && iEnd<=iOneEnd   ) )
+									{
+									bAddSelection = false;
+									}
+									
+								}
+							// add the selection
+							if (bAddSelection)
+								aTokenIndexesIds.push(iStart+","+iEnd);
+							}
+						
+						// update the database and the screen table
+						
+						// rebuild the token indexes string from the current array
+						sTokenIndexesIds = aTokenIndexesIds.join("|");
+						if (sTokenIndexesIds == '') 
+							sTokenIndexesIds = "none";
+						
+						fn.showProcessingMsg(t);
+						
+						fx.updateDatabaseGivenACellOrRow(
+								oCell, 
+								{"onsetoffset": sTokenIndexesIds}, 
+								function(){
+									fn.showProcessingMsg(t);
+									
+									var oRow = fx.getRowFromCell(oCell);
+									fx.callRecord(oRow, ["quote", "onsetoffset"], function(){
+										putHighlightOnOneRow(oRow);
+										fn.removeProcessingMsg(t);
+									});
+									
+								});
+						
+						
+						}					
+				}
+			},
+			
+			
+			quotation_section_id: {
+				
+				"click": function(t, n){
+					
+					var sQuoteId = fn.getDataFromCellNode(n);
+					
+					if ( sQuoteId != '')
+						{
+						fn.callDatabase("token_attestations_worktable", 
+							{"quotation_section_id": sQuoteId}, 
+							function(){
+								fn.setActiveTable(t);
+							});
+						}
+					
+				}
+			}, 
+			lemma_id: {
+				"visible": false
+			}, 
+			multiple_lemmata_analysis_id: {
+				"visible": false
+			}, 
+			onsetoffset: {
+				"visible": false
+			},
+			attention: {
+				// not editable anymore
+			},
+			
+			clitic: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			goed: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			opmerking: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			processed: {
+				"visible": false
+			}
+		},
+		
+		
+		quotes_to_check_5: {
+			
+			alt_att_id: {
+				"visible": false   // it is always empty
+			},
+			
+			quote_shortened: {
+				"visible": false   // it is always false
+			},
+			
+			onset: {
+				"visible": false
+			},
+			
+			offset: {
+				"visible": false
+			},
+			
+			alt_awf: {
+				"click": function(t, n){
+					var sAwfId = fn.getDataFromCellNode(n);
+					fn.callDatabase("lemmata_and_paradigma", {"analyzed_wordform_id": sAwfId});
+				}
+			},
+			
+			analyzed_wordform_id: {
+				"click": function(t, n){
+					var sAwfId = fn.getDataFromCellNode(n);
+					fn.callDatabase("lemmata_and_paradigma", {"analyzed_wordform_id": sAwfId});
+				}
+			},
+			
+			old_onsetoffset: {
+				"visible": false
+			},
+			
+			modern_lemma: {
+				
+			}, 
+			attestation_ids: {
+				"click": function(t, n){
+					var sAttIds = fn.getDataFromCellNode(n);
+					fn.callDatabase("token_attestations_worktable", {"attestation_ids": sAttIds});
+				}
+			}, 
+			
+			"quote": {
+				
+			},
+			
+			"lem_id_to_assign": {
+				"visible": false
+			}, 
+			"awf_id_to_assign": {
+				"visible": false
+			},
+			
+			
+			quotation_section_id: {
+				
+				"click": function(t, n){
+					var sId = fn.getDataFromCellNode(n);
+					sId = sId.split("/")[0];  // take first part of string like 'A001482/A001482.cit.1/7250'
+					window.open("http://gtb.inl.nl/iWDB/search?actie=article&wdb=WNT&id="+sId);
+				}
+			}, 
+			lemma_id: {
+				"visible": false
+			}, 
+			multiple_lemmata_analysis_id: {
+				"visible": false
+			}, 
+			onsetoffset: {
+				"visible": false
+			},
+			attention: {
+				// not editable anymore
+			},
+			
+			clitic: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			goed: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			opmerking: {
+				"editable": true,
+				"bgcolor": "#E0F8EC"
+			},
+			
+			processed: {
+				"visible": false
 			}
 		},
 
@@ -2311,6 +2982,92 @@ function putHighlightOnOneRow(oRow) {
 	fx.putDataIntoCell(oRow, "quote", sQuote);
 };
 
+
+// [3] highlight in 'token_attestations_comparison' table
+
+function highlightAllQuotesInComparison(t){
+	
+	fn.showProcessingMsg(t); 
+	
+	var aAllRowIds = fx.getAllRows(t);
+	
+	aAllRowIds.every(function(){		
+		putHighlightOnOneRowInComparison(this);		
+	});
+	
+	fn.removeProcessingMsg(t);
+	
+};
+
+
+function putHighlightOnOneRowInComparison(oRow) {
+	
+	var sSummerQuote =	fx.getDataFromCellInRow(oRow, "summer_quote");
+	sSummerQuote =	fn.removeHighlight(sSummerQuote);
+	
+	var sQuote =		fx.getDataFromCellInRow(oRow, "quote");
+	sQuote = 		fn.removeHighlight(sQuote);	
+	
+	
+	// get the position pairs (x,y|x,y|...)
+	var sAllPositionPairsOfSummer =	fx.getDataFromCellInRow(oRow, "summer_onsetoffset");
+	var sAllPositionPairs = 		fx.getDataFromCellInRow(oRow, "onsetoffset");
+	
+	if (sAllPositionPairsOfSummer != "-")
+		{
+				
+		// build array of position pairs
+		var aAllPairs = sAllPositionPairsOfSummer.split("\|");		
+		
+		var aNewPairsArray = new Array();
+		for (var i=0; i<aAllPairs.length; i++)
+			{			
+			var onePair = aAllPairs[i].split(",");
+			
+			var iStartIndex = parseInt(onePair[0]);
+			var iEndIndex   = parseInt(onePair[1]);
+			
+			if (iStartIndex<iEndIndex)
+				aNewPairsArray.push( [iStartIndex, iEndIndex] );
+			}
+		
+		// call the highlight function with the whole array of position pairs
+		if (aNewPairsArray.length>0)
+			sSummerQuote = fn.getHighlight(sSummerQuote, aNewPairsArray, "yellow");
+		}
+	
+	if (sAllPositionPairs != "-")
+		{
+				
+		// build array of position pairs
+		var aAllPairs = sAllPositionPairs.split("\|");		
+		
+		var aNewPairsArray = new Array();
+		for (var i=0; i<aAllPairs.length; i++)
+			{			
+			var onePair = aAllPairs[i].split(",");
+			
+			var iStartIndex = parseInt(onePair[0]);
+			var iEndIndex   = parseInt(onePair[1]);
+			
+			if (iStartIndex<iEndIndex)
+				aNewPairsArray.push( [iStartIndex, iEndIndex] );
+			}
+		
+		// call the highlight function with the whole array of position pairs
+		if (aNewPairsArray.length>0)
+			sQuote = fn.getHighlight(sQuote, aNewPairsArray, "yellow");
+		}
+		
+	// put the string back into the table
+	fx.putDataIntoCell(oRow, "summer_quote", sSummerQuote);
+	fx.putDataIntoCell(oRow, "quote", sQuote);
+};
+
+
+
+
+// ----
 
 function highlightGroups(t){
 	

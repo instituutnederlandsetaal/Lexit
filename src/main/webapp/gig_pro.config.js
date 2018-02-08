@@ -8,9 +8,12 @@ oShowOnlyTables = (
 		["lemmata_view", "modified_lemmata_view", "modified_paradigm_view", 
          "lemmata_en_paradigma_view", "nuancerende_opmerkingen"]
 	:
-		(fn.getCurrentUser() == 'tanneke' ? ["anw_online"] : ["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
-		 "surinaams_and_antilliaans_commissions_selections",
-		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "anw_online"] );
+		(fn.getCurrentUser() == 'tanneke' ? 
+			["anw_online"] 
+			: 
+			["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
+			 "surinaams_and_antilliaans_commissions_selections",
+			 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "anw_online", "subsets"] );
 
 
 fn.setProjectTitle("Gigant Molex productie 2016");
@@ -28,6 +31,8 @@ function extractFeature(tag, pattern){
 	}
 };
 
+// do we have stored the names of the subsets in memory?
+var bSubsetsNamesInMemory = false;
 
 //remember chosen parent
 var sChosenParentId = null;
@@ -263,6 +268,85 @@ function setContextMenuOptions(key, options){
 
 // table general settings
 oTableSettingsList = {
+		
+		subsets: {
+			
+			"columns_sorting": {"subset": "asc"},
+			
+			"size": "80%",
+			
+			"button_0":{
+				
+				"name": "Voeg subset toe",
+				"click": function(t){
+					
+					fn.prompt("Voer gegevens in", ["subset", "omschrijving"], ["<geef de subset een naam>", ""], 
+
+							function(){
+								
+								var sSubset = 		fn.getPromptBoxInput("subset");
+								var sDescription =	fn.getPromptBoxInput("omschrijving");
+								
+								// first show the new subset in the table
+								
+								fn.callFunction("api.register_subset", [sSubset, sDescription], function(){
+									
+									fn.goToTheRightPage(t, "subset", sSubset);
+									
+									
+									// then update the pulldown values for the 'lemmata view'
+									
+									updateSubsets();
+									
+								});
+						
+							}
+					);
+					
+				}
+			},
+			
+			"button_1":{
+				
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					if (fx.getNumberOfSelectedRows(t) > 0)
+						{
+						fn.confirm("Let op", "Weet u zeker dat u deze rijen wilt verwijderen?", 
+								
+							// yes we're sure
+								
+							function(){
+							
+								var oSelection = fx.getSelectedRowsFrom(t);
+								oSelection.every(function(){
+									var oCurrentRow = this;
+									var bLastRow = fx.isLastRowOf(oCurrentRow, oSelection);
+									fx.removeFromDatabaseGivenARow(this, function(){
+										if (bLastRow) 
+											{
+											fn.refreshTable(t);
+											
+											// update the subsets available to the lemmata view
+											updateSubsets();
+											}
+									})
+									
+								});
+							}, 
+							
+							// no, cancel!
+							
+							function(){
+								fn.message("OK", "Operatie door gebruiker geannuleerd");
+							})
+						}
+					
+				}
+			}
+
+		},
 		
 		nuancerende_opmerkingen:{
 			
@@ -1467,6 +1551,28 @@ oTableSettingsList = {
 // configuration at column level
 oTableConfigurationList = {
 		
+		subsets: {
+			
+			"subset": {
+				"editable": true,				
+				"editcallback": function(t, n, value){
+					updateSubsets();
+				}
+			},
+			
+			"geplande_uitleverdatum": {
+				"editable": true
+			},
+			
+			"uitgeleverd": {
+				"editable": true
+			},
+			
+			"omschrijving": {
+				"editable": true
+			}
+		},
+		
 		pos_to_rank:{
 			id: {
 				"visible": false,
@@ -1841,6 +1947,23 @@ oTableConfigurationList = {
                 "editable": superUser()
             },
 			
+            "subset": {
+            	"choosefrom": [],
+                "editable": superUser(),
+                "editcallback": function(t, n, value){
+                	fn.callFunction("api.check_subset_is_already_released", [value], function(response){
+                		
+                		if (response["check_subset_is_already_released"] == 't')
+                			{
+                			fn.message("Let op!", "Release '"+value+"' kan niet gekozen worden: deze is al uitgevoerd.");
+                			fn.updateDatabaseGivenANode(n, {"subset": n.revert}, function(){
+                				fn.refreshTable(t);
+                				});
+                			}
+                	});
+                }
+            },
+			
 			// lemma_id
 			"pkid":{				
 				"visible": (fn.getCurrentUser() == 'katrien')
@@ -1873,20 +1996,20 @@ oTableConfigurationList = {
 			},
 			"lemma_gigpos": {				
 				"editable": true,
-				"click": function(t, n){
-					
-					var oCell = fx.getCell(n, "modern_lemma");
-					var lemmaform = fx.getDataFromCell(oCell);
-					
-					fn.showProcessingMsg(t);
-					
-					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
-						
-						fn.removeProcessingMsg(t);
-						fn.message("Resultaat", output["get_biggest_final_matcher"]);
-					});
-					
-				},
+//				"click": function(t, n){
+//					
+//					var oCell = fx.getCell(n, "modern_lemma");
+//					var lemmaform = fx.getDataFromCell(oCell);
+//					
+//					fn.showProcessingMsg(t);
+//					
+//					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
+//						
+//						fn.removeProcessingMsg(t);
+//						fn.message("Resultaat", output["get_biggest_final_matcher"]);
+//					});
+//					
+//				},
 				"editcallback": function(t, n, value){
 					
 					// make sure the menu disappear in IE
@@ -2080,3 +2203,40 @@ function processAwfCheck(sAwfId, response){
 				"is niet goed verlopen. Kopieer de tekst van deze foutmelding en " +
 				"geef die door aan de ontwikkelaar.");
 };
+
+
+
+//make sure have read the subset names
+
+function updateSubsets(){
+	
+	// get the subsets names from the database
+	
+	fn.callFunction("api.get_subsets", [], function(response){
+		
+		var aSuggestionsArr = 
+	          (response["get_subsets"]).split("|");
+		
+		// first array value is the empty, default value
+		var aDefaultChoicePlusSuggestionsArr = ([""]).concat(aSuggestionsArr);
+		
+		// update 'choosefrom' list
+		conf.changeTableConfigValue("lemmata_view", "subset", "choosefrom", aDefaultChoicePlusSuggestionsArr);
+		
+		
+		// update the lemmata-view if it's already loaded,
+		// so the subsets values are available straight away
+		
+		if (fn.tableExists("lemmata_view"))
+			{
+			fn.refreshTable("lemmata_view");
+			}
+		
+		});
+}
+
+$(document).ready(function() {
+	
+	updateSubsets();
+	
+});

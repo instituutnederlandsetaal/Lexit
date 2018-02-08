@@ -7,14 +7,14 @@
 
 
 // this url will be called for the generation of the 'customer result file'
-var sHulKUrlServer = "http://hulk.inl.loc/ws/kick-result/";
+var sHulKUrlServer = 	"http://hulk.inl.loc/ws/kick-result/";
 
 // this url will be called to export the data to the HulK dedicated Gigant-spelling database
 // (not the main Gigant-spelling database, which is kind of holy ground!)
-var sHulKExportUrl = "http://hulk.inl.loc/ws/kick-export/";
+var sHulKExportUrl = 	"http://hulk.inl.loc/ws/kick-export/";
 
 // this url will deliver us autocomplete information
-var sAutoCompleteUrl = "http://hulk.inl.loc/ws/autocomplete-lemmata/";
+var sAutoCompleteUrl =	"http://hulk.inl.loc/ws/autocomplete-lemmata/";
 
 
 
@@ -49,6 +49,7 @@ fn.setProjectTitle("HulK", "#088A08");
 // Autocomplete configuration
 // see: http://stackoverflow.com/questions/5077409/what-does-autocomplete-request-server-response-look-like
 //      http://stackoverflow.com/questions/18677536/jeditable-and-jquery-ui-autocomplete
+
 var sAutoCompleteSelector = ".correction";
 
 $(document).on(
@@ -122,8 +123,9 @@ oTableSettingsList = {
 				conf.changeTableConfigValue(fn.getTableName(t), "document", "keepfilter", false);
 				
 				fn.addFilters(t, 
-						{"hulk_oordeel": (bToonAlleHulkOordelen ? "" : "^UNK"),
-						 "document": sDefaultDocumentWaarde
+						{
+						"hulk_oordeel":	(bToonAlleHulkOordelen ? "" : "^UNK"),
+						"document": 	sDefaultDocumentWaarde
 						 }
 						);				
 			},
@@ -166,7 +168,8 @@ oTableSettingsList = {
 						
 						fn.refreshTable(t, function(){
 							
-							var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+							var oFirstRow = 	fx.getFirstRowFrom(t);
+							var sDocumentId =	fx.getDataFromCellInRow(oFirstRow, "document_id");;
 
 							fn.showProcessingMsg(t);
 							var sOriginalColor = fn.getCustomButtonCss(t, 0, "background-color");
@@ -224,19 +227,18 @@ oTableSettingsList = {
 				"textcolor": "black",
 				"click": function(t){
 					
-					var aRow = fn.getSelectedRowsFrom(t);					
-					
-					if (typeof aRow == 'undefined' || aRow == null || fn.getNumberOfSelectedRows(t)>1)
+					if ( fx.getNumberOfSelectedRows(t)>1 )
 						{
 						fn.message("Let op", "U moet exact één rij selecteren, niet meer, niet minder!");
 						}
 					else
 						{
-						var nRow = aRow[0];
-						var sHulkableWordId = fn.getDataFromCellNamed(t, nRow, "hulkable_word_id");
-						var spellingVersionId = fn.getDataFromCellNamed(t, nRow, "spelling_version_id");
+						var oRow = 				fx.getFirstSelectedRowFrom(t);
+						
+						var sHulkableWordId = 	fx.getDataFromCellInRow(oRow, "hulkable_word_id");
+						var spellingVersionId =	fx.getDataFromCellInRow(oRow, "spelling_version_id");
 												
-						fn.callFunction("duplicateRow", 
+						fn.callFunction("duplicaterow", 
 								[sHulkableWordId, spellingVersionId], 
 								function(){ 
 									fn.refreshTable(t);
@@ -252,18 +254,16 @@ oTableSettingsList = {
 				"click": function(t){
 					
 					fn.confirm("Let op", "Weet u het zeker? Dit kan niet ongedaan worden gemaakt.",
-							function(answer){
-						
-						var aRows = fn.getSelectedRowsFrom(t);
-						if (answer)
-							{
+							
+						function(){
+					
+							var oRows = fx.getSelectedRowsFrom(t)
 							
 							var bRemoveIsAllowed = true;
-							aRows.each(function(){
+							
+							oRows.every(function(){
 								
-								var nCurrentRow = this;
-								
-								var bAddedByUser = fn.getDataFromCellNamed(t, nCurrentRow, "added_by_editor");
+								var bAddedByUser = fx.getDataFromCellInRow(this, "added_by_editor");
 								if (bAddedByUser == 'f' || bAddedByUser == false)
 									bRemoveIsAllowed = false;
 								
@@ -275,11 +275,9 @@ oTableSettingsList = {
 								}
 							else
 								{
-								aRows.each(function(){
+								oRows.every(function(){
 									
-									var nCurrentRow = this;
-									
-									var sJudgementId = fn.getDataFromCellNamed(t, nCurrentRow, "judgement_id");
+									var sJudgementId = fx.getDataFromCellInRow(this, "judgement_id");
 																	
 									fn.removeFromDatabaseGivenFieldValues("judgements", 
 											{
@@ -291,10 +289,15 @@ oTableSettingsList = {
 
 									});
 								}
-							
-							}
+					
+						},
 						
-					});
+						function(){
+							
+							fn.message("OK", "Operatie geannuleerd door gebruiker.");
+							
+						}
+					);
 					
 				}
 			}
@@ -376,8 +379,8 @@ oTableConfigurationList = {
 				//"sortable": false,
 				"colsort": "asc",				// sort #1
 				"click": function(t, n){
-					var sLemma = fn.getDataFromCellNode(t, n);
-					fn.putDataIntoCell(t, fn.getRowNode(n), "correction", sLemma);
+					var sLemma = fn.getDataFromCellNode(n);
+					fn.putDataIntoCellNode(fn.getRowNode(n), "correction", sLemma);
 				},
 				"cell_tooltip": "Klik om te kopiëren naar 'correction'"
 			},
@@ -559,17 +562,19 @@ function alterColorOfRowsGeneratedByUser(t){
 
 	// get manually created row, and give those a different color
 	
-	var aRows = fn.getAllRowsWhere(t, {"added_by_editor": 't'});
+	var oRows = fx.getAllRowsWhere(t, {"added_by_editor": 't'});
+	
+	
 		
-	aRows.each(function(){
+	oRows.every(function(){
 		
-		var nNode = this;
+		var nNode = fx.getNode(this);
 		aCellsSelector = $(nNode).find("td");
 		
 		var aColumns = mt.getListOfVisibleColumnsOf(fn.getTableName(t));
 		for (var i=0; i<aColumns.length; i++)
 			{
-			var eCell = fn.getCellElement(t, nNode, aColumns[i]);
+			var eCell = fn.getCellInRowNode(nNode, aColumns[i]);
 			eCell.css("opacity", "0.5");
 			}
 		
@@ -588,7 +593,7 @@ function showStatistics(t){
 	
 	// Get the documentId
 	// But do that only if some document was chosen. If no choice was made, show a warning instead
-	var sDocumentChoice = fn.getFilters(t)["document"];
+	var sDocumentChoice = 	fn.getFilters(t)["document"];
 	
 	if (sDocumentChoice == sDefaultDocumentWaarde || sDocumentChoice == null)
 		{
@@ -596,15 +601,21 @@ function showStatistics(t){
 		}
 	else
 		{
-		var documentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+		// check if the table is not empty, otherwise we would get an error 
+		if ( fn.getNumberOfVisibleRows(t) > 0)
+			{
+			var oFirstRow = 	fx.getFirstRowFrom(t);
+			var documentId = 	fx.getDataFromCellInRow(oFirstRow, "document_id"); 
+			
+			if (documentId != '')
+				fn.callFunction("getstatistics", [documentId], 
+						function(response){
+					
+					showStatisticsInHeader( response["getstatistics"] );
+								
+					});
+			}
 		
-		if (documentId != '')
-			fn.callFunction("getstatistics", [documentId], 
-					function(){
-				
-				showStatisticsInHeader(fn.getFunctionOutput()[0]);
-							
-				});
 		}
 };
 
@@ -711,7 +722,9 @@ function doExport(t){
 		
 		fn.refreshTable(t, function(){
 			
-			var sDocumentId = fn.getDataFromCellNamed(t, fn.getAllRows(t)[0], "document_id");
+			var oFirstRow = 	fx.getFirstRowFrom(t);
+			var sDocumentId = 	fx.getDataFromCellInRow(oFirstRow, "document_id");
+			//var sDocumentId = fn.getDataFromCellInRowNode(fn.getAllRowNodes(t)[0], "document_id");
 			fn.showProcessingMsg(t);
 			
 			$.ajax({
@@ -749,8 +762,8 @@ function doExport(t){
 function buildDocumentSelector(t){
 	
 	// get the current document filter setting (which doc was already chosen?)
-	var sTableName = fn.getTableName(t);
-	var sSelectedDocument = fn.getFilters(t)["document"];
+	var sTableName = 		fn.getTableName(t);
+	var sSelectedDocument =	fn.getFilters(t)["document"];
 	
 	
 	// (re)build the document selector
@@ -762,9 +775,9 @@ function buildDocumentSelector(t){
 			.css("top", "-105px")
 			);
 	
-	var sTableName = fn.getTableName(t);
-	var oTableConfig = conf.getTableConfig(sTableName);
-	var oColumnConfig = conf.getColumnConfig(oTableConfig, "document");
+	var sTableName = 	fn.getTableName(t);
+	var oTableConfig = 	conf.getTableConfig(sTableName);
+	var oColumnConfig =	conf.getColumnConfig(oTableConfig, "document");
 	
 	var aListOfOptions = conf.getSelectionBox(oColumnConfig);
 

@@ -10,7 +10,7 @@ oShowOnlyTables = (
 	:
 		["lemmata", "lemmata_view", "modified_lemmata_view", "modified_paradigm_view", "lemmata_en_paradigma_view",
 		 "surinaams_and_antilliaans_commissions_selections",
-		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "test2"];
+		 "export_versions", "nuancerende_opmerkingen", "pos_to_rank", "test2", "subsets"];
 
 
 
@@ -28,6 +28,8 @@ function extractFeature(tag, pattern){
 	}
 };
 
+// do we have stored the names of the subsets in memory?
+var bSubsetsNamesInMemory = false;
 
 //remember chosen parent
 var sChosenParentId = null;
@@ -262,11 +264,88 @@ function setContextMenuOptions(key, options){
 
 
 // table general settings
-oTableSettingsList = {
+oTableSettingsList = {		
+		
+		subsets: {
+			
+			"columns_sorting": {"subset": "asc"},
+			
+			"size": "80%",
+			
+			"button_0":{
+				
+				"name": "Voeg subset toe",
+				"click": function(t){
+					
+					fn.prompt("Voer gegevens in", ["subset", "omschrijving"], ["<geef de subset een naam>", ""], 
+
+							function(){
+								
+								var sSubset = 		fn.getPromptBoxInput("subset");
+								var sDescription =	fn.getPromptBoxInput("omschrijving");
+								
+								// first show the new subset in the table
+								
+								fn.callFunction("api.register_subset", [sSubset, sDescription], function(){
+									
+									fn.goToTheRightPage(t, "subset", sSubset);
+									
+									
+									// then update the pulldown values for the 'lemmata view'
+									
+									updateSubsets();
+									
+								});
+						
+							}
+					);
+					
+				}
+			},
+			
+			"button_1":{
+				
+				"name": "Verwijder selectie",
+				"click": function(t){
+					
+					if (fx.getNumberOfSelectedRows(t) > 0)
+						{
+						fn.confirm("Let op", "Weet u zeker dat u deze rijen wilt verwijderen?", 
+								
+							// yes we're sure
+								
+							function(){
+							
+								var oSelection = fx.getSelectedRowsFrom(t);
+								oSelection.every(function(){
+									var oCurrentRow = this;
+									var bLastRow = fx.isLastRowOf(oCurrentRow, oSelection);
+									fx.removeFromDatabaseGivenARow(this, function(){
+										if (bLastRow) 
+											{
+											fn.refreshTable(t);
+											
+											// update the subsets available to the lemmata view
+											updateSubsets();
+											}
+									})
+									
+								});
+							}, 
+							
+							// no, cancel!
+							
+							function(){
+								fn.message("OK", "Operatie door gebruiker geannuleerd");
+							})
+						}
+					
+				}
+			}
+
+		},
 		
 		nuancerende_opmerkingen:{
-			
-			"group": "Diversen",
 			
 			"size": "80%",
 							
@@ -324,8 +403,6 @@ oTableSettingsList = {
 		},
 		
 		export_versions:{
-			
-			"group": "Niet vergeten",
 			
 			"size": "80%",
 			
@@ -890,11 +967,7 @@ oTableSettingsList = {
 		
 		modified_lemmata_view: {
 			
-			"info": "Log van de bijgewerkte lemmata",
-			
-			"creation_date": "23 feb 2017",
-			
-			"group": "Gewone views",
+			"group": "log",
 			
 			"button_0":{
 				"name": "Lemma en paradigma herstellen",
@@ -924,7 +997,7 @@ oTableSettingsList = {
 		
 		modified_paradigm_view:{
 			
-			"group": "Gewone views",
+			"group": "log",
 			
 			"button_0":{
 				"name": "Woordvorm herstellen",
@@ -954,12 +1027,6 @@ oTableSettingsList = {
 
 		lemmata_view: {
 			
-			"group": "Gewone views",
-			
-			"info": "De enige echte lemmata-tabel",
-			
-			"creation_date": "24 feb 2017",
-			
 			"prereset_callback": function(confTable){
 				
 				//fn.addFilters(confTable, {"homo": ""});
@@ -973,8 +1040,7 @@ oTableSettingsList = {
 			
 			"repeat_callback": true,
 			
-			"callback": function(t){				
-				
+			"callback": function(t){	
 				
 				var sTableName = fn.getTableName(t);
 				
@@ -1511,9 +1577,6 @@ oTableSettingsList = {
 		},
 		
 		pos_to_rank:{
-			
-			"group": "Diversen",
-			
 			"size": "60%"
 		}
 		
@@ -1524,6 +1587,28 @@ oTableSettingsList = {
 
 // configuration at column level
 oTableConfigurationList = {
+		
+		subsets: {
+			
+			"subset": {
+				"editable": true,				
+				"editcallback": function(t, n, value){
+					updateSubsets();
+				}
+			},
+			
+			"geplande_uitleverdatum": {
+				"editable": true
+			},
+			
+			"uitgeleverd": {
+				"editable": true
+			},
+			
+			"omschrijving": {
+				"editable": true
+			}
+		},
 		
 		pos_to_rank:{
 			id: {
@@ -1895,6 +1980,16 @@ oTableConfigurationList = {
 
 		lemmata_view: {
 			
+			
+            "source": {
+                "editable": superUser()
+            },
+            
+            "subset": {
+            	"choosefrom": ["", "app", "noot", "mies"],
+                "editable": superUser()
+            },
+			
 			// lemma_id
 			"pkid":{				
 				"visible": (fn.getCurrentUser() == 'katrien')
@@ -1927,20 +2022,20 @@ oTableConfigurationList = {
 			},
 			"lemma_gigpos": {				
 				"editable": true,
-				"click": function(t, n){
-					
-					var oCell = fx.getCell(n, "modern_lemma");
-					var lemmaform = fx.getDataFromCell(oCell);
-					
-					fn.showProcessingMsg(t);
-					
-					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
-						
-						fn.removeProcessingMsg(t);
-						fn.message("Resultaat", output["get_biggest_final_matcher"]);
-					});
-					
-				},
+//				"click": function(t, n){
+//					
+//					var oCell = fx.getCell(n, "modern_lemma");
+//					var lemmaform = fx.getDataFromCell(oCell);
+//					
+//					fn.showProcessingMsg(t);
+//					
+//					fn.callFunction("api.get_biggest_final_matcher", [lemmaform], function(output){
+//						
+//						fn.removeProcessingMsg(t);
+//						fn.message("Resultaat", output["get_biggest_final_matcher"]);
+//					});
+//					
+//				},
 				"editcallback": function(t, n, value){
 					
 					// make sure the menu disappear in IE
@@ -2015,9 +2110,6 @@ oTableConfigurationList = {
 			"toon_paradigma":{				
 				"button": "Paradigma",
 				"click": function(t, n){	
-					
-					
-					//@@@
 					
 					var lemma_id = fn.getDataFromSiblingNode(n, "pkid");
 					
@@ -2127,14 +2219,6 @@ oTableConfigurationList = {
 };
 
 
-function buildForm(formName){ 
-	
-	var formElement = $("<div><\div>").attr("id", formName); 
-	
-};
-
-
-
 // give an error message, if the comparison between the analyzed_wordforms record
 // and the lemma_and_paradigma_view record gives a mismatch
 function processAwfCheck(sAwfId, response){
@@ -2145,3 +2229,40 @@ function processAwfCheck(sAwfId, response){
 				"is niet goed verlopen. Kopieer de tekst van deze foutmelding en " +
 				"geef die door aan de ontwikkelaar.");
 };
+
+
+
+//make sure have read the subset names
+
+function updateSubsets(){
+	
+	// get the subsets names from the database
+	
+	fn.callFunction("api.get_subsets", [], function(response){
+		
+		var aSuggestionsArr = 
+	          (response["get_subsets"]).split("|");
+		
+		// first array value is the empty, default value
+		var aDefaultChoicePlusSuggestionsArr = ([""]).concat(aSuggestionsArr);
+		
+		// update 'choosefrom' list
+		conf.changeTableConfigValue("lemmata_view", "subset", "choosefrom", aDefaultChoicePlusSuggestionsArr);
+		
+		
+		// update the lemmata-view if it's already loaded,
+		// so the subsets values are available straight away
+		
+		if (fn.tableExists("lemmata_view"))
+			{
+			fn.refreshTable("lemmata_view");
+			}
+		
+		});
+}
+
+$(document).ready(function() {
+	
+	updateSubsets();
+	
+});

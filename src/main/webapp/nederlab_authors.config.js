@@ -20,7 +20,42 @@ oShowOnlyTables = [
                    "tmp_werk_uitgave",
                    "tmp_werk_herdruk",
                    "tmp_audio_werk",
-                   "tmp_video_werk",
+                   "tmp_video_werk",                   
+                   "tmp_herdruk_werk_auteurs",
+                   "tmp_herdruk_werk_editeurs",
+                   "tmp_herdruk_werk_auteurs_editeurs",
+                   
+                   "tmp_herdruk_uitgave_werk",
+                   "tmp_uitgave_uitgave_werk",
+                   "tmp_herdruk_werk_werk",
+                   "tmp_herdruk_herdruk_werk",
+                   "tmp_uitgave_herdruk_werk",
+                   "tmp_uitgave_werk_werk",
+                   "tmp_herdruk_uitgave_uitgave",
+                   "tmp_werk_uitgave_werk",
+                   "tmp_werk_herdruk_werk",
+                   "tmp_uitgave_uitgave_uitgave",
+                   "tmp_uitgave_herdruk_uitgave",
+                   "tmp_herdruk_werk_uitgave",
+                   "tmp_herdruk_uitgave_herdruk",
+                   "tmp_werk_werk_werk",
+                   "tmp_herdruk_herdruk_uitgave",
+                   "tmp_uitgave_werk_herdruk",
+                   "tmp_herdruk_werk_herdruk",
+                   "tmp_herdruk_uitgave_uitgave_werk",
+                   "tmp_herdruk_werk_uitgave_werk",
+                   "tmp_uitgave_herdruk_uitgave_werk",
+                   "tmp_uitgave_uitgave_uitgave_werk",
+                   "tmp_uitgave_uitgave_werk_werk",
+                   "tmp_uitgave_werk_herdruk_werk",
+                   "tmp_uitgave_herdruk_werk_werk",
+                   "tmp_herdruk_uitgave_herdruk_werk",
+                   "tmp_herdruk_uitgave_werk_werk",
+                   "tmp_herdruk_uitgave_herdruk_uitgave",
+                   "tmp_herdruk_uitgave_uitgave_uitgave",
+                   "tmp_herdruk_herdruk_uitgave_werk",
+                   "tmp_herdruk_werk_herdruk_werk",
+                   "tmp_herdruk_uitgave_herdruk_uitgave_werk",
                    
                    
                    // klussen
@@ -74,11 +109,109 @@ function updateYearOfDeathLabel(t, n, yearOfDeathMin, yearOfDeathMax, yearOfDeat
 }
 
 
-var pairs_comparison = {
+var pairs_comparisonSettings = function(configTableName){
+	
+	var aColumnOrder = null;
+	
+	var aSorting = (configTableName=="tmp_uitgave_werk") ?
+			{"parent_id": "asc", "combi_id": "asc", "genea": "desc"} :
+			{"combi_id": "asc", "genea": "desc"};
+	
+	
+	var aSplitConfigTableName = configTableName.split("_");
+	
+	// views with 2 or more layers (like tmp_herdruk_uitgave_werk)
+	
+	if ( aSplitConfigTableName.length >= 3 
+			
+//			&&	
+//			
+//			configTableName !="tmp_herdruk_werk_auteurs" &&
+//			configTableName !="tmp_herdruk_werk_editeurs" &&
+//			configTableName !="tmp_herdruk_werk_auteurs_editeurs"
+	)
+		{
+		var aColOrderPart1 = ["pkid", "combi_id", "cat", "genea", 
+		           			"witnessYearMin", "witnessYearMax", "witnessYearApprox", "editor", 
+		        			"ergens_textdata"];
+		
+		var aColOrderPart2 = (configTableName=="tmp_uitgave_werk") ? 
+				["parent_id"] : [];
+		
+		var aColOrderPart3 = ["INT_notes", 
+			"author", "howmany", "siblings", "nederlabID", "editorialCode", "versionID", "sourceRef", 
+			"sourceCollection", "title", "subtitle", "category", 
+			"yearOfPublicationMin", "yearOfPublicationMax", "yearOfPublicationApprox", 
+			"yearOfPublicationLabel", 
+			"edition", "numberOfPages", "numberOfWords", "primaryLanguage", "isTranslation", 
+			"characterEncoding", "codingStandard", "textQuality", "processingMethod", 
+			"autopsyPerformed", "seriesTitleID", "textAvailable", 
+			"ingestTime", "updateTime", "lastEditedBy", "modificationTime", 
+			"editorialNote", "isThesaurusElement", "inNederlabAs", 
+			"permissionWithdrawn", "textYearMin", "textYearMax", "textYearApprox", //"unique_id"
+			"changeLog"];
+		
+		// special columns in middle part
+		
+		for (var i=1; i<aSplitConfigTableName.length; i++)
+			{
+			var colName = aSplitConfigTableName[i] + '_has_textdata';
+			
+			// take of doubles...
+			var j = 2;
+			while ( aColOrderPart2.indexOf(colName) >-1)
+				{
+				colName = aSplitConfigTableName[i] + '_has_textdata' + j;
+				j++;
+				}			
+			
+			// add the column name
+			aColOrderPart2.push(colName);
+			}		
+		
+		aColumnOrder = ( aColOrderPart1.concat(aColOrderPart2) ).concat(aColOrderPart3);
+		
+		}
+	
+
+	
+	
+			
+//	if (aColumnOrder == null)
+//		{
+//		if ( 	configTableName == "tmp_herdruk_werk_auteurs" 
+//			|| 	configTableName == "tmp_herdruk_werk_editeurs" 
+//			|| 	configTableName == "tmp_herdruk_werk_auteurs_editeurs")
+//			{
+//			aSorting = {"combi_id": "asc", "genea": "desc"};
+//			aColumnOrder = ["combi_id", "cat", "genea", 
+//	    			"witnessYearMin", "witnessYearMax", "witnessYearApprox", 
+//	    			"ergens_textdata", "herdruk_has_textdata", "work_has_textdata", "opmerking",
+//	    			"author","nederlabID", "editorialCode", "versionID", "sourceRef", 
+//	    			"sourceCollection", "title", "subtitle", "category", 
+//	    			"yearOfPublicationMin", "yearOfPublicationMax", "yearOfPublicationApprox", 
+//	    			"yearOfPublicationLabel", 
+//	    			"edition", "numberOfPages", "numberOfWords", "primaryLanguage", "isTranslation", 
+//	    			"characterEncoding", "codingStandard", "textQuality", "processingMethod", 
+//	    			"autopsyPerformed", "seriesTitleID", "textAvailable", 
+//	    			"ingestTime", "updateTime", "lastEditedBy", "modificationTime", 
+//	    			"editorialNote", "isThesaurusElement", "inNederlabAs", 
+//				"permissionWithdrawn", "textYearMin", "textYearMax", "textYearApprox", "unique_id"];
+//			}
+//
+//		
+//		}
+	
+	
+	//console.log(aColumnOrder);
+	
+	return {
 		
 		"group": "Vergelijking",
 		
-		"columns_sorting": {"combi_id": "asc", "cat": "asc"},
+		"columns_order": aColumnOrder,
+		
+		"columns_sorting": aSorting,
 		
 		"callback": function(t){
 			
@@ -86,6 +219,10 @@ var pairs_comparison = {
 			var sLastRowId = "";
 			var oLastRow = null;
 			var sBackGroundColor = "red";
+			
+			// don't run this code for this table
+//			if (sTableName == "tmp_uitgave_werk")
+//				return;
 			
 			(fx.getAllRows(t)).every(function(){
 				
@@ -140,18 +277,181 @@ var pairs_comparison = {
 				oLastRow = 		this;
 			});
 			
+			
+			// change column titles to make them shorter
+			var aColumns = mt.getListOfColumnsOf(sTableName);
+			for (var i=0; i<aColumns.length; i++)
+				{
+				if (aColumns[i] == 'yearOfPublicationMin')
+					$( t.column( i ).header() ).text("pubYmin");
+				if (aColumns[i] == 'yearOfPublicationMax')
+					$( t.column( i ).header() ).text("pubYmax");
+				if (aColumns[i] == 'yearOfPublicationApprox')
+					$( t.column( i ).header() ).text("pubYapp");
+				
+				if (aColumns[i] == 'witnessYearMin')
+					$( t.column( i ).header() ).text("witYmin");
+				if (aColumns[i] == 'witnessYearMax')
+					$( t.column( i ).header() ).text("witYmax");
+				if (aColumns[i] == 'witnessYearApprox')
+					$( t.column( i ).header() ).text("witYapp");
+				
+				if (aColumns[i] == 'textYearMin')
+					$( t.column( i ).header() ).text("txtYmin");
+				if (aColumns[i] == 'textYearMax')
+					$( t.column( i ).header() ).text("txtYmax");
+				if (aColumns[i] == 'textYearApprox')
+					$( t.column( i ).header() ).text("txtYapp");
+				}
+			
+			
 		},
 		
-		"repeat_callback": true
+		"repeat_callback": true	
 	};
+	
+	
+};
 
 
 
 var pairs_comparisonConfig = {
 		
-		"opmerking": {
+//		"opmerking": {
+//			"editable": true,
+//			"bgcolor": "#E0F8EC"
+//		},
+				
+		"pkid": {
+			"visible": false
+		},
+				
+		"witnessYearMin": {
 			"editable": true,
-			"bgcolor": "#E0F8EC"
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"witnessYearMin": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},		
+		"witnessYearMax": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"witnessYearMax": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},		
+		"witnessYearApprox": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"witnessYearApprox": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		
+		
+		"yearOfPublicationMin": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"yearOfPublicationMin": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		"yearOfPublicationMax": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"yearOfPublicationMax": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		"yearOfPublicationApprox": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"yearOfPublicationApprox": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		
+		
+		"textYearMin": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"textYearMin": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		"textYearMax": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"textYearMax": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		"textYearApprox": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editfunc": function(t, n, value){
+				if (value=='')
+					value = null;
+				fn.updateDatabaseGivenANode(n, {"textYearApprox": value}, function(){
+						fn.refreshTable(t);
+					});
+			}
+		},
+		
+		
+		"howmany": {
+			
+			"click": function(t, n){				
+				var sCombiIds = fn.getDataFromSiblingNode(n, "siblings");
+				fn.callDatabaseInNewTab(fn.getTableName(t), {"combi_id": "^("+sCombiIds+")$"}, {"displaylength": 50});
+			}
+		},
+		"siblings": {
+			"visible": false
+		},
+		
+		
+		"INT_notes": {
+			"editable": true,
+			"bgcolor": "#E0F8EC",
+			"editcallback": function(t, n, value){
+				fn.refreshTable(t);
+			}
+		}, 
+		"changeLog":{
+			"visible": false
 		},
 		
 		"sourceCollection": {
@@ -177,8 +477,8 @@ var pairs_comparisonConfig = {
 		"nederlabID": {
 			"click": function(t, n){
 				var sId = fn.getDataFromCellNode(n);
-				fn.callDatabase("quickview_titles", {"nederlabID": sId}, function(){
-					fn.scrollToTable("quickview_titles");
+				fn.callDatabase("NLTitle", {"nederlabID": sId}, function(){
+					fn.scrollToTable("NLTitle");
 				});
 			}
 		}
@@ -215,7 +515,35 @@ oTableSettingsList = {
 				"personNameID":"asc"
 			},
 			
+			
 			"button_0":{
+				
+				"name": "Voeg nieuwe persoon toe",
+				"click": function(t){
+					
+					fn.confirm("Zeker weten?", "Weet u het zeker?",
+							
+							// create new person and send the user to the new record
+							function(){
+								fn.callFunction("api.create_new_person", [], function(response){
+									
+									fn.clearAllFilters(t);
+									fn.callDatabase(t, {"personID": response["create_new_person"]},
+											function(){
+												fn.message("Let op", "De tabel toont nu een nieuwe lege record.<BR>" +
+														"Vul daar nu alle gegevens in (naam, enz).");
+									});
+									
+								});
+							}, 
+							function(){
+								fn.message("OK", "Toevoeging geannuleerd");
+							});
+					
+				}
+			},
+			
+			"button_1":{
 				"name": "Voeg naamvariant toe",
 				"click": function(t){
 					
@@ -230,14 +558,16 @@ oTableSettingsList = {
 						var sPersonId = fx.getDataFromCellInRow(oCurrentRow, "personID");
 						
 						fn.callFunction("api.add_name_variant", [sPersonId], function(){
-							fn.refreshTable(t);
+							
+							fn.clearAllFilters(t);
+							fn.callDatabase(t, {"personID": sPersonId});
 							});
 						}
 					
 				}
 			},
 			
-			"button_1":{
+			"button_2":{
 				"name": "Verwijder selectie",
 				"click": function(t){
 					
@@ -316,7 +646,9 @@ oTableSettingsList = {
 		
 		"klus__werken_geen_1ste_druk": {
 			
-			"group": "Klussen"
+			"group": "Klussen", 
+			
+			"processed_date": "4 okt 2017"
 		}		,
 		"klus__herdruk_jonger_dan_tekst": {
 			
@@ -331,25 +663,105 @@ oTableSettingsList = {
 		
 		// vergelijkingen
 		
-		"tmp_uitgave_werk": pairs_comparison,
+		"tmp_uitgave_werk": pairs_comparisonSettings("tmp_uitgave_werk"),
 		
-		"tmp_werk_werk": pairs_comparison,
+		"tmp_werk_werk": pairs_comparisonSettings("tmp_werk_werk"),
 		
-		"tmp_herdruk_uitgave": pairs_comparison,
+		"tmp_herdruk_uitgave": pairs_comparisonSettings("tmp_herdruk_uitgave"),
 		
-		"tmp_herdruk_herdruk": pairs_comparison,
+		"tmp_herdruk_herdruk": pairs_comparisonSettings("tmp_herdruk_herdruk"),
 		
-		"tmp_uitgave_uitgave": pairs_comparison,
+		"tmp_uitgave_uitgave": pairs_comparisonSettings("tmp_uitgave_uitgave"),
 		
-		"tmp_uitgave_herdruk": pairs_comparison,
+		"tmp_uitgave_herdruk": pairs_comparisonSettings("tmp_uitgave_herdruk"),
 		
-		"tmp_werk_uitgave": pairs_comparison,
+		"tmp_werk_uitgave": pairs_comparisonSettings("tmp_werk_uitgave"),
 		
-		"tmp_werk_herdruk": pairs_comparison,
+		"tmp_werk_herdruk": pairs_comparisonSettings("tmp_werk_herdruk"),
 		
-		"tmp_audio_werk": pairs_comparison,
+		"tmp_audio_werk": pairs_comparisonSettings("tmp_audio_werk"),
 		
-		"tmp_video_werk": pairs_comparison
+		"tmp_video_werk": pairs_comparisonSettings("tmp_video_werk"),
+		
+		"tmp_herdruk_werk_auteurs": {
+			
+			"group": "Vergelijking", 			
+			"processed_date": "11 okt 2017"
+		},
+		
+		"tmp_herdruk_werk_editeurs": {
+			
+			"group": "Vergelijking", 			
+			"processed_date": "11 okt 2017"
+		},
+		
+		"tmp_herdruk_werk_auteurs_editeurs": {
+			
+			"group": "Vergelijking", 			
+			"processed_date": "11 okt 2017"
+		},
+		
+		"tmp_herdruk_uitgave_werk": pairs_comparisonSettings("tmp_herdruk_uitgave_werk"),
+		
+		"tmp_uitgave_uitgave_werk": pairs_comparisonSettings("tmp_uitgave_uitgave_werk"),
+		
+		"tmp_herdruk_werk_werk": pairs_comparisonSettings("tmp_herdruk_werk_werk"),
+		
+		"tmp_herdruk_herdruk_werk": pairs_comparisonSettings("tmp_herdruk_herdruk_werk"),
+		
+		"tmp_uitgave_herdruk_werk": pairs_comparisonSettings("tmp_uitgave_herdruk_werk"),
+		
+		"tmp_uitgave_werk_werk": pairs_comparisonSettings("tmp_uitgave_werk_werk"),
+		
+		"tmp_herdruk_uitgave_uitgave": pairs_comparisonSettings("tmp_herdruk_uitgave_uitgave"),
+		
+		"tmp_werk_uitgave_werk": pairs_comparisonSettings("tmp_werk_uitgave_werk"),
+		
+		"tmp_werk_herdruk_werk": pairs_comparisonSettings("tmp_werk_herdruk_werk"),
+		
+		"tmp_uitgave_uitgave_uitgave": pairs_comparisonSettings("tmp_uitgave_uitgave_uitgave"),
+		
+		"tmp_uitgave_herdruk_uitgave": pairs_comparisonSettings("tmp_uitgave_herdruk_uitgave"),
+		
+		"tmp_herdruk_werk_uitgave": pairs_comparisonSettings("tmp_herdruk_werk_uitgave"),
+		
+		"tmp_herdruk_uitgave_herdruk": pairs_comparisonSettings("tmp_herdruk_uitgave_herdruk"),
+		
+		"tmp_werk_werk_werk": pairs_comparisonSettings("tmp_werk_werk_werk"),
+		
+		"tmp_herdruk_herdruk_uitgave": pairs_comparisonSettings("tmp_herdruk_herdruk_uitgave"),
+		
+		"tmp_uitgave_werk_herdruk": pairs_comparisonSettings("tmp_uitgave_werk_herdruk"),
+		
+		"tmp_herdruk_werk_herdruk": pairs_comparisonSettings("tmp_herdruk_werk_herdruk"),
+		
+		"tmp_herdruk_uitgave_uitgave_werk": pairs_comparisonSettings("tmp_herdruk_uitgave_uitgave_werk"),
+		
+		"tmp_herdruk_werk_uitgave_werk": pairs_comparisonSettings("tmp_herdruk_werk_uitgave_werk"),
+		
+		"tmp_uitgave_herdruk_uitgave_werk": pairs_comparisonSettings("tmp_uitgave_herdruk_uitgave_werk"),
+		
+		"tmp_uitgave_uitgave_uitgave_werk": pairs_comparisonSettings("tmp_uitgave_uitgave_uitgave_werk"),
+		
+		"tmp_uitgave_uitgave_werk_werk": pairs_comparisonSettings("tmp_uitgave_uitgave_werk_werk"),
+		
+		"tmp_uitgave_werk_herdruk_werk": pairs_comparisonSettings("tmp_uitgave_werk_herdruk_werk"),
+		
+		"tmp_uitgave_herdruk_werk_werk": pairs_comparisonSettings("tmp_uitgave_herdruk_werk_werk"),
+		
+		"tmp_herdruk_uitgave_herdruk_werk": pairs_comparisonSettings("tmp_herdruk_uitgave_herdruk_werk"),
+		
+		"tmp_herdruk_uitgave_werk_werk": pairs_comparisonSettings("tmp_herdruk_uitgave_werk_werk"),
+		
+		"tmp_herdruk_uitgave_herdruk_uitgave": pairs_comparisonSettings("tmp_herdruk_uitgave_herdruk_uitgave"),
+		
+		"tmp_herdruk_uitgave_uitgave_uitgave": pairs_comparisonSettings("tmp_herdruk_uitgave_uitgave_uitgave"),
+		
+		"tmp_herdruk_herdruk_uitgave_werk": pairs_comparisonSettings("tmp_herdruk_herdruk_uitgave_werk"),
+		
+		"tmp_herdruk_werk_herdruk_werk": pairs_comparisonSettings("tmp_herdruk_werk_herdruk_werk"),
+		
+		"tmp_herdruk_uitgave_herdruk_uitgave_werk": pairs_comparisonSettings("tmp_herdruk_uitgave_herdruk_uitgave_werk"),
 };
 
 
@@ -368,6 +780,8 @@ oTableConfigurationList = {
 		
 		"tmp_uitgave_herdruk": pairs_comparisonConfig,
 		
+		"tmp_uitgave_uitgave": pairs_comparisonConfig,
+		
 		"tmp_werk_uitgave": pairs_comparisonConfig,
 		
 		"tmp_werk_herdruk": pairs_comparisonConfig,
@@ -375,6 +789,74 @@ oTableConfigurationList = {
 		"tmp_audio_werk": pairs_comparisonConfig,
 		
 		"tmp_video_werk": pairs_comparisonConfig,
+		
+		//"tmp_herdruk_werk_auteurs": pairs_comparisonConfig,
+		
+		//"tmp_herdruk_werk_editeurs": pairs_comparisonConfig,
+		
+		//"tmp_herdruk_werk_auteurs_editeurs": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_uitgave": pairs_comparisonConfig,
+		
+		"tmp_werk_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_werk_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_uitgave_uitgave": pairs_comparisonConfig,
+		
+		"tmp_uitgave_herdruk_uitgave": pairs_comparisonConfig,
+		
+		"tmp_herdruk_werk_uitgave": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_herdruk": pairs_comparisonConfig,
+		
+		"tmp_werk_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_herdruk_uitgave": pairs_comparisonConfig,
+		
+		"tmp_uitgave_werk_herdruk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_werk_herdruk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_werk_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_herdruk_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_uitgave_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_uitgave_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_werk_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_uitgave_herdruk_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_werk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_herdruk_uitgave": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_uitgave_uitgave": pairs_comparisonConfig,
+		
+		"tmp_herdruk_herdruk_uitgave_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_werk_herdruk_werk": pairs_comparisonConfig,
+		
+		"tmp_herdruk_uitgave_herdruk_uitgave_werk": pairs_comparisonConfig,
 		
 		// klussen
 		
@@ -581,12 +1063,23 @@ oTableConfigurationList = {
 				 "editable": true
 			 },
 			 
+			 
+			 "title_edition": {
+				 "bgcolor": "#E0F8EC",
+				 "editable": true
+			 },
+			 
 			 "herdruk_pubmin": {
 				 "bgcolor": "#E0F8EC",
 				 "editable": true
 			 },
 			 
 			 "herdruk_pubmax": {
+				 "bgcolor": "#E0F8EC",
+				 "editable": true
+			 },
+			 
+			 "herdruk_edition": {
 				 "bgcolor": "#E0F8EC",
 				 "editable": true
 			 },
@@ -735,7 +1228,8 @@ oTableConfigurationList = {
 				// ?
 			},
 			"sourceCollection" : {
-				// ?
+				"editable": true,
+				"bgcolor": "#E0F8EC"
 			},
 			"preferredNameID" : {
 				// don't modify that!
@@ -886,11 +1380,11 @@ oTableConfigurationList = {
 
 // start up!
 
-fn.callDatabase("AllPersons", null, function(){
-	fn.callDatabase("NLPerson", 
-			null, 
-			function(){
-				fn.setActiveTable("AllPersons");
-			},	
-			{"viewtype": "form"});
-});
+//fn.callDatabase("AllPersons", null, function(){
+//	fn.callDatabase("NLPerson", 
+//			null, 
+//			function(){
+//				fn.setActiveTable("AllPersons");
+//			},	
+//			{"viewtype": "form"});
+//});

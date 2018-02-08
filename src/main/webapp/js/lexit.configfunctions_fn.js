@@ -258,7 +258,7 @@ fn.getTableExtraSettings = function(sSomeTablename){
 fn.getTableName = function(mixed){	
 	
 	// if input is a string, it's probably already a table name
-	if (typeof mixed == 'string')
+	if (typeof mixed == 'string' && mt.tableExists(mixed))
 		return mixed;
 	
 	// if input is a node, get the closest table name
@@ -280,10 +280,12 @@ fn.getTableName = function(mixed){
 // input   : table name
 // returns : integer
 fn.getNumberOfVisibleRows = function(someTable){
-	if (typeof someTable == 'object')
-		someTable = fn.getTableName(someTable);
 	
-	return $("#"+someTable+" tbody tr").length;
+	return fx.getNumberOfVisibleRows(someTable);
+	
+	// REMOVED: not reliable
+	//if (typeof someTable == 'object')	someTable = fn.getTableName(someTable);
+	//return $("#"+someTable+" tbody tr").length;
 };
 
 
