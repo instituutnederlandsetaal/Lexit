@@ -10,7 +10,7 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
     <security-role-ref>
-    	<role-name>lexit_access</role-name>
+      <role-name>lexit_access</role-name>
     </security-role-ref>
   </servlet>
   <servlet-mapping>

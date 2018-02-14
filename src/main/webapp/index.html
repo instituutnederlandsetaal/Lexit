@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2018.02.01
+	v2018.02.14
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -158,7 +158,7 @@
 	// Argument separator within single string 
 	// this will be loaded from webservice (so we're sure the same value is used both in client and server)
 	// It will be set by setInternalSeparator() at initialization time
-	var ARG_INTERNAL_SEPARATOR;
+	var ARG_INTERNAL_SEPARATOR = null;
 	
 	// Data type returned by database when a field type is user-defined
 	var USER_DEFINED = "USER-DEFINED";
@@ -528,6 +528,7 @@
 		var url = WEBSERV_URL+"/table/get_neutral_separator"; 			
 		
 		$.ajax({
+			"async": false, // needed to block code execution while awaiting the server response
 			"type": "GET",
 			"url": url,
 			"dataType": "xml", // get response as xml

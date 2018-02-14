@@ -3262,7 +3262,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: "auto",
+        width: 400,
         modal: true,
         buttons: [
                   {
