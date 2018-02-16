@@ -4,7 +4,7 @@
  * BEWARE: this takes care of search and replace operations on a whole database table
  * (whereas the 'simple' search and replace file only deals with screen data)
  * so this advanced module is actually dangerous. This is why it is turn off (not visible)
- * by default. As the code is not maintained, it is also kind of depricated as well.
+ * by default. As the code is not maintained, it is also kind of deprecated as well.
  * 
  */
 

@@ -944,7 +944,8 @@ head.putHelpButton = function(sSomeTablename){
 				"Er bestaan twee werkwijzen:<BR>" +
 				"[1] Tik een woord in een zoekvakje " +
 				"boven een kolom en klik dan op de knop 'Ga naar': het eerste gedeelte van de tabel " +
-				"waarin dit woordt voorkomt wordt dan onmiddellijk opgezocht en getoond.<BR>" +
+				"waarin dit woord voorkomt wordt dan onmiddellijk opgezocht en getoond. " +
+				"Om te zoeken waar in de tabel dit woord verder voorkomt, klik nog eens op 'Ga naar'.<BR>" +
 				"[2] Druk bij het aanklikken van deze knop ook op 'shift'. Dan krijgt u de mogelijkheid " +
 				"om een paginanummer of rijnummer in te vullen waar u naartoe wilt. " +
 				"<BR><BR></TD>"+

@@ -189,7 +189,7 @@ public class Database {
 	 * @param tableName
 	 * @param columnName
 	 * @param columnValue
-	 * @param occurenceNr
+	 * @param occurenceNr // this gives the possibility to query for different occurrences of a searched string
 	 * @param sortBy
 	 * @param sortDir
 	 * @return a row number
@@ -233,136 +233,79 @@ public class Database {
 		
 			
 		// set arguments
-		// the value to search for, and the table filters
-		// (we have to remove ^ here, as we will be using < and > as operators in first case query)
-		String[] args = Util.concatArr( new String[]{ columnValue.replaceAll("^[\\^]", "")}, filterValues );	
+		String[] args = Util.concatArr( filterValues, new String[]{columnValue} );
 		
 		// set argument types
 		ArgumentTypesObject ato = new ArgumentTypesObject();
-		String[] argsColumns = Util.concatArr( new String[]{columnName}, filterColumns );
+		String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
 		String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
 		for (int i=0; i<argsColumns.length; i++)
 		{
 			ato.setType(i, valueTypes[i]);
 		}
+		 
+		// query 
 		
-		String getRowNumberQuery = null;
-		
-		
-		// *** FIRST CASE ***
-		// this query works only if the main sorting column is the same as the searched column
-		// (if it is not the same, we'll use the next query)
-//		if ( 
-//				columnName.equals(aSortBy[0]) 
-//				&&
-//				occurenceNr == 0  // this query won't work when searching for next occurence
-//				)
-//		{
-//			getRowNumberQuery = 
-//				"SELECT COUNT(*) AS rownumber FROM " +
-//				"(SELECT * " +
-//				" FROM " + getSafeTableName(tableName, schema) + " " +
-//				" WHERE " + getSafeFieldName(columnName) + " " + ( (aSortDir[0]).equalsIgnoreCase("asc")? "<" : ">" ) + " ? ";
-//			
-//			// if filters are required, add those
-//			if (filterColumns!=null)
-//			{
-//				for (int i=0; i<filterColumns.length; i++)
-//				{
-//					String oneFilterColumn = filterColumns[i];
-//					// 
-//					getRowNumberQuery += "AND "+getSafeFieldName(oneFilterColumn)+" "+
-//						getSuitableOperator(filterValues[i], false)+" ? ";
-//				}			
-//			}
-//					
-//			getRowNumberQuery +=
-//				( sortByIsEmpty ? "" : " ORDER BY "+bigSortString ) +
-//				") AS tmp;";
-//		}
-//				
-//	
-//		// *** OTHER CASE ***
-//		// if the main sorting column is different from the searched column
-//		// this query is slow, but reliable! 
-//		else if ( !columnName.equals(aSortBy[0]) 
-//				||
-//				occurenceNr > 0 // subcase: if we require for the 'next' occurence 
-//				)
-//		{
-			// set arguments
-			args = Util.concatArr( filterValues, new String[]{columnValue} );
-			
-			// set argument types
-			ato = new ArgumentTypesObject();
-			argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
-			valueTypes = getTypesOfColumns(tableName, argsColumns);
-			for (int i=0; i<argsColumns.length; i++)
-			{
-				ato.setType(i, valueTypes[i]);
-			}
-			 
-			// query 
-			
-			// since the row number is 1-based in Postgres, 
-			// we need to subtract 1 to get a 0-based number in Lex'it
-			getRowNumberQuery =
-					
-				"SELECT rownumber, CAST( (row_number() OVER (ORDER BY rownumber ASC)) AS integer)-1 AS occurence_nr " +
+		// since the row number is 1-based in Postgres, 
+		// we need to subtract 1 to get a 0-based number in Lex'it
+		String getRowNumberQuery =
 				
-				// begin of 'all_occurences'
+			"SELECT rownumber, CAST( (row_number() OVER (ORDER BY rownumber ASC)) AS integer)-1 AS occurence_nr " +
+			
+			// begin of 'all_occurences'
 
-				"FROM ("+ 
-				
-				"	SELECT min(rownumber) AS rownumber, page " +
-				
-				"	FROM ("+
-				
-				// to_be_grouped subquery
-				
-				"		SELECT "+getSafeFieldName(columnName)+", " +
-				"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
-				"		FROM ("+
-				
-				// sort by field part, with row_number  (tmp subquery)
-				
-				"			SELECT "+getSafeFieldName(columnName)+", " +
-				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
-				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
+			"FROM ("+ 
 			
-			// if filters are required, add those
-			if (filterColumns!=null)
+			"	SELECT min(rownumber) AS rownumber, page " +
+			
+			"	FROM ("+
+			
+			// to_be_grouped subquery
+			
+			"		SELECT "+getSafeFieldName(columnName)+", " +
+			"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
+			"		FROM ("+
+			
+			// sort by field part, with row_number  (tmp subquery)
+			
+			"			SELECT "+getSafeFieldName(columnName)+", " +
+			"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
+			"		 	FROM "+getSafeTableName(tableName, schema)+" ";
+		
+		// if filters are required, add those
+		if (filterColumns!=null)
+		{
+			getRowNumberQuery += "	WHERE ";
+			String[] parts = new String[filterColumns.length];
+			for (int i=0; i<filterColumns.length; i++)
 			{
-				getRowNumberQuery += "	WHERE ";
-				String[] parts = new String[filterColumns.length];
-				for (int i=0; i<filterColumns.length; i++)
-				{
-					parts[i] = getSafeFieldName(filterColumns[i])+" "+
-						getSuitableOperator(filterValues[i], false)+" ? ";
-				}
-				getRowNumberQuery += Util.join(parts, " AND ");
+				parts[i] = getSafeFieldName(filterColumns[i]) + " " +
+					getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
+					" ? ";
 			}
-			
-			// final part after the filters and numbering part:
-			// the value we need to get to!
-			getRowNumberQuery +=
-				"		) tmp "+
-				"	) to_be_grouped "+
-				"	 WHERE "+getSafeFieldName(columnName) + " " + getSuitableOperator(columnValue, false) + " ? " +
-				"	 GROUP BY page " + 
-				") all_occurences; ";
-			
-//		}  // canceled first query type
+			getRowNumberQuery += Util.join(parts, " AND ");
+		}
+		
+		// final part after the filters and numbering part:
+		// the value we need to get to!
+		getRowNumberQuery +=
+			"		) tmp "+
+			"	) to_be_grouped "+
+			"	 WHERE "+getSafeFieldName(columnName) + " " + 
+						getSuitableOperator(tableName, columnName, columnValue, false) + " ? " +
+			"	 GROUP BY page " + 
+			") all_occurences; ";
+		
+
 		
 		
 		// build a key for storing the query and the resultset, for the next goto-call
 		
 		String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
 		boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
-			
-		// we have built the right query, now use it to get the row number
+
 		
-		//System.out.println(getRowNumberQuery);
+		// we have built the right query, now use it to get the row number
 		
 		PostgresDatabaseCommunication dc = connectDatabase();
 		
@@ -407,12 +350,12 @@ public class Database {
 	 * given some column names and values to match
 	 * @param tableName
 	 * @param columnNames
-	 * @param values
+	 * @param columnValues
 	 * @param dro
 	 */
 	public  String getIdOfRecord(
 			String tableName, String[] columnNames, 
-			String[] values){
+			String[] columnValues){
 		
 		String idOfCreatedRecord = null;
 		String schema = getSchema(tableName);
@@ -432,12 +375,15 @@ public class Database {
 		String[] matchingPairs = new String[columnNames.length];
 		for (int i=0; i<columnNames.length; i++)
 		{			
-			matchingPairs[i] = getSafeFieldName(columnNames[i]) + " " + getSuitableOperator(values[i], true) + " ? ";
-			values[i] = removeFrontOperator(values[i]);
+			matchingPairs[i] = 
+					getSafeFieldName(columnNames[i]) + " " + 
+					getSuitableOperator(tableName, columnNames[i], columnValues[i], true) + 
+					" ? ";
+			columnValues[i] = removeFrontOperator(columnValues[i]);
 		}	
 		
 		// set arguments
-		String[] args = values;	
+		String[] args = columnValues;	
 		
 		
 		String getIdQuery = 
@@ -763,7 +709,10 @@ public class Database {
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
-			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+			matchingPairs[i] = 
+					getSafeFieldName(columnNamesToMatch[i]) + " " + 
+					getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
+					" ? ";
 			valuesToMatch[i] = removeFrontOperator(valuesToMatch[i]);
 		}			
 		
@@ -1071,7 +1020,8 @@ public class Database {
 		{
 			String oneColumnName = filterColumnNames[i];
 			String pattern = filterValues[i];
-			allParts[i] = getSafeFieldName(oneColumnName) + " " + getSuitableOperator(pattern, true) + " ? ";
+			allParts[i] = getSafeFieldName(oneColumnName) + 
+					" " + getSuitableOperator(tableName, oneColumnName, pattern, true) + " ? ";
 		}
 		
 		// add the condition WHERE col ~* '^regex' AND ...
@@ -1549,7 +1499,9 @@ public class Database {
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
-			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
+					" " + getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
+					" ? ";
 		}
 		
 		String updateRecords = 
@@ -1624,7 +1576,9 @@ public class Database {
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
-			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + " " + getSuitableOperator(valuesToMatch[i], true) + " ? ";
+			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
+					" " + getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
+					" ? ";
 		}
 		
 		String updateRecords = 
@@ -2129,12 +2083,17 @@ public class Database {
 				// check if current column can be searched given a search string
 				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) )
 				{
-					queryParts.add("CAST("+getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " AS text) ~* ? ");
+					queryParts.add(
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" AS text) ~* ? ");
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
 				{
-					queryParts.add(getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " " + getSuitableOperator(sSearch, true) + " ? ");
+					queryParts.add(
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" " + getSuitableOperator(tableName, columnsToSearch[i], sSearch, false) + 
+							" ? ");
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}
 				
@@ -2174,12 +2133,16 @@ public class Database {
 				// check if current column can be searched given a search string
 				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) )
 				{
-					queryParts.add("CAST("+ getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " AS text) ~* ? ");
+					queryParts.add(
+							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" AS text) ~* ? ");
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
 				{
-					queryParts.add( getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " " + getSuitableOperator(sSearch, true) + " ? ");
+					queryParts.add(
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" " + getSuitableOperator(tableName, columnsToSearch[i], sSearch, false) + " ? ");
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}		
 								
@@ -2207,12 +2170,17 @@ public class Database {
 				// check if current column can be searched given a search string
 				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, aSearchColumnNames.get(i))) )
 				{
-					queryParts.add("CAST("+getSafeTableNameOnly(tableName)+"."+getSafeFieldName(aSearchColumnNames.get(i))+ " AS text) ~* ? ");
+					queryParts.add(
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
+							" AS text) ~* ? ");
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
 				{
-					queryParts.add(getSafeTableNameOnly(tableName)+"."+getSafeFieldName(aSearchColumnNames.get(i))+ " " + getSuitableOperator(aSearchColumnValues.get(i), caseSensitiveColumn) + " ? ");
+					queryParts.add(
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
+							" " + getSuitableOperator(tableName, aSearchColumnNames.get(i), aSearchColumnValues.get(i), caseSensitiveColumn) + 
+							" ? ");
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, aSearchColumnNames.get(i)));
 				}
 				
@@ -2249,12 +2217,17 @@ public class Database {
 				// check if current column can be searched given a search string
 				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, columnsToSearch[i])) )
 				{
-					queryParts.add("CAST("+getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " AS text) ~* ? ");
+					queryParts.add(
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" AS text) ~* ? ");
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
 				{
-					queryParts.add(getSafeTableNameOnly(tableName)+"."+getSafeFieldName(columnsToSearch[i])+ " " + getSuitableOperator(aSearchColumnValues.get(i), caseSensitiveColumn) + " ? ");
+					queryParts.add(
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							" " + getSuitableOperator(tableName, columnsToSearch[i], aSearchColumnValues.get(i), caseSensitiveColumn) + 
+							" ? ");
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}
 				
@@ -2634,6 +2607,8 @@ public class Database {
 	/**
 	 * Determine which operator suits a string (whether it is a regex or not, etc)
 	 * and return it.
+	 * NOTE this function is old, and less reliable than its 4 argument counterpart,
+	 * as it doesn't take column datatype into account (it was designed to work without that).
 	 * @param value
 	 * @return an operator as a string
 	 */
@@ -2668,7 +2643,8 @@ public class Database {
 		if (value.contains("%")) 
 			return " LIKE ";
 		
-		// is value is an integer, just test equality (because it's faster)
+		// if value is an integer, just test equality (because it's faster)
+		// (NOTE that if <= or >= operators were required, those were catched hereabove)
 		if (Util.isInteger(cleanValue)) 
 			return (negation ? "!=" : "=");
 		
@@ -2682,6 +2658,62 @@ public class Database {
 				: 
 				(negation ? "!~*" : "~*");
 	}
+	
+	
+	/**
+	 * Determine which operator suits a string (whether it is a regex or not, etc)
+	 * and return it.
+	 * @param value
+	 * @return an operator as a string
+	 */
+	public String getSuitableOperator(String tableName, String columnName, String columnValue, boolean caseSensitive){
+		
+		// get column type
+		String columnType = getTypeOfColumn(tableName, columnName);
+				
+		
+		// always check that one first (to prevent NullPointerException)
+		if (columnValue == null || columnValue.toLowerCase().equals("null") )
+			return " IS ";		
+		if (columnValue.toLowerCase().equals("!null"))
+			return " IS NOT ";
+		
+		// negation operator
+		boolean negation = false;
+		if (columnValue.startsWith("!"))
+			negation = true;
+		
+		// array type
+		if (columnType.endsWith("[]"))
+			return "@>";
+		
+		// inequality operators 
+		// (type check not necessary, since it works with both numeral and textual types)
+		if (columnValue.startsWith("<=") || columnValue.startsWith(">="))
+			return columnValue.substring(0,2);		
+		if (columnValue.startsWith("<") || columnValue.startsWith(">"))
+			return columnValue.substring(0,1);
+		
+		// special kind of regex requires LIKE
+		if (columnValue.contains("%")) 
+			return " LIKE ";
+		
+		// if type is numeric, just test equality (because it's faster)
+		// (NOTE that if <= or >= operators were required, those were catched hereabove)
+		if (columnType.matches("smallint|integer|bigint|decimal|numeric|real|double precision|serial|bigserial")) 
+			return (negation ? "!=" : "=");
+		
+		// booleans require '='
+		if (columnType.equals("boolean"))
+			return (negation ? "!=" : "=");
+		
+		// suitable operator for case (in)sensitive search and regex
+		return caseSensitive? 
+				(negation ? "!~" : "~") 
+				: 
+				(negation ? "!~*" : "~*");
+	}
+	
 	
 	// remove operators and such, that were put in front of the search string
 	public static String removeFrontOperator(String value){

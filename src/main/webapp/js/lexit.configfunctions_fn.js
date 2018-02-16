@@ -3262,7 +3262,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 400,
+        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readible
         modal: true,
         buttons: [
                   {
