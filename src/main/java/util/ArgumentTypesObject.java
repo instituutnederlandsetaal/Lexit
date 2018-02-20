@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class is used to store the query argument types
  * since prepared statement require to declare the type of the arguments.
  * Each argument has an index, and given its index one can set/get its type. 
+ * 
+ * index is 0-based
  */
 
 

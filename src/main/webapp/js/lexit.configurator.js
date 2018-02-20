@@ -125,14 +125,7 @@ var oTableSettingsList_example = {
 		 */
 		"prereset_callback": function(){ doSomething(); },
 		
-		/** 
-		 * @type {boolean} 
-		 * @description Toon of verberg de toegang tot de geavanceerde zoek&vervang-functie.
-		 * Dit staat default op 'false' want de geavanceerde zoek&vervang-functie is niet ongevaarlijk
-		 * aangezien die effect heeft op de gehele database!
-		 * */
-		"advanced_search_and_replace": false,
-
+		
 		/** 
 		 * @type {boolean} 
 		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)
@@ -1391,13 +1384,6 @@ conf.getTableInfo  = function(aTableSettings){
 };
 
 
-// setting for advanced search and replace
-// default: not allowed = false
-conf.advancedSearchAndReplaceIsUnlocked = function(aTableSettings){
-	if (typeof aTableSettings["advanced_search_and_replace"] == 'undefined')
-		return false;
-	return aTableSettings["advanced_search_and_replace"];
-};
 
 
 // context menus for rows

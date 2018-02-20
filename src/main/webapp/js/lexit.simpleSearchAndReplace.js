@@ -215,24 +215,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	});
 	buttons_span.append(close_button);
 	
-	form.append(buttons_span);
-	
-	// advanced search and replace function link
-	var advancedsearch_link = $("<button/>")
-	.attr("type", "button")
-	.attr("class", "onego_button styled-button-2")
-	.css("margin-left", "40px")
-	.text("Onveilige modus")
-	.bind("click", function(){
-		$("#"+sSomeTablename+"_search_and_replace").remove();
-		$("#"+sSomeTablename+"_wrapper div.top").before( asr.buildAdvancedSearchAndReplaceDiv(sSomeTablename) );
-		$("#"+sSomeTablename+"_search_and_replace").show();
-		
-	});
-	
-	// if advanced search button is unlocked (in configuration), show it, otherwise hide it!
-	if ( conf.advancedSearchAndReplaceIsUnlocked( conf.getTableSettings(sSomeTablename) ) )
-		buttons_span.append(advancedsearch_link);	
+	form.append(buttons_span);	
 	
 	// append the form to the div
 	div.append(form);
