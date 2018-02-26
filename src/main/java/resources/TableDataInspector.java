@@ -23,10 +23,10 @@ import util.Database;
 public class TableDataInspector {
 
 	Database dbObj;
-	String tableName, sSearch, iSortColName, sSortDir_0, access;
+	String tableName, sSearch, iSortColName, sSortDir_0;
 	String[] aSortCol, aSortDir, allColumns;
 	int iDisplayLength, iDisplayStart, countOfTable, searchColumnIndex, iEcho;
-	boolean weMustSort, countQualityOfTable;
+	boolean weMustSort, countQualityOfTable, bCallForGoToFunction;
 	ArrayList<String> newColumnsArr, newColumnSearchArr;
 	ArrayList<Boolean> newCaseSensitiveColumnSearchArr;
 	
@@ -36,7 +36,7 @@ public class TableDataInspector {
 			int iDisplayLength, int iDisplayStart, String sSearch, 
 			ArrayList<String> newColumnsArr, ArrayList<String> newColumnSearchArr, 
 			ArrayList<Boolean> newCaseSensitiveColumnSearchArr,
-			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho) {
+			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho, boolean bCallForGoToFunction) {
 		
 		this.dbObj = dbObj;
 		this.tableName = tableName;
@@ -53,6 +53,7 @@ public class TableDataInspector {
 		this.countQualityOfTable = countQualityOfTable;
 		this.weMustSort = weMustSort;
 		this.iEcho = iEcho;
+		this.bCallForGoToFunction = bCallForGoToFunction;
 	}
 	
 	
@@ -63,10 +64,10 @@ public class TableDataInspector {
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public ResultObject getTable() {		
 		
-		return new ResultObject(dbObj, tableName, access, countOfTable, countQualityOfTable, allColumns,
+		return new ResultObject(dbObj, tableName, countOfTable, countQualityOfTable, allColumns,
 				iDisplayLength, iDisplayStart, sSearch, 
 				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr, weMustSort, 
-				aSortCol, aSortDir, iEcho);
+				aSortCol, aSortDir, iEcho, bCallForGoToFunction);
 		
 	}
 	

@@ -37,7 +37,7 @@ public class ResultObject {
 	public void setTotalRecords(int totalRecords){this.iTotalRecords = totalRecords;}
 	
 	
-	// number of records in resultset
+	// number of records in result set
 	
 	@XmlElement(name="recordsFiltered")
 	public int iTotalDisplayRecords = 10000;
@@ -48,7 +48,7 @@ public class ResultObject {
 	private String tableName = "";
 	
 	
-	// resultset query count quality
+	// result set query count quality
 	@XmlElement(name="bQueryCountIsExact")
 	public boolean bQueryCountIsExact = false;
 	@XmlTransient
@@ -99,12 +99,12 @@ public class ResultObject {
 	
 	
 	public ResultObject( Database dbObj, 
-			String tableName, String access, int countOfTable, boolean countQualityOfTable,
+			String tableName, int countOfTable, boolean countQualityOfTable,
 			String allColumns[], int iDisplayLength, 
 			int iDisplayStart, String sSearch, 
 			ArrayList<String> newColumnsArr, ArrayList<String> newColumnSearchArr,
 			ArrayList<Boolean> newCaseSensitiveColumnSearchArr,
-			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho ){
+			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho, boolean bCallForGoToFunction ){
 		
 		// set table name and count
 		this.setTableName(tableName);			
@@ -133,8 +133,12 @@ public class ResultObject {
 				System.out.println(a.entrySet());
 			}
 		}
-		this.setTotalDisplayRecords( tableAndCount.getPartialCount() );	
-		this.setQueryCountIsExact( tableAndCount.queryCountIsExact() );
+		
+		// when this function was called by the GoTo function, making use of PK, the call is about navigation and not about filtering
+		// so the count must be the count of the whole table. 
+		// But when we are filtering, of course we use partial counts (as filtering results in a subset of the table). 
+		this.setTotalDisplayRecords(	bCallForGoToFunction ? countOfTable : tableAndCount.getPartialCount() );	
+		this.setQueryCountIsExact(		bCallForGoToFunction ? countQualityOfTable : tableAndCount.queryCountIsExact() );
 		this.setTotalCountIsExact( countQualityOfTable );
 	}
 	

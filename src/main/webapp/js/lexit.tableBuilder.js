@@ -153,8 +153,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	$("#"+sSomeTableName+"_dynamic").append(table);
 	
 	
-	// pagination setting
+	// pagination settings
 	var sPane = oExtraTableSettings["pane"];
+	
 	
 	
 	/*************************
@@ -256,9 +257,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			        "sDbName": 			getHttpParams().get("db"),
 			        "sTableName": 		sSomeTableName,
 			        "sAllColumns": 		mt.getListOfColumnsOf(sSomeTableName).join(ARG_INTERNAL_SEPARATOR),
-			        "bForceExactCount":	bForceExactCount
+			        "bForceExactCount":	bForceExactCount,
+			        "sGoToRowIds":		sGoToRowIds      // needed for GoTo function, when working with row ids (all info at Database.getRowNumberOfRecord)
 			      } );
 			},
+			
 			// Trick to be able to read extra data from the server response.
 			// Normally, Datatables expects only a few params to be returned, like:
 			//  recordsTotal, recordsFiltered and data.
@@ -333,6 +336,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		// ** Functions upon table update **
 		// (this is called after the row callback)
 		"drawCallback": function( settings ) {
+			
+			// empty go-to function parameter 
+			// (as this must happen after the tables was redrawn after a GoTo call, 
+			//  otherwise we would keep requesting the same row ids)
+			sGoToRowIds = "";
 			
 			// if form view type is chosen, show a form
 			// (this has to happen quite late in the process, to make sure the form dimensions

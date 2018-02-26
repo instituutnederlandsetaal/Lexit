@@ -206,26 +206,57 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 			});
 };
 
+
+
 // subroutine of sf.getRowNumber
 // go to a given table position, given some requested row number got as XML
+
 sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 	
-	var sRowNumber = $(xml).find("response").text();
-	var iRowNumber = parseInt(sRowNumber);
+	var sServerResponse = $(xml).find("response").text();
 	
-	// if a 'next' occurence has been searched for, but it returned the 1st page of the table,
-	// it is clear the search gave no results, so reset the GoTo-memory!
+	// two responses are possible:
+	// * a list of rows ids (fast solution)
+	// * or a row number (can result in slow rendering, because of use of OFFSET in webservice)
+	//
+	// See all info at Database.getRowNumberOfRecord
 	
-	if (	iRowNumber < fn.getCurrentDisplayLength(sSomeTablename) // result is page 1 
-			&& 
-			mt.getOccurenceNr(sSomeTablename) > 0 // it was not the first call
-		)
+	
+	// fast implementation (making use of PK)
+	
+	if (sServerResponse.indexOf(":")>-1)
 		{
-		// reset GoTo memory, so we won't keep requesting 'next' occurences
-		mt.resetGoToMemoryForTable(sSomeTablename);
+		// split by ':', which will split the response into a page nr, a list of ids
+		
+		var aSplitResponse =	sServerResponse.split(":");
+		var iRowNumber = 		parseInt(aSplitResponse[1]);
+		var sFieldToQuery = 	aSplitResponse[2];
+		sGoToRowIds = 		sFieldToQuery+":^(" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join("|") + ")$";
+		
+		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
 		}
 	
-	mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
+	
+	// slow implementation (when no PK available)
+	else
+		{
+		var iRowNumber = parseInt(sServerResponse);
+		
+		// if a 'next' occurence has been searched for, but it returned the 1st page of the table,
+		// it is clear the search gave no results, so reset the GoTo-memory!
+		
+		if (	iRowNumber < fn.getCurrentDisplayLength(sSomeTablename) // result is page 1 
+				&& 
+				mt.getOccurenceNr(sSomeTablename) > 0 // it was not the first call
+			)
+			{
+			// reset GoTo memory, so we won't keep requesting 'next' occurences
+			mt.resetGoToMemoryForTable(sSomeTablename);
+			}
+		
+		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
+		}
+	
 };
 
 
@@ -629,7 +660,13 @@ sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 		else
 			{
 			inputTag = $(this).find("input").eq(0);
-			inputTag.val(sCurrentValueOfThisColumn);
+			
+			// insert the value only if the field is empty
+			// (this is a hack, to be able to have the searchbox keep its search value even after a refresh:
+			//  the reason we need that, is that we sometimes want to call 'go-to' some more times without having
+			//  to type the search value over and over again!)
+			if (inputTag.val() == '')
+				inputTag.val(sCurrentValueOfThisColumn);
 			}
 	});
 	

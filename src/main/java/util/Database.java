@@ -194,16 +194,12 @@ public class Database {
 	 * @param sortDir
 	 * @return a row number
 	 */
-	public  Integer getRowNumberOfRecord(
+	public  String getRowNumberOfRecord(
 			String tableName, String columnName, String columnValue, 
 			int occurenceNr,
 			String sortBy, String sortDir,
 			String[] filterColumns, String[] filterValues,
 			int iDisplayLength){
-		
-		int rowNumber = 0;
-		String schema = getSchema(tableName);	
-		ArrayList<String[]> res;
 		
 		
 		// *** IF WE HAVE NO SORT COLUMN, WE CAN'T COMPUTE A ROW NUMBER ***
@@ -212,135 +208,290 @@ public class Database {
 		boolean sortByIsEmpty = (sortBy == null || "".equals(sortBy) );
 		if (sortByIsEmpty)
 		{
-			return -1;
+			return "-1";
 		}
 		
 		
-		// put sort information into arrays
-				
-		String[] aSortBy = sortBy.split(",");
-		String[] aSortDir = sortDir.split(",");		
+		// Strategy to get the right table position will depend on having a primary key, or not having any.
+		//
+		// The original version of this function tried to find each row number at which some search value was to be found,
+		// enabling the service to access the right position in the table (where the value is found) by using OFFSET. 
+		//
+		// But in large tables, this gives very serious performance problems (which is a known issue of Postgres).
+		// So, to solve that, we first check if the table has a primary key (PK). If it has one, we gather the values of the PK
+		// at which the search value is to be found, so the service can access the table at the right position by using these values,
+		// which is much, much faster than using OFFSET. Of course, we still make use of the row number, as it is needed
+		// for pagination (showing at which page the search value was found).
 		
-		// and build a complete sort string (ORDER BY field1 dir1, field2 dir2, ...) 
-		// with safe field names, meaning quoted when PostgreSql requires that.
 		
-		String[] aSortBySafe = new String[aSortBy.length];
-		for (int i=0; i<aSortBy.length; i++)
+		String primaryKey = getPrimaryKeyColumn(tableName);
+		
+		String schema = getSchema(tableName);	
+		ArrayList<String[]> res;
+		String functionOuput = "0";
+		
+		
+		// strategy #1, without primary key
+		
+		if (primaryKey == null)
 		{
-			aSortBySafe[i] = getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
-		}
-		String bigSortString = Util.join(aSortBySafe, ", ");
-		
 			
-		// set arguments
-		String[] args = Util.concatArr( filterValues, new String[]{columnValue} );
-		
-		// set argument types
-		ArgumentTypesObject ato = new ArgumentTypesObject();
-		String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
-		String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
-		for (int i=0; i<argsColumns.length; i++)
-		{
-			ato.setType(i, valueTypes[i]);
-		}
-		 
-		// query 
-		
-		// since the row number is 1-based in Postgres, 
-		// we need to subtract 1 to get a 0-based number in Lex'it
-		String getRowNumberQuery =
-				
-			"SELECT rownumber, CAST( (row_number() OVER (ORDER BY rownumber ASC)) AS integer)-1 AS occurence_nr " +
+			// put sort information into arrays
+					
+			String[] aSortBy = sortBy.split(",");
+			String[] aSortDir = sortDir.split(",");		
 			
-			// begin of 'all_occurences'
-
-			"FROM ("+ 
+			// and build a complete sort string (ORDER BY field1 dir1, field2 dir2, ...) 
+			// with safe field names, meaning quoted when PostgreSql requires that.
 			
-			"	SELECT min(rownumber) AS rownumber, page " +
-			
-			"	FROM ("+
-			
-			// to_be_grouped subquery
-			
-			"		SELECT "+getSafeFieldName(columnName)+", " +
-			"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
-			"		FROM ("+
-			
-			// sort by field part, with row_number  (tmp subquery)
-			
-			"			SELECT "+getSafeFieldName(columnName)+", " +
-			"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
-			"		 	FROM "+getSafeTableName(tableName, schema)+" ";
-		
-		// if filters are required, add those
-		if (filterColumns!=null)
-		{
-			getRowNumberQuery += "	WHERE ";
-			String[] parts = new String[filterColumns.length];
-			for (int i=0; i<filterColumns.length; i++)
+			String[] aSortBySafe = new String[aSortBy.length];
+			for (int i=0; i<aSortBy.length; i++)
 			{
-				parts[i] = getSafeFieldName(filterColumns[i]) + " " +
-					getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
-					" ? ";
+				aSortBySafe[i] = getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
 			}
-			getRowNumberQuery += Util.join(parts, " AND ");
+			String bigSortString = Util.join(aSortBySafe, ", ");
+			
+				
+			// set arguments
+			String[] args = Util.concatArr( filterValues, new String[]{columnValue} );
+			
+			// set argument types
+			ArgumentTypesObject ato = new ArgumentTypesObject();
+			String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
+			String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
+			for (int i=0; i<argsColumns.length; i++)
+			{
+				ato.setType(i, valueTypes[i]);
+			}
+			 
+			// query 
+			
+			// since the row number is 1-based in Postgres, 
+			// we need to subtract 1 to get a 0-based number in Lex'it
+			String getRowNumberQuery =
+					
+				"SELECT rownumber, CAST( (row_number() OVER (ORDER BY rownumber ASC)) AS integer)-1 AS occurence_nr " +
+				
+				// begin of 'all_occurences'
+
+				"FROM ("+ 
+				
+				"	SELECT min(rownumber) AS rownumber, page " +
+				
+				"	FROM ("+
+				
+				// to_be_grouped subquery
+				
+				"		SELECT "+getSafeFieldName(columnName)+", " +
+				"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
+				"		FROM ("+
+				
+				// sort by field part, with row_number  (tmp subquery)
+				
+				"			SELECT "+getSafeFieldName(columnName)+", " +
+				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
+				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
+			
+			// if filters are required, add those
+			if (filterColumns!=null)
+			{
+				getRowNumberQuery += "	WHERE ";
+				String[] parts = new String[filterColumns.length];
+				for (int i=0; i<filterColumns.length; i++)
+				{
+					parts[i] = getSafeFieldName(filterColumns[i]) + " " +
+						getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
+						" ? ";
+				}
+				getRowNumberQuery += Util.join(parts, " AND ");
+			}
+			
+			// final part after the filters and numbering part:
+			// the value we need to get to!
+			getRowNumberQuery +=
+				"		) tmp "+
+				"	) to_be_grouped "+
+				"	 WHERE "+getSafeFieldName(columnName) + " " + 
+							getSuitableOperator(tableName, columnName, columnValue, false) + " ? " +
+				"	 GROUP BY page " + 
+				") all_occurences; ";
+			
+
+			
+			
+			// build a key for storing the query and the resultset, for the next goto-call
+			
+			String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
+			boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
+
+			
+			// we have built the right query, now use it to get the row number
+			
+			PostgresDatabaseCommunication dc = connectDatabase();
+			
+			try {
+				dc.sendUpdate("SET search_path TO "+schema+"; ");	
+				
+				ResultSet rs;
+				if( alreadyCalled )
+					{
+					res = gotoQueryToResultSet.get(hashKey);
+					}
+				else
+					{
+					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+					res = getResultsInAList(rs, new String[]{"rownumber"});
+					gotoQueryToResultSet.put(hashKey, res);
+					}
+						 
+				// get row number for the right occurence
+				
+				if (res.size() > 0 && occurenceNr < res.size() )
+					{				
+					functionOuput = res.get(occurenceNr)[0];
+					}
+				
+			} catch (Exception e) {
+				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
+			} 
+			
+			finally {
+				closeDatabase(dc);
+			}
 		}
 		
-		// final part after the filters and numbering part:
-		// the value we need to get to!
-		getRowNumberQuery +=
-			"		) tmp "+
-			"	) to_be_grouped "+
-			"	 WHERE "+getSafeFieldName(columnName) + " " + 
-						getSuitableOperator(tableName, columnName, columnValue, false) + " ? " +
-			"	 GROUP BY page " + 
-			") all_occurences; ";
 		
-
+		// strategy #2 with use of primary key
 		
-		
-		// build a key for storing the query and the resultset, for the next goto-call
-		
-		String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
-		boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
-
-		
-		// we have built the right query, now use it to get the row number
-		
-		PostgresDatabaseCommunication dc = connectDatabase();
-		
-		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+		else
 			
-			ResultSet rs;
-			if( alreadyCalled )
+		{			
+			// put sort information into arrays
+					
+			String[] aSortBy = sortBy.split(",");
+			String[] aSortDir = sortDir.split(",");		
+			
+			// and build a complete sort string (ORDER BY field1 dir1, field2 dir2, ...) 
+			// with safe field names, meaning quoted when PostgreSql requires that.
+			
+			String[] aSortBySafe = new String[aSortBy.length];
+			for (int i=0; i<aSortBy.length; i++)
+			{
+				aSortBySafe[i] = getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
+			}
+			String bigSortString = Util.join(aSortBySafe, ", ");
+			
+				
+			// set arguments
+			String[] args = Util.concatArr( filterValues, new String[]{columnValue} );
+			
+			// set argument types
+			ArgumentTypesObject ato = new ArgumentTypesObject();
+			String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
+			String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
+			for (int i=0; i<argsColumns.length; i++)
+			{
+				ato.setType(i, valueTypes[i]);
+			}
+			 
+			// query 
+			
+			// since the row number is 1-based in Postgres, 
+			// we need to subtract 1 to get a 0-based number in Lex'it
+			
+			String getRowNumberQuery =
+					
+				"	SELECT "+getSafeFieldName(primaryKey)+" AS ids_to_render, CAST( (row_number() OVER (ORDER BY page ASC)) AS integer)-1 AS occurence_nr "+
+				
+				"	FROM ("+
+				
+				// we will return to the client:
+				// * a row number, which will be use for pagination
+				// * the name of the PK column, and all the values of the PK to be found on a page [given an occurrence number ~ call number]
+				//
+				
+				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + getSafeFieldName(primaryKey) + ", " +
+				"			string_agg(" + getSafeFieldName(columnName) + ", ' ') AS " + getSafeFieldName(columnName) + ", " +
+				"			(rownumber / " + iDisplayLength + ") AS page "+
+				"		FROM ("+
+				
+				// row-ids and row numbers
+				
+				"			SELECT " + getSafeFieldName(primaryKey) + ", " + getSafeFieldName(columnName)+", " +
+				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
+				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
+			
+			// if filters are required, add those
+			if (filterColumns!=null)
+			{
+				getRowNumberQuery += "	WHERE ";
+				String[] parts = new String[filterColumns.length];
+				for (int i=0; i<filterColumns.length; i++)
 				{
-				res = gotoQueryToResultSet.get(hashKey);
+					parts[i] = getSafeFieldName(filterColumns[i]) + " " +
+						getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
+						" ? ";
 				}
-			else
-				{
-				rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
-				res = getResultsInAList(rs, new String[]{"rownumber"});
-				gotoQueryToResultSet.put(hashKey, res);
-				}
-					 
-			// get row number for the right occurence
+				getRowNumberQuery += Util.join(parts, " AND ");
+			}
 			
-			if (res.size() > 0 && occurenceNr < res.size() )
-				{				
-				rowNumber = Integer.parseInt(res.get(occurenceNr)[0]);
-				}
+			// final part after the filters and numbering part:
+			// the value we need to get to!
+			getRowNumberQuery +=
+				"		) tmp "+
+				"		GROUP BY (rownumber / " + iDisplayLength + ") "+
+				"	) grouped "+
+				"	 WHERE "+getSafeFieldName(columnName) + " " + 
+							getSuitableOperator(tableName, columnName, columnValue, false) + " ?;";
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
-		} 
+
+			
+			
+			// build a key for storing the query and the resultset, for the next goto-call
+			
+			String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
+			boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
+
+			
+			
+			// we have built the right query, now use it to get the row number
+			
+			PostgresDatabaseCommunication dc = connectDatabase();
+			
+			try {
+				dc.sendUpdate("SET search_path TO "+schema+"; ");	
+				
+				ResultSet rs;
+				if( alreadyCalled )
+					{
+					res = gotoQueryToResultSet.get(hashKey);
+					}
+				else
+					{
+					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+					res = getResultsInAList(rs, new String[]{"ids_to_render"});
+					gotoQueryToResultSet.put(hashKey, res);
+					}
+						 
+				// get row number for the right occurence
+				
+				if (res.size() > 0 && occurenceNr < res.size() )
+					{				
+					functionOuput = res.get(occurenceNr)[0];
+					}
+				
+			} catch (Exception e) {
+				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
+			} 
+			
+			finally {
+				closeDatabase(dc);
+			}
+		}	
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		 
-		return rowNumber;
+		return functionOuput;
 		
 	}
 	
@@ -2730,8 +2881,9 @@ public class Database {
 	
 	/**
 	 * Get the column name of the primary key
+	 * 
 	 * @param table
-	 * @return
+	 * @return primary key OR null
 	 */
 	public  String getPrimaryKeyColumn(String tableName){
 		

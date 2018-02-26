@@ -343,11 +343,11 @@ public class TableResources {
 				null : filterValues.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		
 		
-		String rowNumber = Integer.toString(getDatabaseObject(co).getRowNumberOfRecord(tableName, columnName, columnValue, 
+		String output = getDatabaseObject(co).getRowNumberOfRecord(tableName, columnName, columnValue, 
 						occurenceNr, sortColumns, sortDirections, 
 						filterColumnsArr, filterColumnValuesArr, iDisplayLength
-						));
-		dro.setResponse(rowNumber);
+						);
+		dro.setResponse(output);
 		
 		return dro;
 	}
@@ -956,6 +956,8 @@ public class TableResources {
 			@DefaultValue("") @FormParam("sDbName") String dbName,
 			@DefaultValue("") @FormParam("sTableName") String tableName,
 			
+			@DefaultValue("") @FormParam("sGoToRowIds") String sGoToRowIds,
+			
 			@DefaultValue("") @FormParam("sAllColumns") String allColumns,
 			@DefaultValue("0") @FormParam("order[0][column]") int iSortCol_0,
 			@DefaultValue("asc") @FormParam("order[0][dir]") String sSortDir_0,
@@ -1217,6 +1219,8 @@ public class TableResources {
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
 		
+		// column names
+		
 		String[] columnsArr = new String[]{
 				column0, 
 				column1, column2, column3,
@@ -1262,6 +1266,8 @@ public class TableResources {
 				column101, column102, column103,
 				column104, column105, column106,
 				column107, column108, column109};
+		
+		// search values
 		
 		String[] columnSearchArr = new String[]{
 				sSearch0, 
@@ -1313,7 +1319,33 @@ public class TableResources {
 		ArrayList<String> newColumnSearchArr = new ArrayList<String>();
 		ArrayList<Boolean> newCaseSensitiveColumnSearchArr = new ArrayList<Boolean>();
 		
+		// Is the current call triggers by a call of the GoTo function?
+		// (beware: the particular case in which we use row-ids for speed;
+		//  See info at Database.getRowNumberOfRecord)
+		
+		boolean bCallForGoToFunction = !sGoToRowIds.isEmpty();
+		
+		
 		// gather search data for all columns
+		
+		// first add the row ids searched for (this occurs only when carrying out a GoTo operation [making use of row ids -when available- for speed!])
+		if ( bCallForGoToFunction )
+		{
+			String idsColumn = (sGoToRowIds.split(":"))[0];
+			String idsValues = (sGoToRowIds.split(":"))[1];
+			int idsColumnIdx = Util.getIndexOf(idsColumn, columnsArr);
+			
+			columnsArr[idsColumnIdx] = idsColumn;
+			columnSearchArr[idsColumnIdx] = idsValues;
+			
+			// Set start pos to 0, as we're targeting some row ids, so we don't when the webservice to set an offset.
+			// But since this is part of a GoTo operation, we let the client think it is requesting some given page number
+			// so apparently the function really behaves like a GoTo function (t.i. a navigation function, leading to some page number).
+			// In really to, we've been requesting a list of row ids, and get page 1 of the results!
+			iDisplayStart = 0;
+		}
+		
+		// now gather the search data for all columns
 		for (int i=0; i<columnSearchArr.length; i++)
 		{
 			String oneSearchColumn = columnSearchArr[i].trim();
@@ -1328,6 +1360,7 @@ public class TableResources {
 		
 		
 		// get the count of all records in the table (fast)
+		
 		Map<String, Object> countAndCountQualityOfTable = getCountOfTable(co, tableName);
 		int countOfTable = (Integer) countAndCountQualityOfTable.get("count");
 		boolean countQualityOfTable = (Boolean) countAndCountQualityOfTable.get("exactCount");
@@ -1369,7 +1402,7 @@ public class TableResources {
 				allColumns.split(Constants.ARG_INTERNAL_SEPARATOR, -1),
 				iDisplayLength, iDisplayStart, setRightSearchValue(sSearch), 
 				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr,
-				true, aSortCol, aSortDir, iEcho
+				true, aSortCol, aSortDir, iEcho, bCallForGoToFunction
 				);
 		
 	}
