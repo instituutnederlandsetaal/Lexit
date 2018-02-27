@@ -189,14 +189,14 @@ public class Database {
 	 * @param tableName
 	 * @param columnName
 	 * @param columnValue
-	 * @param occurenceNr // this gives the possibility to query for different occurrences of a searched string
+	 * @param occurrenceNr // this gives the possibility to query for different occurrences of a searched string
 	 * @param sortBy
 	 * @param sortDir
 	 * @return a row number
 	 */
 	public  String getRowNumberOfRecord(
 			String tableName, String columnName, String columnValue, 
-			int occurenceNr,
+			int occurrenceNr,
 			String sortBy, String sortDir,
 			String[] filterColumns, String[] filterValues,
 			int iDisplayLength){
@@ -346,9 +346,9 @@ public class Database {
 						 
 				// get row number for the right occurence
 				
-				if (res.size() > 0 && occurenceNr < res.size() )
+				if (res.size() > 0 && occurrenceNr < res.size() )
 					{				
-					functionOuput = res.get(occurenceNr)[0];
+					functionOuput = res.get(occurrenceNr)[0];
 					}
 				
 			} catch (Exception e) {
@@ -382,12 +382,16 @@ public class Database {
 			String bigSortString = Util.join(aSortBySafe, ", ");
 			
 				
-			// set arguments
-			String[] args = Util.concatArr( filterValues, new String[]{columnValue} );
+			// Set arguments
+			
+			// First argument in the query is the value we search for,
+			// The following arguments in the query are the filter values.
+			
+			String[] argValues = Util.concatArr( new String[]{columnValue}, filterValues );
+			String[] argsColumns = Util.concatArr( new String[]{columnName}, filterColumns );
 			
 			// set argument types
 			ArgumentTypesObject ato = new ArgumentTypesObject();
-			String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
 			String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
 			for (int i=0; i<argsColumns.length; i++)
 			{
@@ -410,8 +414,13 @@ public class Database {
 				// * the name of the PK column, and all the values of the PK to be found on a page [given an occurrence number ~ call number]
 				//
 				
+				//		first row number of each page, and list of row id's contained in the page  
 				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + getSafeFieldName(primaryKey) + ", " +
-				"			string_agg(" + getSafeFieldName(columnName) + ", ' ') AS " + getSafeFieldName(columnName) + ", " +
+
+				//          gather (in an array) a true/false value, telling us if the value we're searching for is found/not found in the row				
+				"			array_agg(" + getSafeFieldName(columnName) + getSuitableOperator(tableName, columnName, columnValue, false) + " ? ) AS \"conditionIsMet_arr\", " +
+				
+				//			page number
 				"			(rownumber / " + iDisplayLength + ") AS page "+
 				"		FROM ("+
 				
@@ -436,20 +445,25 @@ public class Database {
 			}
 			
 			// final part after the filters and numbering part:
-			// the value we need to get to!
+			// 
+			// is the value we're searching for to be found in the sets of rows?
+			// (in that case, the conditionIsMet_arr must contain at least one 'true' value)
 			getRowNumberQuery +=
 				"		) tmp "+
 				"		GROUP BY (rownumber / " + iDisplayLength + ") "+
 				"	) grouped "+
-				"	 WHERE "+getSafeFieldName(columnName) + " " + 
-							getSuitableOperator(tableName, columnName, columnValue, false) + " ?;";
+				"	 WHERE \"conditionIsMet_arr\" @> ARRAY[true];"; 
 			
+			
+			
+			//System.out.println(getRowNumberQuery);
 
+			
 			
 			
 			// build a key for storing the query and the resultset, for the next goto-call
 			
-			String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(args, "|");
+			String hashKey = getRowNumberQuery + Util.join(argsColumns, "|") + Util.join(argValues, "|");
 			boolean alreadyCalled = gotoQueryToResultSet.containsKey(hashKey);
 
 			
@@ -468,16 +482,16 @@ public class Database {
 					}
 				else
 					{
-					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+					rs = dc.sendPreparedQuery(getRowNumberQuery, argValues, ato);
 					res = getResultsInAList(rs, new String[]{"ids_to_render"});
 					gotoQueryToResultSet.put(hashKey, res);
 					}
 						 
 				// get row number for the right occurence
 				
-				if (res.size() > 0 && occurenceNr < res.size() )
+				if (res.size() > 0 && occurrenceNr < res.size() )
 					{				
-					functionOuput = res.get(occurenceNr)[0];
+					functionOuput = res.get(occurrenceNr)[0];
 					}
 				
 			} catch (Exception e) {
@@ -488,8 +502,6 @@ public class Database {
 				closeDatabase(dc);
 			}
 		}	
-		
-		
 		 
 		return functionOuput;
 		

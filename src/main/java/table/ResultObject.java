@@ -134,9 +134,11 @@ public class ResultObject {
 			}
 		}
 		
+		
 		// when this function was called by the GoTo function, making use of PK, the call is about navigation and not about filtering
 		// so the count must be the count of the whole table. 
-		// But when we are filtering, of course we use partial counts (as filtering results in a subset of the table). 
+		// But when we are filtering, of course we use partial counts (as filtering results is a subset of the table). 
+		
 		this.setTotalDisplayRecords(	bCallForGoToFunction ? countOfTable : tableAndCount.getPartialCount() );	
 		this.setQueryCountIsExact(		bCallForGoToFunction ? countQualityOfTable : tableAndCount.queryCountIsExact() );
 		this.setTotalCountIsExact( countQualityOfTable );

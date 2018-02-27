@@ -229,9 +229,17 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 		// split by ':', which will split the response into a page nr, a list of ids
 		
 		var aSplitResponse =	sServerResponse.split(":");
-		var iRowNumber = 		parseInt(aSplitResponse[1]);
+		var iRowNumber = 		parseInt(aSplitResponse[1]);		
+		
+		// sGoToRowIds is a global variable. 
+		// The table builder handles this by adding those values as argument for this particular Ajax call, 
+		// telling the webservice that it has to handle it as a GoTo operation. 
+		// At the client-side, the values in sGoToRowIds are of course disposed of straight after the Ajax call
+		// because those values were only relevant to that particular call (more info at Database.getRowNumberOfRecord).
+		
 		var sFieldToQuery = 	aSplitResponse[2];
-		sGoToRowIds = 		sFieldToQuery+":^(" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join("|") + ")$";
+		// global: no var!
+		sGoToRowIds = 			sFieldToQuery+":^(" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join("|") + ")$";
 		
 		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
 		}
