@@ -2967,6 +2967,25 @@ fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
 // ***************************************
 
 
+
+/**
+ * Close any currently opened dialog programmatically.
+ * 
+ *  @see fn.message
+ *  @see fn.confirm
+ *  @see fn.prompt
+ *  @see fn.promptReorder
+ */
+fn.closeDialog = function(){
+	
+	// find the dialogs, with regex catching all dialog ids
+	// (see fn.message function about the way ids are defined)
+	
+	$("div[id^='dialog-message']").dialog( "close" );
+};
+
+
+
 /**
  * Show a message. This function is an equivalent of js native 'alert'
  * 
@@ -3198,6 +3217,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
  * 
  * @see fn.getPromptBoxOrder
  * @see fn.getNewPositionOfElementAt
+ * @see fn.processPromptBoxOrder
  * @see fn.prompt
  */
 fn.promptReorder = function(sTitle, aFieldNames, fnCallback){

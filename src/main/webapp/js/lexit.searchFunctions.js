@@ -170,6 +170,13 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 		// not the same call, so tell the GoTo memory we have a new table search, starting from occurence #0
 		mt.rememberOccurenceNr( sSomeTablename, 0 );
 		mt.rememberLastGoToCommand( sSomeTablename, sCurrentCallOfGoTo );
+		
+		// at the very first call, tell the user an index is being built
+		fn.message("Ga Naar", 
+				"Lex'it bouwt nu een index van alle voorkomens van het gezochte woord.<BR>" +
+				"(dit duurt mogelijk een paar seconden, maar dat hoeft slechts &eacute;&eacute;n keer!)<BR>" +
+				"<BR>" +
+				"Heel even geduld a.u.b.");
 		}
 	
 
@@ -196,10 +203,12 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 				dataType: "xml",
 				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 				success: function(xml) {
+					fn.closeDialog(); // close automatically the GoTo message about building an index
 					gui.removeProcessingMsg(sSomeTablename);
 					sf.goToPageGiveXmlResponse(xml, sSomeTablename);
 					},
 				error: function(jqXHR, textStatus, errorThrown){
+					fn.closeDialog(); // close automatically the GoTo message about building an index
 					gui.removeProcessingMsg(sSomeTablename);
 					fn.message("Fout in tabel '"+sSomeTablename+"'", "XML laden mislukt: "+textStatus+" "+errorThrown);
 					}
