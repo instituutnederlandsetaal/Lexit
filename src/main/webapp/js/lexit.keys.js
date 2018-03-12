@@ -433,8 +433,11 @@ kf.addKeyFunctions = function(){
 			
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
+			// 3. pagination must be allowed (it may have been disabled by gui.showWarningWhenRefreshingIsRequired)
 			if (sActiveTable != null 
-					&& !$("div#context-menu-layer").elementExists()	)
+					&& !$("div#context-menu-layer").elementExists()
+					&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate")
+				)
 				{
 				if (kf.isPressed("pageup"))
 					mt.getDataTableObjectOf(sActiveTable).page("previous").draw("page");
@@ -460,7 +463,7 @@ kf.addKeyFunctions = function(){
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
-					&& !bSomeDialogBoxIsOpen
+					&& !bSomeDialogBoxIsOpen					
 					)
 				{
 				
@@ -524,7 +527,9 @@ kf.addKeyFunctions = function(){
 					}
 				
 				else if (kf.isPressed("uparrow") && iActiveRow == 0 
-						&& $("#"+sActiveTable+"_paginate a.paginate_active:eq(0)").text()!="1"	)
+						&& $("#"+sActiveTable+"_paginate a.paginate_active:eq(0)").text()!="1"	
+						&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate") // pagination must be allowed
+						)
 					{
 					row.clearRowSelection(sActiveTable);
 					kf.setActiveRowNumber(iMaximalIndex);
@@ -533,7 +538,9 @@ kf.addKeyFunctions = function(){
 					mt.getDataTableObjectOf(sActiveTable).page("previous").draw("page");					
 					}
 				
-				else if (kf.isPressed("downarrow") && iActiveRow == iMaximalIndex)
+				else if (kf.isPressed("downarrow") && iActiveRow == iMaximalIndex
+						&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate") // pagination must be allowed
+						)
 					{
 					row.clearRowSelection(sActiveTable);
 					kf.setActiveRowNumber(0);

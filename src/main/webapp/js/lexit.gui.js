@@ -254,6 +254,30 @@ gui.getFormViewDimensions = function(sSomeTablename, iMaxColumnTitleWidth, iNumb
 };
 
 
+// show a warning when the user has applied some change in a cell belonging to a column
+// onto which a filter was applied.
+// This is needed, since changing some values would mean that some row implicitly won't be part
+// of the filtered row anymore, so the are implicitly replaced by the following rows which a still
+// part of the filter selection. But since this is not reflected by the current view, going to the next
+// page wil cause the user to oversee those rows, which won't be part of the next page of course, since
+// they have gone up into the page the user just left! 
+//
+// To avoid this phenomenon, hige the pagination and show a warning
+// (refreshing by user will be enough to solve that all)
+
+gui.showWarningWhenRefreshingIsRequired = function(sTableName, sColumnName){
+	
+	var sSearchValue = fn.getValueOfFilterBox(sTableName, sColumnName);
+	
+	if ( sSearchValue!= '')
+		{
+		var sWarning = "<B>Weergave wijkt nu af van selectie. Ververs de tabel a.u.b.!</B>";
+		
+		$("#"+sTableName+"_wrapper .paginate_button").hide();
+		$("#"+sTableName+"_wrapper .ellipsis").html(sWarning).addClass("dont_paginate");
+		}
+	
+};
 
 
 // registration of cell changes for undo function
@@ -273,6 +297,12 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 		// of the id of a node, its position in the table, and its old value
 		
 		un.addEvent(sSomeTableName, fn.getRowNodeId(this), aPos.columnVisible, sOldValue);
+		
+		
+		// was the modified cell  part of a column onto which a filter was applied?
+		// if so, disable the paginate buttons: the user will have to refresh to re-enable them!
+		
+		gui.showWarningWhenRefreshingIsRequired( sSomeTableName, (mt.getListOfVisibleColumnsOf(sSomeTableName))[aPos.columnVisible] );
 	});	
 	
 	
@@ -312,6 +342,12 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 		var bNewValue = checked;
 		$(this).find("input").val( bNewValue );
 		
+		
+		// was the modified cell  part of a column onto which a filter was applied?
+		// if so, disable the paginate buttons: the user will have to refresh to re-enable them!
+		
+		gui.showWarningWhenRefreshingIsRequired( sSomeTableName, (mt.getListOfVisibleColumnsOf(sSomeTableName))[aPos.columnVisible] );
+		
 	});
 	
 	
@@ -331,6 +367,12 @@ gui.attachOnCellChangeEvent = function(sSomeTableName){
 		// add event to undo memory stack, consisting
 		// of the id of a node, its position in the table, and its old value
 		un.addEvent(sSomeTableName, fn.getRowNodeId(this), aPos.columnVisible, sOldValue);
+		
+		
+		// was the modified cell  part of a column onto which a filter was applied?
+		// if so, disable the paginate buttons: the user will have to refresh to re-enable them!
+		
+		gui.showWarningWhenRefreshingIsRequired( sSomeTableName, (mt.getListOfVisibleColumnsOf(sSomeTableName))[aPos.columnVisible] );
 	});
 
 };
