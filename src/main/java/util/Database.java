@@ -418,7 +418,7 @@ public class Database {
 				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + getSafeFieldName(primaryKey) + ", " +
 
 				//          gather (in an array) a true/false value, telling us if the value we're searching for is found/not found in the row				
-				"			array_agg(" + getSafeFieldName(columnName) + getSuitableOperator(tableName, columnName, columnValue, false) + " ? ) AS \"conditionIsMet_arr\", " +
+				"			array_agg(searched_column" + getSuitableOperator(tableName, columnName, columnValue, false) + " ? ) AS \"conditionIsMet_arr\", " +
 				
 				//			page number
 				"			(rownumber / " + iDisplayLength + ") AS page "+
@@ -426,7 +426,7 @@ public class Database {
 				
 				// row-ids and row numbers
 				
-				"			SELECT " + getSafeFieldName(primaryKey) + ", " + getSafeFieldName(columnName)+", " +
+				"			SELECT " + getSafeFieldName(primaryKey) + ", " + getSafeFieldName(columnName)+" AS searched_column, " +
 				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
 				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
 			
