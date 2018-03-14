@@ -271,10 +271,10 @@ gui.showWarningWhenRefreshingIsRequired = function(sTableName, sColumnName){
 	
 	if ( sSearchValue!= '')
 		{
-		var sWarning = "<B>Weergave wijkt nu af van selectie. Ververs de tabel a.u.b.!</B>";
+		var sWarning = "<SPAN><B>Weergave wijkt nu af van selectie. Ververs de tabel a.u.b.!</B></SPAN>";
 		
 		$("#"+sTableName+"_wrapper .paginate_button").hide();
-		$("#"+sTableName+"_wrapper .ellipsis").html(sWarning).addClass("dont_paginate");
+		$("#"+sTableName+"_wrapper .dataTables_paginate").html(sWarning).addClass("dont_paginate");
 		}
 	
 };
@@ -1229,8 +1229,13 @@ gui.refreshTable = function(oTable){
 		sTable = fn.getTableName(oTable);
 		}
 	
-	oTable.draw(false); // do redraw, but keep paging
+	// do redraw, but keep paging
+	oTable.draw(false); 
+	
 	sf.putCurrentValueInAllSearchBoxes(sTable);
+	
+	// make sure we can paginate again
+	$("#"+sTable+"_wrapper .dataTables_paginate").removeClass("dont_paginate");
 	
 };
 

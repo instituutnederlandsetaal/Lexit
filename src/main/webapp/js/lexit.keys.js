@@ -436,7 +436,7 @@ kf.addKeyFunctions = function(){
 			// 3. pagination must be allowed (it may have been disabled by gui.showWarningWhenRefreshingIsRequired)
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
-					&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate")
+					&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate")
 				)
 				{
 				if (kf.isPressed("pageup"))
@@ -528,7 +528,7 @@ kf.addKeyFunctions = function(){
 				
 				else if (kf.isPressed("uparrow") && iActiveRow == 0 
 						&& $("#"+sActiveTable+"_paginate a.paginate_active:eq(0)").text()!="1"	
-						&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate") // pagination must be allowed
+						&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate") // pagination must be allowed
 						)
 					{
 					row.clearRowSelection(sActiveTable);
@@ -539,7 +539,7 @@ kf.addKeyFunctions = function(){
 					}
 				
 				else if (kf.isPressed("downarrow") && iActiveRow == iMaximalIndex
-						&& !$("#"+sActiveTable+"_wrapper .ellipsis").hasClass("dont_paginate") // pagination must be allowed
+						&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate") // pagination must be allowed
 						)
 					{
 					row.clearRowSelection(sActiveTable);
