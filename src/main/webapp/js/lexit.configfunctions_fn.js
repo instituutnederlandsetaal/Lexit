@@ -1653,12 +1653,13 @@ fn.getRowNode = function(nMixed){
 	
 	if ( fn.isCellNode(nMixed) )
 		{
-		var sTable = 	fn.getTableName(nMixed);
+		var sTable = 	fn.getTableName(nMixed);		
 		var oTable = 	mt.getDataTableObjectOf(sTable);
 		var iRowIndex =	oTable.cell(nMixed).index().row;
-
+		
 		return oTable.row(iRowIndex).node();
 		}		
+	
 	return nMixed;
 };
 

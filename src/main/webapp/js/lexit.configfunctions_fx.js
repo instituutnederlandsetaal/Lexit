@@ -1092,35 +1092,42 @@ fx.removeFromDatabaseGivenARow = function(oRow, fnCallback){
       
 /**
  * check if an object is a Datatables API instance
- * (non official definition!)
- * 
- * N.B.: some previously used API instance detection tests
- *       were removed from this function, as they appeared to be unreliable
- *       such as:
- *       (1) testing for availability of an array at key '0' (not always there!)
- *       (2) and so on
  * 
  * @param {Object} obj - Some object
  * @returns {Boolean} true if the object is an API instance, otherwise false
  */
 fx.isApiInstance = function(obj){
 	
-	if (obj == undefined || obj == null)
+	// if the obj is NOT an API instance, calling a typical API function will cause an error,
+	// which we will catch so as to return false to the test!
+	try {
+		var test = obj.page.info();
+	}
+	catch (err){
 		return false;
+	}
 	
-	var test = 
-		(
-			// an API instance must have at least one of its typical functions 
-			typeof obj.data == 'function' 
-			||
-			typeof obj.table == 'function'
-			||
-			typeof obj.any == 'function'
-			||
-			(typeof obj[0] !== undefined && typeof obj[0] == 'array')
-		);
+	return true;
 	
-	return test;
+	
+	// OLD code: not reliable enough
+	
+//	if (obj == undefined || obj == null)
+//		return false;
+//	
+//	var test = 
+//		(
+//			// an API instance must have at least one of its typical functions 
+//			typeof obj.data == 'function' 
+//			||
+//			typeof obj.table == 'function'
+//			||
+//			typeof obj.any == 'function'
+//			||
+//			(typeof obj[0] !== undefined && typeof obj[0] == 'array')
+//		);
+//	
+//	return test;
 }
 
 
