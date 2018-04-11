@@ -254,15 +254,15 @@ gui.getFormViewDimensions = function(sSomeTablename, iMaxColumnTitleWidth, iNumb
 };
 
 
-// show a warning when the user has applied some change in a cell belonging to a column
+// Show a warning when the user has applied some change in a cell belonging to a column
 // onto which a filter was applied.
-// This is needed, since changing some values would mean that some row implicitly won't be part
-// of the filtered row anymore, so the are implicitly replaced by the following rows which a still
+// This is needed, since changing some values would mean that some rows implicitly won't be part
+// of the filtered rows anymore, as these are implicitly replaced by the following rows which are still
 // part of the filter selection. But since this is not reflected by the current view, going to the next
-// page wil cause the user to oversee those rows, which won't be part of the next page of course, since
+// page will cause the user to overlook those rows, which won't be part of the next page of course, since
 // they have gone up into the page the user just left! 
 //
-// To avoid this phenomenon, hige the pagination and show a warning
+// To prevent this from happening, hide the pagination and show a warning
 // (refreshing by user will be enough to solve that all)
 
 gui.showWarningWhenRefreshingIsRequired = function(sTableName, sColumnName){
