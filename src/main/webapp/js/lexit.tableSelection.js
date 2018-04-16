@@ -61,7 +61,8 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	// list of table names and description for the list to choose from
 	asTableNames.push( neutralValue );
 	asTableDescriptions.push( neutralValue );
-	asTableComments.push( "" );  // comments, visible through html 'title' attribute
+	asTableComments.push( "" );	// comments (in the GUI called 'notities'), that can be typed in by clicking onto the table name (in the table header),
+								// and which are also visible through html 'title' attribute
 	asTableTypes.push( "none" );
 	abTableVisible.push( true );
 	

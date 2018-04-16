@@ -582,6 +582,49 @@ fn._getBaseUrl = function(){
 // *             GENERAL TABLE FUNCTIONS                           *
 // *****************************************************************
 
+
+/**
+ * Register a new table. This function is needed when one wants to 
+ * call a fully configured table that didn't exist yet at start up (which is why
+ * the table was not registered nor configured yet). 
+ * 
+ * @param {String} sTableName - Name of the new table to register
+ * @param {String} sTableDescription - table description (visible to user in tables list)
+ * @param {String} sType - database table type ('base table', 'view')
+ * @param {String} sTableComment - table comments, which a user can edit by clicking onto the table name (in the table header) in the GUI
+ * @param {Array} oConfiguration - An associative array, containing the table configuration, in the way this has to be declared in oTableConfigurationList
+ * @param {Array} oSettings - An associative array, containing the table settings, in the way those have to be declared in oTableSettingsList
+ * 
+ */
+fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComment, oConfiguration, oSettings ){
+	
+	if (sTableDescription == null)	sTableDescription = '';
+	if (sType == null)	sType = '';
+	if (sTableComment == null)	sTableComment = '';
+	
+	
+	// register each table details
+	
+	asTableNames.push( sTableName );
+	asTableDescriptions.push( sTableDescription );
+	asTableComments.push( sTableComment );
+	asTableTypes.push( sType );
+	abTableVisible.push( false ); // the table list in the GUI won't be rebuilt, so it won't be visible in there...
+	
+	// details of the table
+	
+	mt.addAvailableTableDetails( sTableName, [ sTableDescription, sType, sTableComment ]);
+	
+	// table configuration and settings
+	
+	oTableConfigurationList[sTableName] = oConfiguration;
+	
+	oTableSettingsList[sTableName] = oSettings;
+	
+}
+
+
+
 /**
  * In case only one single table is available to the user to choose from,
  * this table will normally be opened automatically. But in
@@ -3034,6 +3077,8 @@ fn.message = function(sTitle, sMessage, fnFunction){
  * @param {String} sMessage - Message or question to the user
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
+ * 
+ * @see fn.prompt
  */
 fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
@@ -3091,6 +3136,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * 
  * @see fn.getPromptBoxInput
  * @see fn.promptReorder
+ * @see fn.closeDialog
  */
 fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsAndRows){
 	
@@ -3440,7 +3486,7 @@ fn.getNewPositionOfElementAt = function(iOriginalIndex){
  * Click programmatically onto a button
  * 
  *  @param {(String|API-object-instance)} sTableName - A table name or object
- *  @param {String} sButtonId - id of a button
+ *  @param {String} sButtonId - id of a button om DOM tree
  */
 fn.clickOnButton = function(sTableName, sButtonId){
 	
@@ -3463,11 +3509,20 @@ fn.clickOnButton = function(sTableName, sButtonId){
  * @param {(String|API-object-instance)} sTableName - A table name or object
  * @param {Integer} iButtonNumber - Button number
  * @param {String}  sNewName - The name to assign to the button
+ * 
+ * @see fn.addCustomButton
+ * @see fn.setCustomButtonCss
  */
 fn.setCustomButtonName = function(sTableName, iButtonNumber, sNewName){
 	
 	if (typeof sTableName == 'object')
 		sTableName = fn.getTableName(sTableName);
+	
+	// buttons are usually accessed by their 'iButtonNumber' or their id,
+	// but never by their names, so it's safe to change the name
+	// of a button in the array of settings.
+	var oTableSettings = conf.getTableSettings(sTableName);
+	oTableSettings["button_"+iButtonNumber]["name"] = sNewName;
 	
 	var oButton = $("div#"+sTableName+"_custombutton_"+iButtonNumber+" button#"+sTableName+"_button_"+iButtonNumber);
 	oButton.html(sNewName);
@@ -3502,6 +3557,8 @@ fn.setCustomButtonCss = function(sTableName, iButtonNumber, sProperty, sNewValue
  * @returns {String} The value for the given property
  * 
  * @see fn.setCustomButtonCss 
+ * @see fn.getNameOfButtonAtIndex
+ * @see fn.getIndexOfButtonNamed
  */
 fn.getCustomButtonCss = function(sTableName, iButtonNumber, sProperty){
 	
@@ -3519,6 +3576,8 @@ fn.getCustomButtonCss = function(sTableName, iButtonNumber, sProperty){
  * @param {(String|API-object-instance)} sTableName - A table name or object
  * @param {String} sName - Button name
  * @returns {Integer} The button number 
+ * 
+ * @see fn.getNameOfButtonAtIndex 
  */
 fn.getIndexOfButtonNamed = function(sTableName, sName){
 	
@@ -3541,12 +3600,33 @@ fn.getIndexOfButtonNamed = function(sTableName, sName){
 
 
 /**
+ * 
+ * @param {(String|API-object-instance)} sTableName - A table name or object
+ * @param {Integer} The button number
+ * @returns {String} The button name
+ * 
+ * @see fn.getIndexOfButtonNamed
+ */
+fn.getNameOfButtonAtIndex = function(sTableName, iIndex){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var aTableSettings = conf.getTableSettings(sTableName);
+	
+	return aTableSettings["button_"+iIndex]["name"];
+}
+
+
+/**
  * Add a custom button after initialization time (in the header of a table)
  * This function might be needed when a button needs to be dynamically added,
  * as buttons are normally set in the tabel configuration
  * 
  * @param {(String|API-object-instance)} sSomeTableName - A table name or object
  * @param {Array} oButtonConfig - Associative array with the button settings
+ * 
+ * @see fn.setCustomButtonName
  */
 fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 	
