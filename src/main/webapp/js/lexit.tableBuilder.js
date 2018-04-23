@@ -212,7 +212,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		"destroy": 		true, // remove previously build datatable with same table name
 		"order": 		conf.getDefaultSortingSettings(sSomeTableName),
 		"pageLength": 	(typeof oExtraTableSettings["displaylength"]!="undefined" ?
-						oExtraTableSettings["displaylength"] : 
+						parseInt(oExtraTableSettings["displaylength"]) : 
 						( aTableSettings!=null ? conf.getDisplayLength(aTableSettings) : 10 )),
 		"language": {
 			"thousands": ".",

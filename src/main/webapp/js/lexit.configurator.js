@@ -1538,6 +1538,11 @@ conf.getDisplayLength = function(aTableSettings){
 	
 	if (typeof aTableSettings["displaylength"] == 'undefined')
 		return 10;
+	
+	// make sure we get a number, which is the only type allowed for displaylength in datatables
+	if (typeof aTableSettings["displaylength"] == 'string')
+		aTableSettings["displaylength"] = parseInt(aTableSettings["displaylength"]);
+	
 	return aTableSettings["displaylength"];
 };
 
