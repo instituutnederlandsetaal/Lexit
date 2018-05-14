@@ -3486,7 +3486,7 @@ fn.getNewPositionOfElementAt = function(iOriginalIndex){
  * Click programmatically onto a button
  * 
  *  @param {(String|API-object-instance)} sTableName - A table name or object
- *  @param {String} sButtonId - id of a button om DOM tree
+ *  @param {String} sButtonId - id of a button in DOM tree
  */
 fn.clickOnButton = function(sTableName, sButtonId){
 	

@@ -38,6 +38,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var bTableIsaView =					(asTableTypes[iIndexOfTable] == "view");
 	
 	
+	// ********************************************************************************
+	// In the following we always first check the oExtraTableSettings and apply those.
+	// But if we lack oExtraTableSettings, we apply the project configuration (config.js file).
+	// ********************************************************************************
 	
 	// view type
 	var sViewtype = oExtraTableSettings["viewtype"] != null ? oExtraTableSettings["viewtype"] :
