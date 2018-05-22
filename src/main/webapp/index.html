@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2018.05.14
+	v2018.05.22
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -138,16 +138,17 @@
 		
 	<script type="text/javascript"  charset="utf-8">
 	
-	// general
+	// *********************************************************************************************************
+	
+	
+	// CONSTANTS
+	
 	var neutralValue = "Kies een tabel";
 	var neutralColumnValue = "Alles";
 	
-	
-	// ***** CONSTANTS *****
-	
 	// INL Home url, as a regex like: /(...)/
-	// current value should catch both inl.loc as ivdnt domains
-	var INL_HOMEURL = /(inl\.loc|ivdnt)/;
+	// current value should catch both 'inl' as 'ivdnt' domains
+	var INL_HOMEURL = /(inl\.loc|inl\.nl|ivdnt)/;
 	
 	// base url for all http requests
 	var BASE_URL = "../lexit2";
@@ -164,13 +165,16 @@
 	// Name of user that has logged in. This is set by fn.setCurrentUser() at initialization time
 	var USERNAME = null;
 	
-	// *********************
+	// *********************************************************************************************************
 	
 	// configuration file variables
 	var oTableSettingsList;
 	var oHiddenTablesList;
 	var oTableConfigurationList;
 	var aFullConfigFilesList = 	new Array(); 	// list of projects config files on server
+	
+	// spy datatables object
+	var oSpyTable;
 	
 	// about the database
 	var asTableNames = 			new Array();	// list of database tables names	
@@ -203,13 +207,15 @@
 	// go-to funtion parameter (all info at Database.getRowNumberOfRecord)
 	var sGoToRowIds = "";
 	
-	// test mode?
-	var bTest;
-	// spy mode?
-	var bSpyMode;
-	// reset user rights?
-	var bResetUserRights;
 	
+	// booleans: which mode are we running?
+	var bTest;				// test mode
+	var bSpyMode;			// spy mode
+	var bResetUserRights;	// reset user rights mode
+	
+	// *********************************************************************************************************
+	
+	// Start up !
 	
 	
 	$(document).ready(function() {	
@@ -223,14 +229,10 @@
 		// set neutral internal separator
 		setInternalSeparator();
 		
-		// get list of projects from server
-		getConfigFilesList();
 		
-		// read project overview (and add the unknown projects from server to it)
-		
-		// are we in development (test) mode?
-		// if so, load the file from webcontent
-		// if not, load the file from the configuration directory
+		// Are we in development (test) mode?
+		// if so, we'll be loading the file from webcontent (with $.getScript)
+		// if not, we'll be loading the file from the configuration directory (with ajax call to webservice, which is the normal mode)
 		
 		bTest = (paramsHash!=null &&
 				paramsHash.get("test")!=null && 
@@ -251,31 +253,46 @@
 				paramsHash.get("db")=='reset_user_rights');
 		
 		
-		// test mode (development)
-		if (bTest)
-			{
-			$.getScript("projects_overview.js")
-			.done(function(){				
-				initialize();
-				})
-			.fail(function(jqxhr, settings, exception){
-				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
-				});
-			}
+		
 		
 		// spy mode
 		
-		else if (bSpyMode)
+		if (bSpyMode)
 			{				
 			buildSpy();
 			}
+		
+		
+		// reset user rights
 		
 		else if (bResetUserRights)
 			{				
 			window.open(WEBSERV_URL+"/table/reset_user_rights");
 			}
 		
+		
+		// test mode (development)
+		
+		else if (bTest)
+			{
+			$.getScript("projects_overview.js")
+			.done(function(){	
+				
+				// The ajax call gets the list of declared projects out of the projects overview file.
+				// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
+				// In the end, this function will call initialize();
+				getConfigFilesList();
+				
+				})
+			.fail(function(jqxhr, settings, exception){
+				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+				});
+			}
+		
+		
+		
 		// normal mode (production)
+		
 		else
 			{
 			var url = WEBSERV_URL+"/table/get_projects_overview"; 			
@@ -287,23 +304,36 @@
 				"data": {
 					"dummy": getUniqueNumber()
 				},
-				"success": function(){					
-					initialize();
+				"success": function(){			
+					
+					// The ajax call gets the list of declared projects out of the projects overview file.
+					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
+					// In the end, this function will call initialize();
+					getConfigFilesList();
+					
 				},
 				"error": function(jqxhr, settings, exception){
 					fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
 				}
-				});
+				
+			});
+			
 			}
 		
 		
 					
-	});	 // end of document ready
+	});	 // end of start up
 	
 	
-	var oSpyTable;
+	// *********************************************************************************************************
 	
-	// spy mode 
+	
+	// called by $(document).ready()
+	
+	
+		
+	// spy mode
+		
 	function buildSpy(){
 		
 		var url = WEBSERV_URL+"/table/get_users"; 			
@@ -396,8 +426,69 @@
 	};
 	
 	
-	// initialize the application
-	// (this happens once the libraries are fully loaded)
+	// get internal separator in use in webservice  
+	// and set the same separator in this client
+	
+	function setInternalSeparator(){
+		
+		var url = WEBSERV_URL+"/table/get_neutral_separator"; 			
+		
+		$.ajax({
+			"async": false, // needed to block code execution while awaiting the server response
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				ARG_INTERNAL_SEPARATOR = fn.getDbResponse(xml);
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message("Fout", "Het ophalen van de Interne separator string is mislukt.<br><br>Fout: ["+exception+"]");
+			}
+		});
+	}
+	
+	
+	// Get full list of projects config files from server.
+	// We'll need this to be able to show projects which are not declared (yet?) in the projects overview file:
+	// the list will lack descriptions, but at least the projects will be shown and will be clickable!
+	
+	function getConfigFilesList(){
+		
+		var url = WEBSERV_URL+"/table/get_configfiles_list"; 			
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				
+				var sList = fn.getDbResponse(xml);
+				aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
+				
+				initialize();
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message("Fout", "Het ophalen van de list configuratiebestanden is mislukt.<br><br>Fout: ["+exception+"]");
+			}
+		});
+	}
+	
+	// end of : called by $(document).ready()
+	
+	
+	
+	// *********************************************************************************************************
+	
+	// Initialize the application.
+	// This happens once the libraries are fully loaded and we have a list of all projects 
+	// ( which is which this function will be called by getConfigFilesList )
+	
 	function initialize(){	
 		
 		// set current user name
@@ -526,49 +617,10 @@
 	};
 	
 	
-	function setInternalSeparator(){
-		
-		var url = WEBSERV_URL+"/table/get_neutral_separator"; 			
-		
-		$.ajax({
-			"async": false, // needed to block code execution while awaiting the server response
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				ARG_INTERNAL_SEPARATOR = fn.getDbResponse(xml);
-			},
-			"error": function(jqxhr, settings, exception){
-				fn.message("Fout", "Het ophalen van de Interne separator string is mislukt.<br><br>Fout: ["+exception+"]");
-			}
-		});
-	}
 	
+	// *********************************************************************************************************
 	
-	// get full list of projects config files from server
-	function getConfigFilesList(){
-		
-		var url = WEBSERV_URL+"/table/get_configfiles_list"; 			
-		
-		$.ajax({
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				var sList = fn.getDbResponse(xml);
-				aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
-			},
-			"error": function(jqxhr, settings, exception){
-				fn.message("Fout", "Het ophalen van de list configuratiebestanden is mislukt.<br><br>Fout: ["+exception+"]");
-			}
-		});
-	}
+	// called by initialize()
 	
 	
 	// get table filters from url if available (... &filter_a=... & filter_b=...)
@@ -601,6 +653,10 @@
 			extraSettings: oExtraSettings
 			};
 	}
+	
+	
+	
+
 	
 	// generate a welcome page with a project overview 
 	// (projects have to be declared and described in file 'projects_overview.js' so as to be show here)
@@ -773,6 +829,12 @@
 		}
 		return oObjectToReturn;
 	}
+	
+	
+	
+	// end of : called by initialize()
+	
+	// *********************************************************************************************************
 		
 	</script>
 	
