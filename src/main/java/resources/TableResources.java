@@ -135,6 +135,36 @@ public class TableResources {
 	
 	// get the name of the user which had logged in
 	// call:
+	// .../table/get_dbinfo?db=...
+	@Path("get_dbinfo")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject getDbInfo(
+			@QueryParam("db") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest			
+			) throws IOException {
+		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		// output allowed
+		
+		String[] dbInfo = getDatabaseObject(co).getDatabaseInfo();
+		String infoStr = "database '"+dbInfo[0]+"' on host '"+dbInfo[1]+"'";
+		
+		DbResponseObject response = new DbResponseObject();
+		response.setResponse(infoStr);
+		
+		return response;
+	}
+	
+	
+	// get the name of the user which had logged in
+	// call:
 	// .../table/get_username
 	@Path("get_configfiles_list")
 	@GET

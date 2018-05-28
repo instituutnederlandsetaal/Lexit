@@ -4112,6 +4112,31 @@ public class Database {
 	}
 	
 	
+	/**
+	 * get info about the database, so an administrator could check in which db he is working from the GUI 
+	 * (but of course, we will return no password!!!)
+	 * @return
+	 */
+	public String[] getDatabaseInfo(){
+		
+		// first check if the database access data are known
+		// (that is: location, username, password, etc)
+		if ( databaseAccessHash.size() == 0 )
+			try {
+				readPropertiesFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				throw new RuntimeException(e);
+			}
+		
+		String db = databaseAccessHash.get("db");
+		String host = databaseAccessHash.get("host");
+		
+		return new String[]{db, host};
+				
+	}
+	
+	
 	
 	/**
 	 * opens a Postgres database connection
