@@ -761,6 +761,42 @@ public class TableResources {
 	}
 	
 	
+	
+	// .../table/duplicaterecord
+	// duplicate a record in a table and get its id
+	@Path("duplicaterecord")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject duplicateRecord(
+			@QueryParam("table_name") String tableName,
+			@QueryParam("columns_to_skip") String columnsToSkip,
+			@QueryParam("pk_substitute") String pkSubstitute,
+			@QueryParam("pk_value") String pkValue,
+			@QueryParam("db_name") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest
+			){
+		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+		Util.debug(co, "### Duplicate record in "+tableName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_WRITE_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		Util.debug(co, "'"+pkValue+"'");
+		
+		DbResponseObject dro = new DbResponseObject();		
+				
+		String[] columnsToSkipArr = columnsToSkip.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+				
+		// duplicate record and get its id
+		getDatabaseObject(co).duplicateRecordAndGetItsId(tableName, columnsToSkipArr, pkSubstitute, pkValue, dro);		
+		
+		return dro;
+	}
+	
+	
 	// .../tabel/insertmodified
 	// insert some new records based on existing records with ids
 	// which will be re-inserted with modified values, according to some patterns and replacement strings

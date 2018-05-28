@@ -922,6 +922,40 @@ oTableSettingsList = {
 					
 				}
 				
+			},
+			
+			"button_5":{
+				
+				"name": "нельзя",
+				"bgcolor": "white",
+				"textcolor": "red",
+				"click": function(t){
+					
+					// trick: https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+					
+					var tmpTextArea = $("<textarea></textarea>").attr("id", "russischWoordje").text("нельзя");
+					$("#temporary_stuff").append(tmpTextArea);
+					
+					var copyChar = $('#russischWoordje');
+					copyChar.select();
+					
+					try {
+						// now copy it to clipboard
+						
+					    document.execCommand('copy');					    
+					    
+					    // confirm to user which chars he/she has chosen
+					    fn.message("In clipboard", "нельзя");
+					    
+					    // remove temporary textarea
+					    
+					    $("#russischWoordje").remove();
+					    
+					  } catch (err) {
+						  
+					  }
+				}
+				
 			}
 		},
 		

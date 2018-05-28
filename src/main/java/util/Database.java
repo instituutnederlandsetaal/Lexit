@@ -1264,7 +1264,7 @@ public class Database {
 			String returningField, DbResponseObject dro){
 		
 		String idOfCreatedRecord = "";
-		String idColumn = (returningField != null && !returningField.equals("null")) ?
+		String idColumn = (returningField != null && !returningField.equalsIgnoreCase("null")) ?
 				returningField : getPrimaryKeyColumn(tableName);
 		
 		String schema = getSchema(tableName);
@@ -1309,6 +1309,96 @@ public class Database {
 		
 		
 	};
+	
+	
+	
+	/**
+	 * Duplicate a record in a table
+	 * and get the id of the new duplicate record.
+	 * @param tableName
+	 * @param columnNamesToSkip
+	 * @param pkSubstitute  (usually NULL if we want to use the Primary key;  otherwise the name of some serial field)
+	 * @param pkValue : the value the Primary key (or pkSubstitute) must match
+	 * @param dro
+	 * @return
+	 */
+	public  void duplicateRecordAndGetItsId(
+			String tableName, String[] columnNamesToSkip,
+			String pkSubstitute, String pkValue, 
+			DbResponseObject dro){
+		
+		// set schema, table and pk column names etc
+		
+		String schema = 		getSchema(tableName);		
+		String[] columnNames =	getColumnNames(tableName);
+		
+		String idOfCreatedRecord = "";
+		String idColumn = (pkSubstitute != null && !pkSubstitute.equalsIgnoreCase("null")) ?
+				pkSubstitute : getPrimaryKeyColumn(tableName);
+
+		columnNamesToSkip = (columnNamesToSkip != null && (columnNamesToSkip.length>0 && !(columnNamesToSkip[0]).equalsIgnoreCase("null"))) ?
+				columnNamesToSkip : new String[]{};
+		
+		// set the column names
+		
+		for (int i=0; i<columnNames.length; i++)
+		{
+			columnNames[i] = getSafeFieldName(columnNames[i]);
+		}
+		
+		
+		// remove the primary key from the columns names
+		// and also the columns that should be skipped (if set!) 
+		
+		columnNames = Util.removeElement(columnNames, getSafeFieldName(idColumn) );
+		for (int i=0; i<columnNamesToSkip.length; i++)
+		{
+			columnNames = Util.removeElement(columnNames, getSafeFieldName(columnNamesToSkip[i]) );
+		}
+		
+		
+		// now build the row duplication query
+		
+		String duplicateRecord = 
+			"INSERT INTO " + getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
+			"SELECT  " + Util.join(columnNames, ",") + " " +
+			"FROM " + getSafeTableName(tableName, schema) + " " +
+			"WHERE " + getSafeFieldName(idColumn) + " = ? " +
+			"RETURNING " + getSafeFieldName(idColumn) + ";";
+		
+		// set datatypes of arguments
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
+		String[] values = new String[]{ pkValue };
+		String[] valueTypes = getTypesOfColumns(tableName, new String[]{idColumn});
+		ato.setType(0, valueTypes[0]);
+				
+		PostgresDatabaseCommunication dc = connectDatabase();
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			
+			ResultSet rs = dc.sendPreparedQuery(duplicateRecord, values, ato);
+			
+			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
+			idOfCreatedRecord = res.get(0)[0];	
+			dro.setResponse(idOfCreatedRecord);
+		}
+		catch (Exception e) {
+			dro.setResponse("Error while executing query "+duplicateRecord);
+			throw new RuntimeException("Error while executing query "+duplicateRecord, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+		
+	};
+	
+	
+	
+	
 	
 	/**
 	 * Update one column in a record in a table

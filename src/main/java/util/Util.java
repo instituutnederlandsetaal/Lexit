@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +29,12 @@ import resources.ContextObject;
  *
  */
 public class Util {
+	
+	
+	
+	// ******************************************************************
+	// TIME
+	// ******************************************************************
 	
 	static long lastTimeMilliSec = new Date().getTime();	
 	
@@ -43,6 +50,10 @@ public class Util {
 		
 			
 	}
+	
+	// ******************************************************************
+	// DEBUG
+	// ******************************************************************
 	
 	public static void debug(String output){
 		
@@ -66,7 +77,16 @@ public class Util {
 	}
 	
 	
+	
+	
+	
+	// ******************************************************************
+	// FILES  
+	// ******************************************************************
+	
+	
 	// read a file
+	
 	public static String readFile(String filename){
 		
 		StringBuilder sb = new StringBuilder();
@@ -90,7 +110,10 @@ public class Util {
 		return sb.toString();		
 	}
 	
+	
+	
 	// read a properties file
+	
 	public static ConcurrentHashMap<String, String> readPropertiesFile(
 			String filename, 
 			ConcurrentHashMap<String, String> databaseAccessHash){
@@ -121,7 +144,9 @@ public class Util {
 	}
 	
 	
+	
 	// get list of files
+	
 	public static String getListOfFiles(String path){
 		
 		File folder = new File(path);
@@ -147,6 +172,10 @@ public class Util {
 		return Util.join(sortedList, Constants.ARG_INTERNAL_SEPARATOR);		
 	}
 
+	
+	// ******************************************************************
+	// STRING 
+	// ******************************************************************
 
 	
 	// trim function that can cope with no-breaking space
@@ -167,6 +196,186 @@ public class Util {
 	public static boolean isGenuineWord(String value){
 		if (value == null) return false;
 		return value.matches("^([a-zA-Z·ÈÌÛ˙˝‡ËÏÚ˘‚ÍÓÙ˚‰ÎÔˆ¸ˇÒÁ¡…Õ”⁄›¿»Ã“Ÿ¬ Œ‘€ƒÀœ÷‹]+)$");
+	}
+	
+	
+	
+	
+	
+	// ******************************************************************
+	// SQL PROCESSING
+	// ******************************************************************
+	
+	/**
+	 * Returns a string like ?,?,?,...,?,?
+	 * needed for prepared updates.
+	 * The number of question marks depends on the number
+	 * of values to be represented
+	 * @param ref
+	 */
+	public static String getStringOfQuestionMarks(String[] ref){
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i<ref.length; i++)
+		{
+			if ( i>0) builder.append(",");
+			builder.append("?");
+		}
+		return builder.toString();
+	}
+
+
+	/**
+	 * In cases working with prepared statements is not convenient
+	 * We can check some list of args for semicolons and cut off
+	 * the string if it contains suspicious sql commands (prevent sql-injection)
+	 * @param args
+	 * @return
+	 */
+	public static String[] removeSuspiciousSql(String[] args){
+		
+		for (int i=0; i<args.length; i++)
+		{
+			int index = args[i].indexOf(";");
+			boolean suspicious = false;
+			
+			// check if the string is really suspicious
+			if (index>-1)
+			{
+				String stringToDoubleCheck = args[i].substring(index).toLowerCase();
+				suspicious = 
+					stringToDoubleCheck.indexOf("drop ")>-1 ||
+					stringToDoubleCheck.indexOf("update ")>-1 ||
+					stringToDoubleCheck.indexOf("insert ")>-1 ||
+					stringToDoubleCheck.indexOf("delete ")>-1;					 
+			}
+			
+			args[i] = suspicious ? args[i].substring(0, index) : args[i];
+		}
+		return args;
+	}
+	
+	
+	
+
+	
+//	/**
+//	 * Transform the XML we got from the GTB or ANW webservices into a DOM object
+//	 * @param xmlString
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public static Document getDOMfrom(String xmlString) throws Exception{
+//		
+//	    //Create blank DOM Document
+//	    Document doc = null;
+//	        
+//		try {
+//			doc = XmlUtil.parseXml(xmlString);
+//			
+//		} catch (SAXException e) {
+//			// TODO Auto-generated catch block
+//			throw new RuntimeException(e);
+//		}
+//		
+//		return doc;
+//	}
+//	
+	
+	
+	// ******************************************************************
+	// HASHES
+	// ******************************************************************
+	
+	// convert the password into a hash
+	public static String getHashOf(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+		
+		MessageDigest m = MessageDigest.getInstance("MD5");
+		m.reset();
+		m.update(password.getBytes());
+		byte[] digest = m.digest();
+		BigInteger bigInt = new BigInteger(1,digest);
+		String hashtext = bigInt.toString(16);
+		// Now we need to zero pad it if you actually want the full 32 chars.
+		while(hashtext.length() < 32 ){
+		  hashtext = "0"+hashtext;
+		}
+				
+		return hashtext;
+	}
+	
+	public static int getIntValueOfHashOf(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+		str = getHashOf(str);
+		int total = 0;
+		for (int i=0; i<str.length(); i++){
+			total += (int) str.charAt(i);
+		}
+		return total;
+	}
+	
+	
+	
+	// ******************************************************************
+	// NUMBERS
+	// ******************************************************************
+	
+	// test if a string is a number
+
+	public static boolean isInteger(String s) {
+		try {
+			Integer.parseInt(s);
+		}
+		catch (NumberFormatException e) {
+			return false;
+			}
+		return true;
+		}
+	
+
+	public static boolean isNumeric(String str)
+	{
+	  return str.matches("-?\\d+(.\\d+)?");
+	}
+	
+	
+	// ******************************************************************
+	// ARRAYS
+	// ******************************************************************
+	
+	
+	// concat two arrays
+	
+	public static String[] concatArr(String[] first, String[] second) {
+		if (first==null && second==null) return null;
+		else if (first==null) return second;
+		else if (second==null) return first;
+		
+	    List<String> both = new ArrayList<String>(first.length + second.length);
+	    Collections.addAll(both, first);
+	    Collections.addAll(both, second);
+	    return both.toArray(new String[both.size()]);
+	}
+	
+	
+	// clone an array
+	
+	public static String[] cloneArr(String[] someArray){
+		List<String> newArr = new ArrayList<String>(someArray.length);
+	    Collections.addAll(newArr, someArray);
+	    return newArr.toArray(new String[newArr.size()]);
+	}
+	
+	
+	// remove element from array
+	// (Improved version of https://stackoverflow.com/questions/642897/removing-an-element-from-an-array-java)
+	
+	public static String[] removeElement(String[] input, String deleteMe) {
+	    List<String> result = new LinkedList<String>();
+
+	    for(String item : input)
+	        if(!deleteMe.equals(item))
+	            result.add(item);
+
+	    return result.toArray(new String[result.size()]);
 	}
 	
 	
@@ -234,142 +443,7 @@ public class Util {
 		return -1;
 	}
 	
-	/**
-	 * Returns a string like ?,?,?,...,?,?
-	 * needed for prepared updates.
-	 * The number of question marks depends on the number
-	 * of values to be represented
-	 * @param ref
-	 */
-	public static String getStringOfQuestionMarks(String[] ref){
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i<ref.length; i++)
-		{
-			if ( i>0) builder.append(",");
-			builder.append("?");
-		}
-		return builder.toString();
-	}
-
-
-	/**
-	 * In cases working with prepared statements is not convenient
-	 * We can check some list of args for semicolons and cut off
-	 * the string if it contains suspicious sql commands (prevent sql-injection)
-	 * @param args
-	 * @return
-	 */
-	public static String[] removeSuspiciousSql(String[] args){
-		
-		for (int i=0; i<args.length; i++)
-		{
-			int index = args[i].indexOf(";");
-			boolean suspicious = false;
-			
-			// check if the string is really suspicious
-			if (index>-1)
-			{
-				String stringToDoubleCheck = args[i].substring(index).toLowerCase();
-				suspicious = 
-					stringToDoubleCheck.indexOf("drop ")>-1 ||
-					stringToDoubleCheck.indexOf("update ")>-1 ||
-					stringToDoubleCheck.indexOf("insert ")>-1 ||
-					stringToDoubleCheck.indexOf("delete ")>-1;					 
-			}
-			
-			args[i] = suspicious ? args[i].substring(0, index) : args[i];
-		}
-		return args;
-	}
 	
-	
-	public static boolean isNumeric(String str)
-	{
-	  return str.matches("-?\\d+(.\\d+)?");
-	}
-
-	
-//	/**
-//	 * Transform the XML we got from the GTB or ANW webservices into a DOM object
-//	 * @param xmlString
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public static Document getDOMfrom(String xmlString) throws Exception{
-//		
-//	    //Create blank DOM Document
-//	    Document doc = null;
-//	        
-//		try {
-//			doc = XmlUtil.parseXml(xmlString);
-//			
-//		} catch (SAXException e) {
-//			// TODO Auto-generated catch block
-//			throw new RuntimeException(e);
-//		}
-//		
-//		return doc;
-//	}
-//	
-	
-	
-	
-	
-	// convert the password into a hash
-	public static String getHashOf(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		
-		MessageDigest m = MessageDigest.getInstance("MD5");
-		m.reset();
-		m.update(password.getBytes());
-		byte[] digest = m.digest();
-		BigInteger bigInt = new BigInteger(1,digest);
-		String hashtext = bigInt.toString(16);
-		// Now we need to zero pad it if you actually want the full 32 chars.
-		while(hashtext.length() < 32 ){
-		  hashtext = "0"+hashtext;
-		}
-				
-		return hashtext;
-	}
-	
-	public static int getIntValueOfHashOf(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		str = getHashOf(str);
-		int total = 0;
-		for (int i=0; i<str.length(); i++){
-			total += (int) str.charAt(i);
-		}
-		return total;
-	}
-	
-	
-	// test if a string is a number
-	public static boolean isInteger(String s) {
-		try {
-			Integer.parseInt(s);
-		}
-		catch (NumberFormatException e) {
-			return false;
-			}
-		return true;
-		}
-	
-	
-	// concat two arrays
-	public static String[] concatArr(String[] first, String[] second) {
-		if (first==null && second==null) return null;
-		else if (first==null) return second;
-		else if (second==null) return first;
-		
-	    List<String> both = new ArrayList<String>(first.length + second.length);
-	    Collections.addAll(both, first);
-	    Collections.addAll(both, second);
-	    return both.toArray(new String[both.size()]);
-	}
-	
-	public static String[] cloneArr(String[] someArray){
-		List<String> newArr = new ArrayList<String>(someArray.length);
-	    Collections.addAll(newArr, someArray);
-	    return newArr.toArray(new String[newArr.size()]);
-	}
+	// ******************************************************************
 	
 }

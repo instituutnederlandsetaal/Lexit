@@ -2397,6 +2397,59 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 		} );
 };
 
+
+
+/**
+ * Duplicate a record in a table
+ * given its id (or a value for some serial record acting as PK).
+ * and, if needed, a list of columns to skip (t.i.: their values won't be duplicated).
+ * Eventually get the id of the new duplicate record.
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String[]} [aListOfColumnsToSkip=null] - A list of columns to be skipped
+ * @param {String} [pk_substitute=null] - field that acts as a primary key, in case the table lacks one; otherwise NULL
+ * @param {String} pk_value - value the primary key (or pk_substitute) must have
+ * @param {Function} [fnCallback=null] - Function called after the update
+ */
+fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute, pkValue, fnCallback){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// duplicate record in the database
+	var url = WEBSERV_URL+"/table/duplicaterecord"; 
+	
+	$.ajax( {
+		"type": "GET",
+		"async": false,
+		"url": url,
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sSomeTablename,
+			"columns_to_skip": ( aListOfColumnsToSkip == null ? aListOfColumnsToSkip : aListOfColumnsToSkip.join(ARG_INTERNAL_SEPARATOR) ),
+			"pk_substitute": ( pkSubstitute != null ? pkSubstitute : 'null' ),
+			"pk_value": pkValue,
+			"dummy": getUniqueNumber()
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {
+	 		var resp = fn.getDbResponse(xml);
+	 		
+	 		if (fnCallback!=null)
+	 			fnCallback(resp);
+	 		},
+	 	"error": function(jqXHR, textStatus, errorThrown){
+			// if table is loaded, we update it on the screen
+	 		if ( mt.tableExists(sSomeTablename))
+	 			fn.refreshTable(sSomeTablename);
+	 		fn.message("Fout", 
+	 			"Fout bij aanroep van fn.duplicateRecord("+sSomeTablename+"): "+
+				textStatus+" "+errorThrown);
+			}
+		} );
+};
+
+
 // *****************************************************************
 // *      GET ID FROM A RECORD IN THE DATABASE                     *
 // *****************************************************************
