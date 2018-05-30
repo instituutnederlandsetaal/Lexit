@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2018.05.28
+	v2018.05.30
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -210,8 +210,10 @@
 	
 	// booleans: which mode are we running?
 	var bTest;				// test mode
-	var bSpyMode;			// spy mode
+	var bSpyMode;			// global spy mode (who's logged in?)
+	var bRequestDbInfo;		// project spy mode ()
 	var bResetUserRights;	// reset user rights mode
+	
 	
 	// *********************************************************************************************************
 	
@@ -230,36 +232,51 @@
 		setInternalSeparator();
 		
 		
+		// -----------------------------------------------------
+		// Compute mode
+		
 		// Are we in development (test) mode?
 		// if so, we'll be loading the file from webcontent (with $.getScript)
 		// if not, we'll be loading the file from the configuration directory (with ajax call to webservice, which is the normal mode)
 		
 		bTest = (paramsHash!=null &&
 				paramsHash.get("test")!=null && 
-				paramsHash.get("test")=='true');
-		
+				paramsHash.get("test")=='true');		
 		
 		// are we getting a look into the active users list?
 				
 		bSpyMode = (paramsHash!=null &&
 				paramsHash.get("db")!=null && 
-				paramsHash.get("db")=='spy');
-		
+				paramsHash.get("db")=='spy');		
 		
 		// are we resetting the user rights?
-				
+		 
 		bResetUserRights = (paramsHash!=null &&
 				paramsHash.get("db")!=null && 
 				paramsHash.get("db")=='reset_user_rights');
 		
+		// are we requesting host/database name informtion for a given project?
+		
+		bRequestDbInfo =(paramsHash!=null &&
+				paramsHash.get("get_dbinfo")!=null);
 		
 		
+		// -----------------------------------------------------
 		
-		// spy mode
+		
+		// global spy mode (logging info)
 		
 		if (bSpyMode)
 			{				
 			buildSpy();
+			}
+		
+		
+		// project spy mode (database host info)
+		
+		else if (bRequestDbInfo)
+			{				
+			window.open( WEBSERV_URL+"/table/get_dbinfo?db="+paramsHash.get("get_dbinfo") );
 			}
 		
 		
@@ -512,10 +529,12 @@
 			}
 		else
 			{			
+			// Normal case: start opening project
+		
 			// Assign key functions
 			// This needs to be called here because it has global scope
 			// and recalling it at each new table creation will alter other key functions 
-			// which than malfunction (because of unbinds)
+			// which then malfunction (because of unbinds)
 			kf.addKeyFunctions();			
 			
 			
