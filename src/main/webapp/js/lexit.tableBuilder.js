@@ -260,7 +260,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				return $.extend( {}, d, {
 			        "sDbName": 			getHttpParams().get("db"),
 			        "sTableName": 		sSomeTableName,
-			        "sAllColumns": 		mt.getListOfColumnsOf(sSomeTableName).join(ARG_INTERNAL_SEPARATOR),
 			        "bForceExactCount":	bForceExactCount,
 			        "sGoToRowIds":		sGoToRowIds      // needed for GoTo function, when working with row ids (all info at Database.getRowNumberOfRecord)
 			      } );
@@ -928,9 +927,10 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			var falseValue = bIsBooleanType ? false : "\"\"";
 			
 			aColProps.push( { 
-				"data": 		sNameOfCurrentColumn, 
+				"name": 		sNameOfCurrentColumn,
+				"data": 		sNameOfCurrentColumn,
 				"searchable":	false, 
-				"targets": 		[ i ],
+				"targets": 		[i],
 				"render": 		function ( data, type, row  ) {
 					
 					// NOTE: it is not possible to set
@@ -967,9 +967,10 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		else if (aSelectBoxValues != null && aSelectBoxValues.length>1)
 			{			
 			aColProps.push( { 
-				"data": 		sNameOfCurrentColumn, 
+				"name": 		sNameOfCurrentColumn, 
+				"data": 		sNameOfCurrentColumn,
 				"searchable":	columnVisible ? columnSearchable : false, 
-				"targets": 		[ i ],
+				"targets": 		[i],
 				"class": 		columnEditable ? 
 								sClassPrefix + "editable_selectbox"
 								: sClassPrefix + "not_editable_selectbox",
@@ -983,9 +984,10 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			if (columnButton == null)
 				{
 				aColProps.push( {
-					"data": 		sNameOfCurrentColumn, 
+					"name": 		sNameOfCurrentColumn, 
+					"data": 		sNameOfCurrentColumn,
 					"searchable":	columnVisible ? columnSearchable : false, 
-					"targets": 		[ i ],					
+					"targets": 		[i],					
 					"class": 		columnEditable ?
 									sClassPrefix + "editable_text" 
 									: sClassPrefix + "not_editable_text",
@@ -998,9 +1000,10 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			else
 				{
 				aColProps.push( { 
-					"data": 		sNameOfCurrentColumn, 
+					"name": 		sNameOfCurrentColumn, 
+					"data": 		sNameOfCurrentColumn,
 					"searchable":	columnVisible ? columnSearchable : false, 
-					"targets": 		[ i ],
+					"targets": 		[i],
 					"class": 		columnEditable ?
 									sClassPrefix + "editable_text" 
 									: sClassPrefix + "not_editable_text",

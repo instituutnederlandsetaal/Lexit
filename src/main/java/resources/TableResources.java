@@ -1024,7 +1024,6 @@ public class TableResources {
 			
 			@DefaultValue("") @FormParam("sGoToRowIds") String sGoToRowIds,
 			
-			@DefaultValue("") @FormParam("sAllColumns") String allColumns,
 			@DefaultValue("0") @FormParam("order[0][column]") int iSortCol_0,
 			@DefaultValue("asc") @FormParam("order[0][dir]") String sSortDir_0,
 			@DefaultValue("-1") @FormParam("order[1][column]") int iSortCol_1,
@@ -1039,116 +1038,116 @@ public class TableResources {
 			@DefaultValue("10") @FormParam("length") int iDisplayLength,
 			@DefaultValue("0") @FormParam("start") int iDisplayStart,	
 			
-			@DefaultValue("") @FormParam("columns[0][data]") String column0,
-			@DefaultValue("") @FormParam("columns[1][data]") String column1,
-			@DefaultValue("") @FormParam("columns[2][data]") String column2,
-			@DefaultValue("") @FormParam("columns[3][data]") String column3,
-			@DefaultValue("") @FormParam("columns[4][data]") String column4,
-			@DefaultValue("") @FormParam("columns[5][data]") String column5,
-			@DefaultValue("") @FormParam("columns[6][data]") String column6,
-			@DefaultValue("") @FormParam("columns[7][data]") String column7,
-			@DefaultValue("") @FormParam("columns[8][data]") String column8,
-			@DefaultValue("") @FormParam("columns[9][data]") String column9,
-			@DefaultValue("") @FormParam("columns[10][data]") String column10,
-			@DefaultValue("") @FormParam("columns[11][data]") String column11,
-			@DefaultValue("") @FormParam("columns[12][data]") String column12,
-			@DefaultValue("") @FormParam("columns[13][data]") String column13,
-			@DefaultValue("") @FormParam("columns[14][data]") String column14,
-			@DefaultValue("") @FormParam("columns[15][data]") String column15,
-			@DefaultValue("") @FormParam("columns[16][data]") String column16,
-			@DefaultValue("") @FormParam("columns[17][data]") String column17,
-			@DefaultValue("") @FormParam("columns[18][data]") String column18,
-			@DefaultValue("") @FormParam("columns[19][data]") String column19,
-			@DefaultValue("") @FormParam("columns[20][data]") String column20,
-			@DefaultValue("") @FormParam("columns[21][data]") String column21,
-			@DefaultValue("") @FormParam("columns[22][data]") String column22,
-			@DefaultValue("") @FormParam("columns[23][data]") String column23,
-			@DefaultValue("") @FormParam("columns[24][data]") String column24,
-			@DefaultValue("") @FormParam("columns[25][data]") String column25,
-			@DefaultValue("") @FormParam("columns[26][data]") String column26,
-			@DefaultValue("") @FormParam("columns[27][data]") String column27,
-			@DefaultValue("") @FormParam("columns[28][data]") String column28,
-			@DefaultValue("") @FormParam("columns[29][data]") String column29,
-			@DefaultValue("") @FormParam("columns[30][data]") String column30,
-			@DefaultValue("") @FormParam("columns[31][data]") String column31,
-			@DefaultValue("") @FormParam("columns[32][data]") String column32,
-			@DefaultValue("") @FormParam("columns[33][data]") String column33,
-			@DefaultValue("") @FormParam("columns[34][data]") String column34,
-			@DefaultValue("") @FormParam("columns[35][data]") String column35,
-			@DefaultValue("") @FormParam("columns[36][data]") String column36,
-			@DefaultValue("") @FormParam("columns[37][data]") String column37,
-			@DefaultValue("") @FormParam("columns[38][data]") String column38,
-			@DefaultValue("") @FormParam("columns[39][data]") String column39,
-			@DefaultValue("") @FormParam("columns[40][data]") String column40,
-			@DefaultValue("") @FormParam("columns[41][data]") String column41,
-			@DefaultValue("") @FormParam("columns[42][data]") String column42,
-			@DefaultValue("") @FormParam("columns[43][data]") String column43,
-			@DefaultValue("") @FormParam("columns[44][data]") String column44,
-			@DefaultValue("") @FormParam("columns[45][data]") String column45,
-			@DefaultValue("") @FormParam("columns[46][data]") String column46,
-			@DefaultValue("") @FormParam("columns[47][data]") String column47,
-			@DefaultValue("") @FormParam("columns[48][data]") String column48,
-			@DefaultValue("") @FormParam("columns[49][data]") String column49,
-			@DefaultValue("") @FormParam("columns[50][data]") String column50,
-			@DefaultValue("") @FormParam("columns[51][data]") String column51,
-			@DefaultValue("") @FormParam("columns[52][data]") String column52,
-			@DefaultValue("") @FormParam("columns[53][data]") String column53,
-			@DefaultValue("") @FormParam("columns[54][data]") String column54,
-			@DefaultValue("") @FormParam("columns[55][data]") String column55,
-			@DefaultValue("") @FormParam("columns[56][data]") String column56,
-			@DefaultValue("") @FormParam("columns[57][data]") String column57,
-			@DefaultValue("") @FormParam("columns[58][data]") String column58,
-			@DefaultValue("") @FormParam("columns[59][data]") String column59,
-			@DefaultValue("") @FormParam("columns[60][data]") String column60,
-			@DefaultValue("") @FormParam("columns[61][data]") String column61,
-			@DefaultValue("") @FormParam("columns[62][data]") String column62,
-			@DefaultValue("") @FormParam("columns[63][data]") String column63,
-			@DefaultValue("") @FormParam("columns[64][data]") String column64,
-			@DefaultValue("") @FormParam("columns[65][data]") String column65,
-			@DefaultValue("") @FormParam("columns[66][data]") String column66,
-			@DefaultValue("") @FormParam("columns[67][data]") String column67,
-			@DefaultValue("") @FormParam("columns[68][data]") String column68,
-			@DefaultValue("") @FormParam("columns[69][data]") String column69,
-			@DefaultValue("") @FormParam("columns[70][data]") String column70,
-			@DefaultValue("") @FormParam("columns[71][data]") String column71,
-			@DefaultValue("") @FormParam("columns[72][data]") String column72,
-			@DefaultValue("") @FormParam("columns[73][data]") String column73,
-			@DefaultValue("") @FormParam("columns[74][data]") String column74,
-			@DefaultValue("") @FormParam("columns[75][data]") String column75,
-			@DefaultValue("") @FormParam("columns[76][data]") String column76,
-			@DefaultValue("") @FormParam("columns[77][data]") String column77,
-			@DefaultValue("") @FormParam("columns[78][data]") String column78,
-			@DefaultValue("") @FormParam("columns[79][data]") String column79,			
-			@DefaultValue("") @FormParam("columns[80][data]") String column80,
-			@DefaultValue("") @FormParam("columns[81][data]") String column81,
-			@DefaultValue("") @FormParam("columns[82][data]") String column82,
-			@DefaultValue("") @FormParam("columns[83][data]") String column83,
-			@DefaultValue("") @FormParam("columns[84][data]") String column84,
-			@DefaultValue("") @FormParam("columns[85][data]") String column85,
-			@DefaultValue("") @FormParam("columns[86][data]") String column86,
-			@DefaultValue("") @FormParam("columns[87][data]") String column87,
-			@DefaultValue("") @FormParam("columns[88][data]") String column88,
-			@DefaultValue("") @FormParam("columns[89][data]") String column89,
-			@DefaultValue("") @FormParam("columns[90][data]") String column90,
-			@DefaultValue("") @FormParam("columns[91][data]") String column91,
-			@DefaultValue("") @FormParam("columns[92][data]") String column92,
-			@DefaultValue("") @FormParam("columns[93][data]") String column93,
-			@DefaultValue("") @FormParam("columns[94][data]") String column94,
-			@DefaultValue("") @FormParam("columns[95][data]") String column95,
-			@DefaultValue("") @FormParam("columns[96][data]") String column96,
-			@DefaultValue("") @FormParam("columns[97][data]") String column97,
-			@DefaultValue("") @FormParam("columns[98][data]") String column98,
-			@DefaultValue("") @FormParam("columns[99][data]") String column99,
-			@DefaultValue("") @FormParam("columns[100][data]") String column100,
-			@DefaultValue("") @FormParam("columns[101][data]") String column101,
-			@DefaultValue("") @FormParam("columns[102][data]") String column102,
-			@DefaultValue("") @FormParam("columns[103][data]") String column103,
-			@DefaultValue("") @FormParam("columns[104][data]") String column104,
-			@DefaultValue("") @FormParam("columns[105][data]") String column105,
-			@DefaultValue("") @FormParam("columns[106][data]") String column106,
-			@DefaultValue("") @FormParam("columns[107][data]") String column107,
-			@DefaultValue("") @FormParam("columns[108][data]") String column108,
-			@DefaultValue("") @FormParam("columns[109][data]") String column109,
+			@DefaultValue("") @FormParam("columns[0][name]") String column0,
+			@DefaultValue("") @FormParam("columns[1][name]") String column1,
+			@DefaultValue("") @FormParam("columns[2][name]") String column2,
+			@DefaultValue("") @FormParam("columns[3][name]") String column3,
+			@DefaultValue("") @FormParam("columns[4][name]") String column4,
+			@DefaultValue("") @FormParam("columns[5][name]") String column5,
+			@DefaultValue("") @FormParam("columns[6][name]") String column6,
+			@DefaultValue("") @FormParam("columns[7][name]") String column7,
+			@DefaultValue("") @FormParam("columns[8][name]") String column8,
+			@DefaultValue("") @FormParam("columns[9][name]") String column9,
+			@DefaultValue("") @FormParam("columns[10][name]") String column10,
+			@DefaultValue("") @FormParam("columns[11][name]") String column11,
+			@DefaultValue("") @FormParam("columns[12][name]") String column12,
+			@DefaultValue("") @FormParam("columns[13][name]") String column13,
+			@DefaultValue("") @FormParam("columns[14][name]") String column14,
+			@DefaultValue("") @FormParam("columns[15][name]") String column15,
+			@DefaultValue("") @FormParam("columns[16][name]") String column16,
+			@DefaultValue("") @FormParam("columns[17][name]") String column17,
+			@DefaultValue("") @FormParam("columns[18][name]") String column18,
+			@DefaultValue("") @FormParam("columns[19][name]") String column19,
+			@DefaultValue("") @FormParam("columns[20][name]") String column20,
+			@DefaultValue("") @FormParam("columns[21][name]") String column21,
+			@DefaultValue("") @FormParam("columns[22][name]") String column22,
+			@DefaultValue("") @FormParam("columns[23][name]") String column23,
+			@DefaultValue("") @FormParam("columns[24][name]") String column24,
+			@DefaultValue("") @FormParam("columns[25][name]") String column25,
+			@DefaultValue("") @FormParam("columns[26][name]") String column26,
+			@DefaultValue("") @FormParam("columns[27][name]") String column27,
+			@DefaultValue("") @FormParam("columns[28][name]") String column28,
+			@DefaultValue("") @FormParam("columns[29][name]") String column29,
+			@DefaultValue("") @FormParam("columns[30][name]") String column30,
+			@DefaultValue("") @FormParam("columns[31][name]") String column31,
+			@DefaultValue("") @FormParam("columns[32][name]") String column32,
+			@DefaultValue("") @FormParam("columns[33][name]") String column33,
+			@DefaultValue("") @FormParam("columns[34][name]") String column34,
+			@DefaultValue("") @FormParam("columns[35][name]") String column35,
+			@DefaultValue("") @FormParam("columns[36][name]") String column36,
+			@DefaultValue("") @FormParam("columns[37][name]") String column37,
+			@DefaultValue("") @FormParam("columns[38][name]") String column38,
+			@DefaultValue("") @FormParam("columns[39][name]") String column39,
+			@DefaultValue("") @FormParam("columns[40][name]") String column40,
+			@DefaultValue("") @FormParam("columns[41][name]") String column41,
+			@DefaultValue("") @FormParam("columns[42][name]") String column42,
+			@DefaultValue("") @FormParam("columns[43][name]") String column43,
+			@DefaultValue("") @FormParam("columns[44][name]") String column44,
+			@DefaultValue("") @FormParam("columns[45][name]") String column45,
+			@DefaultValue("") @FormParam("columns[46][name]") String column46,
+			@DefaultValue("") @FormParam("columns[47][name]") String column47,
+			@DefaultValue("") @FormParam("columns[48][name]") String column48,
+			@DefaultValue("") @FormParam("columns[49][name]") String column49,
+			@DefaultValue("") @FormParam("columns[50][name]") String column50,
+			@DefaultValue("") @FormParam("columns[51][name]") String column51,
+			@DefaultValue("") @FormParam("columns[52][name]") String column52,
+			@DefaultValue("") @FormParam("columns[53][name]") String column53,
+			@DefaultValue("") @FormParam("columns[54][name]") String column54,
+			@DefaultValue("") @FormParam("columns[55][name]") String column55,
+			@DefaultValue("") @FormParam("columns[56][name]") String column56,
+			@DefaultValue("") @FormParam("columns[57][name]") String column57,
+			@DefaultValue("") @FormParam("columns[58][name]") String column58,
+			@DefaultValue("") @FormParam("columns[59][name]") String column59,
+			@DefaultValue("") @FormParam("columns[60][name]") String column60,
+			@DefaultValue("") @FormParam("columns[61][name]") String column61,
+			@DefaultValue("") @FormParam("columns[62][name]") String column62,
+			@DefaultValue("") @FormParam("columns[63][name]") String column63,
+			@DefaultValue("") @FormParam("columns[64][name]") String column64,
+			@DefaultValue("") @FormParam("columns[65][name]") String column65,
+			@DefaultValue("") @FormParam("columns[66][name]") String column66,
+			@DefaultValue("") @FormParam("columns[67][name]") String column67,
+			@DefaultValue("") @FormParam("columns[68][name]") String column68,
+			@DefaultValue("") @FormParam("columns[69][name]") String column69,
+			@DefaultValue("") @FormParam("columns[70][name]") String column70,
+			@DefaultValue("") @FormParam("columns[71][name]") String column71,
+			@DefaultValue("") @FormParam("columns[72][name]") String column72,
+			@DefaultValue("") @FormParam("columns[73][name]") String column73,
+			@DefaultValue("") @FormParam("columns[74][name]") String column74,
+			@DefaultValue("") @FormParam("columns[75][name]") String column75,
+			@DefaultValue("") @FormParam("columns[76][name]") String column76,
+			@DefaultValue("") @FormParam("columns[77][name]") String column77,
+			@DefaultValue("") @FormParam("columns[78][name]") String column78,
+			@DefaultValue("") @FormParam("columns[79][name]") String column79,			
+			@DefaultValue("") @FormParam("columns[80][name]") String column80,
+			@DefaultValue("") @FormParam("columns[81][name]") String column81,
+			@DefaultValue("") @FormParam("columns[82][name]") String column82,
+			@DefaultValue("") @FormParam("columns[83][name]") String column83,
+			@DefaultValue("") @FormParam("columns[84][name]") String column84,
+			@DefaultValue("") @FormParam("columns[85][name]") String column85,
+			@DefaultValue("") @FormParam("columns[86][name]") String column86,
+			@DefaultValue("") @FormParam("columns[87][name]") String column87,
+			@DefaultValue("") @FormParam("columns[88][name]") String column88,
+			@DefaultValue("") @FormParam("columns[89][name]") String column89,
+			@DefaultValue("") @FormParam("columns[90][name]") String column90,
+			@DefaultValue("") @FormParam("columns[91][name]") String column91,
+			@DefaultValue("") @FormParam("columns[92][name]") String column92,
+			@DefaultValue("") @FormParam("columns[93][name]") String column93,
+			@DefaultValue("") @FormParam("columns[94][name]") String column94,
+			@DefaultValue("") @FormParam("columns[95][name]") String column95,
+			@DefaultValue("") @FormParam("columns[96][name]") String column96,
+			@DefaultValue("") @FormParam("columns[97][name]") String column97,
+			@DefaultValue("") @FormParam("columns[98][name]") String column98,
+			@DefaultValue("") @FormParam("columns[99][name]") String column99,
+			@DefaultValue("") @FormParam("columns[100][name]") String column100,
+			@DefaultValue("") @FormParam("columns[101][name]") String column101,
+			@DefaultValue("") @FormParam("columns[102][name]") String column102,
+			@DefaultValue("") @FormParam("columns[103][name]") String column103,
+			@DefaultValue("") @FormParam("columns[104][name]") String column104,
+			@DefaultValue("") @FormParam("columns[105][name]") String column105,
+			@DefaultValue("") @FormParam("columns[106][name]") String column106,
+			@DefaultValue("") @FormParam("columns[107][name]") String column107,
+			@DefaultValue("") @FormParam("columns[108][name]") String column108,
+			@DefaultValue("") @FormParam("columns[109][name]") String column109,
 			
 			@DefaultValue("") @FormParam("search[value]") String sSearch,
 			
@@ -1287,7 +1286,7 @@ public class TableResources {
 		
 		// column names
 		
-		String[] columnsArr = new String[]{
+		String[] aAllColumns = new String[]{
 				column0, 
 				column1, column2, column3,
 				column4, column5, column6,
@@ -1335,7 +1334,7 @@ public class TableResources {
 		
 		// search values
 		
-		String[] columnSearchArr = new String[]{
+		String[] aAllColumnSearchValues = new String[]{
 				sSearch0, 
 				sSearch1, sSearch2, sSearch3,
 				sSearch4, sSearch5, sSearch6,
@@ -1381,15 +1380,23 @@ public class TableResources {
 				sSearch104, sSearch105, sSearch106,
 				sSearch107, sSearch108, sSearch109};
 		
-		ArrayList<String> newColumnsArr = new ArrayList<String>();
-		ArrayList<String> newColumnSearchArr = new ArrayList<String>();
-		ArrayList<Boolean> newCaseSensitiveColumnSearchArr = new ArrayList<Boolean>();
+		// Compute useful part of the arrays
+		// We need this because the tail of the arrays consists of empty values, since the table is mostly smaller than the max number of allowed columns
+		
+		int startOfEmptyRange = Util.getIndexOf("", aAllColumns);
+		String[] aCleanAllColumns = Arrays.copyOfRange(aAllColumns, 0, startOfEmptyRange);
+		
+		// search arrays
+		
+		ArrayList<String> aSearchColumnNames = new ArrayList<String>();
+		ArrayList<String> aSearchColumnValues = new ArrayList<String>();
+		ArrayList<Boolean> aCaseSensitiveColumnSearch = new ArrayList<Boolean>();
 		
 		// Is the current call triggers by a call of the GoTo function?
 		// (beware: the particular case in which we use row-ids for speed;
 		//  See info at Database.getRowNumberOfRecord)
 		
-		boolean bCallForGoToFunction = !sGoToRowIds.isEmpty();
+		boolean bCallForGoToFunction = !sGoToRowIds.isEmpty();   // sGoToRowIds has the form 'column name':'ids'
 		
 		
 		// gather search data for all columns
@@ -1397,29 +1404,28 @@ public class TableResources {
 		// first add the row ids searched for (this occurs only when carrying out a GoTo operation [making use of row ids -when available- for speed!])
 		if ( bCallForGoToFunction )
 		{
-			String idsColumn = (sGoToRowIds.split(":"))[0];
-			String idsValues = (sGoToRowIds.split(":"))[1];
-			int idsColumnIdx = Util.getIndexOf(idsColumn, columnsArr);
+			String idsColumn = (sGoToRowIds.split(":"))[0];	// column name
+			String idsValues = (sGoToRowIds.split(":"))[1];	// ids
+			int idsColumnIdx = Util.getIndexOf(idsColumn, aAllColumns);
 			
-			columnsArr[idsColumnIdx] = idsColumn;
-			columnSearchArr[idsColumnIdx] = idsValues;
+			aAllColumnSearchValues[idsColumnIdx] = idsValues;
 			
-			// Set start pos to 0, as we're targeting some row ids, so we don't when the webservice to set an offset.
+			// Set start position to 0, as we're targeting some row ids, so we don't want the webservice to set an offset.
 			// But since this is part of a GoTo operation, we let the client think it is requesting some given page number
 			// so apparently the function really behaves like a GoTo function (t.i. a navigation function, leading to some page number).
-			// In really to, we've been requesting a list of row ids, and get page 1 of the results!
+			// In reality, we've been requesting a list of row ids, and get page 1 of the results!
 			iDisplayStart = 0;
 		}
 		
 		// now gather the search data for all columns
-		for (int i=0; i<columnSearchArr.length; i++)
+		for (int i=0; i<aAllColumnSearchValues.length; i++)
 		{
-			String oneSearchColumn = columnSearchArr[i].trim();
+			String oneSearchColumn = aAllColumnSearchValues[i].trim();
 			if ( !oneSearchColumn.isEmpty())
 			{				
-				newColumnsArr.add( columnsArr[i] );  
-				newCaseSensitiveColumnSearchArr.add( setRightCaseSensitivity(oneSearchColumn) );
-				newColumnSearchArr.add(  setRightSearchValue(oneSearchColumn)  );
+				aSearchColumnNames.add( aAllColumns[i] );  
+				aSearchColumnValues.add(  setRightSearchValue(oneSearchColumn)  );
+				aCaseSensitiveColumnSearch.add( setRightCaseSensitivity(oneSearchColumn) );
 			}
 		}
 		
@@ -1435,26 +1441,26 @@ public class TableResources {
 		// sorting
 		ArrayList<String> tmpSortCol = new ArrayList<String>();
 		ArrayList<String> tmpSortDir = new ArrayList<String>();
-		tmpSortCol.add( columnsArr[iSortCol_0] );
+		tmpSortCol.add( aAllColumns[iSortCol_0] );
 		tmpSortDir.add(sSortDir_0);
 		if (iSortCol_1 >-1 && sSortDir_1.toLowerCase().matches("asc|desc"))
 		{
-			tmpSortCol.add( columnsArr[iSortCol_1] );
+			tmpSortCol.add( aAllColumns[iSortCol_1] );
 			tmpSortDir.add(sSortDir_1);
 		}
 		if (iSortCol_2 >-1 && sSortDir_2.toLowerCase().matches("asc|desc"))
 		{
-			tmpSortCol.add( columnsArr[iSortCol_2] );
+			tmpSortCol.add( aAllColumns[iSortCol_2] );
 			tmpSortDir.add(sSortDir_2);
 		}
 		if (iSortCol_3 >-1 && sSortDir_3.toLowerCase().matches("asc|desc"))
 		{
-			tmpSortCol.add( columnsArr[iSortCol_3] );
+			tmpSortCol.add( aAllColumns[iSortCol_3] );
 			tmpSortDir.add(sSortDir_3);
 		}
 		if (iSortCol_4 >-1 && sSortDir_4.toLowerCase().matches("asc|desc"))
 		{
-			tmpSortCol.add( columnsArr[iSortCol_4] );
+			tmpSortCol.add( aAllColumns[iSortCol_4] );
 			tmpSortDir.add(sSortDir_4);
 		}
 		// convert to arrays
@@ -1465,9 +1471,9 @@ public class TableResources {
 		// return the table		
 		return new TableDataInspector(getDatabaseObject(co),
 				tableName, countOfTable, countQualityOfTable,
-				allColumns.split(Constants.ARG_INTERNAL_SEPARATOR, -1),
+				aCleanAllColumns,
 				iDisplayLength, iDisplayStart, setRightSearchValue(sSearch), 
-				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr,
+				aSearchColumnNames, aSearchColumnValues, aCaseSensitiveColumnSearch,
 				true, aSortCol, aSortDir, iEcho, bCallForGoToFunction
 				);
 		

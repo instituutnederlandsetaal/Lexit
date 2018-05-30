@@ -102,8 +102,8 @@ public class ResultObject {
 			String tableName, int countOfTable, boolean countQualityOfTable,
 			String allColumns[], int iDisplayLength, 
 			int iDisplayStart, String sSearch, 
-			ArrayList<String> newColumnsArr, ArrayList<String> newColumnSearchArr,
-			ArrayList<Boolean> newCaseSensitiveColumnSearchArr,
+			ArrayList<String> aSearchColumnNames, ArrayList<String> aSearchColumnValues,
+			ArrayList<Boolean> aCaseSensitiveSearchColumns,
 			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho, boolean bCallForGoToFunction ){
 		
 		// set table name and count
@@ -117,7 +117,7 @@ public class ResultObject {
 		TableAndCountObject tableAndCount = dbObj.getTable( 
 				tableName, countOfTable, allColumns, iDisplayLength, 
 				iDisplayStart, sSearch, 
-				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr,
+				aSearchColumnNames, aSearchColumnValues, aCaseSensitiveSearchColumns,
 				weMustSort, aSortCol, aSortDir);
 		
 		// are the sorting columns indexed?

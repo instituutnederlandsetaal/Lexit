@@ -27,15 +27,15 @@ public class TableDataInspector {
 	String[] aSortCol, aSortDir, allColumns;
 	int iDisplayLength, iDisplayStart, countOfTable, searchColumnIndex, iEcho;
 	boolean weMustSort, countQualityOfTable, bCallForGoToFunction;
-	ArrayList<String> newColumnsArr, newColumnSearchArr;
-	ArrayList<Boolean> newCaseSensitiveColumnSearchArr;
+	ArrayList<String> aSearchColumnNames, aSearchColumnValues;
+	ArrayList<Boolean> aCaseSensitiveSearchColumns;
 	
 	public TableDataInspector(Database dbObj,
 			String tableName, int countOfTable, boolean countQualityOfTable,
 			String[] allColumns, 
 			int iDisplayLength, int iDisplayStart, String sSearch, 
-			ArrayList<String> newColumnsArr, ArrayList<String> newColumnSearchArr, 
-			ArrayList<Boolean> newCaseSensitiveColumnSearchArr,
+			ArrayList<String> searchColumnNamesArr, ArrayList<String> searchColumnValuesArr, 
+			ArrayList<Boolean> caseSensitiveSearchColumnsArr,
 			boolean weMustSort, String[] aSortCol, String[] aSortDir, int iEcho, boolean bCallForGoToFunction) {
 		
 		this.dbObj = dbObj;
@@ -44,9 +44,9 @@ public class TableDataInspector {
 		this.iDisplayLength = iDisplayLength;
 		this.iDisplayStart = iDisplayStart;
 		this.sSearch = sSearch;
-		this.newColumnsArr = newColumnsArr;
-		this.newColumnSearchArr = newColumnSearchArr;
-		this.newCaseSensitiveColumnSearchArr = newCaseSensitiveColumnSearchArr;
+		this.aSearchColumnNames = searchColumnNamesArr;
+		this.aSearchColumnValues = searchColumnValuesArr;
+		this.aCaseSensitiveSearchColumns = caseSensitiveSearchColumnsArr;
 		this.aSortCol = aSortCol;
 		this.aSortDir = aSortDir;
 		this.countOfTable = countOfTable;
@@ -66,8 +66,9 @@ public class TableDataInspector {
 		
 		return new ResultObject(dbObj, tableName, countOfTable, countQualityOfTable, allColumns,
 				iDisplayLength, iDisplayStart, sSearch, 
-				newColumnsArr, newColumnSearchArr, newCaseSensitiveColumnSearchArr, weMustSort, 
-				aSortCol, aSortDir, iEcho, bCallForGoToFunction);
+				aSearchColumnNames, aSearchColumnValues, aCaseSensitiveSearchColumns, 
+				weMustSort, aSortCol, aSortDir, 
+				iEcho, bCallForGoToFunction);
 		
 	}
 	

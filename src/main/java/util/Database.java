@@ -2257,8 +2257,7 @@ public class Database {
 			String tableName, int countOfWholeTable, String[] allColumns, 
 			int iDisplayLength, 
 			int iDisplayStart, String sSearch, 
-			ArrayList<String> aSearchColumnNames, ArrayList<String> aSearchColumnValues, 
-			ArrayList<Boolean> aCaseSensitiveColumnSearch,
+			ArrayList<String> aSearchColumnNames, ArrayList<String> aSearchColumnValues, ArrayList<Boolean> aCaseSensitiveColumnSearch,
 			boolean weMustSort, 
 			String[] aSortCol, String[] aSortDir){
 		
