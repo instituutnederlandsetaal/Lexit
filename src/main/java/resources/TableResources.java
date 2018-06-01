@@ -1148,6 +1148,12 @@ public class TableResources {
 			@DefaultValue("") @FormParam("columns[107][name]") String column107,
 			@DefaultValue("") @FormParam("columns[108][name]") String column108,
 			@DefaultValue("") @FormParam("columns[109][name]") String column109,
+			@DefaultValue("") @FormParam("columns[110][name]") String column110,
+			@DefaultValue("") @FormParam("columns[111][name]") String column111,
+			@DefaultValue("") @FormParam("columns[112][name]") String column112,
+			@DefaultValue("") @FormParam("columns[113][name]") String column113,
+			@DefaultValue("") @FormParam("columns[114][name]") String column114,
+			@DefaultValue("") @FormParam("columns[115][name]") String column115,
 			
 			@DefaultValue("") @FormParam("search[value]") String sSearch,
 			
@@ -1261,6 +1267,12 @@ public class TableResources {
 			@DefaultValue("") @FormParam("columns[107][search][value]") String sSearch107,
 			@DefaultValue("") @FormParam("columns[108][search][value]") String sSearch108,
 			@DefaultValue("") @FormParam("columns[109][search][value]") String sSearch109,
+			@DefaultValue("") @FormParam("columns[110][search][value]") String sSearch110,
+			@DefaultValue("") @FormParam("columns[111][search][value]") String sSearch111,
+			@DefaultValue("") @FormParam("columns[112][search][value]") String sSearch112,
+			@DefaultValue("") @FormParam("columns[113][search][value]") String sSearch113,
+			@DefaultValue("") @FormParam("columns[114][search][value]") String sSearch114,
+			@DefaultValue("") @FormParam("columns[115][search][value]") String sSearch115,
 			
 			@DefaultValue("") @FormParam("bForceExactCount") String sForceExactCount,
 			
@@ -1330,7 +1342,10 @@ public class TableResources {
 				column100, 
 				column101, column102, column103,
 				column104, column105, column106,
-				column107, column108, column109};
+				column107, column108, column109,
+				column110, 
+				column111, column112, column113,
+				column114, column115};
 		
 		// search values
 		
@@ -1378,13 +1393,16 @@ public class TableResources {
 				sSearch100, 
 				sSearch101, sSearch102, sSearch103,
 				sSearch104, sSearch105, sSearch106,
-				sSearch107, sSearch108, sSearch109};
+				sSearch107, sSearch108, sSearch109,
+				sSearch110, 
+				sSearch111, sSearch112, sSearch113,
+				sSearch114, sSearch115};
 		
 		// Compute useful part of the arrays
 		// We need this because the tail of the arrays consists of empty values, since the table is mostly smaller than the max number of allowed columns
 		
 		int startOfEmptyRange = Util.getIndexOf("", aAllColumns);
-		String[] aCleanAllColumns = Arrays.copyOfRange(aAllColumns, 0, startOfEmptyRange);
+		String[] aCleanAllColumns = startOfEmptyRange > -1 ? Arrays.copyOfRange(aAllColumns, 0, startOfEmptyRange) : aAllColumns;
 		
 		// search arrays
 		
