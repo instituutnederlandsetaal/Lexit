@@ -681,6 +681,17 @@ conf.getVisibility = function(aColumnConfig){
 };
 
 
+// retrieve col width settings
+// default is null
+
+conf.getWidth = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["width"] == 'undefined')
+		return null;
+	return aColumnConfig["width"];
+};
+
+
 // retrieve flexible_visibility settings
 // default is flexible_visibility:true
 
@@ -851,8 +862,21 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 		{
 		for (colName in oTsColSettings)
 			{
+			// get column index, given the column name
 			var iColIndex = 	$.inArray(colName, mt.getListOfColumnsOf(sSomeTablename));
-			aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
+			
+			// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
+			// it will cause Datatables to give a very cryptic error message.
+			// So, to prevent that, give a useful and understandable error message here!
+			if (iColIndex<0)
+				{
+				fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+colName+"' als sorteer-kolom, maar deze kolom bestaat niet!");
+				}
+			else
+				{
+				aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
+				}
+			
 			}
 		
 		return aColSettings;
@@ -868,9 +892,22 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 		{
 		var sDefaultSortCol = aDefaultSortCols[i];		
 		var sSortDir  = 	conf.getSortingColumnDirection(conf.getColumnConfig(oTableConfig, sDefaultSortCol));
+		
+		// get column index, given the column name
 		var iColIndex = 	$.inArray(sDefaultSortCol, mt.getListOfColumnsOf(sSomeTablename));
 		
-		aColSettings.push([ iColIndex, sSortDir ]);
+		// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
+		// it will cause Datatables to give a very cryptic error message.
+		// So, to prevent that, give a useful and understandable error message here!
+		if (iColIndex<0)
+			{
+			fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+sDefaultSortCol+"' als sorteer-kolom, maar deze kolom bestaat niet!");
+			}
+		else
+			{
+			aColSettings.push([ iColIndex, sSortDir ]);
+			}	
+		
 		}
 	return aColSettings;
 };

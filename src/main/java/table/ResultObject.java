@@ -16,77 +16,36 @@ import javax.xml.bind.annotation.XmlTransient;
 import resources.Constants;
 import util.Database;
 
-@XmlRootElement(name="results")
 public class ResultObject {
 
 	// draw (originally: echo), unique query identifier
-	
-	@XmlElement(name="draw")
-	public int iEcho;
-	@XmlTransient
-	public int getEcho(){return this.iEcho;}
-	public void setEcho(int echo){this.iEcho = echo;}
-	
-	
-	// number of all records in database (all of them)
-	
-	@XmlElement(name="recordsTotal")
-	public int iTotalRecords = 10000;
-	@XmlTransient
-	public int getTotalRecords(){return this.iTotalRecords;}
-	public void setTotalRecords(int totalRecords){this.iTotalRecords = totalRecords;}
-	
-	
-	// number of records in result set
-	
-	@XmlElement(name="recordsFiltered")
-	public int iTotalDisplayRecords = 10000;
-	@XmlTransient
-	public int getTotalDisplayRecords(){return this.iTotalDisplayRecords;}
-	public void setTotalDisplayRecords(int totalDisplayRecords){this.iTotalDisplayRecords = totalDisplayRecords;}
-
+	public int draw;
+	public int recordsTotal = 10000;
+	public int recordsFiltered = 10000;
 	private String tableName = "";
-	
-	
-	// result set query count quality
-	@XmlElement(name="bQueryCountIsExact")
 	public boolean bQueryCountIsExact = false;
-	@XmlTransient
+	public boolean bTotalCountIsExact = false;
+	public String sNeededIndexForSortColumns = "";
+	public ArrayList<ConcurrentHashMap<String, String>> data = new ArrayList<ConcurrentHashMap<String, String>>();
+	
+	public int getEcho(){return this.draw;}
+	public void setEcho(int echo){this.draw = echo;}
+	public int getTotalRecords(){return this.recordsTotal;}
+	public void setTotalRecords(int totalRecords){this.recordsTotal = totalRecords;}
+	public int getTotalDisplayRecords(){return this.recordsFiltered;}
+	public void setTotalDisplayRecords(int totalDisplayRecords){this.recordsFiltered = totalDisplayRecords;}
 	public boolean queryCountIsExact(){return this.bQueryCountIsExact;}
 	public void setQueryCountIsExact(boolean exactCount){this.bQueryCountIsExact = exactCount;}
-	
-	// count quality for count of whole table (count of all records)
-	@XmlElement(name="bTotalCountIsExact")
-	public boolean bTotalCountIsExact = false;
-	@XmlTransient
 	public boolean totalCountIsExact(){return this.bTotalCountIsExact;}
 	public void setTotalCountIsExact(boolean exactCount){this.bTotalCountIsExact = exactCount;}
-	
-	
-	// index for columns sorted by is needed?
-	@XmlElement(name="sNeededIndexForSortColumns")
-	public String sNeededIndexForSortColumns = "";
-	@XmlTransient
 	public String getNeededIndexForSortColumns(){return this.sNeededIndexForSortColumns;}
 	public void setNeededIndexForSortColumns(String neededIndex){this.sNeededIndexForSortColumns = neededIndex;}
-	
-	
-	
-	
-	// table content
-	
-	@XmlElement(name="data")
-	public ArrayList<ConcurrentHashMap<String, String>> tableContent = new ArrayList<ConcurrentHashMap<String, String>>();
-	@XmlTransient
 	public ArrayList<ConcurrentHashMap<String, String>> getTableContent() {
-		return this.tableContent;
+		return this.data;
 	}	
 	public void setTableContent(ArrayList<ConcurrentHashMap<String, String>> table) {
-		this.tableContent = table;
+		this.data = table;
 	}
-	
-	
-	@XmlTransient
 	public String getTableName() {
 		return tableName;
 	}
@@ -95,7 +54,7 @@ public class ResultObject {
 	}	
 	
 
-	public ResultObject(){} // JAXB needs this
+//	public ResultObject(){} // JAXB needs this
 	
 	
 	public ResultObject( Database dbObj, 
@@ -128,7 +87,7 @@ public class ResultObject {
 		if (Constants.debug)
 		{
 			System.out.println("Table content:");
-			for (ConcurrentHashMap<String, String> a : tableContent)
+			for (ConcurrentHashMap<String, String> a : data)
 			{
 				System.out.println(a.entrySet());
 			}

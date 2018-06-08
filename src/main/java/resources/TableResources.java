@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -27,6 +30,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.w3c.dom.Document;
+
+import table.ResultObject;
 import table.TableRecordObject;
 import table.TableRecordsObject;
 import table.TablesListObject;
@@ -1015,279 +1021,141 @@ public class TableResources {
 	  }
 	
 	
+	
 	// .../table/gettable
+	@POST
 	@Path("gettable")
 	@Produces({MediaType.APPLICATION_JSON})
-	public TableDataInspector getTable(
-			@DefaultValue("") @FormParam("sDbName") String dbName,
-			@DefaultValue("") @FormParam("sTableName") String tableName,
-			
-			@DefaultValue("") @FormParam("sGoToRowIds") String sGoToRowIds,
-			
-			@DefaultValue("0") @FormParam("order[0][column]") int iSortCol_0,
-			@DefaultValue("asc") @FormParam("order[0][dir]") String sSortDir_0,
-			@DefaultValue("-1") @FormParam("order[1][column]") int iSortCol_1,
-			@DefaultValue("none") @FormParam("order[1][dir]") String sSortDir_1,
-			@DefaultValue("-1") @FormParam("order[2][column]") int iSortCol_2,
-			@DefaultValue("none") @FormParam("order[2][dir]") String sSortDir_2,
-			@DefaultValue("-1") @FormParam("order[3][column]") int iSortCol_3,
-			@DefaultValue("none") @FormParam("order[3][dir]") String sSortDir_3,
-			@DefaultValue("-1") @FormParam("order[4][column]") int iSortCol_4,
-			@DefaultValue("none") @FormParam("order[4][dir]") String sSortDir_4,
-			
-			@DefaultValue("10") @FormParam("length") int iDisplayLength,
-			@DefaultValue("0") @FormParam("start") int iDisplayStart,	
-			
-			@DefaultValue("") @FormParam("columns[0][name]") String column0,
-			@DefaultValue("") @FormParam("columns[1][name]") String column1,
-			@DefaultValue("") @FormParam("columns[2][name]") String column2,
-			@DefaultValue("") @FormParam("columns[3][name]") String column3,
-			@DefaultValue("") @FormParam("columns[4][name]") String column4,
-			@DefaultValue("") @FormParam("columns[5][name]") String column5,
-			@DefaultValue("") @FormParam("columns[6][name]") String column6,
-			@DefaultValue("") @FormParam("columns[7][name]") String column7,
-			@DefaultValue("") @FormParam("columns[8][name]") String column8,
-			@DefaultValue("") @FormParam("columns[9][name]") String column9,
-			@DefaultValue("") @FormParam("columns[10][name]") String column10,
-			@DefaultValue("") @FormParam("columns[11][name]") String column11,
-			@DefaultValue("") @FormParam("columns[12][name]") String column12,
-			@DefaultValue("") @FormParam("columns[13][name]") String column13,
-			@DefaultValue("") @FormParam("columns[14][name]") String column14,
-			@DefaultValue("") @FormParam("columns[15][name]") String column15,
-			@DefaultValue("") @FormParam("columns[16][name]") String column16,
-			@DefaultValue("") @FormParam("columns[17][name]") String column17,
-			@DefaultValue("") @FormParam("columns[18][name]") String column18,
-			@DefaultValue("") @FormParam("columns[19][name]") String column19,
-			@DefaultValue("") @FormParam("columns[20][name]") String column20,
-			@DefaultValue("") @FormParam("columns[21][name]") String column21,
-			@DefaultValue("") @FormParam("columns[22][name]") String column22,
-			@DefaultValue("") @FormParam("columns[23][name]") String column23,
-			@DefaultValue("") @FormParam("columns[24][name]") String column24,
-			@DefaultValue("") @FormParam("columns[25][name]") String column25,
-			@DefaultValue("") @FormParam("columns[26][name]") String column26,
-			@DefaultValue("") @FormParam("columns[27][name]") String column27,
-			@DefaultValue("") @FormParam("columns[28][name]") String column28,
-			@DefaultValue("") @FormParam("columns[29][name]") String column29,
-			@DefaultValue("") @FormParam("columns[30][name]") String column30,
-			@DefaultValue("") @FormParam("columns[31][name]") String column31,
-			@DefaultValue("") @FormParam("columns[32][name]") String column32,
-			@DefaultValue("") @FormParam("columns[33][name]") String column33,
-			@DefaultValue("") @FormParam("columns[34][name]") String column34,
-			@DefaultValue("") @FormParam("columns[35][name]") String column35,
-			@DefaultValue("") @FormParam("columns[36][name]") String column36,
-			@DefaultValue("") @FormParam("columns[37][name]") String column37,
-			@DefaultValue("") @FormParam("columns[38][name]") String column38,
-			@DefaultValue("") @FormParam("columns[39][name]") String column39,
-			@DefaultValue("") @FormParam("columns[40][name]") String column40,
-			@DefaultValue("") @FormParam("columns[41][name]") String column41,
-			@DefaultValue("") @FormParam("columns[42][name]") String column42,
-			@DefaultValue("") @FormParam("columns[43][name]") String column43,
-			@DefaultValue("") @FormParam("columns[44][name]") String column44,
-			@DefaultValue("") @FormParam("columns[45][name]") String column45,
-			@DefaultValue("") @FormParam("columns[46][name]") String column46,
-			@DefaultValue("") @FormParam("columns[47][name]") String column47,
-			@DefaultValue("") @FormParam("columns[48][name]") String column48,
-			@DefaultValue("") @FormParam("columns[49][name]") String column49,
-			@DefaultValue("") @FormParam("columns[50][name]") String column50,
-			@DefaultValue("") @FormParam("columns[51][name]") String column51,
-			@DefaultValue("") @FormParam("columns[52][name]") String column52,
-			@DefaultValue("") @FormParam("columns[53][name]") String column53,
-			@DefaultValue("") @FormParam("columns[54][name]") String column54,
-			@DefaultValue("") @FormParam("columns[55][name]") String column55,
-			@DefaultValue("") @FormParam("columns[56][name]") String column56,
-			@DefaultValue("") @FormParam("columns[57][name]") String column57,
-			@DefaultValue("") @FormParam("columns[58][name]") String column58,
-			@DefaultValue("") @FormParam("columns[59][name]") String column59,
-			@DefaultValue("") @FormParam("columns[60][name]") String column60,
-			@DefaultValue("") @FormParam("columns[61][name]") String column61,
-			@DefaultValue("") @FormParam("columns[62][name]") String column62,
-			@DefaultValue("") @FormParam("columns[63][name]") String column63,
-			@DefaultValue("") @FormParam("columns[64][name]") String column64,
-			@DefaultValue("") @FormParam("columns[65][name]") String column65,
-			@DefaultValue("") @FormParam("columns[66][name]") String column66,
-			@DefaultValue("") @FormParam("columns[67][name]") String column67,
-			@DefaultValue("") @FormParam("columns[68][name]") String column68,
-			@DefaultValue("") @FormParam("columns[69][name]") String column69,
-			@DefaultValue("") @FormParam("columns[70][name]") String column70,
-			@DefaultValue("") @FormParam("columns[71][name]") String column71,
-			@DefaultValue("") @FormParam("columns[72][name]") String column72,
-			@DefaultValue("") @FormParam("columns[73][name]") String column73,
-			@DefaultValue("") @FormParam("columns[74][name]") String column74,
-			@DefaultValue("") @FormParam("columns[75][name]") String column75,
-			@DefaultValue("") @FormParam("columns[76][name]") String column76,
-			@DefaultValue("") @FormParam("columns[77][name]") String column77,
-			@DefaultValue("") @FormParam("columns[78][name]") String column78,
-			@DefaultValue("") @FormParam("columns[79][name]") String column79,			
-			@DefaultValue("") @FormParam("columns[80][name]") String column80,
-			@DefaultValue("") @FormParam("columns[81][name]") String column81,
-			@DefaultValue("") @FormParam("columns[82][name]") String column82,
-			@DefaultValue("") @FormParam("columns[83][name]") String column83,
-			@DefaultValue("") @FormParam("columns[84][name]") String column84,
-			@DefaultValue("") @FormParam("columns[85][name]") String column85,
-			@DefaultValue("") @FormParam("columns[86][name]") String column86,
-			@DefaultValue("") @FormParam("columns[87][name]") String column87,
-			@DefaultValue("") @FormParam("columns[88][name]") String column88,
-			@DefaultValue("") @FormParam("columns[89][name]") String column89,
-			@DefaultValue("") @FormParam("columns[90][name]") String column90,
-			@DefaultValue("") @FormParam("columns[91][name]") String column91,
-			@DefaultValue("") @FormParam("columns[92][name]") String column92,
-			@DefaultValue("") @FormParam("columns[93][name]") String column93,
-			@DefaultValue("") @FormParam("columns[94][name]") String column94,
-			@DefaultValue("") @FormParam("columns[95][name]") String column95,
-			@DefaultValue("") @FormParam("columns[96][name]") String column96,
-			@DefaultValue("") @FormParam("columns[97][name]") String column97,
-			@DefaultValue("") @FormParam("columns[98][name]") String column98,
-			@DefaultValue("") @FormParam("columns[99][name]") String column99,
-			@DefaultValue("") @FormParam("columns[100][name]") String column100,
-			@DefaultValue("") @FormParam("columns[101][name]") String column101,
-			@DefaultValue("") @FormParam("columns[102][name]") String column102,
-			@DefaultValue("") @FormParam("columns[103][name]") String column103,
-			@DefaultValue("") @FormParam("columns[104][name]") String column104,
-			@DefaultValue("") @FormParam("columns[105][name]") String column105,
-			@DefaultValue("") @FormParam("columns[106][name]") String column106,
-			@DefaultValue("") @FormParam("columns[107][name]") String column107,
-			@DefaultValue("") @FormParam("columns[108][name]") String column108,
-			@DefaultValue("") @FormParam("columns[109][name]") String column109,
-			@DefaultValue("") @FormParam("columns[110][name]") String column110,
-			@DefaultValue("") @FormParam("columns[111][name]") String column111,
-			@DefaultValue("") @FormParam("columns[112][name]") String column112,
-			@DefaultValue("") @FormParam("columns[113][name]") String column113,
-			@DefaultValue("") @FormParam("columns[114][name]") String column114,
-			@DefaultValue("") @FormParam("columns[115][name]") String column115,
-			
-			@DefaultValue("") @FormParam("search[value]") String sSearch,
-			
-			@DefaultValue("") @FormParam("columns[0][search][value]") String sSearch0,
-			@DefaultValue("") @FormParam("columns[1][search][value]") String sSearch1,
-			@DefaultValue("") @FormParam("columns[2][search][value]") String sSearch2,
-			@DefaultValue("") @FormParam("columns[3][search][value]") String sSearch3,
-			@DefaultValue("") @FormParam("columns[4][search][value]") String sSearch4,
-			@DefaultValue("") @FormParam("columns[5][search][value]") String sSearch5,
-			@DefaultValue("") @FormParam("columns[6][search][value]") String sSearch6,
-			@DefaultValue("") @FormParam("columns[7][search][value]") String sSearch7,
-			@DefaultValue("") @FormParam("columns[8][search][value]") String sSearch8,
-			@DefaultValue("") @FormParam("columns[9][search][value]") String sSearch9,
-			@DefaultValue("") @FormParam("columns[10][search][value]") String sSearch10,
-			@DefaultValue("") @FormParam("columns[11][search][value]") String sSearch11,
-			@DefaultValue("") @FormParam("columns[12][search][value]") String sSearch12,
-			@DefaultValue("") @FormParam("columns[13][search][value]") String sSearch13,
-			@DefaultValue("") @FormParam("columns[14][search][value]") String sSearch14,
-			@DefaultValue("") @FormParam("columns[15][search][value]") String sSearch15,
-			@DefaultValue("") @FormParam("columns[16][search][value]") String sSearch16,
-			@DefaultValue("") @FormParam("columns[17][search][value]") String sSearch17,
-			@DefaultValue("") @FormParam("columns[18][search][value]") String sSearch18,
-			@DefaultValue("") @FormParam("columns[19][search][value]") String sSearch19,
-			@DefaultValue("") @FormParam("columns[20][search][value]") String sSearch20,
-			@DefaultValue("") @FormParam("columns[21][search][value]") String sSearch21,
-			@DefaultValue("") @FormParam("columns[22][search][value]") String sSearch22,
-			@DefaultValue("") @FormParam("columns[23][search][value]") String sSearch23,
-			@DefaultValue("") @FormParam("columns[24][search][value]") String sSearch24,
-			@DefaultValue("") @FormParam("columns[25][search][value]") String sSearch25,
-			@DefaultValue("") @FormParam("columns[26][search][value]") String sSearch26,
-			@DefaultValue("") @FormParam("columns[27][search][value]") String sSearch27,
-			@DefaultValue("") @FormParam("columns[28][search][value]") String sSearch28,
-			@DefaultValue("") @FormParam("columns[29][search][value]") String sSearch29,
-			@DefaultValue("") @FormParam("columns[30][search][value]") String sSearch30,
-			@DefaultValue("") @FormParam("columns[31][search][value]") String sSearch31,
-			@DefaultValue("") @FormParam("columns[32][search][value]") String sSearch32,
-			@DefaultValue("") @FormParam("columns[33][search][value]") String sSearch33,
-			@DefaultValue("") @FormParam("columns[34][search][value]") String sSearch34,
-			@DefaultValue("") @FormParam("columns[35][search][value]") String sSearch35,
-			@DefaultValue("") @FormParam("columns[36][search][value]") String sSearch36,
-			@DefaultValue("") @FormParam("columns[37][search][value]") String sSearch37,
-			@DefaultValue("") @FormParam("columns[38][search][value]") String sSearch38,
-			@DefaultValue("") @FormParam("columns[39][search][value]") String sSearch39,
-			@DefaultValue("") @FormParam("columns[40][search][value]") String sSearch40,
-			@DefaultValue("") @FormParam("columns[41][search][value]") String sSearch41,
-			@DefaultValue("") @FormParam("columns[42][search][value]") String sSearch42,
-			@DefaultValue("") @FormParam("columns[43][search][value]") String sSearch43,
-			@DefaultValue("") @FormParam("columns[44][search][value]") String sSearch44,
-			@DefaultValue("") @FormParam("columns[45][search][value]") String sSearch45,
-			@DefaultValue("") @FormParam("columns[46][search][value]") String sSearch46,
-			@DefaultValue("") @FormParam("columns[47][search][value]") String sSearch47,
-			@DefaultValue("") @FormParam("columns[48][search][value]") String sSearch48,
-			@DefaultValue("") @FormParam("columns[49][search][value]") String sSearch49,
-			@DefaultValue("") @FormParam("columns[50][search][value]") String sSearch50,
-			@DefaultValue("") @FormParam("columns[51][search][value]") String sSearch51,
-			@DefaultValue("") @FormParam("columns[52][search][value]") String sSearch52,
-			@DefaultValue("") @FormParam("columns[53][search][value]") String sSearch53,
-			@DefaultValue("") @FormParam("columns[54][search][value]") String sSearch54,
-			@DefaultValue("") @FormParam("columns[55][search][value]") String sSearch55,
-			@DefaultValue("") @FormParam("columns[56][search][value]") String sSearch56,
-			@DefaultValue("") @FormParam("columns[57][search][value]") String sSearch57,
-			@DefaultValue("") @FormParam("columns[58][search][value]") String sSearch58,
-			@DefaultValue("") @FormParam("columns[59][search][value]") String sSearch59,
-			@DefaultValue("") @FormParam("columns[60][search][value]") String sSearch60,
-			@DefaultValue("") @FormParam("columns[61][search][value]") String sSearch61,
-			@DefaultValue("") @FormParam("columns[62][search][value]") String sSearch62,
-			@DefaultValue("") @FormParam("columns[63][search][value]") String sSearch63,
-			@DefaultValue("") @FormParam("columns[64][search][value]") String sSearch64,
-			@DefaultValue("") @FormParam("columns[65][search][value]") String sSearch65,
-			@DefaultValue("") @FormParam("columns[66][search][value]") String sSearch66,
-			@DefaultValue("") @FormParam("columns[67][search][value]") String sSearch67,
-			@DefaultValue("") @FormParam("columns[68][search][value]") String sSearch68,
-			@DefaultValue("") @FormParam("columns[69][search][value]") String sSearch69,
-			@DefaultValue("") @FormParam("columns[70][search][value]") String sSearch70,
-			@DefaultValue("") @FormParam("columns[71][search][value]") String sSearch71,
-			@DefaultValue("") @FormParam("columns[72][search][value]") String sSearch72,
-			@DefaultValue("") @FormParam("columns[73][search][value]") String sSearch73,
-			@DefaultValue("") @FormParam("columns[74][search][value]") String sSearch74,
-			@DefaultValue("") @FormParam("columns[75][search][value]") String sSearch75,
-			@DefaultValue("") @FormParam("columns[76][search][value]") String sSearch76,
-			@DefaultValue("") @FormParam("columns[77][search][value]") String sSearch77,
-			@DefaultValue("") @FormParam("columns[78][search][value]") String sSearch78,
-			@DefaultValue("") @FormParam("columns[79][search][value]") String sSearch79,			
-			@DefaultValue("") @FormParam("columns[80][search][value]") String sSearch80,
-			@DefaultValue("") @FormParam("columns[81][search][value]") String sSearch81,
-			@DefaultValue("") @FormParam("columns[82][search][value]") String sSearch82,
-			@DefaultValue("") @FormParam("columns[83][search][value]") String sSearch83,
-			@DefaultValue("") @FormParam("columns[84][search][value]") String sSearch84,
-			@DefaultValue("") @FormParam("columns[85][search][value]") String sSearch85,
-			@DefaultValue("") @FormParam("columns[86][search][value]") String sSearch86,
-			@DefaultValue("") @FormParam("columns[87][search][value]") String sSearch87,
-			@DefaultValue("") @FormParam("columns[88][search][value]") String sSearch88,
-			@DefaultValue("") @FormParam("columns[89][search][value]") String sSearch89,
-			@DefaultValue("") @FormParam("columns[90][search][value]") String sSearch90,
-			@DefaultValue("") @FormParam("columns[91][search][value]") String sSearch91,
-			@DefaultValue("") @FormParam("columns[92][search][value]") String sSearch92,
-			@DefaultValue("") @FormParam("columns[93][search][value]") String sSearch93,
-			@DefaultValue("") @FormParam("columns[94][search][value]") String sSearch94,
-			@DefaultValue("") @FormParam("columns[95][search][value]") String sSearch95,
-			@DefaultValue("") @FormParam("columns[96][search][value]") String sSearch96,
-			@DefaultValue("") @FormParam("columns[97][search][value]") String sSearch97,
-			@DefaultValue("") @FormParam("columns[98][search][value]") String sSearch98,
-			@DefaultValue("") @FormParam("columns[99][search][value]") String sSearch99,
-			@DefaultValue("") @FormParam("columns[100][search][value]") String sSearch100,
-			@DefaultValue("") @FormParam("columns[101][search][value]") String sSearch101,
-			@DefaultValue("") @FormParam("columns[102][search][value]") String sSearch102,
-			@DefaultValue("") @FormParam("columns[103][search][value]") String sSearch103,
-			@DefaultValue("") @FormParam("columns[104][search][value]") String sSearch104,
-			@DefaultValue("") @FormParam("columns[105][search][value]") String sSearch105,
-			@DefaultValue("") @FormParam("columns[106][search][value]") String sSearch106,
-			@DefaultValue("") @FormParam("columns[107][search][value]") String sSearch107,
-			@DefaultValue("") @FormParam("columns[108][search][value]") String sSearch108,
-			@DefaultValue("") @FormParam("columns[109][search][value]") String sSearch109,
-			@DefaultValue("") @FormParam("columns[110][search][value]") String sSearch110,
-			@DefaultValue("") @FormParam("columns[111][search][value]") String sSearch111,
-			@DefaultValue("") @FormParam("columns[112][search][value]") String sSearch112,
-			@DefaultValue("") @FormParam("columns[113][search][value]") String sSearch113,
-			@DefaultValue("") @FormParam("columns[114][search][value]") String sSearch114,
-			@DefaultValue("") @FormParam("columns[115][search][value]") String sSearch115,
-			
-			@DefaultValue("") @FormParam("bForceExactCount") String sForceExactCount,
-			
-			@FormParam("draw") int iEcho,	
-			
-			@Context ServletContext context,
-			@Context SecurityContext sc,
+	public ResultObject getTable(
+			String requestBody, 
+			@Context ServletContext context, 
+			@Context SecurityContext sc, 
 			@Context HttpServletRequest httpServletRequest
-			
 			) throws IOException {
 		
+		
+		// Get the request body into a hash
+		
+		String[] requestBodyArr = requestBody.split("&");
+		ConcurrentHashMap<String, String> requestBodyMap = new ConcurrentHashMap<String, String>();
+		int iNumberOfColumns = 0;
+		int iNumberOfSortedColumns = 0;
+		
+		
+		for (int i=0; i<requestBodyArr.length; i++)
+		{
+			String onePair =	requestBodyArr[i];
+			String key = 		onePair.split("=")[0];
+			String value = 		(onePair.split("=").length>1) ? onePair.split("=")[1] : ""; // make sure we have at least an empty string (no null!)
+			
+			// first decode the values (as those might be URL encoded)
+			try {				
+				key = 	java.net.URLDecoder.decode(key, "UTF-8");
+				value =	java.net.URLDecoder.decode(value, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("Error while parsing the requestBody", e);
+			}
+		
+			
+			// if we encounter a column parameter, increase columns counter
+			if (key.startsWith("columns[") && key.endsWith("name]"))
+				iNumberOfColumns++;
+			
+			// if we encounter a sorted column, increase sorted columns counter
+			if (key.startsWith("order[") && key.endsWith("[column]"))
+				iNumberOfSortedColumns++;
+			
+			// put the key/value into our requestBodyMap
+			requestBodyMap.put(key, value);
+			
+		}
+		
+		
+		
+		// ---------------------------------------------------------
+		// we have a parsed request body, now extract all parameters
+		// ---------------------------------------------------------
+		
+		String dbName = 			requestBodyMap.get("sDbName");
+		String sForceExactCount =	requestBodyMap.get("bForceExactCount");
+		String tableName = 			requestBodyMap.get("sTableName");
+		String sGoToRowIds = 		requestBodyMap.get("sGoToRowIds");
+		String sSearch =			requestBodyMap.get("search[value]");
+		
+		String sDisplayStart = 		requestBodyMap.get("start");
+		int iDisplayStart = 		sDisplayStart.equalsIgnoreCase("null") ? 0 : Integer.parseInt(sDisplayStart);
+		String sDisplayLength =		requestBodyMap.get("length");
+		int iDisplayLength =		sDisplayLength.equalsIgnoreCase("null") ? 10 : Integer.parseInt(sDisplayLength);
+		String sEcho =				requestBodyMap.get("draw");
+		int iEcho =					sEcho.equalsIgnoreCase("null") ? 0 : Integer.parseInt(sEcho);
+		
+		
+		// column names and search values parameters
+		
+		ArrayList<String> aAllColumnsList = new ArrayList<String>();
+		ArrayList<String>  aAllColumnSearchValuesList = new ArrayList<String>();
+		
+		for (int i = 0; i<iNumberOfColumns ; i++)
+		{
+			String sColumnKey = "columns["+i+"][name]";
+			String sColumnSearchKey = "columns["+i+"][search][value]";
+			
+			String sColumnValue = requestBodyMap.get(sColumnKey);
+			String sColumnSearchValue = requestBodyMap.get(sColumnSearchKey);
+			sColumnSearchValue = (sColumnSearchValue == null) ? "" : sColumnSearchValue;
+			
+			aAllColumnsList.add(sColumnValue);
+			aAllColumnSearchValuesList.add(sColumnSearchValue);
+			
+		}
+
+		// convert to arrays
+		String[] aAllColumns = new String[iNumberOfColumns];
+		aAllColumns = aAllColumnsList.toArray(aAllColumns);
+		String[] aAllColumnSearchValues = new String[iNumberOfColumns];
+		aAllColumnSearchValues = aAllColumnSearchValuesList.toArray(aAllColumnSearchValues);
+		
+		
+		// sorted columns
+		
+		ArrayList<String> tmpSortCol = new ArrayList<String>();
+		ArrayList<String> tmpSortDir = new ArrayList<String>();
+		
+		// it might happen that no sorting was set,
+		// in that case, we add a default sorted column
+		if (iNumberOfSortedColumns == 0)
+		{
+			tmpSortCol.add( aAllColumns[0] );
+			tmpSortDir.add( "asc" );
+		}
+		
+		// now set the sorted columns arrays
+		for (int i = 0; i<iNumberOfSortedColumns ; i++)
+		{
+			String sSortedColumn = "order["+i+"][column]";
+			String sSortedColumnDir = "order["+i+"][dir]";
+			
+			int iSortCol = Integer.parseInt(requestBodyMap.get(sSortedColumn));
+			String sSortDir = requestBodyMap.get(sSortedColumnDir);
+			
+			tmpSortCol.add( aAllColumns[iSortCol] );
+			tmpSortDir.add( sSortDir );
+		}
+		
+		// convert to arrays
+		String[] aSortCol = tmpSortCol.toArray(new String[tmpSortCol.size()]);
+		String[] aSortDir = tmpSortDir.toArray(new String[tmpSortDir.size()]);
 				
+		
+		
+		// ---------------------------------------
+		// now we have all parameters, do the job!
+		// ---------------------------------------
+		
+		// get context object, given the current database name
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
 		
-		// is exact count required by the user for this call?
+		// is exact count required by the user for this call?		
 		getDatabaseObject(co).setForceExactCount( sForceExactCount.equalsIgnoreCase("true") );				
 		
 		
@@ -1296,107 +1164,7 @@ public class TableResources {
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
 		
-		// column names
 		
-		String[] aAllColumns = new String[]{
-				column0, 
-				column1, column2, column3,
-				column4, column5, column6,
-				column7, column8, column9,
-				column10, 
-				column11, column12, column13,
-				column14, column15, column16,
-				column17, column18, column19,
-				column20, 
-				column21, column22, column23,
-				column24, column25, column26,
-				column27, column28, column29,
-				column30, 
-				column31, column32, column33,
-				column34, column35, column36,
-				column37, column38, column39,
-				column40, 
-				column41, column42, column43,
-				column44, column45, column46,
-				column47, column48, column49,
-				column50, 
-				column51, column52, column53,
-				column54, column55, column56,
-				column57, column58, column59,
-				column60, 
-				column61, column62, column63,
-				column64, column65, column66,
-				column67, column68, column69,
-				column70, 
-				column71, column72, column73,
-				column74, column75, column76,
-				column77, column78, column79,
-				column80, 
-				column81, column82, column83,
-				column84, column85, column86,
-				column87, column88, column89,
-				column90, 
-				column91, column92, column93,
-				column94, column95, column96,
-				column97, column98, column99,
-				column100, 
-				column101, column102, column103,
-				column104, column105, column106,
-				column107, column108, column109,
-				column110, 
-				column111, column112, column113,
-				column114, column115};
-		
-		// search values
-		
-		String[] aAllColumnSearchValues = new String[]{
-				sSearch0, 
-				sSearch1, sSearch2, sSearch3,
-				sSearch4, sSearch5, sSearch6,
-				sSearch7, sSearch8, sSearch9,
-				sSearch10, 
-				sSearch11, sSearch12, sSearch13,
-				sSearch14, sSearch15, sSearch16,
-				sSearch17, sSearch18, sSearch19,
-				sSearch20, 
-				sSearch21, sSearch22, sSearch23,
-				sSearch24, sSearch25, sSearch26,
-				sSearch27, sSearch28, sSearch29,
-				sSearch30, 
-				sSearch31, sSearch32, sSearch33,
-				sSearch34, sSearch35, sSearch36,
-				sSearch37, sSearch38, sSearch39,
-				sSearch40, 
-				sSearch41, sSearch42, sSearch43,
-				sSearch44, sSearch45, sSearch46,
-				sSearch47, sSearch48, sSearch49,
-				sSearch50, 
-				sSearch51, sSearch52, sSearch53,
-				sSearch54, sSearch55, sSearch56,
-				sSearch57, sSearch58, sSearch59,
-				sSearch60, 
-				sSearch61, sSearch62, sSearch63,
-				sSearch64, sSearch65, sSearch66,
-				sSearch67, sSearch68, sSearch69,
-				sSearch70, 
-				sSearch71, sSearch72, sSearch73,
-				sSearch74, sSearch75, sSearch76,
-				sSearch77, sSearch78, sSearch79,
-				sSearch80, 
-				sSearch81, sSearch82, sSearch83,
-				sSearch84, sSearch85, sSearch86,
-				sSearch87, sSearch88, sSearch89,
-				sSearch90, 
-				sSearch91, sSearch92, sSearch93,
-				sSearch94, sSearch95, sSearch96,
-				sSearch97, sSearch98, sSearch99,
-				sSearch100, 
-				sSearch101, sSearch102, sSearch103,
-				sSearch104, sSearch105, sSearch106,
-				sSearch107, sSearch108, sSearch109,
-				sSearch110, 
-				sSearch111, sSearch112, sSearch113,
-				sSearch114, sSearch115};
 		
 		// Compute useful part of the arrays
 		// We need this because the tail of the arrays consists of empty values, since the table is mostly smaller than the max number of allowed columns
@@ -1404,7 +1172,10 @@ public class TableResources {
 		int startOfEmptyRange = Util.getIndexOf("", aAllColumns);
 		String[] aCleanAllColumns = startOfEmptyRange > -1 ? Arrays.copyOfRange(aAllColumns, 0, startOfEmptyRange) : aAllColumns;
 		
-		// search arrays
+		
+		
+		// search arrays: those will contain ONLY non-empty values
+		// (which is the difference between these arrays and the previous ones, which contained all parameters, even when those had empty values)
 		
 		ArrayList<String> aSearchColumnNames = new ArrayList<String>();
 		ArrayList<String> aSearchColumnValues = new ArrayList<String>();
@@ -1413,6 +1184,7 @@ public class TableResources {
 		// Is the current call triggers by a call of the GoTo function?
 		// (beware: the particular case in which we use row-ids for speed;
 		//  See info at Database.getRowNumberOfRecord)
+		
 		
 		boolean bCallForGoToFunction = !sGoToRowIds.isEmpty();   // sGoToRowIds has the form 'column name':'ids'
 		
@@ -1453,41 +1225,11 @@ public class TableResources {
 		
 		Map<String, Object> countAndCountQualityOfTable = getCountOfTable(co, tableName);
 		int countOfTable = (Integer) countAndCountQualityOfTable.get("count");
-		boolean countQualityOfTable = (Boolean) countAndCountQualityOfTable.get("exactCount");
-
-		
-		// sorting
-		ArrayList<String> tmpSortCol = new ArrayList<String>();
-		ArrayList<String> tmpSortDir = new ArrayList<String>();
-		tmpSortCol.add( aAllColumns[iSortCol_0] );
-		tmpSortDir.add(sSortDir_0);
-		if (iSortCol_1 >-1 && sSortDir_1.toLowerCase().matches("asc|desc"))
-		{
-			tmpSortCol.add( aAllColumns[iSortCol_1] );
-			tmpSortDir.add(sSortDir_1);
-		}
-		if (iSortCol_2 >-1 && sSortDir_2.toLowerCase().matches("asc|desc"))
-		{
-			tmpSortCol.add( aAllColumns[iSortCol_2] );
-			tmpSortDir.add(sSortDir_2);
-		}
-		if (iSortCol_3 >-1 && sSortDir_3.toLowerCase().matches("asc|desc"))
-		{
-			tmpSortCol.add( aAllColumns[iSortCol_3] );
-			tmpSortDir.add(sSortDir_3);
-		}
-		if (iSortCol_4 >-1 && sSortDir_4.toLowerCase().matches("asc|desc"))
-		{
-			tmpSortCol.add( aAllColumns[iSortCol_4] );
-			tmpSortDir.add(sSortDir_4);
-		}
-		// convert to arrays
-		String[] aSortCol = tmpSortCol.toArray(new String[tmpSortCol.size()]);
-		String[] aSortDir = tmpSortDir.toArray(new String[tmpSortDir.size()]);
+		boolean countQualityOfTable = (Boolean) countAndCountQualityOfTable.get("exactCount");		
 		
 		
 		// return the table		
-		return new TableDataInspector(getDatabaseObject(co),
+		return new ResultObject(getDatabaseObject(co),
 				tableName, countOfTable, countQualityOfTable,
 				aCleanAllColumns,
 				iDisplayLength, iDisplayStart, setRightSearchValue(sSearch), 

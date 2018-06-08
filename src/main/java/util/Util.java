@@ -437,7 +437,7 @@ public class Util {
 		{
 			if (oneValue == null && values[i] == null)
 				return i;
-			if (oneValue != null && values[i].equals(oneValue))
+			if (oneValue != null && values[i] != null && values[i].equals(oneValue))
 				return i;
 		}
 		return -1;

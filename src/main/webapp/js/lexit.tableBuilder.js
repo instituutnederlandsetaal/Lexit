@@ -300,6 +300,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			
 			// search boxes css
 			gui.setSearchboxesCss(sSomeTableName);
+			
 		},
 		
 		
@@ -490,7 +491,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 	} ); //end of datatable definition
 	
-
 	
 	// add the name of the table in its top div
 	head.showNameOfTheTable(sSomeTableName);
@@ -585,6 +585,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// while another table was already in sight. The tooltip of some column might then
 	// keep in sight and wouldn't go away.
 	$("#tiptip_holder").fadeOut();	
+	
 };
 
 
@@ -860,6 +861,10 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		
 		
 		// retrieve each configuration parameter
+		
+		// BEWARE about width:
+		// https://datatables.net/forums/discussion/41870/column-width-not-working
+		
 		var columnVisible = 	conf.getVisibility(oColumnConfig);
 		var columnSearchable = 	conf.getSearchability(oColumnConfig);
 		var columnSortable = 	conf.getSortability(oColumnConfig);
@@ -928,7 +933,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			
 			aColProps.push( { 
 				"name": 		sNameOfCurrentColumn,
-				"data": 		sNameOfCurrentColumn,
+				"data": 		sNameOfCurrentColumn,				
 				"searchable":	false, 
 				"targets": 		[i],
 				"render": 		function ( data, type, row  ) {
@@ -962,13 +967,14 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				"sortable":	columnVisible && columnHasDataType ? columnSortable : false
 				} );
 			
+			
 			}
 		// select box cell
 		else if (aSelectBoxValues != null && aSelectBoxValues.length>1)
 			{			
 			aColProps.push( { 
 				"name": 		sNameOfCurrentColumn, 
-				"data": 		sNameOfCurrentColumn,
+				"data": 		sNameOfCurrentColumn,				
 				"searchable":	columnVisible ? columnSearchable : false, 
 				"targets": 		[i],
 				"class": 		columnEditable ? 
@@ -977,6 +983,8 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				"visible": 		columnVisible,
 				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false
 				} );
+			
+		
 			}
 		// text cell
 		else
@@ -985,7 +993,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				{
 				aColProps.push( {
 					"name": 		sNameOfCurrentColumn, 
-					"data": 		sNameOfCurrentColumn,
+					"data": 		sNameOfCurrentColumn,					
 					"searchable":	columnVisible ? columnSearchable : false, 
 					"targets": 		[i],					
 					"class": 		columnEditable ?
@@ -995,13 +1003,15 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 					"sortable": 	columnVisible && columnHasDataType ? columnSortable : false
 						} 
 					);
+				
+			
 				}
 			// text cell with a button
 			else
 				{
 				aColProps.push( { 
 					"name": 		sNameOfCurrentColumn, 
-					"data": 		sNameOfCurrentColumn,
+					"data": 		sNameOfCurrentColumn,					
 					"searchable":	columnVisible ? columnSearchable : false, 
 					"targets": 		[i],
 					"class": 		columnEditable ?
@@ -1021,10 +1031,11 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 							}
 						} 
 					);
+				
+				
 				}
 			
-			}
-		
+			}		
 					
 	}
 	
