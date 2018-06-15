@@ -211,7 +211,6 @@
 	// booleans: which mode are we running?
 	var bTest;				// test mode
 	var bSpyMode;			// global spy mode (who's logged in?)
-	var bRequestDbInfo;		// project spy mode ()
 	var bResetUserRights;	// reset user rights mode
 	
 	
@@ -255,11 +254,6 @@
 				paramsHash.get("db")!=null && 
 				paramsHash.get("db")=='reset_user_rights');
 		
-		// are we requesting host/database name informtion for a given project?
-		
-		bRequestDbInfo =(paramsHash!=null &&
-				paramsHash.get("get_dbinfo")!=null);
-		
 		
 		// -----------------------------------------------------
 		
@@ -272,19 +266,29 @@
 			}
 		
 		
-		// project spy mode (database host info)
-		
-		else if (bRequestDbInfo)
-			{				
-			window.open( WEBSERV_URL+"/table/get_dbinfo?db="+paramsHash.get("get_dbinfo") );
-			}
-		
-		
 		// reset user rights
 		
 		else if (bResetUserRights)
 			{				
-			window.open(WEBSERV_URL+"/table/reset_user_rights");
+			var url = WEBSERV_URL+"/table/reset_user_rights"; 
+			
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"dataType": "xml", // get response as xml
+				"success": function(xml) {
+					var sResp = fn.getDbResponse(xml);
+			 		fn.message("Reset", "Response: " + sResp);
+			 		},
+				"error": function(jqXHR, textStatus, errorThrown){
+					
+					fn.message("Fout",
+							"Reset mislukt: " +	textStatus+" "+errorThrown);
+					}
+				});
 			}
 		
 		
