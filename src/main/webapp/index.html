@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2018.06.08
+	v2018.06.15
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -675,6 +675,33 @@
 	
 	
 	
+	
+	// get technical database info and show it in a pop-up 
+	function showDatabaseInfo(sProjectName){
+		
+		var url = WEBSERV_URL+"/table/get_dbinfo"; 
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"data": {
+				"db": sProjectName,
+				"dummy": getUniqueNumber()
+			},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {
+				var sResp = fn.getDbResponse(xml);
+		 		fn.message("Database info", sResp);
+		 		},
+			"error": function(jqXHR, textStatus, errorThrown){
+				
+				fn.message("Fout",
+						"'"+sProjectName+"' heeft mogelijk geen configuratie-bestand meer op deze server: " +				
+					textStatus+" "+errorThrown);
+				}
+			});
+		
+	}
 
 	
 	// generate a welcome page with a project overview 
@@ -747,13 +774,22 @@
 			for (var i=0; i<aProjectList.length; i++)
 				{
 				var sProjectLinkPart = aProjectList[i]["config_filename"];
-				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart;
+				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart;				
 				
 				var sProjectDescription =
+					"<td style='text-align: left; width: 10px'>"+
+					(typeof aProjectList[i]["goody"] == 'undefined' ? 
+							"<A style='text-decoration: none; color: #A4A4A4;' "+ 
+							"   title='"+aProjectList[i]["name"]+"' "+
+							"   href='#' "+
+							"   onclick='showDatabaseInfo(\""+sProjectLinkPart+"\"); return false;' "+
+							"   target='_blank'>&#9830;</A>" : "")+
+					"</td>"+
 					"<td style='text-align: right; width: 400px'>"+
 					"<A href='"+sProjectLink+"'><B>"+aProjectList[i]["name"]+
 					"</B></A></td><td>" +					 
-					"</td><td style='text-align: left; width: 700px'>" +
+					"</td>"+
+					"<td style='text-align: left; width: 700px'>" +
 					(typeof aProjectList[i]["description"] != 'undefined' && aProjectList[i]["description"] != "" ? 
 						" : <I>"+aProjectList[i]["description"]+"</I>" : "") + 
 					"</td>";
