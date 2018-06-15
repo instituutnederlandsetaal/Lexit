@@ -169,9 +169,9 @@ public class TableResources {
 	}
 	
 	
-	// get the name of the user which had logged in
+	// get the list of projects config files
 	// call:
-	// .../table/get_username
+	// .../table/get_configfiles_list
 	@Path("get_configfiles_list")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
