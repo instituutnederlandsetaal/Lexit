@@ -602,7 +602,7 @@ public class Database {
 	    	    "          ORDER BY "+getSafeFieldName(columnName)+" LIMIT 1) "+
 	    	    "  FROM t WHERE n IS NOT NULL "+
 	    	    ") "+
-	    	    "SELECT n FROM t;";
+	    	    "SELECT n FROM t WHERE n IS NOT NULL;";
 	    
 	    
 	    PostgresDatabaseCommunication dc = connectDatabase();
@@ -624,7 +624,7 @@ public class Database {
 	        for (String[] oneRecord : res)
 	        {
 	          String oneValue = oneRecord[0].trim();
-	          if (!oneValue.isEmpty())
+	          if (oneValue != null)
 	            uvo.addValue(oneValue);
 	        }
 	      }
@@ -655,9 +655,10 @@ public class Database {
 	    
     	String query = "SELECT " + getSafeFieldName(columnName) + " AS n " + 
     			"FROM " + getSafeTableName(tableName, schema) + " " + 
+    			"WHERE "+getSafeFieldName(columnName)+" IS NOT NULL " +
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
     			"ORDER BY " + getSafeFieldName(columnName) + ";";
-    	
+    	    	
     	PostgresDatabaseCommunication dc = connectDatabase();
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
@@ -674,7 +675,7 @@ public class Database {
   	        for (String[] oneRecord : res)
   	        {
   	          String oneValue = oneRecord[0].trim();
-  	          if (!oneValue.isEmpty())
+  	          if (oneValue != null)
   	            uvo.addValue(oneValue);
   	        }
   	      }

@@ -255,7 +255,9 @@ td._getUniqueValues = function(xml){
 	aValues.push("");
 	// add values from XML
 	$(xml).find("oneValue").each(function(){
-		aValues.push($(this).text());
+		var thisValue = $(this).text();
+		if (thisValue == '') thisValue = '^$';
+		aValues.push(thisValue);
 	});	
 	return aValues;
 	
