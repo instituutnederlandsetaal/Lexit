@@ -6,8 +6,8 @@
 var ssr = {};
 
 
-//build the search and replace interface
-//this is a subroutine of head.putSearchAndReplaceButton
+// build the search and replace interface
+// this is a subroutine of head.putSearchAndReplaceButton
 
 ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	
@@ -321,7 +321,7 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 	
 	
 	// if nor pattern nor replacement string is filled in, stop right away
-	if (sOldString == '' || sNewString == '' )
+	if (sOldString == '' && sNewString == '' )
 		return;
 	
 	// first check is some selection is made
@@ -369,7 +369,9 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		var match = pattern.exec(sCell) ;
 		
 				
-		if ( match != null && match != "" )
+		if ( ( match != null && match != "" )		// if we have a non-empty match  
+				|| 									//    OR
+			 ( sCell == '' && sOldString == '^$') )	//    we have an empty input and wish to capture just that!
 			{
 			var sNewValue = sCell.replace(pattern, sNewString);
 			var sTestValue = sCell + " <b>>> "+sNewValue+"</b>";
