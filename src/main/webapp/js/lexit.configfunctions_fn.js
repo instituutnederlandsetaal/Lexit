@@ -3738,7 +3738,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 // PART 1
 // ------
 // BEWARE: The following functions affect the filter boxes in the user interface
-//         but have no effect on the filters variables (one get only effect when
+//         but have no effect on the filters variables (one gets only effect when
 //         pressing 'enter')
 //         If you want to access the filters of the engine, see 'PART 2'
 
@@ -3752,6 +3752,8 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
  * @param {(String|API-object-instance)} sSomeTable - A table name or object
  * @param {String} sCellName - Column name of the search box
  * @param {String} sSomeData - Search value to put in the search box
+ * 
+ * @see fn.setAutoComplete
  */
 fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	
@@ -3906,6 +3908,77 @@ fn.getTypeOfFilterBox = function(sSomeTablename, sColumnName){
 	
 	// default: text
 	return "text";
+};
+
+
+
+/**
+ * Add an autocomplete functionality to a given filter box, or to a table cell
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String} sColumnName - Column name of the filter box
+ * @param {Boolean} bFilterBox - Set autocomplete onto the column filterbox (true), or onto the column cells (false)
+ * @param {String} sFunctionName - Name of the database function which will provide the autocomplete suggestions (its output must be a string with separators, see sPrimarySeparator and sSecondarySeparator params)
+ * @param {String} [sPrimarySeparator=|] - String separator between the suggestion returned by the database function (see sFunctionName param)
+ * @param {String} [sSecondarySeparator=:::] - Separator between label and value strings, within a single suggestion (see sPrimarySeparator param)
+ * @param {Integer} [iMinLength=2] - Input length (numer of characters) required for autocomplete activation (a value smaller than 2 is not recommended, since it may cause a heavy data load)
+ * @param {Integer} [iDelay=750] - Delay (in milliseconds) between the very last keypress event and the autocomplete activation. Striking a key causes the stopwatch to be set back to zero, so the delay will be measured only after the very last keypress event. This allows the user to enter multiple characters before the search for autocomplete suggestions starts. A low value for iDelay is not recommended as it may cause the autocomplete to be less responsive because of the heavy data load.
+ * 
+ * @see fn.putDataIntoFilterBox
+ */
+fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunctionName, sPrimarySeparator, sSecondarySeparator, iMinLength, iDelay){
+	
+	var sSomeTablename = fx.getTableName(sSomeTablename);
+	
+	// set some defaults
+	sPrimarySeparator = 	(sPrimarySeparator == null ? "|" : sPrimarySeparator);
+	sSecondarySeparator =	(sSecondarySeparator == null ? ":::" : sSecondarySeparator);
+	iDelay = 				(iDelay == null ? 750 : iDelay);
+	iMinLength = 			(iMinLength == null ? 2 : iMinLength);
+	
+	// selector depends on bFilterBox param: is it a filter box or a cell we've to put the autocomplete onto?
+	var sAutoCompleteSelector = bFilterBox ?
+			"input#"+sSomeTablename+"_searchbox_"+sColumnName
+			:
+			"#"+sSomeTablename+" ."+sColumnName;
+	
+	// remove any focus event from selector
+	// and append the autocomplete upon focus event
+	
+	$(document).off("focus", sAutoCompleteSelector);
+	
+	$(document).on(
+		      "focus", 
+		      sAutoCompleteSelector, 
+		      function(event) {
+		      	
+		      	$(event.target).autocomplete({
+		          	
+		      		delay: iDelay,
+		            minLength: iMinLength,
+			        source: function(request, response){
+			            	
+			           	fn.callFunction(sFunctionName, [ fn.quote( request.term ) ], 
+			          		function(func_resp){  
+			            		
+			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
+			           					sFunctionName.substring(sFunctionName.indexOf(".")+1) : sFunctionName;
+			            		var aSuggestionsArr = 
+			            			(func_resp[sOutputLabel]).split(sPrimarySeparator);
+			            		
+			            		response($.map(aSuggestionsArr, function (item) {
+			                        return {
+			                            label: item.split(sSecondarySeparator)[0],
+			                            value: item.split(sSecondarySeparator)[1]
+			                        };
+			                    }));
+			            	});
+			            }
+		          });
+		          
+		      }
+		  );
+	
 };
 
 
@@ -4284,6 +4357,9 @@ fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCall
 	
 	$.ajax( ajaxParams );
 };
+
+
+
 
 
 
