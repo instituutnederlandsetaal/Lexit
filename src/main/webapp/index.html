@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2018.07.10
+	v2018.07.16
 	</title>
 	
 	<style type="text/css" title="currentStyle">
@@ -306,7 +306,7 @@
 				
 				})
 			.fail(function(jqxhr, settings, exception){
-				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
 				});
 			}
 		
@@ -334,7 +334,7 @@
 					
 				},
 				"error": function(jqxhr, settings, exception){
-					fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+					fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
 				}
 				
 			});
@@ -563,7 +563,7 @@
 							});
 					})
 				.fail(function(jqxhr, settings, exception){
-					fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+					fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
 					});
 				}
 			
@@ -593,7 +593,7 @@
 							});
 					},
 					"error": function(jqxhr, settings, exception){
-						fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]");
+						fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
 					}
 					});
 				}

@@ -3122,6 +3122,59 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	
 };
 
+/**
+ * Show a dialog and aks the user to choose an option. 
+ * 
+ * @param {String} sTitle - Title of the message window
+ * @param {String} sMessage - Message to the user
+ * @param {Array} oOptions - Associative array of options names (keys) and functions (values) to execute when a given option was clicked upon 
+ */
+fn.askToChoose = function(sTitle, sMessage, oOptions){
+	
+	var sP = $("<p></p>").html(sMessage);
+	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
+	
+	$(document.body).append(sDiv);
+	
+	
+	// Fill the buttons associative array of jQueri UI dialog.
+	// We make a copy of the original oOptions param and enrich it with
+	// some commands in such a way that clicking on an option will 
+	// cause the dialog to be closed automatically, as required!
+	
+	var oButtons = {};
+	
+	// https://stackoverflow.com/questions/7113865/how-to-copy-clone-a-hash-object-in-jquery
+	Object.keys(oOptions).forEach(function(key) {
+		oButtons[ key ] = function(){
+	
+			// this will clause the dialog, as soon as an option was chosen
+			$( "#"+dialogDivId ).dialog( "close" );
+			$( "#"+dialogDivId ).remove();
+			
+			// call the function assigned (within configuration) to the chosen option 
+			var fnFunction = oOptions[ key ];
+			fnFunction();
+		}
+	}); 		
+		
+	
+	$( "#"+dialogDivId ).dialog({
+		modal: true,
+		width: "auto",
+		buttons: oButtons
+	});
+	
+	// remove focus from buttons, 
+	// to make sure OK won't be triggered 
+	// when Enter was pressed just before 
+	// in another context (like validating input in cell)
+	$('.ui-dialog :button').blur();
+	
+};
+
+
 
 /**
  * Show a confirmation dialog. This function is an equivalent of js native 'confirm'
@@ -3919,7 +3972,7 @@ fn.getTypeOfFilterBox = function(sSomeTablename, sColumnName){
  * @param {String} sColumnName - Column name of the filter box
  * @param {Boolean} bFilterBox - Set autocomplete onto the column filterbox (true), or onto the column cells (false)
  * @param {String} sFunctionName - Name of the database function which will provide the autocomplete suggestions (its output must be a string with separators, see sPrimarySeparator and sSecondarySeparator params)
- * @param {String} [sPrimarySeparator=|] - String separator between the suggestion returned by the database function (see sFunctionName param)
+ * @param {String} [sPrimarySeparator=|] - String separator between the suggestions returned by the database function (see sFunctionName param)
  * @param {String} [sSecondarySeparator=:::] - Separator between label and value strings, within a single suggestion (see sPrimarySeparator param)
  * @param {Integer} [iMinLength=2] - Input length (numer of characters) required for autocomplete activation (a value smaller than 2 is not recommended, since it may cause a heavy data load)
  * @param {Integer} [iDelay=750] - Delay (in milliseconds) between the very last keypress event and the autocomplete activation. Striking a key causes the stopwatch to be set back to zero, so the delay will be measured only after the very last keypress event. This allows the user to enter multiple characters before the search for autocomplete suggestions starts. A low value for iDelay is not recommended as it may cause the autocomplete to be less responsive because of the heavy data load.
