@@ -3088,7 +3088,7 @@ fn.closeDialog = function(){
  * 
  * @param {String} sTitle - Title of the message window
  * @param {String} sMessage - Message to the user
- * @param {Function} [fnCallback=null] - Function called after the user clicked on 'OK'
+ * @param {Function} [fnFunction=null] - Function called after the user clicked on 'OK'
  */
 fn.message = function(sTitle, sMessage, fnFunction){
 	
@@ -3236,17 +3236,21 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * @param {String} sTitle - Title of the message window
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Array} aValues - Default values (pre-filled when dialog opens)
- * @param {Function} fnCallback - Function called after the user clicked on 'OK'
+ * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
  * @param {Integer[]} [aColsAndRows=null] - Textarea dimensions, if bTextarea was set to true
+ * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * 
  * @see fn.getPromptBoxInput
  * @see fn.promptReorder
  * @see fn.closeDialog
  */
-fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsAndRows){
+fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, bTextarea, aColsAndRows, fnCancelFunction){
 	
 	fn._clearUserInput();
+	
+	if (bTextarea == null) 
+		bTextarea = false;
 	
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	
@@ -3326,8 +3330,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
                 					);
                 		}
                 		// call callback
-                 		if (fnCallback != null)
-                 			fnCallback(); 
+                 		if (fnFunction != null)
+                 			fnFunction(); 
                 		$( this ).dialog( "close" );
                 		$( this ).remove(); 
                 	},
@@ -3337,6 +3341,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
                    {
                 	text: "Annuleren",
                 	click: function() {
+                		// call callback upon Cancel, if available
+                		if (fnCancelFunction != null)
+                			fnCancelFunction(); 
                         $( this ).dialog( "close" );
                         $( this ).remove();
                     }
@@ -3366,14 +3373,15 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnCallback, bTextarea, aColsA
  * 
  * @param {String} sTitle - Title of the message window
  * @param {String[]} aFieldNames - Fields names to show
- * @param {Function} fnCallback - Function called after the user clicked on 'OK'
+ * @param {Function} fnFunction - Function called after the user clicked on 'OK'
+ * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * 
  * @see fn.getPromptBoxOrder
  * @see fn.getNewPositionOfElementAt
  * @see fn.processPromptBoxOrder
  * @see fn.prompt
  */
-fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
+fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	fn._clearUserInput();
 	
@@ -3455,7 +3463,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
                 					);
                 		}
                 		// call callback
-                		fnCallback(); 
+                  		fnFunction(); 
                 		$( this ).dialog( "close" );
                 		$( this ).remove(); 
                 	},
@@ -3464,6 +3472,9 @@ fn.promptReorder = function(sTitle, aFieldNames, fnCallback){
                   {
                 	  text: "Annuleren",
                 	  click: function() {
+                		  // call callback upon Cancel, if available
+                  		  if (fnCancelFunction != null)
+                  			  fnCancelFunction(); 
                           $( this ).dialog( "close" );
                           $( this ).remove();
                       }
