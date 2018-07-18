@@ -3235,17 +3235,17 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * 
  * @param {String} sTitle - Title of the message window
  * @param {String[]} aFieldNames - Fields names to show
- * @param {Array} aValues - Default values (pre-filled when dialog opens)
+ * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
+ * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
  * @param {Integer[]} [aColsAndRows=null] - Textarea dimensions, if bTextarea was set to true
- * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * 
  * @see fn.getPromptBoxInput
  * @see fn.promptReorder
  * @see fn.closeDialog
  */
-fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, bTextarea, aColsAndRows, fnCancelFunction){
+fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
 	
@@ -3265,6 +3265,15 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, bTextarea, aColsA
 	var promptFieldSet = $("<fieldset></fieldset>");
 	for (var i=0; i<aFieldNames.length; i++)
 		{
+		// should the input field be editable?
+		var bFixedValue = false;
+		if (aValues != null && 
+				(aValues[i] instanceof String || typeof aValues[i] === "string") ) // make sure we have a string, or this will crash!
+			{
+			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
+			aValues[i] = (aValues[i]).split("::")[0];
+			}
+		
 		var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		var label = $("<label></label>")
 			.attr("for", fieldLC)
@@ -3274,7 +3283,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, bTextarea, aColsA
 		var input = $("<"+sInputType+"></"+sInputType+">")
 			.attr("type", "text" )
 			.attr("name", fieldLC)
-			.attr("id", "prompt_"+fieldLC);
+			.attr("id", "prompt_"+fieldLC)
+			.prop('disabled', bFixedValue);
 				
 		// preset the input value, if available
 		if (bTextarea)

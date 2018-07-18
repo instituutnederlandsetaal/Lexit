@@ -175,38 +175,44 @@ head.showNameOfTheTable = function(sSomeTablename){
 
 				 		var sOldTableComment = fn.getDbResponse(xml);
 				 		
-				 		fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], function(){
+				 		fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], 
+				 				
+				 			function(){
 							
-							var sNewTableComment = fn.getPromptBoxInput("Notities");
+				 				var sNewTableComment = fn.getPromptBoxInput("Notities");
 							
-							// update the database							 
-							$.ajax( {
-								"type": "GET",
-								"url": WEBSERV_URL+"/table/setcomment",
-								"data": {
-									"db_name": getHttpParams().get("db"),
-									"table_name": sSomeTablename,
-									"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
-									"new_comment": sNewTableComment,
-									"dummy": getUniqueNumber()
-									},
-							 	"dataType": "xml", // get response as xml
-							 	"success": function(xml) {
-							 		fn.message("Gelukt!", "De notitie is toegevoegd.");
-							 		
-							 		// update table details
-							 		var aTableDetails = mt.getAvailableTableDetails(sSomeTablename);
-							 		aTableDetails = [aTableDetails[0], aTableDetails[1], sNewTableComment];
-							 		mt.addAvailableTableDetails(sSomeTablename, aTableDetails);
-
-							 		},
-								"error": function(jqXHR, textStatus, errorThrown){
-									fn.refreshTable(sSomeTablename);
-									fn.message("Fout bij het instellen van een notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
-										textStatus+" "+errorThrown);
-									}
+								// update the database							 
+								$.ajax( {
+									"type": "GET",
+									"url": WEBSERV_URL+"/table/setcomment",
+									"data": {
+										"db_name": getHttpParams().get("db"),
+										"table_name": sSomeTablename,
+										"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
+										"new_comment": sNewTableComment,
+										"dummy": getUniqueNumber()
+										},
+								 	"dataType": "xml", // get response as xml
+								 	"success": function(xml) {
+								 		fn.message("Gelukt!", "De notitie is toegevoegd.");
+								 		
+								 		// update table details
+								 		var aTableDetails = mt.getAvailableTableDetails(sSomeTablename);
+								 		aTableDetails = [aTableDetails[0], aTableDetails[1], sNewTableComment];
+								 		mt.addAvailableTableDetails(sSomeTablename, aTableDetails);
+	
+								 		},
+									"error": function(jqXHR, textStatus, errorThrown){
+										fn.refreshTable(sSomeTablename);
+										fn.message("Fout bij het instellen van een notitie bij tabel '"+sSomeTablename+"'", "Er is een fout opgetreden: "+
+											textStatus+" "+errorThrown);
+										}
 								} );
 				 			},
+				 			function(){
+				 				
+				 				fn.message("Geannuleerd", "Geen notitie opgeslagen");
+				 			}, 
 				 			true,  // textarea
 				 			[35,7] // set minimal size of prompt
 				 			
@@ -1449,6 +1455,15 @@ head.putTableCloseButton = function(sSomeTablename){
 		.append($("<span></span>").addClass("ui-icon ui-icon-closethick"))
 		.bind("click", function(){
 			
+			// callback upon close, if set in the configuration
+			var aTableSettings = conf.getTableSettings(sSomeTablename);
+			var fnCallback = conf.getCloseCallback(aTableSettings);
+			if ( fnCallback != null )
+				{
+				fnCallback(mt.getDataTableObjectOf(sSomeTablename));
+				}
+			
+			// remove table
 			$("#"+sSomeTablename+"_wrapper").hide("slow");
 			tb.destroyTable(sSomeTablename, null, true);
 		});

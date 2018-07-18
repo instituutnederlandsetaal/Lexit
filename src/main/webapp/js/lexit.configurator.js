@@ -126,6 +126,12 @@ var oTableSettingsList_example = {
 		"prereset_callback": function(){ doSomething(); },
 		
 		
+		/**
+		 * @description callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)
+		 */
+		"close_callback": function(){ doSomething(); },
+		
+		
 		/** 
 		 * @type {boolean} 
 		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)
@@ -1717,6 +1723,18 @@ conf.getPreResetCallback = function(aTableSettings){
 	if (typeof aTableSettings["prereset_callback"] == 'undefined')
 		return null;
 	return aTableSettings["prereset_callback"];
+};
+
+
+// retrieve close_callback callback function
+// (which is activated when the Close-button is clicked upon)
+// default is null
+
+conf.getCloseCallback = function(aTableSettings){
+	
+	if (typeof aTableSettings["close_callback"] == 'undefined')
+		return null;
+	return aTableSettings["close_callback"];
 };
 
 // retrieve callback function
