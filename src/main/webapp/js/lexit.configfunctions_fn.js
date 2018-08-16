@@ -41,7 +41,7 @@ var fn = {};
  
 List of sections of functions:
 -----------------------------
-
+PROJECT FUNCTIONS
 GET GENERAL TABLE INFORMATION
 READ A TABLE FROM THE DATABASE
 GENERAL TABLE FUNCTIONS
@@ -62,17 +62,21 @@ GET ID FROM A RECORD IN THE DATABASE
 REMOVE DATA FROM THE DATABASE
 READ A SINGLE RECORD FROM THE DATABASE
 CALL A FUNCTION FROM THE DATABASE THAT RETURNS A RECORD
-READ A SINGLE RECORD FROM THE DATABASE
 
 INTERACTION
 
 FILTER BOXES FUNCTIONS
 GOTO FUNCTION
 STRING FUNCTIONS
+
+WEBSERVICES
 EXTRA FUNCTIONS
 
  */
 
+// *****************************************************************
+// **        PROJECT FUNCTIONS									  **
+// *****************************************************************
 
 /**
  * Set the project title on the screen
@@ -183,6 +187,9 @@ fn.tableIsEmpty = function(sSomeTablename){
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Name of a table
  * @returns {Boolean} true if the table is hidden, otherwise false
+ * 
+ * @see fn.hideTable
+ * @see fn.showTable
  */
 fn.tableIsHidden = function(sSomeTable){
 	if (typeof sSomeTable == 'object')
@@ -875,7 +882,10 @@ fn.closeTable = function(sSomeTablename, fnCallback){
 /**
  * Hide a table
  * 
- * @param {(String|API-object-instance)} sSomeTablename - Table name or object 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * 
+ * @see fn.showTable
+ * @see fn.tableIsHidden
  */
 fn.hideTable = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
@@ -887,7 +897,10 @@ fn.hideTable = function(sSomeTablename){
 /**
  * Show a table
  * 
- * @param {(String|API-object-instance)} sSomeTablename - Table name or object 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * 
+ * @see fn.hideTable
+ * @see fn.tableIsHidden
  */
 fn.showTable = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
@@ -2633,6 +2646,126 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 
 
 
+//*************************************************
+//*  READ A SINGLE RECORD FROM THE DATABASE       *
+//*  and load it into the datatables interface    *
+//*************************************************
+
+/**
+* Call a record
+* This does a job similar to fn.callDatabase(), but limited to a single record
+* which will be updated in the current table view
+* 
+* @param {Node} nRow - A row node
+* @param {String[]} [aColumnsToUpdate={all columns}] - An array of columns to reload
+* @param {Function} [fnCallback=null] - Function called after the operation
+* 
+* @see fn.callDatabase
+* @see fn.getRecord
+* @see fn.getRecords
+* @see fn.getRecordGivenFieldValues
+*/
+fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback){
+	
+	if (fx.isApiInstance(nRow))
+		{
+		fn.message("Fout", 
+				"Verkeerde aanroep van fn.callRecord("+fx.getTableName(nRow)+"). " +
+				"nRow bevat geen node, maar een API instance.");
+		return;
+		}
+	
+	var sTable = fn.getTableName(nRow);
+	
+	if ( fn.isCellNode(nRow))
+		{
+		fn.message("Fout", 
+				"Let op: fn.callRecord("+sTable+") " +
+				"is aangeroepen met een cell node, " +
+				"terwijl de functie een row node vereist.");
+		return;
+		}	
+	
+	// we need to extract the record id from the row node
+	var sRecordId = fn.getRowNodeId(nRow);
+	
+	// if that failed, give a error
+	if ( $.isNullOrUndefined(sRecordId) || sRecordId == '' )
+		{
+		fn.message("Fout", 
+				"Let op: fn.callRecord("+sTable+") " +
+				"verreist een record id.");
+		return;
+		}
+	
+	
+	var url = WEBSERV_URL+"/table/get_record";
+	
+	$.ajax( {
+		"type": "GET",
+		"url": url,
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sTable,
+			"id": sRecordId,
+			"dummy": getUniqueNumber() 
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {
+	 		// if table is loaded, we update it on the screen
+	 		if ( mt.tableExists(sTable))
+	 			fn._callRecord(nRow, aColumnsToUpdate, xml, fnCallback);
+	 		},
+	 	"error": function(jqXHR, textStatus, errorThrown){
+			// if table is loaded, we update it on the screen
+	 		if ( mt.tableExists(sTable))
+	 			fn.refreshTable(sTable);
+	 		fn.message("Fout",
+	 			"Fout bij aanroep van fn.callRecord("+sTable+"): "+
+				textStatus+" "+errorThrown);
+			}
+		} );
+	
+};
+
+//this is a subroutine of fn.callRecord
+//read the response from the database, and put the record value into the table on the screen
+fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
+	
+	var sTable = 		fn.getTableName(nRow);	
+	var oTableConfig =	conf.getTableConfig(sTable);
+	
+	$(xml).find("oneColumn").each(function(){
+		
+		var columnItems = 	$(this).find("item");
+		var columnName = 	columnItems.eq(0).text();
+		var columnValue = 	columnItems.eq(1).text();
+		var oColumnConfig =	conf.getColumnConfig(oTableConfig, columnName);
+		
+		// should the current column be updated?
+		var bUpdateCurrentColumn = 
+			(aColumnsToUpdate == null || (aColumnsToUpdate != null && $.inArray(columnName, aColumnsToUpdate)>-1));
+		if ( !bUpdateCurrentColumn )
+			return; // continue
+		
+		// we don't do anything with button columns, since that contain only a button that must keep untouched
+		var buttonSetting = conf.getButtonSetting(oColumnConfig);		
+		if (buttonSetting != null) 
+			return; // continue
+		
+		// update each cell 
+		fn.putDataIntoCellNode( nRow, columnName, columnValue );
+		
+	});	
+	
+	// if some callback function is given, call it now
+	if (fnCallback!=null) 
+		fnCallback();
+	
+};
+
+
+
 // *************************************************
 // *  READ A SINGLE RECORD FROM THE DATABASE       *
 // *  and return it in an array                    *
@@ -2938,123 +3071,6 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback){
 
 
 
-// *************************************************
-// *  READ A SINGLE RECORD FROM THE DATABASE       *
-// *  and load it into the datatables interface    *
-// *************************************************
-
-/**
- * Call a record
- * This does a job similar to fn.callDatabase(), but limited to a single record
- * which will be updated in the current table view
- * 
- * @param {Node} nRow - A row node
- * @param {String[]} [aColumnsToUpdate={all columns}] - An array of columns to reload
- * @param {Function} [fnCallback=null] - Function called after the operation
- * 
- * @see fn.callDatabase
- * @see fn.getRecord
- * @see fn.getRecords
- * @see fn.getRecordGivenFieldValues
- */
-fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback){
-	
-	if (fx.isApiInstance(nRow))
-		{
-		fn.message("Fout", 
-				"Verkeerde aanroep van fn.callRecord("+fx.getTableName(nRow)+"). " +
-				"nRow bevat geen node, maar een API instance.");
-		return;
-		}
-	
-	var sTable = fn.getTableName(nRow);
-	
-	if ( fn.isCellNode(nRow))
-		{
-		fn.message("Fout", 
-				"Let op: fn.callRecord("+sTable+") " +
-				"is aangeroepen met een cell node, " +
-				"terwijl de functie een row node vereist.");
-		return;
-		}	
-	
-	// we need to extract the record id from the row node
-	var sRecordId = fn.getRowNodeId(nRow);
-	
-	// if that failed, give a error
-	if ( $.isNullOrUndefined(sRecordId) || sRecordId == '' )
-		{
-		fn.message("Fout", 
-				"Let op: fn.callRecord("+sTable+") " +
-				"verreist een record id.");
-		return;
-		}
-	
-	
-	var url = WEBSERV_URL+"/table/get_record";
-	
-	$.ajax( {
-		"type": "GET",
-		"url": url,
-		"data": {
-			"db_name": getHttpParams().get("db"),
-			"table_name": sTable,
-			"id": sRecordId,
-			"dummy": getUniqueNumber() 
-			},
-	 	"dataType": "xml", // get response as xml
-	 	"success": function(xml) {
-	 		// if table is loaded, we update it on the screen
-	 		if ( mt.tableExists(sTable))
-	 			fn._callRecord(nRow, aColumnsToUpdate, xml, fnCallback);
-	 		},
-	 	"error": function(jqXHR, textStatus, errorThrown){
-			// if table is loaded, we update it on the screen
-	 		if ( mt.tableExists(sTable))
-	 			fn.refreshTable(sTable);
-	 		fn.message("Fout",
-	 			"Fout bij aanroep van fn.callRecord("+sTable+"): "+
-				textStatus+" "+errorThrown);
-			}
-		} );
-	
-};
-
-// this is a subroutine of fn.callRecord
-// read the response from the database, and put the record value into the table on the screen
-fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
-	
-	var sTable = 		fn.getTableName(nRow);	
-	var oTableConfig =	conf.getTableConfig(sTable);
-	
-	$(xml).find("oneColumn").each(function(){
-		
-		var columnItems = 	$(this).find("item");
-		var columnName = 	columnItems.eq(0).text();
-		var columnValue = 	columnItems.eq(1).text();
-		var oColumnConfig =	conf.getColumnConfig(oTableConfig, columnName);
-		
-		// should the current column be updated?
-		var bUpdateCurrentColumn = 
-			(aColumnsToUpdate == null || (aColumnsToUpdate != null && $.inArray(columnName, aColumnsToUpdate)>-1));
-		if ( !bUpdateCurrentColumn )
-			return; // continue
-		
-		// we don't do anything with button columns, since that contain only a button that must keep untouched
-		var buttonSetting = conf.getButtonSetting(oColumnConfig);		
-		if (buttonSetting != null) 
-			return; // continue
-		
-		// update each cell 
-		fn.putDataIntoCellNode( nRow, columnName, columnValue );
-		
-	});	
-	
-	// if some callback function is given, call it now
-	if (fnCallback!=null) 
-		fnCallback();
-	
-};
 
 
 
@@ -3063,7 +3079,74 @@ fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
 // *           INTERACTION               *
 // ***************************************
 
-
+/**
+ * Add an autocomplete functionality to a given filter box, or to a table cell
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String} sColumnName - Column name of the cell or filter box
+ * @param {Boolean} bFilterBox - Set autocomplete onto the column filterbox (true), or onto the column cells (false)
+ * @param {String} sFunctionName - Name of the database function which will provide the autocomplete suggestions (its output must be a string with separators, see sPrimarySeparator and sSecondarySeparator params)
+ * @param {String} [sPrimarySeparator=|] - String separator between the suggestions returned by the database function (see sFunctionName param)
+ * @param {String} [sSecondarySeparator=:::] - Separator between label and value strings, within a single suggestion (see sPrimarySeparator param)
+ * @param {Integer} [iMinLength=2] - Input length (numer of characters) required for autocomplete activation (a value smaller than 2 is not recommended, since it may cause a heavy data load)
+ * @param {Integer} [iDelay=750] - Delay (in milliseconds) between the very last keypress event and the autocomplete activation. Striking a key causes the stopwatch to be set back to zero, so the delay will be measured only after the very last keypress event. This allows the user to enter multiple characters before the search for autocomplete suggestions starts. A low value for iDelay is not recommended as it may cause the autocomplete to be less responsive because of the heavy data load.
+ * 
+ * @see fn.putDataIntoFilterBox
+ */
+fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunctionName, sPrimarySeparator, sSecondarySeparator, iMinLength, iDelay){
+	
+	var sSomeTablename = fx.getTableName(sSomeTablename);
+	
+	// set some defaults
+	sPrimarySeparator = 	(sPrimarySeparator == null ? "|" : sPrimarySeparator);
+	sSecondarySeparator =	(sSecondarySeparator == null ? ":::" : sSecondarySeparator);
+	iDelay = 				(iDelay == null ? 750 : iDelay);
+	iMinLength = 			(iMinLength == null ? 2 : iMinLength);
+	
+	// selector depends on bFilterBox param: is it a filter box or a cell we've to put the autocomplete onto?
+	var sAutoCompleteSelector = bFilterBox ?
+			"input#"+sSomeTablename+"_searchbox_"+sColumnName
+			:
+			"#"+sSomeTablename+" ."+sColumnName;
+	
+	// remove any focus event from selector
+	// and append the autocomplete upon focus event
+	
+	$(document).off("focus", sAutoCompleteSelector);
+	
+	$(document).on(
+		      "focus", 
+		      sAutoCompleteSelector, 
+		      function(event) {
+		      	
+		      	$(event.target).autocomplete({
+		          	
+		      		delay: iDelay,
+		            minLength: iMinLength,
+			        source: function(request, response){
+			            	
+			           	fn.callFunction(sFunctionName, [ fn.quote( request.term ) ], 
+			          		function(func_resp){  
+			            		
+			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
+			           					sFunctionName.substring(sFunctionName.indexOf(".")+1) : sFunctionName;
+			            		var aSuggestionsArr = 
+			            			(func_resp[sOutputLabel]).split(sPrimarySeparator);
+			            		
+			            		response($.map(aSuggestionsArr, function (item) {
+			                        return {
+			                            label: item.split(sSecondarySeparator)[0],
+			                            value: item.split(sSecondarySeparator)[1]
+			                        };
+			                    }));
+			            	});
+			            }
+		          });
+		          
+		      }
+		  );
+	
+};
 
 /**
  * Close any currently opened dialog programmatically.
@@ -3625,7 +3708,6 @@ fn.clickOnButton = function(sTableName, sButtonId){
 
 
 
-
 // *******************************
 // ** modify the custom buttons **
 // *******************************
@@ -3894,58 +3976,7 @@ fn.getValueOfFilterBox = function(sSomeTable, sCellName){
 };
 
 
-/**
- * Go to the right page of a table, given some column name and a value it should contain 
- * 
- * @param {(String|API-object-instance)} sSomeTable - A table name or object
- * @param {String} sColumnName - Name of columns to search through
- * @param {String} sColumnValue - Value to search for
- */
-fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
-	
-	
-	// BEWARE:
-	// this function might not work as expected if some search was
-	// carried out just before, as the result set might be much smaller
-	// than the row number this function will try to show...
-	
-	if (typeof sSomeTablename == 'object')
-		sSomeTablename = fn.getTableName(sSomeTablename);
-	
-	// reset filters
-	// this is needed because we will add filters here and we want to make
-	// sure that filters from previous rounds get cleaned
-	mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters(false);
-	
-	// initialize compulsory filters arrays
-	// (these are filters in addition to the "go to"-filter)
-	var filterColumnNames = new Array();
-	var filterValues = new Array();
-	
-	// find sorting columns and directions	
-	var aSortColumns = fn.getSortingColumns(sSomeTablename);
-	var aSortDirections = fn.getSortingDirections(sSomeTablename);
-	
-	// gather the compulsory filters 
-	
-	var oTableConfig = conf.getTableConfig(sSomeTablename);
-	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++)
-		{
-		var aColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfColumnsOf(sSomeTablename)[i]);		
-		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
-		if (keepfilter)
-			{
-			filterColumnNames.push(mt.getListOfColumnsOf(sSomeTablename)[i]);
-			filterValues.push(conf.getFilter(aColumnConfig));
-			}
-		}
-	
-	
-	// now request the corresponding row number
-	// and jump to that position in the table
-	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues);
-	
-};
+
 
 
 /**
@@ -3982,77 +4013,6 @@ fn.getTypeOfFilterBox = function(sSomeTablename, sColumnName){
 	
 	// default: text
 	return "text";
-};
-
-
-
-/**
- * Add an autocomplete functionality to a given filter box, or to a table cell
- * 
- * @param {(String|API-object-instance)} sSomeTablename - A table name or object
- * @param {String} sColumnName - Column name of the filter box
- * @param {Boolean} bFilterBox - Set autocomplete onto the column filterbox (true), or onto the column cells (false)
- * @param {String} sFunctionName - Name of the database function which will provide the autocomplete suggestions (its output must be a string with separators, see sPrimarySeparator and sSecondarySeparator params)
- * @param {String} [sPrimarySeparator=|] - String separator between the suggestions returned by the database function (see sFunctionName param)
- * @param {String} [sSecondarySeparator=:::] - Separator between label and value strings, within a single suggestion (see sPrimarySeparator param)
- * @param {Integer} [iMinLength=2] - Input length (numer of characters) required for autocomplete activation (a value smaller than 2 is not recommended, since it may cause a heavy data load)
- * @param {Integer} [iDelay=750] - Delay (in milliseconds) between the very last keypress event and the autocomplete activation. Striking a key causes the stopwatch to be set back to zero, so the delay will be measured only after the very last keypress event. This allows the user to enter multiple characters before the search for autocomplete suggestions starts. A low value for iDelay is not recommended as it may cause the autocomplete to be less responsive because of the heavy data load.
- * 
- * @see fn.putDataIntoFilterBox
- */
-fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunctionName, sPrimarySeparator, sSecondarySeparator, iMinLength, iDelay){
-	
-	var sSomeTablename = fx.getTableName(sSomeTablename);
-	
-	// set some defaults
-	sPrimarySeparator = 	(sPrimarySeparator == null ? "|" : sPrimarySeparator);
-	sSecondarySeparator =	(sSecondarySeparator == null ? ":::" : sSecondarySeparator);
-	iDelay = 				(iDelay == null ? 750 : iDelay);
-	iMinLength = 			(iMinLength == null ? 2 : iMinLength);
-	
-	// selector depends on bFilterBox param: is it a filter box or a cell we've to put the autocomplete onto?
-	var sAutoCompleteSelector = bFilterBox ?
-			"input#"+sSomeTablename+"_searchbox_"+sColumnName
-			:
-			"#"+sSomeTablename+" ."+sColumnName;
-	
-	// remove any focus event from selector
-	// and append the autocomplete upon focus event
-	
-	$(document).off("focus", sAutoCompleteSelector);
-	
-	$(document).on(
-		      "focus", 
-		      sAutoCompleteSelector, 
-		      function(event) {
-		      	
-		      	$(event.target).autocomplete({
-		          	
-		      		delay: iDelay,
-		            minLength: iMinLength,
-			        source: function(request, response){
-			            	
-			           	fn.callFunction(sFunctionName, [ fn.quote( request.term ) ], 
-			          		function(func_resp){  
-			            		
-			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
-			           					sFunctionName.substring(sFunctionName.indexOf(".")+1) : sFunctionName;
-			            		var aSuggestionsArr = 
-			            			(func_resp[sOutputLabel]).split(sPrimarySeparator);
-			            		
-			            		response($.map(aSuggestionsArr, function (item) {
-			                        return {
-			                            label: item.split(sSecondarySeparator)[0],
-			                            value: item.split(sSecondarySeparator)[1]
-			                        };
-			                    }));
-			            	});
-			            }
-		          });
-		          
-		      }
-		  );
-	
 };
 
 
@@ -4198,6 +4158,63 @@ fn.addFilters = function(sSomeTable, oFilters){
 
 
 
+
+// *************************************************************
+// *                 GOTO FUNCTION                             *
+// *************************************************************
+
+/**
+ * Go to the right page of a table, given some column name and a value it should contain 
+ * 
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ * @param {String} sColumnName - Name of columns to search through
+ * @param {String} sColumnValue - Value to search for
+ */
+fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
+	
+	
+	// BEWARE:
+	// this function might not work as expected if some search was
+	// carried out just before, as the result set might be much smaller
+	// than the row number this function will try to show...
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// reset filters
+	// this is needed because we will add filters here and we want to make
+	// sure that filters from previous rounds get cleaned
+	mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters(false);
+	
+	// initialize compulsory filters arrays
+	// (these are filters in addition to the "go to"-filter)
+	var filterColumnNames = new Array();
+	var filterValues = new Array();
+	
+	// find sorting columns and directions	
+	var aSortColumns = fn.getSortingColumns(sSomeTablename);
+	var aSortDirections = fn.getSortingDirections(sSomeTablename);
+	
+	// gather the compulsory filters 
+	
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++)
+		{
+		var aColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfColumnsOf(sSomeTablename)[i]);		
+		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
+		if (keepfilter)
+			{
+			filterColumnNames.push(mt.getListOfColumnsOf(sSomeTablename)[i]);
+			filterValues.push(conf.getFilter(aColumnConfig));
+			}
+		}
+	
+	
+	// now request the corresponding row number
+	// and jump to that position in the table
+	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues);
+	
+};
 
 // *************************************************************
 // *                 STRING FUNCTIONS                          *
@@ -4384,7 +4401,7 @@ fn.removeHighlight = function(sString){
 
 
 // *******************************************
-// *           EXTRA FUNCTIONS               *
+// *             WEBSERVICES                 *
 // *******************************************
 
 
@@ -4434,7 +4451,9 @@ fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCall
 
 
 
-
+//*******************************************
+//*           EXTRA FUNCTIONS               *
+//*******************************************
 
 
 /**
