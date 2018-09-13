@@ -4406,16 +4406,17 @@ fn.removeHighlight = function(sString){
 
 
 /**
- * Call a webservice
+ * Call a webservice (works automatically crossDomain as well)
  * 
  * @param {String} sUrl - URL of the service
  * @param {Array} aParameters - parameters to send to the service, in an associative array
  * @param {String} [sMethod=GET] - type of call: GET or POST
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
+ * @param {Array} [oExtraParams=null] - additional ajax parameters, if needed
  * 
  */
-fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback){
+fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";
@@ -4427,7 +4428,6 @@ fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCall
 		"type": sMethod,
 		"url": sUrl,
 		"data": aParameters,
-	 	"dataType": sResponseDataType, 
 	 	"success": function(xml) {
 	 		// callback if it is set
 	 		if (fnCallback!=null)
@@ -4441,9 +4441,22 @@ fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCall
 		}
 	
 	// if the called url isn't on the same server, we need a cross domain call
+	
 	if (sUrl.indexOf(document.domain)<0)
 		{
 		ajaxParams["crossDomain"] = true;
+		}
+	
+	if (sResponseDataType != null)
+		{
+		ajaxParams["dataType"] = sResponseDataType;
+		}
+	
+	// if some extra parameters were sent, add them to the ajax call
+	
+	for (oneParam in oExtraParams)
+		{
+		ajaxParams[oneParam] = oExtraParams[oneParam];
 		}
 	
 	$.ajax( ajaxParams );
