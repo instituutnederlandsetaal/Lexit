@@ -190,9 +190,9 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 			var sCause = (aColumnOrder.length != aAllColumns.length) ?
 					"aantal kolommen verschilt (database stuurt "+aAllColumns.length+
 					" kolommen, configuratie noemt "+aColumnOrder.length+" kolommen)" 
-					: "kolomnamen verschillen";
+					: "kolomnamen verschillen.<BR><BR>De database-tabel bevat:<BR>{"+firstArray.join(", ")+"}<BR><BR>Maar de configuratie noemt:<BR>{"+secondArray.join(", ")+"} ";
 			fn.message("Fout in tabel '"+sSomeTableName+"'", "De lijst kolommen in \"column_order\" (in de configuratie) " +
-					"komt niet overeen met de werkelijke kolommen [oorzaak: "+sCause+"].");
+					"komt niet overeen met de werkelijke kolommen.<BR>Oorzaak: "+sCause+".");
 			}
 		}
 	

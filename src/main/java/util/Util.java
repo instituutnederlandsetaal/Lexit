@@ -190,12 +190,12 @@ public class Util {
 	
 	public static boolean containsSomeLetters(String value){
 		if (value == null) return false;
-		return value.matches(".*([a-zA-ZáéíóúıàèìòùâêîôûäëïöüÿñçÁÉÍÓÚİÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ]+).*");
+		return value.matches(".*([a-zA-ZÃ¡Ã©Ã­Ã³ÃºÃ½Ã Ã¨Ã¬Ã²Ã¹Ã¢ÃªÃ®Ã´Ã»Ã¤Ã«Ã¯Ã¶Ã¼Ã¿Ã±Ã§ÃÃ‰ÃÃ“ÃšÃÃ€ÃˆÃŒÃ’Ã™Ã‚ÃŠÃÃ”Ã›Ã„Ã‹ÃÃ–Ãœ]+).*");
 	}
 	
 	public static boolean isGenuineWord(String value){
 		if (value == null) return false;
-		return value.matches("^([a-zA-ZáéíóúıàèìòùâêîôûäëïöüÿñçÁÉÍÓÚİÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ]+)$");
+		return value.matches("^([a-zA-ZÃ¡Ã©Ã­Ã³ÃºÃ½Ã Ã¨Ã¬Ã²Ã¹Ã¢ÃªÃ®Ã´Ã»Ã¤Ã«Ã¯Ã¶Ã¼Ã¿Ã±Ã§ÃÃ‰ÃÃ“ÃšÃÃ€ÃˆÃŒÃ’Ã™Ã‚ÃŠÃÃ”Ã›Ã„Ã‹ÃÃ–Ãœ]+)$");
 	}
 	
 	
