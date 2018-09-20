@@ -2207,8 +2207,13 @@ public class Database {
 			return false;
 		
 		// numeric
-		// (a string containing other things than digits is not suitable to numeric field)
-		if (value.matches(".*([^\\d]).*") && PostgresDatabaseCommunication.isNumericType(columnType))
+		
+		// (a string containing other things than digits is not suitable to whole number field)
+		if (value.matches(".*([^\\d]).*") && PostgresDatabaseCommunication.isWholeNumberType(columnType))
+			return false;
+		
+		// (a string containing other things than digits and a dot is not suitable to real number field)
+		if (value.matches(".*([^\\d\\.]).*") && PostgresDatabaseCommunication.isRealNumberType(columnType))
 			return false;
 		
 		return true;
