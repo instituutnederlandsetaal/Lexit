@@ -300,8 +300,7 @@ public class Database {
 				for (int i=0; i<filterColumns.length; i++)
 				{
 					parts[i] = getSafeFieldName(filterColumns[i]) + " " +
-						getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
-						" ? ";
+						getSuitableOperatorAndArg(tableName, filterColumns[i], filterValues[i], false);
 				}
 				getRowNumberQuery += Util.join(parts, " AND ");
 			}
@@ -312,7 +311,7 @@ public class Database {
 				"		) tmp "+
 				"	) to_be_grouped "+
 				"	 WHERE "+getSafeFieldName(columnName) + " " + 
-							getSuitableOperator(tableName, columnName, columnValue, false) + " ? " +
+							getSuitableOperatorAndArg(tableName, columnName, columnValue, false) +
 				"	 GROUP BY page " + 
 				") all_occurences; ";
 			
@@ -418,7 +417,7 @@ public class Database {
 				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + getSafeFieldName(primaryKey) + ", " +
 
 				//          gather (in an array) a true/false value, telling us if the value we're searching for is found/not found in the row				
-				"			array_agg(searched_column" + getSuitableOperator(tableName, columnName, columnValue, false) + " ? ) AS \"conditionIsMet_arr\", " +
+				"			array_agg(searched_column" + getSuitableOperatorAndArg(tableName, columnName, columnValue, false) + ") AS \"conditionIsMet_arr\", " +
 				
 				//			page number
 				"			(rownumber / " + iDisplayLength + ") AS page "+
@@ -438,8 +437,7 @@ public class Database {
 				for (int i=0; i<filterColumns.length; i++)
 				{
 					parts[i] = getSafeFieldName(filterColumns[i]) + " " +
-						getSuitableOperator(tableName, filterColumns[i], filterValues[i], false) + 
-						" ? ";
+						getSuitableOperatorAndArg(tableName, filterColumns[i], filterValues[i], false);
 				}
 				getRowNumberQuery += Util.join(parts, " AND ");
 			}
@@ -540,8 +538,7 @@ public class Database {
 		{			
 			matchingPairs[i] = 
 					getSafeFieldName(columnNames[i]) + " " + 
-					getSuitableOperator(tableName, columnNames[i], columnValues[i], true) + 
-					" ? ";
+					getSuitableOperatorAndArg(tableName, columnNames[i], columnValues[i], true);
 			columnValues[i] = removeFrontOperator(columnValues[i]);
 		}	
 		
@@ -875,8 +872,7 @@ public class Database {
 		{
 			matchingPairs[i] = 
 					getSafeFieldName(columnNamesToMatch[i]) + " " + 
-					getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
-					" ? ";
+					getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 			valuesToMatch[i] = removeFrontOperator(valuesToMatch[i]);
 		}			
 		
@@ -1185,7 +1181,7 @@ public class Database {
 			String oneColumnName = filterColumnNames[i];
 			String pattern = filterValues[i];
 			allParts[i] = getSafeFieldName(oneColumnName) + 
-					" " + getSuitableOperator(tableName, oneColumnName, pattern, true) + " ? ";
+					" " + getSuitableOperatorAndArg(tableName, oneColumnName, pattern, true);
 		}
 		
 		// add the condition WHERE col ~* '^regex' AND ...
@@ -1754,8 +1750,7 @@ public class Database {
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
 			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
-					" " + getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
-					" ? ";
+					" " + getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
 		
 		String updateRecords = 
@@ -1831,8 +1826,7 @@ public class Database {
 		for (int i=0; i<columnNamesToMatch.length; i++)
 		{
 			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
-					" " + getSuitableOperator(tableName, columnNamesToMatch[i], valuesToMatch[i], true) + 
-					" ? ";
+					" " + getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
 		
 		String updateRecords = 
@@ -2196,6 +2190,10 @@ public class Database {
 		if (value.matches("true|false") && columnType.equals("boolean"))
 			return true;
 		
+		// tsvector
+		if (value.contains("&") && columnType.equals("tsvector"))
+			return true;
+		
 		// user-defined
 		// (searching a user-defined field with a string as '-' will cause a crash if we don't cast to text)
 		if ( columnType.equals("USER-DEFINED") && !Util.containsSomeLetters(value) )
@@ -2321,8 +2319,9 @@ public class Database {
 		ArrayList<String> queryValues = new ArrayList<String>();
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		
-		
+		// -----------------------------------------------
 		// main search, without column filters
+		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()==0)
@@ -2350,8 +2349,8 @@ public class Database {
 				{
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperator(tableName, columnsToSearch[i], sSearch, false) + 
-							" ? ");
+							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], sSearch, false)
+							);
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}
 				
@@ -2367,7 +2366,9 @@ public class Database {
 			
 		}
 		
+		// -----------------------------------------------
 		// main search WITH column filters
+		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		else if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()>0)
@@ -2400,7 +2401,8 @@ public class Database {
 				{
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperator(tableName, columnsToSearch[i], sSearch, false) + " ? ");
+							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], sSearch, false) 
+							);
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}		
 								
@@ -2437,8 +2439,8 @@ public class Database {
 				{
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
-							" " + getSuitableOperator(tableName, aSearchColumnNames.get(i), aSearchColumnValues.get(i), caseSensitiveColumn) + 
-							" ? ");
+							" " + getSuitableOperatorAndArg(tableName, aSearchColumnNames.get(i), aSearchColumnValues.get(i), caseSensitiveColumn)  
+							);
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, aSearchColumnNames.get(i)));
 				}
 				
@@ -2455,7 +2457,9 @@ public class Database {
 			
 		}
 		
+		// -----------------------------------------------
 		// per-column search (no main search)
+		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		else if ( (sSearch!=null && sSearch.isEmpty()) && aSearchColumnValues.size()>0)
@@ -2484,8 +2488,8 @@ public class Database {
 				{
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperator(tableName, columnsToSearch[i], aSearchColumnValues.get(i), caseSensitiveColumn) + 
-							" ? ");
+							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], aSearchColumnValues.get(i), caseSensitiveColumn) 
+							);
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
 				}
 				
@@ -2924,7 +2928,10 @@ public class Database {
 	 * @param value
 	 * @return an operator as a string
 	 */
-	public String getSuitableOperator(String tableName, String columnName, String columnValue, boolean caseSensitive){
+	public String getSuitableOperatorAndArg(String tableName, String columnName, String columnValue, boolean caseSensitive){
+		
+		// argument
+		String arg = " ? ";
 		
 		// get column type
 		String columnType = getTypeOfColumn(tableName, columnName);
@@ -2932,9 +2939,9 @@ public class Database {
 		
 		// always check that one first (to prevent NullPointerException)
 		if (columnValue == null || columnValue.toLowerCase().equals("null") )
-			return " IS ";		
+			return " IS " + arg;		
 		if (columnValue.toLowerCase().equals("!null"))
-			return " IS NOT ";
+			return " IS NOT " + arg;
 		
 		// negation operator
 		boolean negation = false;
@@ -2943,33 +2950,37 @@ public class Database {
 		
 		// array type
 		if (columnType.endsWith("[]"))
-			return "@>";
+			return "@>" + arg;
+		
+		// tsvector
+		if (columnType.equals("tsvector"))
+			return "@@ to_tsquery(" + arg + ") ";
 		
 		// inequality operators 
 		// (type check not necessary, since it works with both numeral and textual types)
 		if (columnValue.startsWith("<=") || columnValue.startsWith(">="))
-			return columnValue.substring(0,2);		
+			return columnValue.substring(0,2) + arg;		
 		if (columnValue.startsWith("<") || columnValue.startsWith(">"))
-			return columnValue.substring(0,1);
+			return columnValue.substring(0,1) + arg;
 		
 		// special kind of regex requires LIKE
 		if (columnValue.contains("%")) 
-			return " LIKE ";
+			return " LIKE " + arg;
 		
 		// if type is numeric, just test equality (because it's faster)
 		// (NOTE that if <= or >= operators were required, those were catched hereabove)
 		if (columnType.matches("smallint|integer|bigint|decimal|numeric|real|double precision|serial|bigserial")) 
-			return (negation ? "!=" : "=");
+			return (negation ? "!=" : "=") + arg;
 		
 		// booleans require '='
 		if (columnType.equals("boolean"))
-			return (negation ? "!=" : "=");
+			return (negation ? "!=" : "=") + arg;
 		
 		// suitable operator for case (in)sensitive search and regex
-		return caseSensitive? 
-				(negation ? "!~" : "~") 
+		return caseSensitive ? 
+				(negation ? "!~" : "~") + arg 
 				: 
-				(negation ? "!~*" : "~*");
+				(negation ? "!~*" : "~*") + arg;
 	}
 	
 	
