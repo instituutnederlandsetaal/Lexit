@@ -2190,8 +2190,8 @@ public class Database {
 		if (value.matches("true|false") && columnType.equals("boolean"))
 			return true;
 		
-		// tsvector
-		if (value.contains("&") && columnType.equals("tsvector"))
+		// tsvector 
+		if (columnType.equals("tsvector")) // good enough for now (no conditions) 
 			return true;
 		
 		// user-defined
@@ -2954,7 +2954,7 @@ public class Database {
 		
 		// tsvector
 		if (columnType.equals("tsvector"))
-			return "@@ to_tsquery(" + arg + ") ";
+			return "@@ " + (negation ? "!!":"") + arg + "::tsquery ";
 		
 		// inequality operators 
 		// (type check not necessary, since it works with both numeral and textual types)
