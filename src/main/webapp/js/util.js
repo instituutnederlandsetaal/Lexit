@@ -751,3 +751,5 @@ $.isNumber = function(o)
 	else
 		return (typeof o === "number");
 }
+
+

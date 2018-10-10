@@ -19,6 +19,7 @@ $.fn.dataTable.render.ellipsis = function ( cutoff ) {
 };
 
 
+
 // get the table context of the selected table 
 // (this way, we can access the settings of this particular table)
 

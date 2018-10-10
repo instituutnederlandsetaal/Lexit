@@ -23,12 +23,7 @@ fx.getTableName = function(oMixed){
 	if (typeof oMixed == 'string')
 		return oMixed;
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.getTableName() is verkeerd aangeroepen. " +
-				"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getTableName", oMixed);
 	
 	// Depending on the state of the API instance
 	// we have different functions at our disposal
@@ -79,12 +74,7 @@ fx.getNumberOfVisibleRows = function(oSomeTable){
  */
 fx.getRowIndex = function(oRow){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getRowIndex() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getRowIndex", oRow);
 	
 	var sTableName =	fx.getTableName(oRow);
 	var oTable = 		mt.getDataTableObjectOf(sTableName);
@@ -107,20 +97,16 @@ fx.getRowIndex = function(oRow){
  */
 fx.getRowNumberOnScreen = function(oRow){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getRowNumberOnScreen() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getRowNumberOnScreen", oRow);
+	
+	if (oRow.count() ==0)
+		return -1;
 	
 	var sTableName =	fx.getTableName(oRow);
 	var oTable = 		mt.getDataTableObjectOf(sTableName);
+	var nNode = 		oRow.node();
 	
-	var nRow = 			oRow.node();
-	var aAllNodes = 	oTable.rows().nodes();
-
-	return $.inArray( nRow, aAllNodes ); 
+	return oTable.row(nNode).index(); 
 };
 
 
@@ -135,12 +121,12 @@ fx.getRowNumberOnScreen = function(oRow){
  * var oRows = fx.getAllRows(t);
  * oRows.every(function(){ ... });
  */
-fx.getAllRows = function(oSomeTable){
-
-	if (typeof oSomeTable == 'string')
-		oSomeTable = mt.getDataTableObjectOf(oSomeTable);
+fx.getAllRows = function(oTable){
 	
-	return oSomeTable.rows();
+	if (typeof oTable === 'string')
+		oTable = mt.getDataTableObjectOf(oTable);
+	
+	return oTable.rows();
 };
 
 
@@ -158,6 +144,9 @@ fx.getRowId = function(oRow){
 				"oRow hoort een API instance te bevatten.");
 		return;
 		}
+	
+	if (oRow.count() == 0)
+		return null;
 	
 	return oRow.id();	
 };
@@ -219,7 +208,7 @@ fx.getAllRowsWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) < 0)
 			{
 			fn.message("Fout", 
-					"Verkeerde aanroep van fn.getAllRowsWhere("+sTableName+"). " +
+					"Verkeerde aanroep van fx.getAllRowsWhere("+sTableName+"). " +
 					"De opgegeven kolom '"+sFieldName+"' komt niet voor in tabel '"+sTableName+"'.");
 			
 			return null;
@@ -230,18 +219,16 @@ fx.getAllRowsWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 	
 	var aNodes = new Array();
 	
-	(fx.getAllRows(sTableName)).every(function(){
+	(fx.getAllRows(sTableName)).every(function(i){
 		
-		var oRowData = this.data();
+		var oCurrentRow = this;
 		
 		// search the row
 		// (if one single required value is not found, the search fails)
 		var bFound = true;
 		for (sFieldName in aFieldsAndValues)
 			{
-			var colNr = fn.getColumnNumberOf(sTableName, sFieldName);
-			var sValueOfCell = (typeof oRowData == 'object') ?
-					oRowData[sFieldName] : oRowData[colNr];
+			var sValueOfCell = fx.getDataFromCellInRow(oCurrentRow, sFieldName);
 					
 			if (sValueOfCell != aFieldsAndValues[sFieldName])
 				bFound = false;						
@@ -251,14 +238,20 @@ fx.getAllRowsWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 		// add it to our result set
 		if (bFound)
 			{
-			// if we only want one row, limit the nodes array to one element 
-			if (!bOnlyFirstRow || (aNodes.length == 0))
-				aNodes.push(this.node()); 		
+			aNodes.push( oCurrentRow.row(i).node() ); 		
 			}
 		
-	});	
+	});
 	
-	return mt.getDataTableObjectOf(sTableName).rows(aNodes);
+	// if we found nothing, select non existing row so as to return an empty set
+	if (aNodes.length == 0)
+		return mt.getDataTableObjectOf(sTableName).rows( "#doesntexist" );
+	
+	// return the matches
+	if (bOnlyFirstRow)		
+		return mt.getDataTableObjectOf(sTableName).row( aNodes[0] );
+	
+	return mt.getDataTableObjectOf(sTableName).rows( aNodes );
 };
 
 
@@ -293,11 +286,7 @@ fx.getRowWhereIdIs = function(oSomeTable, sId){
  */
 fx.unselectAllRows = function(sSomeTable){
 	
-	if (typeof sSomeTable == 'object')
-		sSomeTable = fn.getTableName(sSomeTable);
-	
-	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody').find("tr").removeClass('selected');
+	fn.unselectAllRowNodes(sSomeTable);
 	
 };
 
@@ -566,12 +555,7 @@ fx.getCell = function(mixed, sColumnName){
  */
 fx.getCellType = function(oMixed, sColumnName){
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.getCellType() is verkeerd aangeroepen. " +
-				"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getCellType", oMixed);
 	
 	// column name only required when oMixed is a row
 	return fn.getCellNodeType(oMixed.node(), sColumnName);
@@ -587,12 +571,7 @@ fx.getCellType = function(oMixed, sColumnName){
  */
 fx.getCellNode = function( oRow, sColumnName ){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getCellNode() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getCellNode", oRow);
 	
 	return fx.getNode( fx.getCell(oRow, sColumnName) );
 };
@@ -606,14 +585,9 @@ fx.getCellNode = function( oRow, sColumnName ){
  */
 fx.isEditableCell = function(oCell){
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.isEditableCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.isEditableCell", oCell);
 	
-	return fn.isEditableNode(oCell.node());
+	return fn.isEditableNode( oCell.node() );
 };
 
 
@@ -626,12 +600,7 @@ fx.isEditableCell = function(oCell){
  */
 fx.uncheckCheckboxes = function(oRow, aListOfColumns, fnCallback){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.uncheckCheckboxes() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.uncheckCheckboxes", oRow);
 	
 	fn.uncheckCheckboxes(oRow.node(), aListOfColumns, fnCallback);
 };
@@ -646,12 +615,7 @@ fx.uncheckCheckboxes = function(oRow, aListOfColumns, fnCallback){
  */
 fx.toggleCheckbox = function(oRow, sColumnName, fnCallback){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.toggleCheckbox() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.toggleCheckbox", oRow);
 	
 	fn.toggleCheckbox(oRow.node(), sColumnName, fnCallback);
 };
@@ -671,13 +635,7 @@ fx.toggleCheckbox = function(oRow, sColumnName, fnCallback){
  */
 fx.getNameOfColumnForThisCell = function(oCell){
 	
-	if ( !fx.isApiInstance(oCell))
-		{
-		fn.message("Fout", 
-				"Verkeerde aanroep van fx.getNameOfColumnForThisCell(). " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getNameOfColumnForThisCell", oCell);
 	
 	var sTable = 		fx.getTableName(oCell);
 	var aPos = 			oCell.index();
@@ -702,15 +660,10 @@ fx.getNameOfColumnForThisCell = function(oCell){
  */
 fx.isCell = function(oMixed){	
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.isCell() is verkeerd aangeroepen. " +
-				"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.isCell", oMixed);
 	
-	// if we don't have a row, we have a cell!
-	return !fx.isRow(oMixed);
+	// applied on a cell, index() should return an object
+	return (typeof oMixed.index() == 'object');
 };
 
 
@@ -722,15 +675,10 @@ fx.isCell = function(oMixed){
  */
 fx.isRow = function(oMixed){
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.isRow() is verkeerd aangeroepen. " +
-				"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.isRow", oMixed);
 	
-	// applied on a row, index() should return an integer
-	return (typeof oMixed.index() == 'integer');
+	// applied on a row, index() should return an number (beware: integer is not a JS type!)
+	return (typeof oMixed.index() == 'number');
 };
 
 
@@ -742,10 +690,11 @@ fx.isRow = function(oMixed){
  */
 fx.getRow = function(nRow){
 	
+	fn._checkjQueryObject("fx.getRow", nRow);
+	
 	if ( fx.isApiInstance(nRow) )
 		{
-		fn.message("Fout", "fx.getRow() is verkeerd aangeroepen. " +
-				"nRow bevat geen node, maar een API instance.");
+		fn.message("Fout", "fx.getRow() is aangeroepen met een API instance, maar deze functie verwacht een node als argument!");
 		return;
 		}
 	
@@ -764,12 +713,7 @@ fx.getRow = function(nRow){
  */
 fx.getNode = function(oMixed){
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.getNode() is verkeerd aangeroepen. " +
-		"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getNode", oMixed);
 	
 	return oMixed.node();
 };
@@ -784,12 +728,7 @@ fx.getNode = function(oMixed){
  */
 fx.isLastRowOf = function(oRow, oSelection){	
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.isLastRowOf() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.isLastRowOf", oRow);
 	
 	// beware: we use nodes here instead of ids. This is because some
 	// tables don't have id's, so using rows is more reliable!
@@ -813,12 +752,7 @@ fx.isLastRowOf = function(oRow, oSelection){
  */
 fx.getRowFromCell = function(oCell){
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.getRowFromCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getRowFromCell", oCell);
 	
 	var sTableName =	fx.getTableName(oCell);
 	var oTable = 		mt.getDataTableObjectOf(sTableName);
@@ -844,12 +778,7 @@ fx.getRowFromCell = function(oCell){
  */
 fx.getDataFromSiblingCell = function(oCell, sOtherColumnName){
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.getDataFromSiblingCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getDataFromSiblingCell", oCell);
 	
 	return fn.getDataFromSiblingNode(oCell.node(), sOtherColumnName);
 };
@@ -864,12 +793,7 @@ fx.getDataFromSiblingCell = function(oCell, sOtherColumnName){
  */
 fx.getDataFromCell = function(oCell){
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.getDataFromCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getDataFromCell", oCell);
 	
 	return fn.getDataFromCellNode(oCell.node());
 };
@@ -884,12 +808,7 @@ fx.getDataFromCell = function(oCell){
  */
 fx.getDataFromCellInRow = function(oRow, sColumnName){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getDataFromCellInRow() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getDataFromCellInRow", oRow);
 	
 	return fn.getDataFromCellInRowNode(oRow.node(), sColumnName);
 	
@@ -900,10 +819,8 @@ fx.getDataFromCellInRow = function(oRow, sColumnName){
  * Get selected text within a cell,
  * and also get the start and end positions of the selected text.
  * 
- * Adapted from:
- * http://stackoverflow.com/questions/7991474/calculate-position-of-selected-text-javascript-jquery
- * 
- * @param {API-object-instance} oCell - An API instance of a cell 
+ * @param {API-object-instance} oCell - An API instance of a cell/row
+ * @param {String} [sColumnName=null] - a column name, when first argument contains the API instance of a row  
  * @returns {Object} Selected text, start and end position, reliability
  * 
  * @example
@@ -911,16 +828,13 @@ fx.getDataFromCellInRow = function(oRow, sColumnName){
  * alert(sel.start + ": " + sel.end + " = " + sel.text);
  * 
  * @see fx.getWordClickedUponInCell
- * @see fx.getSelectedTextInSiblingCell
  */
-fx.getSelectedTextInCell = function(oCell) {
+fx.getSelectedTextInCell = function(oMixed, sColumnName) {
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.getSelectedTextInCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getSelectedTextInCell", oMixed);
+	
+	var oCell = (typeof sColumnName != 'undefined') ?
+			fx.getCell(oMixed, sColumnName) : oMixed;
 	
 	return fn.getSelectedTextInNode(oCell.node());
 };
@@ -930,46 +844,20 @@ fx.getSelectedTextInCell = function(oCell) {
  * Select a word within a cell just by clicking on it, 
  * and also get the start and end positions of the selected word.
  * 
- * @param {API-object-instance} oCell - An API instance of a cell
+ * @param {API-object-instance} oCell - An API instance of a cell/row
+ * @param {String} [sColumnName=null] - a column name, when first argument contains the API instance of a row 
  * @returns {Object} Selected text, start and end position, reliability
  * 
  * @see fx.getSelectedTextInCell
- * @see fx.getSelectedTextInSiblingCell
  */
-fx.getWordClickedUponInCell = function(oCell){
+fx.getWordClickedUponInCell = function(oMixed, sColumnName){
 	
-	if ( !fx.isApiInstance(oCell) )
-		{
-		fn.message("Fout", "fx.getWordClickedUponInCell() is verkeerd aangeroepen. " +
-				"oCell hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.getWordClickedUponInCell", oMixed);
+	
+	var oCell = (typeof sColumnName != 'undefined') ?
+			fx.getCell(oMixed, sColumnName) : oMixed;
 	
 	return fn.getWordClickedUponInNode(oCell.node());
-};
-
-
-/**
- * Get selected text within a sibling cell, 
- * given an API instance of a cell, and the name of the column in which the text is selected.
- * 
- * @param {API-object-instance} oRow - An API instance of a row
- * @param {String} sColumnName - A column name
- * @returns {Object} Selected text, start and end position, reliability
- * 
- * @see fx.getSelectedTextInCell
- * @see fx.getWordClickedUponInCell 
- */
-fx.getSelectedTextInSiblingCell = function(oRow, sColumnName){
-	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getSelectedTextInSiblingCell() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
-	
-	return fn.getSelectedTextInSiblingNode(oRow.node(), sColumnName);
 };
 
 
@@ -991,12 +879,7 @@ fx.getSelectedTextInSiblingCell = function(oRow, sColumnName){
  */
 fx.callRecord = function(oRow, aColumnsToUpdate, fnCallback){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.callRecord() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.callRecord", oRow);
 	
 	fn.callRecord(oRow.node(), aColumnsToUpdate, fnCallback);
 }
@@ -1018,12 +901,7 @@ fx.callRecord = function(oRow, aColumnsToUpdate, fnCallback){
  */
 fx.putDataIntoCell = function(oRow, sColumnName, sContent){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.putDataIntoCell() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.putDataIntoCell", oRow);
 	
 	fn.putDataIntoCellNode(oRow.node(), sColumnName, sContent);
 	
@@ -1045,12 +923,7 @@ fx.putDataIntoCell = function(oRow, sColumnName, sContent){
  */
 fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCallback){
 	
-	if ( !fx.isApiInstance(oMixed) )
-		{
-		fn.message("Fout", "fx.updateDatabaseGivenACellOrRow() is verkeerd aangeroepen. " +
-				"oMixed hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.updateDatabaseGivenACellOrRow", oMixed);
 	
 	fn.updateDatabaseGivenANode(oMixed.node(), aColumnNamesAndValues, fnCallback);
 };
@@ -1070,12 +943,7 @@ fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCal
  */
 fx.removeFromDatabaseGivenARow = function(oRow, fnCallback){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.removeFromDatabaseGivenARow() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
-		return;
-		}
+	fx._checkApiInstance("fx.removeFromDatabaseGivenARow", oRow);
 	
 	fn.removeFromDatabaseGivenANode(oRow.node(), fnCallback);	
 };
@@ -1108,26 +976,53 @@ fx.isApiInstance = function(obj){
 	}
 	
 	return true;
-	
-	
-	// OLD code: not reliable enough
-	
-//	if (obj == undefined || obj == null)
-//		return false;
-//	
-//	var test = 
-//		(
-//			// an API instance must have at least one of its typical functions 
-//			typeof obj.data == 'function' 
-//			||
-//			typeof obj.table == 'function'
-//			||
-//			typeof obj.any == 'function'
-//			||
-//			(typeof obj[0] !== undefined && typeof obj[0] == 'array')
-//		);
-//	
-//	return test;
 }
 
-
+/**
+ * Check if some function was called with an API instance
+ * and give an error if it wasn't!
+ */
+fx._checkApiInstance = function(sFunctionName, oArgument){
+	
+	if ( !fx.isApiInstance(oArgument ))
+		{
+		// try to compute name of table in which error occurs
+		var sTableName = "";
+		var sArgType = "";
+		
+		try {
+			// oArgument is a jQuery object
+			if (oArgument instanceof jQuery)
+				{			
+				sTableName = fn.getTableName(oArgument.get(0)); 
+				sArgType = "jQuery object";
+				}
+			// oArgument is a table name
+			else if (typeof oArgument == 'string' && mt.tableExists(oArgument))
+				{
+				sTableName = oArgument;
+				sArgType = "table name";
+				}
+			// oArgument is a node
+			else if ($(oArgument).elementExists())
+				{
+				sTableName = fn.getTableName(oArgument);
+				sArgType = "node";
+				}
+			// oArgument is some other type
+			else 
+				{
+				sArgType = typeof oArgument;
+				}
+		}
+		catch (err){
+			sTableName = "";
+			sArgType = "onbekende type";
+		}		
+		
+		// give error information
+		fn.message("Fout", sFunctionName + "("+sTableName+") is aangeroepen met een "+sArgType+" als argument. " +
+				"Dit is niet toegestaan! Gebruik een API instance.");
+		return;
+		}
+}

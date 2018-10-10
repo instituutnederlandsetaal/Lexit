@@ -347,7 +347,6 @@ td.selectColumns = function(sSomeTablename){
 		
 		var liElement = $("<li></li>")
 			.addClass( "ui-state-default" )
-			.text(fieldLC)
 			.attr("id", fieldLC)
 			.css("margin", "0 3px 3px 3px")
 			.css("padding", "0.4em")
@@ -355,11 +354,14 @@ td.selectColumns = function(sSomeTablename){
 			.css("font-size", "1.0em")
 			.css("height", "18px")
 			.prepend(input);		
-		var spanElement = $("<span></span>")
+		var spanElement1 = $("<span></span>")
 			.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )	
 			.css("position", "absolute")
-			.css("margin-left", "-1.3em");
-		liElement.append(spanElement);
+			.css("margin-left", "-3.0em");
+		var spanElement2 = $("<span></span>")
+			.text(fieldLC);
+		liElement.append(spanElement1);
+		liElement.append(spanElement2);
 		sortableUl.append(liElement);
 		}	
 	
@@ -633,7 +635,7 @@ td.selectColumns = function(sSomeTablename){
 	                				
 	                				// get the text node of the li element and replace it by the column name
 	                				// we want to have there...
-	                				$(this).contents().filter(function() {	                			
+	                				$(this).find("span").contents().filter(function() {	                			
 	                			      return (this.nodeType != 1 && this.textContent != '\n');
 	                				}).replaceWith(aOriginalColumnList[i]);
 	                				
