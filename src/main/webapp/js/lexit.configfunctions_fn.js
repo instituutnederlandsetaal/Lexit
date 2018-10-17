@@ -1019,7 +1019,7 @@ fn.getRowNodeWhere = function(sSomeTable, aFieldsAndValues){
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @param {Array} aFieldsAndValues - An associative array of fields and search values
  * @param {Boolean} [bOnlyFirstRow=false] - true if we only want the first row, otherwise false (default)
- * @returns {Node[]} An array of row nodes (or an empty array if nothing was found)
+ * @returns {Node/Node[]} A node resp. an array of row nodes (NULL resp. an empty array if nothing was found)
  * 
  * @see fn.getRowNodeWhere
  */
@@ -1033,7 +1033,12 @@ fn.getAllRowNodesWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 	var oRows = fx.getAllRowsWhere(sTableName, aFieldsAndValues, bOnlyFirstRow);
 	
 	if (bOnlyFirstRow)
-		return oRows.node();
+		{
+		if (oRows.count() == 1)
+			return oRows.node();
+		else
+			return null;
+		}
 	
 	return oRows.nodes().toArray();
 };
