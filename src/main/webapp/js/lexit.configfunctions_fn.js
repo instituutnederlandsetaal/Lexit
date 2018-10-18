@@ -2978,7 +2978,7 @@ fn.closeDialog = function(){
 	// find the dialogs, with regex catching all dialog ids
 	// (see fn.message function about the way ids are defined)
 	
-	$("div[id^='dialog-message']").dialog( "close" );
+	$("div[id^='dialog-message']").dialog( "close" ).remove();
 };
 
 
