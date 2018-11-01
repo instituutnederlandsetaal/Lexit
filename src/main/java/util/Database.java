@@ -2901,10 +2901,6 @@ public class Database {
 		if (value.startsWith("<") || value.startsWith(">"))
 			return value.substring(0,1);
 		
-		// special kind of regex requires LIKE
-		if (value.contains("%")) 
-			return " LIKE ";
-		
 		// if value is an integer, just test equality (because it's faster)
 		// (NOTE that if <= or >= operators were required, those were catched hereabove)
 		if (Util.isInteger(cleanValue)) 
@@ -2962,10 +2958,6 @@ public class Database {
 			return columnValue.substring(0,2) + arg;		
 		if (columnValue.startsWith("<") || columnValue.startsWith(">"))
 			return columnValue.substring(0,1) + arg;
-		
-		// special kind of regex requires LIKE
-		if (columnValue.contains("%")) 
-			return " LIKE " + arg;
 		
 		// if type is numeric, just test equality (because it's faster)
 		// (NOTE that if <= or >= operators were required, those were catched hereabove)

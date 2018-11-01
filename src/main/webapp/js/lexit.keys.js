@@ -316,6 +316,7 @@ kf.addKeyFunctions = function(){
 
 		var sActiveTable = kf.getActiveTable();
 		var iActiveRow = kf.getActiveRowNumber();
+		
 		// triggers jQuery.contextMenu 
 		// (see: http://medialize.github.com/jQuery-contextMenu/docs.html)
 		$("#"+sActiveTable+" tbody tr:eq("+iActiveRow+") td").contextMenu();
@@ -486,7 +487,7 @@ kf.addKeyFunctions = function(){
 		if (kf.isPressed("uparrow") || kf.isPressed("downarrow"))
 			{			
 			var sActiveTable = kf.getActiveTable();	
-			
+						
 			
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
@@ -499,7 +500,7 @@ kf.addKeyFunctions = function(){
 					)
 				{
 				
-				var iActiveRow = kf.getActiveRowNumber();
+				var iActiveRow = kf.getActiveRowNumber();				
 				var iMaximalIndex = fn.getNumberOfVisibleRows(sActiveTable) - 1;
 				var nActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
 				
@@ -581,6 +582,7 @@ kf.addKeyFunctions = function(){
 					mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
 					}
 				}
+			
 			
 			// prevent scrolling of screen when pressing the up/down arrows
 			// (needed as last command)

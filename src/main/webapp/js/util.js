@@ -1,7 +1,9 @@
 
-
+//*******************************************************
 // SPINNER (Internet Explorer proof)!
-// this is needed because IE can't show animated gifs during Ajax calls in some circumstances
+//*******************************************************
+
+// this IE proof spinner is needed because IE can't show animated gifs during Ajax calls in some circumstances
 // see: http://fgnass.github.com/spin.js/
 
 function showSpinner(target){
@@ -49,8 +51,11 @@ $.fn.spin = function(opts) {
 	  return this;
 	};
 	
-// END OF SPINNER
 	
+	
+//*******************************************************
+// Events 
+//*******************************************************
 	
 // Pre-bind function: bind a handler to some event, before all other handlers of the same event
 // (see: http://stackoverflow.com/questions/6029251/jquery-bind-event-listener-before-another)
@@ -73,45 +78,61 @@ $.fn.preBind = function (type, data, fn) {
     return this;
 };
 
+//*******************************************************
+// Elements
+//*******************************************************
 
-
-
-
-// inArray function supporting regex
-// (improved version of: 
-//  http://stackoverflow.com/questions/23447021/can-i-use-a-regular-expression-within-jquery-inarray)
-
-$.inArrayRegEx = function(value, array, start) {
-    if (!array) return -1;
-    start = start || 0;
-    for (var i = start; i < array.length; i++) {
-    	
-    	// if the array element is a regex
-    	if ( !isRegex(value) && isRegex(array[i]) )
-    		{
-    		if ( new RegExp(array[i]).test(value)) 
-                return i;
-    		}
-    	// or if the value argument is a regex
-    	else if ( isRegex(value) && !isRegex(array[i]) )
-    		{
-    		if ( new RegExp(value).test(array[i])) 
-                return i;
-    		}
-    	// otherwise do strict equality test
-    	else
-    		{
-    		if (value == array[i])
-    			return i;
-    		}        
-    }
-    return -1;
+//Checks if a jQuery object exists in the DOM, by checking the length of its child elements. 
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such) 
+$.fn.elementExists = function()
+{
+	return $(this).length > 0;
 };
 
+//returns true if any portion of the element is visible in the viewport 
+//see: http://upshots.org/javascript/jquery-test-if-element-is-in-viewport-visible-on-screen
+$.fn.isOnScreen = function(){
+
+	var win = $(window);
+	
+	var viewport = {
+	  top : win.scrollTop(),
+	  left : win.scrollLeft()
+	};
+	viewport.right = viewport.left + win.width();
+	viewport.bottom = viewport.top + win.height();
+	
+	var bounds = this.offset();
+	bounds.right = bounds.left + this.outerWidth();
+	bounds.bottom = bounds.top + this.outerHeight();
+	
+	return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+
+};
+
+//scroll smoothly to a given anchor within a given div
+function smoothScroll(div, anchor)
+{
+	
+	// get the offset (currentPos) and the number of pixels  
+	// to add or subtract from the offset 
+	// (in case we need to subtract, the value to add will
+	//  be negative) 
+	var currentYPos = $(div).scrollTop();
+	var currentXPos = $(div).scrollLeft();
+	var yTtarget = $(anchor).position().top;	
+	var xTtarget = $(anchor).position().left;
+	var yToGo = (yTtarget-currentYPos);
+	var xToGo = (xTtarget-currentXPos);
+	
+	// Go to the anchor by resetting the scrollbar position
+	$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
+}
 
 
-
-
+//*******************************************************
+// Text selection
+//*******************************************************
 
 // prevent or allow text selection
 jQuery.fn.extend({ 
@@ -126,6 +147,19 @@ jQuery.fn.extend({
     }	 
 }); 
 
+//clear screen selections
+function clearSelection() {
+    if ( document.selection ) {
+        document.selection.empty();
+    } else if ( window.getSelection ) {
+        window.getSelection().removeAllRanges();
+    }
+}
+
+
+//*******************************************************
+// Colors
+//*******************************************************
 
 // Get a different (eg. darker) shade, given a hex color code
 // usage: var newColor = shadeColor("#AA2222", -10);
@@ -146,9 +180,6 @@ function shadeColor(color, shade) {
 
     return newColorStr;
 }
-
-
-
 
 
 // convert RGB color to HEX and back
@@ -181,6 +212,9 @@ function rgbStrToHex(rgb) {
 
 
 
+//*******************************************************
+// XML
+//*******************************************************
 
 // Name: createXMLDocument
 // Input: String
@@ -204,40 +238,9 @@ return doc;
 
 
 
-// clear screen selections
-function clearSelection() {
-    if ( document.selection ) {
-        document.selection.empty();
-    } else if ( window.getSelection ) {
-        window.getSelection().removeAllRanges();
-    }
-}
-
-
-// js-implementation of indexOf(regex, start) and lastIndexOf(regex, start)
-//                      ---------------------     -------------------------
-// http://stackoverflow.com/questions/273789/is-there-a-version-of-javascripts-string-indexof-that-allows-for-regular-expr
-String.prototype.regexIndexOf = function(regex, startpos) {
-    var indexOf = this.substring(startpos || 0).search(regex);
-    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
-};
-
-String.prototype.regexLastIndexOf = function(regex, startpos) {
-    regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
-    if(typeof (startpos) == "undefined") {
-        startpos = this.length;
-    } else if(startpos < 0) {
-        startpos = 0;
-    }
-    var stringToWorkWith = this.substring(0, startpos + 1);
-    var lastIndexOf = -1;
-    var nextStop = 0;
-    while((result = regex.exec(stringToWorkWith)) != null) {
-        lastIndexOf = result.index;
-        regex.lastIndex = ++nextStop;
-    }
-    return lastIndexOf;
-};
+//*******************************************************
+// String functions
+//*******************************************************
 
 
 // string functions 'left' and 'right'
@@ -261,10 +264,99 @@ function right(str, n){
 }
 
 
+// replaceAll (non regex!)
+// NB: regex version elsewhere in this file
+
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
+//remove html tags from a string
+function removeTags(text){
+	if (typeof text == 'string')
+		return text.replace(/<\/?[^>]+(>|$)/g, "");
+	return text;
+	
+}
+
+// remove all characters that are no letters nor digits
+function keepOnlyLettersAndDigits(str){
+	return str.replace(/([^\w\d])/gi, "");
+}
+
+// remove spaces from a file name and replace it by an underscore
+function processFileName(text){
+	if (typeof text == 'string')
+		return text.replace(/\s/g, "_");
+	return text;
+}
+
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.isString = function(o)
+{
+	return (typeof o === "string");
+}
+
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.emptyString = function(str)
+{
+	if ($.isNullOrUndefined(str))
+		return true;
+	else if (!$.isString(str))
+		throw "isEmpty: the object is not a string";
+	else if (str.length === 0)
+		return true;
+		
+	return false;
+}
+
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.startsWith = function(str,search)
+{
+	if ($.isString(str))
+		return (str.indexOf(search) === 0);
+		
+	return false;
+}
+
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.endsWith = function(str,search)
+{
+	if (!$.isString(str) || !$.isString(search) || $.emptyString(str) || $.emptyString(search))
+		return false;
+	else if (search.length > str.length)
+		return false;
+	else if (str.length - search.length === str.lastIndexOf(search))
+		return true;
+	
+	return false;
+}
 
 
-// get the smallest value of an array
-// see: http://www.javascriptkit.com/javatutors/arraysort.shtml
+//*******************************************************
+// Numeric functions
+//*******************************************************
+
+//get unique number to be added as an arg to http-requests
+//to make sure IE will never use its cache
+function getUniqueNumber(){
+	return new Date().getTime();
+}
+
+//Determines whether the object is a Javascript Number object (int or float)
+//@param The object to compare.
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.isNumber = function(o)
+{
+	if (typeof o == "object" && o !== null)
+		return (typeof o.valueOf() === "number")
+	else
+		return (typeof o === "number");
+}
+
+//get the smallest value of an array
+//see: http://www.javascriptkit.com/javatutors/arraysort.shtml
 function getTheLowestPositive(arr){
 	
 	var positiveArr = new Array();
@@ -282,12 +374,9 @@ function getTheLowestPositive(arr){
 }
 
 
-
 //*******************************************************
-
-/*
- * ARRAY FUNCTIONS
- */
+// ARRAY FUNCTIONS
+//*******************************************************
 
 
 // check array equality
@@ -379,12 +468,42 @@ function getOnlyUniqueValues(array){
 }
 
 
+// inArray function supporting regex
+// (improved version of: 
+// http://stackoverflow.com/questions/23447021/can-i-use-a-regular-expression-within-jquery-inarray)
+
+$.inArrayRegEx = function(value, array, start) {
+ if (!array) return -1;
+ start = start || 0;
+ for (var i = start; i < array.length; i++) {
+ 	
+ 	// if the array element is a regex
+ 	if ( !isRegex(value) && isRegex(array[i]) )
+ 		{
+ 		if ( new RegExp(array[i]).test(value)) 
+             return i;
+ 		}
+ 	// or if the value argument is a regex
+ 	else if ( isRegex(value) && !isRegex(array[i]) )
+ 		{
+ 		if ( new RegExp(value).test(array[i])) 
+             return i;
+ 		}
+ 	// otherwise do strict equality test
+ 	else
+ 		{
+ 		if (value == array[i])
+ 			return i;
+ 		}        
+ }
+ return -1;
+};
+
+
 
 //*******************************************************
-
-
-
 // ESCAPE CHARS functions
+//*******************************************************
 
 function getEscape(str){
 	if (str.indexOf("'")>-1 )
@@ -406,6 +525,10 @@ function escapeRegexChars(str){
 
 
 
+//*******************************************************
+// Regex
+//*******************************************************
+
 // check whether a string is a regex or not
 function isRegex(str){
 	if (str.indexOf("^")>-1 || str.indexOf("$")>-1)
@@ -414,6 +537,23 @@ function isRegex(str){
 }
 
 
+// replaceAll (regex version)
+// https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string-in-javascript
+
+// beware: for IE compatibility, the search argument must be a string, and not a regex literal
+// (t.i.  "^(...)$" instead of /^(...)$/
+// https://stackoverflow.com/questions/40629314/javascript-regexp-not-working-in-ie11-and-working-in-chrome
+
+String.prototype.regexReplaceAll = function(search, replacement) {
+ var target = this;
+ return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+
+
+//*******************************************************
+// NULL or undefined
+//*******************************************************
 
 // Make sure an array contains no null values or convert those into strings 'NULL'.
 // We need this function in our ajax calls, as we otherwise can't use 'join' to 
@@ -434,6 +574,73 @@ function convertNullToString(arr){
 	return arr;
 }
 
+
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.isNull = function(o)
+{
+	return (o === null);
+}
+
+// Determines whether the object is undefined, that is no value has been set for it. This will return false for variables with null value.
+//	@param The object to compare.
+// (extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.isUndefined = function(o)
+{
+	return (typeof o === "undefined");
+}
+
+// Determines whether the object provided is null, or undefined.
+//	@param The object to compare.
+//(extracted from js libraries jquery.extensions.js, jquery.form-extensions.js and such)
+$.isNullOrUndefined = function(o)
+{
+	return $.isNull(o) || $.isUndefined(o);
+}
+
+
+//*******************************************************
+// HTML entities
+//*******************************************************
+
+// check if a given HTML entity is a common one
+// if the input contains a custom IvdNT entity, the function should return false
+function isCommonEntity(sStr){	
+	
+	var regex = /(&)(ldquor|rdquo|mdash|quot|apos|amp|lt|gt|nbsp|iexcl|cent|pound|curren|yen|brvbar|sect|uml|copy|ordf|laquo|not|shy|reg|macr|deg|plusmn|sup2|sup3|acute|micro|para|middot|cedil|sup1|ordm|raquo|frac14|frac12|frac34|iquest|times|divide|thorn|szlig|agrave|aacute|acirc|aelig|atilde|auml|aring|aelig|ccedil|egrave|eacute|ecirc|euml|igrave|iacute|icirc|iuml|eth|ntilde|ograve|oacute|ocirc|oelig|otilde|ouml|oslash|ugrave|uacute|ucirc|uuml|yacute|thorn|yuml|rdquo|ldquo)(;)/gi;
+	return sStr.match(regex);
+}
+
+
+
+//*******************************************************
+// Compute / get INDEXES
+//*******************************************************
+
+//js-implementation of indexOf(regex, start) and lastIndexOf(regex, start)
+//---------------------     -------------------------
+//http://stackoverflow.com/questions/273789/is-there-a-version-of-javascripts-string-indexof-that-allows-for-regular-expr
+
+String.prototype.regexIndexOf = function(regex, startpos) {
+	var indexOf = this.substring(startpos || 0).search(regex);
+	return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+};
+
+String.prototype.regexLastIndexOf = function(regex, startpos) {
+	regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+	if(typeof (startpos) == "undefined") {
+	startpos = this.length;
+	} else if(startpos < 0) {
+	startpos = 0;
+	}
+	var stringToWorkWith = this.substring(0, startpos + 1);
+	var lastIndexOf = -1;
+	var nextStop = 0;
+	while((result = regex.exec(stringToWorkWith)) != null) {
+	lastIndexOf = result.index;
+	regex.lastIndex = ++nextStop;
+	}
+	return lastIndexOf;
+};
 
 
 // given a main string in which a substring was found at a given index
@@ -529,7 +736,7 @@ function getIndexOfPreviousSpace(mainString, startIndex){
 	
 	// We reach this point when the string part in range [0, startIndex]  
 	// contains no space at all (outside the tags).
-	// In that particular case, strictly speaking, the space preceding
+	// In that particular case, strictly speaking, the space preceeding
 	// the first letter of the string is at index -1.
 	return -1;
 }
@@ -562,55 +769,12 @@ function getIndexOfFollowingSpace(mainString, endIndex){
 
 
 
-// scroll smoothly to a given anchor within a given div
-function smoothScroll(div, anchor)
-{
-	
-	// get the offset (currentPos) and the number of pixels  
-	// to add or subtract from the offset 
-	// (in case we need to subtract, the value to add will
-	//  be negative) 
-	var currentYPos = $(div).scrollTop();
-	var currentXPos = $(div).scrollLeft();
-	var yTtarget = $(anchor).position().top;	
-	var xTtarget = $(anchor).position().left;
-	var yToGo = (yTtarget-currentYPos);
-	var xToGo = (xTtarget-currentXPos);
-	
-	// Go to the anchor by resetting the scrollbar position
-	$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
-}
 
+//*******************************************************
+// Http parameters 
+// ******************************************************
 
-// get unique number to be added as an arg to http-requests
-// to make sure IE will never use its cache
-function getUniqueNumber(){
-	return new Date().getTime();
-}
-
-
-// remove html tags from a string
-function removeTags(text){
-	if (typeof text == 'string')
-		return text.replace(/<\/?[^>]+(>|$)/g, "");
-	return text;
-	
-}
-
-// remove all characters that are no letters nor digits
-function keepOnlyLettersAndDigits(str){
-	return str.replace(/([^\w\d])/gi, "");
-}
-
-// remove spaces from a file name and replace it by an underscore
-function processFileName(text){
-	if (typeof text == 'string')
-		return text.replace(/\s/g, "_");
-	return text;
-}
-
-
-// get http parameters into a hashtable object
+// put http params into a hashtable object
 function getHttpParams(){
 	
 	var paramsHash = new Hashtable();
@@ -642,114 +806,7 @@ function getHttpParams(){
 };
 
 
+//*******************************************************
 
-
-
-// returns true if any portion of the element is visible in the viewport 
-// see: http://upshots.org/javascript/jquery-test-if-element-is-in-viewport-visible-on-screen
-$.fn.isOnScreen = function(){
-    
-    var win = $(window);
-     
-    var viewport = {
-        top : win.scrollTop(),
-        left : win.scrollLeft()
-    };
-    viewport.right = viewport.left + win.width();
-    viewport.bottom = viewport.top + win.height();
-     
-    var bounds = this.offset();
-    bounds.right = bounds.left + this.outerWidth();
-    bounds.bottom = bounds.top + this.outerHeight();
-     
-    return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
-     
-};
-
-
-
-// functions extracted from js libraries jquery.extensions.js
-//                                       jquery.form-extensions.js
-//                                       and such
-
-
-/* Checks if a jQuery object exists in the DOM, by checking the length of its child elements. */
-$.fn.elementExists = function()
-{
-	return $(this).length > 0;
-};
-
-
-$.isNull = function(o)
-{
-	return (o === null);
-}
-
-/* Determines whether the object is undefined, that is no value has been set for it. This will return false for variables with null value.
-	@param The object to compare.
-*/
-$.isUndefined = function(o)
-{
-	return (typeof o === "undefined");
-}
-
-/* Determines whether the object provided is null, or undefined.
-	@param The object to compare.
-*/
-$.isNullOrUndefined = function(o)
-{
-	return $.isNull(o) || $.isUndefined(o);
-}
-
-
-$.isString = function(o)
-{
-	return (typeof o === "string");
-}
-
-$.emptyString = function(str)
-{
-	if ($.isNullOrUndefined(str))
-		return true;
-	else if (!$.isString(str))
-		throw "isEmpty: the object is not a string";
-	else if (str.length === 0)
-		return true;
-		
-	return false;
-}
-
-
-$.startsWith = function(str,search)
-{
-	if ($.isString(str))
-		return (str.indexOf(search) === 0);
-		
-	return false;
-}
-
-$.endsWith = function(str,search)
-{
-	if (!$.isString(str) || !$.isString(search) || $.emptyString(str) || $.emptyString(search))
-		return false;
-	else if (search.length > str.length)
-		return false;
-	else if (str.length - search.length === str.lastIndexOf(search))
-		return true;
-	
-	return false;
-}
-
-
-/* Determines whether the object is a Javascript Number object (int or float)
-@param The object to compare.
-*/
-$.isNumber = function(o)
-{
-	if (typeof o == "object" && o !== null)
-		return (typeof o.valueOf() === "number")
-	else
-		return (typeof o === "number");
-}
 
 
