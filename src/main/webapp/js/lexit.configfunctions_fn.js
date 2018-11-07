@@ -1779,7 +1779,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange;
+    var sel, range, priorRange, fulltext;
     
     // all browsers, except IE before version 9
     if (typeof window.getSelection != "undefined") 
@@ -1787,6 +1787,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
         range = window.getSelection().getRangeAt(0);        
         priorRange = range.cloneRange();
         priorRange.selectNodeContents(nCell);
+        fulltext = priorRange.toString();
         priorRange.setEnd(range.startContainer, range.startOffset);
         start = priorRange.toString().length;
         text = range.toString();
@@ -1799,6 +1800,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
         range = sel.createRange();
         priorRange = document.body.createTextRange();
         priorRange.moveToElementText(nCell);
+        fulltext = priorRange.text;
         priorRange.setEndPoint("EndToStart", range);
         start = priorRange.text.length;
         text = range.text;
@@ -1808,9 +1810,13 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
     // This is needed because detection of positions doesn't take into account the tags and 
     //  html entitie names within the original string. We will need to remove highlighting
     //  in advance, because highlighting tags are no part of the original string
-    var oTrueIndexes = getTrueIndexes( 
+    var oTrueIndexes = getTrueIndexes(
+    		fulltext,
     		fn.removeHighlight( fn.getDataFromCellNode(nCell) ), 
     		$.trim(text), start);
+    // (we won't push bounderies here, since the user made a clear selection him/herself,
+    // which is different from fn.getWordClickedUponInNode(): there we need to find the bounderies
+    // since the user only clicked inside a word)
     
     // return an object with 4 parts: selection start/end indexes, selection text, and reliability
     return {
@@ -1842,7 +1848,7 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange, wholeRange;
+    var sel, range, priorRange, wholeRange, fulltext;
     
     // all browsers, except IE before version 9
     if (typeof window.getSelection != "undefined") 
@@ -1855,8 +1861,9 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
         priorRange.setEnd(range.startContainer, range.startOffset);
         start = priorRange.toString().regexLastIndexOf(/(\s|\.|,|;|:|\(|\[|'|"|„|”)/)+1;
         end   = wholeRange.toString().regexIndexOf(/(\s|\?|!|\.|,|;|:|\)|\]|'|"|„|”)/, start+1);
-        if (end<0) end = wholeRange.toString().length;        
-        text  = wholeRange.toString().substring(start, end);
+        if (end<0) end = wholeRange.toString().length;      
+        fulltext = wholeRange.toString();
+        text  = fulltext.substring(start, end);
     } 
     
     // IE before version 9
@@ -1872,14 +1879,16 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
         start = priorRange.text.regexLastIndexOf(/\s|\.|,|;|:|\(|\[/)+1;
         end   = wholeRange.text.regexIndexOf(/(\s|\?|!|\.|,|;|:|\)|\])/, start+1);
         if (end<0) end = wholeRange.toString().length;
-        text  = wholeRange.text.substring(start, end);
+        fulltext = wholeRange.text;
+        text  = fulltext.substring(start, end);
     }
     
     // Compute the true indexes of the text selection
     // This is needed because detection of positions doesn't take into account the tags and 
     //  html entities names within the original string. We will need to remove highlighting
     //  in advance, because highlighting tags are no part of the original string
-    var oTrueIndexes = getTrueIndexes( 
+    var oTrueIndexes = getTrueIndexes(
+    		fulltext,
     		fn.removeHighlight( fn.getDataFromCellNode(nCell) ), 
     		$.trim(text), start, 
     		true); // extra parameter: push word boundaries (see explanation at util.getTrueIndexes)

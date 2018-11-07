@@ -611,6 +611,25 @@ function isCommonEntity(sStr){
 }
 
 
+// translate entities to chars and back! 
+var aFnChar = "⊇|„|”|—|\"|'|&|<|>| |¡|¢|£|¤|¥|¦|§|¨|©|ª|«|¬|­|®|¯|°|±|²|³|´|µ|¶|·|¸|¹|º|»|¼|½|¾|¿|×|÷|þ|ß|à|á|â|æ|ã|ä|å|æ|ç|è|é|ê|ë|ì|í|î|ï|ð|ñ|ò|ó|ô|œ|õ|ö|ø|ù|ú|û|ü|ý|þ|ÿ|”|“".split("|");
+var aFnEntities = "supe|ldquor|rdquo|mdash|quot|apos|amp|lt|gt|nbsp|iexcl|cent|pound|curren|yen|brvbar|sect|uml|copy|ordf|laquo|not|shy|reg|macr|deg|plusmn|sup2|sup3|acute|micro|para|middot|cedil|sup1|ordm|raquo|frac14|frac12|frac34|iquest|times|divide|thorn|szlig|agrave|aacute|acirc|aelig|atilde|auml|aring|aelig|ccedil|egrave|eacute|ecirc|euml|igrave|iacute|icirc|iuml|eth|ntilde|ograve|oacute|ocirc|oelig|otilde|ouml|oslash|ugrave|uacute|ucirc|uuml|yacute|thorn|yuml|rdquo|ldquo".split("|");
+
+function translateCharToEntity(sChar){
+	var iIndex = $.inArray(sChar, aFnChar);
+	if (iIndex>-1)
+		return "&"+aFnEntities[iIndex]+";";
+	return sChar;
+}
+function translateEntityToChar(sEntity){
+	var sEntityMain = sEntity.replace(/&/, '').replace(/;/, '');
+	var iIndex = $.inArray(sEntityMain, aFnEntities);
+	if (iIndex>-1)
+		return aFnChar[iIndex];
+	return sChar;
+}
+
+
 
 //*******************************************************
 // Compute / get INDEXES
@@ -643,23 +662,52 @@ String.prototype.regexLastIndexOf = function(regex, startpos) {
 };
 
 
-// given a main string in which a substring was found at a given index
-// compute the true start and end indexes in the same string containing html entitie 
-function getTrueIndexes(mainString, selection, selectionStartIndex, bPushWordBoundaries){
+
+
+
+// Given a main string in which a substring was found at a given index
+// compute the true start and end indexes in the same string containing html entities
+//
+function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities, sSelectionDecodedEntities, selectionStartIndex, bPushWordBoundaries){
 	
-	// First change all html-entitie names into tags, so we will only have to deal with taglike things
+	// [1] We need to restore the ENcoded entities, since calling range.toString() cause those to be DEcoded
+	
+	// get quote with ENcoded entities 
+	var mainStringAndCorrection = 				reEncodeEntities( sNodeStringEncodedEntities, sRangeStringDecodedEntities );
+	var mainString = 							mainStringAndCorrection["restored_entities"];
+	
+	
+	// compute new start position given the corrected quote string
+	var sPrefixDecodedEntities =				sRangeStringDecodedEntities.substring( 0, selectionStartIndex );	
+	var sPrefixEncodedEntitiesAndCorrection = 	reEncodeEntities( sNodeStringEncodedEntities, sPrefixDecodedEntities );
+	var sPrefixEncodedEntities = 				sPrefixEncodedEntitiesAndCorrection["restored_entities"];
+	
+	var iCorrection = 							sPrefixEncodedEntitiesAndCorrection["index_correction"]; //(sPrefixEncodedEntities.length - sPrefixDecodedEntities.length);
+	selectionStartIndex = 						selectionStartIndex + iCorrection;
+	
+	
+	// do the same with the selection
+	
+	var sSelectionPartEncodedEntities = sNodeStringEncodedEntities.substring( selectionStartIndex );
+	var selection = (reEncodeEntities( sSelectionPartEncodedEntities, sSelectionDecodedEntities ))["restored_entities"];	
+
+	
+	// [2] change all html-entitie names into tags, so we will only have to deal with taglike things
 	
 	// This changes  Hij heet Napol&eacute;on
 	//         into  hij heet napolD<~~~~~>on
 	// so each character keeps its original position in the string
 	
-	mainString = mainString.toLowerCase().replace( /(&)(#x032F|AElig|Aacute|Acirc|Agrave|Alpha|Aring|Beta|Ccaron|Ccedil|Chi|Eacute|Ecaron|Ecirc|Egrave|Emacr|Euml|Gamma|Ibreve|Igrave|Iota|Kappa|Lambda|Mu|Nangb|OElig|Oacute|Ocirc|Ograve|Omacgra|Omacgrave|Omacr|Omega|Ouml|Phi|Pi|Prime|Scaron|Sigma|T|Theta|Ucaron|Ucirc|Uuml|Xi|aacute|abar|abreve|acaron|acirc|acute|aecirc|aelig|aemac|agrave|allabreve|alpha|amacr|amp|ang|apos|aring|atilde|auml|beta|bgothic|br|brvbar|ccaron|ccedil|cedil|cent|chi|cmacr|copy|cperiod|curren|cvb|dagger|dd|ddd|dddd|ddddd|dddddd|deg|delta|dgothic|div|divide|dmacr|dollar|dots|ea|eaa|eacute|ebreve|ebreveacu|ebreveb|ecaron|eced|ecirc|edbmac|egrave|ehacek|emaccirc|emacgra|emacr|eo|eogonek|epsilon|equiv|ering|et|eta|etacb|eth|etilde|eu|euml|eumlbreve|female|firb|flat|fm|fnof|frac12|frac13|frac14|frac23|frac34|frac38|frac58|gAasper|gAasperacu|gAlenis|gElenis|gYasper|gaasper|gaasperacu|galenis|galenisacu|gamma|gatilde|gcaron|gcirc|ge|geasper|geasperacu|gelenis|gelenisacu|ghasper|ghlenisacu|giasper|giasperacu|gilenis|gitilde|gmac|goasper|goasperacu|goaspergra|golenis|golenisacu|grasper|gt|guasper|guasperacu|half|hand|hdot|iacute|ibreve|ibreveb|ic|icaron|icirc|icuml|ie|ieibreveb|iemacr|iexcl|igrave|ihacek|imaccirc|imacr|inf|int|iota|iquest|it|itilde|iuml|kangb|kappa|kappav|kdotb|kmacr|lambda|langb|laquo|larr|lbbar|ldquo|ldquor|le|lsquo|lsquor|lt|macr|male|mangb|mdash|mf|micro|middot|minus|mmacr|mu|nangb|nat|natur|nbsp|ndash|ndotb|ne|nmacr|not|ntb|ntilde|nu|oacute|oang|obreve|ocaron|ocirc|odia|oeacute|oebreve|oelig|oemac|ograve|ogt|ohacek|omacacu|omacced|omacgra|omacr|omega|omicron|opq|ordf|ordm|oring|oslash|oslashmacr|otilde|oudholspond|ouml|oumlb|oumlgra|oumlmac|para|pcnt|percnt|permil|phi|pi|plus|plusmn|pound|prime|psi|pt|ptilde|puml|qacute|quot|r|radic|raquo|rarr|rdquo|reg|remac|rho|root3|rsquo|sacute|scaron|sdia|sect|sgate|sharp|shy|sigma|sigmav|sl|smacr|ssL|ssT|stilde|sub|sub0|sub1|sub2|sub3|sub4|sub5|sub6|sub9|subM|suba|sube|subm|subn|subo|subp|subplus|subr|subs|subspace|subv|subx|sup0|sup1|sup2|sup3|sup4|sup5|sup6|sup7|sup8|sup9|supC|supM|supa|supast|supb|supc|supd|supe|suph|supi|supj|supk|supl|supm|supminus|supn|supo|supperiod|supr|sups|supspace|supt|supu|supv|supw|supx|supy|szlig|tacute|tau|tdot|there4|theta|thorn|tilde|times|tri|uacute|ubreve|ucaron|ucirc|ugrave|uhacek|uibreveb|umacr|uml|umlcirc|uring|ustrok|utilde|uuml|uumlcirc|uumlmac|uumlmaccirc|vr|vrs|wa|xi|yacute|ybreve|ycaron|yen|ymacr|yuml|zerothree|zeta)(;)/gi, 
+	mainString = mainString.toLowerCase().replace( /(&)([^;]+)(;)/gi, 
 			function ($0, $1, $2, $3) {
 	    return "D<" + (new Array($2.length).join("~")) + ">" ;
 	}); // D for dummy char, replacing the entity char
 	
-	var newSelectionStartIndex = computeTrueIndex(mainString, selectionStartIndex);
-	var newSelectionEndIndex   = computeTrueIndex(mainString, selectionStartIndex + (selection.length-1));
+	
+	// [3] Now do the job
+	
+	var newSelectionStartIndex = selectionStartIndex; //computeTrueIndex(mainString, selectionStartIndex);
+	var newSelectionEndIndex   = selectionStartIndex + (selection.length) ; //computeTrueIndex(mainString, selectionStartIndex + (selection.length-1));
 	
 	// if required (it is when a word has been clicked upon, so we search for its boundaries automatically)
 	// check if the word is truely surrounded by spaces or such. If not, look for the true boundaries of the word.
@@ -668,12 +716,12 @@ function getTrueIndexes(mainString, selection, selectionStartIndex, bPushWordBou
 	if (bPushWordBoundaries)
 		{
 		newSelectionStartIndex = getIndexOfPreviousSpace(mainString, newSelectionStartIndex) + 1;
-		newSelectionEndIndex   = getIndexOfFollowingSpace(mainString, newSelectionEndIndex) - 1;
+		newSelectionEndIndex   = getIndexOfFollowingSpace(mainString, newSelectionEndIndex);
 		}
 	
 	return {
 		"start": newSelectionStartIndex,
-		"end": newSelectionEndIndex+1
+		"end": newSelectionEndIndex
 	};
 }
 
@@ -710,13 +758,106 @@ function computeTrueIndex(mainString, incorrectIndex){
 	return incorrectIndex + indexCorrection;
 }
 
+// yet another subfunction of getTrueIndexes(...)
+//
+// This function is used to solve the following problem:
+//
+// When functions like fn.getWordClickedUponInNode() are called, we get
+// some text selection with DEcoded html entities [typically: range.toString()]
+// and some [start, end] indexes for the text selection within this string 
+// with DEcoded entities. But this is not suitable, since TABLE DATA might contain 
+// ENcoded entities [typically: fn.getDataFromCell()], so the [start, end] indexes 
+// computed by fn.getWordClickedUponInNode() might not fit the table data at all!
+// So, this function takes the original table data with ENcoded html entities
+// and some (sub)string representing (a part of) the original table data, 
+// but now with DEcoded entities in it because of the call of range.toString().
+// The function re-ENcoded the entities that were originally ENcoded and leave
+// the rest untouched.
+// This allows the getTrueIndexes() function to work correctly, and compute 
+// text selection indexes that fit the original table data!
+//
+// input:  [1] full original table data with ENcoded entities
+//         [2] substring with DEcoded entities, in which we want to restore the ENcoded entities
+// output: [a] string as in [2] where the DEcoded (but originally ENcoded) entities are re-ENcoded
+//         [b] the numeric correction to apply to indexes, since [a] might be larger than [2].
+function reEncodeEntities(sEncodedEntities, sDecodedEntities){
+	
+	var indexesToEntities = new Hashtable();
+	var indexesToTags = new Hashtable();
+	var iLength = sDecodedEntities.length;
+	var iCorrectionToApply = 0;
+	
+	for (var i=0; i<iLength; i++)
+		{
+	
+		// we found a tag
+		if ( sEncodedEntities.charAt(i) == "<" && 
+			 sDecodedEntities.charAt(i) != sEncodedEntities.charAt(i) )
+			{			
+			// get tag and its end position
+			var iPositionAfterTag =	i + (sEncodedEntities.substring(i)).indexOf(">")+1
+			var sTag = 				sEncodedEntities.substring(i, iPositionAfterTag);
+			// register the tag so we'll be able to put it back at its original position in the output
+			indexesToTags.put(i, sTag); 
+			// remove the tag 
+			sEncodedEntities = sDecodedEntities.substring(0, i) + sEncodedEntities.substring(iPositionAfterTag);
+			}
+		
+		// we found a decoded entity
+		if ( sEncodedEntities.charAt(i) == "&" && 
+			 sDecodedEntities.charAt(i) != sEncodedEntities.charAt(i) )
+			{
+			// Translate the ENcoded entity back into a DEcoded entity in the sEncodedEntities string
+			// That way, we can keep comparing chars at the same position in both strings 
+			// instead of keeping different cursor positions in each string... easier to work with!
+			
+			// get ENcoded entity and its end position
+			// (detect ';' from the cursor position i, otherwise we would possibly catch previous entities)
+			var iPositionAfterEntity =	i + (sEncodedEntities.substring(i)).indexOf(";")+1
+			var sEntity = 				sEncodedEntities.substring(i, iPositionAfterEntity);
+			// register the ENcoded entity so we'll be able to put it back at its original position in the output
+			indexesToEntities.put(i, sEntity); 
+			// do the translation, as explained here above
+			// (end-pos + 1, so we catch prefix plus the entity)
+			sEncodedEntities = sDecodedEntities.substring(0, i+1) + sEncodedEntities.substring(iPositionAfterEntity);
+			}
+		}
+	
+	// Now we are ready to insert the DEcoded entities at their right positions
+	// (begin at the end, of course, since inserting substrings changes indexes at the right side of the cursor)
+	
+	for (var i=iLength; i>=0; i--)
+		{	
+		var sEntity =	indexesToEntities.get(i);
+		var sTag = 		indexesToTags.get(i);
+		
+		if (sEntity != null)
+			{
+			// (end-pos + 1 to skip the DEcoded entity, which is replaced by sEntity
+			sDecodedEntities = sDecodedEntities.substring(0, i) + sEntity + sDecodedEntities.substring(i+1);
+			// (length-1, because we replace a DEcoded entity [1 char] by its ENcoded entity [n chars] -> n-1
+			iCorrectionToApply += (sEntity.length-1); 
+			}
+		if (sTag != null)
+			{
+			// (end-pos without +1, because there's nothing to skip here, instead we just insert sTag)
+			sDecodedEntities = sDecodedEntities.substring(0, i) + sTag + sDecodedEntities.substring(i);
+			iCorrectionToApply += sTag.length;
+			}
+		}
+	
+	// return the substring in which we restored the DEcoded entities of the original table data
+	return {"restored_entities":sDecodedEntities, "index_correction": iCorrectionToApply};
+}
+
+
 
 // Find the first preceding space before a given index.
 // We need this function to solve a particular flow of the fn.getSelectedTextInNode function:
 // Getting the selected text works given a node that has been clicked upon. In most cases,
 // this is good enough. Sadly, in some cases, this method doesn't give the right text boundaries,
 // because a word happens to be broken up in several nodes due to tags assigning style etc.
-// So, to be able to get the true word boundaries, we try to find the surroundin true spaces,
+// So, to be able to get the true word boundaries, we try to find the surrounding true spaces,
 // meaning that we exclude space within a tag, of course.
 function getIndexOfPreviousSpace(mainString, startIndex){
 	
