@@ -670,12 +670,29 @@ String.prototype.regexLastIndexOf = function(regex, startpos) {
 //
 function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities, sSelectionDecodedEntities, selectionStartIndex, bPushWordBoundaries){
 	
+	// debug!
+	var debug = false;
+	
+	if (debug)
+		{
+		console.log("-----------------------------------------------------------");
+		console.log("sRangeStringDecodedEntities = "+sRangeStringDecodedEntities);
+		console.log("sNodeStringEncodedEntities = "+sNodeStringEncodedEntities);
+		console.log("sSelectionDecodedEntities = "+sSelectionDecodedEntities);
+		console.log("selectionStartIndex = "+selectionStartIndex);
+		}
+	
 	// [1] We need to restore the ENcoded entities, since calling range.toString() cause those to be DEcoded,
 	//     in such a way that indexes might not fit the table data. 
 	
 	// get quote with ENcoded entities 
 	var mainStringAndCorrection = 				reEncodeEntities( sNodeStringEncodedEntities, sRangeStringDecodedEntities );
 	var mainString = 							mainStringAndCorrection["restored_entities"];
+	
+	if (debug)
+		{
+		console.log("mainString = "+mainString);
+		}
 	
 	
 	// compute new start position given the corrected quote string
@@ -687,11 +704,23 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	// from now on, selectionStartIndex must be applied to strings with ENcoded entities, instead of range.toString()
 	selectionStartIndex = 						selectionStartIndex + iCorrection;
 	
+	if (debug)
+		{
+		console.log("sPrefixDecodedEntities = "+sPrefixDecodedEntities);
+		console.log("sPrefixEncodedEntities = "+sPrefixEncodedEntities);
+		console.log("selectionStartIndex (herberekend) = "+selectionStartIndex);
+		}
+	
 	
 	// do the same with the selection
 	
 	var sSelectionPartEncodedEntities = sNodeStringEncodedEntities.substring( selectionStartIndex );
 	var selection = (reEncodeEntities( sSelectionPartEncodedEntities, sSelectionDecodedEntities ))["restored_entities"];	
+	
+	if (debug)
+		{
+		console.log("selection = "+selection);
+		}
 
 	
 	// [2] change all html-entitie names into tags, so we will only have to deal with taglike things
@@ -714,6 +743,12 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	var newSelectionStartIndex = selectionStartIndex;
 	var newSelectionEndIndex   = selectionStartIndex + (selection.length); 
 	
+	if (debug)
+		{
+		console.log("newSelectionStartIndex = "+newSelectionStartIndex);
+		console.log("newSelectionEndIndex = "+newSelectionEndIndex);
+		}
+		
 	// if required (it is when a word has been clicked upon, so we search for its boundaries automatically)
 	// check if the word is truely surrounded by spaces or such. If not, look for the true boundaries of the word.
 	// (this is needed, because the selection was obtained by checking the node what was clicked upon; but sometimes
@@ -722,6 +757,13 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 		{
 		newSelectionStartIndex = getIndexOfPreviousSpace(mainString, newSelectionStartIndex) + 1;
 		newSelectionEndIndex   = getIndexOfFollowingSpace(mainString, newSelectionEndIndex);
+		
+		if (debug)
+			{
+			console.log("after PushWordBoundaries:");
+			console.log("newSelectionStartIndex = "+newSelectionStartIndex);
+			console.log("newSelectionEndIndex = "+newSelectionEndIndex);
+			}
 		}
 	
 	return {
@@ -800,7 +842,7 @@ function reEncodeEntities(sEncodedEntities, sDecodedEntities){
 			 sDecodedEntities.charAt(i) != sEncodedEntities.charAt(i) )
 			{			
 			// get tag and its end position
-			var iPositionAfterTag =	i + (sEncodedEntities.substring(i)).indexOf(">")+1
+			var iPositionAfterTag =	i + (sEncodedEntities.substring(i)).regexIndexOf("\>([^\<]|$)")+1
 			var sTag = 				sEncodedEntities.substring(i, iPositionAfterTag);
 			// register the tag so we'll be able to put it back at its original position in the output
 			indexesToTags.put(i, sTag); 
