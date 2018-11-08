@@ -670,7 +670,8 @@ String.prototype.regexLastIndexOf = function(regex, startpos) {
 //
 function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities, sSelectionDecodedEntities, selectionStartIndex, bPushWordBoundaries){
 	
-	// [1] We need to restore the ENcoded entities, since calling range.toString() cause those to be DEcoded
+	// [1] We need to restore the ENcoded entities, since calling range.toString() cause those to be DEcoded,
+	//     in such a way that indexes might not fit the table data. 
 	
 	// get quote with ENcoded entities 
 	var mainStringAndCorrection = 				reEncodeEntities( sNodeStringEncodedEntities, sRangeStringDecodedEntities );
@@ -683,6 +684,7 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	var sPrefixEncodedEntities = 				sPrefixEncodedEntitiesAndCorrection["restored_entities"];
 	
 	var iCorrection = 							sPrefixEncodedEntitiesAndCorrection["index_correction"]; //(sPrefixEncodedEntities.length - sPrefixDecodedEntities.length);
+	// from now on, selectionStartIndex must be applied to strings with ENcoded entities, instead of range.toString()
 	selectionStartIndex = 						selectionStartIndex + iCorrection;
 	
 	
@@ -693,10 +695,13 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 
 	
 	// [2] change all html-entitie names into tags, so we will only have to deal with taglike things
-	
+	//
 	// This changes  Hij heet Napol&eacute;on
 	//         into  hij heet napolD<~~~~~>on
 	// so each character keeps its original position in the string
+	//
+	// This will allow us to find the true word bounderies, where characters as '&' or ';' can be found. 
+	// If we wouldn't convert DEcoded html entities into tags, we would probably interpret the ';' part of an entity as a word border, which it isn't.
 	
 	mainString = mainString.toLowerCase().replace( /(&)([^;]+)(;)/gi, 
 			function ($0, $1, $2, $3) {
@@ -706,8 +711,8 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	
 	// [3] Now do the job
 	
-	var newSelectionStartIndex = selectionStartIndex; //computeTrueIndex(mainString, selectionStartIndex);
-	var newSelectionEndIndex   = selectionStartIndex + (selection.length) ; //computeTrueIndex(mainString, selectionStartIndex + (selection.length-1));
+	var newSelectionStartIndex = selectionStartIndex;
+	var newSelectionEndIndex   = selectionStartIndex + (selection.length); 
 	
 	// if required (it is when a word has been clicked upon, so we search for its boundaries automatically)
 	// check if the word is truely surrounded by spaces or such. If not, look for the true boundaries of the word.
@@ -847,7 +852,7 @@ function reEncodeEntities(sEncodedEntities, sDecodedEntities){
 		}
 	
 	// return the substring in which we restored the DEcoded entities of the original table data
-	return {"restored_entities":sDecodedEntities, "index_correction": iCorrectionToApply};
+	return {"restored_entities": sDecodedEntities, "index_correction": iCorrectionToApply};
 }
 
 
