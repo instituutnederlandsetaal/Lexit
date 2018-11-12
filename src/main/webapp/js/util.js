@@ -766,6 +766,12 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 			}
 		}
 	
+	// finally make sure the start index is not a closing tag
+	while ( $.startsWith(mainString.substring(newSelectionStartIndex), "<\/") )
+		{
+		newSelectionStartIndex = mainString.indexOf(">", newSelectionStartIndex) + 1;
+		}
+	
 	return {
 		"start": newSelectionStartIndex,
 		"end": newSelectionEndIndex
