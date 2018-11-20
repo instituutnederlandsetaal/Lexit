@@ -292,6 +292,12 @@ var oTableConfigurationList_example = {
 		"choosefrom": ["val1", "val2"],
 		
 		/**
+		 * @description Declareer labels voor de waardes van een select-box. Op die manier kunnen de onbegrijpelijke waardes
+		 * die de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.
+		 */
+		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
+		
+		/**
 		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
 		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
 		 * waarden zijn 'asc', 'desc' of null (default).
@@ -673,6 +679,18 @@ conf.getSelectionBox = function(aColumnConfig){
 	if (typeof aColumnConfig["choosefrom"] == 'undefined')
 		return null;
 	return aColumnConfig["choosefrom"];
+};
+
+/**
+ * Retrieve labels for the values of a selection box to choose from
+ * @param {Object} aColumnConfig - An associative array of configuration parameters
+ * @returns {String[]} An associative array of values to labels, or null 
+ */
+conf.getSelectionBoxLabels = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["choosefrom_labels"] == 'undefined')
+		return null;
+	return aColumnConfig["choosefrom_labels"];
 };
 
 

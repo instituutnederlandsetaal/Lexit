@@ -701,7 +701,8 @@ gui.makeTableEditable = function(sSomeTablename){
 		
 		
 		// [1] select values from 'choosefrom' in config.js
-		var aAllowedValues = conf.getSelectionBox(oColumnConfig);
+		var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+		var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);
 		
 		// [2] ELSE  select values from Postgres ENUM type
 		if (aAllowedValues == null)
@@ -858,12 +859,10 @@ gui.makeTableEditable = function(sSomeTablename){
 					// we added a callback as we need to put the chosen value into the jeditable internal settings
 					// in such a way, that jeditable knows that value should be shown as 'selected'
 					{
-						    "data": gui._buildDataArrayForJEditable(sSomeTablename, aAllowedValues, sValueOfThisCell ),
+						    "data": gui._buildDataArrayForJEditable( sSomeTablename, aAllowedValues, sValueOfThisCell, aValuesToLabels ),
 						    "type": "select",
 						    "event": "mouseover",
-						    "onblur": function(value){
-						    	gui._closeJEditable(this, value);
-							},							
+						    "onblur": "cancel", // function(value){gui._closeJEditable(this, value);},							
 							"callback": function(value, settings) {
 								value = value.replace("&amp;", "&"); // prevent mismatch of value, as jeditable converts & into &amp;
 								settings.data.selected = value;
@@ -893,7 +892,7 @@ gui._closeJEditable = function(editor, value){
 	var sThisTable = $(editor).closest('table')[0].id;
 	
 	// close the editor
-	editor.reset(value); 
+	editor.reset(value);
 	
 	// update alignment of searchboxes with columns
 	gui.setSearchboxesCss(sThisTable);
@@ -902,14 +901,20 @@ gui._closeJEditable = function(editor, value){
 
 // for jEditable with selectbox input, we need to build an associative array
 // of 'select text' to 'select values' to be set as options in the select box
-gui._buildDataArrayForJEditable = function(sSomeTableName, aAllowedValues, sValueOfThisCell){
+gui._buildDataArrayForJEditable = function( sSomeTableName, aAllowedValues, sValueOfThisCell, aValuesToLabels ){
 	
 	var aNewArray = new Array();
 	for (var i=0; i<aAllowedValues.length; i++)
 		{
-		aNewArray[aAllowedValues[i]] = aAllowedValues[i];
+		var sLabel = aAllowedValues[i];
+		// do we have labels instead of bare values?
+		if (typeof aValuesToLabels != 'undefined' && aValuesToLabels != null && typeof aValuesToLabels[aAllowedValues[i]] != 'undefined' )
+			sLabel = aValuesToLabels[ aAllowedValues[i] ];
+		
+		aNewArray[ aAllowedValues[i] ] = sLabel;
 		}
 	aNewArray['selected'] = sValueOfThisCell;
+	
 	return aNewArray;
 };
 

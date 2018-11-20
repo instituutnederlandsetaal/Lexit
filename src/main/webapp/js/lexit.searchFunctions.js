@@ -375,6 +375,8 @@ sf.enableSearchFields = function(someTablename){
 		
 		// do we have a selection box?
 		var aColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+		var aColumnSelectionLabels = conf.getSelectionBoxLabels(oColumnConfig);
+		
 		
 		// if we have a checkbox column, we need checkbox-filters!
 		var isACheckBox = ($(this).hasClass("editable_checkbox") || $(this).hasClass("not_editable_checkbox"));
@@ -426,10 +428,13 @@ sf.enableSearchFields = function(someTablename){
 				);
 			for (var j=1; j<aListOfOptions.length; j++)
 				{
+				var sLabel = aListOfOptions[j];
+				if (typeof aColumnSelectionLabels != 'undefined' && aColumnSelectionLabels != null && typeof aColumnSelectionLabels[ aListOfOptions[j] ] != 'undefined')
+					sLabel = aColumnSelectionLabels[ aListOfOptions[j] ];
 				inputTag.append(
 						$("<option></option>")							
 							.attr("value", aListOfOptions[j] )
-							.text( aListOfOptions[j] )
+							.text( sLabel )
 					);
 				}
 			// finally add the 'ALLES' option
