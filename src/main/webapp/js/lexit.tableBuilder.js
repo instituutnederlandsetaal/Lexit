@@ -621,7 +621,7 @@ tb.addExportButtons = function(sSomeTableName){
 		            	extend: 'copyHtml5', text: 'Naar clipboard'
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'excelHtml5', text: 'Excel' 
+						extend: 'excelHtml5', text: 'Excel', action: tb.newExportAction 
 					}),
 					$.extend(true, {}, exportCommonFunction, {
 						extend: 'pdfHtml5', text: 'PDF'
@@ -639,6 +639,105 @@ tb.addExportButtons = function(sSomeTableName){
 	// put buttons on the right side
 	$('div.'+sSomeTableName+'_export_pane div.dt-buttons').css("float", "right");
 }
+
+// --------------------------------------------------------------------------
+
+//subroutine for export buttons
+
+// do a FULL export of the selection, and not only the part of the selection shown on screen (which is default behavious)
+// https://stackoverflow.com/questions/32692618/how-to-export-all-rows-from-datatables-using-ajax
+
+tb.oldExportAction = function (self, e, dt, button, config) {
+	
+	// print button
+	if (button[0].className.indexOf('buttons-print') >= 0) 
+	{
+        $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+    }
+	// xls button
+	else 
+	{
+        if ($.fn.dataTable.ext.buttons.excelHtml5.available(dt, config)) {
+            $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config);
+        }
+        else {
+            $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+        }
+    }  
+};
+
+tb.newExportAction = function (e, dt, button, config) {
+    var self = this;
+    var oldStart = dt.settings()[0]._iDisplayStart;
+    
+    // DEFAULT EXPORT (t.i. only screen output)
+    
+    // Shift key is not pressed -> default export 
+    if ( !kf.isPressed("shift"))
+    	{
+    	tb.oldExportAction(self, e, dt, button, config);
+    	return true;
+    	}
+    
+    
+    // FULL export (t.i. all database content that meets the filters)
+
+    // Now we will build a callback function which will tell the AJAX function to get all data, 
+    // then do the export but cancel the actual draw so that all of that data isn't loading into the DOM. 
+    // This callback will be effectively called at the very end of this piece of code
+    
+    dt.one('preXhr', function (e, s, data) {
+    	// one() tells datatables to listen for a table event once and then to remove the listener.
+        // 'preXhr' is an Ajax event, which is fired before an Ajax request is made
+    	
+        // Here is the trick: 
+    	// [1] Usually, the export function reads the start & end position of the data shown on screen, and exports exactly
+    	//     that part of the data. So, to be able to export everything, we set [data.start] to 0 and set [data.length] to such a high value, 
+    	//     that the export function will have to load all data from the server.
+    	//     As soon as we've done that, we call the default export function, which is fooled by the new values of [data.start, data.length],
+    	//     and load all data into memory (only)!
+    	// [2] Now the export is running, restore the original start position [data.start] so it corresponds again to the start position
+    	//     of the data shown on screen. If we wouldn't do that, datatables and its screen output would be out of sync, causing malfunction!
+    	// [3] Return false, to prevent datatables from loading the full data to the DOM.
+
+    	
+    	// step [1]
+    	
+        data.start = 0;	// get the selection from the beginning (because the start position on screen might not be page 1!)
+        data.length = 2147483647; // set the length to a 'random' very high value, just to make sure that we load all data!
+
+        // the following must happen before that table is redrawn
+        dt.one('preDraw', function (e, settings) {
+        	
+            // Call the original export action function 
+        	tb.oldExportAction(self, e, dt, button, config);
+
+        	// step [2]
+        	
+        	// Since we've set data.start=0, DataTables thinks the first item displayed is index 0, but we don't want to render that.
+            // So, we set that property back to what it was before exporting.
+            dt.one('preXhr', function (e, s, data) {                
+                settings._iDisplayStart = oldStart;
+                data.start = oldStart;
+            });
+
+            // Now we are ready to trigger a new redraw:
+            // data.start is set back correctly (see above), so we can reload the grid the way it was just before the export.
+            // Otherwise, API functions like table.cell(this) won't work properly.
+            setTimeout(dt.ajax.reload, 0);
+            
+            // step [3]
+
+            // Prevent rendering of the full data to the DOM
+            return false;
+        });
+    });
+
+    // Re-query the server with the new one-time export settings
+    // Calling this will trigger the event hereabove
+    dt.ajax.reload();
+};
+
 
 
 // subroutine for export buttons:
