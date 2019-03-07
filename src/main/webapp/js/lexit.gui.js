@@ -28,6 +28,68 @@ gui.getTiptipConfig = function(){
 	
 }
 
+// Activate ellipsis on columns where this is required by configuration
+gui.activateEllipsis = function(sSomeTableName){
+	
+	// retrieve table client configuration
+	var oTableConfig = conf.getTableConfig(sSomeTableName);
+	
+	// we'll loop through the column list, and activate ellipsis on the columns where that's required
+	for (var iColNr=0; iColNr<mt.getListOfColumnsOf(sSomeTableName).length; iColNr++)
+	{
+		// column name
+		var sNameOfCurrentColumn = mt.getListOfVisibleColumnsOf(sSomeTableName)[iColNr];
+		
+		// retrieve column client configuration
+		var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sNameOfCurrentColumn);
+		
+		// retrieve needed configuration parameters		
+		var columnVisible = 	conf.getVisibility(oColumnConfig);
+		var columnEllipsis =	conf.getEllipsis(oColumnConfig);
+	
+		// if the column is visible and it ellipsis is required, that activate it! 
+		if (columnVisible && columnEllipsis)
+		{
+			// get rows 
+			var oRows = fx.getAllRows(sSomeTableName);
+			
+			oRows.every(function(iRowNr){
+				
+				var oCurrentRow = this;
+				
+				var divClassName = sSomeTableName+"_ellipdiv"+iRowNr+"_"+iColNr;
+				
+				// https://codepen.io/jessicamarcus/pen/KpMwZw
+				
+				var sData = fx.getDataFromCellInRow(oCurrentRow, sNameOfCurrentColumn);
+				
+				sData = "<div class='"+divClassName+"'>" + sData + "</div>";
+				
+				fx.putDataIntoCell(oCurrentRow, sNameOfCurrentColumn, sData);
+				
+				$("div."+divClassName)
+				.css("overflow", "hidden")
+				.css("text-overflow", "ellipsis")
+				.css("white-space", "nowrap")
+				.css("max-width", "200px");
+
+				$("div."+divClassName).off();
+				
+				$("div."+divClassName).mouseover(function(){
+					$(this).css("white-space", "normal");
+				});
+				$("div."+divClassName).mouseout(function(){
+					$(this).css("white-space", "nowrap");
+				});
+				
+			});
+			
+		}
+	}
+	
+	
+}
+
 // put the tooltips of the different column buttons in the table
 // if some are set in the config file
 gui.putTooltipsOfColumnButtons = function(sSomeTablename){

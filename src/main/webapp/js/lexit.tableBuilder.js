@@ -392,7 +392,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			gui.attachOnCellChangeEvent(sSomeTableName);			
 			gui.makeTableEditable(sSomeTableName);
 			
-			// other things that need to be reapplied at redraw			
+			// other things that need to be reapplied at redraw	
+			gui.activateEllipsis(sSomeTableName);
 			gui.deHighlightDiv(sSomeTableName);			
 			gui.putTooltipsOfColumnButtons(sSomeTableName);			
 			gui.setPositionOfPaginationPane(sSomeTableName);			
@@ -1088,6 +1089,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		// text cell
 		else
 			{
+			// normal text cell (without button)
 			if (columnButton == null)
 				{
 				aColProps.push( {

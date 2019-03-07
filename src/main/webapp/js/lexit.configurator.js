@@ -433,7 +433,14 @@ var oTableConfigurationList_example = {
 		 * door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) 
 		 * moet men ook "flexible_visibility": false instellen.
 		 */
-		"visible": true
+		"visible": true,
+		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts 
+		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
+		 */
+		"ellipsis": false
 		
 
 		
@@ -757,6 +764,18 @@ conf.getEditability = function(aColumnConfig){
 	if (typeof aColumnConfig["editable"] == 'undefined')
 		return false;
 	return aColumnConfig["editable"];
+};
+
+
+
+// retrieve ellipsis settings for one column
+// default is false
+
+conf.getEllipsis = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis"] == 'undefined')
+		return false;		
+	return aColumnConfig["ellipsis"];
 };
 
 
