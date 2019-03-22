@@ -8,3 +8,5 @@ target/test-classes
 **/js/*.bak
 **/js/*.BAK
 /target/
+src/main/webapp/config_tmp
+src/main/webapp/*.config.js

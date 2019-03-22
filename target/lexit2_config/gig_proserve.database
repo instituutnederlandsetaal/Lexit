@@ -1,6 +1,0 @@
-db=gig_pro
-schema=data
-host=83.96.160.136
-user=postgres
-pass=postgres
-send_tomcat_username_to_db=true

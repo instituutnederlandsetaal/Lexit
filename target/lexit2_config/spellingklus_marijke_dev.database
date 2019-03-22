@@ -1,5 +1,0 @@
-db=gigant_hilex_dev
-schema=marijke_spelling
-host=svowdb02.inl.loc
-user=postgres
-pass=inl
