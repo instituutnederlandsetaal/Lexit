@@ -621,6 +621,12 @@ div.box {
 }
 
 
+/* style for selectable 
+*/
+#selectable .ui-selecting { background: #FECA40; }
+#selectable .ui-selected { background: #F39814; color: white; }
+
+
 /* we need to set this for inline edit textareas, so they inherit the fond family that is set,
    otherwise the font family will be unexpected.
    see http://stackoverflow.com/questions/2874813/why-textarea-and-textfield-not-taking-font-family-and-font-size-from-body 

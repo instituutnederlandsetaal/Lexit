@@ -3151,6 +3151,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * @param {Integer[]} [aColsAndRows=null] - Textarea dimensions, if bTextarea was set to true
  * 
  * @see fn.getPromptBoxInput
+ * @see fn.promptSelect
  * @see fn.promptReorder
  * @see fn.closeDialog
  */
@@ -3287,6 +3288,137 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 
 
 /**
+ * Generate a prompt pop-up, requesting the user to make a selection out of a list of items.
+ * 
+ * @param {String} sTitle - Title of the message window
+ * @param {String[]} aAllOptions - List of items to choose from
+ * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
+ * @param {Function} fnFunction - Function called after the user clicked on 'OK'
+ * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
+ * 
+ * @see fn.prompt
+ * @see fn.closeDialog
+ */
+fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction){
+	
+	var promptDivId = "dialog-form"+getUniqueNumber();
+	var selectableId = "selectable"; // don't change that one: the css expects this id!
+	
+	var promptDiv = $("<div></div>")
+		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
+		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
+		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
+		.attr("id", promptDivId)
+		.attr("title", sTitle)
+		.css("font-size", "12px");
+	
+	
+	// user instructions
+	var sP = $("<p></p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
+	promptDiv.append(sP);
+	
+	// selectable part	
+	var selectableUl = $("<ol></ol>")
+		.attr("id", selectableId)
+		.css("list-style-type", "none")
+		.css("margin", "0")
+		.css("padding", "0")
+		.css("width", "80%");
+	
+	
+	// build the elements of the list to choose from
+	
+	for (var i=0; i<aAllOptions.length; i++)
+		{
+		var sOption = aAllOptions[i];
+		
+		// one element 		
+		var liElement = $("<li></li>")
+			.addClass( "ui-widget-content" )
+			.css("margin", "3px")
+			.css("padding", "0.4em")
+			.css("font-size", "12px")
+			.css("height", "18px");	
+		
+		// if some item was pre-selected, assign it the selected class
+		if (aAlreadyChosen.indexOf(sOption)>-1)
+			{
+			liElement.addClass("ui-selected");
+			}
+		
+		var spanElement = $("<span></span>")
+			.text( $.trim(aAllOptions[i]) );
+		liElement.append(spanElement);
+		selectableUl.append(liElement);
+		}
+	
+	// append the whole thing to the dialog box
+	
+	promptDiv.append(selectableUl);
+	$(document.body).append(promptDiv);
+	
+	
+	// adapt height of the prompt to the number of values to reorder
+	var promptHeight = (200 + 30 * aAllOptions.length);
+	
+	
+	// Open dialog	
+	// Important detail: Pressing enter should trigger click on OK button
+	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
+	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
+	$( "#"+promptDivId ).dialog({
+		autoOpen: false,
+        height: promptHeight,
+        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readable
+        modal: true,
+        buttons: [
+                  {
+                	  text: "OK",
+                	  click: function(){
+                		  
+                		  var aNewChosenOptions = new Array();
+                		  
+                		  var aSelectedNodes = $(".ui-selected");
+                		  aSelectedNodes.each(function(){
+                			  aNewChosenOptions.push( $(this).text());
+                		  });                		  
+                  		
+                		// call callback
+                  		fnFunction(aNewChosenOptions); 
+                		$( this ).dialog( "close" );
+                		$( this ).remove(); 
+                	},
+                	id: 'dialog_accept_button'
+                  },
+                  {
+                	  text: "Annuleren",
+                	  click: function() {
+                		  // call callback upon Cancel, if available
+                  		  if (fnCancelFunction != null)
+                  			  fnCancelFunction(); 
+                          $( this ).dialog( "close" );
+                          $( this ).remove();
+                      }
+                  }
+        ]
+	}).keyup(function() {		 
+		if (kf.isPressed("enter"))
+		{		
+		$( "#dialog_accept_button" ).click();
+		return false;
+		}
+	});
+	
+	$( "#"+promptDivId ).dialog( "open" );
+	
+	$( function() {		
+		$( "#"+selectableId ).selectable();
+	});
+	
+};
+
+
+/**
  * Generate a prompt pop-up, requesting the user to reorder a set of data
  * The output can be retrieved by using fn.getPromptBoxOrder().
  * 
@@ -3364,7 +3496,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readible
+        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         buttons: [
                   {
