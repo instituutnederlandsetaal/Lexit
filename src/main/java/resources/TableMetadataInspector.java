@@ -3,11 +3,11 @@ package resources;
 
 
 
-import util.Database;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import util.Database;
 
 /**
  * The TableInspector class requests table metadata

@@ -598,6 +598,7 @@ fn._getBaseUrl = function(){
  * @param {Array} oConfiguration - An associative array, containing the table configuration, in the way this has to be declared in oTableConfigurationList
  * @param {Array} oSettings - An associative array, containing the table settings, in the way those have to be declared in oTableSettingsList
  * 
+ * @see fn.declareNewTable
  */
 fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComment, oConfiguration, oSettings ){
 	
@@ -624,8 +625,17 @@ fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComme
 	
 	oTableSettingsList[sTableName] = oSettings;
 	
-}
+};
 
+/**
+ * Synonym of fn.registerNewTable
+ * 
+ * @see fn.registerNewTable
+ */
+fn.declareNewTable = function(sTableName, sTableDescription, sType, sTableComment, oConfiguration, oSettings ){
+	
+	fn.registerNewTable(sTableName, sTableDescription, sType, sTableComment, oConfiguration, oSettings );
+};
 
 
 /**
@@ -2685,7 +2695,7 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback){
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		fn.message("Fout", 
-	 			"Fout bij aanroep van fn.getRecord("+sSomeTablename+"): "+
+	 			"Fout bij aanroep van fn.getRecords("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown);
 			}
 		} );
@@ -3142,7 +3152,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * Generate a prompt pop-up, requesting some input from the user
  * The output can be retrieved by using fn.getPromptBoxInput()
  * 
- * @param {String} sTitle - Title of the message window
+ * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
@@ -3159,6 +3169,15 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	fn._clearUserInput();
 	
+	// deal with title/message input
+	var sMessage = "";
+	if ( $.isArray(sTitle) )
+		{
+		sMessage = sTitle[1];
+		sTitle = sTitle[0];
+		}
+	var sMessageP = $("<p></p>").html(sMessage);
+	
 	if (bTextarea == null) 
 		bTextarea = false;
 	
@@ -3170,7 +3189,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
-		.css("font-size", "12px");
+		.css("font-size", "12px")
+		.append(sMessageP);
+	
 	var promptForm = $("<form></form>");
 	var promptFieldSet = $("<fieldset></fieldset>");
 	for (var i=0; i<aFieldNames.length; i++)
@@ -3290,19 +3311,31 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 /**
  * Generate a prompt pop-up, requesting the user to make a selection out of a list of items.
  * 
- * @param {String} sTitle - Title of the message window
+ * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aAllOptions - List of items to choose from
  * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
+ * @param {Boolean} [bOneChoiceOnly=false] - false: multiple choice, true: only one choice allowed
  * 
  * @see fn.prompt
  * @see fn.closeDialog
  */
-fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction){
+fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, bOneChoiceOnly){
 	
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!
+	
+	bOneChoiceOnly = (typeof bOneChoiceOnly == 'undefined' ? false : bOneChoiceOnly);		
+	
+	// deal with title/message input
+	var sMessage = "";
+	if ( $.isArray(sTitle) )
+		{
+		sMessage = sTitle[1];
+		sTitle = sTitle[0];
+		}
+	var sMessageP = $("<p></p>").html(sMessage);
 	
 	var promptDiv = $("<div></div>")
 		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
@@ -3310,12 +3343,16 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
-		.css("font-size", "12px");
+		.css("font-size", "12px")
+		.append(sMessageP);
 	
 	
 	// user instructions
-	var sP = $("<p></p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
-	promptDiv.append(sP);
+	if (!bOneChoiceOnly)
+		{
+		var sP = $("<p></p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
+		promptDiv.append(sP);
+		}	
 	
 	// selectable part	
 	var selectableUl = $("<ol></ol>")
@@ -3412,7 +3449,18 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	$( "#"+promptDivId ).dialog( "open" );
 	
 	$( function() {		
+		
 		$( "#"+selectableId ).selectable();
+		
+		// if only one choice is allowed, dialog must be closed upon selection
+		if (bOneChoiceOnly)
+		{
+			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
+				$( "#dialog_accept_button" ).click();
+        		return false;
+				
+			} );			
+		}		
 	});
 	
 };
@@ -3422,7 +3470,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
  * Generate a prompt pop-up, requesting the user to reorder a set of data
  * The output can be retrieved by using fn.getPromptBoxOrder().
  * 
- * @param {String} sTitle - Title of the message window
+ * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
@@ -3439,13 +3487,23 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	var sortableId = "sortable"+getUniqueNumber();
 	
+	// deal with title/message input
+	var sMessage = "";
+	if ( $.isArray(sTitle) )
+		{
+		sMessage = sTitle[1];
+		sTitle = sTitle[0];
+		}
+	var sMessageP = $("<p></p>").html(sMessage);
+	
 	var promptDiv = $("<div></div>")
 		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
 		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
 		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
-		.css("font-size", "12px");
+		.css("font-size", "12px")
+		.append(sMessageP);
 	
 	var sortableUl = $("<ul></ul>")
 		.attr("id", sortableId)
