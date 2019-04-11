@@ -3455,7 +3455,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		// if only one choice is allowed, dialog must be closed upon selection
 		if (bOneChoiceOnly)
 		{
-			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
+			$( "#"+selectableId ).one( "selectableselected", function( event, ui ) {
 				$( "#dialog_accept_button" ).click();
         		return false;
 				
