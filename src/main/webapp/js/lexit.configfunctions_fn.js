@@ -3316,17 +3316,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
- * @param {Boolean} [bOneChoiceOnly=false] - false: multiple choice, true: only one choice allowed
+ * @param {Boolean|Function} [selectionMode=false] - true: close dialog as soon as an item was clicked; false: multiple choice; function: same as false, plus function to be called upon item selection (without closing the dialog), with the selected text as an argument
  * 
  * @see fn.prompt
  * @see fn.closeDialog
  */
-fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, bOneChoiceOnly){
+fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, selectionMode){
 	
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!
 	
-	bOneChoiceOnly = (typeof bOneChoiceOnly == 'undefined' ? false : bOneChoiceOnly);		
+	selectionMode = (typeof selectionMode == 'undefined' ? false : selectionMode);		
 	
 	// deal with title/message input
 	var sMessage = "";
@@ -3348,7 +3348,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	
 	// user instructions
-	if (!bOneChoiceOnly)
+	if (selectionMode == false)
 		{
 		var sP = $("<p></p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
 		promptDiv.append(sP);
@@ -3406,7 +3406,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readable
+        width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         buttons: [
                   {
@@ -3424,6 +3424,9 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                   		fnFunction(aNewChosenOptions); 
                 		$( this ).dialog( "close" );
                 		$( this ).remove(); 
+                		
+                		// remove 'selectableselected' event
+                		$( "#"+selectableId ).off();
                 	},
                 	id: 'dialog_accept_button'
                   },
@@ -3441,7 +3444,10 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	}).keyup(function() {		 
 		if (kf.isPressed("enter"))
 		{		
-		$( "#dialog_accept_button" ).click();
+		// remove 'selectableselected' event
+		$( "#"+selectableId ).off();
+			
+		$( "#dialog_accept_button" ).click();		
 		return false;
 		}
 	});
@@ -3452,12 +3458,22 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		
 		$( "#"+selectableId ).selectable();
 		
-		// if only one choice is allowed, dialog must be closed upon selection
-		if (bOneChoiceOnly)
+		if (selectionMode != false)
 		{
-			$( "#"+selectableId ).one( "selectableselected", function( event, ui ) {
-				$( "#dialog_accept_button" ).click();
-        		return false;
+			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
+				
+				// if some function was set, execute it and give the selected text as an argument
+				if (typeof selectionMode == 'function')
+					{
+					selectionMode(ui.selected.innerText);
+					}
+				// if only one choice is allowed, dialog must be closed upon selection
+				else
+					{
+					$( "#dialog_accept_button" ).click();
+	        		return false;
+					}
+				
 				
 			} );			
 		}		
@@ -3554,7 +3570,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 400,  // 'auto' setting caused dialog to get to small, very ugly and not readable
+        width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         buttons: [
                   {
