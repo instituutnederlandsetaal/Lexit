@@ -833,8 +833,8 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 
 
 /**
- * Since table with a narrow width are put on the same line on the screen
- * it can be convenient to prevent following table to line up!
+ * Since tables with a narrow width are put on the screen on the same line,
+ * it can be convenient to prevent following tables to line up!
  * To do so, use this function
  * 
  * @deprecated
@@ -3845,7 +3845,7 @@ fn.getIndexOfButtonNamed = function(sTableName, sName){
 /**
  * 
  * @param {(String|API-object-instance)} sTableName - A table name or object
- * @param {Integer} The button number
+ * @param {Integer} iIndex - The button number
  * @returns {String} The button name
  * 
  * @see fn.getIndexOfButtonNamed
