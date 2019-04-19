@@ -1243,6 +1243,30 @@ fn.getActiveRowNode = function(sSomeTable){
 
 
 /**
+ * Get the row node preceding the one given as an argument
+ * 
+ * @param {(Node)} nRow - a row node
+ * @returns {Node} The preceding row node 
+ */
+fn.getPreviousRowNode = function(nRow){
+	
+	return $(nRow).parent().prev().get();
+};
+
+/**
+ * Get the row node following the one given as an argument
+ * 
+ * @param {(Node)} nRow - a row node
+ * @returns {Node} The following row node 
+ */
+fn.getNextRowNode = function(nRow){
+	
+	return $(nRow).parent().next().get();
+};
+
+
+
+/**
  * Get the number of selected rows of a table
  * 
  * @param {(String|API-object-instance)} someTable - Table name or object
@@ -3417,7 +3441,9 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                 		  
                 		  var aSelectedNodes = $(".ui-selected");
                 		  aSelectedNodes.each(function(){
-                			  aNewChosenOptions.push( $(this).text());
+                			  // sometimes doubles are added somehow, so prevent this!
+                			  if (aNewChosenOptions.indexOf( $(this).text() )<0)
+                				  aNewChosenOptions.push( $(this).text());
                 		  });                		  
                   		
                 		// call callback
