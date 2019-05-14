@@ -57,7 +57,7 @@ sf.goTo = function(sSomeTablename){
 		
 		// selectboxes need 'exact:' in front, otherwise preset-values containing regex chars will be
 		// interpreted as regexes, which we don't want
-		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="")
+		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !isRegex(sCurrentColumnValue))
 			{
 			sCurrentColumnValue = "exact:"+sCurrentColumnValue;
 			}
@@ -919,7 +919,7 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	var isASelectBox = conf.getSelectionBox(oColumnConfig) != null || mt.getListOfColumnTypesOf(sTableName)[iColumnIndex]==USER_DEFINED;
 	
 	if (isASelectBox && 
-			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") ) 
+			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !isRegex(sValue) ) 
 		)
 		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
 	

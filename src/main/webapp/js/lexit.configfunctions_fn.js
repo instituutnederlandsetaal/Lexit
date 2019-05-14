@@ -3340,17 +3340,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
- * @param {Boolean|Function} [selectionMode=false] - true: close dialog as soon as an item was clicked; false: multiple choice; function: same as false, plus function to be called upon item selection (without closing the dialog), with the selected text as an argument
+ * @param {Boolean|Function} [mSelectionMode=false] - true: close dialog as soon as an item was clicked; false: multiple choice; function: same as false, plus function to be called upon item selection (without closing the dialog), with the selected text as an argument
  * 
  * @see fn.prompt
  * @see fn.closeDialog
  */
-fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, selectionMode){
+fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, mSelectionMode){
 	
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!
 	
-	selectionMode = (typeof selectionMode == 'undefined' ? false : selectionMode);		
+	mSelectionMode = (typeof mSelectionMode == 'undefined' ? false : mSelectionMode);		
 	
 	// deal with title/message input
 	var sMessage = "";
@@ -3372,7 +3372,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	
 	// user instructions
-	if (selectionMode == false)
+	if (mSelectionMode == false)
 		{
 		var sP = $("<p></p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
 		promptDiv.append(sP);
@@ -3402,7 +3402,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 			.css("height", "18px");	
 		
 		// if some item was pre-selected, assign it the selected class
-		if (aAlreadyChosen.indexOf(sOption)>-1)
+		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
 			{
 			liElement.addClass("ui-selected");
 			}
@@ -3437,14 +3437,14 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                 	  text: "OK",
                 	  click: function(){
                 		  
-                		  var aNewChosenOptions = new Array();
-                		  
-                		  var aSelectedNodes = $(".ui-selected");
-                		  aSelectedNodes.each(function(){
-                			  // sometimes doubles are added somehow, so prevent this!
-                			  if (aNewChosenOptions.indexOf( $(this).text() )<0)
-                				  aNewChosenOptions.push( $(this).text());
-                		  });                		  
+						var aNewChosenOptions = new Array();
+						  
+						var aSelectedNodes = $(".ui-selected");
+						aSelectedNodes.each(function(){
+							// sometimes doubles are added somehow, so prevent this!
+							if (aNewChosenOptions.indexOf( $(this).text() )<0)
+								  aNewChosenOptions.push( $(this).text());
+						});                		  
                   		
                 		// call callback
                   		fnFunction(aNewChosenOptions); 
@@ -3464,15 +3464,15 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                   			  fnCancelFunction(); 
                           $( this ).dialog( "close" );
                           $( this ).remove();
+                          
+                          // remove 'selectableselected' event
+                          $( "#"+selectableId ).off();
                       }
                   }
         ]
 	}).keyup(function() {		 
 		if (kf.isPressed("enter"))
 		{		
-		// remove 'selectableselected' event
-		$( "#"+selectableId ).off();
-			
 		$( "#dialog_accept_button" ).click();		
 		return false;
 		}
@@ -3484,20 +3484,21 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		
 		$( "#"+selectableId ).selectable();
 		
-		if (selectionMode != false)
+		if (mSelectionMode != false)
 		{
 			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
 				
 				// if some function was set, execute it and give the selected text as an argument
-				if (typeof selectionMode == 'function')
+				if (typeof mSelectionMode == 'function')
 					{
-					selectionMode(ui.selected.innerText);
+					mSelectionMode(ui.selected.innerText);
 					}
+				
 				// if only one choice is allowed, dialog must be closed upon selection
 				else
 					{
-					$( "#dialog_accept_button" ).click();
-	        		return false;
+					$( "#dialog_accept_button" ).click();		
+					return false;
 					}
 				
 				
