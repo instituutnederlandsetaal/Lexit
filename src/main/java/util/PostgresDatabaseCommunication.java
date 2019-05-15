@@ -357,6 +357,15 @@ public class PostgresDatabaseCommunication {
 					else 
 						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 				}
+				
+				
+				else if ( isBigWholeNumberType(oneType) )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.BIGINT);
+					else 
+						prest.setLong(i+1, Long.parseLong(oneArg));
+				}
 				else if ( isWholeNumberType(oneType) )
 				{
 					if (oneArg == null) 
@@ -364,6 +373,9 @@ public class PostgresDatabaseCommunication {
 					else 
 						prest.setInt(i+1, Integer.parseInt(oneArg));
 				}
+				
+				
+				
 				else if ( isRealNumberType(oneType) )
 				{
 					if (oneArg == null) 
@@ -463,6 +475,14 @@ public class PostgresDatabaseCommunication {
 					else 
 						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 				}
+				
+				else if ( isBigWholeNumberType(oneType) )
+				{
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.BIGINT);
+					else 
+						prest.setLong(i+1, Long.parseLong(oneArg));
+				}
 				else if ( isWholeNumberType(oneType) )
 				{
 					if (oneArg == null) 
@@ -470,6 +490,7 @@ public class PostgresDatabaseCommunication {
 					else 
 						prest.setInt(i+1, Integer.parseInt(oneArg));
 				}
+				
 				else if ( isRealNumberType(oneType) )
 				{
 					if (oneArg == null) 
@@ -715,20 +736,26 @@ public class PostgresDatabaseCommunication {
 	// do we have a numeric type?
 	
 	public static boolean isNumericTypeOfSomeKind(String typeName){
-		return ( isWholeNumberType(typeName) || isRealNumberType(typeName) ); 
+		return ( isWholeNumberType(typeName) || isRealNumberType(typeName) || isBigWholeNumberType(typeName) ); 
 	}
 	
 	public static boolean isWholeNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
 		return typeName.startsWith("integer") ||
-			typeName.startsWith("bigint") ||
 			typeName.startsWith("smallint") ||
 			typeName.startsWith("decimal") ||		// user-specified precision, exact
 			typeName.startsWith("serial") ||
-			typeName.startsWith("bigserial") ||
 			typeName.startsWith("numeric");
 	};
+	
+	public static boolean isBigWholeNumberType(String typeName){
+		
+		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
+		return typeName.startsWith("bigint") ||
+			typeName.startsWith("bigserial") ;
+	};
+	
 	
 	public static boolean isRealNumberType(String typeName){
 		
