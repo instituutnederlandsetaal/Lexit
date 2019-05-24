@@ -1247,6 +1247,10 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>\"Af\"</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek alleen naar woorden die 'Af' bevatten met een hoofdletter 'A'.</TD>" +
 				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>\"^Af\"</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek alleen naar woorden die met 'Af' beginnen met een hoofdletter 'A'.</TD>" +
+				"</TR>" +
 				"</TABLE>" +
 				"<BR>" +
 				"Aanhalingstekens kunnen ook op andere manieren ingezet worden. Als u bijvoorbeeld zoekt naar " +
