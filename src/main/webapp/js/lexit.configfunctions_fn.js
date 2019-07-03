@@ -696,8 +696,9 @@ fn.resetTable = function(sSomeTablename, fnCallback){
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @param {Function} fnCallback - Some function to call after the cache was cleaned
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.cleanTableCache  = function(sSomeTablename, fnCallback){
+fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -721,9 +722,17 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback){
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			fn.refreshTable(sSomeTablename);
-			fn.message("Fout",
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.cleanTableCache",
+					"sSomeTablename": sSomeTablename
+					});
+			else
+				fn.message("Fout",
 				"Fout bij aanroep van fn.cleanTableCache("+sSomeTablename+"): " +				
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -1109,7 +1118,7 @@ fn.selectAllRowNodes = function(sSomeTable){
 
 
 /**
- * Manually select a row, give its row number on screen
+ * Manually select a row, given its row number on screen
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
  * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
@@ -1136,7 +1145,7 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 
 
 /**
- * Manually unselect a row, give its row number on screen
+ * Manually unselect a row, given its row number on screen
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
  * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
@@ -2074,8 +2083,9 @@ fn.putDataIntoCellNode = function(nRow, sColumnName, sContent){
  * @param {Node} nMixed - A cell/row node
  * @param {Array} aColumnNamesAndValues - An associative array of fields and values to update in the row 
  * @param {Function} fnCallback - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback){
+fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
 	
 	fn._checkApiInstance("fn.updateDatabaseGivenANode", nMixed);
 	fn._checkjQueryObject("fn.updateDatabaseGivenANode", nMixed);
@@ -2131,9 +2141,17 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			fn.refreshTable(sTable);
-			fn.message("Fout", 
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.updateDatabaseGivenANode",
+					"nMixed": nMixed, "aColumnNamesAndValues": aColumnNamesAndValues
+					});
+			else
+				fn.message("Fout", 
 				"Fout bij aanroep van fn.updateDatabaseGivenANode("+sTable+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );		
 
@@ -2153,9 +2171,10 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
  * @param {Array} aFieldsAndValuesToMatch - An associative array of fields and values to match
  * @param {Array} aFieldsAndValuesToUpdate - An associative array of fields and values to assign 
  * @param {Function} fnCallback - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
 fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, 
-		aFieldsAndValuesToUpdate, fnCallback){
+		aFieldsAndValuesToUpdate, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2206,9 +2225,17 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.updateDatabaseGivenFieldValues",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch, "aFieldsAndValuesToUpdate": aFieldsAndValuesToUpdate
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.updateDatabaseGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -2228,8 +2255,9 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
  * @param {Array} aFieldsAndValuesToAdd - An associative array of fields and values to insert
  * @param {String} returnField - Field from which the value should be returned after insertion (eg. an ID, otherwise NULL)
  * @param {Function} [fnCallback=null] - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnField, fnCallback){
+fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnField, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2272,9 +2300,17 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.insertIntoDatabase",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToAdd": aFieldsAndValuesToAdd, "returnField": returnField
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.insertIntoDatabase("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -2292,8 +2328,9 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
  * @param {String} [pk_substitute=null] - field that acts as a primary key, in case the table lacks one; otherwise NULL
  * @param {String} pk_value - value the primary key (or pk_substitute) must have
  * @param {Function} [fnCallback=null] - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute, pkValue, fnCallback){
+fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute, pkValue, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2324,9 +2361,17 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.duplicateRecord",
+					"sSomeTablename": sSomeTablename, "aListOfColumnsToSkip": aListOfColumnsToSkip, "pkSubstitute": pkSubstitute, "pkValue": pkValue
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.duplicateRecord("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -2343,8 +2388,9 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
  * @param {(String|API-object-instance)} sSomeTablename - A table name or object
  * @param {Array} aFieldsAndValues - An associative array of fields and values to match
  * @param {Function} fnCallback - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback){
+fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2384,9 +2430,17 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback){
 	 		
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.getIdFromDatabase",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValues": aFieldsAndValues
+					});
+			else
+				fn.message("Fout", 
 	 				"Fout bij aanroep van fn.getIdFromDatabase("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -2402,8 +2456,9 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback){
  * 
  * @param {Node} nRow - A row node
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.removeFromDatabaseGivenANode = function(nRow, fnCallback){
+fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	
 	fn._checkApiInstance("fn.removeFromDatabaseGivenANode", nRow);
 	fn._checkjQueryObject("fn.removeFromDatabaseGivenANode", nRow);
@@ -2444,9 +2499,17 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback){
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sTable))
 	 			fn.refreshTable(sTable);
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.removeFromDatabaseGivenANode",
+					"nRow": nRow
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.removeFromDatabaseGivenANode("+sTable+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -2461,8 +2524,9 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback){
  * @param {(String|API-object-instance)} sSomeTablename - A table name or object
  * @param {Array} aFieldsAndValuesToMatch - An associative array of fields and values to match
  * @param {Function} [fnCallback=null] - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback){
+fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2501,9 +2565,17 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sSomeTablename))
 	 			fn.refreshTable(sSomeTablename);
-	 		fn.message("Fout",
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.removeFromDatabaseGivenFieldValues",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch
+					});
+			else
+				fn.message("Fout",
 	 			"Fout bij aanroep van fn.removeFromDatabaseGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -2523,13 +2595,14 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 * @param {Node} nRow - A row node
 * @param {String[]} [aColumnsToUpdate={all columns}] - An array of columns to reload
 * @param {Function} [fnCallback=null] - Function called after the operation
+* @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
 * 
 * @see fn.callDatabase
 * @see fn.getRecord
 * @see fn.getRecords
 * @see fn.getRecordGivenFieldValues
 */
-fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback){
+fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	
 	fn._checkApiInstance("fn.callRecord", nRow);
 	fn._checkjQueryObject("fn.callRecord", nRow);
@@ -2580,9 +2653,17 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback){
 			// if table is loaded, we update it on the screen
 	 		if ( mt.tableExists(sTable))
 	 			fn.refreshTable(sTable);
-	 		fn.message("Fout",
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.callRecord",
+					"nRow": nRow, "aColumnsToUpdate": aColumnsToUpdate
+					});
+			else
+				fn.message("Fout",
 	 			"Fout bij aanroep van fn.callRecord("+sTable+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -2640,13 +2721,14 @@ fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
  * @param {(String|API-object-instance)} sSomeTablename - A table name or object
  * @param {String} sRecordId - A row id
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getRecords
  * @see fn.getRecordGivenFieldValues
  * @see fn.callDatabase
  * @see fn.callRecord
  */
-fn.getRecord = function(sSomeTablename, sRecordId, fnCallback){
+fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2670,9 +2752,17 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback){
 	 			fnCallback(recordOutput);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.getRecord",
+					"sSomeTablename": sSomeTablename, "sRecordId": sRecordId
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.getRecord("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -2686,13 +2776,14 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback){
  * @param {(String|API-object-instance)} sSomeTablename - A table name or object
  * @param {String[]} aRecordIds - row ids
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getRecord
  * @see fn.getRecordGivenFieldValues
  * @see fn.callDatabase
  * @see fn.callRecord
  */
-fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback){
+fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2718,9 +2809,17 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback){
 	 			fnCallback(recordsOutput);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.getRecords",
+					"sSomeTablename": sSomeTablename, "aRecordIds": aRecordIds
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.getRecords("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -2736,13 +2835,14 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback){
  * @param {(String|API-object-instance)} sSomeTablename - A table name or object
  * @param {Array} aFieldsAndValuesToMatch - An associative array of fields and values to match
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getRecord
  * @see fn.getRecords
  * @see fn.callRecord
  * @see fn.callDatabase
  */
-fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback){
+fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -2779,9 +2879,17 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 	 			fnCallback(recordOutput);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.getRecordGivenFieldValues",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.getRecord("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -2857,10 +2965,11 @@ fn.getFunctionOutput = function(){
  * @param {String} sFunctionName - A function name
  * @param {Array} aFunctionArguments - An array with the function args
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getFunctionOutput
  */
-fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback){	
+fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler){	
 	
 	var url = WEBSERV_URL+"/table/call_function";
 	
@@ -2918,9 +3027,17 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback){
 	 		},
 	 		
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", 
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.callFunction",
+					"sFunctionName": sFunctionName, "aFunctionArguments": aFunctionArguments
+					});
+			else
+				fn.message("Fout", 
 	 			"Fout bij aanroep van fn.callFunction(" + sFunctionName + "): "+
-				textStatus+" "+errorThrown);			
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));			
 			}
 		} );
 		
@@ -4475,9 +4592,10 @@ fn.removeHighlight = function(sString){
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
  * @param {Array} [oExtraParams=null] - additional ajax parameters, if needed
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams){
+fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";
@@ -4495,9 +4613,17 @@ fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCall
 	 				fnCallback(xml);
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
-			fn.message("Fout",
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.callService",
+					"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+					});
+			else
+				fn.message("Fout",
 				"Fout bij aanroep van fn.callService(): " +				
-				textStatus+" "+errorThrown);
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		}
 	
@@ -4559,10 +4685,11 @@ fn.getCurrentProject = function(){
  * but it is possible to set it here by giving a string, if needed that way)
  *  
  * @param {String} sName - A user name
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getCurrentUser
  */
-fn.setCurrentUser = function(sName){
+fn.setCurrentUser = function(sName, fnErrorHandler){
 	
 	if (sName != null)
 		USERNAME = sName;
@@ -4581,8 +4708,16 @@ fn.setCurrentUser = function(sName){
 	 		USERNAME = fn.getDbResponse(xml);
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
-	 		fn.message("Fout", "Bij het aanroepen van fn.setCurrentUser() is een fout opgetreden: "+
-				textStatus+" "+errorThrown);
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"lexit_function": "fn.setCurrentUser",
+					"sName": sName
+					});
+			else
+				fn.message("Fout", "Bij het aanroepen van fn.setCurrentUser('"+sName+"') is een fout opgetreden: "+
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
 };

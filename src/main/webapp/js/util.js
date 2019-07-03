@@ -1003,4 +1003,40 @@ function getHttpParams(){
 //*******************************************************
 
 
+function getJqXHRInfo(jqXHR){
+	
+	// get http parameters
+	var paramsHash = getHttpParams();
+	
+	// are we in test mode?
+	var bTest = (paramsHash!=null &&
+			paramsHash.get("test")!=null && 
+			paramsHash.get("test")=='true');
+	
+	// if Lex'it is running on home address or is in test mode, give jqXHR info
+		
+	if ( document.URL.regexIndexOf( INL_HOMEURL )>-1 || bTest)
+		{
+		if ( jqXHR != null )
+			{
+			if ( $.isNullOrUndefined(jqXHR["responseText"]) )
+				{
+				return JSON.stringify(jqXHR);
+				}
+			else
+				{
+				var regex = /\<style.+?\<\/style\>/gi
+				return (jqXHR["responseText"]).replace(regex, '');
+				}
+			}	
+		return "no jqXHR info";	
+		}
+	
+	// otherwise we will not
+	
+	return "";		
+}
 
+
+
+//*******************************************************

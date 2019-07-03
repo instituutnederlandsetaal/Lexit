@@ -129,8 +129,7 @@ var aProjectList =
 			name: "Neoloog",
 			config_filename: "neoloog_dev",
 			description: "Neoloog",
-			message: "LET OP: Dit is een testversie",
-			redirect: "http://www.inl.nl"
+			message: "LET OP: Dit is een testversie"
 	 },
 	 {
 			name: "Neoloog",
