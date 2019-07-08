@@ -4394,6 +4394,34 @@ fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
 	
 };
 
+
+/**
+ * Go to the previous page of a table 
+ * 
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ */
+fn.goToPreviousPage = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	( mt.getDataTableObjectOf(sSomeTablename) ).page( 'previous' ).draw( 'page' );
+};
+
+
+/**
+ * Go to the next page of a table 
+ * 
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ */
+fn.goToNextPage = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	( mt.getDataTableObjectOf(sSomeTablename) ).page( 'next' ).draw( 'page' );
+};
+
 // *************************************************************
 // *                 STRING FUNCTIONS                          *
 // *************************************************************
@@ -4595,7 +4623,7 @@ fn.removeHighlight = function(sString){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fn.callService  = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
+fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";

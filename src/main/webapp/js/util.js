@@ -1026,7 +1026,7 @@ function getJqXHRInfo(jqXHR){
 			else
 				{
 				var regex = /\<style.+?\<\/style\>/gi
-				return (jqXHR["responseText"]).replace(regex, '');
+				return '<div style="overflow: auto; height:400px">'+(jqXHR["responseText"]).replace(regex, '')+'</div>';
 				}
 			}	
 		return "no jqXHR info";	
