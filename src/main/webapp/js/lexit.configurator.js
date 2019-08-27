@@ -353,6 +353,13 @@ var oTableConfigurationList_example = {
 		 */
 		"edittrigger": "",
 		
+		
+		/**
+		 * @type {function}
+		 * @description Handler dat aangeroepen wordt wanneer het bewerken van een editable veld een fout veroorzaakt. 
+		 */
+		"editerrorhandler": function(){},
+		
 		/**
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
 		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
@@ -993,6 +1000,17 @@ conf.getEditCallback = function(aColumnConfig){
 		return null;
 	return aColumnConfig["editcallback"];
 };
+
+
+//retrieve cell edition error handler
+//default is editerrorhandler:null
+conf.getEditErrorHandler = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["editerrorhandler"] == 'undefined')
+		return null;
+	return aColumnConfig["editerrorhandler"];
+};
+
 
 // when handling a selectbox selection, if one wants
 // to make sure selection didn't happen by accident (mis-clicking),

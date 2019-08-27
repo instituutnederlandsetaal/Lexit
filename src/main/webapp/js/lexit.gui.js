@@ -482,6 +482,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
 			var fnEditFunction = conf.getEditFunction(oColumnConfig);
 			var fnEditCallback = conf.getEditCallback(oColumnConfig);
+			var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
 			var sEditTrigger = conf.getEditTrigger(oColumnConfig);
 			
 			// Special case: we apply the custom edit function
@@ -552,13 +553,24 @@ gui.makeTableEditable = function(sSomeTablename){
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
 						
-						fn.message("Fout in tabel '"+sSomeTablename+"'", 
-								"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
-								function(){
-									gui.refreshTable(sSomeTablename);
-									//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-									}
-							);
+						if (fnEditErrorHandler != null)
+							{
+							fnEditErrorHandler({
+								"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+								"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
+								});
+							}
+						else
+							{
+							fn.message("Fout in tabel '"+sSomeTablename+"'", 
+									"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+									function(){
+										gui.refreshTable(sSomeTablename);
+										//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+										}
+								);
+							}
+						
 						}
 				 		
 					} );
@@ -676,6 +688,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
 		var fnEditFunction = conf.getEditFunction(oColumnConfig);
 		var fnEditCallback = conf.getEditCallback(oColumnConfig);
+		var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
 		var sEditTrigger = conf.getEditTrigger(oColumnConfig);
 		
 		
@@ -733,13 +746,25 @@ gui.makeTableEditable = function(sSomeTablename){
 			 		
 			 	},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout in tabel '"+sSomeTablename+"'", 
-							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
-							function(){
-								gui.refreshTable(sSomeTablename);
-								//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-								}
-						);
+					
+					if (fnEditErrorHandler != null)
+						{
+						fnEditErrorHandler({
+							"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+							"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": newValue
+							});
+						}
+					else
+						{
+						fn.message("Fout in tabel '"+sSomeTablename+"'", 
+								"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+								function(){
+									gui.refreshTable(sSomeTablename);
+									//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+									}
+							);
+						}
+					
 					}
 				} );			
 			}
@@ -823,6 +848,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						var sValidatorKey =		conf.getEditSelectValidator(oColumnConfig);
 						var fnEditFunction =	conf.getEditFunction(oColumnConfig);
 						var fnEditCallback = 	conf.getEditCallback(oColumnConfig);
+						var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
 						var sEditTrigger = 		conf.getEditTrigger(oColumnConfig);
 						
 						
@@ -901,13 +927,24 @@ gui.makeTableEditable = function(sSomeTablename){
 							 		},
 								"error": function(jqXHR, textStatus, errorThrown){
 									
-									fn.message("Fout in tabel '"+sSomeTablename+"'", 
-											"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
-											function(){
-												gui.refreshTable(sSomeTablename);
-												//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-												}
-										);
+									if (fnEditErrorHandler != null)
+										{
+										fnEditErrorHandler({
+											"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+											"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
+											});
+										}
+									else
+										{
+										fn.message("Fout in tabel '"+sSomeTablename+"'", 
+												"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+												function(){
+													gui.refreshTable(sSomeTablename);
+													//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
+													}
+											);
+										}
+									
 									}
 							 		
 								} );
