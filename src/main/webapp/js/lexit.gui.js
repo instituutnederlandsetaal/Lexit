@@ -555,6 +555,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						
 						if (fnEditErrorHandler != null)
 							{
+							fn.removeProcessingMsg(sSomeTablename);
 							fnEditErrorHandler({
 								"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 								"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
@@ -749,6 +750,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					
 					if (fnEditErrorHandler != null)
 						{
+						fn.removeProcessingMsg(sSomeTablename);
 						fnEditErrorHandler({
 							"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 							"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": newValue
@@ -929,6 +931,7 @@ gui.makeTableEditable = function(sSomeTablename){
 									
 									if (fnEditErrorHandler != null)
 										{
+										fn.removeProcessingMsg(sSomeTablename);
 										fnEditErrorHandler({
 											"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 											"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
