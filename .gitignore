@@ -1,8 +1,4 @@
-target/classes
-target/lexit2
-target/m2e-wtp
-target/maven-archiver
-target/test-classes
+target/
 **/webapp/*.bak
 **/webapp/*.BAK
 **/js/*.bak
