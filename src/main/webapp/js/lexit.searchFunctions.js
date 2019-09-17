@@ -609,12 +609,20 @@ sf.enableSearchFields = function(someTablename){
 				// remember last searchbox clicked upon (needed for goto function)
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
 				
-				});
+				// special: shift+click on text search box to call query builder
+				if(kf._getPressedKey() == 'shift')
+					{
+					sf.getQueryBuilder(someTablename, sCurrentColumnName);
+					
+					}				
+				});			
 			}
 		
 	});
 
 };
+
+
 
 
 
@@ -927,5 +935,276 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 };
 
 
+// generate query builder
+
+sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues){
+	
+	// read configuration:
+	
+	var oTableConfig = 		conf.getTableConfig(sTableName);	
+	var oColumnConfig = 	conf.getColumnConfig( oTableConfig, sColumnName);
+	
+	// get the allowed search values (keys) and their conversion in a wellformed query (values
+	var oKeysAndValues =	conf.getQueryBuilderValues(oColumnConfig);
+	
+	// but if oKeysAndValues is null ...
+	if ( oKeysAndValues == null)
+		{
+		if (oAlternativeKeysAndValues == null)
+			{
+			// read unique values from database and call this function again!
+			sf.getUniqueValuesForQueryBuilder(sTableName, sColumnName);
+			return false;
+			}
+		else
+			{
+			// now, if we have read the database values, we can carry on!
+			oKeysAndValues = oAlternativeKeysAndValues;		
+			}
+		}
+	
+	console.log(oKeysAndValues);
+	
+	// get the processor, which defines how to build the query given the chosen search values
+	var fnProcessor = 		conf.getQueryBuilderProcessor(oColumnConfig);
+	
+	// settings
+	var oSettings =			conf.getQueryBuilderSettings(oColumnConfig);
+	var bGrid = 			!(oSettings != null && typeof oSettings["grid"] != 'undefined' && oSettings["grid"] == false);
+	var bHideNegation =		(oSettings != null && typeof oSettings["hide_negation"] != 'undefined' && oSettings["hide_negation"] == true);
+	var aAlreadyChosen = 	(oSettings != null && typeof oSettings["preselected"] != 'undefined' ? oSettings["preselected"] : null);
+	var bAutoStart = 		!(oSettings != null && typeof oSettings["autostart"] != 'undefined' && oSettings["autostart"] == false);
+	
+	
+	// build dialog 
+	
+	var promptDivId = "dialog-form"+getUniqueNumber();
+	var selectableId = "selectable"; // don't change that one: the css expects this id!	
+	
+	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt bij meervoudige keuze)");
+	
+	var promptDiv = $("<div></div>")
+		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
+		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
+		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
+		.attr("id", promptDivId)
+		.attr("title", "Query builder")
+		.css("font-size", "12px")
+		.append(sMessageP);
+	
+	
+	// extra option
+	var bNegation = false;
+	if ( !bHideNegation )
+		{
+		var negationCheck = $("<div></div>")
+		.append(
+				$('<label />').html('Zoek tegenovergestelde van selectie').prepend(
+						$("<input />", {"type": "checkbox", "id": "querybuilder_checkbox_id", "name": "querybuilder_checkbox"})
+						.click(function(){bNegation = !bNegation;})
+						))
+		.css("border", "1px black outset")
+		.css("padding", "3px");
+		promptDiv.append(negationCheck);
+		promptDiv.append("<p></p>");
+		}
+	
+	
+	// selectable part	
+	var selectableUl = bGrid ?
+				$("<ol></ol>")							// grid type
+				.attr("id", selectableId)
+				.css("list-style-type", "none")
+				.css("margin", "0")
+				.css("padding", "0")
+				.css("width", "80%")
+			:
+				$("<ol></ol>")							// list type
+				.attr("id", selectableId)
+				.css("list-style-type", "none")
+				.css("margin", "0")
+				.css("padding", "0")
+				.css("width", "80%")
+			;
+	
+	
+	// build the elements of the list to choose from
+	
+	for (sOption in oKeysAndValues)
+		{		
+		
+		console.log(sOption);
+		
+		// one element 		
+		var liElement =  bGrid ?
+				$("<li></li>")							// grid type
+				.addClass( "ui-state-default" )
+				.css("margin", "3px")
+				.css("padding", "1px")
+				.css("float", "left")				
+				.css("width", "200px")
+				.css("height", "40px")
+				.css("line-height", "40px") // should be the same as height (https://stackoverflow.com/questions/3400548/how-to-vertically-align-li-elements-in-ul)
+				.css("font-size", "12px")
+				.css("text-align", "center")
+			:
+				$("<li></li>")							// list type
+				.addClass( "ui-widget-content" )
+				.css("margin", "3px")
+				.css("padding", "0.4em")
+				.css("font-size", "12px")
+				.css("height", "18px")
+			;	
+		
+		// if some item was pre-selected, assign it the selected class
+		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
+			{
+			liElement.addClass("ui-selected");
+			}
+		
+		var spanElement = $("<span></span>")
+			.text( $.trim(sOption) );
+		liElement.append(spanElement);
+		selectableUl.append(liElement);
+		}
+	
+	// append the list/grid to the dialog box
+	
+	promptDiv.append(selectableUl);
+	
+	
+	// append the whole thing to the dialog
+	
+	$(document.body).append(promptDiv);
+	
+	
+	// adapt height of the prompt to the number of values 
+	var promptHeight = (200 + 30 * countProperties(oKeysAndValues));
+	
+	
+	// Open dialog	
+	// Important detail: Pressing enter should trigger click on OK button
+	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
+	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
+	$( "#"+promptDivId ).dialog({
+		autoOpen: false,
+        height: promptHeight,
+        width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
+        modal: true,
+        buttons: [
+                  {
+                	  text: "OK",
+                	  click: function(){
+                		  
+						var aNewChosenOptions = new Array();
+						  
+						var aSelectedNodes = $(".ui-selected");
+						aSelectedNodes.each(function(){
+							// sometimes doubles are added somehow, so prevent this!
+							if (aNewChosenOptions.indexOf( $(this).text() )<0)
+								  aNewChosenOptions.push( $(this).text());
+						});                		  
+                  		
+						// generate output
+						// that is: get the conversion (declared in config)
+						// and if avaible, process those conversion with some processor
+						
+						var aOutput = new Array();
+						for (var i=0; i<aNewChosenOptions.length; i++)
+							{
+							var oneNewChoice = aNewChosenOptions[i];
+							aOutput.push( escapeRegexChars( oKeysAndValues[oneNewChoice] ) );
+							}
+						var sOutput = "("+aOutput.join("|")+")";
+						
+                		// or call the processor (if available) to process the values
+						if (fnProcessor != null)
+							sOutput = fnProcessor(aOutput);
+						
+						// negation?
+						if (bNegation)
+							sOutput = "!"+sOutput;
+						
+                		$( this ).dialog( "close" );
+                		$( this ).remove(); 
+                		
+                		// now do what this is all about: put the built query in the search box
+                		fn.putDataIntoFilterBox(sTableName, sColumnName, sOutput);
+                		
+                		// autostart
+                		if (bAutoStart)
+                			sf.startMultiColumnSearch(sTableName);
+                		
+                		// remove 'selectableselected' event
+                		$( "#"+selectableId ).off();
+                		
+                	},
+                	id: 'dialog_accept_button'
+                  },
+                  {
+                	  text: "Annuleren",
+                	  click: function() {
+                		  
+                          $( this ).dialog( "close" );
+                          $( this ).remove();
+                          
+                          // remove 'selectableselected' event
+                          $( "#"+selectableId ).off();
+                      }
+                  }
+        ]
+	}).keyup(function() {		 
+		if (kf.isPressed("enter"))
+		{		
+		$( "#dialog_accept_button" ).click();		
+		return false;
+		}
+	});
+	
+	$( "#"+promptDivId ).dialog( "open" );
+	
+	$( function() {		
+		
+		$( "#"+selectableId ).selectable();	
+			
+	});
+}
 
 
+//needed for query builder to have values to work with
+sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, fnFunction){
+	
+	gui.showProcessingMsg(sSomeTableName);
+	
+	var url = WEBSERV_URL+"/table/get_unique_values_with_limit";
+	$.ajax( {
+		"type": "GET",
+		"async": false, // needed to block code execution while awaiting the server response
+		"url": url,
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sSomeTableName,
+			"column_name": sCurrentColumnName,
+			"limit": "20",
+			"dummy": getUniqueNumber()
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {	 		
+	 		gui.removeProcessingMsg(sSomeTableName);
+	 		
+	 		// add values from XML
+	 		var oValues = {};	 		
+	 		$(xml).find("oneValue").each(function(){
+	 			var thisValue = $(this).text();	 			
+	 			oValues[thisValue] = thisValue;
+	 			});	
+	 		
+	 		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
+	 		},
+		"error": function(jqXHR, textStatus, errorThrown){
+			gui.removeProcessingMsg(sSomeTableName);
+			fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden bij het aanroepen van functie sf._getUniqueValues. "+
+				textStatus+" "+errorThrown);
+			}
+		} );
+}

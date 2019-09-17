@@ -340,6 +340,35 @@ public class TableResources {
 	  }
 	
 	
+	// .../table/get_unique_values_with_limit
+	// get all the unique values a column may contain (needed for select boxes)
+	@Path("get_unique_values_with_limit")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public UniqueValuesObject getUniqueValuesWithLimit(
+			  @QueryParam("db_name") String dbName, 
+			  @QueryParam("table_name") String tableName, 
+			  @QueryParam("column_name") String columnName,
+			  @QueryParam("limit") String limit,
+			  @Context ServletContext context,
+			  @Context SecurityContext sc,
+				@Context HttpServletRequest httpServletRequest
+				)
+	  {
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+		
+	    Util.debug(co, "### Get unique values (with limit) for column " + columnName + " in " + tableName);
+	    
+	    
+	    String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+
+		
+	    return getDatabaseObject(co).getUniqueValues_oldStyle(tableName, columnName, limit);
+	  }
+	
+	
 	// .../table/get_row_number
 	// get the row number corresponding to a given record (given some value to match in some column)
 	@Path("get_row_number")

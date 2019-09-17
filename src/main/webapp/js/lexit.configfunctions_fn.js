@@ -3536,7 +3536,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	$(document.body).append(promptDiv);
 	
 	
-	// adapt height of the prompt to the number of values to reorder
+	// adapt height of the prompt to the number of values 
 	var promptHeight = (200 + 30 * aAllOptions.length);
 	
 	

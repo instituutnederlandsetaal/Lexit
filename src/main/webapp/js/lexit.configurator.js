@@ -361,6 +361,13 @@ var oTableConfigurationList_example = {
 		"editerrorhandler": function(){},
 		
 		/**
+		 * @type {boolean}
+		 * @description Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts 
+		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
+		 */
+		"ellipsis": false,
+		
+		/**
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
 		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
 		 */
@@ -440,15 +447,7 @@ var oTableConfigurationList_example = {
 		 * door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) 
 		 * moet men ook "flexible_visibility": false instellen.
 		 */
-		"visible": true,
-		
-		/**
-		 * @type {boolean}
-		 * @description Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts 
-		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
-		 */
-		"ellipsis": false
-		
+		"visible": true
 
 		
 };
@@ -597,6 +596,32 @@ conf.getColumnConfig = function( oTableConfig, sColumnName){
 	
 	return oColumnConfig;
 };
+
+
+// retrieve query builder keys&values
+// default is null
+conf.getQueryBuilderValues = function(oColumnConfig){
+	if (typeof oColumnConfig["query_builder_values"] == 'undefined')
+		return null;
+	return oColumnConfig["query_builder_values"];
+};
+
+//retrieve query builder processor
+//default is null
+conf.getQueryBuilderProcessor = function(oColumnConfig){
+	if (typeof oColumnConfig["query_builder_processor"] == 'undefined')
+		return null;
+	return oColumnConfig["query_builder_processor"];
+};
+
+//retrieve query builder settings
+//default is null
+conf.getQueryBuilderSettings = function(oColumnConfig){
+	if (typeof oColumnConfig["query_builder_settings"] == 'undefined')
+		return null;
+	return oColumnConfig["query_builder_settings"];
+};
+
 
 
 

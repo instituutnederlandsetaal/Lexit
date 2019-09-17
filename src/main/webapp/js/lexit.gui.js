@@ -972,7 +972,7 @@ gui.makeTableEditable = function(sSomeTablename){
 							"height": "14px",
 					        "width": "100%",
 					        "tooltip": (sValidatorKey != null) ? 
-					        		"Klik en druk op "+sValidatorKey+" om te bewerken" : "Klik om te bewerken",
+					        		"Druk op "+sValidatorKey+" en klik om te bewerken" : "Klik om te bewerken",
 					        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
 					}
 				); // end of jEditable for select boxes

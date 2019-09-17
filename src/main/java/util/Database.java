@@ -631,7 +631,7 @@ public class Database {
 	    	// we might get a time out...
 	    	// try the old style query, which is mostly slow, but in some rare cases it is the fastest...
 	    	
-	    	uvo = getUniqueValues_oldStyle(tableName, columnName);
+	    	uvo = getUniqueValues_oldStyle(tableName, columnName, null);
 	      
 	    }
 	    finally
@@ -643,7 +643,7 @@ public class Database {
 	  }
 	
 	// see getUniqueValues
-	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName) {
+	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName, String limit) {
 		
 		String schema = getSchema(tableName);		
 	
@@ -654,7 +654,9 @@ public class Database {
     			"FROM " + getSafeTableName(tableName, schema) + " " + 
     			"WHERE "+getSafeFieldName(columnName)+" IS NOT NULL " +
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
-    			"ORDER BY " + getSafeFieldName(columnName) + ";";
+    			"ORDER BY " + getSafeFieldName(columnName) + " " +
+    			(limit != null ? "LIMIT "+limit : "") + " " +
+    			";";
     	    	
     	PostgresDatabaseCommunication dc = connectDatabase();
 
