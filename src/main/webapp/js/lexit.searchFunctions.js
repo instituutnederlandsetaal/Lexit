@@ -610,12 +610,17 @@ sf.enableSearchFields = function(someTablename){
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
 				
 				// special: shift+click on text search box to call query builder
-				if(kf._getPressedKey() == 'shift')
-					{
-					sf.getQueryBuilder(someTablename, sCurrentColumnName);
-					
-					}				
-				});			
+				//if(kf._getPressedKey() == 'ctrl')
+				//	{
+				//	sf.getQueryBuilder(someTablename, sCurrentColumnName);					
+				//	}				
+				});
+			
+			$("#"+someTablename+"_dynamic").off('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")");
+			$("#"+someTablename+"_dynamic").on('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){
+				
+					sf.getQueryBuilder(someTablename, sCurrentColumnName);				
+				});
 			}
 		
 	});
@@ -963,14 +968,12 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 			}
 		}
 	
-	console.log(oKeysAndValues);
-	
 	// get the processor, which defines how to build the query given the chosen search values
 	var fnProcessor = 		conf.getQueryBuilderProcessor(oColumnConfig);
 	
 	// settings
 	var oSettings =			conf.getQueryBuilderSettings(oColumnConfig);
-	var bGrid = 			!(oSettings != null && typeof oSettings["grid"] != 'undefined' && oSettings["grid"] == false);
+	var bGrid = 			(oSettings != null && typeof oSettings["grid"] != 'undefined' && oSettings["grid"] == true);
 	var bHideNegation =		(oSettings != null && typeof oSettings["hide_negation"] != 'undefined' && oSettings["hide_negation"] == true);
 	var aAlreadyChosen = 	(oSettings != null && typeof oSettings["preselected"] != 'undefined' ? oSettings["preselected"] : null);
 	var bAutoStart = 		!(oSettings != null && typeof oSettings["autostart"] != 'undefined' && oSettings["autostart"] == false);
@@ -1189,8 +1192,7 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName,
 			"dummy": getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
-	 	"success": function(xml) {	 		
-	 		gui.removeProcessingMsg(sSomeTableName);
+	 	"success": function(xml) {
 	 		
 	 		// add values from XML
 	 		var oValues = {};	 		
@@ -1199,6 +1201,7 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName,
 	 			oValues[thisValue] = thisValue;
 	 			});	
 	 		
+	 		gui.removeProcessingMsg(sSomeTableName);
 	 		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){

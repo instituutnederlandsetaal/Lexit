@@ -652,11 +652,22 @@ public class Database {
 	    
     	String query = "SELECT " + getSafeFieldName(columnName) + " AS n " + 
     			"FROM " + getSafeTableName(tableName, schema) + " " + 
-    			"WHERE "+getSafeFieldName(columnName)+" IS NOT NULL " +
+    			"WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
-    			"ORDER BY " + getSafeFieldName(columnName) + " " +
-    			(limit != null ? "LIMIT "+limit : "") + " " +
-    			";";
+    			"ORDER BY " + getSafeFieldName(columnName) + ";";
+    	
+    	if (limit != null)
+    	{
+    		query = "SELECT n " +
+    				"FROM (" +
+    				"	SELECT " + getSafeFieldName(columnName) + " AS n " + 
+        			"	FROM " + getSafeTableName(tableName, schema) + " " + 
+        			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+        			"	GROUP BY " + getSafeFieldName(columnName) + " " +
+        			"	ORDER BY count(*) DESC " +
+        			"	LIMIT " + limit + ") x " +
+        			"ORDER BY n;";
+    	}
     	    	
     	PostgresDatabaseCommunication dc = connectDatabase();
 
