@@ -433,7 +433,7 @@ td.selectColumns = function(sSomeTablename){
 	                     		conf.changeTableSettingValue(sSomeTablename, "column_order", aColumnListInNewOrder);
 	                     		
 	                     		$( this ).dialog( "close" );
-	                     		$( this ).remove(); 
+	                     		 
 	                     		
 	                     		// read the current Datatables filters settings and page number 
 	                     		// we will re-apply those to the table as it is rebuilt with the new column selection
@@ -529,7 +529,6 @@ td.selectColumns = function(sSomeTablename){
 	                		 title: "Annuleer de nu gemaakte keuzes en sluit dit venster",
 	                		 click: function() {
 	                             $( this ).dialog( "close" );
-	                             $( this ).remove();
 	                         }
 	                	},
 	                	{
@@ -679,6 +678,9 @@ td.selectColumns = function(sSomeTablename){
         width: 700,
         modal: true,
         buttons: aButtonsArray,
+        close: function(event, ui){
+        	$( this ).remove();
+        },
         open: function(event, ui){
         	// activate tipTip jquery plugin for nice cross-browser tooltips    
             $("div.ui-dialog-buttonpane div.ui-dialog-buttonset button.ui-button").tipTip({defaultPosition: "top"});        	

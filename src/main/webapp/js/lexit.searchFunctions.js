@@ -944,6 +944,8 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 
 sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues){
 	
+	var sQueryBuilderName = "Selectiehulp";
+	
 	// read configuration:
 	
 	var oTableConfig = 		conf.getTableConfig(sTableName);	
@@ -973,8 +975,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	// settings
 	var oSettings =			conf.getQueryBuilderSettings(oColumnConfig);
-	var bGrid = 			(oSettings != null && typeof oSettings["grid"] != 'undefined' && oSettings["grid"] == true);
-	var bHideNegation =		(oSettings != null && typeof oSettings["hide_negation"] != 'undefined' && oSettings["hide_negation"] == true);
+	var bGrid = 			(oSettings != null && typeof oSettings["grid"] != 'undefined' && oSettings["grid"] == true);	
 	var aAlreadyChosen = 	(oSettings != null && typeof oSettings["preselected"] != 'undefined' ? oSettings["preselected"] : null);
 	var bAutoStart = 		!(oSettings != null && typeof oSettings["autostart"] != 'undefined' && oSettings["autostart"] == false);
 	
@@ -984,33 +985,47 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!	
 	
-	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt bij meervoudige keuze)");
+	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt voor meervoudige keuze)");
 	
 	var promptDiv = $("<div></div>")
 		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
 		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
 		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
-		.attr("title", "Query builder")
+		.attr("title", sQueryBuilderName)
 		.css("font-size", "12px")
 		.append(sMessageP);
 	
 	
-	// extra option
-	var bNegation = false;
-	if ( !bHideNegation )
-		{
-		var negationCheck = $("<div></div>")
+	// extra options
+	var bNegation = false;	
+	var negationCheck = $("<div ></div>")
+		.css("background-color", "#E0E6F8")
 		.append(
-				$('<label />').html('Zoek tegenovergestelde van selectie').prepend(
-						$("<input />", {"type": "checkbox", "id": "querybuilder_checkbox_id", "name": "querybuilder_checkbox"})
+			$('<label />').html('Zoek tegenovergestelde van selectie').prepend(
+					$("<input />", {"type": "checkbox", "id": "querybuilder_negation_checkbox", "name": "querybuilder_negation_checkbox"})
 						.click(function(){bNegation = !bNegation;})
-						))
+					)
+			)
 		.css("border", "1px black outset")
 		.css("padding", "3px");
-		promptDiv.append(negationCheck);
-		promptDiv.append("<p></p>");
-		}
+	promptDiv.append(negationCheck);
+	promptDiv.append("<p></p>");
+	
+	var bExactMatch = false;
+	var exactMatchCheck = $("<div></div>")
+		.css("background-color", "#E0E6F8")
+		.append(
+			$('<label />').html('Exact matchen').prepend(
+					$("<input />", {"type": "checkbox", "id": "querybuilder_exactmatch_checkbox", "name": "querybuilder_exactmatch_checkbox"})
+						.click(function(){bExactMatch = !bExactMatch;})
+					)
+			)
+		.css("border", "1px black outset")
+		.css("padding", "3px");
+	promptDiv.append(exactMatchCheck);
+	promptDiv.append("<p></p>");
+		
 	
 	
 	// selectable part	
@@ -1034,9 +1049,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	// build the elements of the list to choose from
 	
 	for (sOption in oKeysAndValues)
-		{		
-		
-		console.log(sOption);
+		{
 		
 		// one element 		
 		var liElement =  bGrid ?
@@ -1094,6 +1107,13 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        close: function(event, ui){
+        	
+        	$( this ).remove();
+            
+            // remove 'selectableselected' event
+            $( "#"+selectableId ).off();
+        },
         buttons: [
                   {
                 	  text: "OK",
@@ -1124,12 +1144,16 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 						if (fnProcessor != null)
 							sOutput = fnProcessor(aOutput);
 						
+						// case sensitive?
+						if (bExactMatch)
+							sOutput = "^"+sOutput+"$";
+						
 						// negation?
 						if (bNegation)
-							sOutput = "!"+sOutput;
+							sOutput = "!"+sOutput;						
 						
-                		$( this ).dialog( "close" );
-                		$( this ).remove(); 
+						// call close function
+                		$( this ).dialog( "close" );                		
                 		
                 		// now do what this is all about: put the built query in the search box
                 		fn.putDataIntoFilterBox(sTableName, sColumnName, sOutput);
@@ -1138,9 +1162,6 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
                 		if (bAutoStart)
                 			sf.startMultiColumnSearch(sTableName);
                 		
-                		// remove 'selectableselected' event
-                		$( "#"+selectableId ).off();
-                		
                 	},
                 	id: 'dialog_accept_button'
                   },
@@ -1148,11 +1169,8 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
                 	  text: "Annuleren",
                 	  click: function() {
                 		  
-                          $( this ).dialog( "close" );
-                          $( this ).remove();
-                          
-                          // remove 'selectableselected' event
-                          $( "#"+selectableId ).off();
+                		// call close function
+                		  $( this ).dialog( "close" );                          
                       }
                   }
         ]

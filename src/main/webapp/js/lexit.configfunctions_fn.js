@@ -3161,10 +3161,12 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	$( "#"+dialogDivId ).dialog({
 		modal: true,
 		width: "auto",
+		close: function(event, ui){
+			$( this ).remove();
+		},
 		buttons: {			
 			Ok: function() {
 				$( this ).dialog( "close" );
-				$( this ).remove();	
 				
 				if (fnFunction != null)
 					{
@@ -3211,7 +3213,6 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 	
 			// this will clause the dialog, as soon as an option was chosen
 			$( "#"+dialogDivId ).dialog( "close" );
-			$( "#"+dialogDivId ).remove();
 			
 			// call the function assigned (within configuration) to the chosen option 
 			var fnFunction = oOptions[ key ];
@@ -3223,6 +3224,9 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 	$( "#"+dialogDivId ).dialog({
 		modal: true,
 		width: "auto",
+		close: function(event, ui){
+			$( "#"+dialogDivId ).remove();
+		},
 		buttons: oButtons
 	});
 	
@@ -3264,15 +3268,16 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 		$( "#"+dialogDivId ).dialog({
 			modal: true,
 			width: "auto",
+			close: function(event, ui){
+				$( this ).remove();
+			},
 			buttons: {
 				Ja: function() {
-					$( this ).dialog( "close" );
-					$( this ).remove();
+					$( this ).dialog( "close" );					
 					fnFunction();
 					},
 				Nee: function() {
 					$( this ).dialog( "close" );
-					$( this ).remove();
 					if (fnCancelFunction!=null)
 						fnCancelFunction();
 					}
@@ -3395,6 +3400,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         height: 300,
         width: "auto",
         modal: true,
+        close: function(event, ui){
+        	$( this ).remove(); 
+        },
         buttons: [
                    {
                 	 text: "OK",
@@ -3414,8 +3422,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                 		// call callback
                  		if (fnFunction != null)
                  			fnFunction(); 
-                		$( this ).dialog( "close" );
-                		$( this ).remove(); 
+                		$( this ).dialog( "close" );                		
                 	},
                 	id: 'dialog_accept_button'
                    },
@@ -3427,7 +3434,6 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                 		if (fnCancelFunction != null)
                 			fnCancelFunction(); 
                         $( this ).dialog( "close" );
-                        $( this ).remove();
                     }
                    }
         ]
@@ -3549,6 +3555,12 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        close: function(event, ui){
+        	
+        	$( this ).remove();            
+            // remove 'selectableselected' event
+            $( "#"+selectableId ).off();
+        },
         buttons: [
                   {
                 	  text: "OK",
@@ -3564,12 +3576,11 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 						});                		  
                   		
                 		// call callback
-                  		fnFunction(aNewChosenOptions); 
+                  		fnFunction(aNewChosenOptions);
+                  		
+                  		// call close function
                 		$( this ).dialog( "close" );
-                		$( this ).remove(); 
                 		
-                		// remove 'selectableselected' event
-                		$( "#"+selectableId ).off();
                 	},
                 	id: 'dialog_accept_button'
                   },
@@ -3578,12 +3589,11 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                 	  click: function() {
                 		  // call callback upon Cancel, if available
                   		  if (fnCancelFunction != null)
-                  			  fnCancelFunction(); 
+                  			  fnCancelFunction();
+                  		  
+                  		  // call close function
                           $( this ).dialog( "close" );
-                          $( this ).remove();
                           
-                          // remove 'selectableselected' event
-                          $( "#"+selectableId ).off();
                       }
                   }
         ]
@@ -3716,6 +3726,9 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        close: function(event, ui){
+        	$( this ).remove();
+        },
         buttons: [
                   {
                 	  text: "OK",
@@ -3735,8 +3748,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                 		}
                 		// call callback
                   		fnFunction(); 
-                		$( this ).dialog( "close" );
-                		$( this ).remove(); 
+                		$( this ).dialog( "close" );                		 
                 	},
                 	id: 'dialog_accept_button'
                   },
@@ -3747,7 +3759,6 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                   		  if (fnCancelFunction != null)
                   			  fnCancelFunction(); 
                           $( this ).dialog( "close" );
-                          $( this ).remove();
                       }
                   }
         ]
