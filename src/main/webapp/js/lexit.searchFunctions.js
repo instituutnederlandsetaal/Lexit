@@ -609,18 +609,18 @@ sf.enableSearchFields = function(someTablename){
 				// remember last searchbox clicked upon (needed for goto function)
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
 				
-				// special: shift+click on text search box to call query builder
-				//if(kf._getPressedKey() == 'ctrl')
-				//	{
-				//	sf.getQueryBuilder(someTablename, sCurrentColumnName);					
-				//	}				
+				// special: ctrl+click on text search box to call query builder
+				if(kf._getPressedKey() == 'ctrl')
+					{
+					sf.getQueryBuilder(someTablename, sCurrentColumnName);					
+					}				
 				});
 			
-			$("#"+someTablename+"_dynamic").off('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")");
-			$("#"+someTablename+"_dynamic").on('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){
-				
-					sf.getQueryBuilder(someTablename, sCurrentColumnName);				
-				});
+//			$("#"+someTablename+"_dynamic").off('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")");
+//			$("#"+someTablename+"_dynamic").on('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){
+//				
+//					sf.getQueryBuilder(someTablename, sCurrentColumnName);				
+//				});
 			}
 		
 	});
