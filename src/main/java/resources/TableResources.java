@@ -349,6 +349,7 @@ public class TableResources {
 			  @QueryParam("db_name") String dbName, 
 			  @QueryParam("table_name") String tableName, 
 			  @QueryParam("column_name") String columnName,
+			  @QueryParam("column_value_filter") String columnValueFilter, 
 			  @QueryParam("limit") String limit,
 			  @Context ServletContext context,
 			  @Context SecurityContext sc,
@@ -365,7 +366,7 @@ public class TableResources {
 			throw new RuntimeException("Permission denied to "+userName);
 
 		
-	    return getDatabaseObject(co).getUniqueValues_oldStyle(tableName, columnName, limit);
+	    return getDatabaseObject(co).getUniqueValues_oldStyle(tableName, columnName, columnValueFilter, limit);
 	  }
 	
 	

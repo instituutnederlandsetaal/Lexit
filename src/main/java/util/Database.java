@@ -631,7 +631,7 @@ public class Database {
 	    	// we might get a time out...
 	    	// try the old style query, which is mostly slow, but in some rare cases it is the fastest...
 	    	
-	    	uvo = getUniqueValues_oldStyle(tableName, columnName, null);
+	    	uvo = getUniqueValues_oldStyle(tableName, columnName, null, null);
 	      
 	    }
 	    finally
@@ -643,7 +643,7 @@ public class Database {
 	  }
 	
 	// see getUniqueValues
-	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName, String limit) {
+	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName, String columnValueFilter, String limit) {
 		
 		String schema = getSchema(tableName);		
 	
@@ -653,6 +653,10 @@ public class Database {
     	String query = "SELECT " + getSafeFieldName(columnName) + " AS n " + 
     			"FROM " + getSafeTableName(tableName, schema) + " " + 
     			"WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+    			(
+    			columnValueFilter.isEmpty() ? "" : 
+    			"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+    			) +
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
     			"ORDER BY " + getSafeFieldName(columnName) + ";";
     	
@@ -663,6 +667,10 @@ public class Database {
     				"	SELECT " + getSafeFieldName(columnName) + " AS n " + 
         			"	FROM " + getSafeTableName(tableName, schema) + " " + 
         			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+        			(
+        				columnValueFilter.isEmpty() ? "" : 
+        				"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+        			) +
         			"	GROUP BY " + getSafeFieldName(columnName) + " " +
         			"	ORDER BY count(*) DESC " +
         			"	LIMIT " + limit + ") x " +
@@ -677,7 +685,10 @@ public class Database {
     	try {
   	      dc.sendUpdate("SET search_path TO " + schema + "; ");
   	      
-  	      ResultSet rs = dc.sendQuery(query);
+  	      ResultSet rs = columnValueFilter.isEmpty() ? 
+  	    		  dc.sendQuery(query)
+  	    		  :
+  	    		  dc.sendPreparedQuery(query, new String[]{columnValueFilter});
 
   	      res = getResultsInAList(rs, new String[] { "n" });
   	      if (res.size() > 0)

@@ -998,6 +998,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	
 	// extra options
+	
+	// [a] checkbox: negation
+	
 	var bNegation = false;	
 	var negationCheck = $("<div ></div>")
 		.css("background-color", "#E0E6F8")
@@ -1012,6 +1015,8 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	promptDiv.append(negationCheck);
 	promptDiv.append("<p></p>");
 	
+	// [b] checkbox: exact match
+	
 	var bExactMatch = false;
 	var exactMatchCheck = $("<div></div>")
 		.css("background-color", "#E0E6F8")
@@ -1025,10 +1030,87 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 		.css("padding", "3px");
 	promptDiv.append(exactMatchCheck);
 	promptDiv.append("<p></p>");
-		
 	
 	
-	// selectable part	
+	// filter input
+	
+	var filter = $("<div></div>")
+		.append(
+			$("<span></span>")
+				.text("Filter (regex): ")
+		)
+		.append(
+			$("<input></input>")
+				.attr("id", sQueryBuilderName+"_valuefilter")
+				.bind("input propertychange", function (evt) {
+					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
+					
+				    // If it's the propertychange event, make sure it's the value that changed.
+				    if (window.event && event.type == "propertychange" && event.propertyName != "value")
+				        return;
+				
+				    // Clear any previously set timer before setting a fresh one
+				    window.clearTimeout($(this).data("timeout"));
+				    $(this).data("timeout", setTimeout(function () {
+
+				    	// read new unique values given filter
+				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
+				    	var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, function(oValues){
+							
+							oKeysAndValues = new cloneObject(oValues);							
+							$("#"+selectableId).empty();							
+							buildSelectOptions(oKeysAndValues);
+							
+						});
+						
+				    }, 1000));
+				})
+		)
+		.append(
+			$("<span></span>")
+				.text(" Toon max. ")
+		)
+		.append(
+			$("<input></input>")
+			.css("width", "20px")
+			.val(20)
+			.attr("id", sQueryBuilderName+"_limit")
+			.bind("input propertychange", function (evt) {
+					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
+					
+				    // If it's the propertychange event, make sure it's the value that changed.
+				    if (window.event && event.type == "propertychange" && event.propertyName != "value")
+				        return;
+				
+				    // Clear any previously set timer before setting a fresh one
+				    window.clearTimeout($(this).data("timeout"));
+				    $(this).data("timeout", setTimeout(function () {
+
+				    	// read new unique values given filter
+				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
+				    	var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, function(oValues){
+							
+							oKeysAndValues = new cloneObject(oValues);							
+							$("#"+selectableId).empty();							
+							buildSelectOptions(oKeysAndValues);
+							
+						});
+						
+				    }, 1000));
+				})
+		)
+		.append(
+			$("<span></span>")
+				.text(" opties")
+		);
+	promptDiv.append(filter);
+	promptDiv.append("<p></p>");
+
+	
+	// 'selectable' part: the options to choose from	
+	
 	var selectableUl = bGrid ?
 				$("<ol></ol>")							// grid type
 				.attr("id", selectableId)
@@ -1048,7 +1130,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	// build the elements of the list to choose from
 	
-	for (sOption in oKeysAndValues)
+	buildSelectOptions = function(oKeysAndValues){
+		
+		for (sOption in oKeysAndValues)
 		{
 		
 		// one element 		
@@ -1083,6 +1167,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 		liElement.append(spanElement);
 		selectableUl.append(liElement);
 		}
+	}
+	
+	buildSelectOptions(oKeysAndValues);
 	
 	// append the list/grid to the dialog box
 	
@@ -1109,10 +1196,11 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
         modal: true,
         close: function(event, ui){
         	
+        	// remove 'selectableselected' event
+            $( "#"+selectableId ).off();
+            
         	$( this ).remove();
             
-            // remove 'selectableselected' event
-            $( "#"+selectableId ).off();
         },
         buttons: [
                   {
@@ -1193,7 +1281,15 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 
 
 //needed for query builder to have values to work with
-sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, fnFunction){
+sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName){
+	
+	sf._getUniqueValuesForQueryBuilder(sSomeTableName, sCurrentColumnName, null, null, function(oValues){
+		
+		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
+	})
+}
+
+sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sLimit, fnFunction){
 	
 	gui.showProcessingMsg(sSomeTableName);
 	
@@ -1206,7 +1302,8 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName,
 			"db_name": getHttpParams().get("db"),
 			"table_name": sSomeTableName,
 			"column_name": sCurrentColumnName,
-			"limit": "20",
+			"column_value_filter": sValueFilter,
+			"limit": ((sLimit == null || sLimit == '') ? 20 : sLimit),
 			"dummy": getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
@@ -1220,11 +1317,15 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName,
 	 			});	
 	 		
 	 		gui.removeProcessingMsg(sSomeTableName);
-	 		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
+	 		
+	 		if (typeof fnFunction != 'undefined')
+	 			{
+	 			fnFunction(oValues);
+	 			}
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			gui.removeProcessingMsg(sSomeTableName);
-			fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden bij het aanroepen van functie sf._getUniqueValues. "+
+			fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden bij het aanroepen van functie sf._getUniqueValuesForQueryBuilder. "+
 				textStatus+" "+errorThrown);
 			}
 		} );
