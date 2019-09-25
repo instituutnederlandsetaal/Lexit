@@ -1316,10 +1316,16 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>NULL</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die een NULL-waarde bevatten</TD>" +
 				"</TR>" +
-				"</TABLE>" +
+				"</TABLE>" +				
+				"<BR><BR><BR>" +
+				"<B>Query-builder / Selectiehulp</B>" +
+				"<BR><BR>" +
+				"Zoekvragen kunnen deels automatisch worden samengesteld d.m.v. een tooltje. " +
+				"Om dit tooltje te openen, houdt u bij het aanklikken van een zoekveld de CTRL-toets ingedrukt. " +
+				"Het tooltje toont de meest frequente waardes uit betreffende kolom, zodat een keuze daaruit kan worden gemaakt: Lex'it formuleert " +
+				"dan een zoekopdracht om op de gekozen waardes te zoeken. Ook is het mogelijk om een negatieve selectie te maken, d.w.z. alles " +
+				"behalve de gekozen waardes." +
 				"</div>" +
-				
-				
 				"<div id='tabs-5'>" +
 				"<B>Sorteren op &eacute;&eacute;n kolom</B><BR>"+
 				"<BR>"+
