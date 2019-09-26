@@ -1266,6 +1266,20 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>\" van \"</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> vindt alleen 'rad van fortuin'.</TD>" +
 				"</TR>" +
+				"</TABLE>" +	
+				"<BR>" +
+				"Als u aangeeft dat u exact een bepaald woord zoekt, zonder iets ervoor of erna, kan dat het zoeken behoorlijk versnellen. " +
+				"Gebruik daartoe deze schrijfwijze: " +				
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>exact:lopen</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> vindt exact het woord 'lopen'.</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>//lopen</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> idem.</TD>" +
+				"</TR>" +
 				"</TABLE>" +				
 				"<BR><BR><BR>" +
 				"<B>Zoeken met operatoren</B>" +

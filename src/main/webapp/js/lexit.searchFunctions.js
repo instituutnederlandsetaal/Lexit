@@ -861,6 +861,10 @@ sf.startMultiColumnSearch = function(someTablename){
 				$(this).find("select").eq(0).val()  
 				: 
 				$(this).find("input").eq(0).val();
+				
+		// special short cut
+		if ($.startsWith(oneSearchBoxValue, "//"))
+			oneSearchBoxValue = "\""+oneSearchBoxValue.replace(/^\/\//, 'exact:')+"\"";
 		
 		// if needed (config file), transform the query
 		if (columnSearchQueryTransformFunction != null)
