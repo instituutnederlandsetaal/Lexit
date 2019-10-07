@@ -159,8 +159,8 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		{
 		// first check if the list of columns returned by database is
 		// the same as the list of columns from the table configuration settings
-		var firstArray = cloneArray(aColumnOrder);
-		var secondArray = cloneArray(aAllColumns);
+		var firstArray = cloneArray(aAllColumns);
+		var secondArray = cloneArray(aColumnOrder);
 		firstArray.sort();
 		secondArray.sort();
 		
