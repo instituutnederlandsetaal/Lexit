@@ -3351,35 +3351,74 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			aValues[i] = (aValues[i]).split("::")[0];
 			}
 		
+		// should the input field be an select box?
+		// (in that case we expect the value at the current index i to contain an array of values to select from)
+		var bSelectBox = (aValues != null && typeof aValues[i] === 'object');
+		
 		var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		var label = $("<label></label>")
 			.attr("for", fieldLC)
 			.text($.trim(aFieldNames[i]));
 		
-		var sInputType = bTextarea ? "textarea" : "input";
-		var input = $("<"+sInputType+"></"+sInputType+">")
-			.attr("type", "text" )
-			.attr("name", fieldLC)
+		
+		// now build the input field
+		
+		var input;
+		
+		// select box type
+		
+		if (bSelectBox) 
+			{
+			input = $("<select></select>")
 			.attr("id", "prompt_"+fieldLC)
 			.prop('disabled', bFixedValue);
-				
-		// preset the input value, if available
-		if (bTextarea)
-			{
-			input.text(aValues!=null ? aValues[i]: ""); // textarea
-			}
-		else
-			{
-			input.val(aValues!=null ? aValues[i]: "");  // input
-			input.css("width", "95%");					// prevent small fields
+			
+			// build the options to select 
+			for (var j=0; j<aValues[i].length; j++)
+				{
+				var sThisValue = aValues[i][j];
+				var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
+				sThisValue = sThisValue.replace("::selected", "");
+				var thisOption = $("<option></option>")
+					.attr("value", sThisValue)
+					.text(sThisValue);
+				if (bSelected)
+					thisOption.attr('selected','selected');
+				$(input).append(thisOption);
+				}
 			}
 		
-		// if cols and rows are given, set them!
-		if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)
+		// text field type
+		else
 			{
-			input.attr("cols", aColsAndRows[0]);
-			input.attr("rows", aColsAndRows[1]);
-			}
+			var sInputType = bTextarea ? "textarea" : "input";
+			input = $("<"+sInputType+"></"+sInputType+">")
+				.attr("type", "text" )
+				.attr("name", fieldLC)
+				.attr("id", "prompt_"+fieldLC)
+				.prop('disabled', bFixedValue);
+			
+			// preset the input value, if available
+			if (bTextarea)
+				{
+				input.text(aValues!=null ? aValues[i]: ""); // textarea
+				}
+			else
+				{
+				input.val(aValues!=null ? aValues[i]: "");  // input
+				input.css("width", "95%");					// prevent small fields
+				}
+			
+			// if cols and rows are given, set them!
+			if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)
+				{
+				input.attr("cols", aColsAndRows[0]);
+				input.attr("rows", aColsAndRows[1]);
+				}
+			
+			}				
+		
+		// append the current field
 		
 		promptFieldSet.append(label);
 		promptFieldSet.append($("<br/>"));
@@ -3409,12 +3448,19 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                 	 click: function(){
                  		for (var i=0; i<aFieldNames.length; i++)
                 		{
+                 			// fieldname
+                 			var thisFieldName = $.trim(aFieldNames[i]);
+                 			
+                 			// value for this field, entered by the user
                 			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
-                			fn._registerUserInput(
-                					// fieldname
-                					$.trim(aFieldNames[i]),
-                					// value for this field, entered by the user
-                					$("#"+promptDivId+" #prompt_"+fieldLC).val(), 
+                			// read value for this field
+                			// first try special case (select box), and then the normal case (text)
+                			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
+                			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
+                			
+                			fn._registerUserInput(                					
+                					thisFieldName,                					
+                					thisValue, 
                 					// index of this field/value 
                 					i
                 					);
