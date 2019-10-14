@@ -967,12 +967,19 @@ public class Database {
 			{
 			if (argumentTypes[i].equals("text")
 					&& !args[i].equals("NULL") // exclude null, which must be interpreted as a null value further on
-						                   // so it must be printed without quotes!
-					&& !(args[i].startsWith("'") && args[i].endsWith("'")) )
-				{
-				args[i] = "'" +				
-				(args[i]).replace("'", "''") // escape quote in strings like in "zzp'er" 
-				+ "'";
+				)						       // so it must be printed without quotes!
+				{				
+				// make sure inside-quotes are escaped:
+				// in strings like in "zzp\'er" (with slash)
+				args[i] = (args[i]).replaceAll("([\\\\]+)(')([^'])", "$2$2$3");
+				// in strings like in "zzp'er" (without slash)
+				args[i] = (args[i]).replaceAll("([^'])(')([^'])", "$1$2$2$3");
+				
+				// add quote arount string iff they are missing!
+				if (!(args[i].startsWith("'") && args[i].endsWith("'")) )
+					{
+					args[i] = "'" +	args[i] + "'";	
+					}				
 				}
 			}
 		}

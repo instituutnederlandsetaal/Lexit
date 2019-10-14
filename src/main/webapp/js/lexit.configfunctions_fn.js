@@ -3300,7 +3300,9 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  * 
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
- * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. 
+ * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
+ * When the field at index i has to be a selectbox instead of an input field, aValues must contain (at the same index i) an array of values to choose from. The value to be
+ * selected by default must have '::selected' attached in its string value  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
