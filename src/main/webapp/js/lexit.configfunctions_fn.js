@@ -3185,11 +3185,16 @@ fn.message = function(sTitle, sMessage, fnFunction){
 };
 
 /**
- * Show a dialog and aks the user to choose an option. 
+ * Show a dialog and ask the user to choose some action to perform (input is a list of action names and their corresponding functions attached). 
+ * Since the action names to choose from are displayed horizontally, this function is only suitable for short lists
+ * of actions (like 5 max), of course formulated in a concise way.
+ * If one wants to be able to choose from a bigger list, consider using fn.promptSelect instead.
  * 
  * @param {String} sTitle - Title of the message window
  * @param {String} sMessage - Message to the user
  * @param {Array} oOptions - Associative array of options names (keys) and functions (values) to execute when a given option was clicked upon 
+ * 
+ * @see fn.promptSelect
  */
 fn.askToChoose = function(sTitle, sMessage, oOptions){
 	
@@ -3448,6 +3453,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                    {
                 	 text: "OK",
                 	 click: function(){
+                		 
+                		var aPromptResponse = {}; 
                  		for (var i=0; i<aFieldNames.length; i++)
                 		{
                  			// fieldname
@@ -3460,16 +3467,22 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                 			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
                 			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
                 			
+                			
+                			// compute output for fn.getPromptBoxInput
+                			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
                 			fn._registerUserInput(                					
                 					thisFieldName,                					
                 					thisValue, 
                 					// index of this field/value 
                 					i
                 					);
+                			// compute response as well, to be easily used in callback
+                			aPromptResponse[thisFieldName] = thisValue;
+                			
                 		}
                 		// call callback
                  		if (fnFunction != null)
-                 			fnFunction(); 
+                 			fnFunction(aPromptResponse); 
                 		$( this ).dialog( "close" );                		
                 	},
                 	id: 'dialog_accept_button'
@@ -3514,6 +3527,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * @param {Boolean|Function} [mSelectionMode=false] - true: close dialog as soon as an item was clicked; false: multiple choice; function: same as false, plus function to be called upon item selection (without closing the dialog), with the selected text as an argument
  * 
  * @see fn.prompt
+ * @see fn.askToChoose
  * @see fn.closeDialog
  */
 fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, mSelectionMode){
@@ -3781,10 +3795,13 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                   {
                 	  text: "OK",
                 	  click: function(){
-                  		for (var i=0; i<aFieldNames.length; i++)
+                		  
+                		for (var i=0; i<aFieldNames.length; i++)
                 		{
                 			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
                 			
+                			// compute output for fn.getPromptBoxInput
+                			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
                 			fn._registerUserInput(
                 					// fieldname
                 					$.trim(aFieldNames[i]),
@@ -3794,8 +3811,12 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                 					$.inArray($("#"+sortableId).find("li").eq(i).attr("id"), aOriginalOrder)
                 					);
                 		}
+                  		// compute response as well (the new way!)
+                		// (compute a re-ordered input array straight away, which is what the user mostly expects)
+                  		var aPromptResponse = fn.processPromptBoxOrder( fn.getPromptBoxOrder(), aFieldNames );
+                  		
                 		// call callback
-                  		fnFunction(); 
+                  		fnFunction(aPromptResponse); 
                 		$( this ).dialog( "close" );                		 
                 	},
                 	id: 'dialog_accept_button'
