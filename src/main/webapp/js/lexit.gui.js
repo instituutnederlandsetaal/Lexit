@@ -677,9 +677,10 @@ gui.makeTableEditable = function(sSomeTablename){
 		var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[aPos.column];
 		
 		// get the new value of the checkbox
-		// (must be contrary of current value, which is actully the value before the click)
+		// (must be contrary of current value, which is actually the value before the click)
 		var newValue = gui.getTrueCheckboxValue(sSomeTablename, nCurrentNode);
-		
+		// put the new value into the Datatable object too
+		mt.getDataTableObjectOf(sSomeTablename).cell(nCurrentNode).data(  translateBoolean(newValue) );
 		
 		// send the checked/unchecked value to the database		
 		
@@ -762,7 +763,6 @@ gui.makeTableEditable = function(sSomeTablename){
 								"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
 								function(){
 									gui.refreshTable(sSomeTablename);
-									//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 									}
 							);
 						}
@@ -908,6 +908,7 @@ gui.makeTableEditable = function(sSomeTablename){
 							 		gui.removeProcessingMsg(sSomeTablename);
 							 		if (gui.getDbResponse(xml))
 							 			{
+							 			// put the new value into the Datatable object 							 			
 							 			mt.getDataTableObjectOf(sSomeTablename).cell(nCurrentNode).data(value);
 							 			
 							 			// callcack function, if it is set in configuration
@@ -943,7 +944,6 @@ gui.makeTableEditable = function(sSomeTablename){
 												"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
 												function(){
 													gui.refreshTable(sSomeTablename);
-													//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 													}
 											);
 										}
@@ -1031,7 +1031,7 @@ gui.getDbResponse = function(xml){
 
 
 
-// get the value of a checkbox, according to its data type
+// Get the value of a checkbox in the DOM tree (not necessarily same as in database), according to its data type:
 // - if bit varying(1), then true=1 and false=0
 // - if boolean, then true=TRUE and false=FALSE
 gui.getTrueCheckboxValue = function(sSomeTablename, nSomeNode){

@@ -181,6 +181,94 @@ function shadeColor(color, shade) {
     return newColorStr;
 }
 
+// Change luminance
+//  lum=0.2 means 20% lighter
+//  lum=-0.5 means 50% darker
+//
+// see: https://www.sitepoint.com/javascript-generate-lighter-darker-color/
+function ColorLuminance(hex, lum) {
+
+	// validate hex string
+	hex = String(hex).replace(/[^0-9a-f]/gi, '');
+	if (hex.length < 6) {
+		hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+	}
+	lum = lum || 0;
+
+	// convert to decimal and change luminosity
+	var rgb = "#", c, i;
+	for (i = 0; i < 3; i++) {
+		c = parseInt(hex.substr(i*2,2), 16);
+		c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+		rgb += ("00"+c).substr(c.length);
+	}
+
+	return rgb;
+}
+
+// programmatically detect if a color is light or dark
+// returns: light / dark
+//
+// see: https://awik.io/determine-color-bright-dark-using-javascript/
+function lightOrDark(color) {
+
+    // Variables for red, green, blue values
+    var r, g, b, hsp;
+    
+    // Check the format of the color, HEX or RGB?
+    if (color.match(/^rgb/)) {
+
+        // If HEX --> store the red, green, blue values in separate variables
+        color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
+        
+        r = color[1];
+        g = color[2];
+        b = color[3];
+    } 
+    else {
+        
+        // If RGB --> Convert it to HEX: http://gist.github.com/983661
+        color = +("0x" + color.slice(1).replace( 
+        color.length < 5 && /./g, '$&$&'));
+
+        r = color >> 16;
+        g = color >> 8 & 255;
+        b = color & 255;
+    }
+    
+    // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+    hsp = Math.sqrt(
+    0.299 * (r * r) +
+    0.587 * (g * g) +
+    0.114 * (b * b)
+    );
+
+    // Using the HSP value, determine whether the color is light or dark
+    if (hsp>127.5) {
+
+        return 'light';
+    } 
+    else {
+
+        return 'dark';
+    }
+}
+
+
+// convert any string into a color
+// https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+function stringToColour(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
 
 // convert RGB color to HEX and back
 // see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
@@ -1037,6 +1125,17 @@ function getJqXHRInfo(jqXHR){
 	return "";		
 }
 
+
+
+//*******************************************************
+
+function translateBoolean(mSomeValue){
+	
+	if (mSomeValue==1 || mSomeValue=='1' || mSomeValue==true || mSomeValue=='t' || mSomeValue=='true')
+		return true;
+	if (mSomeValue==0 || mSomeValue=='0' || mSomeValue==false || mSomeValue=='f' || mSomeValue=='false')	
+		return false;
+}
 
 
 //*******************************************************

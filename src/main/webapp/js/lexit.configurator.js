@@ -22,6 +22,15 @@ var oTableSettingsList_example = {
 		 */
 		"group": "...",
 		
+		
+		/**
+		 * @description By default heeft de header van een tabel een licht grijze achtergrond. Met 'header_color'
+		 * kan echter een eigen kleur worden opgegeven. Wanneer er op het scherm allerlei tabellen onder elkaar staan,
+		 * maakt een eigen kleur een tabel sneller herkenbaar. Als men niet zelf een kleur wil kiezen, kan Lex'it
+		 * zelf een kleur kiezen: geef 'header_color' dan de waarde 'auto'. 
+		 */
+		"header_color": "...",
+		
 		/**
 		 * @description Als een tabel een lelijke 'technische' naam heeft, kan die in de interface toch
 		 * met een mooie naam worden weergegeven; geef deze naam op met deze setting.
@@ -551,6 +560,7 @@ conf.getTableName = function(oTableConfig){
 		return null;
 	return oTableConfig["table_name"];
 };
+
 
 // retrieve the list of configured columns of a given table
 // which are set as 'visible':false
@@ -1450,6 +1460,9 @@ conf.getTableSettings = function(sTablename){
 		{
 		if (sName == sTablename)
 			{
+			// add the table name as a key, 
+			// so we can retrieve the name of the table from its settings object!
+			oTableSettingsList[sName]["table_name"] = sName;			
 			return oTableSettingsList[sName];
 			}			
 		}
@@ -1466,6 +1479,33 @@ conf.getTableGroup = function(aTableSettings){
 		return "Default";
 	return aTableSettings["group"];
 	
+};
+
+
+// retrieve the background color
+conf.getHeaderColor = function(aTableSettings){
+	
+	var sTableName = conf.getTableName(aTableSettings);
+	
+	// special case: value is 'auto'
+	if (aTableSettings["header_color"] == 'auto' && sTableName != null)
+		{
+		// generate color out of table name string
+		var sHeaderColor = stringToColour( sTableName );
+		
+		// if color is dark, make it lighter
+		var ligherOn = (lightOrDark(sHeaderColor) == 'dark');
+		while (ligherOn)
+			{
+			sHeaderColor = ColorLuminance(sHeaderColor, 0.5);
+			ligherOn = (lightOrDark(sHeaderColor) == 'dark');
+			} 
+		
+		return sHeaderColor;
+		}
+	
+	// default
+	return aTableSettings["header_color"];
 };
 
 

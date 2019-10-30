@@ -494,6 +494,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	
 	// add the name of the table in its top div
+	// and set background color too
 	head.showNameOfTheTable(sSomeTableName);
 	
 	// add click event to row counter, to trigger exact count

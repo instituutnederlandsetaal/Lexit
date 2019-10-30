@@ -143,7 +143,14 @@ head.showNameOfTheTable = function(sSomeTablename){
 	// replace the standard table description by this 'nice_name'
 	var oTableSettings = conf.getTableSettings(sSomeTablename);
 	var sNiceName = conf.getNiceName(oTableSettings);
-	var sNameToShow = (sNiceName != null) ? sNiceName : sSomeTablename;	
+	var sNameToShow = (sNiceName != null) ? sNiceName : sSomeTablename;
+	
+	// if some header background color was declared, set it
+	var sHeaderColor = conf.getHeaderColor(oTableSettings);
+	if (sHeaderColor != null)
+		{
+		$("div#"+sSomeTablename+"_dynamic").find("div#"+sSomeTablename+"_wrapper").find("div.top").css("background-color", sHeaderColor);
+		}
 	
 	var tableName = $("<span></span>")
 		.text(sNameToShow+":")

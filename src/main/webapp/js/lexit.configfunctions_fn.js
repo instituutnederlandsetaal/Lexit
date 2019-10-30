@@ -1718,7 +1718,7 @@ fn.getDataFromCellNode = function(nCell){
 	
 	var sTable = fn.getTableName(nCell);
 	var oTable = mt.getDataTableObjectOf(sTable);
-	
+		
 	return oTable.cell(nCell).data();
 };
 
