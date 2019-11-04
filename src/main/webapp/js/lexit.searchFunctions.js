@@ -992,9 +992,6 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt voor meervoudige keuze)");
 	
 	var promptDiv = $("<div></div>")
-		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sQueryBuilderName)
 		.css("font-size", "12px")
@@ -1198,6 +1195,10 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        open: function( event, ui ){
+        	$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+        },
         close: function(event, ui){
         	
         	// remove 'selectableselected' event

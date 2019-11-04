@@ -338,6 +338,8 @@ kf.addKeyFunctions = function(){
 		
 		var bSomeDialogBoxIsOpen = 	$("div.ui-dialog").elementExists() ||
 									$(".ui-autocomplete-input").elementExists();
+		
+		console.log(bSomeDialogBoxIsOpen);
 				
 		
 		// register which key was pressed

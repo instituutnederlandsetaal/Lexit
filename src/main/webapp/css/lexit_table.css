@@ -278,6 +278,9 @@ tr.even td.highlight {
 	padding: 15px;
 	background-color: #F5F5F5;
 	border: 1px solid #CCCCCC;
+	/* added for Lex'it */
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
 }
 
 .bottom {
@@ -594,6 +597,20 @@ div.box {
 
 /* extras
  */
+ 
+ 
+ 
+/* https://stackoverflow.com/questions/3448813/jqueryui-how-to-make-a-shadow-around-a-dialog-box */
+.ui-dialog-shadow {
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.table_div {
+	border-radius: 15px;
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
 
 .blinking {text-decoration: blink;}
 

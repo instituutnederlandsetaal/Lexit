@@ -461,6 +461,45 @@ function getTheLowestPositive(arr){
 	return positiveArr[0];
 }
 
+function generateSeries(iStartValue, iEndValue, bAscending){
+	
+	// determine the max string length, because we want to generate values with the same length
+	// like '01', '02', .... '31', '32', etc.
+	//   or '001', '002' ... '145', '146', etc.
+	
+	var sStartValue = String(iStartValue);
+	var sEndValue = String(iEndValue);
+	var iMaxStringLength;
+	
+	if (sStartValue.length > sStartValue.length)
+		iMaxStringLength = sStartValue.length;
+	else
+		iMaxStringLength = sEndValue.length;
+	
+	// build build the series
+	var series = [];
+	
+	if (bAscending)
+		{
+		for (var i = iStartValue; i <= iEndValue; i++)
+			{
+			var sValue = right("0000000000"+String(i), iMaxStringLength);
+			series.push(sValue)
+			}
+		}
+	else
+		{
+		for (var i = iEndValue; i >= iStartValue; i--)
+			{
+			var sValue = right("0000000000"+String(i), iMaxStringLength);
+			series.push(sValue)
+			}
+		}
+	
+	
+	return series;	
+};
+
 
 //*******************************************************
 // ARRAY FUNCTIONS
@@ -1049,6 +1088,46 @@ function getIndexOfFollowingSpace(mainString, endIndex){
 	return mainString.length;
 }
 
+
+
+
+// *******************************************************
+// z-index computations
+// *******************************************************
+
+// https://stackoverflow.com/questions/1768150/how-to-add-a-function-to-jquery
+
+jQuery.fn.putInFront = function() {
+	
+	// get highest z-index on page
+	// but exclude some divs, which have their own z-index, and which must keep their z-index the highest (like tiptip_holder)
+	var iHighestZindex = Math.max.apply(null, $.map($('div:not(#tiptip_holder,#tiptip_content,#tiptip_arrow)'), function(e, n){
+        if($(e).css('position')=='absolute')
+             return parseInt($(e).css('z-index'))||1 ;
+        })
+	);
+	// see: https://www.sitepoint.com/jquery-find-highest-z-index-page/
+	
+	
+	var o = $(this[0]); // This is the selector element
+	o.css("z-index", iHighestZindex + 1 );
+}
+
+function getZindexOfTableInFrond(){
+	
+	// get highest z-index of all visible tables
+	var aTables = mt.getListOfLoadedTables();
+	var iHighestZindex = 0;
+	for (var i=0; i<aTables.length; i++)
+		{
+		var iCurrentZindex = $("#"+aTables[i]+"_dynamic").css("z-index");
+		iCurrentZindex = (iCurrentZindex == 'auto' ? 0 : iCurrentZindex); 
+		if (iCurrentZindex > iHighestZindex)
+			iHighestZindex = iCurrentZindex;		
+		}
+	
+	return iHighestZindex;
+}
 
 
 

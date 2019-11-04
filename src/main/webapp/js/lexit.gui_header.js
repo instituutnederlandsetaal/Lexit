@@ -25,7 +25,11 @@ head.setHeaderSensitivity = function(sSomeTableName){
 			var iRowToSetActive = 	fn.getRowNodeNumberOnScreen(nActiveRow);			
 			
 			kf.setActiveTable( sSomeTableName );
-			kf.setActiveRowNumber( iRowToSetActive );			
+			kf.setActiveRowNumber( iRowToSetActive );
+			
+			// put table in front
+			$("#"+sSomeTableName+"_dynamic").putInFront();
+			
 			}
 			
 		// BEWARE: we only select a row if none is selected yet.
@@ -56,6 +60,7 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				    			.css("height", $(this).height()) 
 				    			.css("width", $(this).width()) 
 				    			.addClass('draggableHelper')
+				    			.css("z-index", 9999999) // always in front
 				    			); 
 				    }, 
 				    // dragging is finished: put the table at the chosen place
@@ -877,9 +882,6 @@ head.putHelpButton = function(sSomeTablename){
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)
-				// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-				// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-				.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999)
 				.attr("title", "Hulp")
 				.css("font-size", "12px");
 			
@@ -1460,9 +1462,21 @@ head.putHelpButton = function(sSomeTablename){
 			helpDiv.append(helpText);			
 			$(document.body).append(helpDiv);
 			
-			$("#"+helpDivId).dialog({width: 800, height: 600});
+			$("#"+helpDivId).dialog({
+				open: function( event, ui ){
+					$(".ui-dialog").addClass("ui-dialog-shadow");
+		        	$( this ).closest(".ui-dialog").putInFront();
+		        },
+		        close: function(event, ui){
+		        	$( this ).remove();
+		        },
+				width: 800, 
+				height: 600
+				}
+			);
 			
 			$("#"+helpDivId).tabs();
+			
 		});
 	
 	$("#"+sSomeTablename+"_filter").append(

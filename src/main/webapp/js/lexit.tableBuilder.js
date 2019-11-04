@@ -65,6 +65,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		$("#dynamic").append(
 				$("<div></div>")
 				.attr("id", sSomeTableName+"_dynamic")
+				.css("z-index", 0)
 				);		
 		}
 	
@@ -646,7 +647,7 @@ tb.addExportButtons = function(sSomeTableName){
 
 //subroutine for export buttons
 
-// do a FULL export of the selection, and not only the part of the selection shown on screen (which is default behavious)
+// do a FULL export of the selection, and not only the part of the selection shown on screen (which is default behaviour)
 // https://stackoverflow.com/questions/32692618/how-to-export-all-rows-from-datatables-using-ajax
 
 tb.oldExportAction = function (self, e, dt, button, config) {

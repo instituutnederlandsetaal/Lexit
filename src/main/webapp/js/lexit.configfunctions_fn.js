@@ -114,7 +114,15 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFondWeight){
 	$("title").text(sProjectName + " - " + sBaseTitle);
 };
 
-
+/**
+ * Set background color 
+ * 
+ * @param {String} sColor - Color code (eg. #3970b3)
+ */
+fn.setBackgroundColor = function(sColor){
+	
+	$(document).find("body").css("background-color", sColor);
+}
 
 
 // *****************************************************************
@@ -3161,6 +3169,10 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	$( "#"+dialogDivId ).dialog({
 		modal: true,
 		width: "auto",
+		open: function(event, ui){
+			$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+		},
 		close: function(event, ui){
 			$( this ).remove();
 		},
@@ -3229,6 +3241,10 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 	$( "#"+dialogDivId ).dialog({
 		modal: true,
 		width: "auto",
+		open: function(event, ui){
+			$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+		},
 		close: function(event, ui){
 			$( "#"+dialogDivId ).remove();
 		},
@@ -3273,6 +3289,10 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 		$( "#"+dialogDivId ).dialog({
 			modal: true,
 			width: "auto",
+			open: function(event, ui){
+				$(".ui-dialog").addClass("ui-dialog-shadow");
+	        	$( this ).closest(".ui-dialog").putInFront();
+			},
 			close: function(event, ui){
 				$( this ).remove();
 			},
@@ -3336,10 +3356,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	var promptDivId = "dialog-form"+getUniqueNumber();
 	
-	var promptDiv = $("<div></div>")
-		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
+	var promptDiv = $("<div></div>") 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
 		.css("font-size", "12px")
@@ -3446,6 +3463,10 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         height: 300,
         width: "auto",
         modal: true,
+        open: function( event, ui ){
+        	$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+        },
         close: function(event, ui){
         	$( this ).remove(); 
         },
@@ -3512,6 +3533,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );	
+	
 };
 
 
@@ -3547,9 +3569,6 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	var sMessageP = $("<p></p>").html(sMessage);
 	
 	var promptDiv = $("<div></div>")
-		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
 		.css("font-size", "12px")
@@ -3617,6 +3636,10 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        open: function( event, ui ){
+        	$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+        },
         close: function(event, ui){
         	
         	$( this ).remove();            
@@ -3729,9 +3752,6 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	var sMessageP = $("<p></p>").html(sMessage);
 	
 	var promptDiv = $("<div></div>")
-		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", sTitle)
 		.css("font-size", "12px")
@@ -3788,6 +3808,10 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
         height: promptHeight,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
+        open: function( event, ui ){
+        	$(".ui-dialog").addClass("ui-dialog-shadow");
+        	$( this ).closest(".ui-dialog").putInFront();
+        },
         close: function(event, ui){
         	$( this ).remove();
         },

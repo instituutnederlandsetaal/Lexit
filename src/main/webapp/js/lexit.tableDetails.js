@@ -295,9 +295,6 @@ td.selectColumns = function(sSomeTablename){
 	var sortableId = "sortable"+getUniqueNumber();
 	
 	var promptDiv = $("<div></div>")
-		// Keep the dialog in front, as elements with class dataTables_length are also brought in front
-		// For some strange reason, the z-index needs to be pretty high, otherwise it doesn't work at all!
-		.css("z-index", ($("div.dataTables_length").eq(0).css("z-index"))+9999) 
 		.attr("id", promptDivId)
 		.attr("title", "Kolommenselectie en -ordening")
 		.css("font-size", "12px");
@@ -683,7 +680,10 @@ td.selectColumns = function(sSomeTablename){
         },
         open: function(event, ui){
         	// activate tipTip jquery plugin for nice cross-browser tooltips    
-            $("div.ui-dialog-buttonpane div.ui-dialog-buttonset button.ui-button").tipTip({defaultPosition: "top"});        	
+            $("div.ui-dialog-buttonpane div.ui-dialog-buttonset button.ui-button").tipTip({defaultPosition: "top"});
+            // style
+            $(".ui-dialog").addClass("ui-dialog-shadow");
+            $( this ).closest(".ui-dialog").putInFront();
         }
 	})
 	.keyup(function() {		 
