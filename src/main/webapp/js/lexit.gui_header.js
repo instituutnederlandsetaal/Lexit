@@ -1406,7 +1406,9 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>Page up/down</TD><TD>&nbsp;&nbsp;</TD><TD>Ga naar de vorige/volgende pagina.</TD>" +
 				"</TR>" +
 				"<TR>" +
-				"<TD>CTRL + pijl naar links/rechts</TD><TD>&nbsp;&nbsp;</TD><TD>Scroll naar links of naar rechts</TD>" +				
+				"<TD>CTRL + pijl naar links/rechts</TD><TD>&nbsp;&nbsp;</TD><TD>Scroll naar links of naar rechts.</TD>" +				
+				"</TR>" +
+				"<TD>CTRL + klik in zoekveld boven kolom</TD><TD>&nbsp;&nbsp;</TD><TD>Roep selectiehulp/query builder op.</TD>" +				
 				"</TR>" +
 				"<TR>" +
 				"<TD>ESC</TD><TD>&nbsp;&nbsp;</TD><TD>Afhankelijk van de context: selectie ongedaan maken, venster sluiten, enz.</TD>" +				

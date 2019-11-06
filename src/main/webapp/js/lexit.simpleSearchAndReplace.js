@@ -22,7 +22,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	.css("background-color", "#D8F781")
 	.attr("id", sSomeTablename+"_search_and_replace")
 	.css("display", "block")
-	.css("height", $("#"+sSomeTablename+"_wrapper").find("div.top").css("height"))
+	.css("height", $("#"+sSomeTablename+"_wrapper").find("div.top").css("height")) // make sure we keep same size as table header
 	.hide();
 	var form = $("<form></form>").attr("action", "");
 	
