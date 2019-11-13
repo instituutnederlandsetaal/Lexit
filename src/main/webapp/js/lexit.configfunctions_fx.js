@@ -814,6 +814,19 @@ fx.getDataFromCellInRow = function(oRow, sColumnName){
 	
 };
 
+/**
+ * Get the content of a row, given a row
+ * 
+ * @param {API-object-instance} oRow - An API instance of a row
+ * @returns {Array} An associative array of fields names and their values
+ */
+fx.getDataFromRow = function(oRow){
+	
+	fx._checkApiInstance("fx.getDataFromRow", oRow);
+	
+	return oRow.data();
+};
+
 
 /**
  * Get selected text within a cell,
@@ -875,13 +888,14 @@ fx.getWordClickedUponInCell = function(oMixed, sColumnName){
  * @param {API-object-instance} oRow - An API instance of a row
  * @param {String[]} aColumnsToUpdate - An array of names of the columns to update
  * @param {Function} fnCallback - A function to call after the record has been loaded
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fx.callRecord = function(oRow, aColumnsToUpdate, fnCallback){
+fx.callRecord = function(oRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	
 	fx._checkApiInstance("fx.callRecord", oRow);
 	
-	fn.callRecord(oRow.node(), aColumnsToUpdate, fnCallback);
+	fn.callRecord(oRow.node(), aColumnsToUpdate, fnCallback, fnErrorHandler);
 }
 
 
@@ -920,12 +934,13 @@ fx.putDataIntoCell = function(oRow, sColumnName, sContent){
  * @param {API-object-instance} oMixed - An API instance of a cell/row 
  * @param {Array} aColumnNamesAndValues - An associative array of fields and values to update in the row
  * @param {Function} fnCallback - Function called after the update
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCallback){
+fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
 	
 	fx._checkApiInstance("fx.updateDatabaseGivenACellOrRow", oMixed);
 	
-	fn.updateDatabaseGivenANode(oMixed.node(), aColumnNamesAndValues, fnCallback);
+	fn.updateDatabaseGivenANode(oMixed.node(), aColumnNamesAndValues, fnCallback, fnErrorHandler);
 };
 
 
@@ -940,12 +955,13 @@ fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCal
  * 
  * @param {API-object-instance} oRow -  An API instance of a row 
  * @param {Function} fnCallback - Function called after the operation
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fx.removeFromDatabaseGivenARow = function(oRow, fnCallback){
+fx.removeFromDatabaseGivenARow = function(oRow, fnCallback, fnErrorHandler){
 	
 	fx._checkApiInstance("fx.removeFromDatabaseGivenARow", oRow);
 	
-	fn.removeFromDatabaseGivenANode(oRow.node(), fnCallback);	
+	fn.removeFromDatabaseGivenANode(oRow.node(), fnCallback, fnErrorHandler);	
 };
 
 

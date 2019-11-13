@@ -999,7 +999,6 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 
 
 
-
 // get the function for conversion of the query in the search form  
 // (that is a function that converts the search query for a given column
 //  into some other form/formaat, if needed)

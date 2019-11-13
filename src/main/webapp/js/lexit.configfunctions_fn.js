@@ -1783,24 +1783,45 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
  * @param {Node} sSomeTable - A table name or object
  * @param {String} sColumnName - Name of a column 
  * @returns {String[]} Content of the cells of the column
+ * 
+ * @see fn.getDataFromRowNode
  */
 fn.getDataFromColumn = function(sSomeTable, sColumnName){
 	
-	var sTableName = (typeof sSomeTable == 'object' ? fn.getTableName(sSomeTable) : sSomeTable);
+	var iVisibleColumnNumber = fn.getVisibleColumnNumberOf(sSomeTable, sColumnName);
 	
-	// get all rows
-    var aAllRows = fx.getAllRows(sTableName);
-    
-    // collect all needed token_indexes_id's of all rows into an array
-    var aAllRowData = new Array();
-    aAllRows.every(function(){ 
-    	
-        var sData = fn.getDataFromCellInRowNode(this.node(), sColumnName);
-        aAllRowData.push(sData);
-    });
-    
-    return aAllRowData;
+	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sTableName) : sSomeTable );
+	
+	return oTable.column( iVisibleColumnNumber ).data();	
 };
+
+/**
+ * Get the content of a row,
+ * given a table name or datatable object, and a row node
+ * 
+ * @param {Node} nRow - A row node
+ * @returns {Array} An associative array of fields names and their values
+ * 
+ * @see fn.getDataFromColumn
+ */
+fn.getDataFromRowNode = function(nRow){
+
+	fn._checkApiInstance("fn.getDataFromRowNode", nRow);
+	fn._checkjQueryObject("fn.getDataFromRowNode", nRow);
+
+	if ( !fn.isRowNode(nRow) )
+		{
+		fn.message("Fout", 
+				"Verkeerde aanroep van fn.getDataFromRowNode("+fn.getTableName(nRow)+"). " +
+				"nRow bevat geen row node.");
+		return;
+		}
+	
+	var sTable = fn.getTableName(nRow);
+	var oTable = mt.getDataTableObjectOf(sTable);
+		
+	return oTable.row(nRow).data();
+}
 
 
 
