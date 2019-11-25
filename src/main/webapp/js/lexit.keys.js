@@ -487,16 +487,18 @@ kf.addKeyFunctions = function(){
 		if (kf.isPressed("uparrow") || kf.isPressed("downarrow"))
 			{			
 			var sActiveTable = kf.getActiveTable();	
-						
+			var iNumberOfRows = fn.getNumberOfVisibleRows(sActiveTable);
 			
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
 			// 3. don't interfere with textarea of jeditable
 			// 4. don't interfere with dialog box
+			// 5. there must be some rows in the table
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
-					&& !bSomeDialogBoxIsOpen					
+					&& !bSomeDialogBoxIsOpen			
+					&& iNumberOfRows>0
 					)
 				{
 				

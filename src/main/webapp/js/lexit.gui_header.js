@@ -18,19 +18,17 @@ head.setHeaderSensitivity = function(sSomeTableName){
 		// select a row in the table having focus
 		// t.i. set the currently selected row active, and
 		// if was none, select the very first visible row
-		var nActiveRow = 		fn.getActiveRowNode(sSomeTableName);
+		var nActiveRow = 		fn.getActiveRowNode(sSomeTableName);		
+					
+		var iRowToSetActive = ( nActiveRow != null ? fn.getRowNodeNumberOnScreen(nActiveRow) : 0 );			
 		
-		if ( nActiveRow != null)
-			{			
-			var iRowToSetActive = 	fn.getRowNodeNumberOnScreen(nActiveRow);			
+		kf.setActiveTable( sSomeTableName );
+		kf.setActiveRowNumber( iRowToSetActive );
+		
+		// put table in front
+		$("#"+sSomeTableName+"_dynamic").putInFront();
+		
 			
-			kf.setActiveTable( sSomeTableName );
-			kf.setActiveRowNumber( iRowToSetActive );
-			
-			// put table in front
-			$("#"+sSomeTableName+"_dynamic").putInFront();
-			
-			}
 			
 		// BEWARE: we only select a row if none is selected yet.
 		// We do so to prevent a given rows selection from getting corrupted (as some new row 
