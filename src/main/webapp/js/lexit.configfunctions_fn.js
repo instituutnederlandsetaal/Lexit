@@ -3171,6 +3171,39 @@ fn.closeDialog = function(){
 };
 
 
+/**
+ * Make sure the buttons of a dialog 
+ * can be triggered by the Enter key as well
+ * @param dialog div ID
+ */
+fn._activeEnterForThisDialog = function(dialogDivId){
+	
+	// time is a way of preventing enter to be triggered by
+	// another key event with enter occuring just before 
+	// (like striking enter for validating something: if a dialog is to be shown right after that,
+	// it should wait for enter to be pressed again)
+	setTimeout(function(){
+		
+		$(document.body).keydown(function(e) {
+			
+			if (e.keyCode === $.ui.keyCode.ENTER && 
+					$("#"+dialogDivId).elementExists())
+				{		
+				// two possibilities: 
+				// click the button that has focus, 
+				// but it none has focus, click the default accept button
+				var buttonToClick = $( ".ui-button:focus");
+				
+				if (buttonToClick == null || buttonToClick.length == 0)
+					buttonToClick = $( "#dialog_accept_button");
+				
+				buttonToClick.click();
+				return false;
+				}
+		});
+	}, 100);
+}
+
 
 /**
  * Show a message. This function is an equivalent of js native 'alert'
@@ -3197,23 +3230,24 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		close: function(event, ui){
 			$( this ).remove();
 		},
-		buttons: {			
-			Ok: function() {
-				$( this ).dialog( "close" );
-				
-				if (fnFunction != null)
-					{
-					fnFunction();
-					}
-			}
-		}
+		buttons: [
+		          {			
+		        	  text: "OK",
+		        	  click: function() {
+						$( this ).dialog( "close" );
+						
+						if (fnFunction != null)
+							{
+							fnFunction();
+							}
+		        	  },
+		        	  id: 'dialog_accept_button'
+		          }
+		]
 	});
 	
-	// remove focus from buttons, 
-	// to make sure OK won't be triggered 
-	// when Enter was pressed just before 
-	// in another context (like validating input in cell)
-	$('.ui-dialog :button').blur();
+	
+	fn._activeEnterForThisDialog(dialogDivId);
 	
 };
 
@@ -3317,24 +3351,27 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 			close: function(event, ui){
 				$( this ).remove();
 			},
-			buttons: {
-				Ja: function() {
-					$( this ).dialog( "close" );					
-					fnFunction();
-					},
-				Nee: function() {
-					$( this ).dialog( "close" );
-					if (fnCancelFunction!=null)
-						fnCancelFunction();
-					}
-				}
+			buttons: [
+			          {
+			        	 text: "Ja",
+			        	 click: function() {
+								$( this ).dialog( "close" );					
+								fnFunction();
+						},
+					    id: 'dialog_accept_button'
+			          },
+			          {
+			        	  text: "Nee",
+			        	  click: function() {
+								$( this ).dialog( "close" );
+								if (fnCancelFunction!=null)
+									fnCancelFunction();
+								}
+			          }
+			]		
 			});
 		
-		// remove focus from buttons, 
-		// to make sure OK won't be triggered 
-		// when Enter was pressed just before 
-		// in another context (like validating input in cell)
-		$('.ui-dialog :button').blur();
+			fn._activeEnterForThisDialog(dialogDivId);
 		}
 	
 };
@@ -3703,15 +3740,11 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
                       }
                   }
         ]
-	}).keyup(function() {		 
-		if (kf.isPressed("enter"))
-		{		
-		$( "#dialog_accept_button" ).click();		
-		return false;
-		}
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );
+	
+	fn._activeEnterForThisDialog(promptDivId);
 	
 	$( function() {		
 		
@@ -3876,15 +3909,11 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                       }
                   }
         ]
-	}).keyup(function() {		 
-		if (kf.isPressed("enter"))
-		{		
-		$( "#dialog_accept_button" ).click();
-		return false;
-		}
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );
+	
+	fn._activeEnterForThisDialog(promptDivId);
 	
 	$( "#"+sortableId ).sortable();
     $( "#"+sortableId ).disableSelection();
