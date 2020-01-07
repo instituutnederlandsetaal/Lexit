@@ -3633,6 +3633,52 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		.append(sMessageP);
 	
 	
+	
+	// adapt height of the prompt to the number of values 
+	// and if there are lots of options, add a filter box
+	
+	var promptHeight = (200 + 30 * aAllOptions.length);
+	if ( promptHeight > $(window).height()) 
+		{
+		promptHeight = $(window).height();
+
+		var sFilter = $("<p></p>")
+			.append(
+				$("<span></span>")
+					.text("Filter: ")
+			)
+			.append(
+				$("<input></input>")
+					.attr("id", promptDivId+"_valuefilter")
+					.bind("input propertychange", function (evt) {
+						// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
+						
+					    // If it's the propertychange event, make sure it's the value that changed.
+					    if (window.event && event.type == "propertychange" && event.propertyName != "value")
+					        return;
+					
+					    // Clear any previously set timer before setting a fresh one
+					    window.clearTimeout($(this).data("timeout"));
+					    $(this).data("timeout", setTimeout(function () {
+	
+					    	// read new unique values given filter
+					    	var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
+					    	var aAllOptionsFiltered = aAllOptions.filter(function(value ){
+					    		return value.match(sFilter);
+					    		});
+					    	fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
+							
+					    }, 1000));
+					})
+			);
+		
+		promptDiv.append(sFilter);
+		}
+
+	
+	
+	// ---
+	
 	// user instructions
 	if (mSelectionMode == false)
 		{
@@ -3651,39 +3697,14 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	// build the elements of the list to choose from
 	
-	for (var i=0; i<aAllOptions.length; i++)
-		{
-		var sOption = aAllOptions[i];
-		
-		// one element 		
-		var liElement = $("<li></li>")
-			.addClass( "ui-widget-content" )
-			.css("margin", "3px")
-			.css("padding", "0.4em")
-			.css("font-size", "12px")
-			.css("height", "18px");	
-		
-		// if some item was pre-selected, assign it the selected class
-		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
-			{
-			liElement.addClass("ui-selected");
-			}
-		
-		var spanElement = $("<span></span>")
-			.text( $.trim(aAllOptions[i]) );
-		liElement.append(spanElement);
-		selectableUl.append(liElement);
-		}
+	fn._promptSelect_AppendOptions(selectableUl, aAllOptions, aAlreadyChosen);
+
 	
 	// append the whole thing to the dialog box
 	
 	promptDiv.append(selectableUl);
 	$(document.body).append(promptDiv);
-	
-	
-	// adapt height of the prompt to the number of values 
-	var promptHeight = (200 + 30 * aAllOptions.length);
-	
+		
 	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
@@ -3773,6 +3794,35 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	});
 	
 };
+
+fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyChosen){
+	
+	selectableUl.empty();
+	
+	for (var i=0; i<aAllOptions.length; i++)
+	{
+	var sOption = aAllOptions[i];
+	
+	// one element 		
+	var liElement = $("<li></li>")
+		.addClass( "ui-widget-content" )
+		.css("margin", "3px")
+		.css("padding", "0.4em")
+		.css("font-size", "12px")
+		.css("height", "18px");	
+	
+	// if some item was pre-selected, assign it the selected class
+	if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
+		{
+		liElement.addClass("ui-selected");
+		}
+	
+	var spanElement = $("<span></span>")
+		.text( $.trim(aAllOptions[i]) );
+	liElement.append(spanElement);
+	selectableUl.append(liElement);
+	}
+}
 
 
 /**

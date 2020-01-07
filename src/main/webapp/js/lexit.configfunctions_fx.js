@@ -312,7 +312,7 @@ fx.selectAllRows = function(sSomeTable){
 
 
 /**
- * Manually select a row, give its row number on screen
+ * Manually select a row, given its row number on screen
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
  * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
