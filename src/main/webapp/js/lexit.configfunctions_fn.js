@@ -3634,10 +3634,12 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	
 	
-	// adapt height of the prompt to the number of values 
-	// and if there are lots of options, add a filter box
+	// adapt height of the prompt to the number of options, 
+	// and if there are more options than the screen can show at once, 
+	// add a filter box on top 
 	
 	var promptHeight = (200 + 30 * aAllOptions.length);
+	
 	if ( promptHeight > $(window).height()) 
 		{
 		promptHeight = $(window).height();
@@ -3672,12 +3674,10 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 					})
 			);
 		
+		// append filter box
 		promptDiv.append(sFilter);
 		}
 
-	
-	
-	// ---
 	
 	// user instructions
 	if (mSelectionMode == false)
@@ -3795,6 +3795,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 };
 
+// subroutine for building the options to choose from in fn.promptSelect
 fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyChosen){
 	
 	selectableUl.empty();
