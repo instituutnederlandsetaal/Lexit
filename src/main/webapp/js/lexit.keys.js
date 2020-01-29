@@ -77,6 +77,11 @@ kf.registerPressedKey = function(event){
 		kf._setReleasedKey( kf._getPressedKey() );
 	kf._setPressedKey( kf._translateCode(iCode) );
 	
+	if (kf._getPressedKey() == 'shift' || kf._getPressedKey() == 'ctrl')
+		fn.setBackgroundColor("lightgrey");
+	else
+		fn.setBackgroundColor("white");
+	
 };
 
 //register the name of the pressed key, given its code
@@ -86,6 +91,8 @@ kf.registerReleasedKey = function(){
 		kf._setReleasedKey( kf._getPressedKey() );
 	kf._setPressedKey("released");	
 	
+	if ((kf._getReleasedKey() == 'shift' || kf._getReleasedKey() == 'ctrl') && ((kf._getPressedKey() != 'shift' && kf._getPressedKey() != 'ctrl')))
+		fn.setBackgroundColor("white");
 };
 
 

@@ -656,10 +656,13 @@ conf.getBackgroundColor = function(aColumnConfig){
 	
 	// if only one color was given, generate the lighter shade automatically for the even rows
 	// (this is only possible when the color is an hex color code)
+	
+	// input is string
 	if (typeof aColumnColorConfig=='string' && $.startsWith(aColumnColorConfig, "#"))
 		{
 		return [shadeColor(aColumnColorConfig, -10), aColumnColorConfig];
 		}
+	// unput is array of string
 	if (aColumnColorConfig.length==1 && $.startsWith(aColumnColorConfig[0], "#"))
 		{
 		return [shadeColor(aColumnColorConfig[0], -10), aColumnColorConfig[0]];

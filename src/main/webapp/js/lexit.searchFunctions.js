@@ -986,7 +986,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	// build dialog 
 	
-	var promptDivId = "dialog-form"+getUniqueNumber();
+	var promptDivId = "dialog-message"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!	
 	
 	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt voor meervoudige keuze)");

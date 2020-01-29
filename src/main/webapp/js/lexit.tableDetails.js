@@ -291,7 +291,7 @@ td.selectColumns = function(sSomeTablename){
 	// retrieve table client configuration
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
 	
-	var promptDivId = "dialog-form"+getUniqueNumber();
+	var promptDivId = "dialog-message"+getUniqueNumber();
 	var sortableId = "sortable"+getUniqueNumber();
 	
 	var promptDiv = $("<div></div>")

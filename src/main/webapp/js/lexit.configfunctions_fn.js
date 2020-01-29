@@ -3165,9 +3165,9 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 fn.closeDialog = function(){
 	
 	// find the dialogs, with regex catching all dialog ids
-	// (see fn.message function about the way ids are defined)
+	// (see fn.message function etc about the way ids are defined)
 	
-	$("div[id^='dialog-message']").dialog( "close" ).remove();
+	$("div[id^='dialog-message']").dialog( "close" );
 };
 
 
@@ -3230,6 +3230,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		close: function(event, ui){
 			$( this ).remove();
 		},
+		position: fn._computeDialogPosition(),
 		buttons: [
 		          {			
 		        	  text: "OK",
@@ -3303,6 +3304,7 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 		close: function(event, ui){
 			$( "#"+dialogDivId ).remove();
 		},
+		position: fn._computeDialogPosition(),
 		buttons: oButtons
 	});
 	
@@ -3351,6 +3353,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 			close: function(event, ui){
 				$( this ).remove();
 			},
+			position: fn._computeDialogPosition(),
 			buttons: [
 			          {
 			        	 text: "Ja",
@@ -3376,6 +3379,25 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
 };
 
+// compute automatically a convenient position for a dialog, given the current active row in a table
+// in such a way that the dialog does NOT hide the row
+fn._computeDialogPosition = function(){
+	
+	var sTable = kf.getActiveTable();
+	if (sTable == null)	return {};
+	
+	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");
+	if (nRow == null) n = fn.getFirstSelectedRowNodeFrom(sTable);
+	
+	var iRowPosition = $(nRow).offset().top; 	
+	var iMiddleOfScreen = $(window).height() / 2;
+	
+	return {
+    	my: iRowPosition < iMiddleOfScreen ? 'center top' : 'center bottom',
+    	at: iRowPosition < iMiddleOfScreen ? 'center bottom' : 'center top',
+    	of: nRow
+    }
+};
 
 /**
  * Generate a prompt pop-up, requesting some input from the user
@@ -3412,7 +3434,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	if (bTextarea == null) 
 		bTextarea = false;
 	
-	var promptDivId = "dialog-form"+getUniqueNumber();
+	var promptDivId = "dialog-message"+getUniqueNumber();
 	
 	var promptDiv = $("<div></div>") 
 		.attr("id", promptDivId)
@@ -3526,8 +3548,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         	$( this ).closest(".ui-dialog").putInFront();
         },
         close: function(event, ui){
-        	$( this ).remove(); 
+        	$( this ).remove();        	
         },
+        position: fn._computeDialogPosition(),
         buttons: [
                    {
                 	 text: "OK",
@@ -3559,10 +3582,11 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                 			aPromptResponse[thisFieldName] = thisValue;
                 			
                 		}
+                 		$( this ).dialog( "close" );  
                 		// call callback
                  		if (fnFunction != null)
                  			fnFunction(aPromptResponse); 
-                		$( this ).dialog( "close" );                		
+                		              		
                 	},
                 	id: 'dialog_accept_button'
                    },
@@ -3570,10 +3594,11 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
                    {
                 	text: "Annuleren",
                 	click: function() {
+                		$( this ).dialog( "close" );
                 		// call callback upon Cancel, if available
                 		if (fnCancelFunction != null)
                 			fnCancelFunction(); 
-                        $( this ).dialog( "close" );
+                        
                     }
                    }
         ]
@@ -3612,7 +3637,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  */
 fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, mSelectionMode){
 	
-	var promptDivId = "dialog-form"+getUniqueNumber();
+	var promptDivId = "dialog-message"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!
 	
 	mSelectionMode = (typeof mSelectionMode == 'undefined' ? false : mSelectionMode);		
@@ -3725,6 +3750,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
             // remove 'selectableselected' event
             $( "#"+selectableId ).off();
         },
+        position: fn._computeDialogPosition(),
         buttons: [
                   {
                 	  text: "OK",
@@ -3737,27 +3763,27 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 							// sometimes doubles are added somehow, so prevent this!
 							if (aNewChosenOptions.indexOf( $(this).text() )<0)
 								  aNewChosenOptions.push( $(this).text());
-						});                		  
+						});
+						
+						// call close function
+                		$( this ).dialog( "close" );
                   		
                 		// call callback
                   		fnFunction(aNewChosenOptions);
                   		
-                  		// call close function
-                		$( this ).dialog( "close" );
-                		
                 	},
                 	id: 'dialog_accept_button'
                   },
                   {
                 	  text: "Annuleren",
                 	  click: function() {
+                		  // call close function
+                          $( this ).dialog( "close" );
+                          
                 		  // call callback upon Cancel, if available
                   		  if (fnCancelFunction != null)
                   			  fnCancelFunction();
                   		  
-                  		  // call close function
-                          $( this ).dialog( "close" );
-                          
                       }
                   }
         ]
@@ -3788,7 +3814,6 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 					return false;
 					}
 				
-				
 			} );			
 		}		
 	});
@@ -3804,26 +3829,37 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 	{
 	var sOption = aAllOptions[i];
 	
-	// one element 		
-	var liElement = $("<li></li>")
-		.addClass( "ui-widget-content" )
-		.css("margin", "3px")
-		.css("padding", "0.4em")
-		.css("font-size", "12px")
-		.css("height", "18px");	
-	
-	// if some item was pre-selected, assign it the selected class
-	if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
+	// null represent an empty space, which can be used to put room between groups of options not belonging together
+	if (sOption == null)
 		{
-		liElement.addClass("ui-selected");
+		selectableUl.append($("<br/>"));
 		}
 	
-	var spanElement = $("<span></span>")
-		.text( $.trim(aAllOptions[i]) );
-	liElement.append(spanElement);
-	selectableUl.append(liElement);
+	// normal case: build option
+	else
+		{
+		// one element 		
+		var liElement = $("<li></li>")
+			.addClass( "ui-widget-content" )
+			.css("margin", "3px")
+			.css("padding", "0.4em")
+			.css("font-size", "12px")
+			.css("height", "18px");	
+		
+		// if some item was pre-selected, assign it the selected class
+		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
+			{
+			liElement.addClass("ui-selected");
+			}
+		
+		var spanElement = $("<span></span>").text( $.trim(sOption) );
+		liElement.append(spanElement);
+		selectableUl.append(liElement);
+		}	
 	}
 }
+
+
 
 
 /**
@@ -3844,7 +3880,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	fn._clearUserInput();
 	
-	var promptDivId = "dialog-form"+getUniqueNumber();
+	var promptDivId = "dialog-message"+getUniqueNumber();
 	var sortableId = "sortable"+getUniqueNumber();
 	
 	// deal with title/message input
@@ -3920,6 +3956,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
         close: function(event, ui){
         	$( this ).remove();
         },
+        position: fn._computeDialogPosition(),
         buttons: [
                   {
                 	  text: "OK",
@@ -3944,19 +3981,21 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
                 		// (compute a re-ordered input array straight away, which is what the user mostly expects)
                   		var aPromptResponse = fn.processPromptBoxOrder( fn.getPromptBoxOrder(), aFieldNames );
                   		
+                  		$( this ).dialog( "close" );     
                 		// call callback
                   		fnFunction(aPromptResponse); 
-                		$( this ).dialog( "close" );                		 
+                		           		 
                 	},
                 	id: 'dialog_accept_button'
                   },
                   {
                 	  text: "Annuleren",
                 	  click: function() {
+                		  $( this ).dialog( "close" );
                 		  // call callback upon Cancel, if available
                   		  if (fnCancelFunction != null)
                   			  fnCancelFunction(); 
-                          $( this ).dialog( "close" );
+                          
                       }
                   }
         ]
