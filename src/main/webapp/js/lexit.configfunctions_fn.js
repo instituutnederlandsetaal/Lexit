@@ -125,6 +125,58 @@ fn.setBackgroundColor = function(sColor){
 }
 
 
+/**
+ * Load a library with extra functions for a given project
+ * 
+ * @param {String} [sPath=null] - Path to the library (see extra info below)
+ * @param {Function} [fnCallback=null] - Function to be called after loading the library
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * If no path to the library is specified, Lex'it assumes that
+ * the library file is called the same as the project file: 
+ * 
+ * t.i. if the config file of a project is called 'myproject.config.js',
+ * Lex'it assumes the library file is called 'myproject.library.js'  
+ * and Lex'it will look for it as the very same location as the 
+ * project file.
+ */
+fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
+	
+	// Default behaviour, when no pash was specified
+	
+	// in test mode, we load the file locally, 
+	// but on the server we load the file from the 'lexit2_config' folder 
+	var sPrefix = (paramsHash.get("test")=='true') ? "" : "../lexit2_config/";
+	var sPathToLibrary = sPrefix + paramsHash.get("db") + ".library.js";
+	
+	// BUT if some path was specified, we'll follow that instead
+	if (sPath != null)
+		{
+		sPathToLibrary = sPath;
+		}
+	
+	$.getScript(sPathToLibrary)
+	.done(function(){
+		
+		if (fnCallback != null)
+			fnCallback();		
+	})
+	.fail(function(jqXHR, textStatus, errorThrown){
+		
+		if (fnErrorHandler!=null)
+			fnErrorHandler({
+				"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+				"lexit_function": "fn.getLibrary"
+				});
+		else
+			fn.message("Fout",
+			"Fout bij aanroep van fn.getLibrary(): " +				
+			textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+	});
+	
+}
+
+
 // *****************************************************************
 // *     GET GENERAL TABLE INFORMATION                             *
 // *****************************************************************
@@ -3844,7 +3896,7 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 			.css("margin", "3px")
 			.css("padding", "0.4em")
 			.css("font-size", "12px")
-			.css("height", "18px");	
+			.css("min-height", "18px");	
 		
 		// if some item was pre-selected, assign it the selected class
 		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
@@ -3919,7 +3971,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 			.css("padding", "0.4em")
 			.css("padding-left", "1.5em")
 			.css("font-size", "12px")
-			.css("height", "18px");		
+			.css("min-height", "18px");		
 		var spanElement = $("<span></span>")
 			.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )	
 			.css("position", "absolute")
