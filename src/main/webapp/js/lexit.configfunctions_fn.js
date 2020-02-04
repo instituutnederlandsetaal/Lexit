@@ -547,6 +547,7 @@ fn.restoreTableState = function(sTableName){
 	
 	// Read the saved table state
 	var oTableState = mt.getTableState(sTableName);
+	
 	aFilters = oTableState["columns"];
 	
 	// first empty the filters
@@ -580,8 +581,12 @@ fn.restoreTableState = function(sTableName){
 					// remove callback, as we don't want to end up in an infinite loop!
 					oTable.addDrawCallback(sTableName, function(){});
 					
+					console.log("go to "+iPageNumber);
+					
 					// go to the saved page
 					oTable.displayRow( iPageNumber ).draw(false);
+					
+					$(this).dequeue();
 				});
 		
 	});
