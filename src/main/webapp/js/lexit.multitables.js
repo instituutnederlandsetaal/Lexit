@@ -33,8 +33,11 @@ var hbTableCallbackWasCalledAlready = new Hashtable();
 // hash mapping table name to boolean saying wether the table was called already
 var hbTableWasCalledAlready = new Hashtable(); 
 
-//hash mapping table name to boolean saying wether the table must be optimal or not
+// hash mapping table name to boolean saying wether the table must be optimal or not
 var hbTableMustBeOptimal = new Hashtable(); 
+
+// hash mapping table name to an array of filter values etc
+var hTableState = new Hashtable(); 
 
 // tables part
 
@@ -166,6 +169,17 @@ mt.getTableMustBeOptimal = function(sTableName){
 	return bOptimal == null ? false : bOptimal;
 };
 
+
+// table state
+
+mt.setTableState = function(sTableName, oState){
+	
+	hTableState.put(sTableName, oState);
+};
+mt.getTableState = function(sTableName){
+	
+	return hTableState.get(sTableName);
+}
 
 
 // get number of tables loaded

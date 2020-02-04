@@ -21,7 +21,7 @@ un.cleanUndoStack = function(sSomeTableName){
 	
 	var undoStack    = new Array(); 
 	var tooltipStack = new Array();
-	var sEmptyTooltip = "Herstelfunctie: Er is niets te herstellen.";
+	var sEmptyTooltip = "Herstelfunctie: Er is niets te herstellen.<BR>[+ Shift: herstel vorige selectie]";
 	tooltipStack.push(sEmptyTooltip);
 	
 	mt.putUndoStacks(sSomeTableName, undoStack);

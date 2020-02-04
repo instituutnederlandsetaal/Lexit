@@ -631,13 +631,20 @@ head.putUndoButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 			
-			fn.confirm("Let op", "Weet u zeker dat u de laatste bewerking ongedaan wilt maken?", function(){
-				
-				// clear highlighted rows
-				row.clearRowSelection(sSomeTablename);
-				// undo last change
-				un.undoEvent(sSomeTablename);
-			});			
+			if (kf._getPressedKey() == 'shift')
+				{
+				fn.restoreTableState(sSomeTablename);
+				}
+			else
+				{
+				fn.confirm("Let op", "Weet u zeker dat u de laatste bewerking ongedaan wilt maken?", function(){
+					
+					// clear highlighted rows
+					row.clearRowSelection(sSomeTablename);
+					// undo last change
+					un.undoEvent(sSomeTablename);
+				});
+				}			
 			
 		})
 		// button text and counter

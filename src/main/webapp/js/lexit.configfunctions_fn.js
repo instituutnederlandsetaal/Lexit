@@ -490,6 +490,108 @@ fn.getCurrentDisplayStart = function(sSomeTablename){
 };
 
 
+
+
+
+/**
+ * Save current table state
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ */
+fn.saveTableState = function(sTableName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	var oTable = mt.getDataTableObjectOf(sTableName);
+	
+	var oTableState = {};
+	
+	// Column filters 
+	var aFilters = {};
+	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ )
+		{
+		var sColumnName = 		mt.getListOfColumnsOf(sTableName)[i];
+		var sValue =			fn.getValueOfFilterBox(sTableName, sColumnName);
+		if (sValue != null && sValue != '')
+			aFilters[sColumnName] = sValue;
+		}
+	
+	// Sorting
+	var aSorting = {};
+	var aSortColumns = fn.getSortingColumns(sTableName);
+	var aSortDirections = fn.getSortingDirections(sTableName);
+	for (var i=0; i<aSortColumns.length; i++)
+		{
+		aSorting[ aSortColumns[i] ] = aSortDirections[i];
+		}
+	
+	// Save the table state
+	
+	oTableState["columns"] = aFilters;
+	oTableState["sorting"] = aSorting;	
+	oTableState["start"] = oTable.page.info().start;
+	
+	mt.setTableState(sTableName, oTableState);
+};
+
+/**
+ * Restore the state of some table
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ */
+fn.restoreTableState = function(sTableName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	var oTable = mt.getDataTableObjectOf(sTableName);
+	
+	// Read the saved table state
+	var oTableState = mt.getTableState(sTableName);
+	aFilters = oTableState["columns"];
+	
+	// first empty the filters
+	oTable.resetSearchFilters();
+	
+	// sorting 
+	fn.setSorting(sTableName, oTableState["sorting"]);
+	
+	// Restore the column filters
+	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ )
+		{
+		var sColumnName = 		mt.getListOfColumnsOf(sTableName)[i];
+		
+		if (typeof aFilters[sColumnName] != 'undefined' && aFilters[sColumnName] != '')
+			{
+			// restore per column
+			oTable.columns(i).search( aFilters[sColumnName] );
+			
+			// put values into filter boxes
+			fn.putDataIntoFilterBox(sTableName, sColumnName, aFilters[sColumnName]);
+			}
+		}	
+	
+	var iPageNumber = parseInt(oTableState["start"]);
+	
+	// add a callback which will lead to the saved page number
+	oTable.addDrawCallback(sTableName, function(){
+		
+		$(document.body).delay(500).queue(
+				function(){
+					// remove callback, as we don't want to end up in an infinite loop!
+					oTable.addDrawCallback(sTableName, function(){});
+					
+					// go to the saved page
+					oTable.displayRow( iPageNumber ).draw(false);
+				});
+		
+	});
+	
+	// restore the table state now!
+	oTable.draw();
+
+};
+
+
 // *************************************************
 // *  READ A TABLE FROM THE DATABASE               *
 // *  load a table into the datatables interface   *
@@ -514,6 +616,10 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	// make sure sSomeTablename contains a string
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// Save current table state, in such a way that one can restore it after this call
+	if (fn.tableExists(sSomeTablename))
+		fn.saveTableState(sSomeTablename);
 	
 	// In some rare cases, when a config.js-file calls a table straight
 	// at initialization time, the function competes with the normal initialization 
@@ -3586,6 +3692,64 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	$(document.body).append(promptDiv);
 	
+	// array of buttons
+	var aButtons = [];
+	
+	// Put a OK button only if we have a callback function, even an empty one
+	if (fnFunction != null){
+		aButtons.push({
+       	 text: "OK",
+    	 click: function(){
+    		 
+    		var aPromptResponse = {}; 
+     		for (var i=0; i<aFieldNames.length; i++)
+    		{
+     			// fieldname
+     			var thisFieldName = $.trim(aFieldNames[i]);
+     			
+     			// value for this field, entered by the user
+    			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+    			// read value for this field
+    			// first try special case (select box), and then the normal case (text)
+    			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
+    			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
+    			
+    			
+    			// compute output for fn.getPromptBoxInput
+    			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
+    			fn._registerUserInput(                					
+    					thisFieldName,                					
+    					thisValue, 
+    					// index of this field/value 
+    					i
+    					);
+    			// compute response as well, to be easily used in callback
+    			aPromptResponse[thisFieldName] = thisValue;
+    			
+    		}
+     		$( this ).dialog( "close" );  
+    		// call callback
+     		fnFunction(aPromptResponse); 
+    		              		
+    	},
+    	id: 'dialog_accept_button'
+       });
+	}
+	
+	// A cancel button is always needed
+	aButtons.push({
+    	text: "Annuleren",
+    	click: function() {
+    		$( this ).dialog( "close" );
+    		// call callback upon Cancel
+    		if (fnCancelFunction != null)
+    			fnCancelFunction(); 
+            
+        }
+	});
+	
+	
+	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
 	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
@@ -3603,57 +3767,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         	$( this ).remove();        	
         },
         position: fn._computeDialogPosition(),
-        buttons: [
-                   {
-                	 text: "OK",
-                	 click: function(){
-                		 
-                		var aPromptResponse = {}; 
-                 		for (var i=0; i<aFieldNames.length; i++)
-                		{
-                 			// fieldname
-                 			var thisFieldName = $.trim(aFieldNames[i]);
-                 			
-                 			// value for this field, entered by the user
-                			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
-                			// read value for this field
-                			// first try special case (select box), and then the normal case (text)
-                			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
-                			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
-                			
-                			
-                			// compute output for fn.getPromptBoxInput
-                			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
-                			fn._registerUserInput(                					
-                					thisFieldName,                					
-                					thisValue, 
-                					// index of this field/value 
-                					i
-                					);
-                			// compute response as well, to be easily used in callback
-                			aPromptResponse[thisFieldName] = thisValue;
-                			
-                		}
-                 		$( this ).dialog( "close" );  
-                		// call callback
-                 		if (fnFunction != null)
-                 			fnFunction(aPromptResponse); 
-                		              		
-                	},
-                	id: 'dialog_accept_button'
-                   },
-                   
-                   {
-                	text: "Annuleren",
-                	click: function() {
-                		$( this ).dialog( "close" );
-                		// call callback upon Cancel, if available
-                		if (fnCancelFunction != null)
-                			fnCancelFunction(); 
-                        
-                    }
-                   }
-        ]
+        buttons: aButtons
 	}) 
 	.keyup(function() {		 
 		if (	kf.isPressed("enter") && 
@@ -3782,6 +3896,49 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	promptDiv.append(selectableUl);
 	$(document.body).append(promptDiv);
 		
+	// array of buttons
+	var aButtons = [];
+	
+	// Put a OK button only if we have a callback function, even an empty one
+	if (fnFunction != null){
+		aButtons.push({
+      	  text: "OK",
+    	  click: function(){
+    		  
+			var aNewChosenOptions = new Array();
+			  
+			var aSelectedNodes = $(".ui-selected");
+			aSelectedNodes.each(function(){
+				// sometimes doubles are added somehow, so prevent this!
+				if (aNewChosenOptions.indexOf( $(this).text() )<0)
+					  aNewChosenOptions.push( $(this).text());
+			});
+			
+			// call close function
+    		$( this ).dialog( "close" );
+      		
+    		// call callback
+      		fnFunction(aNewChosenOptions);
+      		
+    	},
+    	id: 'dialog_accept_button'
+      });
+	}
+	
+	// A cancel button is always needed
+	aButtons.push({
+	  text: "Annuleren",
+	  click: function() {
+		  // call close function
+          $( this ).dialog( "close" );
+          
+		  // call callback upon Cancel
+          if (fnCancelFunction != null)
+        	  fnCancelFunction();
+  		  
+      }
+	});
+	
 	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
@@ -3803,42 +3960,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
             $( "#"+selectableId ).off();
         },
         position: fn._computeDialogPosition(),
-        buttons: [
-                  {
-                	  text: "OK",
-                	  click: function(){
-                		  
-						var aNewChosenOptions = new Array();
-						  
-						var aSelectedNodes = $(".ui-selected");
-						aSelectedNodes.each(function(){
-							// sometimes doubles are added somehow, so prevent this!
-							if (aNewChosenOptions.indexOf( $(this).text() )<0)
-								  aNewChosenOptions.push( $(this).text());
-						});
-						
-						// call close function
-                		$( this ).dialog( "close" );
-                  		
-                		// call callback
-                  		fnFunction(aNewChosenOptions);
-                  		
-                	},
-                	id: 'dialog_accept_button'
-                  },
-                  {
-                	  text: "Annuleren",
-                	  click: function() {
-                		  // call close function
-                          $( this ).dialog( "close" );
-                          
-                		  // call callback upon Cancel, if available
-                  		  if (fnCancelFunction != null)
-                  			  fnCancelFunction();
-                  		  
-                      }
-                  }
-        ]
+        buttons: aButtons
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );
@@ -3991,6 +4113,57 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	// adapt height of the prompt to the number of values to reorder
 	var promptHeight = (200 + 30 * aFieldNames.length);
 	
+	// array of buttons
+	var aButtons = [];
+
+	// Put a OK button only if we have a callback function, even an empty one
+	if (fnFunction != null){
+		aButtons.push({
+      	  text: "OK",
+    	  click: function(){
+    		  
+    		for (var i=0; i<aFieldNames.length; i++)
+    		{
+    			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+    			
+    			// compute output for fn.getPromptBoxInput
+    			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
+    			fn._registerUserInput(
+    					// fieldname
+    					$.trim(aFieldNames[i]),
+    					// no value entered, since user only had to (re)order the set of data
+    					"", 
+    					// index of reordered fieldname
+    					$.inArray($("#"+sortableId).find("li").eq(i).attr("id"), aOriginalOrder)
+    					);
+    		}
+      		// compute response as well (the new way!)
+    		// (compute a re-ordered input array straight away, which is what the user mostly expects)
+      		var aPromptResponse = fn.processPromptBoxOrder( fn.getPromptBoxOrder(), aFieldNames );
+      		
+      		$( this ).dialog( "close" );     
+    		// call callback
+      		fnFunction(aPromptResponse); 
+    		           		 
+    	},
+    	id: 'dialog_accept_button'
+      });
+	}
+
+	// A cancel button is always needed
+	
+	aButtons.push({
+  	  text: "Annuleren",
+	  click: function() {
+		  $( this ).dialog( "close" );
+		  // call callback upon Cancel
+		  if (fnCancelFunction != null)
+			  fnCancelFunction(); 
+          
+      }
+	});
+	
+	
 	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
@@ -4009,48 +4182,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
         	$( this ).remove();
         },
         position: fn._computeDialogPosition(),
-        buttons: [
-                  {
-                	  text: "OK",
-                	  click: function(){
-                		  
-                		for (var i=0; i<aFieldNames.length; i++)
-                		{
-                			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
-                			
-                			// compute output for fn.getPromptBoxInput
-                			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
-                			fn._registerUserInput(
-                					// fieldname
-                					$.trim(aFieldNames[i]),
-                					// no value entered, since user only had to (re)order the set of data
-                					"", 
-                					// index of reordered fieldname
-                					$.inArray($("#"+sortableId).find("li").eq(i).attr("id"), aOriginalOrder)
-                					);
-                		}
-                  		// compute response as well (the new way!)
-                		// (compute a re-ordered input array straight away, which is what the user mostly expects)
-                  		var aPromptResponse = fn.processPromptBoxOrder( fn.getPromptBoxOrder(), aFieldNames );
-                  		
-                  		$( this ).dialog( "close" );     
-                		// call callback
-                  		fnFunction(aPromptResponse); 
-                		           		 
-                	},
-                	id: 'dialog_accept_button'
-                  },
-                  {
-                	  text: "Annuleren",
-                	  click: function() {
-                		  $( this ).dialog( "close" );
-                		  // call callback upon Cancel, if available
-                  		  if (fnCancelFunction != null)
-                  			  fnCancelFunction(); 
-                          
-                      }
-                  }
-        ]
+        buttons: aButtons
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );
