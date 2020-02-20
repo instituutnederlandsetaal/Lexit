@@ -4194,6 +4194,7 @@ public class Database {
 		
 		String db = databaseAccessHash.get("db");
 		String host = databaseAccessHash.get("host");
+		String port = databaseAccessHash.get("port");
 		String user = databaseAccessHash.get("user");
 		String pass = databaseAccessHash.get("pass");
 		
@@ -4215,7 +4216,7 @@ public class Database {
 		PostgresDatabaseCommunication postgresDc = 
 			new PostgresDatabaseCommunication(this.co, bSendTomcatUserInfoToDb);
 		
-		postgresDc.connectTo(host, db, user, pass);
+		postgresDc.connectTo(host, port, db, user, pass);
 		
 		return postgresDc;
 		

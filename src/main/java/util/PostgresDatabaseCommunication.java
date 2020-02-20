@@ -53,10 +53,13 @@ public class PostgresDatabaseCommunication {
 		}
 	}
 	
-	public void connectTo(String host, String db, String user, String password)
+	public void connectTo(String host, String port, String db, String user, String password)
 	{
+		// if project config doesn't specify any port, choose the Postgres default port 
+		port = (port == null || port.isEmpty()) ? "5432" : port; 
+				
 		// location		
-		String location = "jdbc:postgresql://"+host+":5432/"+db;
+		String location = "jdbc:postgresql://"+host+":"+port+"/"+db;
 		
 		if (Constants.debug) System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
 		
