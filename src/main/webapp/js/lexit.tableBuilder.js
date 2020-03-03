@@ -937,6 +937,37 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 	
 	// retrieve table client configuration
 	var oTableConfig = 					conf.getTableConfig(sSomeTableName);
+	var oWildcardTableConfig = 			conf.getTableConfig("*"); // wildcard
+	
+	if (oTableConfig == null) 
+		oTableConfig = {};	
+	
+	
+	// ---------------------------------------------------------------------
+	// special: when available, merge '*' wildcard config (table level)
+	//			with current table config
+	
+	if (oWildcardTableConfig != null)
+		{
+		for (var sColumnName in oWildcardTableConfig)
+			{
+			// the wildcard is only applied to columns not mentionned in wildcard 
+			// (because explicit configuration wins over wildcard) 
+			if (oTableConfig[sColumnName] == null)
+				oTableConfig[sColumnName] = oWildcardTableConfig[sColumnName];
+			
+			// very special: 	we have a wildcard table with a wildcard column, 
+			//					and the current table has a wildcard column as well...
+			//					Merge!, but give current table config priority in case of propery clash
+			if (sColumnName == "*" && oTableConfig[sColumnName] != null)
+				{
+				oTableConfig[sColumnName] = $.extend({}, oWildcardTableConfig[sColumnName], oTableConfig[sColumnName])
+				}
+			}
+		}
+	// ---------------------------------------------------------------------
+	
+	
 	
 	// the data that will be set here
 	var aVisibleColumns = 				new Array();	
@@ -958,7 +989,25 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		aoSearchColsArray.push(null);
 		
 		// retrieve column client configuration
-		var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sNameOfCurrentColumn);
+		var oColumnConfig = 		conf.getColumnConfig(oTableConfig, sNameOfCurrentColumn);
+		var oWildcartColumnConfig = conf.getColumnConfig(oTableConfig, "*"); // wildcard
+		
+		// ---------------------------------------------------------------------
+		// special: when available, merge '*' wildcard config (column level)
+		//			with current column config		
+		
+		if (oWildcartColumnConfig != null)
+			{			
+			for (var sPropertyName in oWildcartColumnConfig)
+				{
+				// the wildcard is only applied to properties not mentionned in wildcard
+				// (because explicit configuration wins over wildcard) 
+				if (oColumnConfig[sPropertyName] == null)
+					conf.changeTableConfigValue(sSomeTableName, sNameOfCurrentColumn, sPropertyName, oWildcartColumnConfig[sPropertyName])
+				}
+			}
+		// ---------------------------------------------------------------------
+		
 		
 		
 		
@@ -1151,6 +1200,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 	
 	// properties for Datatable object (will be set as soon as this function ends)
 	mt.setDatatablesPropsOf(sSomeTableName, aColProps);
+	
 	
 };
 

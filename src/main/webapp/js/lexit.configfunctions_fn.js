@@ -3552,7 +3552,8 @@ fn._computeDialogPosition = function(){
 	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");
 	if (nRow == null) n = fn.getFirstSelectedRowNodeFrom(sTable);
 	
-	var iRowPosition = $(nRow).offset().top; 	
+	var oOffset = $(nRow).offset();		
+	var iRowPosition = (typeof oOffset == 'undefined') ? 0 : oOffset.top; 	
 	var iMiddleOfScreen = $(window).height() / 2;
 	
 	return {
