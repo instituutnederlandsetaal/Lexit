@@ -3849,12 +3849,12 @@ public class Database {
 		return parts[parts.length-1];
 	}
 	
-	// if a table name contains both upper and lower case characters
+	// if a table name contains both upper and lower case characters, or chars like '-',
 	// Postgres gets confused, so the table name needs to be rewritten
 	// as schema."tablename"
 	private  String getSafeTableName(String tableName, String schema){
 		
-		if (tableName.toLowerCase().equals(tableName))
+		if (tableName.toLowerCase().equals(tableName) && !tableName.contains("-"))
 			return schema+"."+tableName;
 		
 		return schema+".\""+tableName+"\"";
@@ -3863,7 +3863,7 @@ public class Database {
 	// same as above, except schema name is not added in front
 	private  String getSafeTableNameOnly(String tableName){
 		
-		if (tableName.toLowerCase().equals(tableName))
+		if (tableName.toLowerCase().equals(tableName) && !tableName.contains("-"))
 			return tableName;
 		
 		return "\""+tableName+"\"";
