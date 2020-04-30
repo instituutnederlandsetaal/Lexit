@@ -1183,7 +1183,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	
 	// adapt height of the prompt to the number of values 
-	var promptHeight = (200 + 30 * countProperties(oKeysAndValues));
+	var promptHeight = (250 + 30 * countProperties(oKeysAndValues));
 	
 	
 	// Open dialog	
