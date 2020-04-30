@@ -932,8 +932,7 @@ tb._getRelevantColumnsStraightFromJson = function(sSomeTablename, json){
 
 
 // assign properties to the different table columns
-tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
-				
+tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){				
 	
 	// retrieve table client configuration
 	var oTableConfig = 					conf.getTableConfig(sSomeTableName);
