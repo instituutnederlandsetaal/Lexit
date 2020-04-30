@@ -664,7 +664,7 @@ public class TableResources {
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TableRecordObject callFunction(
 			@QueryParam("function_name") String functionName,
-			@QueryParam("args") String args,
+			@DefaultValue("true_null") @QueryParam("args") String args,	// true null
 			@QueryParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
@@ -673,6 +673,15 @@ public class TableResources {
 		
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
 		Util.debug(co, "### Call function "+functionName);
+		
+		// true null must be null (we must be able to make the difference between an empty string and null)
+		if (args != null && args.equals("true_null")) 
+			args = null;		
+		String[] argsStr = (args != null) ?
+				args.split(Constants.ARG_INTERNAL_SEPARATOR, -1)
+				:
+				new String[]{};		
+		
 		
 		// first check the function operation type (= writing/reading)
 		boolean functionDoesWritingOperations = 
@@ -689,7 +698,7 @@ public class TableResources {
 			throw new RuntimeException("Permission denied to "+userName);		
 		
 		TableRecordObject tro = 
-			getDatabaseObject(co).callFunction(functionName, args.split(Constants.ARG_INTERNAL_SEPARATOR, -1));
+			getDatabaseObject(co).callFunction(functionName, argsStr);
 				
 		return tro;
 	}
