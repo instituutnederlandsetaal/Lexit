@@ -520,10 +520,14 @@ fn.saveTableState = function(sTableName){
 	var aSorting = {};
 	var aSortColumns = fn.getSortingColumns(sTableName);
 	var aSortDirections = fn.getSortingDirections(sTableName);
-	for (var i=0; i<aSortColumns.length; i++)
+	if (aSortColumns != null)
 		{
-		aSorting[ aSortColumns[i] ] = aSortDirections[i];
+		for (var i=0; i<aSortColumns.length; i++)
+			{
+			aSorting[ aSortColumns[i] ] = aSortDirections[i];
+			}
 		}
+	
 	
 	// Save the table state
 	
@@ -580,8 +584,6 @@ fn.restoreTableState = function(sTableName){
 				function(){
 					// remove callback, as we don't want to end up in an infinite loop!
 					oTable.addDrawCallback(sTableName, function(){});
-					
-					console.log("go to "+iPageNumber);
 					
 					// go to the saved page
 					oTable.displayRow( iPageNumber ).draw(false);
@@ -3170,17 +3172,23 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 	
 	// make sure the function arguments contain no null value, as join can't deal with it		
 	aFunctionArguments = convertNullToString(aFunctionArguments);		
+	
+	// data to be send
+	var aData = {
+			"db_name": getHttpParams().get("db"),
+			"function_name": sFunctionName,
+			"dummy": getUniqueNumber() 
+			};
+	// add the args only if those are non-empty (otherwise the webservice can't tell the difference between
+	// no argument at all vs. one single empty string argument, which are two quite different things!)
+	if (aFunctionArguments.length>0)
+		aData["args"] = aFunctionArguments.join(ARG_INTERNAL_SEPARATOR);
 	 
 	$.ajax( {
 		"type": "GET",
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
-		"data": {
-			"db_name": getHttpParams().get("db"),
-			"function_name": sFunctionName,
-			"args": aFunctionArguments.join(ARG_INTERNAL_SEPARATOR),
-			"dummy": getUniqueNumber() 
-			},
+		"data": aData,
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
 	 		
@@ -3294,7 +3302,7 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 		            minLength: iMinLength,
 			        source: function(request, response){
 			            	
-			           	fn.callFunction(sFunctionName, [ fn.quote( request.term ) ], 
+			           	fn.callFunction(sFunctionName, [ request.term ], 
 			          		function(func_resp){  
 			            		
 			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
@@ -3410,9 +3418,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		]
 	});
 	
-	
 	fn._activeEnterForThisDialog(dialogDivId);
-	
 };
 
 /**
@@ -3550,11 +3556,15 @@ fn._computeDialogPosition = function(){
 	if (sTable == null)	return {};
 	
 	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");
-	if (nRow == null) n = fn.getFirstSelectedRowNodeFrom(sTable);
+	if (nRow == null) nRow = fn.getFirstSelectedRowNodeFrom(sTable);
+	
+	// in some cases, the row is empty
+	if (nRow.length == 0)
+		nRow = window; 
 	
 	var oOffset = $(nRow).offset();		
 	var iRowPosition = (typeof oOffset == 'undefined') ? 0 : oOffset.top; 	
-	var iMiddleOfScreen = $(window).height() / 2;
+	var iMiddleOfScreen = $(window).height() / 2; 
 	
 	return {
     	my: iRowPosition < iMiddleOfScreen ? 'center top' : 'center bottom',
@@ -3862,8 +3872,8 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 					    	// read new unique values given filter
 					    	var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
-					    	var aAllOptionsFiltered = aAllOptions.filter(function(value ){
-					    		return value.match(sFilter);
+					    	var aAllOptionsFiltered = aAllOptions.filter(function(value){
+					    		return value.toLowerCase().match(sFilter);
 					    		});
 					    	fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
 							
