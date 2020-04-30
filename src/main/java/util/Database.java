@@ -956,8 +956,8 @@ public class Database {
 		args = Util.removeSuspiciousSql(args);
 		
 		// get the function argument types
-		String[] argumentTypes = getFunctionTypes(functionName);
-		String returnType = getFunctionReturnType(functionName);
+		String[] argumentTypes = getFunctionTypes(functionName, args.length);
+		String returnType = getFunctionReturnType(functionName, args.length);
 		
 		// process the argument list according to the type
 		// (t.i. add quotes for text args)
@@ -969,13 +969,18 @@ public class Database {
 					&& !args[i].equals("NULL") // exclude null, which must be interpreted as a null value further on
 				)						       // so it must be printed without quotes!
 				{				
-				// make sure inside-quotes are escaped:
+				// make sure inside-quotes are escaped in the Postgres way:
 				// in strings like in "zzp\'er" (with slash)
 				args[i] = (args[i]).replaceAll("([\\\\]+)(')([^'])", "$2$2$3");
 				// in strings like in "zzp'er" (without slash)
 				args[i] = (args[i]).replaceAll("([^'])(')([^'])", "$1$2$2$3");
+				// in strings beginning or ending with a single quote (like in "'s ochtends")
+				// (but of course, there must be no quote at the other end, in which case the quotes plays a different role)
+				args[i] = ( !args[i].endsWith("'") ) ? (args[i]).replaceAll("^(')([^'])", "$1$1$2") : args[i];
+				args[i] = ( !args[i].startsWith("'") ) ? (args[i]).replaceAll("([^'])(')$", "$1$2$2") : args[i];
 				
-				// add quote arount string iff they are missing!
+				// last step:
+				// add quotes around string iff they are missing!
 				if (!(args[i].startsWith("'") && args[i].endsWith("'")) )
 					{
 					args[i] = "'" +	args[i] + "'";	
@@ -3342,7 +3347,7 @@ public class Database {
 	 * @param functionName
 	 * @return
 	 */
-	public String[] getFunctionTypes(String functionName){
+	public String[] getFunctionTypes(String functionName, int numberOfArgs){
 		
 		// (see: http://www.varlena.com/GeneralBits/39.php)
 		String functionDetailsQuery = "SELECT " +
@@ -3354,11 +3359,13 @@ public class Database {
 			"AND p.pronamespace = n.oid "+
 			"AND p.prolang = l.oid "+
 			"AND p.proname = ? " +  // function name
-			"AND n.nspname = ? ;";  // schema name
+			"AND n.nspname = ? " +  // schema name
+			"AND p.pronargs = ?;";	// number of arguments (needed for distinction since we sometimes have homonyms)
 		
 		
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String schemaName = "public";
+		String numberOfArguments = String.valueOf(numberOfArgs);
 		if (functionName.indexOf(".")>0)
 			{
 				schemaName = functionName.split("\\.")[0];
@@ -3387,7 +3394,7 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			String[] args = new String[]{functionName, schemaName};		
+			String[] args = new String[]{functionName, schemaName, numberOfArguments };		
 			
 			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"argument_types"});
@@ -3535,7 +3542,7 @@ public class Database {
 	 * @param functionName
 	 * @return
 	 */
-	public String getFunctionReturnType(String functionName){
+	public String getFunctionReturnType(String functionName, int numberOfArgs){
 		
 		// (see: http://www.varlena.com/GeneralBits/39.php)
 		String functionDetailsQuery = "SELECT " +
@@ -3546,11 +3553,12 @@ public class Database {
 			"AND p.pronamespace = n.oid "+
 			"AND p.prolang = l.oid "+
 			"AND p.proname = ? " +  // function name
-			"AND n.nspname = ? ;";  // schema name
-		
+			"AND n.nspname = ? " +  // schema name
+			"AND p.pronargs = ?;";	// number of arguments (needed for distinction since we sometimes have homonyms)
 		
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String schemaName = "public";
+		String numberOfArguments = String.valueOf(numberOfArgs);
 		if (functionName.indexOf(".")>0)
 			{
 				schemaName = functionName.split("\\.")[0];
@@ -3579,7 +3587,7 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			String[] args = new String[]{functionName, schemaName};		
+			String[] args = new String[]{functionName, schemaName, numberOfArguments};		
 			
 			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"return_type"});
