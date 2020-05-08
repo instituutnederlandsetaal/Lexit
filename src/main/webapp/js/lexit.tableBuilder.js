@@ -1021,7 +1021,9 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		var columnEditable = 	conf.getEditability(oColumnConfig);
 		var columnFilter = 		conf.getFilter(oColumnConfig);
 		var columnKeepFilter =	conf.getKeepFilterSetting(oColumnConfig);
-		var columnButton = 		conf.getButtonSetting(oColumnConfig);		
+		var columnButton = 		conf.getButtonSetting(oColumnConfig);
+		var columnWidth = 		conf.getWidthSetting(oColumnConfig);
+		var cellClass = 		conf.getCellClass(oColumnConfig);
 		var columnHasDataType =	mt.getListOfColumnTypesOf(sSomeTableName)[i] != 'unknown';
 		
 		// build array of visible columns (we need to distinguish them from complete column list)
@@ -1060,7 +1062,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		// now set the columns
 		
 		// Each column classname must have its number and name in it
-		var sClassPrefix = i+" "+sSomeTableName+" "+sNameOfCurrentColumn+" ";
+		var sClassPrefix = i+" "+sSomeTableName+" "+sNameOfCurrentColumn+" "+cellClass+" ";
 		
 		// Do we have a checkbox, and with which datatype?
 		var iCheckBoxType = $.inArray(mt.getListOfColumnTypesOf(sSomeTableName)[i], ["bit varying(1)", "boolean"]);
@@ -1083,6 +1085,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			
 			aColProps.push( { 
 				"name": 		sNameOfCurrentColumn,
+				"width":		columnWidth,
 				"data": 		sNameOfCurrentColumn,				
 				"searchable":	false, 
 				"targets": 		[i],
@@ -1124,6 +1127,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 			{			
 			aColProps.push( { 
 				"name": 		sNameOfCurrentColumn, 
+				"width":		columnWidth,
 				"data": 		sNameOfCurrentColumn,				
 				"searchable":	columnVisible ? columnSearchable : false, 
 				"targets": 		[i],
@@ -1144,6 +1148,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				{
 				aColProps.push( {
 					"name": 		sNameOfCurrentColumn, 
+					"width":		columnWidth,
 					"data": 		sNameOfCurrentColumn,					
 					"searchable":	columnVisible ? columnSearchable : false, 
 					"targets": 		[i],					
@@ -1162,6 +1167,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 				{
 				aColProps.push( { 
 					"name": 		sNameOfCurrentColumn, 
+					"width":		columnWidth,
 					"data": 		sNameOfCurrentColumn,					
 					"searchable":	columnVisible ? columnSearchable : false, 
 					"targets": 		[i],

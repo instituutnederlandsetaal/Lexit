@@ -306,6 +306,12 @@ var oTableConfigurationList_example = {
 		 */
 		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
 		
+		
+		/**
+		 * @description Ken een class toe aan een kolom, om de cellen van de kolom te kunnen stylen.
+		 */
+		"class": "",
+		
 		/**
 		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
 		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
@@ -456,7 +462,12 @@ var oTableConfigurationList_example = {
 		 * door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) 
 		 * moet men ook "flexible_visibility": false instellen.
 		 */
-		"visible": true
+		"visible": true,
+		
+		/**
+		 * @description Breedte van een kolom. Dit kan worden gespecificeerd in 'px', maar men kan ook een relatieve waarde (in '%') opgeven.
+		 */
+		"width": "10%"
 
 		
 };
@@ -845,6 +856,32 @@ conf.getKeepFilterSetting = function(aColumnConfig){
 		return false;
 	return aColumnConfig["keepfilter"];
 };
+
+
+
+// retrieve width of column
+// default is null (like in Datatables)
+
+conf.getWidthSetting = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["width"] == 'undefined')
+		return null;
+	return aColumnConfig["width"];
+};
+
+
+
+// retrieve cell class
+// default is empty string (no class name to be added)
+
+conf.getCellClass = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["class"] == 'undefined')
+		return "";
+	return aColumnConfig["class"];
+};
+
+
 
 // retrieve name of button, if a button should be set in a column
 // default is null

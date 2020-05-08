@@ -166,6 +166,14 @@ table.display td.center {
 	text-align: center;	
 }
 
+table.display td.right {
+	text-align: right;
+}
+
+table.display td.left {
+	text-align: left;
+}
+
 tr td {
 	vertical-align: top;
 }
