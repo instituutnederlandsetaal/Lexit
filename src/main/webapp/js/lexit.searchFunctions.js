@@ -794,7 +794,7 @@ sf.clearPerColumnSearchFields = function(someTablename){
 		if(isACheckBox) {
 			// remove the color indicating some value is activated (true or false)
 			$(this).css("background-color", "#FFFFFF");
-			$(this).find("input").eq(0).removeAttr("checked");	
+			$(this).find("input").eq(0).removeAttr("checked").prop('checked', false);	
 			// the value of the checkbox needs to be set (doesn't happen upon checking the box!)
 			$(this).find("input").eq(0).val("");
 		}		

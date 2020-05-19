@@ -550,7 +550,7 @@ td.selectColumns = function(sSomeTablename){
 	                    			if ($.inArray(sColumnName, aListOfRelevantColumns)>-1)
 	                    				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).prop("checked", "checked");
 	                    			else
-	                    				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked");
+	                    				$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked").prop('checked', false);
 	                    		});
 	                        },
 	                        style: "color: #3970b3"
@@ -591,7 +591,7 @@ td.selectColumns = function(sSomeTablename){
 	                    			if ( !conf.getFlexibleVisibility(oColumnConfig))
 	                    				return true;
 	                    			// else UNcheck this one
-	                    			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked");
+	                    			$( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).removeAttr("checked").prop('checked', false);
 	                    		});        		
 	                        },
 	                        style: "color: #3970b3"
@@ -646,7 +646,7 @@ td.selectColumns = function(sSomeTablename){
 	                				if (bColumnVisibility)
 	                					$(this).find("input").prop("checked", "checked");
 	                				else
-	                					$(this).find("input").removeAttr("checked");
+	                					$(this).find("input").removeAttr("checked").prop('checked', false);
 	                			});
 	                				
 	                			// remove the custom configuration, as we just restored the default
