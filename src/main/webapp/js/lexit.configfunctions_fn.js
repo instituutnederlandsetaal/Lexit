@@ -5040,7 +5040,8 @@ fn.getHighlight = function(sString, aaIndexes, sColor){
  */
 fn.removeHighlight = function(sString){
 
-	var sNewString = sString.replace(/(\<span style='background: .+?\>)(.+?)(\<\/span\>)/gi, "$2");
+	var sNewString = sString.replace(/\<span[^\>]+?\>/gi, "");
+	sNewString = sNewString.replace(/\<.span\>/gi, "");
 	return sNewString;
 };
 
