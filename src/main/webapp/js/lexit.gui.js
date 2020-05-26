@@ -85,10 +85,28 @@ gui.activateEllipsis = function(sSomeTableName){
 			});
 			
 		}
-	}
+	}	
 	
+};
+
+// replace the possibly technical names of columns by nice user friendly names, if available
+gui.setColumnNiceNames = function(sSomeTablename){
 	
-}
+	var oTable = mt.getDataTableObjectOf(sSomeTablename);
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	
+	var aColumnsList = mt.getListOfColumnsOf(sSomeTablename);
+		
+	for (var i=0; i<aColumnsList.length; i++)
+		{		
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, aColumnsList[i]);
+		var sNiceName = conf.getColumnNiceName(oColumnConfig);
+		
+		// trick: https://datatables.net/forums/discussion/27038/how-change-dynamically-title-of-column#Comment_73504
+		if(sNiceName != null)
+			$( oTable.column(i).header() ).text( sNiceName );
+		}
+};
 
 // put the tooltips of the different column buttons in the table
 // if some are set in the config file

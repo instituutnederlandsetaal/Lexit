@@ -572,6 +572,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// when the table is sorted by a new column, we need to rebuild the map of cell colors
 	gui.setColumnHighlightResetter(sSomeTableName);
 	
+	// set the column nice names if available (those can be declared to replace user UNfriendly column names)
+	gui.setColumnNiceNames(sSomeTableName);
+	
 	// initialize arrow keys for this table
 	kf.setActiveTable(sSomeTableName);
 	kf.setActiveRowNumber( 0 );

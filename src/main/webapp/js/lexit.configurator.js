@@ -69,7 +69,8 @@ var oTableSettingsList_example = {
 		"processed_date": "25 feb 2017",
 		
 		/**
-		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast
+		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.
+		 * Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.
 		 */
 		"info": "Deze tabel is ....",
 		
@@ -308,14 +309,24 @@ var oTableConfigurationList_example = {
 		
 		
 		/**
-		 * @description Ken een class toe aan een kolom, om de cellen van de kolom te kunnen stylen.
+		 * @description Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.
 		 */
 		"class": "",
+		
+		
+		/**
+		 * @description Wanneer een kolom een technische, niet gebruikersvriendelijke naam heeft, kan men deze voor  
+		 * de gebruiker een mooiere naam geven. Dat doet men met deze parameter.
+		 */
+		"nice_name": "",
 		
 		/**
 		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
 		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
 		 * waarden zijn 'asc', 'desc' of null (default).
+		 * Let wel: als er op meerdere kolommen tegelijk gesorteerd moet worden, wordt de prioriteit bepaald aan
+		 * de hand van de volgorde waarin de te sorteren kolommen worden opgegeven. Beter en overzichtelijker
+		 * is het om de sorteerkolommen in de table settings op te geven met parameter "columns_sorting" (zie aldaar).  
 		 */
 		"colsort": "",
 		
@@ -915,14 +926,14 @@ conf.getCellTooltip = function(aColumnConfig){
 
 
 
-// get the title of a column
+// get the nice name of a column (more user friendly than a technical name)
 // default is null
 
-conf.getTitle = function(aColumnConfig){
+conf.getColumnNiceName = function(aColumnConfig){
 	
-	if (typeof aColumnConfig["title"] == 'undefined')
+	if (typeof aColumnConfig["nice_name"] == 'undefined')
 		return null;
-	return aColumnConfig["title"];
+	return aColumnConfig["nice_name"];
 };
 
 
@@ -1685,7 +1696,7 @@ conf.getRefreshUponFocus = function(aTableSettings){
 };
 
 
-// retrive table 'nice name'
+// retrieve table 'nice name'
 conf.getNiceName = function(aTableSettings){
 	
 	if (typeof aTableSettings["nice_name"] == 'undefined')
