@@ -43,7 +43,8 @@ sf.goTo = function(sSomeTablename){
 		var searchBoxSelector = bCurrentColumnIsASelectBox ? 
 				$(this).find("select") : $(this).find("input");
 		
-		var sCurrentColumnName = $('#'+sSomeTablename+' thead th').eq(i).text();
+		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sSomeTablename)[i]; 
+			//$('#'+sSomeTablename+' thead th').eq(i).text();  -- this won't work if the name of the column was changed by 'nice name'
 		var sCurrentColumnValue = $.trim(searchBoxSelector.val());
 		
 		// for checkboxes, we need to recompute the value
