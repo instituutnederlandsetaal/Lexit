@@ -196,15 +196,24 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	$("#"+sSomeTablename+"_wrapper tr").removeClass("odd");
 	$("#"+sSomeTablename+"_wrapper tr").removeClass("even");
 	
-	// room te keep between top of form and bottom of header
-	var iRoomAboveAll = 10;
+	// room to keep between top of form and bottom of header
+	var iRoomAboveAll = 30;
 	
 	// compute the cell referential positions etc
 	// so as to be able to put the cells at new screen positions
-	var nReferentialTd = $("#"+sSomeTablename+"_wrapper ").find("td").eq(0);
-	var nReferentialTr = $("#"+sSomeTablename+"_wrapper ").find("tr").eq(0);
-	var iBaseLeft = parseInt(nReferentialTd.position().left);
-	var iBaseTop = parseInt(nReferentialTd.position().top);
+	
+	var nReference = $( "#"+sSomeTablename+"_wrapper table");
+	var nReferentialTd = $("#"+sSomeTablename+"_wrapper").find("td").eq(0);
+	var nReferentialTr = $("#"+sSomeTablename+"_wrapper").find("tr").eq(0);
+	//var iBaseLeft = parseInt(nReferentialTd.position().left);
+	//var iBaseTop = parseInt(nReferentialTd.position().top);
+	var iBaseLeft = parseInt(nReference.position().left);
+	var iBaseTop = parseInt(nReference.position().top);
+	
+	//console.log("iBaseTop="+$("#"+sSomeTablename+"_wrapper .top").css("height"));
+	//console.log("iBaseTop="+$("#"+sSomeTablename+"_wrapper table").position().top);
+	//console.log("iBaseTop="+iBaseTop);
+	
 	var iBaseHeight = 25 + // fixed to 25, instead of 'parseInt(nReferentialTr.css("height"))',
 	                       // which sometimes causes very ugly layout because of 
 	                       // long, thus multilines column names.

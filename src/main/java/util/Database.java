@@ -198,7 +198,7 @@ public class Database {
 			String tableName, String columnName, String columnValue, 
 			int occurrenceNr,
 			String sortBy, String sortDir,
-			String[] filterColumns, String[] filterValues,
+			String[] filterColumns, String[] filterValues,  // this is filled with 'filter' parameter in <project>.config.js
 			int iDisplayLength){
 		
 		

@@ -781,8 +781,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 	//
 	// NB: Since the info div is not filled immediately after the ajax call,
 	//     we have wait for the draw event to finish before
-	//     processing the table info
-	
+	//     processing the table info	
 
 	
 	$("#"+sSomeTableName).one("draw.dt", json, function(){

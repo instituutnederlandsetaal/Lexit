@@ -865,7 +865,18 @@ conf.getKeepFilterSetting = function(aColumnConfig){
 	
 	if (typeof aColumnConfig["keepfilter"] == 'undefined')
 		return false;
-	return aColumnConfig["keepfilter"];
+	
+	var bKeepFilter = aColumnConfig["keepfilter"];
+	
+	// give understandable error message, when this parameter is misused
+	if (bKeepFilter && conf.getFilter(aColumnConfig) == null)
+		{
+		fn.message("Let op", "Parameter 'keepfilter: true' werkt alleen als vooraf ook parameter 'filter' is ingesteld.");
+		}
+	else
+		{
+		return aColumnConfig["keepfilter"];
+		}	
 };
 
 
