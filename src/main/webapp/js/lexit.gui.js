@@ -205,14 +205,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	var nReference = $( "#"+sSomeTablename+"_wrapper table");
 	var nReferentialTd = $("#"+sSomeTablename+"_wrapper").find("td").eq(0);
 	var nReferentialTr = $("#"+sSomeTablename+"_wrapper").find("tr").eq(0);
-	//var iBaseLeft = parseInt(nReferentialTd.position().left);
-	//var iBaseTop = parseInt(nReferentialTd.position().top);
 	var iBaseLeft = parseInt(nReference.position().left);
 	var iBaseTop = parseInt(nReference.position().top);
-	
-	//console.log("iBaseTop="+$("#"+sSomeTablename+"_wrapper .top").css("height"));
-	//console.log("iBaseTop="+$("#"+sSomeTablename+"_wrapper table").position().top);
-	//console.log("iBaseTop="+iBaseTop);
 	
 	var iBaseHeight = 25 + // fixed to 25, instead of 'parseInt(nReferentialTr.css("height"))',
 	                       // which sometimes causes very ugly layout because of 

@@ -494,8 +494,7 @@ function generateSeries(iStartValue, iEndValue, bAscending){
 			var sValue = right("0000000000"+String(i), iMaxStringLength);
 			series.push(sValue)
 			}
-		}
-	
+		}	
 	
 	return series;	
 };

@@ -754,6 +754,95 @@ fn._getBaseUrl = function(){
 
 
 
+/**
+ * Change the visibility of the columns of a table 
+ * and redraw the table accordingly
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Array} - List of columns that have to be visible (the remaining columns will be invisible)
+ * @param {Function} [fnFunction=null] - A function to be called once the table has been redrawn
+ * @param {TableSettingsArray} [oExtraSettings=null] - An associative array containing some extra settings for the table to be redrawn
+ */
+fn.changeTableColumnsVisibility = function(sSomeTablename, aListOfVisibleColumns, fnFunction, oExtraSettings){
+	
+	// BEWARE: during tests it appeared that this function do not work properly when a users changed the column visibility manually
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// get list of columns
+	var aAllColumns = mt.getListOfColumnsOf(sSomeTablename);
+	
+	// set the columns visibility		
+	for (var i=0; i<aAllColumns.length; i++)
+		{
+		var sColName = aAllColumns[i];
+		var bVisible = $.inArray(sColName, aListOfVisibleColumns)>-1;
+		conf.changeTableConfigValue(sSomeTablename, sColName, "visible", bVisible);	
+		}
+	
+	// save position etc, so as to be able to put table back at same position
+	var iCurrentLeft =		$("#"+sSomeTablename+"_dynamic").offset().left;
+	var iCurrentTop = 		$("#"+sSomeTablename+"_dynamic").offset().top;
+	var iTableWidth = 		$("#"+sSomeTablename+"_dynamic").css("width");
+	var sViewtype = 		fn.getViewType(sSomeTablename);
+	var iDisplayLength =	fn.getCurrentDisplayLength(sSomeTablename);
+	var iRecordNumberToStartAt = parseInt(fn.getCurrentDisplayStart(sSomeTablename));	
+	var aSortingSettings = 	mt.getDataTableObjectOf(sSomeTablename).order();
+	
+	// read current filters so we can re-apply those
+	var oFilterSettings = mt.getDataTableObjectOf(sSomeTablename).getSearchFilters();	
+	
+	// we want to be able to put the table back at the very same place
+	var oExtraSettingsBase = {
+			"top": iCurrentTop, 
+			"left": iCurrentLeft,
+			"displaylength": iDisplayLength
+	};	
+	// add custom extra settings
+	if (oExtraSettings != null)
+		{
+		for (sSettingName in oExtraSettings)
+			{
+			oExtraSettingsBase[sSettingName] = oExtraSettings[sSettingName];
+			}
+		}	
+	
+	tb.destroyTable(sSomeTablename, function(){
+		
+		fn.callDatabase(sSomeTablename, 
+				oFilterSettings,		// re-apply the filters 
+				function(){
+			
+					// small delay needed otherwise this will be fired too early and the following won't work
+					$("#"+sSomeTablename).delay(200).queue(function(){
+						
+						// restore sorting settings
+						if (aSortingSettings.length==0) 
+							mt.getDataTableObjectOf(sSomeTablename).order.neutral();
+						else
+							mt.getDataTableObjectOf(sSomeTablename).order(aSortingSettings);
+						
+						// put table back at same page
+						mt.getDataTableObjectOf(sSomeTablename)
+							.displayRow(iRecordNumberToStartAt)
+							.draw(false);
+						
+						// callback if available
+						if (fnFunction!= null)
+							fnFunction();
+						
+					});					
+					
+				}, 
+				oExtraSettingsBase
+		);
+	});
+	
+		
+}
+
+
 // *****************************************************************
 // *             GENERAL TABLE FUNCTIONS                           *
 // *****************************************************************
@@ -3555,19 +3644,26 @@ fn._computeDialogPosition = function(){
 	var sTable = kf.getActiveTable();
 	if (sTable == null)	return {};
 	
-	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");
-	if (nRow == null) nRow = fn.getFirstSelectedRowNodeFrom(sTable);
+	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");	
+	if ( nRow != null)
+		nRow = nRow.get(0); // get DOM element out of jquery object
+	else
+		nRow = fn.getFirstSelectedRowNodeFrom(sTable); // last rescue?
 	
 	// in some cases, the row is empty
-	if (nRow.length == 0)
-		nRow = window; 
+	if (nRow == null || nRow.length == 0)
+		{
+		// this will cause the dialog to be centered
+		return {}; 
+		}
 	
-	var oOffset = $(nRow).offset();		
-	var iRowPosition = (typeof oOffset == 'undefined') ? 0 : oOffset.top; 	
-	var iMiddleOfScreen = $(window).height() / 2; 
+	// but if we have a non-empty row, position the dialog relative to that row
+	var oOffset = $(nRow).offset();
+	var iRowPosition = (typeof oOffset == 'undefined') ? 0 : oOffset.top;
+	var iMiddleOfScreen = $(window).height() / 2;
 	
 	return {
-    	my: iRowPosition < iMiddleOfScreen ? 'center top' : 'center bottom',
+		my: iRowPosition < iMiddleOfScreen ? 'center top' : 'center bottom',
     	at: iRowPosition < iMiddleOfScreen ? 'center bottom' : 'center top',
     	of: nRow
     }

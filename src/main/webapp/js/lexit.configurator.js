@@ -227,6 +227,11 @@ var oTableSettingsList_example = {
 		 * */
 		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },
 		
+		/** 
+		 * @description wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden
+		 * */
+		"selected": "...",
+		
 		/**
 		 *  @type {function} 
 		 *  @description ken een functie toe aan een toets at keyup
@@ -1668,6 +1673,11 @@ conf.getHeaderButtonMenu = function(aButtonSettings){
 	if (typeof aButtonSettings["menu"] == 'undefined')
 		return null;
 	return aButtonSettings["menu"];
+};
+conf.getHeaderButtonMenuSelected = function(aButtonSettings){
+	if (typeof aButtonSettings["selected"] == 'undefined')
+		return null;
+	return aButtonSettings["selected"];
 };
 conf.getHeaderButtonToolTip = function(aButtonSettings){
 	if (typeof aButtonSettings["tooltip"] == 'undefined')

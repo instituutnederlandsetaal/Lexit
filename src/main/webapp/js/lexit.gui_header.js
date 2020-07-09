@@ -295,6 +295,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		var aButtonSettings = 	conf.getHeaderButtonSettings(aTableSettings, i);
 		var sButtonName = 		conf.getHeaderButtonName(aButtonSettings);
 		var aButtonMenu = 		conf.getHeaderButtonMenu(aButtonSettings);
+		var sSelectedItem = 	conf.getHeaderButtonMenuSelected(aButtonSettings);
 		var sButtonBgColor = 	conf.getHeaderButtonBgColor(aButtonSettings);
 		var sButtonTextColor = 	conf.getHeaderButtonTextColor(aButtonSettings);
 		var sToolTip = 			conf.getHeaderButtonToolTip(aButtonSettings);
@@ -329,20 +330,22 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 			.attr("name", i) // give button its number as name attribute
 			.addClass("header_button");
 			
-			customButton.append(
-					$("<option></option>")							
-						.attr("value", sButtonName )
-						.text( sButtonName )
-				);
-			
 			// append all the options
 			for (sOneOption in aButtonMenu)
 			{
-				customButton.append(
-					$("<option></option>")							
-						.attr("value", sOneOption )
-						.text( sOneOption )
-				);
+				if (sSelectedItem == sOneOption)	// option to be selected by default
+					customButton.append(
+						$("<option></option>")							
+							.attr("value", sOneOption )
+							.text( sOneOption )
+							.prop('selected', true)			
+					);
+				else
+					customButton.append(			// other options
+							$("<option></option>")							
+								.attr("value", sOneOption )
+								.text( sOneOption )
+						);
 			}
 			// button behaviour
 			customButton.bind("change", function(){
@@ -350,30 +353,30 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 				var aButtonSettings = conf.getHeaderButtonSettings(aTableSettings, $(this).attr("name"));
 				var sChosenOption = $(this).val();
 				
-				// menu option has been clicked upon (as it's not the button name, which is visible by default)
-				if (sChosenOption != sButtonName) 
-					{
-					// retrieve menu option function 					
-					var aButtonMenu = conf.getHeaderButtonMenu(aButtonSettings);
-					// bind callback to be called for this particular option
-					aButtonMenu[sChosenOption](mt.getDataTableObjectOf(sSomeTableName));
-					}				
+				var aButtonMenu = conf.getHeaderButtonMenu(aButtonSettings);
+				// bind callback to be called for this particular option
+				aButtonMenu[sChosenOption](mt.getDataTableObjectOf(sSomeTableName));
 				$(this).blur();				
 				
-				// button name must keep visible after a choice was name
-				var sButtonName = conf.getHeaderButtonName(aButtonSettings);
-				$(this).val(sButtonName);
 			});
 		}
 		
 		
+		// append div for button
+		$("#"+sSomeTableName+"_filter").append(
+			$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+i).css("display", "inline")
+			);
+		
 		// add tooltip
 		if (sToolTip != null)
 			customButton.attr("title", sToolTip).addClass("tooltip");
-	
-		$("#"+sSomeTableName+"_filter").append(
-			$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+i).css("display", "inline").append(customButton)
-			);
+		
+		// add label (for select buttons) 
+		if (aButtonMenu != null)
+			$("#"+sSomeTableName+"_custombutton_"+i).append("<label></label>").attr("for", i).text(sButtonName)  // give label/button its number as name attribute
+			
+		// add button (had its own label)
+		$("#"+sSomeTableName+"_custombutton_"+i).append(customButton);
 		}
 	
 };
