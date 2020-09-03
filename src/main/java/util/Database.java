@@ -2552,7 +2552,16 @@ public class Database {
 			String sortSeparator = "";
 			for (int s = 0; s < aSortCol.length; s++)
 			{
-				sortPart += sortSeparator + getSafeFieldName(aSortCol[s]) + " " + aSortDir[s];
+				// apply reverse sorting if required
+				if (aSortDir[s].toLowerCase().contains("reverse"))
+				{
+					sortPart += sortSeparator + "REVERSE("+getSafeFieldName(aSortCol[s]) + ") " + aSortDir[s].replaceAll("(reverse|REVERSE)", "");
+				}
+				// normal sorting
+				else
+				{
+					sortPart += sortSeparator + getSafeFieldName(aSortCol[s]) + " " + aSortDir[s];
+				}
 				sortSeparator = ", ";
 			}
 			query += sortPart;

@@ -269,10 +269,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			// Trick to be able to read extra data from the server response.
 			// Normally, Datatables expects only a few params to be returned, like:
 			//  recordsTotal, recordsFiltered and data.
-			// Since jQuery accepts an array of functions in the success callback of ajax,
-			// we first call 'fnCallback' which is the built-in Datatables callback
-			// but we also call 'tb.processExtraParamsFromServerResponse' to which the json response is passed
-			// so we can read the extra server params from there!
+			// However by calling 'tb.processExtraParamsFromServerResponse', to which the json response is passed,
+			// we can read the extra server params from there!
 			// (see: http://www.datatables.net/forums/discussion/4968/accessing-the-ajax-json-response-from-within-fndrawcallback/p1)
 			"dataSrc" : function(json){
 				
@@ -282,7 +280,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				$("#"+sSomeTableName+"_info").hide();
 				
 				// now put in the info we got from the server
-				tb.processExtraParamsFromServerResponse(json, sSomeTableName);	        	
+				tb.processExtraParamsFromServerResponse(json, sSomeTableName);
 	        				 
 	        	// return the data sent by the server
 	        	return json.data;
@@ -375,8 +373,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			        		.attr("title", currentTooltip+"Rij "+ (iRowNumber+1) +" in '"+currentColumnName+"'")
 			        		.addClass("tooltip");
 						}
-				});
-				
+				});				
 		        
 		    }
 			
@@ -780,7 +777,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 	// Change count rendering according to count quality
 	//
 	// NB: Since the info div is not filled immediately after the ajax call,
-	//     we have wait for the draw event to finish before
+	//     we have to wait for the draw event to finish before
 	//     processing the table info	
 
 	
@@ -805,7 +802,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 			}
 					
 		
-		// pre-processing: if no query was send (so result is whole table), Datatables
+		// pre-processing: if no query was sent (so result is whole table), Datatables
 		// actually shows the whole count as if it was an query count. But the
 		// relevent count quality is in this case the total count quality, not the query
 		// count quality. To make sure we will get just that, we replace _PLUSMN_ in the
@@ -826,7 +823,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		//  to require an exact count)
 		bForceExactCount = false;
 		
-		// now the table info the correctly set, make it visible again
+		// now the table info is correctly set, make it visible again
     	$("#"+sSomeTableName+"_info").show();	
     	    	
 	});
@@ -1119,7 +1116,8 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 							sClassPrefix + "editable_checkbox"
 							: sClassPrefix + "not_editable_checkbox",
 				"visible": 	columnVisible,
-				"sortable":	columnVisible && columnHasDataType ? columnSortable : false
+				"sortable":	columnVisible && columnHasDataType ? columnSortable : false,
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []
 				} );
 			
 			
@@ -1137,7 +1135,8 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 								sClassPrefix + "editable_selectbox"
 								: sClassPrefix + "not_editable_selectbox",
 				"visible": 		columnVisible,
-				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false
+				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []
 				} );
 			
 		
@@ -1158,9 +1157,9 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 									sClassPrefix + "editable_text" 
 									: sClassPrefix + "not_editable_text",
 					"visible": 		columnVisible,
-					"sortable": 	columnVisible && columnHasDataType ? columnSortable : false
-						} 
-					);
+					"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
+					"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []		
+					} );
 				
 			
 				}
