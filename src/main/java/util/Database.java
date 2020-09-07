@@ -2553,9 +2553,9 @@ public class Database {
 			for (int s = 0; s < aSortCol.length; s++)
 			{
 				// apply reverse sorting if required
-				if (aSortDir[s].toLowerCase().contains("reverse"))
+				if (aSortDir[s].toLowerCase().contains("_reverse"))
 				{
-					sortPart += sortSeparator + "REVERSE("+getSafeFieldName(aSortCol[s]) + ") " + aSortDir[s].replaceAll("(reverse|REVERSE)", "");
+					sortPart += sortSeparator + "REVERSE("+getSafeFieldName(aSortCol[s]) + ") " + aSortDir[s].replaceAll("(_reverse|_REVERSE)", "");
 				}
 				// normal sorting
 				else

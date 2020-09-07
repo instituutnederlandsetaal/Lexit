@@ -14448,6 +14448,8 @@
 		/* Sorting */
 		"sSortAsc": "sorting_asc",
 		"sSortDesc": "sorting_desc",
+		"sSortAscReverse": "sorting_asc_reverse",
+		"sSortDescReverse": "sorting_desc_reverse",
 		"sSortable": "sorting", /* Sortable in both directions */
 		"sSortableAsc": "sorting_asc_disabled",
 		"sSortableDesc": "sorting_desc_disabled",
@@ -14892,14 +14894,28 @@
 					cell
 						.removeClass(
 							column.sSortingClass +' '+
-							classes.sSortAsc +' '+
-							classes.sSortDesc
+							classes.sSortAsc +" "+ 
+							classes.sSortAscReverse +" "+ 
+							classes.sSortDesc +" "+ 
+							classes.sSortDescReverse 
 						)
+//						.removeClass(
+//							column.sSortingClass +' '+
+//							classes.sSortAsc +' '+
+//							classes.sSortDesc
+//						)
 						.addClass( columns[ colIdx ] == 'asc' ?
 							classes.sSortAsc : columns[ colIdx ] == 'desc' ?
-								classes.sSortDesc :
-								column.sSortingClass
+									classes.sSortDesc : columns[ colIdx ] == 'asc_reverse' ?
+										classes.sSortAscReverse : columns[ colIdx ] == 'desc_reverse' ?
+												classes.sSortDescReverse :
+												column.sSortingClass
 						);
+//						.addClass( columns[ colIdx ] == 'asc' ?
+//							classes.sSortAsc : columns[ colIdx ] == 'desc' ?
+//								classes.sSortDesc :
+//								column.sSortingClass
+//						);
 				} );
 			},
 	
@@ -14921,12 +14937,25 @@
 					var colIdx = column.idx;
 	
 					cell
-						.removeClass( classes.sSortAsc +" "+classes.sSortDesc )
+						.removeClass( 
+								classes.sSortAsc +" "+ 
+								classes.sSortAscReverse +" "+ 
+								classes.sSortDesc +" "+ 
+								classes.sSortDescReverse 
+						)
+						//.removeClass( classes.sSortAsc +" "+classes.sSortDesc )
 						.addClass( columns[ colIdx ] == 'asc' ?
 							classes.sSortAsc : columns[ colIdx ] == 'desc' ?
-								classes.sSortDesc :
-								column.sSortingClass
+									classes.sSortDesc : columns[ colIdx ] == 'asc_reverse' ?
+											classes.sSortAscReverse : columns[ colIdx ] == 'desc_reverse' ?
+													classes.sSortDescReverse :
+													column.sSortingClass
 						);
+//						.addClass( columns[ colIdx ] == 'asc' ?
+//							classes.sSortAsc : columns[ colIdx ] == 'desc' ?
+//								classes.sSortDesc :
+//								column.sSortingClass
+//						);
 	
 					cell
 						.find( 'span.'+classes.sSortIcon )

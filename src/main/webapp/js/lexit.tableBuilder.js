@@ -1117,7 +1117,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 							: sClassPrefix + "not_editable_checkbox",
 				"visible": 	columnVisible,
 				"sortable":	columnVisible && columnHasDataType ? columnSortable : false,
-				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []
 				} );
 			
 			
@@ -1136,7 +1136,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 								: sClassPrefix + "not_editable_selectbox",
 				"visible": 		columnVisible,
 				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
-				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []
 				} );
 			
 		
@@ -1158,7 +1158,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 									: sClassPrefix + "not_editable_text",
 					"visible": 		columnVisible,
 					"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
-					"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc reverse", "desc reverse" ] : []		
+					"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []		
 					} );
 				
 			
