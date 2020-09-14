@@ -46,6 +46,8 @@ gui.activateEllipsis = function(sSomeTableName){
 		// retrieve needed configuration parameters		
 		var columnVisible = 	conf.getVisibility(oColumnConfig);
 		var columnEllipsis =	conf.getEllipsis(oColumnConfig);
+		var columnEllipsisWidth = conf.getEllipsisWidth(oColumnConfig);
+		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
 	
 		// if the column is visible and it ellipsis is required, that activate it! 
 		if (columnVisible && columnEllipsis)
@@ -71,16 +73,19 @@ gui.activateEllipsis = function(sSomeTableName){
 				.css("overflow", "hidden")
 				.css("text-overflow", "ellipsis")
 				.css("white-space", "nowrap")
-				.css("max-width", "200px");
+				.css("max-width", columnEllipsisWidth);
 
-				$("div."+divClassName).off();
-				
-				$("div."+divClassName).mouseover(function(){
-					$(this).css("white-space", "normal");
-				});
-				$("div."+divClassName).mouseout(function(){
-					$(this).css("white-space", "nowrap");
-				});
+				if (columnEllipsisUnwrap)
+					{
+					$("div."+divClassName).off();
+					
+					$("div."+divClassName).mouseover(function(){
+						$(this).css("white-space", "normal");
+					});
+					$("div."+divClassName).mouseout(function(){
+						$(this).css("white-space", "nowrap");
+					});
+					}				
 				
 			});
 			

@@ -790,6 +790,8 @@ fx.getDataFromSiblingCell = function(oCell, sOtherColumnName){
  * 
  * @param {API-object-instance} oCell - An API instance of a cell
  * @returns {String} Cell content
+ * 
+ * @see fx.getCheckboxValue
  */
 fx.getDataFromCell = function(oCell){
 	
@@ -873,6 +875,21 @@ fx.getWordClickedUponInCell = function(oMixed, sColumnName){
 	return fn.getWordClickedUponInNode(oCell.node());
 };
 
+
+/**
+ * Read the value of a checkbox cell in a reliable way
+ * 
+ * @param {API-object-instance} oCell - An API instance of a cell
+ * @returns {Boolean} the checkbox value
+ * 
+ * @see fx.getDataFromCell
+ */
+fx.getCheckboxValue = function(oCell){
+	
+	fx._checkApiInstance("fx.getCheckboxValue", oCell);
+	
+	return fn.getCheckboxValue(oCell.node())
+};
 
 
 // *************************************************

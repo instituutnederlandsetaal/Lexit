@@ -399,6 +399,18 @@ var oTableConfigurationList_example = {
 		 */
 		"ellipsis": false,
 		
+		
+		/**
+		 * @description 'max-width' attribuut bij ellipsis.
+		 */
+		"ellipsis_width": "200px",
+		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.
+		 */
+		"ellipsis_unwrap": true,
+		
 		/**
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
 		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
@@ -850,6 +862,26 @@ conf.getEllipsis = function(aColumnConfig){
 		return false;		
 	return aColumnConfig["ellipsis"];
 };
+
+// retrieve ellipsis width
+// default is 200px
+conf.getEllipsisWidth = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_width"] == 'undefined')
+		return "200px";		
+	return aColumnConfig["ellipsis_width"];
+};
+
+// retrieve ellipsis behavior: should the content be unwrapped or not?
+// default: true
+conf.getEllipsisUnwrap = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_unwrap"] == 'undefined')
+		return true;		
+	return aColumnConfig["ellipsis_unwrap"];
+};
+
+
 
 
 // retrieve filter settings for one column

@@ -1023,7 +1023,8 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		var columnButton = 		conf.getButtonSetting(oColumnConfig);
 		var columnWidth = 		conf.getWidthSetting(oColumnConfig);
 		var cellClass = 		conf.getCellClass(oColumnConfig);
-		var columnHasDataType =	mt.getListOfColumnTypesOf(sSomeTableName)[i] != 'unknown';
+		var columnType = 		mt.getListOfColumnTypesOf(sSomeTableName)[i];
+		var columnHasDataType =	columnType != 'unknown';
 		
 		// build array of visible columns (we need to distinguish them from complete column list)
 		if (columnVisible) 
@@ -1117,7 +1118,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 							: sClassPrefix + "not_editable_checkbox",
 				"visible": 	columnVisible,
 				"sortable":	columnVisible && columnHasDataType ? columnSortable : false,
-				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc" ] : []
 				} );
 			
 			
@@ -1136,7 +1137,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 								: sClassPrefix + "not_editable_selectbox",
 				"visible": 		columnVisible,
 				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
-				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []
+				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc" ] : []
 				} );
 			
 		
@@ -1158,7 +1159,13 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 									: sClassPrefix + "not_editable_text",
 					"visible": 		columnVisible,
 					"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
-					"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc", "asc_reverse", "desc_reverse" ] : []		
+					"orderSequence": columnVisible && columnHasDataType ? 
+							( columnType.toLowerCase().match(/^(character varying|varchar|char|text)/) != null ? 
+									[ "asc", "desc", "asc_reverse", "desc_reverse" ]	// text type 
+									: 
+									[ "asc", "desc" ] 	 								// other type
+							)
+							: []		
 					} );
 				
 			

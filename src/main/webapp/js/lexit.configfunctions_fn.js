@@ -1964,6 +1964,8 @@ fn.getDataFromSiblingNode = function(nCell, sOtherColumnName){
  * 
  * @param {Node} nCell - A cell node
  * @returns {String} Cell content
+ * 
+ * @see fn.getCheckboxValue
  */
 fn.getDataFromCellNode = function(nCell){
 	
@@ -2295,6 +2297,22 @@ fn._selectionIsReliable = function(nCell, iStart, iEnd, sText){
 	
 };
 
+
+/**
+ * Read the value of a checkbox cell in a reliable way
+ * 
+ * @param {Node} nCell - A cell node containing a checkbox 
+ * @returns {Boolean} the checkbox value
+ * 
+ * @see fn.getDataFromCellNode
+ */
+fn.getCheckboxValue = function(nCell){
+	
+	fn._checkApiInstance("fn.getDataFromCellNode", nCell);
+	fn._checkjQueryObject("fn.getDataFromCellNode", nCell);
+	
+	return $(nCell).find("input").eq(0).prop("checked");
+};
 
 
 
