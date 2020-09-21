@@ -289,7 +289,7 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 
 sf.enableSearchFields = function(someTablename){
 	
-	// disable automatic search on keypress (default behavious of Datatables)
+	// disable automatic search on keypress (default behaviour of DataTables)
 	// now search starts only after pressing enter
 	
 	// main search function
@@ -847,7 +847,7 @@ sf.startMultiColumnSearch = function(someTablename){
 	$("#"+someTablename+"_searchboxes div").each(function(i){
 				
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(someTablename)[i]);
-		var columnSearchQueryTransformFunction = conf.getSearchForm(oColumnConfig);
+		//var columnSearchQueryTransformFunction = conf.getSearchForm(oColumnConfig);
 		
 		// do we have a checkbox?
 		var isACheckBox = $(this).find("input").eq(0).attr("type")=="checkbox";
@@ -868,8 +868,8 @@ sf.startMultiColumnSearch = function(someTablename){
 			oneSearchBoxValue = "\""+oneSearchBoxValue.replace(/^\/\//, 'exact:')+"\"";
 		
 		// if needed (config file), transform the query
-		if (columnSearchQueryTransformFunction != null)
-			oneSearchBoxValue = columnSearchQueryTransformFunction(oneSearchBoxValue);
+//		if (columnSearchQueryTransformFunction != null)
+//			oneSearchBoxValue = columnSearchQueryTransformFunction(oneSearchBoxValue);
 		
 		
 		// ** TEXT or SELECT filter **
@@ -936,10 +936,18 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	
 	var isASelectBox = conf.getSelectionBox(oColumnConfig) != null || mt.getListOfColumnTypesOf(sTableName)[iColumnIndex]==USER_DEFINED;
 	
-	if (isASelectBox && 
+	// query transformation (config lile "searchform": function(value){return value.blah();})
+	var fnColumnSearchQueryTransformFunction = conf.getSearchForm(oColumnConfig);
+	
+	if (	isASelectBox && 
+			fnColumnSearchQueryTransformFunction == null && // custom query transformation has priority on general transformation
 			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !isRegex(sValue) ) 
 		)
 		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
+	
+	// apply custom query transformation if general transformation was canceled
+	if (fnColumnSearchQueryTransformFunction != null)
+		sValue = fnColumnSearchQueryTransformFunction(sValue);
 	
 	return sValue;
 };
