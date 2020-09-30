@@ -2169,6 +2169,13 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
  */
 fn.getWordClickedUponInNode = function(nMixed, sColumnName){
 	
+	// NB:
+	// This function appeared to malfunction in FF
+	// when right-clicking.
+	// If needed in the future, some solution is provided here:
+	//
+	// https://stackoverflow.com/questions/43571090/detect-which-word-has-been-right-clicked-on-within-a-text
+	
 	fn._checkApiInstance("fn.getWordClickedUponInNode", nMixed);
 	fn._checkjQueryObject("fn.getWordClickedUponInNode", nMixed);
 	

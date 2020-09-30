@@ -76,7 +76,7 @@ var oTableSettingsList_example = {
 		
 		/** 
 		 * @type {array} 
-		 * @description volgorde waarin de kolommen moeten worden weergegeven,
+		 * @description Volgorde waarin de kolommen moeten worden weergegeven,
 		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)
 		 * */
 		"columns_order": ["colname1", "colname2", "colnameX"],
@@ -89,6 +89,18 @@ var oTableSettingsList_example = {
 		 * */
 		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
 		
+		
+		/**
+		 * @type {string}
+		 * @description Wanneer een tabel een kolom bevat waarnaar rijen gegroepeerd kunnen worden
+		 * (omdat meerdere rijen dezelfde waarde hebben in bedoelde kolom), is het mogelijk om de groepen
+		 * zichtbaar te maken: in parameter "grouping_column" geeft men de naam op van de kolom
+		 * waarnaar gegroepeerd kan worden. 
+		 * Let wel: gebruik van deze parameter zorgt er alleen voor dat groepen op het scherm zichtbaar 
+		 * worden gemaakt, maar om daadwerkelijk te groeperen moet de tabel vooraf op dezelfde kolom worden 
+		 * gesorteerd.      
+		 */
+		"grouping_column": "...",
 		
 		/**
 		 * @description Breedte van de tabel. Synoniem: "width"
@@ -1577,6 +1589,16 @@ conf.getTableGroup = function(aTableSettings){
 	if (typeof aTableSettings["group"] == 'undefined')
 		return "Default";
 	return aTableSettings["group"];
+	
+};
+
+
+
+conf.getGroupingColumn = function(aTableSettings){
+	
+	if (typeof aTableSettings["grouping_column"] == 'undefined')
+		return null;
+	return aTableSettings["grouping_column"];
 	
 };
 

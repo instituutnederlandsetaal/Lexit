@@ -355,7 +355,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			// (only if that is allowed)
 			if (mt.tableExists(sSomeTableName) && bTooltipsAllowedInTable ) {
 				
-				var oTable = mt.getDataTableObjectOf(sSomeTableName);
+				var oTable = 		mt.getDataTableObjectOf(sSomeTableName);
 				
 				oTable.rows().every(function(iRowIndex){
 					
@@ -376,6 +376,28 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				});				
 		        
 		    }
+			
+			// perform row grouping in table view, if required		
+			var sGroupingColumn = conf.getGroupingColumn(aTableSettings);
+			var iGroupingColumn = $.inArray(sGroupingColumn, mt.getListOfColumnsOf(sSomeTableName));
+			
+			if ( iGroupingColumn >=0 && mt.getViewType(sSomeTableName) =='table' )
+				{
+				// https://datatables.net/examples/advanced_init/row_grouping.html
+				var api = this.api();
+	            var rows = api.rows( {page:'current'} ).nodes();
+	            var last=null;
+	            
+	            api.column(iGroupingColumn, {page:'current'} ).data().each( function ( group, i ) {
+	                if ( last !== group ) {
+	                    $(rows).eq( i ).before(
+	                        '<tr class="group"><td colspan="'+(mt.getListOfVisibleColumnsOf(sSomeTableName)).length+'"><B>'+group+'</B></td></tr>'
+	                    );
+	 
+	                    last = group;
+	                }
+	            } );
+				}
 			
 			// remove focus from table selector to prevent unpredictable events when using keys
 			// (this is because the table selector might now have focus, so attempting to navigate the
@@ -490,6 +512,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 	} ); //end of datatable definition
 	
+	
+	// apply row grouping, if required
+	gui.applyRowGrouping(sSomeTableName);	
 	
 	// add the name of the table in its top div
 	// and set background color too

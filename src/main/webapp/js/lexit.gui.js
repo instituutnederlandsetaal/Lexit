@@ -170,6 +170,33 @@ gui.setPositionOfPaginationPane = function(sSomeTableName){
 };
 
 
+// apply row grouping, if configuration requires that
+gui.applyRowGrouping = function(sSomeTableName){
+	
+	var aTableSettings = conf.getTableSettings(sSomeTableName);
+	var sGroupingColumn = conf.getGroupingColumn(aTableSettings);
+	var iGroupingColumn = $.inArray(sGroupingColumn, mt.getListOfColumnsOf(sSomeTableName));
+	
+	// row grouping
+	// https://datatables.net/examples/advanced_init/row_grouping.html
+	
+	if (iGroupingColumn>=0)
+		{
+		// Order by the grouping
+	    $('#'+sSomeTableName+' tbody').on( 'click', 'tr.group', function () {
+	    	
+	    	var oTable = mt.getDataTableObjectOf(sSomeTableName);
+	    	
+	        var currentOrder = oTable.order()[0];
+	        if ( currentOrder[0] === iGroupingColumn && currentOrder[1] === 'asc' ) {
+	        	oTable.order( [ iGroupingColumn, 'desc' ] ).draw();
+	        }
+	        else {
+	        	oTable.order( [ iGroupingColumn, 'asc' ] ).draw();
+	        }
+	    });
+		}
+}
 
 
 
@@ -1154,14 +1181,14 @@ gui.setColumnHighlight = function(sSomeTableName){
 	
 	$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
 	
-	if ($("#"+sSomeTableName+" tbody tr").length <= iRowThreshold)
+	if ($("#"+sSomeTableName+" tbody tr:not('.group')").length <= iRowThreshold)
 		{
-		$("#"+sSomeTableName+" tbody").on("mouseenter.columnHighlight", "td", 
+		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseenter.columnHighlight", "td", 
 				function() {				
 				// highlight columns
 				var iNodeNr = $("#"+sSomeTableName+" tbody td").index(this);
 				var iCol = iNodeNr % iNumberOfVisibleColumns;
-				$("#"+sSomeTableName+" tbody tr").each(function(i){
+				$("#"+sSomeTableName+" tbody tr:not('.group')").each(function(i){
 					// don't highlight selected columns
 					if ($(this).hasClass("selected")) return;
 					// give each column the right shaded color
@@ -1170,12 +1197,12 @@ gui.setColumnHighlight = function(sSomeTableName){
 					.css("background-color", mt.columnsHighlight_getNodeHighlightColors(sSomeTableName)[iIndexOfTdInMap]);
 				});
 			});
-		$("#"+sSomeTableName+" tbody").on("mouseleave.columnHighlight", "td", 
+		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseleave.columnHighlight", "td", 
 				   function() {					
 					// remove highlight from columns
 					var iNodeNr = $("#"+sSomeTableName+" tbody td").index(this);
 					var iCol = iNodeNr % iNumberOfVisibleColumns;
-					$("#"+sSomeTableName+" tbody tr").each(function(i){
+					$("#"+sSomeTableName+" tbody tr:not('.group')").each(function(i){
 						// don't change color attributes of selected columns
 						if ($(this).hasClass("selected")) return;
 						// give each cell its own color back

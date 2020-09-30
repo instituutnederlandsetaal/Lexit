@@ -158,6 +158,14 @@ table.display tr.heading2 td {
 	border-bottom: 1px solid #aaa;
 }
 
+/*
+* added for styling row grouping
+*/
+table.display tr.group td {
+	color: #F2F2F2 !important;
+	background-color: #585858 !important;
+}
+
 table.display td {
 	padding: 3px 10px;
 }
