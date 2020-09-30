@@ -2188,7 +2188,7 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
     // all browsers, except IE before version 9
     if (typeof window.getSelection != "undefined") 
     {    	
-        range = window.getSelection().getRangeAt(0);   
+        range = window.getSelection().getRangeAt(0);        
         wholeRange = range.cloneRange();
         wholeRange.selectNodeContents(nCell);
         priorRange = range.cloneRange();

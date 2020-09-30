@@ -187,8 +187,9 @@ gui.applyRowGrouping = function(sSomeTableName){
 	    	
 	    	var oTable = mt.getDataTableObjectOf(sSomeTableName);
 	    	
-	        var currentOrder = oTable.order()[0];
-	        if ( currentOrder[0] === iGroupingColumn && currentOrder[1] === 'asc' ) {
+	        var currentOrder = oTable.order();
+	        if ( currentOrder.length>0 && 
+	        		currentOrder[0][0] === iGroupingColumn && currentOrder[0][1] === 'asc' ) {
 	        	oTable.order( [ iGroupingColumn, 'desc' ] ).draw();
 	        }
 	        else {
