@@ -1,0 +1,40 @@
+
+
+
+Bron:
+http://stackoverflow.com/questions/17249939/jsdoc-setting-up
+
+===============
+
+Well, are you using windows or GNU/Linux? First, you have to follow the default tags to markup your source code, identifying your classes, methods, parameters, etc... After that, you download the file here: https://github.com/jsdoc3/jsdoc Extract it and then go to folder jsdoc-master.
+
+Inside it, you have a script called jsdoc (with no extension). Only you have to do is execute it pointing the whole path to your .js file you want to create a documentation like this: ./jsdoc your_class.js Then, in a couple minutes you'll have the output inside the 'out' folder. Open the .html file and bang! You have your documentation working pretty good.
+
+Right here you can find some common tags to use in your code (as comments): http://usejsdoc.org/
+
+This solution is for Unix based system. But, there is another one using nodejs (that you can run with windows, Linux, mac, etc...). First, download the nodejs here: http://nodejs.org/
+
+Then go to this website to take a look at the package jsdoc: https://npmjs.org/
+
+Then, go back to your terminal (in any operating system after installed node) and type: npm install -g jsdoc The option -g means globally, so you have inside the main folder of your node packages and they are available for whatever project you have and you don't need to install it again and again...
+
+Finally, you can just use this command: jsdoc path/to/your/file.js
+
+And that's it! I hope it helps you.
+
+===============
+
+
+2 possible destinations:
+
+* [1] to the project, so we can get the API online
+* [2] to some other netwerk location, as offline documentation
+
+[1]:
+don't generate straight to this directory, it might be dangerous for the code integrity if we happen to make some mistake when giving the path etc.
+A good solution is to do step [2] and copy the result to this path:   C:\git_projects\Lexit\jsdoc
+
+[2]:
+jsdoc C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fn.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fx.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configurator.js C:\git_projects\Lexit\src\main\webapp\js\lexit.keys.js C:\git_projects\Lexit\src\main\webapp\js\lexit.multitables.js -d N:\databaseproject\Lex'it_API
+
+

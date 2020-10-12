@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Global</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Global</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2></h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="oTableConfigurationList_example"><span class="type-signature"></span>oTableConfigurationList_example<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>click</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Functie die moet worden getriggerd als men in een gegeven kolom klikt e.d.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dblclick</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Functie die moet worden getriggerd als men in een gegeven kolom dubbelklikt e.d.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bgcolor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Achtergrondkleur van de kolom als html kleurcode (zoals "#123ABC"). Als men slechts één kleurcode opgeef, dan berekent Lex'it automatisch een andere nuance van die kleur voor de oneven rijen (het werkt echter niet bij letterlijke kleurnamen (zoals "green"). Het is ook mogelijk om de kleur van zowel de oneven als de even rijen precies op te geven: dan moet men een tweeledige array opgeven, met de twee kleuren achter elkaar: ["#123ABC", "#ABC123"].</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Plaats een button in een kolom, met de als string opgegeven naam. Het is ook mogelijk om de inhoud van de kolom als Button-naam te gebruiken: daartoe moet in de configuratie als naam een lege string worden gegeven ("button": ""). De functionaliteit van de button moet worden opgegeven met parameter 'click'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>button_tooltip</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Zet een tooltip bij een button, te zien bij mouseover. Dit is handig om de functie van een knop te verklaren als de naam van de knop dat onvoldoende doet (bijv. vanwege een te korte naam).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cell_tooltip</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Zet een tooltip bij een cell, te zien bij mouseover. Dit is handig om zichtbaar te maken dat klikken op een cell een functie heeft.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>choosefrom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Maak van de zoekbox van betreffende kolom een select-box. De waarden om uit te kiezen kunnen op twee manieren worden opgegeven: [1] Als lege array, in welk geval de tool zelf de verschillende unieke waardes ophaalt in de database (voorbeeld: {"choosefrom": []}). [2] Als een array van stringwaarden. Omdat de select-box als eerste waarde de aansporing "Kiezen" zal hebben, moet "Kiezen" ook een onderliggende waarde hebben. Deze 'neutrale' waarde moet als allereerste lid van eerdergenoemde array worden opgegeven; als daar geen waarde aan toegekend hoeft te worden, dan voldoet een lege string (voorbeeld: {"choosefrom": ["", "1", "2", "3"]}, waarin "" de onderliggende waarde van "Kiezen" zal zijn).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>choosefrom_labels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Declareer labels voor de waardes van een select-box. Op die manier kunnen de onbegrijpelijke waardesdie de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>class</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nice_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Wanneer een kolom een technische, niet gebruikersvriendelijke naam heeft, kan men deze voor  de gebruiker een mooiere naam geven. Dat doet men met deze parameter.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>colsort</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke waarden zijn 'asc', 'desc' of null (default).Let wel: als er op meerdere kolommen tegelijk gesorteerd moet worden, wordt de prioriteit bepaald aande hand van de volgorde waarin de te sorteren kolommen worden opgegeven. Beter en overzichtelijkeris het om de sorteerkolommen in de table settings op te geven met parameter "columns_sorting" (zie aldaar).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contextmenu</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, zie: http://medialize.github.com/jQuery-contextMenu/docs.html)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>copy_upon_insert</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als dit true is, dan wordt bij een Zoek&Voegtoe-actie (insert) de inhoud van deze kolom gekopieerd. Kolommen waarbij deze setting op false staat worden juist niet meegenomen in de insert.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Bewerkbaarheid van een kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editcallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback functie die aangeroepen moet worden na het editten van een cell door een gebruiker. Let wel: dit is iets anders dan de 'editfunc'. 'editfunc' is bedoeld om de werking van de editfunctie te wijzigen. 'editcallback' wordt als laatste uitgevoerd, na 'editfunc'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editfunc</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Customfunctie die uitgevoerd moet worden na het editten van een cell. Deze functie is bedoeld om de standaardverwerking van celinvoer te vervangen: normaal zou de software de bewerkte cel in de database direct willen bewerken, maar wanneer de schermtabel een view is, moeten juist andere tabellen worden bewerkt en dat kan in editfunc worden gedeclareerd.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editrefresh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Lijst van tabellen die ververst moeten worden na het editten van een cell.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>edittrigger</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Regex waarmee de bewerkte cellinhoud mee moet matchen om de 'editfunc' te triggeren. Als 'edittrigger' null is, dan wordt 'editfunc' altijd getriggerd.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editerrorhandler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Handler dat aangeroepen wordt wanneer het bewerken van een editable veld een fout veroorzaakt.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ellipsis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ellipsis_width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">'max-width' attribuut bij ellipsis.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ellipsis_unwrap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>flexible_visibility</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als dit 'false' is, dan kan een gebruiker de zichtbaarheid van een kolom niet wijzigen (bijv. handig als een verbogen kolom informatie bevat die niet voor de gebruiker bestemd is).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keepfilter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als dit 'true' is, dan wordt de filter (uit parameter 'filter':...) opnieuw toegepast als men op 'RESET' klikt. Als men wil voorkomen dat de filter tussentijds wordt gewijzigd, moet met dezelfde kolom op "searchable": false zetten.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Doorzoekbaarheid van een kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sortable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sorteerbaarheid van een kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>searchform</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textcolor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Kleur die de tekst moet hebben in een gegeven kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textfont</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Font-family in een gegeven kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textsize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Font-size in een gegeven kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textstyle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Font-style in een gegeven kolom.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textweight</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Font-weight in een gegeven kolom. Zie voorbeeld bij 'textstyle'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>validator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Bij het gebruik van selectboxen kan het zijn dat een gebruiker een waarde per ongeluk klikt.Om dat te voorkomen, kan men in de configuratie afdwingen dat de gebruiker bij het maken van zijn keuze tegelijkertijd een opgegeven toets indrukt. Wanneer de gebruiker deze toets bij het maken van een keuze in een selectbox niet indrukt, wordt de keuze afgekeurd. Deze validatie-toets kan worden opgegeven als 'validator'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>visible</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Zichtbaarheid van een kolom. De zichtbaarheid van een kolom kan in de gebruikersinterface door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) moet men ook "flexible_visibility": false instellen.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Breedte van een kolom. Dit kan worden gespecificeerd in 'px', maar men kan ook een relatieve waarde (in '%') opgeven.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line263">line 263</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="oTableSettingsList_example"><span class="type-signature"></span>oTableSettingsList_example<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>group</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als men in het tabellen-menu de tabellen wil groeperen in subcategorieën (bijv. eencategorie 'klustabellen', een categorie 'opzoektabellen' enz.) dan voldoet het omde tabellen in kwestie een 'group' toe te kennen. Alle tabellen die dezelfde groepsnaamdelen, worden in het tabellen-selectiemenu bij elkaar gevoegd met deze groepsnaam als kop</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>header_color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">By default heeft de header van een tabel een licht grijze achtergrond. Met 'header_color'kan echter een eigen kleur worden opgegeven. Wanneer er op het scherm allerlei tabellen onder elkaar staan,maakt een eigen kleur een tabel sneller herkenbaar. Als men niet zelf een kleur wil kiezen, kan Lex'itzelf een kleur kiezen: geef 'header_color' dan de waarde 'auto'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nice_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als een tabel een lelijke 'technische' naam heeft, kan die in de interface tochmet een mooie naam worden weergegeven; geef deze naam op met deze setting.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>displaylength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">By default toont een tabel 10 rijen tegelijk. Dit aantal kan in de GUI door de gebruikerhandmatig worden gewijzigd. Maar indien men standaard een ander aantal rijen wil zien,zonder dat telkens weer handmatig te hoeven instellen, kan men dit aantal met 'displaylength'declareren.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>viewtype</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).Default is 'table'</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>creation_date</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>finished_date</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Om in het tabeloverzicht aan te geven wanneer de handmatige bewerking van een tabel af is, legt men het hier vast</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>processed_date</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Om in het tabeloverzicht aan te geven wanneer een tabel door scripts e.d. verwerkt is, legt men het hier vast</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>info</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>columns_order</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Volgorde waarin de kolommen moeten worden weergegeven,wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>columns_sorting</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>grouping_column</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Wanneer een tabel een kolom bevat waarnaar rijen gegroepeerd kunnen worden(omdat meerdere rijen dezelfde waarde hebben in bedoelde kolom), is het mogelijk om de groepenzichtbaar te maken: in parameter "grouping_column" geeft men de naam op van de kolomwaarnaar gegroepeerd kan worden. Let wel: gebruik van deze parameter zorgt er alleen voor dat groepen op het scherm zichtbaar worden gemaakt, maar om daadwerkelijk te groeperen moet de tabel vooraf op dezelfde kolom worden gesorteerd.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Breedte van de tabel. Synoniem: "width"</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Breedte van de tabel. Synoniem: "size"</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>header_height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">hoogte van de header boven de tabel; default is 50px</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>footer_height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">hoogte van de footer onder de tabel; default is 50px</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>main_search</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)beschikbaar moet zijn; default is true</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback bij initialisatie</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>repeat_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prereset_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback die uitgevoerd moet worden bij het aanklikken van de resetknop, maar dan netvoordat de tabel wordt herladen (zodat bijvoorbeeld filters aangepast kunnen worden enz)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>close_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>get_focus_on_tab</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>refresh_upon_focus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>reset_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "RESET" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>columns_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>viewtype_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Formulier/Tabel view" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>refresh_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Ververs" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>replace_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Zoek & Bewerk" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selection_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Selectie" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selection_button_active</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">zet de knop "Selectie" alvast aan/uit (default: false = uit)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>undo_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Ongedaan maken" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>goto_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "Ga naar" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>help_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">toon/verberg knop "?" (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contextmenu</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>menu</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">zorg ervoor dat een pulldownmenu verschijnt als een button in de tabelheader wordt aangeklikt</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selected</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keyup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ken een functie toe aan een toets at keyup</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keydown</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ken een functie toe aan een toets at keydown</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line15">line 15</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="API-object-instance">API-object-instance</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.configfunctions_fn.js.html">lexit.configfunctions_fn.js</a>, <a href="lexit.configfunctions_fn.js.html#line33">line 33</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="http://datatables.net/reference/type/DataTables.Api">http://datatables.net/reference/type/DataTables.Api</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="TableSettingsArray">TableSettingsArray</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pane</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    all elements
+                
+                </td>
+            
+
+            <td class="description last">Elements to use in the rendering of the top pane. This string must consist of a combinations of letters symbolizing the needed functionalities,like: 'i' for table information summary, 'f' for filtering input, 'l' for length changing input control,'p' for pagination control.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>top</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Vertical position of the left upper corner of the table (px)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>left</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Horizontal position of the left upper corner of the table (px)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>viewtype</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    table
+                
+                </td>
+            
+
+            <td class="description last">'table' or 'form'</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>displaylength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Integer</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    10
+                
+                </td>
+            
+
+            <td class="description last">Number of rows to show at once in the table</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore_initialisation_filters</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">if true, the default filters (stated in config file) to be set at initialization time will be omitted</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.configfunctions_fn.js.html">lexit.configfunctions_fn.js</a>, <a href="lexit.configfunctions_fn.js.html#line17">line 17</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 12 2020 11:10:16 GMT+0200 (GMT+02:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
