@@ -4258,7 +4258,17 @@ public class Database {
 			return databaseAccessHash.get("schema");
 	}
 	
-	
+	/**
+	 * Set a new schema to work in, if needed.
+	 * When this methode has been called, next database calls
+	 * will address this schema instead of the default one (t.i.
+	 * the one which is set in the .database config file)
+	 * @param newSchema
+	 */
+	public void setSchemaName(String newSchema){
+		
+		databaseAccessHash.put("schema", newSchema);
+	}
 
 	
 	

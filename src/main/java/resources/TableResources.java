@@ -135,6 +135,35 @@ public class TableResources {
 	}
 	
 	
+	// set current project to work in another schema than the default one
+	// (the default schema is the one specified in the .database config file)
+	// call:
+	// .../table/set_schema?db_name=...&schema_name=...
+	@Path("set_schema")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject setSchema(
+			@QueryParam("db_name") String dbName,
+			@QueryParam("schema_name") String schemaName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest){
+		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		// change psql search path
+		getDatabaseObject(co).setSchemaName(schemaName);
+		
+		DbResponseObject response = new DbResponseObject();
+		response.setResponse("search_path set to "+schemaName);
+		
+		return response;
+	}
+	
+	
 	// get the name of the user which had logged in
 	// call:
 	// .../table/get_dbinfo?db=...

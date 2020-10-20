@@ -176,6 +176,51 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 	
 }
 
+/**
+ * Change the psql search path
+ * (the default search path of a project is normally set as schema=... in the .database config file)
+ * 
+ * @param {String} sNewSchema - new schema to work in
+ * @param {Function} [fnCallback=null] - Some function to call after the new schema has been set
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ */
+fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
+	
+	// force webservice to clean its counter cache etc
+	// update the database
+	var url = WEBSERV_URL+"/table/set_schema"; 
+	$.ajax( {
+		"type": "GET",
+		"url": url,
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"schema_name": sNewSchema,
+			"dummy": getUniqueNumber()
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {
+	 		// callback if it is set
+	 		if (fnCallback!=null)
+	 				fnCallback();
+	 		},
+		"error": function(jqXHR, textStatus, errorThrown){
+			fn.refreshTable(sSomeTablename);
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.setSchema",
+					"sNewSchema": sNewSchema
+					});
+			else
+				fn.message("Fout",
+				"Fout bij aanroep van fn.setSchema("+sNewSchema+"): " +				
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+			}
+		} );
+};
+
+
 
 // *****************************************************************
 // *     GET GENERAL TABLE INFORMATION                             *
