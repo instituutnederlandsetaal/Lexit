@@ -3746,8 +3746,8 @@ fn._computeDialogPosition = function(){
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
- * When the field at index i has to be a selectbox instead of an input field, aValues must contain (at the same index i) an array of values to choose from. The value to be
- * selected by default must have '::selected' attached in its string value  
+ * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default / And when one needs a selectbox, give an array of values to choose from. 
+ * The value to be selected by default must have '::selected' attached in its string value.  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
@@ -3798,6 +3798,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		// should the input field be an select box?
 		// (in that case we expect the value at the current index i to contain an array of values to select from)
 		var bSelectBox = (aValues != null && typeof aValues[i] === 'object');
+		// or a checkbox?
+		var bCheckBox = (aValues != null && typeof aValues[i] === 'boolean');
 		
 		var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		var label = $("<label></label>")
@@ -3832,7 +3834,22 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				}
 			}
 		
+		// checkbox field type
+		
+		else if (bCheckBox)
+			{
+			input = $("<input></input>")
+			.attr("id", "prompt_"+fieldLC)
+			.attr("type", "checkbox" )
+			.val(aValues[i])
+			.prop("checked", aValues[i])
+			.change(function(){
+				$(this).val( $(this).prop("checked") );
+			});
+			}
+		
 		// text field type
+		
 		else
 			{
 			var sInputType = bTextarea ? "textarea" : "input";
