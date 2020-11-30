@@ -176,6 +176,13 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 	
 }
 
+
+
+// globals for the fn.setSchema() function
+var setSchemaNameCache = null;
+var setSchemaTimeOut = null;
+
+
 /**
  * Change the psql search path
  * (the default search path of a project is normally set as schema=... in the .database config file)
@@ -199,6 +206,37 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
+	 		
+	 		// Since the ContextObject (cache) of Lex'it is emptied after a few minutes of inactivity,
+			// we might end up with Lex'it addressing the default schema again (t.i. the one set in the .database config file), 
+	 		// instead of the schema set in this function.
+	 		// So, we need to set a TimeOut with a duration shorter than the ContextObject life duration,
+	 		// in such a way that this function is reactivated before the end of the ContextObject life cycle.
+	 		// ( about ContextObject life duration, see: java Constants.java, MAX_DB_OBJECT_DURATION )
+	 		
+	 		// But of course, if the code sets another schema later on,
+	 		// we must remove the TimeOut that was set to keep the previously set schema, 
+	 		// and set a new TimeOut as final step.
+	 		
+	 		if (setSchemaNameCache != sNewSchema && setSchemaTimeOut != null)
+	 			{
+	 			clearTimeout(setSchemaTimeOut);
+	 			}
+	 		
+	 		setSchemaNameCache = sNewSchema;
+	 		setSchemaTimeOut = setTimeout(
+					function(){
+						// BEWARE: the callback must be fired ONLY at the first call of fn.setSchema().
+						// Calling it at every TimeOut could cause unexpected behavior to the developers:
+						// the developers most probably expect that a schema is set once and for all, 
+						// and do not know of the necessity to re-call the function regularly, as this is just
+						// a trick to deal with the short life of the ContextObject. As a consequence, the
+						// callback give as a parameter is called only at the first round, to meet this 
+						// probable expectation (of developers) of the function behavior. 
+						fn.setSchema(sNewSchema, null, fnErrorHandler);
+						}, 
+					1000*60); 
+			
 	 		// callback if it is set
 	 		if (fnCallback!=null)
 	 				fnCallback();
@@ -219,6 +257,8 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			}
 		} );
 };
+
+
 
 
 

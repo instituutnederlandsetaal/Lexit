@@ -1100,7 +1100,7 @@ jQuery.fn.putInFront = function() {
 	
 	// get highest z-index on page
 	// but exclude some divs, which have their own z-index, and which must keep their z-index the highest (like tiptip_holder)
-	var iHighestZindex = Math.max.apply(null, $.map($('div:not(#tiptip_holder,#tiptip_content,#tiptip_arrow)'), function(e, n){
+	var iHighestZindex = Math.max.apply(null, $.map($(':not(div#tiptip_holder,div#tiptip_content,div#tiptip_arrow)'), function(e, n){
         if($(e).css('position')=='absolute')
              return parseInt($(e).css('z-index'))||1 ;
         })
