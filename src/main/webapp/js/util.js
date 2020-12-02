@@ -1109,7 +1109,10 @@ jQuery.fn.putInFront = function() {
 	
 	
 	var o = $(this[0]); // This is the selector element
-	o.css("z-index", iHighestZindex + 1 );
+	
+	// remember this one in case of visibility issues:
+	// https://stackoverflow.com/questions/6762174/jquery-uis-autocomplete-not-display-well-z-index-issue
+	o.css("z-index", (iHighestZindex + 1)+" !important" );
 }
 
 function getZindexOfTableInFrond(){
