@@ -45,7 +45,7 @@ kf.getActiveRowNumber = function(){
 	// number doesn't exist anymore, we should put it back to zero	
 	var sTable = kf.getActiveTable();
 	
-	var nTargettedNode = "#"+sTable+" tbody tr:eq("+iActiveRowNumber+")";
+	var nTargettedNode = "#"+sTable+" tbody tr:not('.group'):eq("+iActiveRowNumber+")";
 	if ( !$(nTargettedNode).elementExists() )
 		iActiveRowNumber = 0;
 	
@@ -326,7 +326,7 @@ kf.addKeyFunctions = function(){
 		
 		// triggers jQuery.contextMenu 
 		// (see: http://medialize.github.com/jQuery-contextMenu/docs.html)
-		$("#"+sActiveTable+" tbody tr:eq("+iActiveRow+") td").contextMenu();
+		$("#"+sActiveTable+" tbody tr:not('.group'):eq("+iActiveRow+") td").contextMenu();
 		
 		event.preventDefault();
 	});
@@ -695,5 +695,5 @@ kf._callCustomKeyFunctions = function(sKeyEventType){
 };
 
 kf._getTrElement = function(sTableName, iRowNumber){
-	return "#"+sTableName+" tbody tr:eq("+iRowNumber+")";
+	return "#"+sTableName+" tbody tr:not('.group'):eq("+iRowNumber+")";
 };

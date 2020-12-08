@@ -304,7 +304,7 @@ fx.selectAllRows = function(sSomeTable){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody tr').each(function(){
+	$("#"+sSomeTable+" tbody tr:not('.group')").each(function(){
 		if ( !$(this).hasClass("selected"))
 			$(this).toggleClass('selected');
 	});
@@ -326,7 +326,7 @@ fx.selectRow = function(sSomeTable, iRowNumber){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( iRowNumber>=0 && !nRowSelector.hasClass("selected"))
 		{
 		nRowSelector.toggleClass('selected');
@@ -353,7 +353,7 @@ fx.unselectRow = function(sSomeTable, iRowNumber){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( nRowSelector.hasClass("selected"))
 		nRowSelector.toggleClass('selected');
 };

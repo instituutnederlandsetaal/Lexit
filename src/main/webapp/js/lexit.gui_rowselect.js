@@ -7,8 +7,8 @@ var row = {};
 // assign functions for row selection
 row.addRowSelectionFunctions = function(sSomeTablename){
 	
-	$('#'+sSomeTablename+'_dynamic').off('click', '#'+sSomeTablename+' tbody tr');
-	$('#'+sSomeTablename+'_dynamic').on('click', '#'+sSomeTablename+' tbody tr', function() {
+	$('#'+sSomeTablename+'_dynamic').off('click', "#"+sSomeTablename+" tbody tr:not('.group')");
+	$('#'+sSomeTablename+'_dynamic').on('click', "#"+sSomeTablename+" tbody tr:not('.group')", function() {
 		
 		row._rowSelectionHandler(sSomeTablename, this);
 	} );
@@ -19,7 +19,7 @@ row._rowSelectionHandler = function(sSomeTablename, nRow){
 	
 	// store the row that was clicked on, to enable arrow keys
     kf.setActiveTable(sSomeTablename);
-	kf.setActiveRowNumber( $('#'+sSomeTablename+' tbody tr').index(nRow) );
+	kf.setActiveRowNumber( $("#"+sSomeTablename+" tbody tr:not('.group')").index(nRow) );
 	
 	// if row selection is not allowed, 
 	// we remove highlight and leave right now

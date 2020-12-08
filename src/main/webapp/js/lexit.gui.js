@@ -119,7 +119,7 @@ gui.putTooltipsOfColumnButtons = function(sSomeTablename){
 	
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
 	
-	$("#"+sSomeTablename+" tbody tr").each(function(){
+	$("#"+sSomeTablename+" tbody tr:not('.group')").each(function(){
 		
 		$(this).find("td").each(function(i){	
 				
@@ -226,8 +226,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	// remove the built-in datatables row even/odd class names, to prevent row highlight
 	// (as a form represents only one row, row highlight is of no use)
-	$("#"+sSomeTablename+"_wrapper tr").removeClass("odd");
-	$("#"+sSomeTablename+"_wrapper tr").removeClass("even");
+	$("#"+sSomeTablename+"_wrapper tr:not('.group')").removeClass("odd");
+	$("#"+sSomeTablename+"_wrapper tr:not('.group')").removeClass("even");
 	
 	// room to keep between top of form and bottom of header
 	var iRoomAboveAll = 30;
@@ -237,7 +237,7 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	var nReference = $( "#"+sSomeTablename+"_wrapper table");
 	var nReferentialTd = $("#"+sSomeTablename+"_wrapper").find("td").eq(0);
-	var nReferentialTr = $("#"+sSomeTablename+"_wrapper").find("tr").eq(0);
+	var nReferentialTr = $("#"+sSomeTablename+"_wrapper").find("tr:not('.group')").eq(0);
 	var iBaseLeft = parseInt(nReference.position().left);
 	var iBaseTop = parseInt(nReference.position().top);
 	

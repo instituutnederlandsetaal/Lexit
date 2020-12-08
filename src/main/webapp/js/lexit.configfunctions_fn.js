@@ -323,7 +323,7 @@ fn.tableIsEmpty = function(sSomeTablename){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
-	return $("#"+sSomeTablename+" tbody tr:eq(0)").find("td:eq(0)").hasClass("dataTables_empty");
+	return $("#"+sSomeTablename+" tbody tr:not('.group'):eq(0)").find("td:eq(0)").hasClass("dataTables_empty");
 };
 
 
@@ -1439,7 +1439,7 @@ fn.unselectAllRowNodes = function(sSomeTable){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody').find("tr").removeClass('selected');
+	$('#'+sSomeTable+' tbody').find("tr:not('.group')").removeClass('selected');
 	
 };
 
@@ -1456,7 +1456,7 @@ fn.selectAllRowNodes = function(sSomeTable){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody tr').each(function(){
+	$("#"+sSomeTable+" tbody tr:not('.group')").each(function(){
 		if ( !$(this).hasClass("selected"))
 			$(this).toggleClass('selected');
 	});
@@ -1476,7 +1476,7 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( iRowNumber>=0 && !nRowSelector.hasClass("selected"))
 		{
 		nRowSelector.toggleClass('selected');
@@ -1503,7 +1503,7 @@ fn.unselectRowNode = function(sSomeTable, iRowNumber){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( nRowSelector.hasClass("selected"))
 		nRowSelector.toggleClass('selected');
 };
@@ -1756,7 +1756,7 @@ fn.uncheckCheckboxes = function(nMixed, aListOfColumns, fnCallback){
 		var sColumnName =			aListOfColumns[i];			
 		var iVisibleColumnNumber =	fn.getVisibleColumnNumberOf(oTable, sColumnName);
 		
-		var nCell = $("#"+sTable+" tbody tr").eq(iRowNumber)
+		var nCell = $("#"+sTable+" tbody tr:not('.group')").eq(iRowNumber)
 			.find("td").eq(iVisibleColumnNumber)
 			.find("input").eq(0);
 		// prop is the most reliable 
@@ -1925,7 +1925,7 @@ fn.isRowNode = function(nMixed){
 	fn._checkApiInstance("fn.isRowNode", nMixed);
 	fn._checkjQueryObject("fn.isRowNode", nMixed);
 	
-	return $(nMixed).is("tr");
+	return $(nMixed).is("tr:not('.group')");
 };
 
 
@@ -3754,7 +3754,7 @@ fn._computeDialogPosition = function(){
 	var sTable = kf.getActiveTable();
 	if (sTable == null)	return {};
 	
-	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");	
+	var nRow = $("#"+sTable+"_wrapper table tbody tr:not('.group').selected:eq(0)");	
 	if ( nRow != null)
 		nRow = nRow.get(0); // get DOM element out of jquery object
 	else
