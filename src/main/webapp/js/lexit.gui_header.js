@@ -1365,6 +1365,8 @@ head.putHelpButton = function(sSomeTablename){
 				"<UL>"+
 				"<LI>oplopend (pijltje omhoog)</LI>" +
 				"<LI>aflopend (pijltje omlaag)</LI>" +
+				"<LI>retrograad oplopend (pijltje omhoog en R-teken)</LI>" +
+				"<LI>retrograad aflopend (pijltje omlaag en R-teken)</LI>" +
 				"</UL>"+
 				"Om de sorteerrichting te wijzigen, moet u nogmaals op de kolomnaam klikken.<BR>" +
 				"<BR>" +
@@ -1372,11 +1374,13 @@ head.putHelpButton = function(sSomeTablename){
 				"<B>Sorteren opheffen</B><BR>"+
 				"<BR>" +
 				"Als u het sorteren op een kolom wilt opheffen, moet u de SHIFT-toets ingedrukt houden. <BR>" +
-				"Door herhaaldelijk op de kolomnaam te klikken, gaat u dan door drie standen heen, totdat de " +
+				"Door herhaaldelijk op de kolomnaam te klikken, gaat u dan door verschillende standen heen, totdat de " +
 				"sortering opgeheven wordt:<BR>" +				
 				"<UL>"+
 				"<LI>oplopend sorteren</LI>" +
 				"<LI>aflopend sorteren</LI>" +
+				"<LI>retrograad oplopend</LI>" +
+				"<LI>retrograad aflopend</LI>" +
 				"<LI>neutraal (= niet sorteren)</LI>" +
 				"</UL>"+				
 				"<BR>"+
