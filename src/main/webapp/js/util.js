@@ -1112,7 +1112,12 @@ jQuery.fn.putInFront = function() {
 	
 	// remember this one in case of visibility issues:
 	// https://stackoverflow.com/questions/6762174/jquery-uis-autocomplete-not-display-well-z-index-issue
-	o.css("z-index", (iHighestZindex + 1)+" !important" );
+	// => o.css("z-index", (iHighestZindex + 1) );
+	
+	// PROBLEM of previous command caused by jQuery not understanding the !important attribute in css function
+	// (https://stackoverflow.com/questions/2655925/how-to-apply-important-using-css)
+	// so, we do it this way:
+	o.attr('style', function(i,s) { return (s||'') + 'z-index: '+(iHighestZindex + 1)+ ' !important;' });
 }
 
 function getZindexOfTableInFrond(){
