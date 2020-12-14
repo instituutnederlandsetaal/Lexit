@@ -1321,7 +1321,7 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 					
 					// The function gets the node as an argument, so as to be
 					// able to process the right content.
-					function(){			
+					function(event){			
 				
 						// highlight clicked row
 						// if this row wasn't selected yet, we have to select it to
@@ -1359,7 +1359,7 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 						// execute function from the configuration file
 						// except if the selection button is active (secure selection)
 						if ( !fn.rowsSelectionIsAllowed(sSomeTablename))
-							aColumnConfig[sMouseEvent]( mt.getDataTableObjectOf(sSomeTablename), this );
+							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), this );
 
 					} 
 				);

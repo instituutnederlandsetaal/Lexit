@@ -1128,7 +1128,7 @@ function getZindexOfTableInFrond(){
 	for (var i=0; i<aTables.length; i++)
 		{
 		var iCurrentZindex = $("#"+aTables[i]+"_dynamic").css("z-index");
-		iCurrentZindex = (iCurrentZindex == 'auto' ? 0 : iCurrentZindex); 
+		iCurrentZindex = (iCurrentZindex == 'auto' ? 0 : parseInt(iCurrentZindex) ); 
 		if (iCurrentZindex > iHighestZindex)
 			iHighestZindex = iCurrentZindex;		
 		}
