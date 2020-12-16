@@ -2195,7 +2195,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
     var sel, range, priorRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined" && window.getSelection.rangeCount > 0) 
+    if (typeof window.getSelection != "undefined" && window.getSelection().rangeCount > 0) 
     {    	
     	range = window.getSelection().getRangeAt(0);        
         priorRange = range.cloneRange();
@@ -2271,7 +2271,7 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
     var sel, range, priorRange, wholeRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined" && window.getSelection.rangeCount > 0) 
+    if (typeof window.getSelection != "undefined" && window.getSelection().rangeCount > 0) 
     {    	
         range = window.getSelection().getRangeAt(0);        
         wholeRange = range.cloneRange();
