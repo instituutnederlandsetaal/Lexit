@@ -2192,12 +2192,12 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange, fulltext;
+    var sel, range, priorRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined") 
+    if (typeof window.getSelection != "undefined" && window.getSelection.rangeCount > 0) 
     {    	
-        range = window.getSelection().getRangeAt(0);        
+    	range = window.getSelection().getRangeAt(0);        
         priorRange = range.cloneRange();
         priorRange.selectNodeContents(nCell);
         fulltext = priorRange.toString();
@@ -2268,10 +2268,10 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange, wholeRange, fulltext;
+    var sel, range, priorRange, wholeRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined") 
+    if (typeof window.getSelection != "undefined" && window.getSelection.rangeCount > 0) 
     {    	
         range = window.getSelection().getRangeAt(0);        
         wholeRange = range.cloneRange();
