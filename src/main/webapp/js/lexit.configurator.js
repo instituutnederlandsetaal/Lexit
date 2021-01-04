@@ -1321,7 +1321,9 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 					
 					// The function gets the node as an argument, so as to be
 					// able to process the right content.
-					function(event){			
+					function(event){
+				
+						var nCurrentCell = this;
 				
 						// highlight clicked row
 						// if this row wasn't selected yet, we have to select it to
@@ -1347,11 +1349,11 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 									}
 								}
 							// now select the current row
-							var bRowWasAlreadySelectedBeforeSelection = $(this).parent().hasClass('selected');
+							var bRowWasAlreadySelectedBeforeSelection = $(nCurrentCell).parent().hasClass('selected');
 							$(this).parent().addClass('selected');							
 							
 							// remember this row is selected now (since it must be unselected later)
-							hLastSelectedRow.put(sSomeTablename, $(this).parent());
+							hLastSelectedRow.put(sSomeTablename, $(nCurrentCell).parent());
 							hPreviousStateOfLastSelectedRow.put(sSomeTablename, bRowWasAlreadySelectedBeforeSelection);					
 							}
 						
@@ -1359,7 +1361,7 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 						// execute function from the configuration file
 						// except if the selection button is active (secure selection)
 						if ( !fn.rowsSelectionIsAllowed(sSomeTablename))
-							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), this );
+							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), nCurrentCell );
 
 					} 
 				);

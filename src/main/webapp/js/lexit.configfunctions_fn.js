@@ -636,6 +636,7 @@ fn.restoreTableState = function(sTableName){
 	
 	// Read the saved table state
 	var oTableState = mt.getTableState(sTableName);
+	if (oTableState == null) return;
 	
 	aFilters = oTableState["columns"];
 	
