@@ -311,28 +311,29 @@ td.selectColumns = function(sSomeTablename){
 	// get list of columns to choose from
 	var aColumnNames = mt.getListOfColumnsOf(sSomeTablename);
 	
-	// we need a array to save the original column settings, 
-	// so as to be able to recover those when user presses 'reset' in dialog
-	var aOriginalColumnSettings = new Array();
+	// build the list of draggable and clickable columns
 	
 	for (var i=0; i<aColumnNames.length; i++)
 		{
+		// get column name
 		var fieldLC = aColumnNames[i];
 		
 		// retrieve column client configuration
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, aColumnNames[i]);
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, fieldLC);
+		
+		// there might be a preferred, GUI friendly name stated in config
+		// (this name, if available, is the one to be displayed)
+		var sNiceName = conf.getColumnNiceName(oColumnConfig);		
+		
 		// is the column visible?
 		var columnVisible = conf.getVisibility(oColumnConfig);
-		
-		// save column settings as explained above
-		aOriginalColumnSettings.push(fieldLC+":"+(columnVisible?"true":"false"));
 		
 		
 		var input = $("<input></input>")
 			.attr("type", "checkbox")
 			.attr("name", fieldLC)			
 			.attr("id", "prompt_"+fieldLC)
-			// (un)checking a box implies that the table is not in optimal mode 
+			// some users (un)checking a box implies that the table is NOT in automatic/optimal mode  
 			.click(function(){bOptimal = false;}); 
 		
 		// check the box if the column is visible
@@ -356,7 +357,7 @@ td.selectColumns = function(sSomeTablename){
 			.css("position", "absolute")
 			.css("margin-left", "-3.0em");
 		var spanElement2 = $("<span></span>")
-			.text(fieldLC);
+			.text( sNiceName != null ? sNiceName : fieldLC ); // show column name of (if available) a preferred, GUI friendly name
 		liElement.append(spanElement1);
 		liElement.append(spanElement2);
 		sortableUl.append(liElement);
@@ -393,7 +394,7 @@ td.selectColumns = function(sSomeTablename){
 	                     			var aChosenColumns = new Array();
 	                    			
 	                    			$( "#"+promptDivId+" ul li" ).each(function(){
-	                    				var sColumnName = $(this).text();	                    				
+	                    				var sColumnName = $(this).attr("id");	                    				
 	                    				var bChosen = $( "#"+promptDivId+" ul li input#prompt_"+sColumnName ).prop("checked");
 	                    				
 	                    				aChosenColumns.push( sColumnName+":"+(bChosen?"true":"false") );
@@ -420,7 +421,7 @@ td.selectColumns = function(sSomeTablename){
 	                     		var aColumnListInNewOrder = new Array();
 	                     		for (var i=0; i<aColumnNames.length; i++)
 	                     		{
-	                     			var sNewColumnNameAfterResorting = $( "#"+promptDivId+" ul li:eq("+i+")" ).text();
+	                     			var sNewColumnNameAfterResorting = $( "#"+promptDivId+" ul li:eq("+i+")" ).attr("id");
 	                     			aColumnListInNewOrder.push(sNewColumnNameAfterResorting);
 	                     			var columnChecked = $( "#"+promptDivId+" ul li:eq("+i+") input").eq(0).prop("checked") == true;
 	                     			
@@ -539,7 +540,7 @@ td.selectColumns = function(sSomeTablename){
 	                        	// get the relevant columns
 	                        	var aListOfRelevantColumns = td._getRelevantColumns(sSomeTablename);
 	                    		$( "#"+promptDivId+" ul li" ).each(function(){
-	                    			var sColumnName = $(this).text();
+	                    			var sColumnName = $(this).attr("id");
 	                    			
 	                    			// if changing the setting is not allowed, skip
 	                    			var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
@@ -563,7 +564,7 @@ td.selectColumns = function(sSomeTablename){
 	                    		bOptimal = false;
 	                    		
 	                    		$( "#"+promptDivId+" ul li" ).each(function(){
-	                    			var sColumnName = $(this).text();
+	                    			var sColumnName = $(this).attr("id");
 	                    			
 	                    			// if changing the setting is not allowed, skip
 	                    			var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
@@ -584,7 +585,7 @@ td.selectColumns = function(sSomeTablename){
 	                    		bOptimal = false;
 	                    		
 	                    		$( "#"+promptDivId+" ul li" ).each(function(){
-	                    			var sColumnName = $(this).text();
+	                    			var sColumnName = $(this).attr("id");
 	                    			
 	                    			// if changing the setting is not allowed, skip
 	                    			var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
@@ -629,11 +630,18 @@ td.selectColumns = function(sSomeTablename){
 	                			// (see trick: http://stackoverflow.com/questions/12863437/change-just-text-in-li-that-contains-img)
 	                			$( "#"+promptDivId+" ul li").each(function(i){
 	                				
+	                				// retrieve column client configuration
+	                				var oColumnConfig = conf.getColumnConfig(oTableConfig, aOriginalColumnList[i]);
+	                				
+	                				// there might be a preferred, GUI friendly name stated in config
+	                				// (this name, if available, is the one to be displayed)
+	                				var sNiceName = conf.getColumnNiceName(oColumnConfig);	
+	                				
 	                				// get the text node of the li element and replace it by the column name
 	                				// we want to have there...
 	                				$(this).find("span").contents().filter(function() {	                			
 	                			      return (this.nodeType != 1 && this.textContent != '\n');
-	                				}).replaceWith(aOriginalColumnList[i]);
+	                				}).replaceWith( sNiceName != null ? sNiceName : aOriginalColumnList[i] );
 	                				
 	                			});
 	                			
