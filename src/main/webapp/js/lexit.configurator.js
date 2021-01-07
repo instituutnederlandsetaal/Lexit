@@ -1838,6 +1838,36 @@ conf.getDisplayLength = function(aTableSettings){
 };
 
 
+// retrieve dislay length menu
+
+conf.getDisplayLengthMenu = function(aTableSettings){
+	
+	if (typeof aTableSettings["displaylength_menu"] == 'undefined')
+		return 'Toon <select>'+
+		   '<option value="1">1</option>'+
+		   '<option value="5">5</option>'+
+           '<option value="10">10</option>'+
+           '<option value="20">20</option>'+
+           '<option value="50">50</option>'+
+           '<option value="100">100</option>'+
+           '<option value="500">500</option>'+
+           '<option value="1000">1000</option>'+
+           '<option value="-1">alle</option>'+
+           '</select> rijen';
+	
+	var sMenuBody = "";
+	for (var i=0; i<aTableSettings["displaylength_menu"].length; i++)
+		{
+		var sThisValue = aTableSettings["displaylength_menu"][i];
+		var sLabel = (sThisValue == -1 ? "alle" : sThisValue);
+		sMenuBody += '<option value="'+sThisValue+'">'+sLabel+'</option>';
+		}
+	
+	return 'Toon <select>'+ sMenuBody +	'</select> rijen';
+	
+};
+
+
 
 // retrieve reset button settings
 // default is true

@@ -233,17 +233,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				"next": "Volgende",
 				"last": "Laatste"
 			},
-			"lengthMenu": 'Toon <select>'+
-			   '<option value="1">1</option>'+
-			   '<option value="5">5</option>'+
-	           '<option value="10">10</option>'+
-	           '<option value="20">20</option>'+
-	           '<option value="50">50</option>'+
-	           '<option value="100">100</option>'+
-	           '<option value="500">500</option>'+
-	           '<option value="1000">1000</option>'+
-	           '<option value="-1">alle</option>'+
-	           '</select> rijen',
+			"lengthMenu": conf.getDisplayLengthMenu(aTableSettings),
 			"loadingRecords": "Data laden uit de database...",
 			"processing": "" // no processing message, we have a spinner
 		},
