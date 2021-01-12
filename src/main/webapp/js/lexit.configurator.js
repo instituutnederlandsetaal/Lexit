@@ -45,6 +45,13 @@ var oTableSettingsList_example = {
 		 */
 		"displaylength": 50,
 		
+		
+		/**
+		 * @description Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).
+		 * Voor 'alles tonen' moet waarde -1 worden opgegeven.
+		 */
+		"displaylength_menu": [1, 5, 10, 50],
+		
 		/**
 		 * @description Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).
 		 * Default is 'table'
@@ -422,6 +429,13 @@ var oTableConfigurationList_example = {
 		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.
 		 */
 		"ellipsis_unwrap": true,
+		
+		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? Default: true.
+		 */
+		"ellipsis_keep_selected_unwrapped": true,
 		
 		/**
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
@@ -892,6 +906,16 @@ conf.getEllipsisUnwrap = function(aColumnConfig){
 		return true;		
 	return aColumnConfig["ellipsis_unwrap"];
 };
+
+
+// retrieve ellipsis behavior: should a selected row remain unwrapped or not?
+// default: false
+conf.getEllipsisKeepSelectedRowOpen = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_keep_selected_unwrapped"] == 'undefined')
+		return false;		
+	return aColumnConfig["ellipsis_keep_selected_unwrapped"];
+}
 
 
 

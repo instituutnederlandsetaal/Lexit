@@ -18,7 +18,6 @@ gui.getTiptipConfig = function(){
 	}
 	else {
 		return {
-			activation: "dblclick",  
 			fadeOut: 0, // fade out immediately
 			defaultPosition: "top", 
 			edgeOffset: 10 // never less than 10! (see above)
@@ -46,6 +45,7 @@ gui.activateEllipsis = function(sSomeTableName){
 		// retrieve needed configuration parameters		
 		var columnVisible = 	conf.getVisibility(oColumnConfig);
 		var columnEllipsis =	conf.getEllipsis(oColumnConfig);
+		var columnKeepSelectedOpen = conf.getEllipsisKeepSelectedRowOpen(oColumnConfig);
 		var columnEllipsisWidth = conf.getEllipsisWidth(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
 	
@@ -63,28 +63,46 @@ gui.activateEllipsis = function(sSomeTableName){
 				
 				// https://codepen.io/jessicamarcus/pen/KpMwZw
 				
-				var sData = fx.getDataFromCellInRow(oCurrentRow, sNameOfCurrentColumn);
-				
-				sData = "<div class='"+divClassName+"'>" + sData + "</div>";
-				
+				var sData = fx.getDataFromCellInRow(oCurrentRow, sNameOfCurrentColumn);				
+				sData = "<div class='"+divClassName+"'>" + sData + "</div>";				
 				fx.putDataIntoCell(oCurrentRow, sNameOfCurrentColumn, sData);
 				
+				// currently selected row must be unwrapped
+				var bSelectedRow = (kf.getActiveTable() == sSomeTableName) ? kf.getActiveRowNumber() == iRowNr : false;
+								
 				$("div."+divClassName)
 				.css("overflow", "hidden")
 				.css("text-overflow", "ellipsis")
-				.css("white-space", "nowrap")
+				.css("white-space", bSelectedRow ? "normal" : "nowrap")
 				.css("max-width", columnEllipsisWidth);
 
 				if (columnEllipsisUnwrap)
 					{
 					$("div."+divClassName).off();
 					
+					
+					// unwrap this ellipsis cell at mouseover
 					$("div."+divClassName).mouseover(function(){
-						$(this).css("white-space", "normal");
+						$(this).css("white-space", "normal");						
 					});
-					$("div."+divClassName).mouseout(function(){
-						$(this).css("white-space", "nowrap");
-					});
+					
+					// wrap this ellipsis cell at mouseout
+					if (columnKeepSelectedOpen)
+						{
+						$("div."+divClassName).mouseout(function(){
+							// special case: close this ellipsis cell at mouseout, except when config says selected rows must keep unwrapped
+							if ( !$(this).closest("tr").hasClass("selected"))
+								$(this).css("white-space", "nowrap");
+						});
+						}
+					else
+						{
+						$("div."+divClassName).mouseout(function(){
+							// close this ellipsis cell at mouseout
+							$(this).css("white-space", "nowrap");
+						});
+						}
+					
 					}				
 				
 			});
