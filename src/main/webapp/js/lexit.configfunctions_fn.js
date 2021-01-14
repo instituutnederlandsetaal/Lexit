@@ -521,6 +521,26 @@ fn.getSortingDirections = function(sSomeTablename){
 	return aSortingDirs;
 };
 
+/**
+ * Get the sorting direction of a specified column in a table
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {String} sSortingColumn - name of the sorted column
+ * @returns {String} Sorting direction 'asc' or 'desc', or '' if the column is not sorted
+ */
+fn.getSortingDirectionOf = function(sSomeTablename, sSortingColumn){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	var aCurrentSortCols = fn.getSortingColumns(sSomeTablename);
+	var aCurrentSortDirs = fn.getSortingDirections(sSomeTablename);
+	var iCurrentSortColIdx = $.inArray(sSortingColumn, aCurrentSortCols);
+	var sCurrentSortDir = aCurrentSortDirs[iCurrentSortColIdx];
+	if (sCurrentSortDir == null) sCurrentSortDir = '';
+	return sCurrentSortDir; 
+};
+
+
 
 /**
  * Set the sorting of a table,

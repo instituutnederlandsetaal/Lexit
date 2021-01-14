@@ -676,7 +676,13 @@ String.prototype.regexReplaceAll = function(search, replacement) {
 };
 
 
-
+// jquery selector Regexp selection
+//
+// usage:	$(':regex(id,^[aeiou])');
+//			$('div:regex(class,[0-9])');
+//			$('script:regex(src,jQuery)');
+//
+// source:
 // https://j11y.io/javascript/regex-selector-for-jquery/
 jQuery.expr[':'].regex = function(elem, index, match) {
     var matchParams = match[3].split(','),
