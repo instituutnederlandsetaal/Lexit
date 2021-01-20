@@ -242,7 +242,8 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	 				fnCallback();
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
-			fn.refreshTable(sSomeTablename);
+
+			fn.refreshTable(kf.getActiveTable());
 			
 			if (fnErrorHandler!=null)
 				fnErrorHandler({

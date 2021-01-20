@@ -1088,64 +1088,64 @@ public class TableResources {
 	// NOT IN USE (YET?)
 	//
 	// .../table/getexport
-	@GET
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response getFileExport(
-			String requestBody, 
-			@Context ServletContext context, 
-			@Context SecurityContext sc, 
-			@Context HttpServletRequest httpServletRequest
-			) {
-		
-		// Get the request body into a hash
-		
-		String[] requestBodyArr = requestBody.split("&");
-		ConcurrentHashMap<String, String> requestBodyMap = new ConcurrentHashMap<String, String>();		
-		
-		for (int i=0; i<requestBodyArr.length; i++)
-		{
-			String onePair =	requestBodyArr[i];
-			String key = 		onePair.split("=")[0];
-			String value = 		(onePair.split("=").length>1) ? onePair.split("=")[1] : ""; // make sure we have at least an empty string (no null!)
-			
-			// first decode the values (as those might be URL encoded)
-			try {				
-				key = 	java.net.URLDecoder.decode(key, "UTF-8");
-				value =	java.net.URLDecoder.decode(value, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException("Error while parsing the requestBody", e);
-			}
-			
-			// put the key/value into our requestBodyMap
-			requestBodyMap.put(key, value);			
-		}
-		
-		String dbName = 			requestBodyMap.get("sDbName");
-		String tableName = 			requestBodyMap.get("sTableName");
-		
-		// get context object, given the current database name
-		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
-		
-		String fileName = tableName+".lexit_export.xls";
-		String filepath = co.getContext().getRealPath(fileName);
-		
-		filepath = filepath.replace(
-				File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
-				File.separatorChar + Constants.CONFIG_DIR + File.separator+fileName);
-		
-		try {
-			
-			Util.writeXlFile(filepath, tableName, getTable(requestBody,	context, sc, httpServletRequest));
-			
-		} catch (IOException e) {
-			throw new RuntimeException("Error while calling function Util.writeXlFile()", e);
-		}
-		
-		File file = new File(filepath); // Initialize this to the File path you want to serve.
-		return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
-		      .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"" ) 
-		      .build();
-	}
+//	@GET
+//	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+//	public Response getFileExport(
+//			String requestBody, 
+//			@Context ServletContext context, 
+//			@Context SecurityContext sc, 
+//			@Context HttpServletRequest httpServletRequest
+//			) {
+//		
+//		// Get the request body into a hash
+//		
+//		String[] requestBodyArr = requestBody.split("&");
+//		ConcurrentHashMap<String, String> requestBodyMap = new ConcurrentHashMap<String, String>();		
+//		
+//		for (int i=0; i<requestBodyArr.length; i++)
+//		{
+//			String onePair =	requestBodyArr[i];
+//			String key = 		onePair.split("=")[0];
+//			String value = 		(onePair.split("=").length>1) ? onePair.split("=")[1] : ""; // make sure we have at least an empty string (no null!)
+//			
+//			// first decode the values (as those might be URL encoded)
+//			try {				
+//				key = 	java.net.URLDecoder.decode(key, "UTF-8");
+//				value =	java.net.URLDecoder.decode(value, "UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				throw new RuntimeException("Error while parsing the requestBody", e);
+//			}
+//			
+//			// put the key/value into our requestBodyMap
+//			requestBodyMap.put(key, value);			
+//		}
+//		
+//		String dbName = 			requestBodyMap.get("sDbName");
+//		String tableName = 			requestBodyMap.get("sTableName");
+//		
+//		// get context object, given the current database name
+//		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+//		
+//		String fileName = tableName+".lexit_export.xls";
+//		String filepath = co.getContext().getRealPath(fileName);
+//		
+//		filepath = filepath.replace(
+//				File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
+//				File.separatorChar + Constants.CONFIG_DIR + File.separator+fileName);
+//		
+//		try {
+//			
+//			Util.writeXlFile(filepath, tableName, getTable(requestBody,	context, sc, httpServletRequest));
+//			
+//		} catch (IOException e) {
+//			throw new RuntimeException("Error while calling function Util.writeXlFile()", e);
+//		}
+//		
+//		File file = new File(filepath); // Initialize this to the File path you want to serve.
+//		return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
+//		      .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"" ) 
+//		      .build();
+//	}
 	
 	
 	// .../table/gettable

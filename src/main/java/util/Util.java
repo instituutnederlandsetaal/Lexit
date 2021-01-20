@@ -22,14 +22,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.WorkbookUtil;
+//import org.apache.poi.hssf.usermodel.HSSFCell;
+//import org.apache.poi.hssf.usermodel.HSSFRow;
+//import org.apache.poi.hssf.usermodel.HSSFSheet;
+//import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+//import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+//import org.apache.poi.ss.usermodel.Row;
+//import org.apache.poi.ss.usermodel.Sheet;
+//import org.apache.poi.ss.util.WorkbookUtil;
 
 import resources.Constants;
 import resources.ContextObject;
@@ -129,114 +129,114 @@ public class Util {
 	// BEWARE: this is basic code for later implementation, it does nothing yet!
 	//
 	// https://stackoverflow.com/questions/1516144/how-to-read-and-write-excel-file
-	public static void readXlFile(String filePath){
-		
-		try {
-		    POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(filePath));
-		    HSSFWorkbook wb = new HSSFWorkbook(fs);
-		    HSSFSheet sheet = wb.getSheetAt(0);
-		    HSSFRow row;
-		    HSSFCell cell;
-
-		    int rows; // No of rows
-		    rows = sheet.getPhysicalNumberOfRows();
-
-		    int cols = 0; // No of columns
-		    int tmp = 0;
-
-		    // This trick ensures that we get the data properly even if it doesn't start from first few rows
-		    for(int i = 0; i < 10 || i < rows; i++) {
-		        row = sheet.getRow(i);
-		        if(row != null) {
-		            tmp = sheet.getRow(i).getPhysicalNumberOfCells();
-		            if(tmp > cols) cols = tmp;
-		        }
-		    }
-
-		    for(int r = 0; r < rows; r++) {
-		        row = sheet.getRow(r);
-		        if(row != null) {
-		            for(int c = 0; c < cols; c++) {
-		                cell = row.getCell((short)c);
-		                if(cell != null) {
-		                	
-		                    // code what needs to be done here!!!
-		                	
-		                }
-		            }
-		        }
-		    }
-		} catch(Exception ioe) {
-		    ioe.printStackTrace();
-		}
-	}
+//	public static void readXlFile(String filePath){
+//		
+//		try {
+//		    POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(filePath));
+//		    HSSFWorkbook wb = new HSSFWorkbook(fs);
+//		    HSSFSheet sheet = wb.getSheetAt(0);
+//		    HSSFRow row;
+//		    HSSFCell cell;
+//
+//		    int rows; // No of rows
+//		    rows = sheet.getPhysicalNumberOfRows();
+//
+//		    int cols = 0; // No of columns
+//		    int tmp = 0;
+//
+//		    // This trick ensures that we get the data properly even if it doesn't start from first few rows
+//		    for(int i = 0; i < 10 || i < rows; i++) {
+//		        row = sheet.getRow(i);
+//		        if(row != null) {
+//		            tmp = sheet.getRow(i).getPhysicalNumberOfCells();
+//		            if(tmp > cols) cols = tmp;
+//		        }
+//		    }
+//
+//		    for(int r = 0; r < rows; r++) {
+//		        row = sheet.getRow(r);
+//		        if(row != null) {
+//		            for(int c = 0; c < cols; c++) {
+//		                cell = row.getCell((short)c);
+//		                if(cell != null) {
+//		                	
+//		                    // code what needs to be done here!!!
+//		                	
+//		                }
+//		            }
+//		        }
+//		    }
+//		} catch(Exception ioe) {
+//		    ioe.printStackTrace();
+//		}
+//	}
 	
 	// write a Excel file
 	// see: http://poi.apache.org/components/spreadsheet/quick-guide.html#NewWorkbook
-	public static void writeXlFile(String filepath, String tableName, ResultObject tableObject ){
-		
-		// get table content
-		ArrayList<ConcurrentHashMap<String, String>> tableContent = tableObject.getTableContent();
-		
-		// number of rows, etc.
-		int nrOfRows = tableContent.size();
-		// build list of column names and their corresponding column number
-		ConcurrentHashMap<String, Integer> fieldName2ColumnNr = new ConcurrentHashMap<String, Integer>();
-		if (nrOfRows > 0)
-		{
-			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(0);
-			for (String key : tableObjectRow.keySet())
-			{
-				int columnNr = fieldName2ColumnNr.size();
-				fieldName2ColumnNr.put(key, columnNr);
-			}
-		}
-		else
-		{
-			// if the table object is empty, do nothing
-			return;
-		}
-		
-		
-		// Blank XL workbook
-		HSSFWorkbook workbook = new HSSFWorkbook();
-
-	    // Create a blank sheet
-		// (Safe way to create valid names, this replaces invalid characters with a space)
-		String safeName = WorkbookUtil.createSafeSheetName(tableName); 
-		Sheet sheet = workbook.createSheet(safeName);
-		
-		// Fill the XL workbook
-		
-		// column names at row #0
-		Row row = sheet.createRow(0);
-		for (String columnName : fieldName2ColumnNr.keySet())
-		{
-			int columnNr = fieldName2ColumnNr.get(columnName);
-			row.createCell(columnNr).setCellValue(columnName);
-		}
-		// fill the table from row #1 on 
-		for (int i=0; i<nrOfRows; i++)
-		{
-			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(i);
-			row = sheet.createRow(i+1);  // row #0 is reserved for cell names, so we start counting at row #1
-			for (String columnName : tableObjectRow.keySet())
-			{
-				int columnNr = fieldName2ColumnNr.get(columnName);
-				String cellContent = tableObjectRow.get(columnName);
-				row.createCell(columnNr).setCellValue(cellContent);				 
-			}
-			 
-		}
-		
-		try (OutputStream fileOut = new FileOutputStream(filepath)) {
-			
-			workbook.write(fileOut);
-			
-	    } catch (IOException e) {
-	    	throw new RuntimeException("Error while building the export file: "+filepath, e);
-		}
-	}
+//	public static void writeXlFile(String filepath, String tableName, ResultObject tableObject ){
+//		
+//		// get table content
+//		ArrayList<ConcurrentHashMap<String, String>> tableContent = tableObject.getTableContent();
+//		
+//		// number of rows, etc.
+//		int nrOfRows = tableContent.size();
+//		// build list of column names and their corresponding column number
+//		ConcurrentHashMap<String, Integer> fieldName2ColumnNr = new ConcurrentHashMap<String, Integer>();
+//		if (nrOfRows > 0)
+//		{
+//			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(0);
+//			for (String key : tableObjectRow.keySet())
+//			{
+//				int columnNr = fieldName2ColumnNr.size();
+//				fieldName2ColumnNr.put(key, columnNr);
+//			}
+//		}
+//		else
+//		{
+//			// if the table object is empty, do nothing
+//			return;
+//		}
+//		
+//		
+//		// Blank XL workbook
+//		HSSFWorkbook workbook = new HSSFWorkbook();
+//
+//	    // Create a blank sheet
+//		// (Safe way to create valid names, this replaces invalid characters with a space)
+//		String safeName = WorkbookUtil.createSafeSheetName(tableName); 
+//		Sheet sheet = workbook.createSheet(safeName);
+//		
+//		// Fill the XL workbook
+//		
+//		// column names at row #0
+//		Row row = sheet.createRow(0);
+//		for (String columnName : fieldName2ColumnNr.keySet())
+//		{
+//			int columnNr = fieldName2ColumnNr.get(columnName);
+//			row.createCell(columnNr).setCellValue(columnName);
+//		}
+//		// fill the table from row #1 on 
+//		for (int i=0; i<nrOfRows; i++)
+//		{
+//			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(i);
+//			row = sheet.createRow(i+1);  // row #0 is reserved for cell names, so we start counting at row #1
+//			for (String columnName : tableObjectRow.keySet())
+//			{
+//				int columnNr = fieldName2ColumnNr.get(columnName);
+//				String cellContent = tableObjectRow.get(columnName);
+//				row.createCell(columnNr).setCellValue(cellContent);				 
+//			}
+//			 
+//		}
+//		
+//		try (OutputStream fileOut = new FileOutputStream(filepath)) {
+//			
+//			workbook.write(fileOut);
+//			
+//	    } catch (IOException e) {
+//	    	throw new RuntimeException("Error while building the export file: "+filepath, e);
+//		}
+//	}
 	
 	
 	
