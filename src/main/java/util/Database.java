@@ -646,6 +646,7 @@ public class Database {
 	public UniqueValuesObject getUniqueValues_oldStyle(String tableName, String columnName, String columnValueFilter, String limit) {
 		
 		String schema = getSchema(tableName);		
+		if (columnValueFilter == null) columnValueFilter = "";
 	
 		// GROUP BY can be faster than DISTINCT
 	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
