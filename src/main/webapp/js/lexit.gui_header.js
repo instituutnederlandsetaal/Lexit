@@ -676,7 +676,7 @@ head.putGoToButton = function(sSomeTablename){
 		.attr("type", "button")
 		.css("background-color", "#FF8585")
 		.append($("<span></span>").addClass("ui-icon ui-icon-circle-arrow-e"))
-		.attr("title", "Ga naar woord<BR>[+Shift: naar pagina]").addClass("tooltip")
+		.attr("title", "Ga naar woord<BR>[+Shift: naar rij/pagina]").addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){
 			
@@ -1352,7 +1352,7 @@ head.putHelpButton = function(sSomeTablename){
 				"<B>Query-builder / Selectiehulp</B>" +
 				"<BR><BR>" +
 				"Zoekvragen kunnen deels automatisch worden samengesteld d.m.v. een tooltje. " +
-				"Om dit tooltje te openen, houdt u bij het aanklikken van een zoekveld de CTRL-toets ingedrukt. " +
+				"Om dit tooltje te openen, houdt u bij het aanklikken van een zoekveld de "+(isMac?"Command":"CTRL")+"-toets ingedrukt. " +
 				"Het tooltje toont de meest frequente waardes uit betreffende kolom, zodat een keuze daaruit kan worden gemaakt: Lex'it formuleert " +
 				"dan een zoekopdracht om op de gekozen waardes te zoeken. Ook is het mogelijk om een negatieve selectie te maken, d.w.z. alles " +
 				"behalve de gekozen waardes." +
@@ -1418,9 +1418,9 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>Page up/down</TD><TD>&nbsp;&nbsp;</TD><TD>Ga naar de vorige/volgende pagina.</TD>" +
 				"</TR>" +
 				"<TR>" +
-				"<TD>CTRL + pijl naar links/rechts</TD><TD>&nbsp;&nbsp;</TD><TD>Scroll naar links of naar rechts.</TD>" +				
+				"<TD>"+(isMac?"Command":"CTRL")+" + pijl naar links/rechts</TD><TD>&nbsp;&nbsp;</TD><TD>Scroll naar links of naar rechts.</TD>" +				
 				"</TR>" +
-				"<TD>CTRL + klik in zoekveld boven kolom</TD><TD>&nbsp;&nbsp;</TD><TD>Roep selectiehulp/query builder op.</TD>" +				
+				"<TD>"+(isMac?"Command":"CTRL")+" + klik in zoekveld boven kolom</TD><TD>&nbsp;&nbsp;</TD><TD>Roep selectiehulp/query builder op.</TD>" +				
 				"</TR>" +
 				"<TR>" +
 				"<TD>ESC</TD><TD>&nbsp;&nbsp;</TD><TD>Afhankelijk van de context: selectie ongedaan maken, venster sluiten, enz.</TD>" +				

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.01.21
+	v2021.02.01
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -222,6 +222,9 @@
 	var bTest;				// test mode
 	var bSpyMode;			// global spy mode (who's logged in?)
 	var bResetUserRights;	// reset user rights mode
+
+	// are we on Mac or PC?
+	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	
 	
 	// *********************************************************************************************************
@@ -533,7 +536,7 @@
 		// user instruction for accessing tables
 		$("#indicator").empty().append(
 				$("<span></span>")
-				.html("Kies een tabel: <I>(vooraf CTRL ingedrukt houden om tabel toe te voegen, of SHIFT voor tabel in nieuwe tab)</I>")
+				.html("Kies een tabel: <I>(vooraf "+(isMac?"Command":"CTRL")+" ingedrukt houden om tabel toe te voegen, of SHIFT voor tabel in nieuwe tab)</I>")
 				);
 		
 		// get url parameters		

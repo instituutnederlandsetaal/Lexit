@@ -998,7 +998,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var promptDivId = "dialog-message"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!	
 	
-	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd CTRL ingedrukt voor meervoudige keuze)");
+	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd "+(isMac?"Command":"CTRL")+" ingedrukt voor meervoudige keuze)");
 	
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)
