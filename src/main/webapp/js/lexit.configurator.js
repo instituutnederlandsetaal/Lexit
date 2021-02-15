@@ -423,6 +423,12 @@ var oTableConfigurationList_example = {
 		 * @description 'max-width' attribuut bij ellipsis.
 		 */
 		"ellipsis_width": "200px",
+
+
+		/**
+		 * @description 'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar. 
+		 */
+		"ellipsis_height": "150px",
 		
 		/**
 		 * @type {boolean}
@@ -896,6 +902,15 @@ conf.getEllipsisWidth = function(aColumnConfig){
 	if (typeof aColumnConfig["ellipsis_width"] == 'undefined')
 		return "200px";		
 	return aColumnConfig["ellipsis_width"];
+};
+
+// retrieve ellipsis (max) height
+// default is null
+conf.getEllipsisHeight = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_height"] == 'undefined')
+		return null;		
+	return aColumnConfig["ellipsis_height"];
 };
 
 // retrieve ellipsis behavior: should the content be unwrapped or not?

@@ -47,6 +47,7 @@ gui.activateEllipsis = function(sSomeTableName){
 		var columnEllipsis =	conf.getEllipsis(oColumnConfig);
 		var columnKeepSelectedOpen = conf.getEllipsisKeepSelectedRowOpen(oColumnConfig);
 		var columnEllipsisWidth = conf.getEllipsisWidth(oColumnConfig);
+		var columnEllipsisHeight = conf.getEllipsisHeight(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
 	
 		// if the column is visible and it ellipsis is required, that activate it! 
@@ -76,8 +77,15 @@ gui.activateEllipsis = function(sSomeTableName){
 				.css("white-space", bSelectedRow ? "normal" : "nowrap")
 				.css("max-width", columnEllipsisWidth);
 
+				// if some (max) height was set, apply that
+				if (columnEllipsisHeight != null)
+					$("div."+divClassName)
+					.css("max-height", columnEllipsisHeight)
+					.css("overflow-y", "auto")
+
 				if (columnEllipsisUnwrap)
 					{
+					// first clean up
 					$("div."+divClassName).off();
 					
 					
