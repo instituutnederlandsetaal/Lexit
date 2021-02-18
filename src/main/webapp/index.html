@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.02.15
+	v2021.02.17
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -172,8 +172,9 @@
 	// Data type returned by database when a field type is user-defined
 	var USER_DEFINED = "USER-DEFINED";
 	
-	// Name of user that has logged in. This is set by fn.setCurrentUser() at initialization time
+	// Name of user that has logged in, and its session-ID. This is set by fn.setCurrentUser() at initialization time
 	var USERNAME = null;
+	var SESSION_ID = null;
 	
 	// *********************************************************************************************************
 	

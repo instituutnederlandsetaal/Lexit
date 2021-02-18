@@ -116,7 +116,7 @@ public class PostgresDatabaseCommunication {
 		{
 			Statement stmt = null;
 			String query = "CREATE TEMPORARY TABLE active_user AS "+
-				"SELECT '"+ this.co.getUsername() +"'::text AS username;";
+				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id;";
 			
 			try
 			{

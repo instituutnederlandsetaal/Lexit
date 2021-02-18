@@ -416,7 +416,18 @@ fn.getTableName = function(mixed){
 	
 	// if input is a node, get the closest table name
 	if ( $(mixed).is("td") || $(mixed).is("tr") )
-		return $( mixed ).closest('table')[0].id;	
+		{
+			if ($( mixed ).closest('table').length > 0)
+				return $( mixed ).closest('table')[0].id;
+
+			// in some rare cases, closest return nothing, don't know why...
+			// so here's a rescue operation: extract the table name from the row class name
+			var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
+			var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
+			var sTableName = aRowClassName[0].replace("_row", "");
+			return sTableName;
+
+		}	
 	
 	// otherwise we must have an API instance
 	return fx.getTableName(mixed);
@@ -1343,10 +1354,8 @@ fn.getRowNodeNumberOnScreen = function(nRow){
 	
 	fn._checkApiInstance("fn.getRowNodeNumberOnScreen", nRow);
 	fn._checkjQueryObject("fn.getRowNodeNumberOnScreen", nRow);
-	
-	var oRow = fx.getRow(nRow); 
 
-	return fx.getRowNumberOnScreen(oRow); 
+	return $(nRow).index();
 };
 
 
@@ -1487,13 +1496,21 @@ fn.selectAllRowNodes = function(sSomeTable){
 
 
 /**
- * Manually select a row, given its row number on screen
+ * Manually select a row, given its node or its row number on screen
  * 
- * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {(String|API-object-instance|Node)} sSomeTable - Table name or object, or row node
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if node was given as 1st parameter
  */
 fn.selectRowNode = function(sSomeTable, iRowNumber){
+
+	// special case: if 1st parameter is a node
+	if (iRowNumber == null && fn.isRowNode(sSomeTable))
+	{
+		if (!$(sSomeTable).hasClass("selected"))
+			$(sSomeTable).toggleClass('selected');
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
@@ -1514,13 +1531,21 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 
 
 /**
- * Manually unselect a row, given its row number on screen
+ * Manually unselect a row, given its node or its row number on screen
  * 
- * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {(String|API-object-instance|Node)} sSomeTable - Table name or object
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if node was given as 1st parameter
  */
 fn.unselectRowNode = function(sSomeTable, iRowNumber){
+
+	// special case: if 1st parameter is a node
+	if (iRowNumber == null && fn.isRowNode(sSomeTable))
+	{
+		if ($(sSomeTable).hasClass("selected"))
+			$(sSomeTable).toggleClass('selected');
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
@@ -3616,6 +3641,9 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		modal: true,
 		width: "auto",
 		open: function(event, ui){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
 			$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
 		},
@@ -3688,6 +3716,9 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 		modal: true,
 		width: "auto",
 		open: function(event, ui){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
 			$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
 		},
@@ -3737,6 +3768,9 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 			modal: true,
 			width: "auto",
 			open: function(event, ui){
+				// remove close button (cancel is enough)
+				$(".ui-dialog-titlebar-close").hide();
+				// add shadows
 				$(".ui-dialog").addClass("ui-dialog-shadow");
 	        	$( this ).closest(".ui-dialog").putInFront();
 			},
@@ -4021,6 +4055,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         width: "auto",
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -4211,6 +4248,9 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -4436,6 +4476,9 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -5389,6 +5432,21 @@ fn.getCurrentUser = function(){
 
 
 /**
+ * Get the session-ID of the Tomcat user which has logged in.
+ * This only workt when 'send_tomcat_username_to_db=true'
+ * was set in the project.database configuration file
+ * 
+ * @returns {String} A session-ID
+ * 
+ * @see fn.getCurrentUser
+ */
+fn.getCurrentSessionId = function(){
+	return SESSION_ID;
+};
+
+
+
+/**
  * Get the current project name
  *  
  * @returns {String} A project name
@@ -5400,7 +5458,7 @@ fn.getCurrentProject = function(){
 
 /**
  * Set the user name (the name of the user who has logged in is normally got from webservice
- * but it is possible to set it here by giving a string, if needed that way)
+ * at initialisation time, but it is possible to set it here by giving a string, if needed that way)
  *  
  * @param {String} sName - A user name
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
@@ -5423,7 +5481,9 @@ fn.setCurrentUser = function(sName, fnErrorHandler){
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
 	 		// return the user name
-	 		USERNAME = fn.getDbResponse(xml);
+			var aUsernameAndSessionId = ( fn.getDbResponse(xml) ).split(ARG_INTERNAL_SEPARATOR);
+			USERNAME = aUsernameAndSessionId[0];
+			SESSION_ID = aUsernameAndSessionId[1];
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		

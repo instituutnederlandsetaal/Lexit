@@ -30,9 +30,6 @@ public class Constants {
 	// it must be called the way it's stated here:
 	public final static String PRIMARYKEY_FIELDNAME = "pkid";
 	
-	// neutral separator, if needed
-	public final String NEUTRAL_SEPARATOR = "nEuTrAlSePaRaToR";
-	
 	// maximal allowed time a database object is allowed to keep alive
 	// when left unused. After this max duration, this object will be automatically
 	// deleted

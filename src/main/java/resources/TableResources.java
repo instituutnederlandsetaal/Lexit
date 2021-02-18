@@ -129,7 +129,9 @@ public class TableResources {
 			) throws IOException {
 		
 		DbResponseObject response = new DbResponseObject();
-		response.setResponse(sc.getUserPrincipal().getName());
+		String userName = sc.getUserPrincipal().getName();
+		String sessionId = httpServletRequest.getSession().getId();
+		response.setResponse(userName + Constants.ARG_INTERNAL_SEPARATOR + sessionId);
 		
 		return response;
 	}

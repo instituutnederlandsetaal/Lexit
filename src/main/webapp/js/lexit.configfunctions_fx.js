@@ -312,16 +312,23 @@ fx.selectAllRows = function(sSomeTable){
 
 
 /**
- * Manually select a row, given its row number on screen
+ * Manually select a row, given its row number on screen or its API-object-instance
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if 1st parameter is API-object-instance of a row
  * 
  * @see fx.unselectRow
  * @see fx.selectAllRows
  */
 fx.selectRow = function(sSomeTable, iRowNumber){
+
+	if (iRowNumber == null && fx.isApiInstance(sSomeTable))
+	{
+		iRowNumber = fx.getRowNumberOnScreen(sSomeTable);
+		sSomeTable = fx.getTableName(sSomeTable);
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
@@ -340,15 +347,22 @@ fx.selectRow = function(sSomeTable, iRowNumber){
 
 
 /**
- * Manually unselect a row, give its row number on screen
+ * Manually unselect a row, give its row number on screen or its API-object-instance
  * 
  * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if 1st parameter is API-object-instance of a row
  * 
  * @see fx.selectRow
  */
 fx.unselectRow = function(sSomeTable, iRowNumber){
+
+	if (iRowNumber == null && fx.isApiInstance(sSomeTable))
+	{
+		iRowNumber = fx.getRowNumberOnScreen(sSomeTable);
+		sSomeTable = fx.getTableName(sSomeTable);
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
@@ -1017,7 +1031,7 @@ fx.isApiInstance = function(obj){
  */
 fx._checkApiInstance = function(sFunctionName, oArgument){
 	
-	if ( !fx.isApiInstance(oArgument ))
+	if ( !fx.isApiInstance(oArgument))
 		{
 		// try to compute name of table in which error occurs
 		var sTableName = "";

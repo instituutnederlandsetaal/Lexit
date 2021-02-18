@@ -100,6 +100,11 @@ public class ContextObject {
 		return this.context;
 	}
 	
+	public String getSessionId() {
+		setTimeLastUsed();
+		return this.sessionId;
+	}
+	
 
 	// part [b]
 
