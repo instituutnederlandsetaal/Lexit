@@ -3835,6 +3835,8 @@ fn._computeDialogPosition = function(){
     }
 };
 
+
+
 /**
  * Generate a prompt pop-up, requesting some input from the user
  * The output can be retrieved by using fn.getPromptBoxInput()
@@ -3857,7 +3859,7 @@ fn._computeDialogPosition = function(){
 fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
-	
+
 	// deal with title/message input
 	var sMessage = "";
 	if ( $.isArray(sTitle) )
@@ -3865,8 +3867,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		sMessage = sTitle[1];
 		sTitle = sTitle[0];
 		}
-	var sMessageP = $("<p></p>").html(sMessage);
-	
+	var sMessageP = $("<p></p>").html(sMessage);	
+
 	if (bTextarea == null) 
 		bTextarea = false;
 	
@@ -3966,7 +3968,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				input.css("width", "95%");					// prevent small fields
 				}
 			
-			// if cols and rows are given, set them!
+			// if cols and rows are given, set them!			
 			if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)
 				{
 				input.attr("cols", aColsAndRows[0]);
@@ -4051,7 +4053,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: 300,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: "auto",
         modal: true,
         open: function( event, ui ){
@@ -4122,50 +4125,39 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		.append(sMessageP);
 	
 	
-	
-	// adapt height of the prompt to the number of options, 
-	// and if there are more options than the screen can show at once, 
-	// add a filter box on top 
-	
-	var promptHeight = (200 + 30 * aAllOptions.length);
-	
-	if ( promptHeight > $(window).height()) 
-		{
-		promptHeight = $(window).height();
-
-		var sFilter = $("<p></p>")
-			.append(
-				$("<span></span>")
-					.text("Filter: ")
-			)
-			.append(
-				$("<input></input>")
-					.attr("id", promptDivId+"_valuefilter")
-					.bind("input propertychange", function (evt) {
-						// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
-						
-					    // If it's the propertychange event, make sure it's the value that changed.
-					    if (window.event && event.type == "propertychange" && event.propertyName != "value")
-					        return;
+	var sFilter = $("<p></p>")
+		.append(
+			$("<span></span>")
+				.text("Filter: ")
+		)
+		.append(
+			$("<input></input>")
+				.attr("id", promptDivId+"_valuefilter")
+				.bind("input propertychange", function (evt) {
+					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
 					
-					    // Clear any previously set timer before setting a fresh one
-					    window.clearTimeout($(this).data("timeout"));
-					    $(this).data("timeout", setTimeout(function () {
+					// If it's the propertychange event, make sure it's the value that changed.
+					if (window.event && event.type == "propertychange" && event.propertyName != "value")
+						return;
+				
+					// Clear any previously set timer before setting a fresh one
+					window.clearTimeout($(this).data("timeout"));
+					$(this).data("timeout", setTimeout(function () {
+
+						// read new unique values given filter
+						var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
+						var aAllOptionsFiltered = aAllOptions.filter(function(value){
+							return value.toLowerCase().match(sFilter);
+							});
+						fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
+						
+					}, 1000));
+				})
+		);
 	
-					    	// read new unique values given filter
-					    	var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
-					    	var aAllOptionsFiltered = aAllOptions.filter(function(value){
-					    		return value.toLowerCase().match(sFilter);
-					    		});
-					    	fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
-							
-					    }, 1000));
-					})
-			);
-		
-		// append filter box
-		promptDiv.append(sFilter);
-		}
+	// append filter box
+	promptDiv.append(sFilter);
+
 
 	
 	// user instructions
@@ -4244,7 +4236,8 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: promptHeight,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
@@ -4411,9 +4404,6 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	$(document.body).append(promptDiv);
 	
 	
-	// adapt height of the prompt to the number of values to reorder
-	var promptHeight = (200 + 30 * aFieldNames.length);
-	
 	// array of buttons
 	var aButtons = [];
 
@@ -4472,7 +4462,8 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: promptHeight,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
