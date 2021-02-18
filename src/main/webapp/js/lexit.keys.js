@@ -72,6 +72,8 @@ kf.wasPressed = function(sKeyName){
 kf.registerPressedKey = function(event){
 	
 	var iCode = (event != null) ? event.keyCode : -1;
+	// Cmd (Mac) should be seen as CTRL
+	if (event.metaKey) iCode = 17; 
 	
 	if (kf._getPressedKey() != kf._translateCode(iCode) )
 		kf._setReleasedKey( kf._getPressedKey() );
@@ -81,7 +83,6 @@ kf.registerPressedKey = function(event){
 		fn.setBackgroundColor("lightgrey");
 	else
 		fn.setBackgroundColor("white");
-	
 };
 
 //register the name of the pressed key, given its code
