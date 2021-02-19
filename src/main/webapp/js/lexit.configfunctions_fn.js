@@ -4125,6 +4125,19 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		.append(sMessageP);
 	
 	
+
+	// if there are more options than the screen can show at once, 
+	// add a filter box on top 
+
+	var iNumberOfPixelOccupedByOptions = (749.0/23.0); // real life example: 749px taken by 23 options
+	var iPercentOfHeightTakenByFullDialog = 0.78; // real life example: 749px (dialog) vs 952px (window)
+	var iWindowHeight = $(window).height();
+	var iComputedHeight = aAllOptions.length * iNumberOfPixelOccupedByOptions;
+
+
+	// if ratio of height-of-all-options to window height is too heigh, add a filter box
+	if (iComputedHeight / iWindowHeight > iPercentOfHeightTakenByFullDialog)
+	{
 	var sFilter = $("<p></p>")
 		.append(
 			$("<span></span>")
@@ -4157,7 +4170,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	// append filter box
 	promptDiv.append(sFilter);
-
+	} 
 
 	
 	// user instructions
