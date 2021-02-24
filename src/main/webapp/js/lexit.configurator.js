@@ -1400,7 +1400,7 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 						// execute function from the configuration file
 						// except if the selection button is active (secure selection)
 						if ( !fn.rowsSelectionIsAllowed(sSomeTablename))
-							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), nCurrentCell );
+							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), nCurrentCell, event);
 
 					} 
 				);
