@@ -17,7 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -691,12 +693,12 @@ public class TableResources {
 	// .../table/call_function
 	// get a record, given its id
 	@Path("call_function")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public TableRecordObject callFunction(
-			@QueryParam("function_name") String functionName,
-			@DefaultValue("true_null") @QueryParam("args") String args,	// true null
-			@QueryParam("db_name") String dbName,
+			@FormParam("function_name") String functionName,
+			@DefaultValue("true_null") @FormParam("args") String args,	// true null
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest

@@ -3431,7 +3431,7 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 		aData["args"] = aFunctionArguments.join(ARG_INTERNAL_SEPARATOR);
 	 
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": aData,
