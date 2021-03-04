@@ -10,8 +10,10 @@ var sKeyReleased = "";
 var bKeyDebug = false;
 
 
+// keep track of active table...
 var sActiveTableName = null;
-var iActiveRowNumber = 0;
+// ... and of active row of each table
+var aActiveRowNumber = {};
 
 
 // get and set the active table (t.i. the table that has focus for arrow keys)
@@ -36,7 +38,7 @@ kf.getActiveTable = function(){
 
 // get and set the active row (t.i. the table/row that has focus for arrow keys)
 kf.setActiveRowNumber = function(iRowNumber){
-	iActiveRowNumber = iRowNumber;
+	aActiveRowNumber[kf.getActiveTable()] = iRowNumber;
 };
 
 kf.getActiveRowNumber = function(){
@@ -44,13 +46,14 @@ kf.getActiveRowNumber = function(){
 	// if some process deleted some rows, in such a way that the current active row
 	// number doesn't exist anymore, we should put it back to zero	
 	var sTable = kf.getActiveTable();
+	var iActiveRowNumber = aActiveRowNumber[sTable] || 0;
 	
 	var nTargettedNode = "#"+sTable+" tbody tr:not('.group'):eq("+iActiveRowNumber+")";
 	if ( !$(nTargettedNode).elementExists() )
-		iActiveRowNumber = 0;
+		aActiveRowNumber[sTable] = 0;
 	
 	// return value as requested
-	return iActiveRowNumber;
+	return aActiveRowNumber[sTable];
 };
 
 

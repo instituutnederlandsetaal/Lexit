@@ -50,7 +50,7 @@ gui.activateEllipsis = function(sSomeTableName){
 		var columnEllipsisHeight = conf.getEllipsisHeight(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
 	
-		// if the column is visible and it ellipsis is required, that activate it! 
+		// if the column is visible and if ellipsis is required, that activate it! 
 		if (columnVisible && columnEllipsis)
 		{
 			// get rows 
@@ -83,6 +83,8 @@ gui.activateEllipsis = function(sSomeTableName){
 					.css("max-height", columnEllipsisHeight)
 					.css("overflow-y", "auto")
 
+
+				// if content must be unwrapped at mouseover, assign that to mouseevent
 				if (columnEllipsisUnwrap)
 					{
 					// first clean up
