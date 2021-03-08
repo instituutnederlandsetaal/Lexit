@@ -32,7 +32,7 @@ public class Database {
 	// servlet context etc
 	ContextObject co;
 	
-	// hashed for caching
+	// columns names and types, etc. hashed for caching
 	public ConcurrentHashMap<String, String> tableAndColumnNameToTypes = new ConcurrentHashMap<String, String>(); 
 	public ConcurrentHashMap<String, String> tableAndColumnNameToCustomTypesValues = new ConcurrentHashMap<String, String>();
 	public ConcurrentHashMap<String, String[]> functionNameToTypes = new ConcurrentHashMap<String, String[]>();
@@ -73,7 +73,23 @@ public class Database {
 		}
 	};
 	
+	// the ContextObject wasn't really supposed to keep information: it's mostly a convenient way to send servert context info in one single object
+	// BUT we do use it to keep some more info: 
+	//  [1] the last usage time of the database object (so it can be removed when it hasn't been used for some time)
+	//  [2] the tab the user is currently viewing (so we can simulate a session ID per tab for example)
+	// Both behave differently:
+	//  [1] has is usage time set each time it's called... and at each call, we loop throught to other cached ContextObjects of some usage time is too long ago
+	//  [2] has its tab-id only set at tab creation or tab change, so the tab-id is lost at the very next round since the ContextObject by default only contains
+	//      server context info. So, to prevent loss, we check if the previous version had some tab-id, and copy it to the new ContextObject
 	public void updateContextObject(ContextObject co){
+		
+		// see explanation hereabove
+		if ( (co.getActiveTabId() == null || co.getActiveTabId().isEmpty())
+				&&
+			 (this.co.getActiveTabId() != null && !this.co.getActiveTabId().isEmpty())) {
+			co.setActiveTabId(this.co.getActiveTabId());
+			}
+		
 		this.co = co;
 	}
 	
@@ -4269,6 +4285,26 @@ public class Database {
 	public void setSchemaName(String newSchema){
 		
 		databaseAccessHash.put("schema", newSchema);
+	}
+	
+	
+	
+	public void setActiveTabId(String activeTabId) {
+		
+		// set the new active tab id in the ContextObject kept in this DatabaseObject
+		this.co.setActiveTabId(activeTabId);
+		
+		PostgresDatabaseCommunication dc = connectDatabase();
+		try {
+			dc.SendActiveTabIdToDatabaseServer();
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query setting the active tab", e);
+		} 		
+		finally {
+			closeDatabase(dc);
+		}
+		
 	}
 
 	

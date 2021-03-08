@@ -83,7 +83,8 @@ function onchange (evt) {
   // save currently visible window in the cookie, for the next round
   if ( sWindowVisibility=="visible" )
  	 {
- 	 $.cookie('active_lexit_window', $("#page_id").attr("name"));
+	  $.cookie('active_lexit_window', idOfThisInstance);
+	  sendActiveTabIdToService(idOfThisInstance);
  	 }
   
 }

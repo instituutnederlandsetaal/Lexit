@@ -10,7 +10,9 @@ import javax.ws.rs.core.SecurityContext;
  * This class is meant to gather the Tomcat context data,
  * username, projectname into one single
  * object that can be easily passed
- * to functions and so on  
+ * to functions and so on. 
+ * 
+ * This object is saved into the DatabaseObject
  */
 public class ContextObject {
 	
@@ -27,6 +29,9 @@ public class ContextObject {
 	// last time this object was used
 	// (old objects will be removed)
 	private long timeLastUsed;
+	
+	// active tab_id (consists of a database name and a page_id [=tab-id])
+	private String activeTabId;
 	
 	
 	// constructor
@@ -48,6 +53,10 @@ public class ContextObject {
 		this.username = sc.getUserPrincipal().getName(); 
 	}
 	
+	
+	public void setActiveTabId(String activeTab) {
+		this.activeTabId = activeTab;
+	}
 	
 	// special methods
 	
@@ -77,7 +86,7 @@ public class ContextObject {
 	
 	
 	
-	// Getters and setters
+	// Getters
 	
 	// The first set of methods [part a] are the 'normal ones'.
 	// When those are called, we consider it to be genuine user activity,
@@ -95,6 +104,11 @@ public class ContextObject {
 		return this.dbName;
 	}
 	
+	public String getActiveTabId() {
+		setTimeLastUsed();
+		return this.activeTabId;
+	}
+	
 	public ServletContext getContext() {
 		setTimeLastUsed();
 		return this.context;
@@ -110,6 +124,10 @@ public class ContextObject {
 
 	public String getDbNameForSpy() {
 		return this.dbName;
+	}
+	
+	public String getActiveTabIdForSpy() {
+		return this.activeTabId;
 	}
 	
 	public ServletContext getContextForSpy() {

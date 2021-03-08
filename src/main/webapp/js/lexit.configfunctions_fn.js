@@ -5451,6 +5451,19 @@ fn.getCurrentSessionId = function(){
 
 
 /**
+ * Get the page_id, t.a. the ID assigned to the tab
+ * currently being viewed. Just like the tomcat username
+ * and the session-ID, this is saved in the Lex'it
+ * temporary table 'active_user', allowing database
+ * functions to take this into account, to simulate a kind
+ * of per-tab-session-ID
+ */
+fn.getCurrentTabId = function(){
+	return fn.getCurrentProject() + "_" + $("#page_id").attr("name");
+}
+
+
+/**
  * Get the current project name
  *  
  * @returns {String} A project name

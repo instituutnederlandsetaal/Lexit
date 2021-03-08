@@ -116,7 +116,7 @@ public class PostgresDatabaseCommunication {
 		{
 			Statement stmt = null;
 			String query = "CREATE TEMPORARY TABLE active_user AS "+
-				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id;";
+				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
 			
 			try
 			{
@@ -132,9 +132,41 @@ public class PostgresDatabaseCommunication {
 			}			
 			
 		}
+	}
+	
+	public void SendActiveTabIdToDatabaseServer(){
+	
+		// Keep track of active database and tab id 
+		// This is convenient when some Lex'it project is used in multiple tabs at the same time
+		// and database function must be able to tell which tab is sending information
 		
-		
-		
+		if ( sendTomcatUserInfoToDb )
+		{
+			if (activeTomcatUserTableIsThere) {
+				
+				Statement stmt = null;
+				String query = "UPDATE active_user "+
+								"SET active_tab_id = '"+this.co.getActiveTabId()+"'::text "+
+								"WHERE username = '"+this.co.getUsername()+"'::text "+
+								"AND session_id = '"+this.co.getSessionId()+"'::text; ";
+				
+				try
+				{
+					// Create a Statement object
+					stmt = this.db.createStatement();
+					stmt.executeUpdate(query);
+				}
+				catch (SQLException e)
+				{
+					throw new RuntimeException("Error while executing query "+query, e);
+				}
+			}
+			// if the active tomcat table is not there yet, create it
+			else {
+				SendUserIdentityToDatabaseServer();
+			}
+		}
+
 	}
 	
 	

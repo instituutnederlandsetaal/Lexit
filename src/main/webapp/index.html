@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.03.03
+	v2021.03.08
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -398,6 +398,7 @@
 					thead_tr.append( $("<th></th>").text("project_name") );
 					thead_tr.append( $("<th></th>").text("active_user") );
 					thead_tr.append( $("<th></th>").text("session_id") );
+					thead_tr.append( $("<th></th>").text("active_tab") );
 					thead_tr.append( $("<th></th>").text("last_active") );
 					thead_tr.append( $("<th></th>").text("status") );
 					thead.append(thead_tr);
@@ -405,6 +406,7 @@
 					
 					var tfoot = $("<tfoot></tfoot>");
 					var tfoot_tr = $("<tr></tr>");
+					tfoot_tr.append( $("<th></th>").text() );
 					tfoot_tr.append( $("<th></th>").text() );
 					tfoot_tr.append( $("<th></th>").text() );
 					tfoot_tr.append( $("<th></th>").text() );
@@ -444,7 +446,8 @@
 						UsersItems.eq(1).text(),
 						UsersItems.eq(2).text(),
 						UsersItems.eq(3).text(),
-						UsersItems.eq(4).text()
+						UsersItems.eq(4).text(),
+						UsersItems.eq(5).text()
 						]);
 					});
 				
@@ -481,6 +484,33 @@
 			},
 			"error": function(jqxhr, settings, exception){
 				fn.message("Fout", "Het ophalen van de Interne separator string is mislukt.<br><br>Fout: ["+exception+"]");
+			}
+		});
+	}
+
+
+	function sendActiveTabIdToService(sPageId){
+
+		if (paramsHash.get("db") == 'spy')
+			return;
+
+		var url = WEBSERV_URL+"/table/set_active_tab_id"; 
+
+		$.ajax({
+			"async": false, // needed to block code execution while awaiting the server response
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"db_name": paramsHash.get("db"),
+				"active_tab_id": sPageId,
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				// nothing to do
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message("Fout", "Het registeren van de active tab is mislukt.<br><br>Fout: ["+exception+"]");
 			}
 		});
 	}
@@ -531,8 +561,10 @@
 		
 		// generate unique id for this page
 		// we will need this to detect page focus/blur in a reliable way
-		$("#page_id").attr("name", getUniqueNumber());
-		$.cookie('active_lexit_window', $("#page_id").attr("name"));
+		var sPageId = getUniqueNumber();
+		$("#page_id").attr("name", sPageId);
+		$.cookie('active_lexit_window', sPageId);
+		sendActiveTabIdToService(sPageId);
 		
 		// user instruction for accessing tables
 		$("#indicator").empty().append(

@@ -139,6 +139,39 @@ public class TableResources {
 	}
 	
 	
+	// register the active tab a user is currently viewing 
+	// .../table/set_active_tab_id
+	@Path("set_active_tab_id")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject setActiveTab(
+			@QueryParam("db_name") String dbName,
+			@QueryParam("active_tab_id") String activeTabId,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest){
+		
+		DbResponseObject response = new DbResponseObject();
+		
+		if (dbName.equals("spy")) {
+			response.setResponse("active_tab_id needn't to be set in spy mode ");
+		}
+		else {
+			ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);			
+			
+			if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+				throw new RuntimeException("Permission denied to "+co.getUsername());
+			
+			// register the database + tab id the user is currently viewing
+			getDatabaseObject(co).setActiveTabId(dbName+"_"+activeTabId);
+			
+			response.setResponse("active_tab_id set to "+co.getActiveTabIdForSpy());
+		}		
+		
+		return response;
+	}
+	
+	
 	// set current project to work in another schema than the default one
 	// (the default schema is the one specified in the .database config file)
 	// call:
@@ -1470,7 +1503,7 @@ public class TableResources {
 		
 		Util.debug(co, "## >>> PAK DATABASE OBJECT "+cachingKey);
 		newDbObj = nameToDatabaseObject.get(cachingKey);
-		newDbObj.updateContextObject(co);
+		newDbObj.updateContextObject(co); // make sure that data newly added to context object is saved in DatabaseObject
 		return newDbObj;
 	};
 	
@@ -1493,11 +1526,12 @@ public class TableResources {
 			String userName = co.getUsername();
 			Date date=new Date(co.getTimeLastUsed());
 			String sessionId = co.getSessionIdForSpy();
+			String activeTabId = co.getActiveTabIdForSpy();
 			SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd 'om' HH:mm:ss");
 			String lastActive = df2.format(date);
 			String activeRecently = (co.isLeftUnused() ? "Slaapstand" : "Nu actief");
 			
-			ulo.addUserData(new String[]{dbName, userName, sessionId, lastActive, activeRecently});
+			ulo.addUserData(new String[]{dbName, userName, sessionId, activeTabId, lastActive, activeRecently});
 		}
 		return ulo;
 	}
