@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.03.08
+	v2021.03.15
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -491,7 +491,7 @@
 
 	function sendActiveTabIdToService(sPageId){
 
-		if (paramsHash.get("db") == 'spy')
+		if (paramsHash == null || paramsHash.get("db") == null || paramsHash.get("db") == 'spy')
 			return;
 
 		var url = WEBSERV_URL+"/table/set_active_tab_id"; 
