@@ -1355,7 +1355,8 @@ fn.getRowNodeNumberOnScreen = function(nRow){
 	fn._checkApiInstance("fn.getRowNodeNumberOnScreen", nRow);
 	fn._checkjQueryObject("fn.getRowNodeNumberOnScreen", nRow);
 
-	return $(nRow).index();
+	var aRows = $(nRow).closest("tbody").find("tr:not('.group')");
+	return aRows.index(nRow);
 };
 
 
@@ -1370,7 +1371,7 @@ fn.getAllRowNodes = function(oTable){
 
 	if (typeof oTable == 'string')
 		oTable = mt.getDataTableObjectOf(oTable);
-	
+
 	// return the nodes
 	return (fx.getAllRows(oTable)).nodes().toArray();
 };
