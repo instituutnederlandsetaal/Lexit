@@ -235,6 +235,8 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
+
+			console.log("Lex'it: schema was set to "+sNewSchema);
 	 		
 	 		// Since the ContextObject (cache) of Lex'it is emptied after a few minutes of inactivity,
 			// we might end up with Lex'it addressing the default schema again (t.i. the one set in the .database config file), 
@@ -262,7 +264,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 						// a trick to deal with the short life of the ContextObject. As a consequence, the
 						// callback give as a parameter is called only at the first round, to meet this 
 						// probable expectation (of developers) of the function behavior. 
-						fn.setSchema(sNewSchema, null, fnErrorHandler);
+						fn.setSchema(sNewSchema, null, fnErrorHandler);						
 						}, 
 					1000*60); 
 			
