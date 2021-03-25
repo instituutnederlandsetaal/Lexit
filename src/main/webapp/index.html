@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.03.22
+	v2021.03.25
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -211,6 +211,13 @@
 	// this table will be opened automatically (default value 'true')
 	// This behaviour can be switched off by calling fn.preventAutomaticStartup() in config.js file
 	var bOpenSingleTableAtStartup = true;
+
+	// If some action needs to be performed (eg. to restore a given situation)
+	// as soon as a tab regains or looses focus, some function can be declared to do so,
+	// by calling fn.doAtFocusGain(). The function will be store in this variable.
+	// (default is null)
+	var fnDoAtFocusGain;
+	var fnDoAtFocusLoss;
 	
 	// http parameters	
 	var paramsHash;

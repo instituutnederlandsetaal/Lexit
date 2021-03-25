@@ -74,11 +74,15 @@ function onchange (evt) {
   //  page id will be saved into the cookie, so in the next round
   //  we will know for sure that the window doesn't get visible
   //  for the first time = parasite blur/focus events)
-  if ( sWindowVisibility=="visible" && idOfThisInstance != idInCookie)
+  if ( sWindowVisibility=="visible")
  	 {    	 
- 	 refr.fireUpdateOfLayout();
+ 	 refr.fireUpdateAtFocusGain();
  	 }
   
+  if ( sWindowVisibility=="hidden")
+ 	 {    	 
+ 	 refr.fireUpdateAtFocusLoss();
+ 	 }
   
   // save currently visible window in the cookie, for the next round
   if ( sWindowVisibility=="visible" )
@@ -90,25 +94,39 @@ function onchange (evt) {
 }
 })();
 
-//This function relies silently on the onchange function 
-//to detect if focus or blur had genuinely occured 
+// These functions rely silently on the onchange function 
+// to detect if focus or blur had genuinely occured 
 
-refr.fireUpdateOfLayout = function(){	
+refr.fireUpdateAtFocusGain = function(){	
+
+	// gain of focus might trigger a custom function
+	if (typeof fnDoAtFocusGain === "function")
+		fnDoAtFocusGain();
 	
+	// update the layout upon focus
 	refr.updateLayout(true);	
 };
 
+
+refr.fireUpdateAtFocusLoss = function(){
+
+	// loss of focus might trigger a custom function
+	if (typeof fnDoAtFocusLoss === "function")
+		fnDoAtFocusLoss();
+};
+
+
+// subroutine for job upon focus
 refr.updateLayout = function(bRefreshTable){
-	
+
 	var currentUpdateAttemptTime = Math.floor($.now()/1000);
 	
 	if ( lastLayoutUpdateTime == null || 
-			(currentUpdateAttemptTime - lastLayoutUpdateTime) >layoutUpdateLatency)
-	{
+			(currentUpdateAttemptTime - lastLayoutUpdateTime) >layoutUpdateLatency){
+
 		lastLayoutUpdateTime = currentUpdateAttemptTime;
 		
-		for (var i=0; i<mt.getListOfLoadedTables().length; i++)
-			{			
+		for (var i=0; i<mt.getListOfLoadedTables().length; i++){			
 			var sTableName = mt.getListOfLoadedTables()[i];
 			var aTbableSettings = conf.getTableSettings(sTableName);
 			
@@ -121,13 +139,12 @@ refr.updateLayout = function(bRefreshTable){
 			
 			// refresh table content if required
 			// (table should be visible and refresh upon focus must be allowed)
-			if (bRefreshTable && !fn.tableIsHidden(sTableName) && conf.getRefreshUponFocus(aTbableSettings) )
-				{
+			if (bRefreshTable && !fn.tableIsHidden(sTableName) && conf.getRefreshUponFocus(aTbableSettings) ){
 				fn.refreshTable(sTableName);				
-				}
+			}
 			
 			gui.setPositionOfPaginationPane(sTableName);
-			}
+		}
 	}
 	
 };

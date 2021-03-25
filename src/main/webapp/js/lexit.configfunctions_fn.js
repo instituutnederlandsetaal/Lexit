@@ -125,6 +125,35 @@ fn.setBackgroundColor = function(sColor){
 }
 
 
+
+
+/**
+ * If some action needs to be performed (eg. to restore a given situation)
+ * as soon as a tab regains or looses focus, set a function to do so.
+ * This call be cancelled by giving null as a argument
+ * 
+ * @param {*} fnFunction function to be executed in a tab that regains focus
+ */
+fn.doAtFocusGain = function(fnFunction){
+
+	fnDoAtFocusGain = fnFunction;
+}
+
+fn.doAtFocusLoss = function(fnFunction){
+
+	fnDoAtFocusLoss = fnFunction;
+}
+
+
+
+/**
+ * Tell Lex'it to force exact count for the following table refresh
+ * (the default setting is set back to normal immediatelly after the table refresh)
+ */
+fn.forceExactCount = function(){
+	bForceExactCount = true;
+}
+
 /**
  * Load a library with extra functions for a given project
  * 
