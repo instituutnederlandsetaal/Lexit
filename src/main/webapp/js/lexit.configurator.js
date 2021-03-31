@@ -335,6 +335,9 @@ var oTableConfigurationList_example = {
 		/**
 		 * @description Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.
 		 * Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.
+		 * 
+		 * Lex'it heeft enige default classes beschikbaar, zoals 'inlfont10pt' (voor weergave van INL font in 10 pt),
+		 * of 'inlfont' (deze zonder font-size specificatie). 
 		 */
 		"class": "",
 		

@@ -1,4 +1,10 @@
 
+
+body {
+    font-family: 'Times New Roman', Times, serif, gtb;
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables features
  */
@@ -145,7 +151,7 @@ table.display thead th {
 	border-bottom: 1px solid black;
 	font-weight: bold;
 	cursor: pointer;
-	* cursor: hand;
+	*cursor: hand;
 }
 
 table.display tfoot th {
@@ -686,4 +692,42 @@ table.dataTable input[type=checkbox]
 textarea {
    font-family: inherit;
    font-size: inherit;
+}
+
+
+/*
+* GTB / INL font for historical characters
+*/
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVRG__.TTF') format('truetype');
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVI___.TTF') format('truetype');
+    font-style: italic;
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVB___.TTF') format('truetype');
+    font-weight: bold;
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVBI__.TTF') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+.inlfont {
+	font-family: Verdana, sans-serif, gtb;
+}
+
+.inlfont10pt {
+	font-family: Verdana, sans-serif, gtb;
+	font-size: 10pt;
 }
