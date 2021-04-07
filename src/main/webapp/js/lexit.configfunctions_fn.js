@@ -3627,7 +3627,7 @@ fn.closeDialog = function(){
  */
 fn._activeEnterForThisDialog = function(dialogDivId){
 	
-	// time is a way of preventing enter to be triggered by
+	// timeout is a way of preventing enter to be triggered by
 	// another key event with enter occuring just before 
 	// (like striking enter for validating something: if a dialog is to be shown right after that,
 	// it should wait for enter to be pressed again)
