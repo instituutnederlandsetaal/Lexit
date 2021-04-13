@@ -81,7 +81,7 @@ gui.activateEllipsis = function(sSomeTableName){
 				if (columnEllipsisHeight != null)
 					$("div."+divClassName)
 					.css("max-height", columnEllipsisHeight)
-					.css("overflow-y", "auto")
+					.css("overflow-y", "auto");
 
 
 				// if content must be unwrapped at mouseover, assign that to mouseevent

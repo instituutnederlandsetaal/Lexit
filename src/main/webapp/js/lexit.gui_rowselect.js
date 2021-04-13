@@ -4,7 +4,9 @@
 
 var row = {};
 
-// assign functions for row selection
+// assign functions for row selection, 
+// excluding group rows
+
 row.addRowSelectionFunctions = function(sSomeTablename){
 	
 	$('#'+sSomeTablename+'_dynamic').off('click', "#"+sSomeTablename+" tbody tr:not('.group')");
@@ -14,6 +16,8 @@ row.addRowSelectionFunctions = function(sSomeTablename){
 	} );
 };
 
+
+// the row selection handler
 
 row._rowSelectionHandler = function(sSomeTablename, nRow){
 	

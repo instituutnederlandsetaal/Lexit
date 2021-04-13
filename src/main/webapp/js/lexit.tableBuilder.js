@@ -360,7 +360,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
 		        		
 		        		$("td:eq("+iColNumber+")", oCurrentRow.node())
-			        		.attr("title", currentTooltip+"Rij "+ (iRowNumber+1) +" in '"+currentColumnName+"'")
+			        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>Rij "+ (iRowNumber+1) +" in '"+currentColumnName+"'</span>")
 			        		.addClass("tooltip");
 						}
 				});				
