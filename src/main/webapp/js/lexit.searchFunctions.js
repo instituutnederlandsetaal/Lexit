@@ -1134,7 +1134,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				.css("list-style-type", "none")
 				.css("margin", "0")
 				.css("padding", "0")
-				.css("width", "80%")
+				.css("width", "auto") // allow longer values to be rendered nicely
 			;
 	
 	
