@@ -2384,7 +2384,7 @@ public class Database {
 			ArrayList<String> queryParts = new ArrayList<String>();
 			ato = new ArgumentTypesObject();
 			
-			// build the query condition for each column
+			// build the query condition for each column (!!! the MAIN search will search EACH column of course !!!)
 			for (int i=0; i<columnsToSearch.length; i++)
 			{
 				// build current part
@@ -2395,7 +2395,8 @@ public class Database {
 				{
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" AS text) ~* ? ");
+							" AS text) " + getSuitableOperatorAndArg(tableName, null, sSearch, false)
+							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
@@ -2447,7 +2448,8 @@ public class Database {
 				{
 					queryParts.add(
 							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" AS text) ~* ? ");
+							" AS text) "+ getSuitableOperatorAndArg(tableName, null, sSearch, false)
+							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
@@ -2485,7 +2487,8 @@ public class Database {
 				{
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
-							" AS text) ~* ? ");
+							" AS text) "+ getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
+							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
@@ -2534,7 +2537,8 @@ public class Database {
 				{
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" AS text) ~* ? ");
+							" AS text) " + getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
+							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else
@@ -2992,7 +2996,8 @@ public class Database {
 		String arg = " ? ";
 		
 		// get column type
-		String columnType = getTypeOfColumn(tableName, columnName);
+		String columnType = (columnName==null ? 
+					"text" : getTypeOfColumn(tableName, columnName));
 				
 		
 		// always check that one first (to prevent NullPointerException)
