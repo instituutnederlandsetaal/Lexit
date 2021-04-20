@@ -420,6 +420,16 @@ var oTableConfigurationList_example = {
 		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
 		 */
 		"ellipsis": false,
+
+		/**
+		 * @type {integer}
+		 * @description Ellipsis. Wanneer ellipsis is toegepast en de gebruiker met de muis over de tabel heen gaat, klapt
+		 * de een na de andere cel open en swingen de rijen steeds open en dicht, wat erg onrustig is. Bovendien bemoeilijkt
+		 * dat het selecteren van een rij, omdat rijen eromheen te pas en te onpas open- en dichtklappen. Een oplossing is om een delay
+		 * in te stellen, waardoor het uitklappen van een rij pas gebeurt als er na een opgegeven tijdsduur nog steeds sprake
+		 * is van 'mouseover' op de uit te klappen cel. Zo niet, dan klapt de cel niet open. 
+		 */
+		"ellipsis_delay": 300,
 		
 		
 		/**
@@ -906,6 +916,17 @@ conf.getEllipsisWidth = function(aColumnConfig){
 		return "200px";		
 	return aColumnConfig["ellipsis_width"];
 };
+
+// retrieve ellipsis delay
+// default is 300 (ms)
+conf.getEllipsisDelay = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_delay"] == 'undefined')
+		return 300;		
+	return aColumnConfig["ellipsis_delay"];
+};
+
+
 
 // retrieve ellipsis (max) height
 // default is null

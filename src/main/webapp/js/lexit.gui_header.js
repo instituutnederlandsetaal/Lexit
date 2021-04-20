@@ -1090,7 +1090,7 @@ head.putHelpButton = function(sSomeTablename){
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>\\w</I></CENTER></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>een willekeurige letter</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD>een willekeurige letter, cijfer of underscore</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><CENTER><I>\\d</I></CENTER></TD>" +
@@ -1192,26 +1192,26 @@ head.putHelpButton = function(sSomeTablename){
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi\\w$</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door &eacute;&eacute;n letter</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door &eacute;&eacute;n letters/cijfers</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi\\w{2}$</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door twee letters</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door twee letters/cijfers</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi\\w{2,4}$</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door twee tot vier letters</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door twee tot vier letters/cijfers</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD></TD>" +				
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi\\w*</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door nul of meer letters</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door nul of meer letters/cijfers</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>mooi\\w+</I></TD>" +
-				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door &eacute;&eacute;n of meer letters</TD>"+
+				"<TD>&nbsp;&nbsp;</TD><TD>zoek naar '<I>mooi</I>' gevolgd door &eacute;&eacute;n of meer letters/cijfers</TD>"+
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD></TD>" +				
@@ -1267,6 +1267,16 @@ head.putHelpButton = function(sSomeTablename){
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>\"^Af\"</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek alleen naar woorden die met 'Af' beginnen met een hoofdletter 'A'.</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR>" +
+				"Zoals het laatste voorbeeld laat zien, moeten de aanhalingstekens om de gehele expressie heen. Zoals "+
+				"bij deze reguliere expressie:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>\"^[A-Z]\"</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met een hoofdletter beginnen.</TD>" +
 				"</TR>" +
 				"</TABLE>" +
 				"<BR>" +
@@ -1328,7 +1338,23 @@ head.putHelpButton = function(sSomeTablename){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>!(ing|heid)$</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET op '-ing' of '-heid' eindigen</TD>" +
 				"</TR>" +
-				"</TABLE>" +				
+				"</TABLE>" +
+				"<BR><BR>" +
+				"Belangrijk is te noteren hoe de negatie bij 'exact zoeken' gebruikt wordt. Exact zoeken " +
+				"gebeurt, zoals we boven zagen, door gebruik van aanhalingstekens om de zoektermen heen. " +
+				"De negatie hoort vóór de aanhalingstekens te staan:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!\"^Boek\"</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET met het woord 'Boek' (met een hoofdletter) beginnen.</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!\"^[A-Z]\"</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET met een hoofdletter beginnen.</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR>" +			
 				"<BR><BR><BR>" +
 				"<B>Nog een paar trucjes</B>" +
 				"<BR><BR>" +

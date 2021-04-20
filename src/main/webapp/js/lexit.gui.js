@@ -49,6 +49,7 @@ gui.activateEllipsis = function(sSomeTableName){
 		var columnEllipsisWidth = conf.getEllipsisWidth(oColumnConfig);
 		var columnEllipsisHeight = conf.getEllipsisHeight(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
+		
 	
 		// if the column is visible and if ellipsis is required, that activate it! 
 		if (columnVisible && columnEllipsis)
@@ -85,35 +86,51 @@ gui.activateEllipsis = function(sSomeTableName){
 
 
 				// if content must be unwrapped at mouseover, assign that to mouseevent
-				if (columnEllipsisUnwrap)
-					{
+				if (columnEllipsisUnwrap) {
 					// first clean up
 					$("div."+divClassName).off();
 					
 					
 					// unwrap this ellipsis cell at mouseover
 					$("div."+divClassName).mouseover(function(){
-						$(this).css("white-space", "normal");						
+						thisDiv = this;
+
+						var thisNode = $(thisDiv).closest("td").get(0);
+						var sTable = fn.getTableName(thisNode);
+						var sColName = fn.getNameOfColumnForThisNode(thisNode);
+						var columnEllipsisDelay = conf.getEllipsisDelay(conf.getColumnConfig(conf.getTableConfig(sTable), sColName));
+
+						// wait a bit before unwrapping, to allow moving the mouse
+						// over a table without unnecessarily unwrapping every cell the mouse meets 
+						setTimeout(function(){
+							var bStillHover = thisDiv.matches(":hover");
+							if (bStillHover){
+								$(thisDiv).css("white-space", "normal");								
+							}
+						}, columnEllipsisDelay);
 					});
 					
 					// wrap this ellipsis cell at mouseout
-					if (columnKeepSelectedOpen)
-						{
+					if (columnKeepSelectedOpen) {
 						$("div."+divClassName).mouseout(function(){
+							thisDiv = this;
+
 							// special case: close this ellipsis cell at mouseout, except when config says selected rows must keep unwrapped
-							if ( !$(this).closest("tr").hasClass("selected"))
-								$(this).css("white-space", "nowrap");
+							if ( !$(thisDiv).closest("tr").hasClass("selected")){
+								$(thisDiv).css("white-space", "nowrap");
+							}
 						});
-						}
-					else
-						{
+					}
+					else {
 						$("div."+divClassName).mouseout(function(){
-							// close this ellipsis cell at mouseout
-							$(this).css("white-space", "nowrap");
+							thisDiv = this;
+
+							// close this ellipsis cell at mouseout							
+							$(thisDiv).css("white-space", "nowrap");
 						});
-						}
+					}
 					
-					}				
+				}				
 				
 			});
 			
@@ -121,6 +138,19 @@ gui.activateEllipsis = function(sSomeTableName){
 	}	
 	
 };
+
+// compute the heights of an element wrapped and unwrapped  
+gui._getTrueHeights = function(nNode){
+
+	$(nNode).css("height", "");
+	var minimalHeight = $(nNode).css("white-space", "nowrap").css("height");
+	var inExtensionHeight = $(nNode).css("white-space", "normal").css("height");
+
+	return {"minimal": minimalHeight, "extended": inExtensionHeight};
+}
+
+
+
 
 // replace the possibly technical names of columns by nice user friendly names, if available
 gui.setColumnNiceNames = function(sSomeTablename){
