@@ -93,7 +93,7 @@ gui.activateEllipsis = function(sSomeTableName){
 					
 					// unwrap this ellipsis cell at mouseover
 					$("div."+divClassName).mouseover(function(){
-						thisDiv = this;
+						var thisDiv = this;
 
 						var thisNode = $(thisDiv).closest("td").get(0);
 						var sTable = fn.getTableName(thisNode);
@@ -113,7 +113,7 @@ gui.activateEllipsis = function(sSomeTableName){
 					// wrap this ellipsis cell at mouseout
 					if (columnKeepSelectedOpen) {
 						$("div."+divClassName).mouseout(function(){
-							thisDiv = this;
+							var thisDiv = this;
 
 							// special case: close this ellipsis cell at mouseout, except when config says selected rows must keep unwrapped
 							if ( !$(thisDiv).closest("tr").hasClass("selected")){
@@ -123,7 +123,7 @@ gui.activateEllipsis = function(sSomeTableName){
 					}
 					else {
 						$("div."+divClassName).mouseout(function(){
-							thisDiv = this;
+							var thisDiv = this;
 
 							// close this ellipsis cell at mouseout							
 							$(thisDiv).css("white-space", "nowrap");
