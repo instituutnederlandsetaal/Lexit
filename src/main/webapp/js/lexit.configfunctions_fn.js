@@ -2206,13 +2206,12 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
  * 
  * @see fn.getDataFromRowNode
  */
-fn.getDataFromColumn = function(sSomeTable, sColumnName){
+fn.getDataFromColumn = function(sSomeTable, sColumnName){	
 	
-	var iVisibleColumnNumber = fn.getVisibleColumnNumberOf(sSomeTable, sColumnName);
+	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sSomeTable) : sSomeTable );
 	
-	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sTableName) : sSomeTable );
-	
-	return oTable.column( iVisibleColumnNumber ).data();	
+	// special column selector: https://datatables.net/reference/type/column-selector
+	return oTable.column( sColumnName+':name' ).data();	
 };
 
 /**
