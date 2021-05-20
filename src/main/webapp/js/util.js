@@ -823,6 +823,7 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	if (debug)
 		{
 		console.log("-----------------------------------------------------------");
+		console.log("bPushWordBoundaries="+bPushWordBoundaries);
 		console.log("sRangeStringDecodedEntities = "+sRangeStringDecodedEntities);
 		console.log("sNodeStringEncodedEntities = "+sNodeStringEncodedEntities);
 		console.log("sSelectionDecodedEntities = "+sSelectionDecodedEntities);
@@ -849,7 +850,8 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 	
 	var iCorrection = 							sPrefixEncodedEntitiesAndCorrection["index_correction"]; //(sPrefixEncodedEntities.length - sPrefixDecodedEntities.length);
 	// from now on, selectionStartIndex must be applied to strings with ENcoded entities, instead of range.toString()
-	selectionStartIndex = 						selectionStartIndex + iCorrection;
+	// 
+	selectionStartIndex = 						getIndexOfTrueStart(sNodeStringEncodedEntities, selectionStartIndex + iCorrection);
 	
 	if (debug)
 		{
@@ -918,7 +920,14 @@ function getTrueIndexes(sRangeStringDecodedEntities, sNodeStringEncodedEntities,
 		{
 		newSelectionStartIndex = mainString.indexOf(">", newSelectionStartIndex) + 1;
 		}
-	
+
+	// if (debug)
+	// 	{
+	// 	console.log(mainString);
+	// 	console.log(mainString.indexOf(selection.toLowerCase()));
+	// 	console.log(mainString.indexOf(selection.toLowerCase(), newSelectionStartIndex));
+	// 	}
+
 	return {
 		"start": newSelectionStartIndex,
 		"end": newSelectionEndIndex
@@ -987,6 +996,15 @@ function reEncodeEntities(sEncodedEntities, sDecodedEntities){
 	var iLength = sDecodedEntities.length;
 	var iCorrectionToApply = 0;
 	
+	// IMPORTANT:
+	// In the following, we loop through the DEcoded string and compare the current character position (at index i)
+	//    with the very same position in the ENcoded string.
+	// As soon as we encounter a MISmatch, that means we have an DEcoded char on the one side, and an ENcoded char on the other.
+	// So, in such a case:
+	//  * we first extract the encountered CODE (tag or entity) and store it with its positon in a hash;
+	//  * as a second step, we replace the CODE by its DEcoded char in the encoded string, so as to be able to keep comparing both strings
+	//    at the same index i: if we wouldn't replace the codes by the chars, we wouldn't be able to compare the strings further on, because
+	//    a code obviously occupies a different number of chars positions that the single decoded char!  
 	for (var i=0; i<iLength; i++)
 		{
 	
@@ -1005,7 +1023,15 @@ function reEncodeEntities(sEncodedEntities, sDecodedEntities){
 		
 		// we found a decoded entity
 		if ( sEncodedEntities.charAt(i) == "&" && 
-			 sDecodedEntities.charAt(i) != sEncodedEntities.charAt(i) )
+			 (	sDecodedEntities.charAt(i) != sEncodedEntities.charAt(i) // expected mismatch between char and corresponding entity
+				||
+				( // small exception: condition hereabove won't work with '&', because it starts the same as '&amp;'
+				sDecodedEntities.substring(i, i+"&amp;".length) != "&amp;"
+				&&
+				sEncodedEntities.substring(i, i+"&amp;".length) == "&amp;"
+				)
+			 )
+			 )
 			{
 			// Translate the ENcoded entity back into a DEcoded entity in the sEncodedEntities string
 			// That way, we can keep comparing chars at the same position in both strings 
@@ -1053,7 +1079,7 @@ function reEncodeEntities(sEncodedEntities, sDecodedEntities){
 
 
 // Find the first preceding space before a given index.
-// We need this function to solve a particular flow of the fn.getSelectedTextInNode function:
+// We need this function to solve a particular flaw of the fn.getSelectedTextInNode function:
 // Getting the selected text works given a node that has been clicked upon. In most cases,
 // this is good enough. Sadly, in some cases, this method doesn't give the right text boundaries,
 // because a word happens to be broken up in several nodes due to tags assigning style etc.
@@ -1069,8 +1095,9 @@ function getIndexOfPreviousSpace(mainString, startIndex){
 		if (currentChar==">") 
 			withinTag = true;
 		
-		if (currentChar.match(/[\^\$\(\)\[\]\{\}\\\|\.\*\+\?\s'"!:;,&@#%=]/) && !withinTag)
-			return i;
+		if (currentChar.match(/[\^\$\(\)\[\]\{\}\\\|\.\*\+\?\s'"!:;,&@#%=]/) && !withinTag){
+			return i;						
+		}
 		
 		if (currentChar=="<") withinTag = false;
 		}
@@ -1107,6 +1134,19 @@ function getIndexOfFollowingSpace(mainString, endIndex){
 	// the following space would occur
 	return mainString.length;
 }
+
+
+// if a word starts with some tags, compute the start-index skipping the front tags
+function getIndexOfTrueStart(fullString, startIndex){
+
+	if (fullString.charAt(startIndex) != '<')
+		return startIndex;
+
+	var sFrontTag = fullString.substring(startIndex).replace(/^((\<[^\>]+?\>)+)([^\<])(.+)$/, '$1');
+	
+	return startIndex + sFrontTag.length;
+}
+
 
 
 
