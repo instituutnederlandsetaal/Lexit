@@ -1169,11 +1169,11 @@ gui.getTrueCheckboxValue = function(sSomeTablename, nSomeNode){
 
 
 // show/hide Processing... message
-gui.showProcessingMsg = function(sSomeTablename){
+gui.showProcessingMsg = function(sSomeTablename, bRefreshing){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	showSpinner("#"+sSomeTablename+"_wrapper");	
+	showSpinner("#"+sSomeTablename+"_wrapper", bRefreshing);	
 	$("*").css("cursor", "progress");
 };
 gui.removeProcessingMsg = function(sSomeTablename){

@@ -297,7 +297,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		"preDrawCallback": function( settings ) {
 			
 			// show 'in progress' before table draw starts
-			gui.showProcessingMsg(sSomeTableName);
+			gui.showProcessingMsg(sSomeTableName, true);
 			
 			var oTable = 		mt.getDataTableObjectOf(sSomeTableName);
 			

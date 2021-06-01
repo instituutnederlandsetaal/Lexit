@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.05.18
+	v2021.06.01
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -234,6 +234,13 @@
 	// are we on Mac or PC?
 	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	
+	// tell IE won't work
+	var msie = /MSIE|Trident/.test(window.navigator.userAgent);
+		
+	if (msie > 0){		
+		alert("Internet Explorer is not supported.");
+	}	
+
 	
 	// *********************************************************************************************************
 	

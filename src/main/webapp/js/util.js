@@ -6,15 +6,28 @@
 // this IE proof spinner is needed because IE can't show animated gifs during Ajax calls in some circumstances
 // see: http://fgnass.github.com/spin.js/
 
-function showSpinner(target){
+function showSpinner(target, bRefreshing){
+
+	// default setting indicating Lex'it is working
+	var sColorCode = '#000';
+	var iRadius = 10;
+	var iWidth = 4;
+
+	// other setting, indication Lex'it is refreshing the view
+	if (bRefreshing != null && bRefreshing == true){
+		sColorCode = '#0099ff';
+		iRadius = 20;
+		iWidth = 8;
+	} 
+
 	var opts = {
 			  lines: 13, // The number of lines to draw
 			  length: 7, // The length of each line
-			  width: 4, // The line thickness
-			  radius: 10, // The radius of the inner circle
+			  width: iWidth, // The line thickness
+			  radius: iRadius, // The radius of the inner circle
 			  corners: 1, // Corner roundness (0..1)
 			  rotate: 0, // The rotation offset
-			  color: '#000', // #rgb or #rrggbb
+			  color: sColorCode, // #rgb or #rrggbb
 			  speed: 1, // Rounds per second
 			  trail: 60, // Afterglow percentage
 			  shadow: false, // Whether to render a shadow
@@ -34,7 +47,7 @@ function removeSpinner(target){
 	$(target+" .spinner").remove();
 };
 
-// added for user within jQuery
+// added for use within jQuery
 $.fn.spin = function(opts) {
 	  this.each(function() {
 	    var $this = $(this),
