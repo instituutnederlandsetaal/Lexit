@@ -3664,7 +3664,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	
 	var sP = $("<p></p>").html(sMessage);
 	var dialogDivId = "dialog-message"+getUniqueNumber();
-	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
+	var sDiv = $("<div></div>").attr("id", dialogDivId).attr("title", sTitle).append(sP);
 	
 	$(document.body).append(sDiv);
 	

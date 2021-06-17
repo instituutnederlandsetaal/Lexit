@@ -103,9 +103,9 @@ refr.fireUpdateAtFocusGain = function(){
 	// gain of focus might trigger a custom function
 	if (typeof fnDoAtFocusGain === "function")
 		fnDoAtFocusGain();
-	
-	// update the layout upon focus
-	refr.updateLayout(true);	
+	else
+	// default: update the layout upon focus
+		refr.updateLayout(true);	
 };
 
 

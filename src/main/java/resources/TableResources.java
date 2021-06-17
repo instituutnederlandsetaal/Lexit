@@ -1383,7 +1383,6 @@ public class TableResources {
 		}
 		
 		
-		
 		// get the count of all records in the table (fast)
 		
 		Map<String, Object> countAndCountQualityOfTable = getCountOfTable(co, tableName);
