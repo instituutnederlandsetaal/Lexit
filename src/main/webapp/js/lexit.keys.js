@@ -386,19 +386,22 @@ kf.addKeyFunctions = function(){
     	kf._callCustomKeyFunctions('keydown');
     	
     	// F8 (toggle tooltips in table)
-    	if (kf.isPressed("f8"))
-    		{
-    		var sActiveTable = kf.getActiveTable();
+    	if (kf.isPressed("f8")){
     		bTooltipsAllowedInTable = !bTooltipsAllowedInTable;
     		// force tooltip to fadeout (otherwise it will keep in sight)
-    		$("#tiptip_holder").fadeOut();    		
-    		fn.refreshTable(sActiveTable);
+			$("#tiptip_holder").fadeOut();
+			
+			// now refresh the tables to activate the new setting
+			var aTablesToRefresh = mt.getListOfLoadedTables();
+			for (var i=0; i<aTablesToRefresh.length; i++){
+				var sTable = aTablesToRefresh[i];
+				if (fn.tableExists(sTable))	fn.refreshTable(sTable);
+			}		
     		
-    		}
+    	}
     	
     	// refresh active table
-    	if (kf.isPressed("f5"))
-    		{
+    	if (kf.isPressed("f5")){
     		// make sure the dropdown menus disappear in IE
 			$(".ui-menu-item").hide();
 			
@@ -406,41 +409,36 @@ kf.addKeyFunctions = function(){
     		var sActiveTable = kf.getActiveTable();
     		if (sActiveTable!=null)
     			fn.refreshTable(sActiveTable);
-    		}
+    	}
     	
     	// refresh active table AND force exact count
-    	if (kf.isPressed("pause"))
-    		{
+    	if (kf.isPressed("pause")){
     		// force exact count!
     		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
     		bForceExactCount = true; 
     		// but for now, do a refresh with an exact count
     		var sActiveTable = kf.getActiveTable();
     		fn.refreshTable(sActiveTable);
-    		}
+    	}
     	
     	
     	// F2 (shortcut for rows selection button)
-    	if (kf.isPressed("f2"))
-			{
+    	if (kf.isPressed("f2")){
     		var sActiveTable = kf.getActiveTable();
     		
     		// special case: search and replace panel is opened (and table header is hidden)
-    		if ($("#"+sActiveTable+"_search_and_replace").elementExists() )
-    			{
+    		if ($("#"+sActiveTable+"_search_and_replace").elementExists() ){
     			$("#"+sActiveTable+"_wrapper #"+sActiveTable+"_search_and_replace #selectionbutton").click();
-    			}
+    		}
     		// normal case: table header is visible
-    		else
-    			{
+    		else {
     		$("#"+sActiveTable+"_wrapper #selectionbutton").click();
-    			}
-			}
+    		}
+		}
     	
     	
     	// pageup/down
-    	if (kf.isPressed("pageup") || kf.isPressed("pagedown"))
-			{			
+    	if (kf.isPressed("pageup") || kf.isPressed("pagedown")){			
 			var sActiveTable = kf.getActiveTable();
 			
 			// 1. there must be some table active 
@@ -449,14 +447,11 @@ kf.addKeyFunctions = function(){
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate")
-				)
-				{
-				if (kf.isPressed("pageup"))
-					{
+				){
+				if (kf.isPressed("pageup")){
 					mt.getDataTableObjectOf(sActiveTable).page("previous").draw("page");
-					}
-				else if (kf.isPressed("pagedown"))
-					{
+				}
+				else if (kf.isPressed("pagedown")){
 					// it might occur that the estimated total number of pages is lower than the true number of pages;
 					// in such cases, one might get stuck on the last page, which is actually NOT the last page.
 					// So, to solve that, Lex'it checks if we are on the last page, and if so, it forces a hard refresh
@@ -464,8 +459,7 @@ kf.addKeyFunctions = function(){
 					var iCurrentPage = 		mt.getDataTableObjectOf(sActiveTable).page.info().page+1;
 					var iTotalNrOfPages =	mt.getDataTableObjectOf(sActiveTable).page.info().pages;
 					
-					if (iTotalNrOfPages == iCurrentPage)
-						{
+					if (iTotalNrOfPages == iCurrentPage){
 						// force exact count!
 			    		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
 			    		bForceExactCount = true; 
@@ -478,20 +472,19 @@ kf.addKeyFunctions = function(){
 							}, 300);
 							
 							});
-						}
-					// normal case: just go to the next page
-					else
-						{
-						mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
-						}
-					
-					
 					}
+					// normal case: just go to the next page
+					else {
+						mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
+					}
+					
+					
 				}
+			}
 			// prevent scrolling of screen when pressing the up/down arrows
 			// (needed as last command)
 			return false;
-			}
+		}
     	
     	
 		// arrow keys
