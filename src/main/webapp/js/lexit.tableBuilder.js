@@ -247,6 +247,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			"url": WEBSERV_URL+"/table/gettable",
 			"type": "POST",
 			"data": function ( d ) {
+
+				var sGoToRowIds = ( aGoToRowIds[sSomeTableName] == null ) ? "" : aGoToRowIds[sSomeTableName];
 				
 				return $.extend( {}, d, {
 			        "sDbName": 			getHttpParams().get("db"),
@@ -333,7 +335,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			// empty go-to function parameter 
 			// (as this must happen after the tables was redrawn after a GoTo call, 
 			//  otherwise we would keep requesting the same row ids)
-			sGoToRowIds = "";
+			aGoToRowIds[sSomeTableName] = "";
 			
 			// if form view type is chosen, show a form
 			// (this has to happen quite late in the process, to make sure the form dimensions
