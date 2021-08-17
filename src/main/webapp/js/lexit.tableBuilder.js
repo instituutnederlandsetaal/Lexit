@@ -30,6 +30,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	// retrieve table client configuration and settings
 	var oTableConfig =					conf.getTableConfig(sSomeTableName);
+
 	var aTableSettings =				conf.getTableSettings(sSomeTableName);
 	var bIgnoreInitialisationFilters =	false;
 	
@@ -998,6 +999,7 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		
 		// column name
 		var sNameOfCurrentColumn = mt.getListOfColumnsOf(sSomeTableName)[i];
+
 		
 		// column filters upon initialization
 		// (null is default, we will set it further on)
@@ -1011,16 +1013,17 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 		// special: when available, merge '*' wildcard config (column level)
 		//			with current column config		
 		
-		if (oWildcartColumnConfig != null)
-			{			
-			for (var sPropertyName in oWildcartColumnConfig)
-				{
+		if (oWildcartColumnConfig != null) {			
+			for (var sPropertyName in oWildcartColumnConfig) {
 				// the wildcard is only applied to properties not mentionned in wildcard
 				// (because explicit configuration wins over wildcard) 
 				if (oColumnConfig[sPropertyName] == null)
 					conf.changeTableConfigValue(sSomeTableName, sNameOfCurrentColumn, sPropertyName, oWildcartColumnConfig[sPropertyName])
-				}
 			}
+
+			// update tanle config
+			oColumnConfig = 		conf.getColumnConfig(oTableConfig, sNameOfCurrentColumn);
+		}
 		// ---------------------------------------------------------------------
 		
 		
