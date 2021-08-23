@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2021.08.17
+	v2021.08.23
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -662,21 +662,20 @@
 			
 			
 			
-			// show the project name at the top of the screen
-			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
-			
-			fn.setProjectTitle(sProjectName);
 			
 			
 			// show message or warning for this project, if available
 			
 			var oProjectObject = getProjectObject(paramsHash.get("db"));
-			if (typeof oProjectObject != 'undefined')
-				{
+
+			// set a default project name for display on screen (and set front character in uppercase)
+			// this default name might be overwritten by configuration in project_overview.js, if some project 'name' was set there
+			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
+
+			if (typeof oProjectObject != 'undefined') {
 				
 				// message
-				if (typeof oProjectObject["message"] != 'undefined')
-					{
+				if (typeof oProjectObject["message"] != 'undefined') {
 					var sWarning = oProjectObject["message"];
 					var bPrivate = (typeof oProjectObject["private"] != 'undefined') ?
 						oProjectObject["private"] : false; // default is 'false'
@@ -689,15 +688,23 @@
 							!(bPrivate && (document.URL).regexIndexOf( INL_HOMEURL )<0 ) 
 						)
 						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
-					}
+				}
 				
 				// redirect to other URL (rare, but it has been required in the past)
-				if (typeof oProjectObject["redirect"] != 'undefined')
-					{
+				if (typeof oProjectObject["redirect"] != 'undefined') {
 					window.location.href = oProjectObject["redirect"];
-					}
+				}
+
+				// is some project name was set, overwrite the default one
+				if (typeof oProjectObject["name"] != 'undefined') {
+					sProjectName = oProjectObject["name"];
 				}
 			}
+
+
+			// show the project name at the top of the screen
+			fn.setProjectTitle(sProjectName);
+		}
 		
 	};
 	
@@ -743,7 +750,7 @@
 	
 	
 	// get technical database info and show it in a pop-up 
-	function showDatabaseInfo(sProjectName){
+	function showDatabaseInfo(sDbName){
 		
 		var url = WEBSERV_URL+"/table/get_dbinfo"; 
 		
@@ -751,7 +758,7 @@
 			"type": "GET",
 			"url": url,
 			"data": {
-				"db": sProjectName,
+				"db": sDbName,
 				"dummy": getUniqueNumber()
 			},
 			"dataType": "xml", // get response as xml
@@ -762,7 +769,7 @@
 			"error": function(jqXHR, textStatus, errorThrown){
 				
 				fn.message("Fout",
-						"'"+sProjectName+"' heeft mogelijk geen configuratie-bestand meer op deze server: " +				
+						"'"+sDbName+"' heeft mogelijk geen configuratie-bestand meer op deze server: " +				
 					textStatus+" "+errorThrown);
 				}
 			});
@@ -777,12 +784,12 @@
 		var sCurrentURL = document.URL;
 		
 		// keep this list private to internal environment
-		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest)
-			{
+		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
+
 			$("#indicator").empty().append(
-					$("<span></span>")
+				$("<span></span>")
 					.html("<br><h2>Welkom in Lex'it</h2>Kies een project:<br><br>")
-					);
+			);
 			
 			var docOpenTitle = $("<span></span>").html("<b>Productie</b>");
 			var docOpen = $("<table></table>")
@@ -813,46 +820,47 @@
 			// process list of all config files
 			var aKnownConfigFilesList = new Array();
 			
-			for (var i=0; i<aProjectList.length; i++) // get list of known projects in projects overview
-				{
+			// get list of known projects in projects overview
+			for (var i=0; i<aProjectList.length; i++) {
 				aKnownConfigFilesList.push(aProjectList[i]["config_filename"]);				
-				}
+			}
 			
 			// now, if some configfile is no part of the projects overview list, 
 			// it will be added to it as part of the 'unknown projects' category
 			// (so it will appear as such in the menu)
-			for (var i=0; i<aFullConfigFilesList.length; i++)
-				{
+			for (var i=0; i<aFullConfigFilesList.length; i++) {
 				var oneConfigFile = aFullConfigFilesList[i];
-				if (aKnownConfigFilesList.indexOf(oneConfigFile) < 0)
-					{
+				if (aKnownConfigFilesList.indexOf(oneConfigFile) < 0) {
 					aProjectList.push({
 						"name": oneConfigFile,
 						"config_filename": oneConfigFile,
 						"description": "onbekend",
 						"unknown": true
-				 		});
-					}
+				 	});
 				}
+			}
 			
 			
 			// build menu now!
-			for (var i=0; i<aProjectList.length; i++)
-				{
+			for (var i=0; i<aProjectList.length; i++){
+
+				// set project name to be rendered and a project link to be clicked upon
+
 				var sProjectLinkPart = aProjectList[i]["config_filename"];
-				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart;				
+				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"");
+				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
 				
 				var sProjectDescription =
 					"<td style='text-align: left; width: 10px'>"+
 					(typeof aProjectList[i]["goody"] == 'undefined' ? 
 							"<A style='text-decoration: none; color: #A4A4A4;' "+ 
-							"   title='"+aProjectList[i]["name"]+"' "+
+							"   title='"+sProjectName+"' "+
 							"   href='#' "+
 							"   onclick='showDatabaseInfo(\""+sProjectLinkPart+"\"); return false;' "+
 							"   target='_blank'>&#9830;</A>" : "")+
 					"</td>"+
 					"<td style='text-align: right; width: 400px'>"+
-					"<A href='"+sProjectLink+"'><B>"+aProjectList[i]["name"]+
+					"<A href='"+sProjectLink+"'><B>"+sProjectName+
 					"</B></A></td><td>" +					 
 					"</td>"+
 					"<td style='text-align: left; width: 700px'>" +
@@ -864,34 +872,30 @@
 				
 				// Put the project in the right category:
 				
-				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"])
-					{
+				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"]) {
 					goodies.append(eProjectDiv)
-					}
+				}
 					
 				// project is closed
-				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"])
-					{
+				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"]) {
 					docClosed.append(eProjectDiv)
-					}
+				}
 				
 				// project is unknown
-				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"])
-					{
+				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"]) {
 					docUnknown.append(eProjectDiv);
-					}
+				}
 				
 				// project is open
-				else
-					{
+				else {
 					// production
 					if (typeof aProjectList[i]["production"] != 'undefined' && aProjectList[i]["production"])
 						docOpen.append(eProjectDiv);
 					// development
 					else
 						docDevelopment.append(eProjectDiv);
-					}
 				}
+			}
 			
 			// make sure each table is still visible, when it's empty 
 							
@@ -911,11 +915,10 @@
 			$("#page").append(_deEmptyMenuList(docUnknown));
 			
 			
-			}
-		else
-			{
+		}
+		else {
 			fn.message("Fout", "Geen toegang");
-			}
+		}
 		
 	}
 	
@@ -932,21 +935,18 @@
 	
 	
 	// get all the properties belonging to the description of a project
-	function getProjectObject(sProjectName){
+	function getProjectObject(sDbName){
 		
 		var oObjectToReturn;
 		
-		for (var i=0; i<aProjectList.length; i++)
-		{
-			if (aProjectList[i]["config_filename"] != sProjectName)
-				{
+		for (var i=0; i<aProjectList.length; i++) {
+			if (aProjectList[i]["config_filename"] != sDbName) {
 				continue;
-				}
-			else
-				{
+			}
+			else {
 				oObjectToReturn = new cloneObject(aProjectList[i]);
 				break;
-				}
+			}
 		}
 		return oObjectToReturn;
 	}

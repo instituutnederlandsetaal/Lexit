@@ -46,7 +46,7 @@ var aProjectList =
 		
 	},	 
 	 {
-		name: "Gigant MoLex",
+		name: "Gigant Molex productie 2016",
 		config_filename: "gig_pro",
 		description: "Gigant Modern lexicon (versie 2016)",
 		production: true
@@ -88,7 +88,7 @@ var aProjectList =
 		message: "LET OP: Dit is een testversie"
 	},
 	{
-		name: "Gigant MoLex (NIEUWE development)",
+		//name: "Gigant MoLex (NIEUWE development)",
 		config_filename: "gig_pro_dev",
 		description: "Gigant Modern lexicon in nieuwe database structuur, voor test",
 		message: "LET OP: Dit is een testversie"
