@@ -1302,8 +1302,10 @@ public class TableResources {
 			String sSortDir = requestBodyMap.get(sSortedColumnDir);
 			
 			// Sanity check
-			if (!sSortDir.toLowerCase().matches("^(asc|desc|nulls first|nulls last)$"))
+			if (!sSortDir.toLowerCase().matches("^(asc|asc_reverse|desc|desc_reverse|nulls first|nulls last)$"))
+				{
 				throw new RuntimeException("Illegal sort direction in request: "+sSortDir);
+				}
 			
 			tmpSortCol.add( aAllColumns[iSortCol] );
 			tmpSortDir.add( sSortDir );
