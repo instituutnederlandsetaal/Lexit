@@ -432,7 +432,7 @@ kf.addKeyFunctions = function(){
     		}
     		// normal case: table header is visible
     		else {
-    		$("#"+sActiveTable+"_wrapper #selectionbutton").click();
+    			$("#"+sActiveTable+"_wrapper #selectionbutton").click();
     		}
 		}
     	

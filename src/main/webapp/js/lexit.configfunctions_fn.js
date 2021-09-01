@@ -2211,7 +2211,7 @@ fn.getDataFromColumn = function(sSomeTable, sColumnName){
 	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sSomeTable) : sSomeTable );
 	
 	// special column selector: https://datatables.net/reference/type/column-selector
-	return oTable.column( sColumnName+':name' ).data();	
+	return oTable.column( sColumnName+':name' ).data().toArray();	
 };
 
 /**
