@@ -58,22 +58,6 @@ var oTableSettingsList_example = {
 		 */
 		"viewtype": "form",
 		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast
-		 */
-		"creation_date": "20 feb 2017",
-		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer de handmatige bewerking van een tabel af is, 
-		 * legt men het hier vast
-		 */
-		"finished_date": "25 feb 2017",
-		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel door scripts e.d. verwerkt is, 
-		 * legt men het hier vast
-		 */
-		"processed_date": "25 feb 2017",
 		
 		/**
 		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.
@@ -361,7 +345,7 @@ var oTableConfigurationList_example = {
 		/**
 		 * @type {object}
 		 * @description Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, 
-		 * zie: http://medialize.github.com/jQuery-contextMenu/docs.html)
+		 * zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)
 		 */
 		"contextmenu": {},
 		
@@ -1695,32 +1679,7 @@ conf.getHeaderColor = function(aTableSettings){
 };
 
 
-// get creation date
-conf.getCreationDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["creation_date"] == 'undefined')
-		return null;
-	return aTableSettings["creation_date"];
-	
-};
 
-//get finished date
-conf.getFinishedDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["finished_date"] == 'undefined')
-		return null;
-	return aTableSettings["finished_date"];
-	
-};
-
-//get processed date
-conf.getProcessedDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["processed_date"] == 'undefined')
-		return null;
-	return aTableSettings["processed_date"];
-	
-};
 
 
 // get table info

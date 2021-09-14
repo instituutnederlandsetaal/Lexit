@@ -26,10 +26,10 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 					removeSpinner('#indicators');
 					
 					ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
-					},
+				},
 				error: function(jqXHR, textStatus, errorThrown){
 					fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);
-					}
+				}
 			});
 	
 };
@@ -113,6 +113,10 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		var sNiceName = conf.getNiceName(aTableSettings);
 		if (sNiceName != null)
 			sTableDescription = sNiceName;
+
+
+		// parse the table comments into created/finished/processed + notes
+		var oTableComments = head._parseTableNotes(sTableComment);
 		
 		
 		
@@ -120,16 +124,16 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		// add it to the table description
 		var aFullDescription = new Array();
 		
-		var sCreationDate = conf.getCreationDate(aTableSettings);
-		if (sCreationDate != null)
+		var sCreationDate = oTableComments["created"];
+		if (sCreationDate != null && sCreationDate != '')
 			aFullDescription.push("CREATED "+sCreationDate);
 		
-		var sFinishedDate = conf.getFinishedDate(aTableSettings);
-		if (sFinishedDate != null)
+		var sFinishedDate = oTableComments["finished"];
+		if (sFinishedDate != null && sFinishedDate != '')
 			aFullDescription.push("FINISHED "+sFinishedDate);
 		
-		var sProcessedDate = conf.getProcessedDate(aTableSettings);
-		if (sProcessedDate != null)
+		var sProcessedDate = oTableComments["processed"];
+		if (sProcessedDate != null && sProcessedDate != '')
 			aFullDescription.push("PROCESSED "+sProcessedDate);
 		
 		
@@ -151,7 +155,7 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		
 		asTableNames.push( sTableName );
 		asTableDescriptions.push( sTableDescription );
-		asTableComments.push( sTableComment );
+		asTableComments.push( oTableComments["notes"] );
 		asTableTypes.push( sTableType.toLowerCase() );
 		abTableVisible.push( bTableVisible );
 				
@@ -163,7 +167,7 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		//  not be called from the dropdown menu, but with the fn.callDatabase function
 		//  which doesn't require a table to be visible in the dropdown menu)
 		mt.addAvailableTableDetails( sTableName, 
-				[ sTableDescription, sTableType.toLowerCase(), sTableComment ]
+				[ sTableDescription, sTableType.toLowerCase(), oTableComments["notes"] ]
 		);
 		
 		

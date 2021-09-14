@@ -3875,7 +3875,10 @@ fn._computeDialogPosition = function(){
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
- * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default / And when one needs a selectbox, give an array of values to choose from. 
+ * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default /
+ * When when one needs a datepicker, add '::datepicker' to the value string. /
+ * When when one needs a text area for one field only, add '::textarea' to the value string. / 
+ * And when one needs a selectbox, give an array of values to choose from. 
  * The value to be selected by default must have '::selected' attached in its string value.  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
@@ -3890,6 +3893,9 @@ fn._computeDialogPosition = function(){
 fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
+
+	// list of datepickers to be activated when diolog is opened
+	var aDatePickersIds = [];
 
 	// deal with title/message input
 	var sMessage = "";
@@ -3917,12 +3923,19 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		{
 		// should the input field be editable?
 		var bFixedValue = false;
+		// datepicker?
+		var bDatePicker = false;
+		// textarea type
+		var bOneTextarea = false;
+
 		if (aValues != null && 
-				(aValues[i] instanceof String || typeof aValues[i] === "string") ) // make sure we have a string, or this will crash!
-			{
+				(aValues[i] instanceof String || typeof aValues[i] === "string") ) {// make sure we have a string, or this will crash!
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
+			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
+			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			aValues[i] = (aValues[i]).split("::")[0];
-			}
+		}
+
 		
 		// should the input field be an select box?
 		// (in that case we expect the value at the current index i to contain an array of values to select from)
@@ -3942,15 +3955,13 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		
 		// select box type
 		
-		if (bSelectBox) 
-			{
+		if (bSelectBox) {
 			input = $("<select></select>")
 			.attr("id", "prompt_"+fieldLC)
 			.prop('disabled', bFixedValue);
 			
 			// build the options to select 
-			for (var j=0; j<aValues[i].length; j++)
-				{
+			for (var j=0; j<aValues[i].length; j++) {
 				var sThisValue = aValues[i][j];
 				var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
 				sThisValue = sThisValue.replace("::selected", "");
@@ -3960,13 +3971,12 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				if (bSelected)
 					thisOption.attr('selected','selected');
 				$(input).append(thisOption);
-				}
 			}
+		}
 		
 		// checkbox field type
 		
-		else if (bCheckBox)
-			{
+		else if (bCheckBox) {
 			input = $("<input></input>")
 			.attr("id", "prompt_"+fieldLC)
 			.attr("type", "checkbox" )
@@ -3975,13 +3985,12 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			.change(function(){
 				$(this).val( $(this).prop("checked") );
 			});
-			}
+		}
 		
 		// text field type
 		
-		else
-			{
-			var sInputType = bTextarea ? "textarea" : "input";
+		else {
+			var sInputType = (bTextarea || bOneTextarea) ? "textarea" : "input";
 			input = $("<"+sInputType+"></"+sInputType+">")
 				.attr("type", "text" )
 				.attr("name", fieldLC)
@@ -3989,24 +3998,26 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				.prop('disabled', bFixedValue);
 			
 			// preset the input value, if available
-			if (bTextarea)
-				{
+			if ((bTextarea || bOneTextarea)) {
 				input.text(aValues!=null ? aValues[i]: ""); // textarea
-				}
-			else
-				{
+			}
+			else {
 				input.val(aValues!=null ? aValues[i]: "");  // input
 				input.css("width", "95%");					// prevent small fields
-				}
+			}
 			
 			// if cols and rows are given, set them!			
-			if (bTextarea && aColsAndRows!= null && aColsAndRows.length ==2)
-				{
+			if ((bTextarea || bOneTextarea) && aColsAndRows!= null && aColsAndRows.length ==2){
 				input.attr("cols", aColsAndRows[0]);
 				input.attr("rows", aColsAndRows[1]);
-				}
+			}
+
+			// add datepicker is needed
+			if (bDatePicker) {
+				aDatePickersIds.push( "prompt_"+fieldLC );
+			}
 			
-			}				
+		}				
 		
 		// append the current field
 		
@@ -4014,7 +4025,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		promptFieldSet.append($("<br/>"));
 		promptFieldSet.append(input);
 		promptFieldSet.append($("<br/>"));
-		}
+	}
 	promptForm.append(promptFieldSet);
 	promptDiv.append(promptForm);
 	
@@ -4077,7 +4088,6 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	});
 	
 	
-	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
 	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
@@ -4113,7 +4123,21 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			}
 	});
 	
-	$( "#"+promptDivId ).dialog( "open" );	
+	$( "#"+promptDivId ).dialog( "open" );
+
+	// activate the datepickers
+	setTimeout(function(){
+		for (var i=0; i<aDatePickersIds.length; i++){
+			$( "#" + aDatePickersIds[i] ).datepicker({
+				dateFormat: "dd-mm-yy"
+			});		
+		
+			
+		}
+	}, 1000);
+
+	if ( $.inArray( $(':focus').attr("id"), aDatePickersIds ) == 0)
+		$(':focus').blur();
 	
 };
 
@@ -4123,7 +4147,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * Generate a prompt pop-up, requesting the user to make a selection out of a list of items.
  * 
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
- * @param {String[]} aAllOptions - List of items to choose from
+ * @param {String[]} aAllOptions - List of items to choose from (to add space between twee items or groups of item, just add an item with NULL value)
  * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'

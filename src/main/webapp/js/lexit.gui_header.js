@@ -168,8 +168,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 			// add notes or comments to a table
 
 			// keep this list private to internal environment
-			if ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 )
-				{
+			if ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 ) {
 				
 				$.ajax( {
 					"type": "GET",
@@ -183,13 +182,25 @@ head.showNameOfTheTable = function(sSomeTablename){
 				 	"dataType": "xml", // get response as xml
 				 	"success": function(xml) {
 
-				 		var sOldTableComment = fn.getDbResponse(xml);
+						 var oTableComments = head._parseTableNotes( fn.getDbResponse(xml) ) ;
+						 
+						 var sCreated = oTableComments["created"];
+						 var sFinished = oTableComments["finished"];
+						 var sProcessed = oTableComments["processed"];
+						 var sNotes = oTableComments["notes"];
 				 		
-				 		fn.prompt("Tabelnotities", ["Notities"], [sOldTableComment], 
+						 fn.prompt("Tabelnotities", 
+							 ["Klus aangemaakt op", "Klus afgemaakt op", "Klus verwerkt op", "Notities"], 
+							 [sCreated+":::datepicker", sFinished+":::datepicker", sProcessed+":::datepicker", sNotes+":::textarea"], 
 				 				
-				 			function(){
+				 			function(noteResp){
 							
-				 				var sNewTableComment = fn.getPromptBoxInput("Notities");
+								var sCreated = noteResp["Klus aangemaakt op"];
+								var sFinished = noteResp["Klus afgemaakt op"];
+								var sProcessed = noteResp["Klus verwerkt op"];
+								var sNotes = noteResp["Notities"];
+
+				 				var sNewTableComment = [sCreated, sFinished, sProcessed, sNotes].join("|||||");
 							
 								// update the database							 
 								$.ajax( {
@@ -222,11 +233,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 				 			function(){
 				 				
 				 				fn.message("Geannuleerd", "Geen notitie opgeslagen");
-				 			}, 
-				 			true,  // textarea
-				 			[35,7] // set minimal size of prompt
-				 			
-				 		);
+				 			});
 				 		
 				 		},
 					"error": function(jqXHR, textStatus, errorThrown){
@@ -235,7 +242,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 						}
 					} );
 				
-				}
+			}
 			
 			
 		});
@@ -251,6 +258,36 @@ head.showNameOfTheTable = function(sSomeTablename){
 			.css("text-align", "left")			
 			.append(tableName)
 			);
+};
+
+// subroutines of head.showNameOfTheTable()
+//
+// create a table comment containing created/finished/processed + notes
+head._packinTableNotes = function(sCreated, sFinished, sProcessed, sNotes){
+	return [sCreated, sFinished, sProcessed, sNotes].join("|||||");;
+};
+// parse the table comment containing created/finished/processed + notes
+head._parseTableNotes = function(sNotes){
+
+	// split the table comment into its parts (with our own separator)
+	var aNotes = sNotes.split("|||||");
+
+	// backwards compatibility: single note will be put a 4th position, as 1 to 3 as reserved for created/finished/processed
+	if (aNotes.length == 1){
+		aNotes = ["", "", "", aNotes[0]];
+	};
+
+	// if we can't make sense of the table comment response, create an empty one
+	if (aNotes.length !=1 && aNotes.length != 4){
+		aNotes = ["", "", "", ""];
+	};
+
+	return {
+		"created": aNotes[0],
+		"finished": aNotes[1],
+		"processed": aNotes[2],
+		"notes": aNotes[3]
+	};
 };
 
 
