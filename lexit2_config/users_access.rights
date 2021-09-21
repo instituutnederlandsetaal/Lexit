@@ -1,0 +1,11 @@
+#
+# Lex'it users access rights
+#
+# format:
+# username=project1_right,project2_right,etc
+# (with right = {read,write,all} )
+# of
+# username= {superuser,superreader}
+
+myname=someprojectname_all,anotherprojectname_all
+yourname=readonlyproject_read
