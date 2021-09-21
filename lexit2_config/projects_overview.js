@@ -41,21 +41,34 @@ var aProjectList = [
 	{
 		name: "Some beautiful project name",
 		config_filename: "my_configfile",
-		description: "This project is about beautiful things"		
+		description: "This project is about beautiful things",
+		production: true
 	},
 	{
 		name: "Another wonderful project name",
 		config_filename: "my_other_configfile",
-		description: "This project is wonderful too"		
-	},	 
+		description: "This project is wonderful too",
+		production: true
+	},
+	{
+		name: "Yet another project",
+		config_filename: "my_dev_proj_configfile",
+		description: "This project is being tested"		
+	},
+	{
+		name: "Some project of the past",
+		config_filename: "my_old_proj_configfile",
+		description: "We used to work on this one, we're finished with it now",
+		closed: true
+	},	
 	 
 	{		 
 		comment: "========== DON'T MODIFY ANYTHING BELOW THIS LINE ================================================",
 		
 		name: "Login overzicht",
-			config_filename: "spy",
-			description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
-			goody: true
+		config_filename: "spy",
+		description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
+		goody: true
 	},
 	{
 		name: "Reset user rights",
