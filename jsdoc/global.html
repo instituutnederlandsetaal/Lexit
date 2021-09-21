@@ -345,7 +345,7 @@
 
             
 
-            <td class="description last">Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.</td>
+            <td class="description last">Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.Lex'it heeft enige default classes beschikbaar, zoals 'inlfont10pt' (voor weergave van INL font in 10 pt),of 'inlfont' (deze zonder font-size specificatie).</td>
         </tr>
 
     
@@ -414,7 +414,7 @@
 
             
 
-            <td class="description last">Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, zie: http://medialize.github.com/jQuery-contextMenu/docs.html)</td>
+            <td class="description last">Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)</td>
         </tr>
 
     
@@ -605,6 +605,29 @@
 
         <tr>
             
+                <td class="name"><code>ellipsis_delay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ellipsis. Wanneer ellipsis is toegepast en de gebruiker met de muis over de tabel heen gaat, klaptde een na de andere cel open en swingen de rijen steeds open en dicht, wat erg onrustig is. Bovendien bemoeilijktdat het selecteren van een rij, omdat rijen eromheen te pas en te onpas open- en dichtklappen. Een oplossing is om een delayin te stellen, waardoor het uitklappen van een rij pas gebeurt als er na een opgegeven tijdsduur nog steeds sprakeis van 'mouseover' op de uit te klappen cel. Zo niet, dan klapt de cel niet open.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>ellipsis_width</code></td>
             
 
@@ -628,6 +651,29 @@
 
         <tr>
             
+                <td class="name"><code>ellipsis_height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>ellipsis_unwrap</code></td>
             
 
@@ -645,6 +691,29 @@
             
 
             <td class="description last">Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ellipsis_keep_selected_unwrapped</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? Default: true.</td>
         </tr>
 
     
@@ -1005,7 +1074,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line263">line 263</a>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line254">line 254</a>
     </li></ul></dd>
     
 
@@ -1162,6 +1231,29 @@
 
         <tr>
             
+                <td class="name"><code>displaylength_menu</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).Voor 'alles tonen' moet waarde -1 worden opgegeven.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>viewtype</code></td>
             
 
@@ -1179,75 +1271,6 @@
             
 
             <td class="description last">Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).Default is 'table'</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>creation_date</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>finished_date</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Om in het tabeloverzicht aan te geven wanneer de handmatige bewerking van een tabel af is, legt men het hier vast</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>processed_date</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Om in het tabeloverzicht aan te geven wanneer een tabel door scripts e.d. verwerkt is, legt men het hier vast</td>
         </tr>
 
     
@@ -2414,7 +2437,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Oct 28 2020 14:47:23 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 21 2021 14:34:17 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

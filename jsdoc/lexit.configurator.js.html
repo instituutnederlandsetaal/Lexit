@@ -73,28 +73,19 @@ var oTableSettingsList_example = {
 		 */
 		"displaylength": 50,
 		
+		
+		/**
+		 * @description Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).
+		 * Voor 'alles tonen' moet waarde -1 worden opgegeven.
+		 */
+		"displaylength_menu": [1, 5, 10, 50],
+		
 		/**
 		 * @description Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).
 		 * Default is 'table'
 		 */
 		"viewtype": "form",
 		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel gemaakt is, legt men het hier vast
-		 */
-		"creation_date": "20 feb 2017",
-		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer de handmatige bewerking van een tabel af is, 
-		 * legt men het hier vast
-		 */
-		"finished_date": "25 feb 2017",
-		
-		/**
-		 * @description Om in het tabeloverzicht aan te geven wanneer een tabel door scripts e.d. verwerkt is, 
-		 * legt men het hier vast
-		 */
-		"processed_date": "25 feb 2017",
 		
 		/**
 		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.
@@ -356,6 +347,9 @@ var oTableConfigurationList_example = {
 		/**
 		 * @description Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.
 		 * Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.
+		 * 
+		 * Lex'it heeft enige default classes beschikbaar, zoals 'inlfont10pt' (voor weergave van INL font in 10 pt),
+		 * of 'inlfont' (deze zonder font-size specificatie). 
 		 */
 		"class": "",
 		
@@ -379,7 +373,7 @@ var oTableConfigurationList_example = {
 		/**
 		 * @type {object}
 		 * @description Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, 
-		 * zie: http://medialize.github.com/jQuery-contextMenu/docs.html)
+		 * zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)
 		 */
 		"contextmenu": {},
 		
@@ -438,18 +432,41 @@ var oTableConfigurationList_example = {
 		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
 		 */
 		"ellipsis": false,
+
+		/**
+		 * @type {integer}
+		 * @description Ellipsis. Wanneer ellipsis is toegepast en de gebruiker met de muis over de tabel heen gaat, klapt
+		 * de een na de andere cel open en swingen de rijen steeds open en dicht, wat erg onrustig is. Bovendien bemoeilijkt
+		 * dat het selecteren van een rij, omdat rijen eromheen te pas en te onpas open- en dichtklappen. Een oplossing is om een delay
+		 * in te stellen, waardoor het uitklappen van een rij pas gebeurt als er na een opgegeven tijdsduur nog steeds sprake
+		 * is van 'mouseover' op de uit te klappen cel. Zo niet, dan klapt de cel niet open. 
+		 */
+		"ellipsis_delay": 300,
 		
 		
 		/**
 		 * @description 'max-width' attribuut bij ellipsis.
 		 */
 		"ellipsis_width": "200px",
+
+
+		/**
+		 * @description 'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar. 
+		 */
+		"ellipsis_height": "150px",
 		
 		/**
 		 * @type {boolean}
 		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.
 		 */
 		"ellipsis_unwrap": true,
+		
+		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? Default: true.
+		 */
+		"ellipsis_keep_selected_unwrapped": true,
 		
 		/**
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
@@ -912,6 +929,26 @@ conf.getEllipsisWidth = function(aColumnConfig){
 	return aColumnConfig["ellipsis_width"];
 };
 
+// retrieve ellipsis delay
+// default is 300 (ms)
+conf.getEllipsisDelay = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_delay"] == 'undefined')
+		return 300;		
+	return aColumnConfig["ellipsis_delay"];
+};
+
+
+
+// retrieve ellipsis (max) height
+// default is null
+conf.getEllipsisHeight = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_height"] == 'undefined')
+		return null;		
+	return aColumnConfig["ellipsis_height"];
+};
+
 // retrieve ellipsis behavior: should the content be unwrapped or not?
 // default: true
 conf.getEllipsisUnwrap = function(aColumnConfig){
@@ -920,6 +957,16 @@ conf.getEllipsisUnwrap = function(aColumnConfig){
 		return true;		
 	return aColumnConfig["ellipsis_unwrap"];
 };
+
+
+// retrieve ellipsis behavior: should a selected row remain unwrapped or not?
+// default: false
+conf.getEllipsisKeepSelectedRowOpen = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_keep_selected_unwrapped"] == 'undefined')
+		return false;		
+	return aColumnConfig["ellipsis_keep_selected_unwrapped"];
+}
 
 
 
@@ -1349,7 +1396,9 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 					
 					// The function gets the node as an argument, so as to be
 					// able to process the right content.
-					function(){			
+					function(event){
+				
+						var nCurrentCell = this;
 				
 						// highlight clicked row
 						// if this row wasn't selected yet, we have to select it to
@@ -1375,11 +1424,11 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 									}
 								}
 							// now select the current row
-							var bRowWasAlreadySelectedBeforeSelection = $(this).parent().hasClass('selected');
+							var bRowWasAlreadySelectedBeforeSelection = $(nCurrentCell).parent().hasClass('selected');
 							$(this).parent().addClass('selected');							
 							
 							// remember this row is selected now (since it must be unselected later)
-							hLastSelectedRow.put(sSomeTablename, $(this).parent());
+							hLastSelectedRow.put(sSomeTablename, $(nCurrentCell).parent());
 							hPreviousStateOfLastSelectedRow.put(sSomeTablename, bRowWasAlreadySelectedBeforeSelection);					
 							}
 						
@@ -1387,7 +1436,7 @@ conf.assignAction = function(sSomeTablename, aColumnConfig, iColumnNr){
 						// execute function from the configuration file
 						// except if the selection button is active (secure selection)
 						if ( !fn.rowsSelectionIsAllowed(sSomeTablename))
-							aColumnConfig[sMouseEvent]( mt.getDataTableObjectOf(sSomeTablename), this );
+							aColumnConfig[ event.type ]( mt.getDataTableObjectOf(sSomeTablename), nCurrentCell, event);
 
 					} 
 				);
@@ -1658,32 +1707,7 @@ conf.getHeaderColor = function(aTableSettings){
 };
 
 
-// get creation date
-conf.getCreationDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["creation_date"] == 'undefined')
-		return null;
-	return aTableSettings["creation_date"];
-	
-};
 
-//get finished date
-conf.getFinishedDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["finished_date"] == 'undefined')
-		return null;
-	return aTableSettings["finished_date"];
-	
-};
-
-//get processed date
-conf.getProcessedDate  = function(aTableSettings){
-	
-	if (typeof aTableSettings["processed_date"] == 'undefined')
-		return null;
-	return aTableSettings["processed_date"];
-	
-};
 
 
 // get table info
@@ -1861,6 +1885,36 @@ conf.getDisplayLength = function(aTableSettings){
 		aTableSettings["displaylength"] = parseInt(aTableSettings["displaylength"]);
 	
 	return aTableSettings["displaylength"];
+};
+
+
+// retrieve dislay length menu
+
+conf.getDisplayLengthMenu = function(aTableSettings){
+	
+	if (typeof aTableSettings["displaylength_menu"] == 'undefined')
+		return 'Toon &lt;select>'+
+		   '&lt;option value="1">1&lt;/option>'+
+		   '&lt;option value="5">5&lt;/option>'+
+           '&lt;option value="10">10&lt;/option>'+
+           '&lt;option value="20">20&lt;/option>'+
+           '&lt;option value="50">50&lt;/option>'+
+           '&lt;option value="100">100&lt;/option>'+
+           '&lt;option value="500">500&lt;/option>'+
+           '&lt;option value="1000">1000&lt;/option>'+
+           '&lt;option value="-1">alle&lt;/option>'+
+           '&lt;/select> rijen';
+	
+	var sMenuBody = "";
+	for (var i=0; i&lt;aTableSettings["displaylength_menu"].length; i++)
+		{
+		var sThisValue = aTableSettings["displaylength_menu"][i];
+		var sLabel = (sThisValue == -1 ? "alle" : sThisValue);
+		sMenuBody += '&lt;option value="'+sThisValue+'">'+sLabel+'&lt;/option>';
+		}
+	
+	return 'Toon &lt;select>'+ sMenuBody +	'&lt;/select> rijen';
+	
 };
 
 
@@ -2075,7 +2129,7 @@ conf.getDefaultSortingFromTableSettings = function(aTableSettings){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Oct 28 2020 14:47:23 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 21 2021 14:34:17 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

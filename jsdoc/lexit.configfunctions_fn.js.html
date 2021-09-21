@@ -153,6 +153,35 @@ fn.setBackgroundColor = function(sColor){
 }
 
 
+
+
+/**
+ * If some action needs to be performed (eg. to restore a given situation)
+ * as soon as a tab regains or looses focus, set a function to do so.
+ * This call be cancelled by giving null as a argument
+ * 
+ * @param {*} fnFunction function to be executed in a tab that regains focus
+ */
+fn.doAtFocusGain = function(fnFunction){
+
+	fnDoAtFocusGain = fnFunction;
+}
+
+fn.doAtFocusLoss = function(fnFunction){
+
+	fnDoAtFocusLoss = fnFunction;
+}
+
+
+
+/**
+ * Tell Lex'it to force exact count for the following table refresh
+ * (the default setting is set back to normal immediatelly after the table refresh)
+ */
+fn.forceExactCount = function(){
+	bForceExactCount = true;
+}
+
 /**
  * Load a library with extra functions for a given project
  * 
@@ -204,6 +233,13 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 	
 }
 
+
+
+// globals for the fn.setSchema() function
+var setSchemaNameCache = null;
+var setSchemaTimeOut = null;
+
+
 /**
  * Change the psql search path
  * (the default search path of a project is normally set as schema=... in the .database config file)
@@ -227,12 +263,46 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
+
+			console.log("Lex'it: schema was set to "+sNewSchema);
+	 		
+	 		// Since the ContextObject (cache) of Lex'it is emptied after a few minutes of inactivity,
+			// we might end up with Lex'it addressing the default schema again (t.i. the one set in the .database config file), 
+	 		// instead of the schema set in this function.
+	 		// So, we need to set a TimeOut with a duration shorter than the ContextObject life duration,
+	 		// in such a way that this function is reactivated before the end of the ContextObject life cycle.
+	 		// ( about ContextObject life duration, see: java Constants.java, MAX_DB_OBJECT_DURATION )
+	 		
+	 		// But of course, if the code sets another schema later on,
+	 		// we must remove the TimeOut that was set to keep the previously set schema, 
+	 		// and set a new TimeOut as final step.
+	 		
+	 		if (setSchemaNameCache != sNewSchema &amp;&amp; setSchemaTimeOut != null)
+	 			{
+	 			clearTimeout(setSchemaTimeOut);
+	 			}
+	 		
+	 		setSchemaNameCache = sNewSchema;
+	 		setSchemaTimeOut = setTimeout(
+					function(){
+						// BEWARE: the callback must be fired ONLY at the first call of fn.setSchema().
+						// Calling it at every TimeOut could cause unexpected behavior to the developers:
+						// the developers most probably expect that a schema is set once and for all, 
+						// and do not know of the necessity to re-call the function regularly, as this is just
+						// a trick to deal with the short life of the ContextObject. As a consequence, the
+						// callback give as a parameter is called only at the first round, to meet this 
+						// probable expectation (of developers) of the function behavior. 
+						fn.setSchema(sNewSchema, null, fnErrorHandler);						
+						}, 
+					1000*60); 
+			
 	 		// callback if it is set
 	 		if (fnCallback!=null)
 	 				fnCallback();
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
-			fn.refreshTable(sSomeTablename);
+
+			fn.refreshTable(kf.getActiveTable());
 			
 			if (fnErrorHandler!=null)
 				fnErrorHandler({
@@ -247,6 +317,8 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			}
 		} );
 };
+
+
 
 
 
@@ -311,7 +383,7 @@ fn.tableIsEmpty = function(sSomeTablename){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
-	return $("#"+sSomeTablename+" tbody tr:eq(0)").find("td:eq(0)").hasClass("dataTables_empty");
+	return $("#"+sSomeTablename+" tbody tr:not('.group'):eq(0)").find("td:eq(0)").hasClass("dataTables_empty");
 };
 
 
@@ -403,7 +475,18 @@ fn.getTableName = function(mixed){
 	
 	// if input is a node, get the closest table name
 	if ( $(mixed).is("td") || $(mixed).is("tr") )
-		return $( mixed ).closest('table')[0].id;	
+		{
+			if ($( mixed ).closest('table').length > 0)
+				return $( mixed ).closest('table')[0].id;
+
+			// in some rare cases, closest return nothing, don't know why...
+			// so here's a rescue operation: extract the table name from the row class name
+			var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
+			var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
+			var sTableName = aRowClassName[0].replace("_row", "");
+			return sTableName;
+
+		}	
 	
 	// otherwise we must have an API instance
 	return fx.getTableName(mixed);
@@ -508,6 +591,26 @@ fn.getSortingDirections = function(sSomeTablename){
 	
 	return aSortingDirs;
 };
+
+/**
+ * Get the sorting direction of a specified column in a table
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {String} sSortingColumn - name of the sorted column
+ * @returns {String} Sorting direction 'asc' or 'desc', or '' if the column is not sorted
+ */
+fn.getSortingDirectionOf = function(sSomeTablename, sSortingColumn){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	var aCurrentSortCols = fn.getSortingColumns(sSomeTablename);
+	var aCurrentSortDirs = fn.getSortingDirections(sSomeTablename);
+	var iCurrentSortColIdx = $.inArray(sSortingColumn, aCurrentSortCols);
+	var sCurrentSortDir = aCurrentSortDirs[iCurrentSortColIdx];
+	if (sCurrentSortDir == null) sCurrentSortDir = '';
+	return sCurrentSortDir; 
+};
+
 
 
 /**
@@ -624,6 +727,7 @@ fn.restoreTableState = function(sTableName){
 	
 	// Read the saved table state
 	var oTableState = mt.getTableState(sTableName);
+	if (oTableState == null) return;
 	
 	aFilters = oTableState["columns"];
 	
@@ -1309,10 +1413,9 @@ fn.getRowNodeNumberOnScreen = function(nRow){
 	
 	fn._checkApiInstance("fn.getRowNodeNumberOnScreen", nRow);
 	fn._checkjQueryObject("fn.getRowNodeNumberOnScreen", nRow);
-	
-	var oRow = fx.getRow(nRow); 
 
-	return fx.getRowNumberOnScreen(oRow); 
+	var aRows = $(nRow).closest("tbody").find("tr:not('.group')");
+	return aRows.index(nRow);
 };
 
 
@@ -1327,7 +1430,7 @@ fn.getAllRowNodes = function(oTable){
 
 	if (typeof oTable == 'string')
 		oTable = mt.getDataTableObjectOf(oTable);
-	
+
 	// return the nodes
 	return (fx.getAllRows(oTable)).nodes().toArray();
 };
@@ -1427,7 +1530,7 @@ fn.unselectAllRowNodes = function(sSomeTable){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody').find("tr").removeClass('selected');
+	$('#'+sSomeTable+' tbody').find("tr:not('.group')").removeClass('selected');
 	
 };
 
@@ -1444,7 +1547,7 @@ fn.selectAllRowNodes = function(sSomeTable){
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the nodes
-	$('#'+sSomeTable+' tbody tr').each(function(){
+	$("#"+sSomeTable+" tbody tr:not('.group')").each(function(){
 		if ( !$(this).hasClass("selected"))
 			$(this).toggleClass('selected');
 	});
@@ -1453,18 +1556,26 @@ fn.selectAllRowNodes = function(sSomeTable){
 
 
 /**
- * Manually select a row, given its row number on screen
+ * Manually select a row, given its node or its row number on screen
  * 
- * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {(String|API-object-instance|Node)} sSomeTable - Table name or object, or row node
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if node was given as 1st parameter
  */
 fn.selectRowNode = function(sSomeTable, iRowNumber){
+
+	// special case: if 1st parameter is a node
+	if (iRowNumber == null &amp;&amp; fn.isRowNode(sSomeTable))
+	{
+		if (!$(sSomeTable).hasClass("selected"))
+			$(sSomeTable).toggleClass('selected');
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( iRowNumber>=0 &amp;&amp; !nRowSelector.hasClass("selected"))
 		{
 		nRowSelector.toggleClass('selected');
@@ -1480,18 +1591,26 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 
 
 /**
- * Manually unselect a row, given its row number on screen
+ * Manually unselect a row, given its node or its row number on screen
  * 
- * @param {(String|API-object-instance)} sSomeTable - Table name or object
- * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such)
+ * @param {(String|API-object-instance|Node)} sSomeTable - Table name or object
+ * @param {Integer} iRowNumber - A row number within the current display range (0-9 or such); not needed if node was given as 1st parameter
  */
 fn.unselectRowNode = function(sSomeTable, iRowNumber){
+
+	// special case: if 1st parameter is a node
+	if (iRowNumber == null &amp;&amp; fn.isRowNode(sSomeTable))
+	{
+		if ($(sSomeTable).hasClass("selected"))
+			$(sSomeTable).toggleClass('selected');
+	}
 	
+	// otherwise Table name or object
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 	
 	// NOTE the operation is performed onto the node
-	var nRowSelector = $('#'+sSomeTable+' tbody tr:eq('+iRowNumber+')');
+	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
 	if ( nRowSelector.hasClass("selected"))
 		nRowSelector.toggleClass('selected');
 };
@@ -1744,7 +1863,7 @@ fn.uncheckCheckboxes = function(nMixed, aListOfColumns, fnCallback){
 		var sColumnName =			aListOfColumns[i];			
 		var iVisibleColumnNumber =	fn.getVisibleColumnNumberOf(oTable, sColumnName);
 		
-		var nCell = $("#"+sTable+" tbody tr").eq(iRowNumber)
+		var nCell = $("#"+sTable+" tbody tr:not('.group')").eq(iRowNumber)
 			.find("td").eq(iVisibleColumnNumber)
 			.find("input").eq(0);
 		// prop is the most reliable 
@@ -1913,7 +2032,7 @@ fn.isRowNode = function(nMixed){
 	fn._checkApiInstance("fn.isRowNode", nMixed);
 	fn._checkjQueryObject("fn.isRowNode", nMixed);
 	
-	return $(nMixed).is("tr");
+	return $(nMixed).is("tr:not('.group')");
 };
 
 
@@ -2115,13 +2234,12 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
  * 
  * @see fn.getDataFromRowNode
  */
-fn.getDataFromColumn = function(sSomeTable, sColumnName){
+fn.getDataFromColumn = function(sSomeTable, sColumnName){	
 	
-	var iVisibleColumnNumber = fn.getVisibleColumnNumberOf(sSomeTable, sColumnName);
+	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sSomeTable) : sSomeTable );
 	
-	var oTable = ( typeof sSomeTable == 'string' ? mt.getDataTableObjectOf(sTableName) : sSomeTable );
-	
-	return oTable.column( iVisibleColumnNumber ).data();	
+	// special column selector: https://datatables.net/reference/type/column-selector
+	return oTable.column( sColumnName+':name' ).data().toArray();	
 };
 
 /**
@@ -2180,12 +2298,12 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange, fulltext;
+    var sel, range, priorRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined") 
+    if (typeof window.getSelection != "undefined" &amp;&amp; window.getSelection().rangeCount > 0) 
     {    	
-        range = window.getSelection().getRangeAt(0);        
+    	range = window.getSelection().getRangeAt(0);        
         priorRange = range.cloneRange();
         priorRange.selectNodeContents(nCell);
         fulltext = priorRange.toString();
@@ -2256,10 +2374,10 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
 			fn.getCellInRowNode(nMixed, sColumnName) : nMixed;
 	
 	var start = 0, end = 0;
-    var sel, range, priorRange, wholeRange, fulltext;
+    var sel, range, priorRange, wholeRange, fulltext = "", text = "";
     
     // all browsers, except IE before version 9
-    if (typeof window.getSelection != "undefined") 
+    if (typeof window.getSelection != "undefined" &amp;&amp; window.getSelection().rangeCount > 0) 
     {    	
         range = window.getSelection().getRangeAt(0);        
         wholeRange = range.cloneRange();
@@ -3372,7 +3490,7 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 		aData["args"] = aFunctionArguments.join(ARG_INTERNAL_SEPARATOR);
 	 
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": aData,
@@ -3536,7 +3654,7 @@ fn.closeDialog = function(){
  */
 fn._activeEnterForThisDialog = function(dialogDivId){
 	
-	// time is a way of preventing enter to be triggered by
+	// timeout is a way of preventing enter to be triggered by
 	// another key event with enter occuring just before 
 	// (like striking enter for validating something: if a dialog is to be shown right after that,
 	// it should wait for enter to be pressed again)
@@ -3574,7 +3692,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 	
 	var sP = $("&lt;p>&lt;/p>").html(sMessage);
 	var dialogDivId = "dialog-message"+getUniqueNumber();
-	var sDiv = $("&lt;div>&lt;/div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
+	var sDiv = $("&lt;div>&lt;/div>").attr("id", dialogDivId).attr("title", sTitle).append(sP);
 	
 	$(document.body).append(sDiv);
 	
@@ -3582,6 +3700,9 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		modal: true,
 		width: "auto",
 		open: function(event, ui){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
 			$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
 		},
@@ -3654,6 +3775,9 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
 		modal: true,
 		width: "auto",
 		open: function(event, ui){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
 			$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
 		},
@@ -3703,6 +3827,9 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 			modal: true,
 			width: "auto",
 			open: function(event, ui){
+				// remove close button (cancel is enough)
+				$(".ui-dialog-titlebar-close").hide();
+				// add shadows
 				$(".ui-dialog").addClass("ui-dialog-shadow");
 	        	$( this ).closest(".ui-dialog").putInFront();
 			},
@@ -3742,7 +3869,7 @@ fn._computeDialogPosition = function(){
 	var sTable = kf.getActiveTable();
 	if (sTable == null)	return {};
 	
-	var nRow = $("#"+sTable+"_wrapper table tbody tr.selected:eq(0)");	
+	var nRow = $("#"+sTable+"_wrapper table tbody tr:not('.group').selected:eq(0)");	
 	if ( nRow != null)
 		nRow = nRow.get(0); // get DOM element out of jquery object
 	else
@@ -3767,6 +3894,8 @@ fn._computeDialogPosition = function(){
     }
 };
 
+
+
 /**
  * Generate a prompt pop-up, requesting some input from the user
  * The output can be retrieved by using fn.getPromptBoxInput()
@@ -3774,7 +3903,10 @@ fn._computeDialogPosition = function(){
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
  * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
- * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default / And when one needs a selectbox, give an array of values to choose from. 
+ * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default /
+ * When when one needs a datepicker, add '::datepicker' to the value string. /
+ * When when one needs a text area for one field only, add '::textarea' to the value string. / 
+ * And when one needs a selectbox, give an array of values to choose from. 
  * The value to be selected by default must have '::selected' attached in its string value.  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
@@ -3789,7 +3921,10 @@ fn._computeDialogPosition = function(){
 fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
-	
+
+	// list of datepickers to be activated when diolog is opened
+	var aDatePickersIds = [];
+
 	// deal with title/message input
 	var sMessage = "";
 	if ( $.isArray(sTitle) )
@@ -3797,8 +3932,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		sMessage = sTitle[1];
 		sTitle = sTitle[0];
 		}
-	var sMessageP = $("&lt;p>&lt;/p>").html(sMessage);
-	
+	var sMessageP = $("&lt;p>&lt;/p>").html(sMessage);	
+
 	if (bTextarea == null) 
 		bTextarea = false;
 	
@@ -3816,12 +3951,19 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		{
 		// should the input field be editable?
 		var bFixedValue = false;
+		// datepicker?
+		var bDatePicker = false;
+		// textarea type
+		var bOneTextarea = false;
+
 		if (aValues != null &amp;&amp; 
-				(aValues[i] instanceof String || typeof aValues[i] === "string") ) // make sure we have a string, or this will crash!
-			{
+				(aValues[i] instanceof String || typeof aValues[i] === "string") ) {// make sure we have a string, or this will crash!
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
+			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
+			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			aValues[i] = (aValues[i]).split("::")[0];
-			}
+		}
+
 		
 		// should the input field be an select box?
 		// (in that case we expect the value at the current index i to contain an array of values to select from)
@@ -3841,15 +3983,13 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		
 		// select box type
 		
-		if (bSelectBox) 
-			{
+		if (bSelectBox) {
 			input = $("&lt;select>&lt;/select>")
 			.attr("id", "prompt_"+fieldLC)
 			.prop('disabled', bFixedValue);
 			
 			// build the options to select 
-			for (var j=0; j&lt;aValues[i].length; j++)
-				{
+			for (var j=0; j&lt;aValues[i].length; j++) {
 				var sThisValue = aValues[i][j];
 				var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
 				sThisValue = sThisValue.replace("::selected", "");
@@ -3859,13 +3999,12 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				if (bSelected)
 					thisOption.attr('selected','selected');
 				$(input).append(thisOption);
-				}
 			}
+		}
 		
 		// checkbox field type
 		
-		else if (bCheckBox)
-			{
+		else if (bCheckBox) {
 			input = $("&lt;input>&lt;/input>")
 			.attr("id", "prompt_"+fieldLC)
 			.attr("type", "checkbox" )
@@ -3874,13 +4013,12 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			.change(function(){
 				$(this).val( $(this).prop("checked") );
 			});
-			}
+		}
 		
 		// text field type
 		
-		else
-			{
-			var sInputType = bTextarea ? "textarea" : "input";
+		else {
+			var sInputType = (bTextarea || bOneTextarea) ? "textarea" : "input";
 			input = $("&lt;"+sInputType+">&lt;/"+sInputType+">")
 				.attr("type", "text" )
 				.attr("name", fieldLC)
@@ -3888,24 +4026,26 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				.prop('disabled', bFixedValue);
 			
 			// preset the input value, if available
-			if (bTextarea)
-				{
+			if ((bTextarea || bOneTextarea)) {
 				input.text(aValues!=null ? aValues[i]: ""); // textarea
-				}
-			else
-				{
+			}
+			else {
 				input.val(aValues!=null ? aValues[i]: "");  // input
 				input.css("width", "95%");					// prevent small fields
-				}
+			}
 			
-			// if cols and rows are given, set them!
-			if (bTextarea &amp;&amp; aColsAndRows!= null &amp;&amp; aColsAndRows.length ==2)
-				{
+			// if cols and rows are given, set them!			
+			if ((bTextarea || bOneTextarea) &amp;&amp; aColsAndRows!= null &amp;&amp; aColsAndRows.length ==2){
 				input.attr("cols", aColsAndRows[0]);
 				input.attr("rows", aColsAndRows[1]);
-				}
+			}
+
+			// add datepicker is needed
+			if (bDatePicker) {
+				aDatePickersIds.push( "prompt_"+fieldLC );
+			}
 			
-			}				
+		}				
 		
 		// append the current field
 		
@@ -3913,7 +4053,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		promptFieldSet.append($("&lt;br/>"));
 		promptFieldSet.append(input);
 		promptFieldSet.append($("&lt;br/>"));
-		}
+	}
 	promptForm.append(promptFieldSet);
 	promptDiv.append(promptForm);
 	
@@ -3976,17 +4116,20 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	});
 	
 	
-	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
 	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: 300,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: "auto",
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -4008,7 +4151,21 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			}
 	});
 	
-	$( "#"+promptDivId ).dialog( "open" );	
+	$( "#"+promptDivId ).dialog( "open" );
+
+	// activate the datepickers
+	setTimeout(function(){
+		for (var i=0; i&lt;aDatePickersIds.length; i++){
+			$( "#" + aDatePickersIds[i] ).datepicker({
+				dateFormat: "dd-mm-yy"
+			});		
+		
+			
+		}
+	}, 1000);
+
+	if ( $.inArray( $(':focus').attr("id"), aDatePickersIds ) == 0)
+		$(':focus').blur();
 	
 };
 
@@ -4018,7 +4175,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * Generate a prompt pop-up, requesting the user to make a selection out of a list of items.
  * 
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
- * @param {String[]} aAllOptions - List of items to choose from
+ * @param {String[]} aAllOptions - List of items to choose from (to add space between twee items or groups of item, just add an item with NULL value)
  * @param {String[]} aAlreadyChosen - List of pre-selected items (those will be shown as 'chosen' right from the start) 
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
@@ -4051,50 +4208,52 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 		.append(sMessageP);
 	
 	
-	
-	// adapt height of the prompt to the number of options, 
-	// and if there are more options than the screen can show at once, 
-	// add a filter box on top 
-	
-	var promptHeight = (200 + 30 * aAllOptions.length);
-	
-	if ( promptHeight > $(window).height()) 
-		{
-		promptHeight = $(window).height();
 
-		var sFilter = $("&lt;p>&lt;/p>")
-			.append(
-				$("&lt;span>&lt;/span>")
-					.text("Filter: ")
-			)
-			.append(
-				$("&lt;input>&lt;/input>")
-					.attr("id", promptDivId+"_valuefilter")
-					.bind("input propertychange", function (evt) {
-						// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
-						
-					    // If it's the propertychange event, make sure it's the value that changed.
-					    if (window.event &amp;&amp; event.type == "propertychange" &amp;&amp; event.propertyName != "value")
-					        return;
+	// if there are more options than the screen can show at once, 
+	// add a filter box on top 
+
+	var iNumberOfPixelOccupedByOptions = (749.0/23.0); // real life example: 749px taken by 23 options
+	var iPercentOfHeightTakenByFullDialog = 0.78; // real life example: 749px (dialog) vs 952px (window)
+	var iWindowHeight = $(window).height();
+	var iComputedHeight = aAllOptions.length * iNumberOfPixelOccupedByOptions;
+
+
+	// if ratio of height-of-all-options to window height is too heigh, add a filter box
+	if (iComputedHeight / iWindowHeight > iPercentOfHeightTakenByFullDialog)
+	{
+	var sFilter = $("&lt;p>&lt;/p>")
+		.append(
+			$("&lt;span>&lt;/span>")
+				.text("Filter: ")
+		)
+		.append(
+			$("&lt;input>&lt;/input>")
+				.attr("id", promptDivId+"_valuefilter")
+				.bind("input propertychange", function (evt) {
+					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
 					
-					    // Clear any previously set timer before setting a fresh one
-					    window.clearTimeout($(this).data("timeout"));
-					    $(this).data("timeout", setTimeout(function () {
+					// If it's the propertychange event, make sure it's the value that changed.
+					if (window.event &amp;&amp; event.type == "propertychange" &amp;&amp; event.propertyName != "value")
+						return;
+				
+					// Clear any previously set timer before setting a fresh one
+					window.clearTimeout($(this).data("timeout"));
+					$(this).data("timeout", setTimeout(function () {
+
+						// read new unique values given filter
+						var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
+						var aAllOptionsFiltered = aAllOptions.filter(function(value){
+							return value.toLowerCase().match(sFilter);
+							});
+						fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
+						
+					}, 1000));
+				})
+		);
 	
-					    	// read new unique values given filter
-					    	var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
-					    	var aAllOptionsFiltered = aAllOptions.filter(function(value){
-					    		return value.toLowerCase().match(sFilter);
-					    		});
-					    	fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
-							
-					    }, 1000));
-					})
-			);
-		
-		// append filter box
-		promptDiv.append(sFilter);
-		}
+	// append filter box
+	promptDiv.append(sFilter);
+	} 
 
 	
 	// user instructions
@@ -4173,10 +4332,14 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: promptHeight,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -4337,9 +4500,6 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	$(document.body).append(promptDiv);
 	
 	
-	// adapt height of the prompt to the number of values to reorder
-	var promptHeight = (200 + 30 * aFieldNames.length);
-	
 	// array of buttons
 	var aButtons = [];
 
@@ -4398,10 +4558,14 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	// only change is use of keyup instead of keypress, otherwise it doesn't work in some cases
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
-        height: promptHeight,
+		height: "auto",
+		maxHeight: $(window).height(),
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
+			// remove close button (cancel is enough)
+			$(".ui-dialog-titlebar-close").hide();
+			// add shadows
         	$(".ui-dialog").addClass("ui-dialog-shadow");
         	$( this ).closest(".ui-dialog").putInFront();
         },
@@ -5355,6 +5519,34 @@ fn.getCurrentUser = function(){
 
 
 /**
+ * Get the session-ID of the Tomcat user which has logged in.
+ * This only workt when 'send_tomcat_username_to_db=true'
+ * was set in the project.database configuration file
+ * 
+ * @returns {String} A session-ID
+ * 
+ * @see fn.getCurrentUser
+ */
+fn.getCurrentSessionId = function(){
+	return SESSION_ID;
+};
+
+
+
+/**
+ * Get the page_id, t.a. the ID assigned to the tab
+ * currently being viewed. Just like the tomcat username
+ * and the session-ID, this is saved in the Lex'it
+ * temporary table 'active_user', allowing database
+ * functions to take this into account, to simulate a kind
+ * of per-tab-session-ID
+ */
+fn.getCurrentTabId = function(){
+	return fn.getCurrentProject() + "_" + $("#page_id").attr("name");
+}
+
+
+/**
  * Get the current project name
  *  
  * @returns {String} A project name
@@ -5366,7 +5558,7 @@ fn.getCurrentProject = function(){
 
 /**
  * Set the user name (the name of the user who has logged in is normally got from webservice
- * but it is possible to set it here by giving a string, if needed that way)
+ * at initialisation time, but it is possible to set it here by giving a string, if needed that way)
  *  
  * @param {String} sName - A user name
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
@@ -5389,7 +5581,9 @@ fn.setCurrentUser = function(sName, fnErrorHandler){
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
 	 		// return the user name
-	 		USERNAME = fn.getDbResponse(xml);
+			var aUsernameAndSessionId = ( fn.getDbResponse(xml) ).split(ARG_INTERNAL_SEPARATOR);
+			USERNAME = aUsernameAndSessionId[0];
+			SESSION_ID = aUsernameAndSessionId[1];
 	 		},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		
@@ -5529,7 +5723,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Oct 28 2020 14:47:23 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 21 2021 14:34:17 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>
