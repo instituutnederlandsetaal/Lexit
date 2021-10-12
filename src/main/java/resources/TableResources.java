@@ -417,6 +417,7 @@ public class TableResources {
 			  @QueryParam("column_name") String columnName,
 			  @QueryParam("column_value_filter") String columnValueFilter, 
 			  @QueryParam("limit") String limit,
+			  @DefaultValue("false") @QueryParam("sort_by_freq") String sortByFrequency,
 			  @Context ServletContext context,
 			  @Context SecurityContext sc,
 				@Context HttpServletRequest httpServletRequest
@@ -430,9 +431,8 @@ public class TableResources {
 	    String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
-
 		
-	    return getDatabaseObject(co).getUniqueValues_oldStyle(tableName, columnName, columnValueFilter, limit);
+	    return getDatabaseObject(co).getUniqueValuesWithFreqs(tableName, columnName, columnValueFilter, limit, sortByFrequency.toLowerCase().equals("true"));
 	  }
 	
 	

@@ -732,6 +732,80 @@ public class Database {
 	
 	
 	
+	// see getUniqueValues
+	public UniqueValuesObject getUniqueValuesWithFreqs(String tableName, String columnName, String columnValueFilter, String limit, boolean sortByFreq) {
+		
+		String schema = getSchema(tableName);		
+		if (columnValueFilter == null) columnValueFilter = "";
+	
+		// GROUP BY can be faster than DISTINCT
+	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
+	    
+    	String query = "SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+    			"FROM " + getSafeTableName(tableName, schema) + " " + 
+    			"WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+    			(
+    			columnValueFilter.isEmpty() ? "" : 
+    			"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+    			) +
+    			"GROUP BY " + getSafeFieldName(columnName) + " " +
+    			"ORDER BY " + ( sortByFreq ? "count(*) DESC" : getSafeFieldName(columnName)) + ";";
+    	
+    	if (limit != null)
+    	{
+    		query = "SELECT n, cnt " +
+    				"FROM (" +
+    				"	SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+        			"	FROM " + getSafeTableName(tableName, schema) + " " + 
+        			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+        			(
+        				columnValueFilter.isEmpty() ? "" : 
+        				"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+        			) +
+        			"	GROUP BY " + getSafeFieldName(columnName) + " " +
+        			"	ORDER BY count(*) DESC " +
+        			"	LIMIT " + limit + ") x " +
+        			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") +";";
+    	}
+    	    	
+    	PostgresDatabaseCommunication dc = connectDatabase();
+
+	    UniqueValuesObject uvo = new UniqueValuesObject();
+	    ArrayList<String[]> res;
+	    
+    	try {
+  	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+  	      
+  	      ResultSet rs = columnValueFilter.isEmpty() ? 
+  	    		  dc.sendQuery(query)
+  	    		  :
+  	    		  dc.sendPreparedQuery(query, new String[]{columnValueFilter});
+
+  	      res = getResultsInAList(rs, new String[] { "n", "cnt" });
+  	      if (res.size() > 0)
+  	      {
+  	        for (String[] oneRecord : res)
+  	        {
+  	          String oneValue = oneRecord[0].trim() +" ("+ oneRecord[1].trim() +")";
+  	          if (oneValue != null)
+  	            uvo.addValue(oneValue);
+  	        }
+  	      }
+  	    }
+    	catch (Exception e) {
+    		throw new RuntimeException("Error while executing query " + query, e);
+    	}
+    	finally
+	    {
+	      closeDatabase(dc);
+	    }
+    	
+    	return uvo;
+    	
+	}
+
+	
+	
 	/**
 	 * Get a table record, given a table name and id
 	 * @param tableName

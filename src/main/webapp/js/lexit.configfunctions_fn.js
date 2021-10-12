@@ -84,16 +84,16 @@ EXTRA FUNCTIONS
  * @param {String} sProjectName - Name of the project
  * @param {String} sColor - Color code (eg. #3970b3)
  * @param {String} sFontSize - Font size (eg. 50px)
- * @param {String} sFondWeight - Font weight (eg. bold)
+ * @param {String} sFontWeight - Font weight (eg. bold)
  */
-fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFondWeight){
+fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 	
 	// default values
 	if (typeof sColor == 'undefined')
 		sColor = "#3970b3";
 	
-	if (typeof sFondWeight == 'undefined')
-		sFondWeight = "bold";
+	if (typeof sFontWeight == 'undefined')
+		sFontWeight = "bold";
 	
 	if (typeof sFontSize == 'undefined')
 		sFontSize = "50px";
@@ -105,7 +105,7 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFondWeight){
 	// set text, color, size, etc
 	$("#projectname").find("span")
 	.text(sProjectName)
-	.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFondWeight);
+	.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFontWeight);
 	
 	// set title tab as well (and don't double the lex'it version number after the '-'
 	var sBaseTitle = $("title").text();
@@ -1726,6 +1726,7 @@ fn.getNumberOfSelectedRowNodes = function(sSomeTable){
  * This function gives the possibility to access a node so as to be able to modify its CSS and such.
  * 
  * @param {Node} nRow - A row node
+ * @param {String} sColumnName - A column name
  * @returns {Node} A cell node (or null if function failed)
  */
 fn.getCellInRowNode = function(nRow, sColumnName){

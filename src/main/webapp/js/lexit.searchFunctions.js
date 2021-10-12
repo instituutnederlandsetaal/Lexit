@@ -968,20 +968,17 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var oKeysAndValues =	conf.getQueryBuilderValues(oColumnConfig);
 	
 	// but if oKeysAndValues is null ...
-	if ( oKeysAndValues == null)
-		{
-		if (oAlternativeKeysAndValues == null)
-			{
+	if ( oKeysAndValues == null){
+		if (oAlternativeKeysAndValues == null) {
 			// read unique values from database and call this function again!
 			sf.getUniqueValuesForQueryBuilder(sTableName, sColumnName);
 			return false;
-			}
-		else
-			{
-			// now, if we have read the database values, we can carry on!
-			oKeysAndValues = oAlternativeKeysAndValues;		
-			}
 		}
+		else {
+			// now, if we have read the database values, we are ready to carry on
+			oKeysAndValues = oAlternativeKeysAndValues;
+		}
+	}
 	
 	// get the processor, which defines how to build the query given the chosen search values
 	var fnProcessor = 		conf.getQueryBuilderProcessor(oColumnConfig);
@@ -1065,8 +1062,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 
 				    	// read new unique values given filter
 				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
-				    	var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, function(oValues){
+						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
+						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
 							$("#"+selectableId).empty();							
@@ -1099,8 +1097,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 
 				    	// read new unique values given filter
 				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
-				    	var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, function(oValues){
+						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
+						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
 							$("#"+selectableId).empty();							
@@ -1113,7 +1112,42 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 		)
 		.append(
 			$("<span></span>")
-				.text(" opties")
+				.text(" opties ")
+		)
+		.append(
+			$("<select></select>")
+			.attr("id", sQueryBuilderName+"_sortbyfreq")
+			.append(
+				$("<option></option>").val("true").text("Sorteer naar freq")
+			)
+			.append(
+				$("<option></option>").val("false").text("Sorteer alfabetisch").attr("selected", "selected")
+			)
+			.bind("input propertychange", function(evt){
+
+				// If it's the propertychange event, make sure it's the value that changed.
+				if (window.event && event.type == "propertychange" && event.propertyName != "value")
+					return;
+
+				// Clear any previously set timer before setting a fresh one
+				    window.clearTimeout($(this).data("timeout"));
+				    $(this).data("timeout", setTimeout(function () {
+
+				    	// read new unique values given filter
+				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
+						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
+						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
+							
+							oKeysAndValues = new cloneObject(oValues);							
+							$("#"+selectableId).empty();							
+							buildSelectOptions(oKeysAndValues);
+							
+						});
+						
+				    }, 1000));
+
+			})
 		);
 	promptDiv.append(filter);
 	promptDiv.append("<p></p>");
@@ -1142,40 +1176,38 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	
 	buildSelectOptions = function(oKeysAndValues){
 		
-		for (sOption in oKeysAndValues)
-		{
+		for (sOption in oKeysAndValues){
 		
-		// one element 		
-		var liElement =  bGrid ?
-				$("<li></li>")							// grid type
-				.addClass( "ui-state-default" )
-				.css("margin", "3px")
-				.css("padding", "1px")
-				.css("float", "left")				
-				.css("width", "200px")
-				.css("height", "40px")
-				.css("line-height", "40px") // should be the same as height (https://stackoverflow.com/questions/3400548/how-to-vertically-align-li-elements-in-ul)
-				.css("font-size", "12px")
-				.css("text-align", "center")
-			:
-				$("<li></li>")							// list type
-				.addClass( "ui-widget-content" )
-				.css("margin", "3px")
-				.css("padding", "0.4em")
-				.css("font-size", "12px")
-				.css("height", "18px")
-			;	
-		
-		// if some item was pre-selected, assign it the selected class
-		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
-			{
-			liElement.addClass("ui-selected");
+			// one element 		
+			var liElement =  bGrid ?
+					$("<li></li>")							// grid type
+					.addClass( "ui-state-default" )
+					.css("margin", "3px")
+					.css("padding", "1px")
+					.css("float", "left")				
+					.css("width", "200px")
+					.css("height", "40px")
+					.css("line-height", "40px") // should be the same as height (https://stackoverflow.com/questions/3400548/how-to-vertically-align-li-elements-in-ul)
+					.css("font-size", "12px")
+					.css("text-align", "center")
+				:
+					$("<li></li>")							// list type
+					.addClass( "ui-widget-content" )
+					.css("margin", "3px")
+					.css("padding", "0.4em")
+					.css("font-size", "12px")
+					.css("height", "18px")
+				;	
+			
+			// if some item was pre-selected, assign it the selected class
+			if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1){
+				liElement.addClass("ui-selected");
 			}
-		
-		var spanElement = $("<span></span>")
-			.text( $.trim(sOption) );
-		liElement.append(spanElement);
-		selectableUl.append(liElement);
+			
+			var spanElement = $("<span></span>")
+				.html( $.trim(sOption) );
+			liElement.append(spanElement);
+			selectableUl.append(liElement);
 		}
 	}
 	
@@ -1223,30 +1255,42 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
                 		  
 						var aNewChosenOptions = new Array();
 						  
-						var aSelectedNodes = $(".ui-selected");
+						var aSelectedNodes = $("li.ui-selected");
 						aSelectedNodes.each(function(){
 							// sometimes doubles are added somehow, so prevent this!
 							if (aNewChosenOptions.indexOf( $(this).text() )<0)
 								  aNewChosenOptions.push( $(this).text());
-						});                		  
-                  		
+						});
+						
+
 						// generate output
 						// that is: get the conversion (declared in config)
-						// and if avaible, process those conversion with some processor
+						// and if available, process those conversion with some processor
 						
 						var aOutput = new Array();
-						for (var i=0; i<aNewChosenOptions.length; i++)
-							{
+						for (var i=0; i<aNewChosenOptions.length; i++){
 							var oneNewChoice = aNewChosenOptions[i];
+
 							aOutput.push( escapeRegexChars( oKeysAndValues[oneNewChoice] ) );
-							}
+						}
+
+
+						// ready for final steps:
+						// ---------------------
+
+						// cut off the counts from the values
+						aOutput = sf._cutoffCounts(aOutput);
+
+
+						// turn array of chosen values into regex string
+
 						var sOutput = "("+aOutput.join("|")+")";
 						
-                		// or call the processor (if available) to process the values
+                		// or, if set in config, call the processor to process the values
 						if (fnProcessor != null)
 							sOutput = fnProcessor(aOutput);
 						
-						// case sensitive?
+						// exact match?
 						if (bExactMatch)
 							sOutput = "^"+sOutput+"$";
 						
@@ -1294,16 +1338,32 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 }
 
 
+// process array of values from the queryBuilder list, to make sure the count-value at the end of each string is removed
+//
+// like:				becomes:
+//  somevalue1 (234)  		somevalue1
+//	somevalue2 (654)		somevalue2
+//	somevalue3 (31)			somevalue3
+sf._cutoffCounts = function (aValueWithCounter){
+	
+	for (var i=0; i<aValueWithCounter.length; i++){
+		// the replacement also matches the regex espaced chars of the count part [ t.i. like \(654\) ]
+		aValueWithCounter[i] = (aValueWithCounter[i]).replace(/\\\([\d]+\\\)$/i, "").trim();
+	}
+	return aValueWithCounter
+};
+
+
 //needed for query builder to have values to work with
 sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName){
 	
-	sf._getUniqueValuesForQueryBuilder(sSomeTableName, sCurrentColumnName, null, null, function(oValues){
+	sf._getUniqueValuesForQueryBuilder(sSomeTableName, sCurrentColumnName, null, null, null, function(oValues){
 		
 		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
 	})
 }
 
-sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sLimit, fnFunction){
+sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sLimit, bSortbyfreq, fnFunction){
 	
 	gui.showProcessingMsg(sSomeTableName);
 	
@@ -1318,6 +1378,7 @@ sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName
 			"column_name": sCurrentColumnName,
 			"column_value_filter": sValueFilter,
 			"limit": ((sLimit == null || sLimit == '') ? 20 : sLimit),
+			"sort_by_freq": bSortbyfreq,
 			"dummy": getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
