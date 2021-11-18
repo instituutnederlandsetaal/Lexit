@@ -1062,7 +1062,7 @@ public class Database {
 				{				
 				// make sure inside-quotes are escaped in the Postgres way:
 				// in strings like in "zzp\'er" (with slash)
-				args[i] = (args[i]).replaceAll("([\\\\]+)(')([^'])", "$2$2$3");
+				args[i] = (args[i]).replaceAll("([\\\\]+)(')", "$2$2");
 				// in strings like in "zzp'er" (without slash)
 				args[i] = (args[i]).replaceAll("([^'])(')([^'])", "$1$2$2$3");
 				// in strings beginning or ending with a single quote (like in "'s ochtends")

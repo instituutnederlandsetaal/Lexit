@@ -3983,8 +3983,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			.attr("type", "checkbox" )
 			.val(aValues[i])
 			.prop("checked", aValues[i])
-			.change(function(){
-				$(this).val( $(this).prop("checked") );
+			.change(function(){ 
+				$(this).val( $(this).prop("checked") ); 
+				// beware: the checked attribute is string typed somehow
 			});
 		}
 		
