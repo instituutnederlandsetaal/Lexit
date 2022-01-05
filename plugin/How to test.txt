@@ -1,0 +1,6 @@
+
+* make a new folder in the Tomcat webapps folder
+* copy the plugin files into this new folder (which will now behave like any other Tomcat app in the webapps folder)
+* assign the new folder the needed access rights (chmod!)
+* call the plugin demo by calling URL 
+	http://<myhost>:8080/lexit_plugin_demo
