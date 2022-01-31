@@ -314,6 +314,14 @@ var oTableConfigurationList_example = {
 		 * die de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.
 		 */
 		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
+
+
+		/**
+		 * @description Een editeerbare cel waarin slechts een gesloten aantal waardes zijn toegestaan, wordt normaal gesproken
+		 * bewerkt via een Select-box. Met deze parameter declareert men welke mouse-event het weergeven van de Select-box moet triggeren.
+		 * Default is dat 'mouseover'.
+		 */
+		"select_trigger_event": "mouseover",
 		
 		
 		/**
@@ -813,6 +821,17 @@ conf.getSelectionBoxLabels = function(aColumnConfig){
 		return null;
 	return aColumnConfig["choosefrom_labels"];
 };
+
+
+/**
+ * Retrieve mouse event triggering select box to appear
+ * Default: mouseover
+ */
+conf.getSelectTriggerEvent = function(aColumnConfig){
+	if (typeof aColumnConfig["select_trigger_event"] == 'undefined')
+		return "mouseover";
+	return aColumnConfig["select_trigger_event"];
+}
 
 
 // retrieve visibility settings

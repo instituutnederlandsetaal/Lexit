@@ -899,7 +899,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		var oColumnConfig =		conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(sSomeTablename)[i]);
 		var bColumnEditable =	conf.getEditability(oColumnConfig);
 		var sValidatorKey =		conf.getEditSelectValidator(oColumnConfig);
-		
+		var sSelectTriggerEvent = 	conf.getSelectTriggerEvent(oColumnConfig);
 		
 		// [1] select values from 'choosefrom' in config.js
 		var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
@@ -964,6 +964,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						var fnEditCallback = 	conf.getEditCallback(oColumnConfig);
 						var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
 						var sEditTrigger = 		conf.getEditTrigger(oColumnConfig);
+						
 						
 						
 						
@@ -1075,7 +1076,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					{
 						    "data": gui._buildDataArrayForJEditable( sSomeTablename, aAllowedValues, sValueOfThisCell, aValuesToLabels ),
 						    "type": "select",
-						    "event": "mouseover",
+						    "event": sSelectTriggerEvent,
 						    "onblur": "cancel", // function(value){gui._closeJEditable(this, value);},							
 							"callback": function(value, settings) {
 								value = value.replace("&amp;", "&"); // prevent mismatch of value, as jeditable converts & into &amp;
