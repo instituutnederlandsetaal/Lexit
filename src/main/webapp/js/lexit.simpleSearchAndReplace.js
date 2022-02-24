@@ -34,12 +34,12 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 				$("<span></span>")
 				.css("text-align", "center")
 				.css("font-weight", "bold")
-				.text("De tekstvelden van deze tabel mogen niet bewerkt worden.")
+				.text(lang.header_search_and_replace_denied+ ".")
 				);
 		// close button, meant to leave back to the main interface
 		var close_button = $("<button/>")
 		.attr("type", "button")
-		.html("Sluiten")
+		.html(lang.close)
 		.css("margin-left", "20px")
 		.bind("click", function(){
 			
@@ -63,11 +63,11 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 			$("<span></span>")
 			.css("font-weight", "bold")
 			.css("font-size", "120%")
-			.text("Zoek & Bewerk ")
+			.text(lang.header_search_and_replace_button+ " ")
 			);
 	titleDiv.append(
 			$("<span></span>")
-			.text("(veilige modus: bewerking beperkt zich tot de schermgegevens)")
+			.text(lang.header_search_and_replace_safemode)
 			);
 	buttonDiv.append( ssr.buildSelectionButton(sSomeTablename) );
 	
@@ -79,7 +79,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	
 	
 	// column selection part
-	var column_to_alter_txt = $("<span></span>").text(" in ");
+	var column_to_alter_txt = $("<span></span>").text(" "+ lang.header_search_and_replace_in +" ");
 	var column_to_alter = $("<div></div>").attr("id", sSomeTablename+"_column_to_alter").css("display", "inline");	
 	var selectColumnTag = $("<select></select>").attr("id", sSomeTablename+"_selected_column");
 	
@@ -115,12 +115,12 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	selectActionTag.append(
 			$("<option></option>")
 			.attr("value", "update")
-			.text("vervang het door:")
+			.text(lang.header_search_and_replace_replacethisby+ ":")
 			);
 	selectActionTag.append(
 			$("<option></option>")
 			.attr("value", "insert")
-			.text("voeg dit toe:")
+			.text(lang.header_search_and_replace_addthis+ ":")
 			);
 	
 	action_to_perform.append(selectActionTag);
@@ -128,10 +128,10 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	
 	// input fields for search and replace values
 	var old_and_new_value = $("<div></div>").attr("id", sSomeTablename+"_old_and_new_value").css("display", "inline");
-	var old_string_txt = $("<span></span>").text("Zoek dit [regex] ");
+	var old_string_txt = $("<span></span>").text(lang.header_search_and_replace_searchforthis+ " ");
 	var old_string = $("<input/>")
 		.attr("type", "text").attr("id", sSomeTablename+"_old_string");
-	var new_string_txt = $("<span></span>").text(" en ");
+	var new_string_txt = $("<span></span>").text(" "+ lang.header_search_and_replace_and+ " ");
 	var new_string = $("<input/>")
 		.attr("type", "text").attr("id", sSomeTablename+"_new_string");
 	
@@ -157,7 +157,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	var test_button = $("<button/>")
 	.attr("type", "button")
 	.attr("class", "onego_button")
-	.html("Test effect")
+	.html(lang.header_search_and_replace_test)
 	.bind("click", function(){
 		ssr.alterTable(sSomeTablename, false);
 	});
@@ -167,7 +167,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	var execute_button = $("<button/>")
 	.attr("type", "button")
 	.attr("class", "onego_button")
-	.html("Uitvoeren")
+	.html(lang.carryout)
 	.css("margin-right", "20px")
 	.bind("click", function(){
 		ssr.alterTable(sSomeTablename, true);
@@ -180,7 +180,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	var clearfields_button = $("<button/>")
 	.attr("type", "button")
 	.attr("class", "onego_button")
-	.html("Velden legen")
+	.html(lang.header_search_and_replace_emptyfields)
 	.bind("click", function(){
 		$("#"+sSomeTablename+"_old_string").val("");
 		$("#"+sSomeTablename+"_new_string").val("");
@@ -191,7 +191,7 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	var close_button = $("<button/>")
 	.attr("type", "button")
 	.attr("id", sSomeTablename+"_searchandreplace_close_button")
-	.html("Sluiten")
+	.html(lang.close)
 	.bind("click", function(){
 		
 		// remember the search and replace settings for the next time (to allow reuse, often convenient)
@@ -236,7 +236,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 	
 	// what is the current setting of the button?
 	var bRowSelectionAllowed = mt.rowSelectionIsAllowed(sSomeTablename);
-	var sButtonMsg = bRowSelectionAllowed ? "Zet rijselectie UIT [F2]" : "Zet rijselectie AAN [F2]";
+	var sButtonMsg = bRowSelectionAllowed ? lang.turn_row_selection_off : lang.turn_row_selection_on;
 	var sBackgroundColor = bRowSelectionAllowed ? "#EE0000" : "#99CCFF";
 	var sFunctionAwakeOrAsleep = bRowSelectionAllowed ? "functions_are_asleep" : "functions_are_awake";
 		
@@ -265,7 +265,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 		// give button the right settings
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.css("background-color", "#EE0000")
-			.attr("title", "Zet rijselectie UIT [F2]").addClass("tooltip");
+			.attr("title", lang.turn_row_selection_off).addClass("tooltip");
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.delay(500).removeClass("functions_are_awake").addClass("functions_are_asleep");
 		
@@ -284,7 +284,7 @@ ssr.buildSelectionButton = function(sSomeTablename){
 		// give button the right settings
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.css("background-color", "#99CCFF")
-			.attr("title", "Zet rijselectie AAN [F2]").addClass("tooltip");
+			.attr("title", lang.turn_row_selection_on).addClass("tooltip");
 		$("#"+sSomeTablename+"_wrapper #"+sSomeTablename+"_search_and_replace #selectionbutton")
 			.delay(500).removeClass("functions_are_asleep").addClass("functions_are_awake");
 		
@@ -448,13 +448,13 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		 			
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
-			 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+			 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]");
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
 					
-					fn.message("Fout in tabel '"+sSomeTablename+"'", 
-							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+					fn.message(lang.error_occurred_in_table+" '"+sSomeTablename+"'", 
+							lang.some_error_has_occurred+": "+textStatus+" "+errorThrown,
 							function(){
 								gui.refreshTable(sSomeTablename);
 							}
@@ -492,13 +492,13 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 		 			
 			 		if (!gui.getDbResponse(xml))
 			 			{			 			
-			 			fn.message("Fout in tabel '"+sSomeTablename+"'", "Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+			 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]");
 			 			}
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
 					
-					fn.message("Fout in tabel '"+sSomeTablename+"'", 
-							"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+					fn.message(lang.error_occurred_in_table+" '"+sSomeTablename+"'", 
+							lang.some_error_has_occurred+": "+textStatus+" "+errorThrown,
 							function(){
 								gui.refreshTable(sSomeTablename);
 								}

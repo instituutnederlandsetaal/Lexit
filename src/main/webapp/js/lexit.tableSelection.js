@@ -28,7 +28,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 					ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
 				},
 				error: function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);
+					fn.message(lang.error, lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
 				}
 			});
 	
@@ -56,11 +56,11 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	
 	// create a neutral nameless group, with the neutral value as its first option
 	aTableGroups.push( "" );
-	haTableGroups.put( "", [neutralValue] );
+	haTableGroups.put( "", [lang.choose_a_table_default_value] );
 	
 	// list of table names and description for the list to choose from
-	asTableNames.push( neutralValue );
-	asTableDescriptions.push( neutralValue );
+	asTableNames.push( lang.choose_a_table_default_value );
+	asTableDescriptions.push( lang.choose_a_table_default_value );
 	asTableComments.push( "" );	// comments (in the GUI called 'notities'), that can be typed in by clicking onto the table name (in the table header),
 								// and which are also visible through html 'title' attribute
 	asTableTypes.push( "none" );
@@ -68,13 +68,10 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	
 	
 	// show error message if configuration tries to call a table that is set to be hidden
-	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) )
-		{
-		fn.message("Fout", "U probeert tabel '"+sTableToCallUponStartUp+"' te openen, " +
-				"maar volgens de configuratie moet deze tabel verborgen blijven. " +
-				"Zie oShowOnlyTables of oHiddenTablesList in " +
-				"het "+getHttpParams().get("db")+".config.js-bestand.");
-		}
+	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) ) {
+		fn.message(lang.error, 
+			"'"+sTableToCallUponStartUp+"': " +lang.error_opening_hidden_table+	" "+getHttpParams().get("db")+".config.js");
+	}
 	
 	
 		
@@ -309,10 +306,10 @@ ts.callTable = function(haTableFilters, haTableSettings){
 	var sTableName = $("#selected_source").find(":selected").val();
 	
 	// and put the selector back into neutral position
-	$("#selected_source").val(neutralValue);
+	$("#selected_source").val(lang.choose_a_table_default_value);
 	
 	// no choice means do nothing
-	if (sTableName == neutralValue) 
+	if (sTableName == lang.choose_a_table_default_value) 
 		{
 		removeSpinner();
 		return true;
@@ -326,7 +323,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 		else
 			{
 			removeSpinner();
-			fn.message("Let op", "De tabel '"+sTableName+"' is al geladen");
+			fn.message(lang.beware, lang.already_loaded);
 			return true;
 			}
 			

@@ -145,7 +145,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var tbody_tr_tag = $("<tr></tr>");
 	var tbody_tr_td_tag = $("<td></td>")
 		.attr("colspan", mt.getListOfColumnsOf(sSomeTableName).length+"")
-		.text("Data wordt van de server geladen");
+		.text(lang.loading_from_server);
 	tbody_tr_tag.append(tbody_tr_td_tag);
 	tbody_tag.append(tbody_tr_tag);
 	
@@ -222,20 +222,20 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 						( aTableSettings!=null ? conf.getDisplayLength(aTableSettings) : 10 )),
 		"language": {
 			"thousands": ".",
-			"search": "ZOEK in gehele tabel:",
-			"infoEmpty": "Geen resultaten",
-			"emptyTable": "Geen resultaten",
-			"info": "_PLUSMN__TOTAL_ rij(en) gevonden",
-			"zeroRecords": "Geen resultaten. Probeer een ander zoekwoord.",
-			"infoFiltered": " (uit _TOTALPLUSMN__MAX_ rijen)",
+			"search": lang.header_main_search,
+			"infoEmpty": lang.header_info_empty,
+			"emptyTable": lang.empty_table,
+			"info": lang.header_x_rows_found,
+			"zeroRecords": lang.no_results_modify_your_query,
+			"infoFiltered": lang.header_info_filtered,
 			"paginate": {
-				"first": "Eerste",
-				"previous": "Vorige",
-				"next": "Volgende",
-				"last": "Laatste"
+				"first": lang.paginate_first,
+				"previous": lang.paginate_previous,
+				"next": lang.paginate_next,
+				"last": lang.paginate_last
 			},
 			"lengthMenu": conf.getDisplayLengthMenu(aTableSettings),
-			"loadingRecords": "Data laden uit de database...",
+			"loadingRecords": lang.loading_records,
 			"processing": "" // no processing message, we have a spinner
 		},
 				
@@ -363,7 +363,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
 		        		
 		        		$("td:eq("+iColNumber+")", oCurrentRow.node())
-			        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>Rij "+ (iRowNumber+1) +" in '"+currentColumnName+"'</span>")
+			        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
 			        		.addClass("tooltip");
 						}
 				});				
@@ -639,16 +639,16 @@ tb.addExportButtons = function(sSomeTableName){
 	new $.fn.dataTable.Buttons( oTable, {
 	    buttons: [
 	            	$.extend(true, {}, exportCommonFunction, {
-		            	extend: 'copyHtml5', text: 'Naar clipboard'
+		            	extend: 'copyHtml5', text: lang.export_toclipboard
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'excelHtml5', text: 'Excel', action: tb.newExportAction 
+						extend: 'excelHtml5', text: lang.export_excel, action: tb.newExportAction 
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'pdfHtml5', text: 'PDF'
+						extend: 'pdfHtml5', text: lang.export_pdf
 					}),
 					$.extend(true, {}, exportCommonFunction, {
-						extend: 'print', text: 'Afdrukken'
+						extend: 'print', text: lang.export_print
 					})
 	    ]
 	} );	
@@ -809,11 +809,8 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 				&& aMissingIndexes.indexOf(sSomeTableName+json.sNeededIndexForSortColumns) <0 // warning wasn't given yet
 				)
 			{			
-			fn.message("Let op!", "Let op: voor de huidige sorteerkolommen in tabel '"+sSomeTableName+"' " +
-						"is geen index beschikbaar.<BR>" +
-						"Dit vertraagt het werken met de database.<BR><BR>" +
-						"Betroffen kolommen: "+json.sNeededIndexForSortColumns+"<BR><BR>" +
-						"Geef dit door aan de administrator.");		
+			fn.message(lang.beware+ "!", lang.beware+ ": " +lang.missing_database_indexes+ " " +json.sNeededIndexForSortColumns+"<BR><BR>" +
+						lang.inform_admin);		
 			
 			// remember that the warning was already given, so the user won't see it again during the session
 			aMissingIndexes.push(sSomeTableName+json.sNeededIndexForSortColumns);

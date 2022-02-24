@@ -21,7 +21,7 @@ un.cleanUndoStack = function(sSomeTableName){
 	
 	var undoStack    = new Array(); 
 	var tooltipStack = new Array();
-	var sEmptyTooltip = "Herstelfunctie: Er is niets te herstellen.<BR>[+ Shift: herstel vorige selectie]";
+	var sEmptyTooltip = lang.undo_button;
 	tooltipStack.push(sEmptyTooltip);
 	
 	mt.putUndoStacks(sSomeTableName, undoStack);
@@ -84,7 +84,7 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 	// human users count 1-based instead of 0-based, so we add 1 to the row index
 	var iRowNumber = 	fx.getRowIndex(oRowOnStack)+1;
 	var sColName = 		mt.getListOfVisibleColumnsOf(sSomeTableName)[iColumnNr];
-	var sNewTooltip = "'"+sOldValue+"' herstellen in rij "+ iRowNumber + " van kolom '"+ sColName +"'.";
+	var sNewTooltip =   lang.undo_restore_msg1+ " '" +sOldValue+ "' "+ lang.undo_restore_msg2 +" "+ iRowNumber + " " +lang.undo_restore_msg3+ " '"+ sColName +"'.";
 	
 	// put the new tooltip onto the stack of previous tooltips
 	var thisTooltipsStack = mt.getUndoTooltips(sSomeTableName);
@@ -206,14 +206,14 @@ un.undoEvent = function(sSomeTableName){
 		 			}
 		 		else
 		 			{
-		 			fn.message("Fout in tabel '"+sSomeTableName+"'", 
-		 					"Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]");
+		 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", 
+		 					lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]");
 		 			}
 		 		},
 			"error": function(jqXHR, textStatus, errorThrown){
 				
-				fn.message("Fout in tabel '"+sSomeTableName+"'", 
-						"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+				fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", 
+						lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
 						function(){
 							gui.refreshTable(sSomeTableName);
 							}

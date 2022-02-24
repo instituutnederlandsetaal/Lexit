@@ -985,14 +985,12 @@ conf.getKeepFilterSetting = function(aColumnConfig){
 	var bKeepFilter = aColumnConfig["keepfilter"];
 	
 	// give understandable error message, when this parameter is misused
-	if (bKeepFilter && conf.getFilter(aColumnConfig) == null)
-		{
-		fn.message("Let op", "Parameter 'keepfilter: true' werkt alleen als vooraf ook parameter 'filter' is ingesteld.");
-		}
-	else
-		{
+	if (bKeepFilter && conf.getFilter(aColumnConfig) == null){
+		fn.message(lang.beware, lang.keep_filter_warning+ ".");
+	}
+	else {
 		return aColumnConfig["keepfilter"];
-		}	
+	}	
 };
 
 
@@ -1076,23 +1074,17 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 		var sColName = 		aColumnList[i];
 		var aColumnConfig =	conf.getColumnConfig(oTableConfig, sColName);
 		
-		if (typeof aColumnConfig["colsort"] != 'undefined')
-			{
-			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
-				{
+		if (typeof aColumnConfig["colsort"] != 'undefined'){
+			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1){
 				aSortingColumnsList.push(sColName);
-				}
-			else
-				{
-				var hParamsHash = getHttpParams();
-				var sDbName = hParamsHash.get("db");
-				fn.message("Fout in configuratie van tabel '"+sTableName+"'",				
-					"Kolom '"+sColName+"' van tabel '"+ sTableName + 
-					"' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. " +
-					"Verwijder deze kolom uit het configuratiebestand " +
-					"("+ sDbName +".config.js).");
-				}
 			}
+			else {
+				fn.message(lang.error,				
+					lang.sort_column_warning1 +"<BR>"+
+					lang.sort_column_warning2 +": "+ sTableName + "<BR>"+
+					lang.sort_column_warning3 +": "+ sColName);
+			}
+		}
 	}	
 	return aSortingColumnsList;
 };
@@ -1121,29 +1113,28 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 	
 	var oTableSettings = 	conf.getTableSettings(sSomeTablename);
 	var oTsColSettings =	conf.getDefaultSortingFromTableSettings(oTableSettings);
-	if (oTsColSettings != null)
-		{
-		for (colName in oTsColSettings)
-			{
+	if (oTsColSettings != null){
+		for (colName in oTsColSettings){
 			// get column index, given the column name
 			var iColIndex = 	$.inArray(colName, mt.getListOfColumnsOf(sSomeTablename));
 			
 			// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
 			// it will cause Datatables to give a very cryptic error message.
 			// So, to prevent that, give a useful and understandable error message here!
-			if (iColIndex<0)
-				{
-				fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+colName+"' als sorteer-kolom, maar deze kolom bestaat niet!");
-				}
-			else
-				{
-				aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
-				}
-			
+			if (iColIndex<0){
+				fn.message(lang.error, 
+					lang.sort_column_warning1 +"<BR>"+
+					lang.sort_column_warning2 +": "+ sSomeTablename + "<BR>"+
+					lang.sort_column_warning3 +": "+ colName);
 			}
+			else {
+				aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
+			}
+			
+		}
 		
 		return aColSettings;
-		}
+	}
 	
 	// [2] sorting was set in the table configuration array
 	
@@ -1151,8 +1142,7 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 	var oTableConfig = 		conf.getTableConfig(sSomeTablename);
 	var aDefaultSortCols =	conf.getDefaultSortingColumns(oTableConfig);
 	
-	for (var i=0; i<aDefaultSortCols.length; i++)
-		{
+	for (var i=0; i<aDefaultSortCols.length; i++){
 		var sDefaultSortCol = aDefaultSortCols[i];		
 		var sSortDir  = 	conf.getSortingColumnDirection(conf.getColumnConfig(oTableConfig, sDefaultSortCol));
 		
@@ -1162,16 +1152,17 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 		// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
 		// it will cause Datatables to give a very cryptic error message.
 		// So, to prevent that, give a useful and understandable error message here!
-		if (iColIndex<0)
-			{
-			fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+sDefaultSortCol+"' als sorteer-kolom, maar deze kolom bestaat niet!");
-			}
-		else
-			{
-			aColSettings.push([ iColIndex, sSortDir ]);
-			}	
-		
+		if (iColIndex<0) {
+			fn.message(lang.error, 
+					lang.sort_column_warning1 +"<BR>"+
+					lang.sort_column_warning2 +": "+ sSomeTablename + "<BR>"+
+					lang.sort_column_warning3 +": "+ sDefaultSortCol);
 		}
+		else {
+			aColSettings.push([ iColIndex, sSortDir ]);
+		}	
+		
+	}
 	return aColSettings;
 };
 
@@ -1801,7 +1792,9 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 // this function is called when a button is being clicked upon
 conf.getHeaderButtonFunction = function(aButtonSettings){
 	if (typeof aButtonSettings["click"] == 'undefined')
-		return function(){fn.message("Configuratieprobleem", "Aan deze button is geen functie toegekend.");};
+		return function(){
+			fn.message(lang.error, lang.error_button_config);
+		};
 	return aButtonSettings["click"];
 };
 
@@ -1884,7 +1877,7 @@ conf.getDisplayLength = function(aTableSettings){
 conf.getDisplayLengthMenu = function(aTableSettings){
 	
 	if (typeof aTableSettings["displaylength_menu"] == 'undefined')
-		return 'Toon <select>'+
+		return lang.header_show+ ' <select>'+
 		   '<option value="1">1</option>'+
 		   '<option value="5">5</option>'+
            '<option value="10">10</option>'+
@@ -1893,8 +1886,8 @@ conf.getDisplayLengthMenu = function(aTableSettings){
            '<option value="100">100</option>'+
            '<option value="500">500</option>'+
            '<option value="1000">1000</option>'+
-           '<option value="-1">alle</option>'+
-           '</select> rijen';
+           '<option value="-1">'+ lang.header_all +'</option>'+
+           '</select> '+ lang.header_rows;
 	
 	var sMenuBody = "";
 	for (var i=0; i<aTableSettings["displaylength_menu"].length; i++)
@@ -1904,7 +1897,7 @@ conf.getDisplayLengthMenu = function(aTableSettings){
 		sMenuBody += '<option value="'+sThisValue+'">'+sLabel+'</option>';
 		}
 	
-	return 'Toon <select>'+ sMenuBody +	'</select> rijen';
+	return lang.header_show+' <select>'+ sMenuBody + '</select> '+lang.header_rows;
 	
 };
 

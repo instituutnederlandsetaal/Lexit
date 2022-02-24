@@ -99,11 +99,10 @@ sf.goTo = function(sSomeTablename){
 			}
 	});
 	
-	if (sColumnName=="")
-		{
-		fn.message("Let op", "Tik een zoekterm in een zoekbox boven een kolom, en klik dan pas op 'Ga naar'!");
+	if (sColumnName==""){
+		fn.message(lang.beware, lang.header_goto_no_search_term);
 		return true;
-		}
+	}
 	
 	// find sorting columns and directions	
 	var aSortColumns = fn.getSortingColumns(sSomeTablename);
@@ -137,12 +136,10 @@ sf.goTo = function(sSomeTablename){
 // and jump to that position in the table
 sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues){
 	
-	if ( aSortColumns == null || aSortColumns.length == 0 )
-		{
-		fn.message("Let op", "De tabel '"+sSomeTablename+"' is niet gesorteerd op een kolom. " +
-				"De functie 'Ga naar' werkt niet zonder sortering. Sorteer eerst de tabel op een kolom.");
+	if ( aSortColumns == null || aSortColumns.length == 0 ){
+		fn.message(lang.beware, lang.header_goto_missing_sort);
 		return;
-		}
+	}
 	
 	gui.showProcessingMsg(sSomeTablename);
 	
@@ -161,24 +158,18 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 								(fn.getSortingColumns(sSomeTablename)).join() + 
 								(fn.getSortingDirections(sSomeTablename)).join();
 	
-	if (sCurrentCallOfGoTo == mt.getLastGoToCommand(sSomeTablename) )
-		{
+	if (sCurrentCallOfGoTo == mt.getLastGoToCommand(sSomeTablename) ) {
 		// same call, so we will ask for the 'next' occurence of the word searched for
 		mt.rememberOccurenceNr( sSomeTablename, mt.getOccurenceNr(sSomeTablename) + 1 );
-		}
-	else
-		{
+	}
+	else {
 		// not the same call, so tell the GoTo memory we have a new table search, starting from occurence #0
 		mt.rememberOccurenceNr( sSomeTablename, 0 );
 		mt.rememberLastGoToCommand( sSomeTablename, sCurrentCallOfGoTo );
 		
 		// at the very first call, tell the user an index is being built
-		fn.message("Ga Naar", 
-				"Lex'it bouwt nu een index van alle voorkomens van het gezochte woord.<BR>" +
-				"(dit duurt mogelijk een paar seconden, maar dat hoeft slechts &eacute;&eacute;n keer!)<BR>" +
-				"<BR>" +
-				"Heel even geduld a.u.b.");
-		}
+		fn.message(lang.header_goto_button, lang.header_goto_building_index);
+	}
 	
 
 	
@@ -200,19 +191,19 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 					"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR),
 					"display_length": fn.getCurrentDisplayLength(sSomeTablename)
 					
-					},
+				},
 				dataType: "xml",
 				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 				success: function(xml) {
 					fn.closeDialog(); // close automatically the GoTo message about building an index
 					gui.removeProcessingMsg(sSomeTablename);
 					sf.goToPageGiveXmlResponse(xml, sSomeTablename);
-					},
+				},
 				error: function(jqXHR, textStatus, errorThrown){
 					fn.closeDialog(); // close automatically the GoTo message about building an index
 					gui.removeProcessingMsg(sSomeTablename);
-					fn.message("Fout in tabel '"+sSomeTablename+"'", "XML laden mislukt: "+textStatus+" "+errorThrown);
-					}
+					fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", lang.loading_xml_failed+": "+textStatus+" "+errorThrown);
+				}
 			});
 };
 
@@ -234,8 +225,7 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 	
 	// fast implementation (making use of PK)
 	
-	if (sServerResponse.indexOf(":")>-1)
-		{
+	if (sServerResponse.indexOf(":")>-1) {
 		// split by ':', which will split the response into a page nr, a list of ids
 		
 		var aSplitResponse =	sServerResponse.split(":");
@@ -252,7 +242,7 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 		aGoToRowIds[sSomeTablename] = sFieldToQuery+":^(" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join("|") + ")$";
 		
 		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
-		}
+	}
 	
 	
 	// slow implementation (when no PK available)
@@ -425,7 +415,7 @@ sf.enableSearchFields = function(someTablename){
 			inputTag.append(
 					$("<option></option>")
 						.attr("value", aListOfOptions[0] )
-						.text( "Kiezen" )
+						.text( lang.choose )
 				);
 			for (var j=1; j<aListOfOptions.length; j++)
 				{
@@ -444,7 +434,7 @@ sf.enableSearchFields = function(someTablename){
 				inputTag.append(
 						$("<option></option>")							
 							.attr("value", sAllOptions )
-							.text( "ALLES" )
+							.text( lang.EVERYTHING )
 					);
 				}
 			
@@ -456,7 +446,7 @@ sf.enableSearchFields = function(someTablename){
 			inputTag = $("<input/>")
 				.attr("type", "checkbox")
 				.attr("disabled", !columnSearchable)
-				.attr("title", "Neutraal")
+				.attr("title", lang.neutral)
 				.attr("cycle_value", 0);
 			}
 		
@@ -713,18 +703,23 @@ sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 // give the checkbox filter the right color etc., 
 // so as to make the filter setting visible to the user
 
-// checkboxes have a cycle value 
-// values of several settings depend on the phase in the cycle (0 to 2)
-// we have three possible settings, following each other in a cycle
-//  0: unchecked  -> no value
-//  1: checked    -> true
-//  2: unchecked  -> false
-var aCheckboxBackgroundColors =	["#FFFFFF",	"#D8F6CE",	"#F5A9A9"];
-var aCheckboxCheckvalue =     	["",		"1",		"0"];
-var aCheckboxCheckvalueTitle =	["Neutraal","Aan",  	"Uit"];
-var aCheckboxVisibleSetting = 	[false,  	true,		false];
-
 sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
+
+	// checkboxes have a cycle value 
+	// values of several settings depend on the phase in the cycle (0 to 2)
+	// we have three possible settings, following each other in a cycle
+	//  0: unchecked  -> no value
+	//  1: checked    -> true
+	//  2: unchecked  -> false
+	//
+	// BEWARE: keep this IN the function (not outside), otherwise
+	// the code will be executed before setLanguge can bet called,
+	// causing checkboxes to keep default tooltip, instead of in the
+	// chosen language
+	var aCheckboxBackgroundColors =	["#FFFFFF",	"#D8F6CE",	"#F5A9A9"];
+	var aCheckboxCheckvalue =     	["",		"1",		"0"];
+	var aCheckboxCheckvalueTitle =	[lang.neutral,lang.on,  lang.off];
+	var aCheckboxVisibleSetting = 	[false,  	true,		false];
 	
 	var inputTag = sSearchBoxesDiv.find("input").eq(0);
 	
@@ -957,8 +952,6 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 
 sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues){
 	
-	var sQueryBuilderName = "Selectiehulp";
-	
 	// read configuration:
 	
 	var oTableConfig = 		conf.getTableConfig(sTableName);	
@@ -995,11 +988,11 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var promptDivId = "dialog-message"+getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!	
 	
-	var sMessageP = $("<p></p>").html("Stel uw zoekvraag samen (Houd "+(isMac?"Command":"CTRL")+" ingedrukt voor meervoudige keuze)");
+	var sMessageP = $("<p></p>").html(lang.search_help_msg);
 	
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)
-		.attr("title", sQueryBuilderName)
+		.attr("title", lang.search_help)
 		.css("font-size", "12px")
 		.append(sMessageP);
 	
@@ -1012,7 +1005,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var negationCheck = $("<div ></div>")
 		.css("background-color", "#E0E6F8")
 		.append(
-			$('<label />').html('Zoek tegenovergestelde van selectie').prepend(
+			$('<label />').html(lang.search_help_search_for_contrary).prepend(
 					$("<input />", {"type": "checkbox", "id": "querybuilder_negation_checkbox", "name": "querybuilder_negation_checkbox"})
 						.click(function(){bNegation = !bNegation;})
 					)
@@ -1028,7 +1021,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var exactMatchCheck = $("<div></div>")
 		.css("background-color", "#E0E6F8")
 		.append(
-			$('<label />').html('Exact matchen').prepend(
+			$('<label />').html(lang.search_help_search_for_exact_match).prepend(
 					$("<input />", {"type": "checkbox", "id": "querybuilder_exactmatch_checkbox", "name": "querybuilder_exactmatch_checkbox"})
 						.click(function(){bExactMatch = !bExactMatch;})
 					)
@@ -1044,11 +1037,11 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 	var filter = $("<div></div>")
 		.append(
 			$("<span></span>")
-				.text("Filter (regex): ")
+				.text(lang.filter_regex+ ": ")
 		)
 		.append(
 			$("<input></input>")
-				.attr("id", sQueryBuilderName+"_valuefilter")
+				.attr("id", "querybuilder_valuefilter")
 				.bind("input propertychange", function (evt) {
 					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
 					
@@ -1061,9 +1054,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    $(this).data("timeout", setTimeout(function () {
 
 				    	// read new unique values given filter
-				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
-						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
-						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+				    	var sFilter = 	$("#querybuilder_valuefilter").val();
+						var sLimit = 	$("#querybuilder_limit").val();
+						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
@@ -1077,13 +1070,13 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 		)
 		.append(
 			$("<span></span>")
-				.text(" Toon max. ")
+				.text(" " +lang.show_max+ " ")
 		)
 		.append(
 			$("<input></input>")
 			.css("width", "20px")
 			.val(20)
-			.attr("id", sQueryBuilderName+"_limit")
+			.attr("id", "querybuilder_limit")
 			.bind("input propertychange", function (evt) {
 					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
 					
@@ -1096,9 +1089,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    $(this).data("timeout", setTimeout(function () {
 
 				    	// read new unique values given filter
-				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
-						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
-						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+				    	var sFilter = 	$("#querybuilder_valuefilter").val();
+						var sLimit = 	$("#querybuilder_limit").val();
+						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
@@ -1112,16 +1105,16 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 		)
 		.append(
 			$("<span></span>")
-				.text(" opties ")
+				.text(" "+lang.options+" ")
 		)
 		.append(
 			$("<select></select>")
-			.attr("id", sQueryBuilderName+"_sortbyfreq")
+			.attr("id", "querybuilder_sortbyfreq")
 			.append(
-				$("<option></option>").val("true").text("Sorteer naar freq")
+				$("<option></option>").val("true").text(lang.sort_by_freq)
 			)
 			.append(
-				$("<option></option>").val("false").text("Sorteer alfabetisch").attr("selected", "selected")
+				$("<option></option>").val("false").text(lang.sort_alphabetically).attr("selected", "selected")
 			)
 			.bind("input propertychange", function(evt){
 
@@ -1134,9 +1127,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    $(this).data("timeout", setTimeout(function () {
 
 				    	// read new unique values given filter
-				    	var sFilter = 	$("#"+sQueryBuilderName+"_valuefilter").val();
-						var sLimit = 	$("#"+sQueryBuilderName+"_limit").val();
-						var bSortbyfreq=$("#"+sQueryBuilderName+"_sortbyfreq").find(":selected").val();
+				    	var sFilter = 	$("#querybuilder_valuefilter").val();
+						var sLimit = 	$("#querybuilder_limit").val();
+						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
@@ -1250,7 +1243,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
         },
         buttons: [
                   {
-                	  text: "OK",
+                	  text: lang.ok,
                 	  click: function(){
                 		  
 						var aNewChosenOptions = new Array();
@@ -1312,7 +1305,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
                 	id: 'dialog_accept_button'
                   },
                   {
-                	  text: "Annuleren",
+                	  text: lang.cancel,
                 	  click: function() {
                 		  
                 		// call close function
@@ -1400,7 +1393,7 @@ sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName
 	 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			gui.removeProcessingMsg(sSomeTableName);
-			fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden bij het aanroepen van functie sf._getUniqueValuesForQueryBuilder. "+
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_when_calling+" sf._getUniqueValuesForQueryBuilder. "+
 				textStatus+" "+errorThrown);
 			}
 		} );

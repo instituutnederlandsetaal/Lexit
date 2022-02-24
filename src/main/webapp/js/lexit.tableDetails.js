@@ -27,7 +27,7 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 					td.processColumnResponse(xml, sSomeTableName, fnFunction, oExtraTableSettings);
 					},
 				error: function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout in tabel '"+sSomeTableName+"'", "XML laden mislukt: "+textStatus+" "+errorThrown);
+					fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
 					}
 			});
 	
@@ -93,7 +93,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 			 		conf.changeTableConfigValue(sSomeTableName, sCurrentColumnName, "choosefrom", td._getUniqueValues(xml));
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message("Fout in tabel '"+sSomeTableName+"'", "Er is een fout opgetreden tijdens het opbouwen van de zoekbox '"+sColumnName+"': "+
+					fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sColumnName+"' "+
 						textStatus+" "+errorThrown);
 					}
 				} );
@@ -188,11 +188,12 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		else
 			{
 			var sCause = (aColumnOrder.length != aAllColumns.length) ?
-					"aantal kolommen verschilt (database stuurt "+aAllColumns.length+
-					" kolommen, configuratie noemt "+aColumnOrder.length+" kolommen)" 
-					: "kolomnamen verschillen.<BR><BR>De database-tabel bevat:<BR>{"+firstArray.join(", ")+"}<BR><BR>Maar de configuratie noemt:<BR>{"+secondArray.join(", ")+"} ";
-			fn.message("Fout in tabel '"+sSomeTableName+"'", "De lijst kolommen in \"column_order\" (in de configuratie) " +
-					"komt niet overeen met de werkelijke kolommen.<BR>Oorzaak: "+sCause+".");
+					lang.columns_list_number_mismatch1+": "+aAllColumns.length+".<BR><BR>"+
+					lang.columns_list_number_mismatch2+": "+aColumnOrder.length 
+					: 
+					lang.columns_list_name_mismatch1+ ":<BR>{"+ firstArray.join(", ") +"}.<BR><BR>"+
+					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}";
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ ": " +sCause+".");
 			}
 		}
 	
@@ -296,7 +297,7 @@ td.selectColumns = function(sSomeTablename){
 	
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)
-		.attr("title", "Kolommenselectie en -ordening")
+		.attr("title", lang.columns_selection_and_order)
 		.css("font-size", "12px");
 	
 	
@@ -377,8 +378,8 @@ td.selectColumns = function(sSomeTablename){
 	
 	var aButtonsArray = [
 	                	 {
-	                		 text: "Toepassen",     
-	                		 title: "Pas de nu gemaakte keuzes toe en sluit dit venster",
+	                		 text: lang.apply,     
+	                		 title: lang.columns_selection_optimal_apply_msg,
 	                		 click: function(){
 	                     		
 	                     		// if the optimal mode was chosen, put the table into this mode
@@ -523,16 +524,15 @@ td.selectColumns = function(sSomeTablename){
 	                     	id: 'dialog_accept_button'
 	                	 },
 	                	{
-	                		 text: "Annuleren",
-	                		 title: "Annuleer de nu gemaakte keuzes en sluit dit venster",
+	                		 text: lang.cancel,
+	                		 title: lang.columns_selection_optimal_cancel_msg,
 	                		 click: function() {
 	                             $( this ).dialog( "close" );
 	                         }
 	                	},
 	                	{
-	                		text: "Optimaal",
-	                		title: "Verberg kolommen automatisch wanneer die in de huidige view leeg zijn, " +
-	                				"zodat de tabel niet onnodig breed is",
+	                		text: lang.columns_selection_optimal_label,
+	                		title: lang.columns_selection_optimal_tooltip,
 	                		click: function() {
 	                    		
 	                        	bOptimal = true;
@@ -557,8 +557,8 @@ td.selectColumns = function(sSomeTablename){
 	                        style: "color: #3970b3"
 	                	},
 	                	{
-	                		text: "Alles",
-	                		title: "Selecteer alle kolommen",
+	                		text: lang.everything,
+	                		title: lang.columns_selection_select_all,
 	                		click: function() {
 	                    		
 	                    		bOptimal = false;
@@ -578,8 +578,8 @@ td.selectColumns = function(sSomeTablename){
 	                		
 	                	},
 	                	{
-	                		text: "Niets",
-	                		title: "Deselecteer alle kolommen",
+	                		text: lang.nothing,
+	                		title: lang.columns_selection_deselect_all,
 	                		click: function() {
 	                    		
 	                    		bOptimal = false;
@@ -607,8 +607,8 @@ td.selectColumns = function(sSomeTablename){
 	
 	if ( typeof sSavedCookie != 'undefined' || mt.getTableMustBeOptimal(sSomeTablename) )
 		aButtonsArray.push({
-	                		text: "Herstel default",
-	                		title: "Herstel de oorspronkelijke configuratie van deze tabel",
+	                		text: lang.columns_selection_reset_default,
+	                		title: lang.columns_selection_reset_default_msg,
 	                		click: function() {
 	                			
 	                			var aOriginalColumnList = conf.getOriginalColumnList(sSomeTablename);

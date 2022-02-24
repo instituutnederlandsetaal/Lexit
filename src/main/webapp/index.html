@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2022.01.31
+	v2022.02.24
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -84,6 +84,9 @@
 	<!-- Datatables stuff -->
 	
 	<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+
+	<!-- language must be loaded first, since the other modules depend on it-->
+	<script type="text/javascript" language="javascript" src="js/lexit.language.js"></script>
 	
 	
 	<!-- Export facilities-->
@@ -135,7 +138,7 @@
 	<script type="text/javascript" language="javascript" src="js/lexit.gui_rowselect.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.keys.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.tableSelection.js"></script>
-	<script type="text/javascript" language="javascript" src="js/lexit.multitables.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.multitables.js"></script>	
 	
 	<!-- extra custom dataTables functions as an extension to the standard installation -->
 	
@@ -152,9 +155,6 @@
 	// *********************************************************************************************************
 	
 	// CONSTANTS
-	
-	var neutralValue = "Kies een tabel";
-	var neutralColumnValue = "Alles";
 	
 	// INL Home url, as a regex like: /(...)/
 	// current value should catch both 'inl' as 'ivdnt' domains
@@ -231,6 +231,9 @@
 	var bSpyMode;			// global spy mode (who's logged in?)
 	var bResetUserRights;	// reset user rights mode
 
+	// Lex'it language mode
+	var sLexitLanguage;
+
 	// are we on Mac or PC?
 	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	
@@ -248,12 +251,18 @@
 	
 	
 	$(document).ready(function() {
-		
+
 		// put INL logo
 		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
 		
 		// get http parameters
 		paramsHash = getHttpParams();
+
+		// set language to be used
+		sLexitLanguage = (paramsHash!=null && paramsHash.get("lang")!=null ?
+				paramsHash.get("lang").toLowerCase() : "nl" );
+
+		lang.setLanguage(sLexitLanguage);
 		
 		// set neutral internal separator
 		setInternalSeparator();
@@ -288,16 +297,14 @@
 		
 		// global spy mode (logging info)
 		
-		if (bSpyMode)
-			{				
+		if (bSpyMode) {				
 			buildSpy();
-			}
+		}
 		
 		
 		// reset user rights
 		
-		else if (bResetUserRights)
-			{				
+		else if (bResetUserRights){
 			var url = WEBSERV_URL+"/table/reset_user_rights"; 
 			
 			$.ajax({
@@ -309,21 +316,19 @@
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
 					var sResp = fn.getDbResponse(xml);
-			 		fn.message("Reset", "Response: " + sResp);
-			 		},
+			 		fn.message(lang.reset, lang.response+ ": " + sResp);
+			 	},
 				"error": function(jqXHR, textStatus, errorThrown){
 					
-					fn.message("Fout",
-							"Reset mislukt: " +	textStatus+" "+errorThrown);
-					}
-				});
-			}
+					fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+				}
+			});
+		}
 		
 		
 		// test mode (development)
 		
-		else if (bTest)
-			{
+		else if (bTest) {
 			$.getScript("projects_overview.js")
 			.done(function(){	
 				
@@ -332,18 +337,17 @@
 				// In the end, this function will call initialize();
 				getConfigFilesList();
 				
-				})
+			})
 			.fail(function(jqxhr, settings, exception){
-				fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
-				});
-			}
+				fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+			});
+		}
 		
 		
 		
 		// normal mode (production)
 		
-		else
-			{
+		else {
 			var url = WEBSERV_URL+"/table/get_projects_overview"; 			
 			
 			$.ajax({
@@ -362,12 +366,12 @@
 					
 				},
 				"error": function(jqxhr, settings, exception){
-					fn.message("Fout", "Het projectenoverzicht 'projects_overview.js' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
+					fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
 				}
 				
 			});
 			
-			}
+		}
 		
 		
 					
@@ -472,7 +476,7 @@
 				setTimeout(function(){ buildSpy(); }, 2000);
 				},
 			error: function(jqXHR, textStatus, errorThrown){
-				fn.message("Fout", "XML laden mislukt: "+textStatus+" "+errorThrown);
+				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
 				}
 		});
 	};
@@ -497,7 +501,7 @@
 				ARG_INTERNAL_SEPARATOR = fn.getDbResponse(xml);
 			},
 			"error": function(jqxhr, settings, exception){
-				fn.message("Fout", "Het ophalen van de Interne separator string is mislukt.<br><br>Fout: ["+exception+"]");
+				fn.message(lang.error, lang.reading_internal_separator_failed +"<br><br>" +lang.error +": ["+exception+"]");
 			}
 		});
 	}
@@ -526,7 +530,7 @@
 				// nothing to do
 			},
 			"error": function(jqxhr, settings, exception){
-				fn.message("Fout", "Het registeren van de active tab is mislukt.<br><br>Fout: ["+exception+"]");
+				fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
 			}
 		});
 	}
@@ -555,7 +559,7 @@
 				initialize();
 			},
 			"error": function(jqxhr, settings, exception){
-				fn.message("Fout", "Het ophalen van de list configuratiebestanden is mislukt.<br><br>Fout: ["+exception+"]");
+				fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
 			}
 		});
 	}
@@ -585,16 +589,14 @@
 		// user instruction for accessing tables
 		$("#indicator").empty().append(
 				$("<span></span>")
-				.html("Kies een tabel: <I>(vooraf "+(isMac?"Command":"CTRL")+" ingedrukt houden om tabel toe te voegen, of SHIFT voor tabel in nieuwe tab)</I>")
+				.html(lang.choose_a_table)
 				);
 		
 		// get url parameters		
-		if (paramsHash == null || paramsHash.get("db") == null)
-			{
+		if (paramsHash == null || paramsHash.get("db") == null) {
 			showListOfProjects();
-			}
-		else
-			{			
+		}
+		else {			
 			// Normal case: start opening project
 		
 			// Assign key functions
@@ -609,8 +611,7 @@
 			
 			
 			// test mode (development)
-			if (bTest)
-				{
+			if (bTest) {
 				$.getScript(paramsHash.get("db")+".config.js")
 				.done(function(){
 					
@@ -622,16 +623,15 @@
 					if (bowser.chrome)
 						$(window).bind('beforeunload', function(){   
 							return false;
-							});
-					})
+						});
+				})
 				.fail(function(jqxhr, settings, exception){
-					fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
-					});
-				}
+					fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
+				});
+			}
 			
 			// normal mode (production)
-			else
-				{
+			else {
 				var url = WEBSERV_URL+"/table/get_configfile"; 			
 				
 				$.ajax({
@@ -655,12 +655,10 @@
 							});
 					},
 					"error": function(jqxhr, settings, exception){
-						fn.message("Fout", "Het configuratiebestand '<i>"+paramsHash.get("db")+"</i>' bestaat niet of het bevat fouten.<br><br>Fout: ["+exception+"]<BR><BR>");
+						fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
 					}
-					});
-				}
-			
-			
+				});
+			}
 			
 			
 			
@@ -720,30 +718,26 @@
 		
 		var oContentToMatch = new Array();
 		var oExtraSettings = new Array();
-		for (var i=0; i<paramsHash.keys().length; i++)
-			{
+		for (var i=0; i<paramsHash.keys().length; i++) {
 			var sOneParam = paramsHash.keys()[i];
 			// read all parameters, except 'db' and 'table', since we process those elsewhere
-			if ( $.inArray(sOneParam, ["db", "table"])<0 )
-				{
+			if ( $.inArray(sOneParam, ["db", "table"])<0 ) {
 				// table setting parameters
-				if ($.startsWith(sOneParam, "setting."))
-					{
+				if ($.startsWith(sOneParam, "setting.")) {
 					var sTrueSettingName = sOneParam.replace("setting.", "");
 					oExtraSettings[sTrueSettingName] = paramsHash.get(sOneParam);					
-					}
-				// table filters
-				else
-					{
-					oContentToMatch[sOneParam] = paramsHash.get(sOneParam);
-					}				
 				}
+				// table filters
+				else {
+					oContentToMatch[sOneParam] = paramsHash.get(sOneParam);
+				}				
 			}
+		}
 		
 		return { 
 			contentToMatch: oContentToMatch,
 			extraSettings: oExtraSettings
-			};
+		};
 	}
 	
 	
@@ -764,15 +758,13 @@
 			"dataType": "xml", // get response as xml
 			"success": function(xml) {
 				var sResp = fn.getDbResponse(xml);
-		 		fn.message("Database info", sResp);
-		 		},
+		 		fn.message(lang.database_info, sResp);
+		 	},
 			"error": function(jqXHR, textStatus, errorThrown){
 				
-				fn.message("Fout",
-						"'"+sDbName+"' heeft mogelijk geen configuratie-bestand meer op deze server: " +				
-					textStatus+" "+errorThrown);
-				}
-			});
+				fn.message(lang.error, "'"+sDbName+"' " +lang.file_is_missing+ ": " + textStatus+" "+errorThrown);
+			}
+		});
 		
 	}
 
@@ -788,30 +780,30 @@
 
 			$("#indicator").empty().append(
 				$("<span></span>")
-					.html("<br><h2>Welkom in Lex'it</h2>Kies een project:<br><br>")
+					.html("<br><h2>" +lang.welcome+ "</h2>" +lang.choose_a_project+ ":<br><br>")
 			);
 			
-			var docOpenTitle = $("<span></span>").html("<b>Productie</b>");
+			var docOpenTitle = $("<span></span>").html("<b>" +lang.production+ "</b>");
 			var docOpen = $("<table></table>")
 				.css("border", "dotted black 1px")
 				.css("background", "#D0F5A9");
 			
-			var goodiesTitle = $("<span></span>").html("<b>Goodies en tools</b>");
+			var goodiesTitle = $("<span></span>").html("<b>" +lang.goodies+ "</b>");
 			var goodies = $("<table></table>")
 				.css("border", "dotted black 1px")
 				.css("background", "#A9E2F3");
 			
-			var docDevelopmentTitle = $("<span></span>").html("<b>In ontwikkeling</b>");
+			var docDevelopmentTitle = $("<span></span>").html("<b>" +lang.in_development+ "</b>");
 			var docDevelopment = $("<table></table>")
 				.css("border", "dotted black 1px")
 				.css("background", "#EFEFFB");
 			
-			var docClosedTitle = $("<span></span>").html("<b>Afgesloten</b>");
+			var docClosedTitle = $("<span></span>").html("<b>" +lang.project_closed+ "</b>");
 			var docClosed = $("<table></table>")
 				.css("border", "dotted black 1px")
 				.css("background", "#F8E0E0");
 			
-			var docUnknownTitle = $("<span></span>").html("<b>Onbekend</b>");
+			var docUnknownTitle = $("<span></span>").html("<b>" +lang.project_unknown+ "</b>");
 			var docUnknown = $("<table></table>")
 				.css("border", "dotted black 1px")
 				.css("background", "#F2F2F2");
@@ -834,7 +826,7 @@
 					aProjectList.push({
 						"name": oneConfigFile,
 						"config_filename": oneConfigFile,
-						"description": "onbekend",
+						"description": lang.unknown,
 						"unknown": true
 				 	});
 				}
@@ -847,7 +839,8 @@
 				// set project name to be rendered and a project link to be clicked upon
 
 				var sProjectLinkPart = aProjectList[i]["config_filename"];
-				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"");
+				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"")+
+					( sCurrentURL.indexOf("lang=")>-1 ? "&lang="+sCurrentURL.substring(sCurrentURL.indexOf("lang=")+"lang=".length, sCurrentURL.indexOf("lang=")+"lang=".length+2):"");
 				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
 				
 				var sProjectDescription =
@@ -917,7 +910,7 @@
 			
 		}
 		else {
-			fn.message("Fout", "Geen toegang");
+			fn.message(lang.error, lang.access_denied);
 		}
 		
 	}

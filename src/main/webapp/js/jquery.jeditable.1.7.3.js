@@ -8,6 +8,7 @@
  *
  * Project home:
  *   http://www.appelsiini.net/projects/jeditable
+ *   https://web.archive.org/web/20190507041304/https://appelsiini.net/projects/jeditable/
  *
  * Based on editable by Dylan Verheul <dylan_at_dyve.net>:
  *    http://www.dyve.net/jquery/?editable

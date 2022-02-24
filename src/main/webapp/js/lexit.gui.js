@@ -445,7 +445,7 @@ gui.showWarningWhenRefreshingIsRequired = function(sTableName, sColumnName){
 	
 	if ( sSearchValue!= '')
 		{
-		var sWarning = "<SPAN><B>Weergave wijkt nu af van selectie. Ververs de tabel a.u.b.!</B></SPAN>";
+		var sWarning = "<SPAN><B>"+ lang.display_differs_from_selection +"!</B></SPAN>";
 		
 		$("#"+sTableName+"_wrapper .paginate_button").hide();
 		$("#"+sTableName+"_wrapper .dataTables_paginate").html(sWarning).addClass("dont_paginate");
@@ -608,11 +608,10 @@ gui.makeTableEditable = function(sSomeTablename){
 				conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
 				// callcack function, if it is set in configuration
 				if (fnEditCallback!=null)
-					fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", 
-							"Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
-							"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
-							"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
-									"in uw configuratiebestand.");
+					fn.message(lang.error, 
+						lang.editcallback_warning1+".<BR>"+
+						lang.editcallback_warning2+": "+ sSomeTablename + "<BR>"+
+						lang.editcallback_warning3+": "+ sColumnName);
 				
 				// new input might affect column and searchboxes alignment 
 	 			gui.setSearchboxesCss(sSomeTablename);	 			
@@ -621,8 +620,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				}
 			
 			// normal case: we apply the normal edit function 
-			else
-				{
+			else {
 				gui.showProcessingMsg(sSomeTablename);
 				var rowId = this.parentNode.getAttribute('id');
 				var url = WEBSERV_URL+"/table/setvalue";
@@ -643,8 +641,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				 	"success": function(xml) {
 				 		
 				 		gui.removeProcessingMsg(sSomeTablename);
-				 		if (gui.getDbResponse(xml))
-				 			{
+				 		if (gui.getDbResponse(xml)) {
 				 			
 				 			// callcack function, if it is set in configuration
 				 			if (fnEditCallback!=null)
@@ -655,39 +652,36 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			// refresh the tables that config file requires to be refreshed upon editing of current cell
 				 			conf.refreshTables(oColumnConfig);	
 				 			
-				 			}
-				 		else
-				 			{
-				 			fn.message("Fout in tabel '"+sSomeTablename+"'", 
-				 					"Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]"
+				 		}
+				 		else {
+				 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+				 					lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]"
 				 					);
-				 			}
-				 		},
+				 		}
+				 	},
 					"error": function(jqXHR, textStatus, errorThrown){
 						
-						if (fnEditErrorHandler != null)
-							{
+						if (fnEditErrorHandler != null)	{
 							fn.removeProcessingMsg(sSomeTablename);
 							fnEditErrorHandler({
 								"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 								"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
 								});
-							}
-						else
-							{
-							fn.message("Fout in tabel '"+sSomeTablename+"'", 
-									"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+						}
+						else {
+							fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
 									function(){
 										gui.refreshTable(sSomeTablename);
 										//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 										}
 								);
-							}
-						
 						}
+						
+					}
 				 		
-					} );
-				}			
+				} );
+			}			
 						
 			// needed, otherwise clicking multiple times causes jeditable to be fired multiple times 
 			return(value);
@@ -705,7 +699,7 @@ gui.makeTableEditable = function(sSomeTablename){
 			"callback": function(value, settings){				
 				mt.getDataTableObjectOf(sSomeTablename).cell(this).data(value);				
 			},
-			"tooltip": "Klik om te bewerken",
+			"tooltip": lang.click_to_edit,
 			"type": "textarea", // this gives more room than the default 'input' field of jEditable
 			"placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
 		}
@@ -819,19 +813,17 @@ gui.makeTableEditable = function(sSomeTablename){
 			
 			// callback function, if it is set in configuration
 			if (fnEditCallback!=null)
-				fn.message("Fout in configuratie van tabel '"+sSomeTablename+"'", 
-						"Gebruik van 'editcallback' bij 'editfunc' is niet toegestaan. " +
-						"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'. " +
-						"Zie de configuratie van tabel '"+sSomeTablename+"' / kolom '"+sColumnName+"' " +
-								"in uw configuratiebestand.");
+				fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+					lang.editcallback_warning1+ ".<BR>"+
+					lang.editcallback_warning2+ ": "+sSomeTablename+"<BR>"+
+					lang.editcallback_warning3+ ": "+sColumnName);
 			
 			// refresh the tables that config file requires to be refreshed upon editing of current cell
 			conf.refreshTables(oColumnConfig);
 			}
 		
 		// normal case: we apply the normal edit function
-		else
-			{
+		else {
 			var url = WEBSERV_URL+"/table/setvalue";
 			$.ajax( {
 				"type": "GET",
@@ -861,27 +853,25 @@ gui.makeTableEditable = function(sSomeTablename){
 			 	},
 				"error": function(jqXHR, textStatus, errorThrown){
 					
-					if (fnEditErrorHandler != null)
-						{
+					if (fnEditErrorHandler != null) {
 						fn.removeProcessingMsg(sSomeTablename);
 						fnEditErrorHandler({
 							"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 							"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": newValue
-							});
-						}
-					else
-						{
-						fn.message("Fout in tabel '"+sSomeTablename+"'", 
-								"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
-								function(){
-									gui.refreshTable(sSomeTablename);
-									}
-							);
-						}
-					
+						});
 					}
-				} );			
-			}
+					else {
+						fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
+							function(){
+								gui.refreshTable(sSomeTablename);
+							}
+						);
+					}
+					
+				}
+			} );			
+		}
 		
 		
 	});
@@ -923,8 +913,9 @@ gui.makeTableEditable = function(sSomeTablename){
 				
 				$( nCell ).editable( 
 						
+					// this comes into action only once some value was chosen in the select-menu
 					function(value, settings){
-						
+
 						// if rows are being selected, we don't want to edit rows!
 						if (mt.rowSelectionIsAllowed(sSomeTablename))
 							{
@@ -1029,42 +1020,39 @@ gui.makeTableEditable = function(sSomeTablename){
 											fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
 							 			// refresh the tables that config file requires to be refreshed upon editing of current cell
 							 			conf.refreshTables(oColumnConfig);
-							 			}
-							 		else
-							 			{
-							 			fn.message("Fout in tabel '"+sSomeTablename+"'", 
-							 					"Er is een fout opgetreden ["+gui.getDbResponse(xml)+"]",
+							 		}
+							 		else {
+							 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+							 					lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]",
 							 					function(){
 													gui.refreshTable(sSomeTablename);
 													//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 												}
-							 				);
-							 			}
-							 		},
+							 			);
+							 		}
+							 	},
 								"error": function(jqXHR, textStatus, errorThrown){
 									
-									if (fnEditErrorHandler != null)
-										{
+									if (fnEditErrorHandler != null) {
 										fn.removeProcessingMsg(sSomeTablename);
 										fnEditErrorHandler({
 											"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 											"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
 											});
-										}
-									else
-										{
-										fn.message("Fout in tabel '"+sSomeTablename+"'", 
-												"Er is een fout opgetreden: "+textStatus+" "+errorThrown,
+									}
+									else {
+										fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
+												lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
 												function(){
 													gui.refreshTable(sSomeTablename);
-													}
-											);
-										}
-									
+												}
+										);
 									}
+									
+								}
 							 		
-								} );
-							}			
+							} );
+						}			
 						
 					},
 					// end of custom function
@@ -1085,7 +1073,7 @@ gui.makeTableEditable = function(sSomeTablename){
 							"height": "14px",
 					        "width": "100%",
 					        "tooltip": (sValidatorKey != null) ? 
-					        		"Druk op "+sValidatorKey+" en klik om te bewerken" : "Klik om te bewerken",
+					        		lang.press_on +" "+ sValidatorKey +" & " + lang.click_to_edit : lang.click_to_edit,
 					        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
 					}
 				); // end of jEditable for select boxes
@@ -1102,9 +1090,9 @@ gui.makeTableEditable = function(sSomeTablename){
 // closes Jeditable manually
 // see: http://stackoverflow.com/questions/4081040/jeditable-onblur-function
 gui._closeJEditable = function(editor, value){
-	
+
 	// in which table are we operating?
-	var sThisTable = $(editor).closest('table')[0].id;
+	var sThisTable = $(editor).closest('table')[0].id;	
 	
 	// close the editor
 	editor.reset(value);
