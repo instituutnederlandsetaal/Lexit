@@ -1585,9 +1585,9 @@ lang.setLanguage = function(sLanguageCode){
 		lang.opening_config_file_failed = "The config file doesn't exist or it may contain errors.";
 		lang.file_is_missing = "might not have any configuration file left on the server";
 		lang.missing_database_indexes = "No indexes available for the current sorting columns.<BR>" +
-						"The may cause database operations to be too slow.<BR><BR>" +
-						"Columns at sake:";
-		lang.inform_admin = "Please informeer the administrator.";
+						"This may cause database operations to be too slow.<BR><BR>" +
+						"Columns at stake:";
+		lang.inform_admin = "Please inform the administrator.";
 		lang.error_opening_hidden_table = "You're trying to open this table, " +
 				"but according to the configuration it should remain hidden. " +
 				"See oShowOnlyTables or oHiddenTablesList in file";
