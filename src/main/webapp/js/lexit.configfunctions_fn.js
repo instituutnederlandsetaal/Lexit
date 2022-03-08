@@ -221,8 +221,6 @@ var setSchemaTimeOut = null;
  */
 fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	
-	// force webservice to clean its counter cache etc
-	// update the database
 	var url = WEBSERV_URL+"/table/set_schema"; 
 	$.ajax( {
 		"type": "GET",
@@ -248,7 +246,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		// we must remove the TimeOut that was set to keep the previously set schema, 
 	 		// and set a new TimeOut as final step.
 	 		
-	 		if (setSchemaNameCache != sNewSchema && setSchemaTimeOut != null)
+	 		if (setSchemaTimeOut != null)
 	 			{
 	 			clearTimeout(setSchemaTimeOut);
 	 			}
@@ -261,7 +259,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 						// the developers most probably expect that a schema is set once and for all, 
 						// and do not know of the necessity to re-call the function regularly, as this is just
 						// a trick to deal with the short life of the ContextObject. As a consequence, the
-						// callback give as a parameter is called only at the first round, to meet this 
+						// callback given as a parameter is called only at the first round, to meet this 
 						// probable expectation (of developers) of the function behavior. 
 						fn.setSchema(sNewSchema, null, fnErrorHandler);						
 						}, 
@@ -2199,7 +2197,7 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 /**
  * Get the content of a whole column, given its name
  * 
- * @param {Node} sSomeTable - A table name or object
+ * @param {String} sSomeTable - A table name or object
  * @param {String} sColumnName - Name of a column 
  * @returns {String[]} Content of the cells of the column
  * 

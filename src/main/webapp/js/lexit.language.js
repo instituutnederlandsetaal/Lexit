@@ -1448,7 +1448,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.close = "Close";
 
 		// project
-		lang.welcome = "Welcome in Lex'it";
+		lang.welcome = "Welcome to Lex'it";
 		lang.choose_a_project = "Choose a project";
 		lang.production = "Production";
 		lang.goodies = "Goodies and tools";

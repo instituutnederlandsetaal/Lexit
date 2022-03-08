@@ -114,9 +114,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	$("#"+sSomeTableName+"_dynamic")
 		.resizable(); // a table container should be resizable
 	
-	
-	// recompute the size (% becomes px)
-	sTableWidth = $("#"+sSomeTableName+"_dynamic").css("width");
 			
 	
 	var table = $("<table></table>")
@@ -124,7 +121,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		.attr("cellspacing", "0")
 		.attr("border", "0")
 		.attr("class", "display")
-		.css("width", sTableWidth)
+		.css("width", "100%")
 		.attr("id", sSomeTableName);
 	
 	var thead_tag = $("<thead></thead>");
@@ -180,8 +177,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// i - Table information summary
 	// p - pagination control
 	// r - processing display element
-	var sTopPaneSettings = '<"top"iflp<"clear">>t<"'+sSomeTableName+'_bottom_pane"p>'+
-							'<"'+sSomeTableName+'_export_pane">';
+	var sTopPaneSettings = '<"top"iflp<"clear">>t<"bottom_pane"p>'+
+							'<"export_pane">';
 	
 	
 	// if some values where given as argument, build the appropriate sDom value
@@ -202,10 +199,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		// if pagination is required, we also need the bottom pagination pane
 		if (sPane.indexOf("p")>-1)
 			{
-			sTopPaneSettings += '<"'+sSomeTableName+'_bottom_pane"p>';
+			sTopPaneSettings += '<"bottom_pane"p>';
 			}			
 		
-		sSomeTableName += '<"'+sSomeTableName+'_export_pane">'; 
+		sSomeTableName += '<"export_pane">'; 
 		}
 	
 	
@@ -655,10 +652,12 @@ tb.addExportButtons = function(sSomeTableName){
 
 	// attach the buttons to the bottom pane
 	oTable.buttons().container()
-    .appendTo( $('div.'+sSomeTableName+'_export_pane', oTable.table().container() ) );
+	//.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane', oTable.table().container() ) );
+	.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
 	
 	// put buttons on the right side
-	$('div.'+sSomeTableName+'_export_pane div.dt-buttons').css("float", "right");
+	$('#'+sSomeTableName+'_wrapper div.export_pane').find('div.dt-buttons')
+		.css("float", "right");
 }
 
 // --------------------------------------------------------------------------

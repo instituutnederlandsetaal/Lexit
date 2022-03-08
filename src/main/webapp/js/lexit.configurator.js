@@ -1826,7 +1826,6 @@ conf.getTabSetting = function(aTableSettings){
 
 
 // retrieve size (or width) settings
-// default is 100%
 
 conf.getSize = function(aTableSettings){
 	
@@ -1839,7 +1838,7 @@ conf.getSize = function(aTableSettings){
 		return aTableSettings["width"];
 	
 	// none is set, so return default value
-	return "100%";
+	return "auto";
 	
 };
 

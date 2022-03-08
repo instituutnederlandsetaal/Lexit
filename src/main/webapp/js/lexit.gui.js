@@ -204,26 +204,18 @@ gui.putTooltipsOfColumnButtons = function(sSomeTablename){
 // with the position of the pagination pane at the top
 gui.setPositionOfPaginationPane = function(sSomeTableName){
 	
-	// if we don't paginate, leave straight away
-	if (!$("#"+sSomeTableName+"_paginate").elementExists())
-		return;
-	
-	var p = $("#"+sSomeTableName+"_paginate");
-	var iHorizontalPosition = p.offset().right;	
-	var iWidth = $("div.paging_full_numbers").css("width");	
-	var iTop = 0;
+	// if (!$("#"+sSomeTableName+"_wrapper div.top").elementExists())
+	// 	return;
 		
-	// If iHorizontalPosition == 0, it usually means we were not able to read p.offset().left
-	// because the paginate div wasn't visible. In that case we won't change the css, otherwise
-	// the bottom pagination pane will shift to the left, while we expect it to keep in place.
-	if (iHorizontalPosition>0)
-		{
-		$("div."+sSomeTableName+"_bottom_pane")
-		.css("position", "relative")
-		.css("width", iWidth)
-		.css("top", iTop)
-		.offset( {right: iHorizontalPosition} );		
-		}
+	// var iLeft = $("#"+sSomeTableName+"_wrapper div.top").css("left");
+	// var iPadding = $("#"+sSomeTableName+"_wrapper div.top").css("padding");
+	// var iTop = 0;
+	
+	// $("#"+sSomeTableName+"_wrapper div.bottom_pane")
+		
+	// 	.css("left", iLeft)
+		
+	// 	.css("top", 0);
 
 };
 
@@ -267,8 +259,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	if (mt.getViewType(sSomeTablename) == 'table')
 		{
 		// in table view mode, make sure the export buttons are visible
-		$("div."+sSomeTablename+"_export_pane").show();
-		
+		$("#"+sSomeTablename+"_wrapper div.export_pane").show();
+		$("#"+sSomeTablename+"_wrapper div.bottom_pane").show();
 		return;
 		}
 		
@@ -279,7 +271,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex);
 	
 	// in form view mode, hide the export buttons
-	$("div."+sSomeTablename+"_export_pane").hide();
+	$("#"+sSomeTablename+"_wrapper div.export_pane").hide();
+	$("#"+sSomeTablename+"_wrapper div.bottom_pane").hide();
 		
 	
 	// remove the built-in datatables row even/odd class names, to prevent row highlight
@@ -1349,9 +1342,10 @@ gui.setSearchboxesCss = function(sSomeTableName){
 	if ( !$("#"+sSomeTableName+"_searchboxes").elementExists())
 		return;
 	
-	// give searchboxes div little bigger width than the table (prevent line break)
-	$("#"+sSomeTableName+"_searchboxes").css("width", (parseInt($("#"+sSomeTableName).css("width"))+500)+"px");
 	$("#"+sSomeTableName+"_searchboxes").css("height", "25px");
+	// prevent line break
+	$("#"+sSomeTableName+"_searchboxes").css("vertical-align", "top");
+	$("#"+sSomeTableName+"_searchboxes").css("display", "inline-block");
 	
 	
 	// Compute the width and relative position of each search box.
@@ -1368,9 +1362,11 @@ gui.setSearchboxesCss = function(sSomeTableName){
 		// able to compute the right horizontal correction at each draw
 		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("position", "relative");
 		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("left", 0);
+		// prevent line break
+		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("display", "inline-block");
 
 		// get the width setting of the table 	
-		var iPixelCorrection = -4;
+		var iPixelCorrection = -6;
 		var iWidth = parseInt($(this).width()) + iPixelCorrection;
 		var iLeft = parseInt($(this).position().left);
 		var iLeftBox = parseInt($("#"+sSomeTableName+"_searchboxes div:eq("+i+")").position().left);

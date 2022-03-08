@@ -35,7 +35,7 @@ body {
 }
 
 .dataTables_length {
-	position:absolute; /* fixed position left under the table info */
+	position: absolute; /* fixed position left under the table info */
 	top: 55px;
 	left: 25px;
 	font-size: 90%;
@@ -43,10 +43,10 @@ body {
 }
 
 .dataTables_filter {
-	position:absolute;  /* fixed position in the top right corner */
-	width: 70%;
+	position: sticky;  /* fixed position in the top right corner */
+	width: 45vw;
 	top: 5px;
-	right: 5px;
+	left: 50vw;
 	text-align: right;
 }
 
@@ -57,14 +57,14 @@ body {
 }
 
 .dataTables_info {
-	position:absolute;  /* fixed position left under the table name */
+	position: absolute;  /* fixed position left under the table name */
 	top: 30px;
 	left: 25px;
 	font-size: 90%;
 }
 
 .dataTables_paginate {
-	position: absolute;  /* fixed position in the bottom right corner */
+	position: sticky;  /* fixed position in the bottom right corner */
 	bottom: 5px;
 	right: 5px;
 	text-align: right;
@@ -359,10 +359,32 @@ td.details {
 }
 
 .paging_full_numbers {
-	width: auto; 
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
 	height: 22px;
 	line-height: 22px;
-	/*font-size: 80%;*/
+	margin: 7px;
+}
+
+.bottom_pane {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	margin: 5px;
+	height: 30px;
+	padding-right: 15px;
+	top: 0px;
+}
+
+.export_pane {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	margin: 5px;
+	height: 30px;
+	padding-right: 15px;
+	top: 30px;
 }
 
 .paging_full_numbers a:active {

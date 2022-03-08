@@ -119,9 +119,7 @@ head.setHeaderHeight = function(sSomeTableName){
 		iNewHeight = 80;
 	}
 	
-	$("#"+sSomeTableName+"_wrapper").find("div.top").css("height", iNewHeight);	
-	$("#"+sSomeTableName+"_wrapper").find("div."+sSomeTableName+"_bottom_pane").css("height", "30px");
-	
+	$("#"+sSomeTableName+"_wrapper").find("div.top").css("min-height", iNewHeight);		
 };
 
 // keep standard main search input field, or remove it if required
