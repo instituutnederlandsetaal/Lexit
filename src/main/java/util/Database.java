@@ -3059,7 +3059,7 @@ public class Database {
 	
 	
 	/**
-	 * Determine which operator suits a string (whether it is a regex or not, etc)
+	 * Determine which operator suits a value, given its type
 	 * and return it.
 	 * @param value
 	 * @return an operator as a string
@@ -3074,7 +3074,7 @@ public class Database {
 					"text" : getTypeOfColumn(tableName, columnName));
 				
 		
-		// always check that one first (to prevent NullPointerException)
+		// always check null value first (to prevent NullPointerException)
 		if (columnValue == null || columnValue.toLowerCase().equals("null") )
 			return " IS " + arg;		
 		if (columnValue.toLowerCase().equals("!null"))
@@ -3092,6 +3092,10 @@ public class Database {
 		// tsvector
 		if (columnType.equals("tsvector"))
 			return "@@ " + (negation ? "!!":"") + arg + "::tsquery ";
+		
+		// date
+		if (columnType.equals("date") && !(columnValue.startsWith("<")||columnValue.startsWith(">")))
+			return " = " + arg;
 		
 		// inequality operators 
 		// (type check not necessary, since it works with both numeral and textual types)
