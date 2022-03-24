@@ -111,8 +111,12 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			.css("left", iCurrentLeft);
 		}
 	
-	$("#"+sSomeTableName+"_dynamic")
-		.resizable(); // a table container should be resizable
+	$("#"+sSomeTableName+"_dynamic")	// a table container should be resizable
+		.resizable({
+			"resize": function(event, ui){
+				gui.setSearchboxesCss(sSomeTableName); // make sure the search field resize too
+			}
+		}); 
 	
 	
 	// recompute the size (% becomes px)
@@ -292,6 +296,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			
 			// search boxes css
 			gui.setSearchboxesCss(sSomeTableName);
+			setTimeout(function(){
+				gui.setSearchboxesCss(sSomeTableName); // sometimes needed once again if function was first executed too soon!
+			}, 500);
 			
 		},
 		

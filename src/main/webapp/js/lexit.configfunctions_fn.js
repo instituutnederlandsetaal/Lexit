@@ -3825,20 +3825,35 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 fn._computeDialogPosition = function(){
 	
 	var sTable = kf.getActiveTable();
+
+	// No table open yet? Return empty settings, which will result in default window centering
 	if (sTable == null)	return {};
+
+
+	// if we do have a table open, try to find the active row
+
+	var nElementToPositionAgainst = $("#"+sTable+"_dynamic");
 	
 	var nRow = $("#"+sTable+"_wrapper table tbody tr:not('.group').selected:eq(0)");	
 	if ( nRow != null)
 		nRow = nRow.get(0); // get DOM element out of jquery object
 	else
 		nRow = fn.getFirstSelectedRowNodeFrom(sTable); // last rescue?
-	
+
+
 	// in some cases, the row is empty
-	if (nRow == null || nRow.length == 0)
-		{
+	if (nRow == null || nRow.length == 0){
 		// this will cause the dialog to be centered
-		return {}; 
-		}
+		return {
+			my: "center",
+			at: "center",
+			of: nElementToPositionAgainst,
+			using: function(oComputedPosition, oElementAndTarget){				
+				var nDialog = oElementAndTarget.element.element.get(0);
+				$(nDialog).css("left", $(window).width() / 2 - (oElementAndTarget.element.width / 2)).css("top", oComputedPosition.top);
+			}
+		}; 
+	}
 	
 	// but if we have a non-empty row, position the dialog relative to that row
 	var oOffset = $(nRow).offset();
@@ -3848,7 +3863,13 @@ fn._computeDialogPosition = function(){
 	return {
 		my: iRowPosition < iMiddleOfScreen ? 'center top' : 'center bottom',
     	at: iRowPosition < iMiddleOfScreen ? 'center bottom' : 'center top',
-    	of: nRow
+		of: nRow,
+		within: nElementToPositionAgainst,
+		using: function(oComputedPosition, oElementAndTarget){			
+			var nDialog = oElementAndTarget.element.element.get(0);
+			$(nDialog).css("left", $(window).width() / 2 - (oElementAndTarget.element.width / 2)).css("top", oComputedPosition.top);
+			
+		}
     }
 };
 
