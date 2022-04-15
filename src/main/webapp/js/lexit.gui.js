@@ -79,10 +79,16 @@ gui.activateEllipsis = function(sSomeTableName){
 				.css("max-width", columnEllipsisWidth);
 
 				// if some (max) height was set, apply that
-				if (columnEllipsisHeight != null)
+				if (columnEllipsisHeight != null){
 					$("div."+divClassName)
-					.css("max-height", columnEllipsisHeight)
-					.css("overflow-y", "auto");
+						.css("max-height", columnEllipsisHeight)
+						.css("overflow-y", "auto");
+				}
+					
+				setTimeout(function(){
+					gui.setSearchboxesCss(sSomeTableName);
+					$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+				}, 300);
 
 
 				// if content must be unwrapped at mouseover, assign that to mouseevent
@@ -105,7 +111,11 @@ gui.activateEllipsis = function(sSomeTableName){
 						setTimeout(function(){
 							var bStillHover = thisDiv.matches(":hover");
 							if (bStillHover){
-								$(thisDiv).css("white-space", "normal");								
+								$(thisDiv).css("white-space", "normal");
+								setTimeout(function(){
+									gui.setSearchboxesCss(sSomeTableName);
+									$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+								}, 300);
 							}
 						}, columnEllipsisDelay);
 					});
@@ -118,6 +128,10 @@ gui.activateEllipsis = function(sSomeTableName){
 							// special case: close this ellipsis cell at mouseout, except when config says selected rows must keep unwrapped
 							if ( !$(thisDiv).closest("tr").hasClass("selected")){
 								$(thisDiv).css("white-space", "nowrap");
+								setTimeout(function(){
+									gui.setSearchboxesCss(sSomeTableName);
+									$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+								}, 300);
 							}
 						});
 					}
@@ -127,6 +141,10 @@ gui.activateEllipsis = function(sSomeTableName){
 
 							// close this ellipsis cell at mouseout							
 							$(thisDiv).css("white-space", "nowrap");
+							setTimeout(function(){
+								gui.setSearchboxesCss(sSomeTableName);
+								$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+							}, 300);
 						});
 					}
 					
@@ -200,24 +218,7 @@ gui.putTooltipsOfColumnButtons = function(sSomeTablename){
 };
 
 
-// align the position of the pagination pane at the bottom of the table
-// with the position of the pagination pane at the top
-gui.setPositionOfPaginationPane = function(sSomeTableName){
-	
-	// if (!$("#"+sSomeTableName+"_wrapper div.top").elementExists())
-	// 	return;
-		
-	// var iLeft = $("#"+sSomeTableName+"_wrapper div.top").css("left");
-	// var iPadding = $("#"+sSomeTableName+"_wrapper div.top").css("padding");
-	// var iTop = 0;
-	
-	// $("#"+sSomeTableName+"_wrapper div.bottom_pane")
-		
-	// 	.css("left", iLeft)
-		
-	// 	.css("top", 0);
 
-};
 
 
 // apply row grouping, if configuration requires that
@@ -230,8 +231,7 @@ gui.applyRowGrouping = function(sSomeTableName){
 	// row grouping
 	// https://datatables.net/examples/advanced_init/row_grouping.html
 	
-	if (iGroupingColumn>=0)
-		{
+	if (iGroupingColumn>=0) {
 		// Order by the grouping
 	    $('#'+sSomeTableName+' tbody').on( 'click', 'tr.group', function () {
 	    	
@@ -246,8 +246,8 @@ gui.applyRowGrouping = function(sSomeTableName){
 	        	oTable.order( [ iGroupingColumn, 'asc' ] ).draw();
 	        }
 	    });
-		}
-}
+	}
+};
 
 
 
@@ -256,15 +256,24 @@ gui.applyRowGrouping = function(sSomeTableName){
 gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	// we do this only in the 'form' view type of course!
-	if (mt.getViewType(sSomeTablename) == 'table')
-		{
+	if (mt.getViewType(sSomeTablename) == 'table') {
+
+		// remove any left label of previous round
+		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove(); 
+		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
+
 		// in table view mode, make sure the export buttons are visible
 		$("#"+sSomeTablename+"_wrapper div.export_pane").show();
 		$("#"+sSomeTablename+"_wrapper div.bottom_pane").show();
+
+		$("#"+sSomeTablename+"_searchboxes").show();
+		$("#"+sSomeTablename+"_wrapper table thead").show();
+
+		gui.setSearchboxesCss(sSomeTablename);
+
 		return;
-		}
+	}
 		
-	
 	// make sure only one row at the time will be shown
 	var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename);
 	mt.getDataTableObjectOf(sSomeTablename).page.len(1);
@@ -273,23 +282,25 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	// in form view mode, hide the export buttons
 	$("#"+sSomeTablename+"_wrapper div.export_pane").hide();
 	$("#"+sSomeTablename+"_wrapper div.bottom_pane").hide();
+	// and hide the search boxes
+	$("#"+sSomeTablename+"_searchboxes").hide();
+	$("#"+sSomeTablename+"_wrapper table thead").hide();
 		
 	
 	// remove the built-in datatables row even/odd class names, to prevent row highlight
 	// (as a form represents only one row, row highlight is of no use)
-	$("#"+sSomeTablename+"_wrapper tr:not('.group')").removeClass("odd");
-	$("#"+sSomeTablename+"_wrapper tr:not('.group')").removeClass("even");
+	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tr:not('.group')").removeClass("odd");
+	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tr:not('.group')").removeClass("even");
 	
 	// room to keep between top of form and bottom of header
-	var iRoomAboveAll = 30;
+	var iRoomAboveAll = parseInt( $("#"+sSomeTablename+"_wrapper").find("div.top").height()) + 35;
 	
 	// compute the cell referential positions etc
 	// so as to be able to put the cells at new screen positions
 	
-	var nReference = $( "#"+sSomeTablename+"_wrapper table");
-	var nReferentialTd = $("#"+sSomeTablename+"_wrapper").find("td").eq(0);
-	var nReferentialTr = $("#"+sSomeTablename+"_wrapper").find("tr:not('.group')").eq(0);
-	var iBaseLeft = parseInt(nReference.position().left);
+	var nReference = $( "#"+sSomeTablename+"_wrapper div.dataTables_scrollBody table");
+	var nReferentialTr = $("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tbody").find("tr:not('.group')").eq(0);
+	var iBaseLeft = parseInt(nReference.position().left) + 10;
 	var iBaseTop = parseInt(nReference.position().top);
 	
 	var iBaseHeight = 25 + // fixed to 25, instead of 'parseInt(nReferentialTr.css("height"))',
@@ -302,7 +313,8 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	// put the cells at new positions (as a form instead of as a table)
 	// and add labels 
-	$("#"+sSomeTablename+"_wrapper div#"+sSomeTablename+"_cell_label").remove();
+	$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove(); // remove any left label of previous round
+	$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
 	
 	var iMaxColumnTitleWidth = gui.getMaxColumnTitleWidth(sSomeTablename);
 	
@@ -313,8 +325,13 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	var iNumberOfFormRows     = aFormDimensions[1]; // y	
 	
 	
-	$("#"+sSomeTablename+"_wrapper").find("td").each(function(i){
+	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tbody").find("td").each(function(i){
 		
+		var thisCell = this;
+
+		// hide the normal table cells (we'll render the content otherwise...)
+		$(thisCell).hide();
+
 		var y = i%iNumberOfFormRows ;
 		var x = Math.floor(i/iNumberOfFormRows);
 		
@@ -322,38 +339,54 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 		var nReferentialColumn = $("#"+sSomeTablename+"_wrapper thead").find("th").eq(i);
 		var sColumnTitle = nReferentialColumn.text();
 		var eCellLabel = $("<div></div>")			
-			.attr("id", sSomeTablename+"_cell_label")
+			.addClass(sSomeTablename+"_cell_label")
 			.css("width", iMaxColumnTitleWidth)
 			.css("background-color", "#E2E4FF")
 			.append($("<span></span>").text(sColumnTitle));	
 		
 		var iNewTop  = iBaseTop + y*iBaseHeight;
-		var iNewLeft = iBaseLeft + x*(2*iMaxColumnTitleWidth);
+		var iNewLeft = iBaseLeft + x*(2*iMaxColumnTitleWidth) + x*10;
 		
-		eCellLabel.css("position", "absolute")
+		eCellLabel
+			.css("position", "absolute")
 			.css("left", iNewLeft)
-			.css("top", iNewTop + iRoomAboveAll );
+			.css("top", iNewTop + iRoomAboveAll )
+			.css("padding-left", "3px");
 		// tooltip for content, since long text can't be fully read in form view type
-		eCellLabel.addClass("tooltip")
+		eCellLabel
+			.addClass("tooltip")
 			.attr("title", $(this).text());
 		$("#"+sSomeTablename+"_wrapper").append(eCellLabel);
 		
 		// cells 
-		// the cells need to be lifted up a bit since they don't have the same height as the titles 
-		var iYcorrection = -3; // default padding value is 3 
-		$(this).css("position", "absolute")
+		
+		var nCellContent = $(thisCell).html();
+
+		var eCellValue = $("<div></div>")			
+			.addClass(sSomeTablename+"_cell_value")
+			.css("width", iMaxColumnTitleWidth)
+			.css("background-color", "#FFFFFF")
+			.css("border", "1px dotted black")
+			.append(nCellContent);
+		 
+		$(eCellValue)
+			.css("position", "absolute")
 			.css("left", iNewLeft + iMaxColumnTitleWidth)
-			.css("top", iNewTop + iRoomAboveAll + iYcorrection );
-		$(this).css("width", iMaxColumnTitleWidth+"px")
-			.css("height", iBaseHeight+"px")		
+			.css("top", iNewTop + iRoomAboveAll );
+		$(eCellValue)
+			.css("width", iMaxColumnTitleWidth+"px")
+			.css("height", iBaseHeight+"px")
+			.css("padding-left", "3px")	
 			.css("empty-cells", "show")
 			.css("overflow", "hidden")
 			.css("display", "inline-block")
-			.css("white-space", "nowrap");			
-		// tooltip for content, since long text can't be fully read in form view type
-		$(this).addClass("tooltip")
-			.attr("title", $(this).text());
-		
+			.css("white-space", "nowrap")
+			.addClass("tooltip")
+			.attr("title", $(thisCell).text());
+			
+		$("#"+sSomeTablename+"_wrapper").append(eCellValue);		
+	
+		$(eCellValue).find("input").css("pointer-events", "none");	// enough to disable anything inside!
 		
 	});
 	
@@ -361,19 +394,19 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	// give the tbody a height to force the bottom pagination pane to shift to the bottom
 	
 	// compute the needed height
-	var iLowestYpos = 9999;
-	var iHighestYpos = 0;
-	$("#"+sSomeTablename+"_wrapper").find("td").each(function(){
+	// var iLowestYpos = 9999;
+	// var iHighestYpos = 0;
+	// $("#"+sSomeTablename+"_wrapper").find("td").each(function(){
 		
-		var iYpos = $(this).position().top;
-		if (iYpos<iLowestYpos) iLowestYpos = iYpos;
-		if (iYpos>iHighestYpos) iHighestYpos = iYpos;
-	});		
-	// Set the needed height
-	$("#"+sSomeTablename+"_wrapper").css("height", "auto");
-	var iOriginalTableWrapperHeight = parseInt($("#"+sSomeTablename+"_wrapper").css("height"));
-	var iNewHeight = iOriginalTableWrapperHeight+(iHighestYpos-iLowestYpos+iBaseHeight + iRoomAboveAll);
-	$("#"+sSomeTablename+"_wrapper").css("height", iNewHeight+"px");
+	// 	var iYpos = $(this).position().top;
+	// 	if (iYpos<iLowestYpos) iLowestYpos = iYpos;
+	// 	if (iYpos>iHighestYpos) iHighestYpos = iYpos;
+	// });		
+	// // Set the needed height
+	// $("#"+sSomeTablename+"_wrapper").css("height", "auto");
+	// var iOriginalTableWrapperHeight = parseInt($("#"+sSomeTablename+"_wrapper").css("height"));
+	// var iNewHeight = iOriginalTableWrapperHeight+(iHighestYpos-iLowestYpos+iBaseHeight + iRoomAboveAll);
+	// $("#"+sSomeTablename+"_wrapper").css("height", iNewHeight+"px");
 	
 	
 	// activate tipTip jquery plugin for nice cross-browser tooltips
@@ -693,6 +726,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				mt.getDataTableObjectOf(sSomeTablename).cell(this).data(value);				
 			},
 			"tooltip": lang.click_to_edit,
+			"width": "100%",
 			"type": "textarea", // this gives more room than the default 'input' field of jEditable
 			"placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
 		}
@@ -707,6 +741,9 @@ gui.makeTableEditable = function(sSomeTablename){
 		
 		// keep alignment of columns and searchboxes		
 		gui.setSearchboxesCss(sThisTable);
+		setTimeout(function(){
+			gui.setSearchboxesCss(sThisTable);
+		}, 500);
 		
 		// if rows are being selected, we don't want to edit rows!
 		if (mt.rowSelectionIsAllowed(sThisTable))
@@ -1225,7 +1262,7 @@ gui.setColumnHighlight = function(sSomeTableName){
 	if ($("#"+sSomeTableName+" tbody tr:not('.group')").length <= iRowThreshold)
 		{
 		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseenter.columnHighlight", "td", 
-				function() {				
+			function() {				
 				// highlight columns
 				var iNodeNr = $("#"+sSomeTableName+" tbody td").index(this);
 				var iCol = iNodeNr % iNumberOfVisibleColumns;
@@ -1237,6 +1274,9 @@ gui.setColumnHighlight = function(sSomeTableName){
 					$(this).find("td:eq("+iCol+")")
 					.css("background-color", mt.columnsHighlight_getNodeHighlightColors(sSomeTableName)[iIndexOfTdInMap]);
 				});
+			
+				// keep column header adjustment
+				gui.setSearchboxesCss(sSomeTableName);
 			});
 		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseleave.columnHighlight", "td", 
 				   function() {					
@@ -1252,7 +1292,14 @@ gui.setColumnHighlight = function(sSomeTableName){
 						.css("background-color", mt.columnsHighlight_getNodeColors(sSomeTableName)[iIndexOfTdInMap]);
 					});
 				} );
-		}
+		};
+
+		$("#"+sSomeTableName+" tbody tr:not('.group')").on("click.columnHighlight", "td", function(){
+			setTimeout(function(){
+				// keep column header adjustment
+				gui.setSearchboxesCss(sSomeTableName);
+			}, 500);
+		});
 		
 };
 
@@ -1341,76 +1388,67 @@ gui.setSearchboxesCss = function(sSomeTableName){
 	// safe: if the search boxes are not set, leave right away
 	if ( !$("#"+sSomeTableName+"_searchboxes").elementExists())
 		return;
+
+	// reapply font size
+	$("td").css("font-size", iFontSize);
 	
 	$("#"+sSomeTableName+"_searchboxes").css("height", "25px");
-	// prevent line break
-	$("#"+sSomeTableName+"_searchboxes").css("vertical-align", "top");
-	$("#"+sSomeTableName+"_searchboxes").css("display", "inline-block");
-	
+	$("#"+sSomeTableName+"_searchboxes").css("width", $("#"+sSomeTableName).width());
+	$("#"+sSomeTableName+"_searchboxes").css("padding", 0);
+	$("#"+sSomeTableName+"_searchboxes").css("margin", 0);
 	
 	// Compute the width and relative position of each search box.
 	// We will use the column names in THEAD as a reference for width, because
 	// the THEAD element is always there, even when the table is empty
 	// (on the contrary, the TBODY isn't always there)
 	
-	$("#"+sSomeTableName+" thead tr:eq(0)").find("th").each(function(i){
+	$("#"+sSomeTableName+"  thead tr:eq(0)").find("th").each(function(i){	
 		
-		var oTableConfig = conf.getTableConfig(sSomeTableName);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(sSomeTableName)[i]);
-		
-		// set the relative horizontal position to zero, so as to be
-		// able to compute the right horizontal correction at each draw
-		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("position", "relative");
-		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("left", 0);
-		// prevent line break
-		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")").css("display", "inline-block");
-
 		// get the width setting of the table 	
-		var iPixelCorrection = -6;
-		var iWidth = parseInt($(this).width()) + iPixelCorrection;
-		var iLeft = parseInt($(this).position().left);
-		var iLeftBox = parseInt($("#"+sSomeTableName+"_searchboxes div:eq("+i+")").position().left);
-		var iPaddingLeft = parseInt($(this).css("padding-left"));
-		var iPaddingRight = parseInt($(this).css("padding-right"));
+		var iWidth = parseInt($(this).outerWidth());
+
+		// now set the width of the searchboxes according to the table columns
+
+		$("#"+sSomeTableName+"_searchboxes td:eq("+i+")")
+			.css("width", iWidth)
+			.css("margin", 0)
+			.css("padding", 0)
+			.css("border", "0px");
 		
-		
-		// now set the padding and width of the searchboxes according to the table columns
-		
-		$("#"+sSomeTableName+"_searchboxes div:eq("+i+")")
-			.css("width", iWidth )
-			.css("position", "relative")
-			.css("left", (iLeft-iLeftBox) );			
-		
+
+		// small tune up for particular types of search boxes 
+
 		// filter box type?
 		var sCurrentColumnName =	mt.getListOfVisibleColumnsOf(sSomeTableName)[i];
 		var sFilterBoxType =		fn.getTypeOfFilterBox(sSomeTableName, sCurrentColumnName);
 		
 		// checkboxes need to be centered
-		if (sFilterBoxType == 'checkbox')
-			{
-			$("#"+sSomeTableName+"_searchboxes div:eq("+i+")")
-				.css("text-align", "center")
-				.css("padding-left", iPaddingLeft)
-				.css("padding-right", iPaddingRight);
-			}
+		if (sFilterBoxType == 'checkbox'){
+			$("#"+sSomeTableName+"_searchboxes td:eq("+i+")")
+				.css("text-align", "center");
+		}
 		// text and select boxes need to have full width
-		if (sFilterBoxType == 'text' || sFilterBoxType == 'select')
-			{
-			iWidth += iPaddingLeft + iPaddingRight - 2;
-			}
+		if (sFilterBoxType == 'text' || sFilterBoxType == 'select'){
 		
-		// determine the right selector for searchbox (input or select type)
-		// and set its width too
-		var searchBoxSelector = (sFilterBoxType == 'select') ? 
-				$("#"+sSomeTableName+"_searchboxes div:eq("+i+") select") :
-					$("#"+sSomeTableName+"_searchboxes div:eq("+i+") input");
-		searchBoxSelector.css("width", iWidth);			
-
+			// determine the right selector for searchbox (input or select type)
+			// and set its width too
+			var searchBoxSelector = (sFilterBoxType == 'select') ? 
+					$("#"+sSomeTableName+"_searchboxes td:eq("+i+") select") :
+					$("#"+sSomeTableName+"_searchboxes td:eq("+i+") input");
+			searchBoxSelector.css("width", "97%");
+		}
+		
 	});	
 	
 	
 	// make searchboxes visible, as they are set now
 	$("#"+sSomeTableName+"_searchboxes").css("visibility", "visible");
+
+	// make sure header with is set properly too
+	// https://datatables.net/forums/discussion/42938/header-width
+	setTimeout(function(){
+		$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+	}, 500);
 };
 
 

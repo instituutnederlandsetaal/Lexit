@@ -488,8 +488,7 @@ kf.addKeyFunctions = function(){
     	
     	
 		// arrow keys
-		if (kf.isPressed("uparrow") || kf.isPressed("downarrow"))
-			{			
+		if (kf.isPressed("uparrow") || kf.isPressed("downarrow")){	
 			var sActiveTable = kf.getActiveTable();	
 			var iNumberOfRows = fn.getNumberOfVisibleRows(sActiveTable);
 			
@@ -587,7 +586,7 @@ kf.addKeyFunctions = function(){
 					$('html, body').animate({scrollTop: mt.getDataTableObjectOf(sActiveTable).$("tr").first().position().top}, 800);
 					mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
 					}
-				}
+			}
 			
 			
 			// prevent scrolling of screen when pressing the up/down arrows
@@ -596,23 +595,60 @@ kf.addKeyFunctions = function(){
 			//            arrow keys is needed for navigation in the textarea 
 			if (!$("td form textarea").elementExists())
 				return false;
-			}
+		}
+
+		// font size 
+		if (kf.isPressed("+") && e.shiftKey){
+			var iSize = parseInt($("td").css("font-size"));
+			iFontSize = iSize*1.1;
+			$("td").css("font-size", iFontSize);
+			return false;
+		}
+		if (kf.isPressed("-") && e.shiftKey){
+			var iSize = parseInt($("td").css("font-size"));
+			iFontSize = iSize*0.9;
+			$("td").css("font-size", iFontSize);
+			return false;
+		}
+		if (kf.isPressed("/") && e.shiftKey){
+			iFontSize = "100%";
+			$("td").css("font-size", iFontSize);
+			return false;
+		}
 		
-		if (kf.isPressed("leftarrow") && e.ctrlKey)
-			{
-			var iXposition = $('html, body').scrollLeft();
-			var iStep = $('html').width()/2;
-			$('html, body').animate({scrollLeft: iXposition-iStep}, 250);
-			e.preventDefault();
-			}
+		// if (kf.isPressed("leftarrow") && e.ctrlKey)
+		// 	{
+		// 	var iXposition = $('html, body').scrollLeft();
+		// 	var iStep = $('html').width()/2;
+		// 	$('html, body').animate({scrollLeft: iXposition-iStep}, 250);
+		// 	e.preventDefault();
+		// 	}
 		
-		if (kf.isPressed("rightarrow") && e.ctrlKey)
-			{
-			var iXposition = $('html, body').scrollLeft();
+		// if (kf.isPressed("rightarrow") && e.ctrlKey)
+		// 	{
+		// 	var iXposition = $('html, body').scrollLeft();
+		// 	var iStep = $('html').width()/2;
+		// 	$('html, body').animate({scrollLeft: iXposition+iStep}, 250);
+		// 	e.preventDefault();
+		// 	}
+
+		if (kf.isPressed("leftarrow") && e.ctrlKey){
+			var sActiveTable = kf.getActiveTable();
+			var nSelector = "#"+sActiveTable+"_wrapper div.dataTables_scrollBody";
+			var iXposition = $(nSelector).scrollLeft();
 			var iStep = $('html').width()/2;
-			$('html, body').animate({scrollLeft: iXposition+iStep}, 250);
+			$(nSelector).animate({scrollLeft: iXposition-iStep}, 250);
 			e.preventDefault();
-			}
+		}
+		
+		if (kf.isPressed("rightarrow") && e.ctrlKey){
+			var sActiveTable = kf.getActiveTable();
+			var nSelector = "#"+sActiveTable+"_wrapper div.dataTables_scrollBody";
+			var iXposition = $(nSelector).scrollLeft();
+			var iStep = $('html').width()/2;
+			$(nSelector).animate({scrollLeft: iXposition+iStep}, 250);
+			e.preventDefault();
+		}
 		
 		// call context menu
 		// and don't interfere with inline edit (jeditable)

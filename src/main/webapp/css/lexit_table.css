@@ -12,7 +12,7 @@ body {
 .dataTables_wrapper {
 	position: relative;
 	clear: both;
-	zoom: 1; /* Feeling sorry for IE */	
+	zoom: 1; /* Feeling sorry for IE */
 }
 
 .dataTables_processing {

@@ -465,7 +465,7 @@ td.selectColumns = function(sSomeTablename){
 	                     		// into the rebuilt table
 	                     		var aListOfFilterNames = new Array();
 	                     		var aListOfFilterValues = new Array();
-	                     		$('#'+sSomeTablename+'_searchboxes div').each( function(i){
+	                     		$('#'+sSomeTablename+'_searchboxes td').each( function(i){
 	                     			var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sSomeTablename)[i];
 	                     			aListOfFilterNames.push( sCurrentColumnName );
 	                     			aListOfFilterValues.push( fn.getValueOfFilterBox(sSomeTablename, sCurrentColumnName) );        			

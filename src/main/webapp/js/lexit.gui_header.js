@@ -296,6 +296,9 @@ head.putExactCountEvent = function(sSomeTableName){
 		// but for now, do a refresh with an exact count
 		fn.refreshTable(sSomeTableName);
 	});
+
+	// put table in front
+	$("#"+sSomeTableName+"_info").putInFront();
 }
 
 
@@ -556,7 +559,8 @@ head.putViewTypeButton = function(sSomeTablename){
 				// reset position or pagination pane
 				$("#"+sSomeTablename+"_wrapper").css("height", "auto");
 				// remove cell labels of form view
-				$("#"+sSomeTablename+"_wrapper div#"+sSomeTablename+"_cell_label").remove();
+				$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove();
+				$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
 				
 				// get the current display start: we will show the corresponding page 
 				// once we get into the table view mode

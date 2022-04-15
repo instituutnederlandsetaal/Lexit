@@ -135,7 +135,7 @@ refr.updateLayout = function(bRefreshTable){
 						
 			// adapt search boxes if available
 			if ( $("#"+sTableName+"_searchboxes").elementExists())
-				setTimeout("gui.setSearchboxesCss('"+sTableName+"')", 100);
+				setTimeout(function(){gui.setSearchboxesCss(sTableName);}, 100);
 
 			
 			// refresh table content if required
@@ -144,7 +144,6 @@ refr.updateLayout = function(bRefreshTable){
 				fn.refreshTable(sTableName);				
 			}
 			
-			gui.setPositionOfPaginationPane(sTableName);
 		}
 	}
 	

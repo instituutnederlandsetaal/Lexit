@@ -143,7 +143,13 @@ var oTableSettingsList_example = {
 		 * @description callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)
 		 */
 		"close_callback": function(){ doSomething(); },
-		
+
+
+		/** 
+		 * @type {boolean} 
+		 * @description bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)
+		 * */
+		"exact_count": true,
 		
 		/** 
 		 * @type {boolean} 
@@ -487,6 +493,13 @@ var oTableConfigurationList_example = {
 		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
 		 */
 		"searchform": function(){},
+
+		/**
+		 * @type {function}
+		 * @description Pas de tekst van een cell aan voordat die op het scherm wordt getoond. Dit is zuiver bedoeld voor rendering.
+		 * Dit heeft dus géén invloed op de onderliggende data. Zoekopdrachten worden door deze functie dus niet beïnvloed.
+		 */
+		"render": function(text){},
 		
 		/**
 		 * @description Kleur die de tekst moet hebben in een gegeven kolom.
@@ -930,7 +943,6 @@ conf.getEllipsisDelay = function(aColumnConfig){
 };
 
 
-
 // retrieve ellipsis (max) height
 // default is null
 conf.getEllipsisHeight = function(aColumnConfig){
@@ -948,7 +960,6 @@ conf.getEllipsisUnwrap = function(aColumnConfig){
 		return true;		
 	return aColumnConfig["ellipsis_unwrap"];
 };
-
 
 // retrieve ellipsis behavior: should a selected row remain unwrapped or not?
 // default: false
@@ -1004,6 +1015,17 @@ conf.getWidthSetting = function(aColumnConfig){
 		return null;
 	return aColumnConfig["width"];
 };
+
+
+// retrieve text rendering setting of column
+// default is null (default rendering)
+conf.getTextRendering = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["render"] == 'undefined')
+		return null;
+	return aColumnConfig["render"];
+};
+
 
 
 
@@ -1652,7 +1674,7 @@ conf.getTableGroup = function(aTableSettings){
 };
 
 
-
+// get the grouping column setting, if available
 conf.getGroupingColumn = function(aTableSettings){
 	
 	if (typeof aTableSettings["grouping_column"] == 'undefined')
@@ -1660,6 +1682,16 @@ conf.getGroupingColumn = function(aTableSettings){
 	return aTableSettings["grouping_column"];
 	
 };
+
+
+// get the exact count setting, if available
+// default is false
+conf.getExactCount = function(aTableSettings){
+	if (typeof aTableSettings["exact_count"] == 'undefined')
+		return false;
+	return aTableSettings["exact_count"];
+};
+
 
 
 // retrieve the background color
@@ -1829,7 +1861,7 @@ conf.getTabSetting = function(aTableSettings){
 
 conf.getSize = function(aTableSettings){
 	
-	// try 'size'
+	// try 'size' (backwards compatibility)
 	if (typeof aTableSettings["size"] != 'undefined')
 		return aTableSettings["size"];
 	
@@ -1837,8 +1869,9 @@ conf.getSize = function(aTableSettings){
 	if (typeof aTableSettings["width"] != 'undefined')
 		return aTableSettings["width"];
 	
-	// none is set, so return default value
-	return "auto";
+	// none is set, so return the viewport width
+	// (which is the best to prevent table width from changing when css is updated or so)
+	return Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 	
 };
 

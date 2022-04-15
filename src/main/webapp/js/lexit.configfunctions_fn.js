@@ -1596,6 +1596,18 @@ fn.getSelectedRowNodesFrom = function(someTable){
 
 
 /**
+ * Get the first row node of a table
+ * 
+ * @param {(String|API-object-instance)} someTable - Table name or object
+ * @returns {Node} A row node
+ */
+fn.getFirstRowNodeFrom = function(someTable){
+
+	return fx.getFirstRowFrom(someTable).node();
+}
+
+
+/**
  * Get the first selected row node from a user rows selection
  * 
  * @param {(String|API-object-instance)} someTable - Table name or object
@@ -4892,27 +4904,33 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	var iColNr = fn.getVisibleColumnNumberOf(sSomeTable, sCellName);
 	
 	// carry on only if the search box exists (is visible column) 
-	if (iColNr>-1)
-		{
-		var oTableConfig = conf.getTableConfig(sSomeTableName);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
-		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+	if (iColNr>-1) {
 		
 		// determine right selector for searchbox (input or select type)
 		
 		var searchBoxSelector = $("#"+sSomeTableName+"_searchbox_"+sCellName);		
 			
-		if (searchBoxSelector.attr("disabled") != "disabled")
-			{			
+		if (searchBoxSelector.attr("disabled") != "disabled") {		
+
 			// put value
 			searchBoxSelector.val( sSomeData );
 
-			// special case: if we have a checkbox, we also need to (un)check it			
-			if (searchBoxSelector.attr("type")=="checkbox" && sf.isCheckboxTrueValue(sSomeData))
+			// special cases:
+
+			// if we have a checkbox, we also need to (un)check it			
+			if (searchBoxSelector.attr("type")=="checkbox" && sf.isCheckboxTrueValue(sSomeData)) {
 				searchBoxSelector.prop("checked", "checked");
-			
+			}
+
+			// if we have a select box, we also need to set the right value
+			if (searchBoxSelector.find("option").length > 0) {
+				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
+				searchBoxSelector.find("option").filter(function(i, e) {
+					return e.text == sSomeData
+				}).attr("selected", "selected");
 			}
 		}
+	}
 };
 
 
@@ -4932,19 +4950,15 @@ fn.getValueOfFilterBox = function(sSomeTable, sCellName){
 	var iColNr = fn.getVisibleColumnNumberOf(sSomeTable, sCellName);
 	
 	// carry on only if the search box exists (is visible column)
-	if (iColNr>-1)
-		{
-		var oTableConfig = conf.getTableConfig(sSomeTableName);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
-		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+	if (iColNr>-1) {
 		
 		// determine right selector for searchbox (input or select type)
-		var searchDivSelector = $("#"+sSomeTableName+"_searchboxes div:eq("+iColNr+")");
-		var searchBoxSelector = (oColumnSelectionBox!=null) ? 
-				searchDivSelector.find("select").eq(0).find(":selected") : searchDivSelector.find("input").eq(0);
-		
+		var searchDivSelector = $("#"+sSomeTableName+"_searchboxes td:eq("+iColNr+")");
+		var searchBoxSelector = (searchDivSelector.find("option").length > 0) ? 
+				searchDivSelector.find("select").find(":selected") : searchDivSelector.find("input").eq(0);
+
 		return $.trim(searchBoxSelector.val());
-		}	
+	}	
 	return "";
 };
 

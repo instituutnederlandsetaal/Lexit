@@ -415,7 +415,8 @@ public class TableResources {
 			  @QueryParam("db_name") String dbName, 
 			  @QueryParam("table_name") String tableName, 
 			  @QueryParam("column_name") String columnName,
-			  @QueryParam("column_value_filter") String columnValueFilter, 
+			  @QueryParam("column_value_filter") String columnValueFilter,	// regex filter box value in the Query Builder
+			  @QueryParam("other_columns_filters_and_values") String otherFiltersAndValues, // existing search box filters from table, which we expect to operate
 			  @QueryParam("limit") String limit,
 			  @DefaultValue("false") @QueryParam("sort_by_freq") String sortByFrequency,
 			  @Context ServletContext context,
@@ -432,7 +433,7 @@ public class TableResources {
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
-	    return getDatabaseObject(co).getUniqueValuesWithFreqs(tableName, columnName, columnValueFilter, limit, sortByFrequency.toLowerCase().equals("true"));
+	    return getDatabaseObject(co).getUniqueValuesWithFreqs(tableName, columnName, columnValueFilter, otherFiltersAndValues, limit, sortByFrequency.toLowerCase().equals("true"));
 	  }
 	
 	

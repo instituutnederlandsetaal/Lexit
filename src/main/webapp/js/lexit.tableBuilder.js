@@ -111,8 +111,20 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			.css("left", iCurrentLeft);
 		}
 	
-	$("#"+sSomeTableName+"_dynamic")
-		.resizable(); // a table container should be resizable
+		
+
+	$("#"+sSomeTableName+"_dynamic") // a table container should be resizable
+		.resizable({
+			"resize": function(event, ui){
+
+				// resize is only for width
+				// https://stackoverflow.com/questions/3628194/how-to-resize-only-horizontally-or-vertically-with-jquery-ui-resizable
+				ui.size.height = ui.originalSize.height;
+
+				// make sure the search field resize too
+				gui.setSearchboxesCss(sSomeTableName); 
+			}
+		}); 
 	
 			
 	
@@ -209,7 +221,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	// datatables object building
 	
-	var oTable = $('#'+sSomeTableName).DataTable( {			
+	var oTable = $('#'+sSomeTableName).DataTable( {	
+		"scrollX": true,		
 		"searchCols":	aoSearchColsArray,
 		"autoWidth": 	false,  
 		"destroy": 		true, // remove previously build datatable with same table name
@@ -246,12 +259,17 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			"type": "POST",
 			"data": function ( d ) {
 
+				// needed for GoTo function (see comment in java code Database.getRowNumberOfRecord)
 				var sGoToRowIds = ( aGoToRowIds[sSomeTableName] == null ) ? "" : aGoToRowIds[sSomeTableName];
+
+				// count settings
+				var oTableSettings = conf.getTableSettings(sSomeTableName);
+				var bExactCountByConfig = conf.getExactCount(oTableSettings);
 				
 				return $.extend( {}, d, {
 			        "sDbName": 			getHttpParams().get("db"),
 			        "sTableName": 		sSomeTableName,
-			        "bForceExactCount":	bForceExactCount,
+			        "bForceExactCount":	(bForceExactCount || bExactCountByConfig), // if one is true, it's enough
 			        "sGoToRowIds":		sGoToRowIds      // needed for GoTo function, when working with row ids (all info at Database.getRowNumberOfRecord)
 			      } );
 			},
@@ -289,6 +307,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			
 			// search boxes css
 			gui.setSearchboxesCss(sSomeTableName);
+			setTimeout(function(){
+				gui.setSearchboxesCss(sSomeTableName);
+			}, 500);
 			
 		},
 		
@@ -304,25 +325,25 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			// make sure the config filters which should be kept, are kept
 			var oTableConfig =	conf.getTableConfig(sSomeTableName);
 			
-			if (oTable != null)
-				{
+			if (oTable != null){
+
 				oTable.columns().every( function (i){
 					
 					var thisCol = 		this;
 					var sColumnName =	mt.getListOfColumnsOf(sSomeTableName)[i];
-					var aColumnConfig =	conf.getColumnConfig(oTableConfig, sColumnName);
-					var keepfilter =	conf.getKeepFilterSetting(aColumnConfig);
+					var oColumnConfig =	conf.getColumnConfig(oTableConfig, sColumnName);
+					var keepfilter =	conf.getKeepFilterSetting(oColumnConfig);
 					if (keepfilter)
-						thisCol.search( conf.getFilter(aColumnConfig) );			
+						thisCol.search( conf.getFilter(oColumnConfig) );			
 					
 					// ensure the proper formatting of search values
 					// (as select boxes need special format)
 					thisCol.search( 
 						sf.giveRightShapeToSearchValue( sSomeTableName, sColumnName, thisCol.search() )
-						);
-					});
-				}
-			
+					);
+				});
+
+			}	
 			
 		},
 		
@@ -352,8 +373,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 					var oCurrentRow = this;					
 					var iRowNumber = oTable.page.info().start + iRowIndex;					
 					
-					for (var iColNumber=0; iColNumber<mt.getListOfVisibleColumnsOf(sSomeTableName).length; iColNumber++)
-						{
+					for (var iColNumber=0; iColNumber<mt.getListOfVisibleColumnsOf(sSomeTableName).length; iColNumber++){
 						var currentColumnName =	mt.getListOfVisibleColumnsOf(sSomeTableName)[iColNumber]; 
 		        		var oColumnConfig =		conf.getColumnConfig(oTableConfig, currentColumnName);
 		        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
@@ -361,8 +381,17 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		        		
 		        		$("td:eq("+iColNumber+")", oCurrentRow.node())
 			        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
-			        		.addClass("tooltip");
+							.addClass("tooltip");
+							
+						// special rendering if required by config
+						var textRendering = 	conf.getTextRendering(oColumnConfig);
+						if (textRendering != null){
+							var sTextVal = $("td:eq("+iColNumber+")", oCurrentRow.node()).text();
+							sTextVal = textRendering(sTextVal);
+							$("td:eq("+iColNumber+")", oCurrentRow.node()).text(sTextVal);
 						}
+					}
+
 				});				
 		        
 		    }
@@ -405,8 +434,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			// other things that need to be reapplied at redraw	
 			gui.activateEllipsis(sSomeTableName);
 			gui.deHighlightDiv(sSomeTableName);			
-			gui.putTooltipsOfColumnButtons(sSomeTableName);			
-			gui.setPositionOfPaginationPane(sSomeTableName);			
+			gui.putTooltipsOfColumnButtons(sSomeTableName);					
 			gui.removeProcessingMsg(sSomeTableName);
 			
 			
@@ -433,6 +461,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 					function(){
 						// this replaces the callback added in fn.refreshTable() by an empty one
 						mt.getDataTableObjectOf(sSomeTableName).addDrawCallback("userCallBack", function(){});
+						gui.setSearchboxesCss(sSomeTableName); // just to be sure
 						$(this).dequeue();
 					});	
 			
@@ -573,9 +602,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// 2. empty main search field when clicking on per-column search field
 	//    and empty per-column search field when clicking on main search field			
 	sf.enableSearchFields(sSomeTableName); 
-	
-	// make sure the pagination pane at the bottom keeps correctly aligned with the top pagination pane			
-	gui.setPositionOfPaginationPane(sSomeTableName);
 	
 	
 	// generate undo stack for this table

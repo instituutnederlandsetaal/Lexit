@@ -39,6 +39,8 @@ function showSpinner(target, bRefreshing){
 			};
 	
 	$(target).spin(opts);
+
+	
 };
 function removeSpinner(target){
 	

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2022.03.24
+	v2022.04.08
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -175,6 +175,7 @@
 	// Name of user that has logged in, and its session-ID. This is set by fn.setCurrentUser() at initialization time
 	var USERNAME = null;
 	var SESSION_ID = null;
+
 	
 	// *********************************************************************************************************
 	
@@ -233,6 +234,9 @@
 
 	// Lex'it language mode
 	var sLexitLanguage;
+
+	// font size memory
+	var iFontSize = "100%";
 
 	// are we on Mac or PC?
 	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
@@ -400,8 +404,7 @@
 			success: function(xml) {
 				
 				// build the table if it doesn't exist yet
-				if ( !$("#spytable").elementExists() )
-					{
+				if ( !$("#spytable").elementExists() ) {
 					var spyDiv = $("<div></div>")
 					.attr("id", "#spytable");
 				
@@ -446,10 +449,13 @@
 					
 					oSpyTable = $('#spytable').DataTable({
 						"dom": '<"top"f>t',
-						"pageLength": 100
-						}).column(2).order('desc').draw();
+						"pageLength": 100,
+						"language": {
+							"search": "Filter: "
+						}
+					}).column(2).order('desc').draw();
 					
-					}
+				}
 				
 				// remove rows from previous cycle
 				oSpyTable.rows().remove();

@@ -25,8 +25,8 @@ sf.goTo = function(sSomeTablename){
 	var sColumnName = "";
 	var sColumnValue = "";
 	
-	$("#"+sSomeTablename+"_searchboxes div").each(function(i){
-		
+	$("#"+sSomeTablename+"_searchboxes td").each(function(i){
+
 		var oTableConfig = conf.getTableConfig(sSomeTablename);
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(sSomeTablename)[i]);
 		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
@@ -44,7 +44,6 @@ sf.goTo = function(sSomeTablename){
 				$(this).find("select") : $(this).find("input");
 		
 		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sSomeTablename)[i]; 
-			//$('#'+sSomeTablename+' thead th').eq(i).text();  -- this won't work if the name of the column was changed by 'nice name'
 		var sCurrentColumnValue = $.trim(searchBoxSelector.val());
 		
 		// for checkboxes, we need to recompute the value
@@ -272,10 +271,9 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 
 // enable the search fields (normally called only at initialisation, or at each draw in 'optimal mode')
 // job: 
-// - disable default behaviour (which is: fire new search query at each keypress event = too demanding)
+// - disable default Datatables behaviour (which is: fire new search query at each keypress event = too demanding)
 // - set 'pressing enter' as start sign for search actions
 // - set special checkbox filter when column is boolean (bit varying)
-
 
 sf.enableSearchFields = function(someTablename){
 	
@@ -292,14 +290,16 @@ sf.enableSearchFields = function(someTablename){
 		kf.registerPressedKey(e);
 		
 		if (kf.isPressed("enter")) {
-	    	  sf.startSearch(someTablename);
+			sf.startSearch(someTablename);
 		}
 	});	
 	
 	
 	// enable search on enter press
-	$("#"+someTablename+"_dynamic").off('keyup', '#'+someTablename+'_searchboxes div input');
-	$("#"+someTablename+"_dynamic").on('keyup', '#'+someTablename+'_searchboxes div input', function(e) {
+	$("#"+someTablename+"_dynamic").off('keyup', '#'+someTablename+'_searchboxes td input');
+	$("#"+someTablename+"_dynamic").on('keyup', '#'+someTablename+'_searchboxes td input', function(e) {
+
+		var thisInput = this;
 		
 		// pressed keys are normally caught by the attached events in kf.addKeyFunctions()
 		// but since the keyup-event on input-element is overriden here,
@@ -309,14 +309,23 @@ sf.enableSearchFields = function(someTablename){
 		if (kf.isPressed("enter")) {			
         	sf.startMultiColumnSearch(someTablename);
 		}
-    } );
+
+		// tab should lead to next input field 
+		if (kf.isPressed("tab")) {
+			var next = $(thisInput).parent().next("td:has(input)");
+			if (next != null){				
+				$(next).find("input").focus();
+			}
+			
+		}
+	});
 	
 
 	// empty whole-table search field when clicking on per-column search field
 	// (this is meant to prevent user confusion, as he/she wouldn't understand the search
 	//  results if some 'forgotten' search string in the main search box is affecting the search)
-	$("#"+someTablename+"_dynamic").off("focus", '#'+someTablename+'_searchboxes div input');
-    $("#"+someTablename+"_dynamic").on("focus", '#'+someTablename+'_searchboxes div input', function () {
+	$("#"+someTablename+"_dynamic").off("focus", '#'+someTablename+'_searchboxes td input');
+    $("#"+someTablename+"_dynamic").on("focus", '#'+someTablename+'_searchboxes td input', function () {
     	
     	// clear whole-table search field
      	sf.clearSearchField(someTablename);
@@ -337,19 +346,18 @@ sf.enableSearchFields = function(someTablename){
 	// add per-column search fields
 	// ****************************
 	
-	var oTableConfig = conf.getTableConfig(someTablename);
+	var oTableConfig = conf.getTableConfig(someTablename);	
 	
-	var bSearchBoxesExistedAlready = $("#"+someTablename+"_searchboxes").elementExists();
-	
-	
-	var sSearchBoxesDiv = $("<div></div>")
+	var sSearchBoxesDiv = $("<table></table>")
 		.attr("id", someTablename+"_searchboxes")
 		.bind("mouseenter", function(){gui.setSearchboxesCss(someTablename);})
 		.css("display", "block")
 		.css("visibility", "hidden");
+
+	var sSearchBoxesTr = $("<tr></tr>");
+	sSearchBoxesDiv.append(sSearchBoxesTr);
 	
-	
-	$('#'+someTablename+' thead th').each( function(i){
+	$('#'+someTablename+'_wrapper div.dataTables_scrollHeadInner table.display th').each( function(i){
 		
 		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(someTablename)[i];
 		
@@ -462,10 +470,9 @@ sf.enableSearchFields = function(someTablename){
 		// the right filter type is set,	
 		// now append the search box to the user interface
 				
-		sCurrentSearchBoxDiv = $("<div></div>")			
-			.css("display", "inline")
+		sCurrentSearchBoxDiv = $("<td></td>")
 			.append(inputTag.attr("id", someTablename+"_searchbox_"+sCurrentColumnName));
-		sSearchBoxesDiv.append(sCurrentSearchBoxDiv);
+		sSearchBoxesTr.append(sCurrentSearchBoxDiv);
 		
 		
 		// *************************		
@@ -517,9 +524,9 @@ sf.enableSearchFields = function(someTablename){
 	
 	// append the searchboxes we just built
 	if ($("#"+someTablename+"_searchboxes").elementExists())
-		$("#"+someTablename+"_searchboxes").replaceWith(sSearchBoxesDiv);
+		$("#"+someTablename+"_searchboxes").replaceWith(sSearchBoxesTr);
 	else
-		$("#"+someTablename).before(sSearchBoxesDiv);
+		$("#"+someTablename+"_wrapper div.dataTables_scrollHeadInner table").before(sSearchBoxesDiv);
 	
 	
 	
@@ -530,7 +537,7 @@ sf.enableSearchFields = function(someTablename){
 	
 	// last job: add events the search box should react to
 	
-	$('#'+someTablename+' thead th').each( function(i){
+	$('#'+someTablename+'_wrapper div.dataTables_scrollHeadInner table.display th').each( function(i){
 		
 		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(someTablename)[i];
 		var oColumnConfig = conf.getColumnConfig( oTableConfig, sCurrentColumnName);
@@ -545,8 +552,8 @@ sf.enableSearchFields = function(someTablename){
 		// add click event for checkbox filters
 		if (isACheckBox)
 			{
-			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes div:eq("+i+")");
-			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){				
+			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes td:eq("+i+")");
+			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes td:eq("+i+")", function(){				
 				
 				// remember last searchbox clicked upon (needed for goto function)
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
@@ -576,8 +583,8 @@ sf.enableSearchFields = function(someTablename){
 		// add change event for selection box filters
 		else if (isASelectBox)
 			{
-			$("#"+someTablename+"_dynamic").off('change', "#"+someTablename+"_searchboxes div:eq("+i+") select");
-			$("#"+someTablename+"_dynamic").on('change', "#"+someTablename+"_searchboxes div:eq("+i+") select", function(){
+			$("#"+someTablename+"_dynamic").off('change', "#"+someTablename+"_searchboxes td:eq("+i+") select");
+			$("#"+someTablename+"_dynamic").on('change', "#"+someTablename+"_searchboxes td:eq("+i+") select", function(){
 				
 				// remove focus from search box, to prevent unpredictable change because of user pressing an arrow key
 				$(this).blur();
@@ -594,8 +601,8 @@ sf.enableSearchFields = function(someTablename){
 			}
 		else 
 			{
-			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes div:eq("+i+")");
-			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){
+			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes td:eq("+i+")");
+			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes td:eq("+i+")", function(){
 				
 				// remember last searchbox clicked upon (needed for goto function)
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
@@ -607,11 +614,6 @@ sf.enableSearchFields = function(someTablename){
 					}				
 				});
 			
-//			$("#"+someTablename+"_dynamic").off('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")");
-//			$("#"+someTablename+"_dynamic").on('dblclick', "#"+someTablename+"_searchboxes div:eq("+i+")", function(){
-//				
-//					sf.getQueryBuilder(someTablename, sCurrentColumnName);				
-//				});
 			}
 		
 	});
@@ -623,14 +625,14 @@ sf.enableSearchFields = function(someTablename){
 
 
 // make sure the current filter values are visible in all search boxes
-sf.putCurrentValueInAllSearchBoxes = function(sTablename){	
+sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 	
 	// get the table filters settings
 	var oFilterSettings = mt.getDataTableObjectOf(sTablename).getSearchFilters();
 	var oTableConfig = conf.getTableConfig(sTablename);
 	
 	// process each visible column
-	$("#"+sTablename+"_searchboxes div").each(function(i){
+	$("#"+sTablename+"_searchboxes td").each(function(i){
 		
 		// get column name and config
 		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sTablename)[i];
@@ -768,7 +770,7 @@ sf.clearPerColumnSearchFields = function(someTablename){
 	var oTableConfig = conf.getTableConfig(someTablename);
 	
 	// clear all search field
-	$("#"+someTablename+"_searchboxes div").each(function(i){		
+	$("#"+someTablename+"_searchboxes td").each(function(i){		
 		
 		var sStartValueOfThisColumn = "";
 		
@@ -785,7 +787,7 @@ sf.clearPerColumnSearchFields = function(someTablename){
 	});
 	
 	// uncheck the checkboxes and put selection boxes back to default
-	$("#"+someTablename+"_searchboxes div").each(function(){
+	$("#"+someTablename+"_searchboxes td").each(function(){
 		var isACheckBox = $(this).find("input").eq(0).attr("type")=="checkbox";
 		if(isACheckBox) {
 			// remove the color indicating some value is activated (true or false)
@@ -839,10 +841,9 @@ sf.startMultiColumnSearch = function(someTablename){
 	mt.getDataTableObjectOf(someTablename).resetSearchFilters(false);
 	
 	// collect data from all per-column fields 
-	$("#"+someTablename+"_searchboxes div").each(function(i){
+	$("#"+someTablename+"_searchboxes td").each(function(i){
 				
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfVisibleColumnsOf(someTablename)[i]);
-		//var columnSearchQueryTransformFunction = conf.getSearchForm(oColumnConfig);
 		
 		// do we have a checkbox?
 		var isACheckBox = $(this).find("input").eq(0).attr("type")=="checkbox";
@@ -861,10 +862,6 @@ sf.startMultiColumnSearch = function(someTablename){
 		// special short cut
 		if ($.startsWith(oneSearchBoxValue, "//"))
 			oneSearchBoxValue = "\""+oneSearchBoxValue.replace(/^\/\//, 'exact:')+"\"";
-		
-		// if needed (config file), transform the query
-//		if (columnSearchQueryTransformFunction != null)
-//			oneSearchBoxValue = columnSearchQueryTransformFunction(oneSearchBoxValue);
 		
 		
 		// ** TEXT or SELECT filter **
@@ -950,7 +947,7 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 
 // generate query builder
 
-sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues){
+sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndValues, oAlternativeKeysAndValues){
 	
 	// read configuration:
 	
@@ -1057,7 +1054,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    	var sFilter = 	$("#querybuilder_valuefilter").val();
 						var sLimit = 	$("#querybuilder_limit").val();
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
 							$("#"+selectableId).empty();							
@@ -1092,7 +1089,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    	var sFilter = 	$("#querybuilder_valuefilter").val();
 						var sLimit = 	$("#querybuilder_limit").val();
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
 							$("#"+selectableId).empty();							
@@ -1130,7 +1127,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, oAlternativeKeysAndValues
 				    	var sFilter = 	$("#querybuilder_valuefilter").val();
 						var sLimit = 	$("#querybuilder_limit").val();
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sLimit, bSortbyfreq, function(oValues){
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
 							oKeysAndValues = new cloneObject(oValues);							
 							$("#"+selectableId).empty();							
@@ -1350,13 +1347,24 @@ sf._cutoffCounts = function (aValueWithCounter){
 //needed for query builder to have values to work with
 sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName){
 	
-	sf._getUniqueValuesForQueryBuilder(sSomeTableName, sCurrentColumnName, null, null, null, function(oValues){
+	// gather the filters surrounding the column we search the uniques values of
+
+	var oOtherFilters = mt.getDataTableObjectOf(sSomeTableName).getSearchFilters();
+	var aOtherColumnsFiltersAndValues = new Array();
+	for (var sOneFilter in oOtherFilters){
+		if (sOneFilter != sCurrentColumnName && oOtherFilters[sOneFilter] != null && oOtherFilters[sOneFilter] != ''){
+			aOtherColumnsFiltersAndValues.push( sOneFilter +"###"+ oOtherFilters[sOneFilter]);
+		}
+	}
+	var sOtherColumnsFiltersAndValues = aOtherColumnsFiltersAndValues.join(ARG_INTERNAL_SEPARATOR);
+
+	sf._getUniqueValuesForQueryBuilder(sSomeTableName, sCurrentColumnName, null, sOtherColumnsFiltersAndValues, null, null, function(oValues){
 		
-		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, oValues);
+		sf.getQueryBuilder(sSomeTableName, sCurrentColumnName, sOtherColumnsFiltersAndValues, oValues);
 	})
 }
 
-sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sLimit, bSortbyfreq, fnFunction){
+sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, fnFunction){
 	
 	gui.showProcessingMsg(sSomeTableName);
 	
@@ -1370,6 +1378,7 @@ sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName
 			"table_name": sSomeTableName,
 			"column_name": sCurrentColumnName,
 			"column_value_filter": sValueFilter,
+			"other_columns_filters_and_values": sOtherColumnsFiltersAndValues,
 			"limit": ((sLimit == null || sLimit == '') ? 20 : sLimit),
 			"sort_by_freq": bSortbyfreq,
 			"dummy": getUniqueNumber()

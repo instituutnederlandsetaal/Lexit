@@ -733,10 +733,59 @@ public class Database {
 	
 	
 	// see getUniqueValues
-	public UniqueValuesObject getUniqueValuesWithFreqs(String tableName, String columnName, String columnValueFilter, String limit, boolean sortByFreq) {
+	public UniqueValuesObject getUniqueValuesWithFreqs(String tableName, String columnName, String columnValueFilter, String otherFiltersAndValues, String limit, boolean sortByFreq) {
 		
 		String schema = getSchema(tableName);		
 		if (columnValueFilter == null) columnValueFilter = "";
+		
+		
+		// prepare the column filters part
+		
+		ArrayList<String> columnsValues = new ArrayList<String>();
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
+		// first: the possible regex filter on the 'get-unique-values-column' (t.i. the value entered in the filter box in the Query Builder)
+		
+		String columnsFilters = "";
+		if ( !columnValueFilter.isEmpty() ) {
+			
+			columnsFilters = "AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" ";
+			columnsValues.add(columnValueFilter);
+			ato.setType(columnsValues.size()-1, "text");
+		}
+			
+		
+		// second: the other columns filters (search boxes of table, still expected to operate)
+		
+		String[] aOtherFiltersAndValues = otherFiltersAndValues.split(Constants.ARG_INTERNAL_SEPARATOR);
+		for (int i=0; i<aOtherFiltersAndValues.length; i++) {
+			
+			String[] columnNameAndValuePair = aOtherFiltersAndValues[i].split("###");
+			if (columnNameAndValuePair.length != 2) continue;
+			String oneColumnName = columnNameAndValuePair[0];
+			String oneColumnValue = columnNameAndValuePair[1];
+			
+			// check if current column can be searched given a search string
+			if ( !valueIsSuitableForColumnType(oneColumnValue, getTypeOfColumn(tableName, oneColumnName)) )
+			{
+				columnsFilters += (					
+						"AND " +
+								"CAST(" +getSafeFieldName(oneColumnName)+" AS text) "+getSuitableOperatorAndArg(tableName, null, oneColumnValue, false)+" "
+						);		
+				columnsValues.add(oneColumnValue);
+				ato.setType(columnsValues.size()-1, "text");
+			}
+			else
+			{
+				columnsFilters += (					
+						"AND " +
+								getSafeFieldName(oneColumnName)+" "+getSuitableOperatorAndArg(tableName, oneColumnName, oneColumnValue, false)+" "
+						);		
+				columnsValues.add(oneColumnValue);
+				ato.setType(columnsValues.size()-1, getTypeOfColumn(tableName, oneColumnName));
+			}	
+			
+		}
 	
 		// GROUP BY can be faster than DISTINCT
 	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
@@ -744,10 +793,7 @@ public class Database {
     	String query = "SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
     			"FROM " + getSafeTableName(tableName, schema) + " " + 
     			"WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
-    			(
-    			columnValueFilter.isEmpty() ? "" : 
-    			"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
-    			) +
+    			"	" + columnsFilters +
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
     			"ORDER BY " + ( sortByFreq ? "count(*) DESC" : getSafeFieldName(columnName)) + ";";
     	
@@ -758,15 +804,13 @@ public class Database {
     				"	SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
         			"	FROM " + getSafeTableName(tableName, schema) + " " + 
         			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
-        			(
-        				columnValueFilter.isEmpty() ? "" : 
-        				"AND "+getSafeFieldName(columnName)+" "+getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
-        			) +
+        			"	" + columnsFilters +
         			"	GROUP BY " + getSafeFieldName(columnName) + " " +
         			"	ORDER BY count(*) DESC " +
         			"	LIMIT " + limit + ") x " +
         			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") +";";
     	}
+    	
     	    	
     	PostgresDatabaseCommunication dc = connectDatabase();
 
@@ -776,10 +820,10 @@ public class Database {
     	try {
   	      dc.sendUpdate("SET search_path TO " + schema + "; ");
   	      
-  	      ResultSet rs = columnValueFilter.isEmpty() ? 
+  	      ResultSet rs = columnsValues.size() == 0 ? 
   	    		  dc.sendQuery(query)
   	    		  :
-  	    		  dc.sendPreparedQuery(query, new String[]{columnValueFilter});
+  	    		  dc.sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato);
 
   	      res = getResultsInAList(rs, new String[] { "n", "cnt" });
   	      if (res.size() > 0)
