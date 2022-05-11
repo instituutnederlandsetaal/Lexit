@@ -12,8 +12,11 @@ public class Constants {
 	public final static String BASE_URL = "lexit2";
 	
 	// Tomcat configuration directory
-	// (this is the directory in which the config files are to be found)
+	// (this is the directory in which the JavaScript config files are to be found)
 	public final static String CONFIG_DIR = "lexit2_config";
+	// (this is the directory in which the DATABASE config files are to be found)
+	public final static String DB_CONFIG_ROOT = "etc";
+	public final static String DB_CONFIG_DIR = "lexit2_db_config";
 	
 	// separator for arguments within a single string
 	// this must be the same as in the Javascript part (same variable name)

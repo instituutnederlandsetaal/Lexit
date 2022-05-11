@@ -521,12 +521,13 @@ sf.enableSearchFields = function(someTablename){
 	});
 	
 	
-	
 	// append the searchboxes we just built
-	if ($("#"+someTablename+"_searchboxes").elementExists())
-		$("#"+someTablename+"_searchboxes").replaceWith(sSearchBoxesTr);
-	else
+	if ($("table#"+someTablename+"_searchboxes").elementExists()){
+		$("table#"+someTablename+"_searchboxes").replaceWith(sSearchBoxesTr);
+	}
+	else {
 		$("#"+someTablename+"_wrapper div.dataTables_scrollHeadInner table").before(sSearchBoxesDiv);
+	}
 	
 	
 	
@@ -1071,7 +1072,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 		)
 		.append(
 			$("<input></input>")
-			.css("width", "20px")
+			.css("width", "40px")
 			.val(20)
 			.attr("id", "querybuilder_limit")
 			.bind("input propertychange", function (evt) {
@@ -1224,7 +1225,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
         height: promptHeight,
-        width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
+        width: 650,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
         	$(".ui-dialog").addClass("ui-dialog-shadow");

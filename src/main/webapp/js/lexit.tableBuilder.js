@@ -876,8 +876,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 	if ( mt.getTableMustBeOptimal(sSomeTableName)
 			// if there are no results, there are no relevant columns
 			// so the searchboxes will disappear, prevent that by requiring a non-empty result set
-			&& json.recordsFiltered > 0 ) 
-		{		
+			&& json.recordsFiltered > 0 ) {		
 		
 		// now make the relevant columns visible, and hide the others
 		var aRelevantColumns = tb._getRelevantColumnsStraightFromJson(sSomeTableName, json);
@@ -885,8 +884,7 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		var aVisibleColumnsTypes = new Array();
 		var oaVisibleColumnsAllowedTypes = new Array();
 		
-		for (var i=0; i<mt.getListOfColumnsOf(sSomeTableName).length; i++)
-			{
+		for (var i=0; i<mt.getListOfColumnsOf(sSomeTableName).length; i++) {
 			var sCurrentColumnName =		mt.getListOfColumnsOf(sSomeTableName)[i];
 			var bColumnShouldBeVisible =	$.inArray(sCurrentColumnName, aRelevantColumns)>-1;
 			
@@ -900,22 +898,22 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 			
 			var iColumnIndex = fn.getColumnNumberOf(sSomeTableName, sCurrentColumnName);
 			mt.getDataTableObjectOf(sSomeTableName).column(iColumnIndex).visible(bColumnShouldBeVisible, false);
-			}
+		}
 		
 		mt.setListOfVisibleColumnsOf(sSomeTableName, aRelevantColumns);
 		mt.setListOfTypesOfVisibleColumnsOf(sSomeTableName, aVisibleColumnsTypes);
 		// Postgres ENUM values
 		mt.setListOfAllowedValuesInVisibleColumnsOf(sSomeTableName, oaVisibleColumnsAllowedTypes);
 		
-		// enable searchboxes		
+		// enable searchboxes	
+		$("table#"+sSomeTableName+"_searchboxes").remove();	
 		sf.enableSearchFields(sSomeTableName);
 		gui.setSearchboxesCss(sSomeTableName);
 		
 		// highlight (resetter must be called first)
 		gui.setColumnHighlightResetter(sSomeTableName);
 		gui.setColumnHighlight(sSomeTableName);
-		
-		}
+	}
 	
 	
 };

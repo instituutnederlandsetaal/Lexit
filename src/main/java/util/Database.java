@@ -797,18 +797,35 @@ public class Database {
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
     			"ORDER BY " + ( sortByFreq ? "count(*) DESC" : getSafeFieldName(columnName)) + ";";
     	
-    	if (limit != null)
-    	{
-    		query = "SELECT n, cnt " +
-    				"FROM (" +
-    				"	SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
-        			"	FROM " + getSafeTableName(tableName, schema) + " " + 
-        			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+    	if (limit != null) {
+    		// This takes the MOST frequent values,
+    		// limit the result set to the specified limit,
+    		// and (as a final step) sort that as required.
+    		//
+    		// Advantage to it, is that one sees the mode common values
+    		// but it might be confusing, sine less frequent values are filtered out
+    		// while the use might expect those in the result...
+    		
+//    		query = "SELECT n, cnt " +
+//    				"FROM (" +
+//    				"	SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+//        			"	FROM " + getSafeTableName(tableName, schema) + " " + 
+//        			"	WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
+//        			"	" + columnsFilters +
+//        			"	GROUP BY " + getSafeFieldName(columnName) + " " +
+//        			"	ORDER BY count(*) DESC " +
+//        			"	LIMIT " + limit + ") x " +
+//        			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") +";";
+    		
+    		// This query applies the limit after sorting, not before!
+    		
+    		query = "SELECT " + getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+        			"FROM " + getSafeTableName(tableName, schema) + " " + 
+        			"WHERE " + getSafeFieldName(columnName)+" IS NOT NULL " +
         			"	" + columnsFilters +
-        			"	GROUP BY " + getSafeFieldName(columnName) + " " +
-        			"	ORDER BY count(*) DESC " +
-        			"	LIMIT " + limit + ") x " +
-        			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") +";";
+        			"GROUP BY " + getSafeFieldName(columnName) + " " +
+        			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") + " " +
+        			"LIMIT " + limit + ";";
     	}
     	
     	    	
@@ -4444,9 +4461,15 @@ public class Database {
 		
 		String filepath = co.getContext().getRealPath(fileName);
 		
+		// remove '/lexit2/...' of url
 		filepath = filepath.replace(
 				File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
-				File.separatorChar + Constants.CONFIG_DIR + File.separator+fileName);
+				""); 
+		// remove remaining '/servlet|webapps' part of url
+		filepath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar));
+		
+		// now add path to right file
+		filepath = filepath + File.separatorChar + Constants.DB_CONFIG_ROOT + File.separatorChar + Constants.DB_CONFIG_DIR + File.separatorChar + fileName;
 		
 		Util.debug(co, "File: "+filepath);
 		

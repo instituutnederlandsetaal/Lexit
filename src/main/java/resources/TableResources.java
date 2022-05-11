@@ -231,7 +231,7 @@ public class TableResources {
 	}
 	
 	
-	// get the list of projects config files
+	// get the list of projects Javascript config files
 	// call:
 	// .../table/get_configfiles_list
 	@Path("get_configfiles_list")
@@ -250,14 +250,14 @@ public class TableResources {
 		String filepath = co.getContext().getRealPath(fileName);
 		
 		filepath = filepath.replace(
-		File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
+		File.separatorChar + Constants.BASE_URL + File.separator + fileName, 
 		File.separatorChar + Constants.CONFIG_DIR); // remove filename as we only need the path here
 		
 		DbResponseObject response = new DbResponseObject();
 		response.setResponse(Util.getListOfFiles(filepath));
 		
 		return response;
-		}
+	}
 	
 	
 	// clean the cache of some table
@@ -1598,8 +1598,8 @@ public class TableResources {
 	}
 	
 	
-	// read the javascript configuration file from
-	//  the configuration directory
+	// Read the javascript configuration file from
+	// the configuration directory
 	public synchronized String readConfigJsFile(ContextObject co) throws IOException{
 		
 		Util.debug(co, "Read javascript configuration file '"+co.getDbName()+".config.js"+"'...");
@@ -1696,9 +1696,15 @@ public class TableResources {
 			String fileName = "users_access.rights";		
 			String filepath = co.getContext().getRealPath(fileName);
 			
+			// remove '/lexit2/...' of url
 			filepath = filepath.replace(
 					File.separatorChar + Constants.BASE_URL + File.separator+fileName, 
-					File.separatorChar + Constants.CONFIG_DIR + File.separator+fileName);
+					""); 
+			// remove remaining '/servlet|webapps' part of url
+			filepath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar));
+			
+			// now add path to right file
+			filepath = filepath + File.separatorChar + Constants.DB_CONFIG_ROOT + File.separatorChar + Constants.DB_CONFIG_DIR + File.separatorChar + fileName;
 			
 			Util.debug(co, "File: "+filepath);
 			
