@@ -1,5 +1,0 @@
-db=mydatabasename
-schema=public
-host=yourhost.com
-user=username
-pass=password
