@@ -299,7 +299,7 @@ sf.enableSearchFields = function(someTablename){
 	$("#"+someTablename+"_dynamic").off('keyup', '#'+someTablename+'_searchboxes td input');
 	$("#"+someTablename+"_dynamic").on('keyup', '#'+someTablename+'_searchboxes td input', function(e) {
 
-		var thisInput = this;
+		//var thisInput = this;
 		
 		// pressed keys are normally caught by the attached events in kf.addKeyFunctions()
 		// but since the keyup-event on input-element is overriden here,
@@ -310,14 +310,15 @@ sf.enableSearchFields = function(someTablename){
         	sf.startMultiColumnSearch(someTablename);
 		}
 
+		// SOMEHOW not needed anymore? 
 		// tab should lead to next input field 
-		if (kf.isPressed("tab")) {
-			var next = $(thisInput).parent().next("td:has(input)");
-			if (next != null){				
-				$(next).find("input").focus();
-			}
+		// if (kf.isPressed("tab")) {
+		// 	var next = $(thisInput).parent().next("td:has(input)");
+		// 	if (next != null){				
+		// 		$(next).find("input").focus();
+		// 	}
 			
-		}
+		// }
 	});
 	
 
