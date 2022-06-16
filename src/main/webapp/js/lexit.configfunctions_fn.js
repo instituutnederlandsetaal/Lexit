@@ -3576,7 +3576,7 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 			        source: function(request, response){
 			            	
 			           	fn.callFunction(sFunctionName, [ request.term ], 
-			          		function(func_resp){  
+			          		function(func_resp){
 			            		
 			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
 			           					sFunctionName.substring(sFunctionName.indexOf(".")+1) : sFunctionName;
@@ -3590,8 +3590,13 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 			                        };
 			                    }));
 			            	});
-			            }
-		          });
+					},
+					open: function(event, ui){
+
+						// make sure that the autocomplete won't disappear behind the table (it did happen in the past...)
+						$(event.target).putInFront();
+					}
+		        });
 		          
 		      }
 		  );
