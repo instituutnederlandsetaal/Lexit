@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -21,6 +22,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.SecurityContext;
 
 //import org.apache.poi.hssf.usermodel.HSSFCell;
 //import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -273,6 +278,38 @@ public class Util {
 	}
 	
 	
+	// special version needed for get_configfiles_list
+	//
+	public static ConcurrentHashMap<String, String> readPropertiesFile(String filename){
+		
+		ConcurrentHashMap<String, String> logInfo = new ConcurrentHashMap<String, String>();
+		
+		try{
+			FileInputStream fstream = new FileInputStream(filename);
+			// Get the object of DataInputStream
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			while ((strLine = br.readLine()) != null) {
+				if (	strLine.indexOf("=")<0  // skip illegal format (we expect key=prop) 
+						|| 
+						strLine.startsWith("#"))// skip comment lines
+					continue;
+				String key = strLine.split("=")[0];
+				String value = strLine.split("=")[1];
+				logInfo.put(key, value);
+			}
+			br.close();
+			in.close();
+		}
+		catch (Exception e){//Catch exception if any
+			
+		}
+		
+		return logInfo;		
+	}
+	
+	
 	
 	// get list of files
 	
@@ -289,6 +326,38 @@ public class Util {
 				if (fileName.endsWith(".config.js") || fileName.endsWith(".database") )
 				{
 					fileName = fileName.substring(0, fileName.indexOf("."));
+					boolean dbExists = true;
+					
+					// check if the file exists
+					// ------------------------
+										
+					// to do so, we need to compute the right path
+					path = path.substring( 0, path.indexOf(File.separatorChar + Constants.BASE_URL) );										
+					// remove remaining '/servlet|webapps' part of url
+					path = path.substring(0, path.lastIndexOf(File.separatorChar));					
+					// now add path to right file
+					path = path + File.separatorChar + Constants.DB_CONFIG_ROOT + File.separatorChar + Constants.DB_CONFIG_DIR + File.separatorChar + fileName + ".database";					
+					boolean fileExists = new File(path).exists();
+					
+						
+					// check if the database is available
+					// ----------------------------------
+					
+					if (fileExists) {
+						dbExists = dbExists(path);
+					}
+					
+					// add gathered info to filename
+					// -----------------------------
+					
+					if ( !fileExists) {
+						fileName += ":::[BEWARE: the .database configuration file is missing]";
+					}
+					if ( !dbExists) {
+						fileName += ":::[BEWARE: the PSQL database is missing, it might have been archived]";
+					}
+					
+					// add file to the list
 					hashList.add(fileName);
 				}
 				
@@ -300,6 +369,28 @@ public class Util {
 		
 		return Util.join(sortedList, Constants.ARG_INTERNAL_SEPARATOR);		
 	}
+	
+	
+	private static boolean dbExists(String path) {
+		
+		ConcurrentHashMap<String, String> logInfo = readPropertiesFile(path);
+		
+		PostgresDatabaseCommunication postgresDc = new PostgresDatabaseCommunication(null, false);			
+		try {
+			// try to connect
+			postgresDc.connectTo(logInfo.get("host"), logInfo.get("port"), logInfo.get("db"), logInfo.get("user"), logInfo.get("pass"));
+			postgresDc.closeConnection();
+		}
+		catch (Exception e) {
+			
+			// if connection fails, the database might be missing
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 
 	
 	// ******************************************************************

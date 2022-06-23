@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2022.06.16
+	v2022.06.22
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -827,12 +827,25 @@
 			// it will be added to it as part of the 'unknown projects' category
 			// (so it will appear as such in the menu)
 			for (var i=0; i<aFullConfigFilesList.length; i++) {
-				var oneConfigFile = aFullConfigFilesList[i];
-				if (aKnownConfigFilesList.indexOf(oneConfigFile) < 0) {
+
+				var sOneConfigFile = aFullConfigFilesList[i];
+				
+				// if server return some description/message, set it
+
+				var aOneConfigFile = sOneConfigFile.split(":::");
+				var sOneDescription = lang.unknown;	// default: 'unknown'
+				if (aOneConfigFile.length>1){
+					sOneConfigFile  = aOneConfigFile[0];
+					sOneDescription = aOneConfigFile[1];
+				}
+
+				// add unknown project
+
+				if (aKnownConfigFilesList.indexOf(sOneConfigFile) < 0) {
 					aProjectList.push({
-						"name": oneConfigFile,
-						"config_filename": oneConfigFile,
-						"description": lang.unknown,
+						"name": sOneConfigFile,
+						"config_filename": sOneConfigFile,
+						"description": sOneDescription,
 						"unknown": true
 				 	});
 				}
