@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2022.06.22
+	v2022.06.30
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -547,27 +547,44 @@
 	// the list will lack descriptions, but at least the projects will be shown and will be clickable!
 	
 	function getConfigFilesList(){
-		
-		var url = WEBSERV_URL+"/table/get_configfiles_list"; 			
-		
-		$.ajax({
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				
-				var sList = fn.getDbResponse(xml);
-				aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
-				
-				initialize();
-			},
-			"error": function(jqxhr, settings, exception){
-				fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
-			}
-		});
+
+		// if some project was selected already, no need to get the list, 
+		// initialize straight away!
+		if (paramsHash!=null &&	paramsHash.get("db")!=null){
+			initialize();
+		}
+		else {
+
+			// this might take a while, so put spinner
+			showSpinner("#dynamic", true);
+			
+			var url = WEBSERV_URL+"/table/get_configfiles_list"; 			
+			
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"dataType": "xml", // get response as xml
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"success": function(xml){
+					
+					var sList = fn.getDbResponse(xml);
+					aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
+
+					// remove spinner
+					removeSpinner("#dynamic");
+					
+					// go!
+					initialize();
+				},
+				"error": function(jqxhr, settings, exception){
+					fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
+				}
+			});
+
+		}
+
 	}
 	
 	// end of : called by $(document).ready()

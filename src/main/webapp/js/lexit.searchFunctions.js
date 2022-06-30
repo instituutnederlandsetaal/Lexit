@@ -516,6 +516,7 @@ sf.enableSearchFields = function(someTablename){
 				{
 				iCycleValue = 2;
 				}
+
 			sf.setCheckboxRight(sCurrentSearchBoxDiv, iCycleValue);	
 			}
 			
@@ -908,11 +909,11 @@ sf.startMultiColumnSearch = function(someTablename){
 // check if a given value means 'true' or 'false', if it belongs to a checkbox
 sf.isCheckboxTrueValue = function(sValue){
 	
-	return (sValue==1||sValue=='1'||sValue==true||sValue=='t');
+	return (sValue==1||sValue=='1'||sValue==true||sValue==='true'||sValue=='t');
 };
 sf.isCheckboxFalseValue = function(sValue){
 	
-	return (sValue==0||sValue=='0'||sValue==false||sValue=='f');
+	return (sValue==0||sValue=='0'||sValue==false||sValue==='false'||sValue=='f');
 };
 
 

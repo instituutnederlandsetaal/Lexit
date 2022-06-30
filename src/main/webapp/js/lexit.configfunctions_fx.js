@@ -1062,7 +1062,10 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 		catch (err){
 			sTableName = "";
 			sArgType = "onbekende type";
-		}		
+		}
+		
+		// give info in console
+		console.log("oArgument:"+oArgument);
 		
 		// give error information
 		fn.message(lang.error, lang.error_when_calling+ " "+ sFunctionName + "("+sTableName+").<BR>"+ 

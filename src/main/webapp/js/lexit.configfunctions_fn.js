@@ -5677,6 +5677,9 @@ fn.getLastDbResponse = function(){
 fn._checkApiInstance = function(sFunctionName, oArgument){
 	
 	if (fx.isApiInstance(oArgument)){
+		// give info in console
+		console.log("oArgument:"+oArgument);
+
 		fn.message(lang.error, sFunctionName + "('"+fx.getTableName(oArgument)+"') "+lang.error_function_called_with_api_instance+".");
 		return;
 	}
@@ -5687,6 +5690,9 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
 	if (oArgument instanceof jQuery){
+		// give info in console
+		console.log("oArgument:"+oArgument);
+
 		// get(0) makes sure we get the node out of the jQuery object
 		fn.message(lang.error, sFunctionName + "('"+fn.getTableName(oArgument.get(0))+"') "+lang.error_function_called_with_jquery_object+".");
 		return;
