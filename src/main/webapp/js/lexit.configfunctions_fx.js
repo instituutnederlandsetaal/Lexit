@@ -1030,6 +1030,10 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 	
 	if ( !fx.isApiInstance(oArgument))
 		{
+		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
+		console.log("oArgument:"+oArgument);
+		
 		// try to compute name of table in which error occurs
 		var sTableName = "";
 		var sArgType = "";
@@ -1064,8 +1068,6 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 			sArgType = "onbekende type";
 		}
 		
-		// give info in console
-		console.log("oArgument:"+oArgument);
 		
 		// give error information
 		fn.message(lang.error, lang.error_when_calling+ " "+ sFunctionName + "("+sTableName+").<BR>"+ 

@@ -5678,6 +5678,7 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 	
 	if (fx.isApiInstance(oArgument)){
 		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
 		console.log("oArgument:"+oArgument);
 
 		fn.message(lang.error, sFunctionName + "('"+fx.getTableName(oArgument)+"') "+lang.error_function_called_with_api_instance+".");
@@ -5691,6 +5692,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
 	if (oArgument instanceof jQuery){
 		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
 		console.log("oArgument:"+oArgument);
 
 		// get(0) makes sure we get the node out of the jQuery object
