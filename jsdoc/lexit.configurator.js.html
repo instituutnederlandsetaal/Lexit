@@ -171,7 +171,13 @@ var oTableSettingsList_example = {
 		 * @description callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)
 		 */
 		"close_callback": function(){ doSomething(); },
-		
+
+
+		/** 
+		 * @type {boolean} 
+		 * @description bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)
+		 * */
+		"exact_count": true,
 		
 		/** 
 		 * @type {boolean} 
@@ -342,6 +348,14 @@ var oTableConfigurationList_example = {
 		 * die de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.
 		 */
 		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
+
+
+		/**
+		 * @description Een editeerbare cel waarin slechts een gesloten aantal waardes zijn toegestaan, wordt normaal gesproken
+		 * bewerkt via een Select-box. Met deze parameter declareert men welke mouse-event het weergeven van de Select-box moet triggeren.
+		 * Default is dat 'mouseover'.
+		 */
+		"select_trigger_event": "mouseover",
 		
 		
 		/**
@@ -507,6 +521,13 @@ var oTableConfigurationList_example = {
 		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
 		 */
 		"searchform": function(){},
+
+		/**
+		 * @type {function}
+		 * @description Pas de tekst van een cell aan voordat die op het scherm wordt getoond. Dit is zuiver bedoeld voor rendering.
+		 * Dit heeft dus géén invloed op de onderliggende data. Zoekopdrachten worden door deze functie dus niet beïnvloed.
+		 */
+		"render": function(text){},
 		
 		/**
 		 * @description Kleur die de tekst moet hebben in een gegeven kolom.
@@ -843,6 +864,17 @@ conf.getSelectionBoxLabels = function(aColumnConfig){
 };
 
 
+/**
+ * Retrieve mouse event triggering select box to appear
+ * Default: mouseover
+ */
+conf.getSelectTriggerEvent = function(aColumnConfig){
+	if (typeof aColumnConfig["select_trigger_event"] == 'undefined')
+		return "mouseover";
+	return aColumnConfig["select_trigger_event"];
+}
+
+
 // retrieve visibility settings
 // default is visible:true
 
@@ -939,7 +971,6 @@ conf.getEllipsisDelay = function(aColumnConfig){
 };
 
 
-
 // retrieve ellipsis (max) height
 // default is null
 conf.getEllipsisHeight = function(aColumnConfig){
@@ -957,7 +988,6 @@ conf.getEllipsisUnwrap = function(aColumnConfig){
 		return true;		
 	return aColumnConfig["ellipsis_unwrap"];
 };
-
 
 // retrieve ellipsis behavior: should a selected row remain unwrapped or not?
 // default: false
@@ -994,14 +1024,12 @@ conf.getKeepFilterSetting = function(aColumnConfig){
 	var bKeepFilter = aColumnConfig["keepfilter"];
 	
 	// give understandable error message, when this parameter is misused
-	if (bKeepFilter &amp;&amp; conf.getFilter(aColumnConfig) == null)
-		{
-		fn.message("Let op", "Parameter 'keepfilter: true' werkt alleen als vooraf ook parameter 'filter' is ingesteld.");
-		}
-	else
-		{
+	if (bKeepFilter &amp;&amp; conf.getFilter(aColumnConfig) == null){
+		fn.message(lang.beware, lang.keep_filter_warning+ ".");
+	}
+	else {
 		return aColumnConfig["keepfilter"];
-		}	
+	}	
 };
 
 
@@ -1015,6 +1043,17 @@ conf.getWidthSetting = function(aColumnConfig){
 		return null;
 	return aColumnConfig["width"];
 };
+
+
+// retrieve text rendering setting of column
+// default is null (default rendering)
+conf.getTextRendering = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["render"] == 'undefined')
+		return null;
+	return aColumnConfig["render"];
+};
+
 
 
 
@@ -1085,23 +1124,17 @@ conf.getDefaultSortingColumns = function(oTableConfig){
 		var sColName = 		aColumnList[i];
 		var aColumnConfig =	conf.getColumnConfig(oTableConfig, sColName);
 		
-		if (typeof aColumnConfig["colsort"] != 'undefined')
-			{
-			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1)
-				{
+		if (typeof aColumnConfig["colsort"] != 'undefined'){
+			if ($.inArray(sColName, mt.getListOfColumnsOf(sTableName))>-1){
 				aSortingColumnsList.push(sColName);
-				}
-			else
-				{
-				var hParamsHash = getHttpParams();
-				var sDbName = hParamsHash.get("db");
-				fn.message("Fout in configuratie van tabel '"+sTableName+"'",				
-					"Kolom '"+sColName+"' van tabel '"+ sTableName + 
-					"' is aangewezen als sorteerkolom, maar deze kolom bestaat niet. " +
-					"Verwijder deze kolom uit het configuratiebestand " +
-					"("+ sDbName +".config.js).");
-				}
 			}
+			else {
+				fn.message(lang.error,				
+					lang.sort_column_warning1 +"&lt;BR>"+
+					lang.sort_column_warning2 +": "+ sTableName + "&lt;BR>"+
+					lang.sort_column_warning3 +": "+ sColName);
+			}
+		}
 	}	
 	return aSortingColumnsList;
 };
@@ -1130,29 +1163,28 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 	
 	var oTableSettings = 	conf.getTableSettings(sSomeTablename);
 	var oTsColSettings =	conf.getDefaultSortingFromTableSettings(oTableSettings);
-	if (oTsColSettings != null)
-		{
-		for (colName in oTsColSettings)
-			{
+	if (oTsColSettings != null){
+		for (colName in oTsColSettings){
 			// get column index, given the column name
 			var iColIndex = 	$.inArray(colName, mt.getListOfColumnsOf(sSomeTablename));
 			
 			// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
 			// it will cause Datatables to give a very cryptic error message.
 			// So, to prevent that, give a useful and understandable error message here!
-			if (iColIndex&lt;0)
-				{
-				fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+colName+"' als sorteer-kolom, maar deze kolom bestaat niet!");
-				}
-			else
-				{
-				aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
-				}
-			
+			if (iColIndex&lt;0){
+				fn.message(lang.error, 
+					lang.sort_column_warning1 +"&lt;BR>"+
+					lang.sort_column_warning2 +": "+ sSomeTablename + "&lt;BR>"+
+					lang.sort_column_warning3 +": "+ colName);
 			}
+			else {
+				aColSettings.push([ iColIndex, oTsColSettings[colName] ]);
+			}
+			
+		}
 		
 		return aColSettings;
-		}
+	}
 	
 	// [2] sorting was set in the table configuration array
 	
@@ -1160,8 +1192,7 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 	var oTableConfig = 		conf.getTableConfig(sSomeTablename);
 	var aDefaultSortCols =	conf.getDefaultSortingColumns(oTableConfig);
 	
-	for (var i=0; i&lt;aDefaultSortCols.length; i++)
-		{
+	for (var i=0; i&lt;aDefaultSortCols.length; i++){
 		var sDefaultSortCol = aDefaultSortCols[i];		
 		var sSortDir  = 	conf.getSortingColumnDirection(conf.getColumnConfig(oTableConfig, sDefaultSortCol));
 		
@@ -1171,16 +1202,17 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 		// if the column doesn't exist (because it was removed from the database table, or it was misspelled in the config file)
 		// it will cause Datatables to give a very cryptic error message.
 		// So, to prevent that, give a useful and understandable error message here!
-		if (iColIndex&lt;0)
-			{
-			fn.message("Fout", "De configuratie van tabel '"+sSomeTablename+"' vermeldt '"+sDefaultSortCol+"' als sorteer-kolom, maar deze kolom bestaat niet!");
-			}
-		else
-			{
-			aColSettings.push([ iColIndex, sSortDir ]);
-			}	
-		
+		if (iColIndex&lt;0) {
+			fn.message(lang.error, 
+					lang.sort_column_warning1 +"&lt;BR>"+
+					lang.sort_column_warning2 +": "+ sSomeTablename + "&lt;BR>"+
+					lang.sort_column_warning3 +": "+ sDefaultSortCol);
 		}
+		else {
+			aColSettings.push([ iColIndex, sSortDir ]);
+		}	
+		
+	}
 	return aColSettings;
 };
 
@@ -1670,7 +1702,7 @@ conf.getTableGroup = function(aTableSettings){
 };
 
 
-
+// get the grouping column setting, if available
 conf.getGroupingColumn = function(aTableSettings){
 	
 	if (typeof aTableSettings["grouping_column"] == 'undefined')
@@ -1678,6 +1710,16 @@ conf.getGroupingColumn = function(aTableSettings){
 	return aTableSettings["grouping_column"];
 	
 };
+
+
+// get the exact count setting, if available
+// default is false
+conf.getExactCount = function(aTableSettings){
+	if (typeof aTableSettings["exact_count"] == 'undefined')
+		return false;
+	return aTableSettings["exact_count"];
+};
+
 
 
 // retrieve the background color
@@ -1810,7 +1852,9 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 // this function is called when a button is being clicked upon
 conf.getHeaderButtonFunction = function(aButtonSettings){
 	if (typeof aButtonSettings["click"] == 'undefined')
-		return function(){fn.message("Configuratieprobleem", "Aan deze button is geen functie toegekend.");};
+		return function(){
+			fn.message(lang.error, lang.error_button_config);
+		};
 	return aButtonSettings["click"];
 };
 
@@ -1842,11 +1886,10 @@ conf.getTabSetting = function(aTableSettings){
 
 
 // retrieve size (or width) settings
-// default is 100%
 
 conf.getSize = function(aTableSettings){
 	
-	// try 'size'
+	// try 'size' (backwards compatibility)
 	if (typeof aTableSettings["size"] != 'undefined')
 		return aTableSettings["size"];
 	
@@ -1854,8 +1897,9 @@ conf.getSize = function(aTableSettings){
 	if (typeof aTableSettings["width"] != 'undefined')
 		return aTableSettings["width"];
 	
-	// none is set, so return default value
-	return "100%";
+	// none is set, so return the viewport width
+	// (which is the best to prevent table width from changing when css is updated or so)
+	return Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 	
 };
 
@@ -1893,7 +1937,7 @@ conf.getDisplayLength = function(aTableSettings){
 conf.getDisplayLengthMenu = function(aTableSettings){
 	
 	if (typeof aTableSettings["displaylength_menu"] == 'undefined')
-		return 'Toon &lt;select>'+
+		return lang.header_show+ ' &lt;select>'+
 		   '&lt;option value="1">1&lt;/option>'+
 		   '&lt;option value="5">5&lt;/option>'+
            '&lt;option value="10">10&lt;/option>'+
@@ -1902,8 +1946,8 @@ conf.getDisplayLengthMenu = function(aTableSettings){
            '&lt;option value="100">100&lt;/option>'+
            '&lt;option value="500">500&lt;/option>'+
            '&lt;option value="1000">1000&lt;/option>'+
-           '&lt;option value="-1">alle&lt;/option>'+
-           '&lt;/select> rijen';
+           '&lt;option value="-1">'+ lang.header_all +'&lt;/option>'+
+           '&lt;/select> '+ lang.header_rows;
 	
 	var sMenuBody = "";
 	for (var i=0; i&lt;aTableSettings["displaylength_menu"].length; i++)
@@ -1913,7 +1957,7 @@ conf.getDisplayLengthMenu = function(aTableSettings){
 		sMenuBody += '&lt;option value="'+sThisValue+'">'+sLabel+'&lt;/option>';
 		}
 	
-	return 'Toon &lt;select>'+ sMenuBody +	'&lt;/select> rijen';
+	return lang.header_show+' &lt;select>'+ sMenuBody + '&lt;/select> '+lang.header_rows;
 	
 };
 
@@ -2129,7 +2173,7 @@ conf.getDefaultSortingFromTableSettings = function(aTableSettings){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 14 2021 17:47:22 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Jul 06 2022 11:53:02 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

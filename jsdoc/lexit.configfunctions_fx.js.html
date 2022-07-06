@@ -166,12 +166,13 @@ fx.getAllRows = function(oTable){
  */
 fx.getRowId = function(oRow){
 	
-	if ( !fx.isApiInstance(oRow) )
-		{
-		fn.message("Fout", "fx.getRowId() is verkeerd aangeroepen. " +
-				"oRow hoort een API instance te bevatten.");
+	if ( !fx.isApiInstance(oRow) ){
+		fn.message(lang.error, 
+				lang.error_when_calling+ " fx.getRowId().&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_expected+ ": API instance.");
 		return;
-		}
+	}
 	
 	if (oRow.count() == 0)
 		return null;
@@ -196,14 +197,13 @@ fx.getRowWhere = function(sSomeTable, aFieldsAndValues){
 	// pre-check: are the given fields correct?
 	for (sFieldName in aFieldsAndValues)
 	{		
-		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) &lt; 0)
-			{
-			fn.message("Fout", 
-					"Verkeerde aanroep van fx.getRowWhere("+sTableName+"). " +
-					"De opgegeven kolom '"+sFieldName+"' komt niet voor in tabel '"+sTableName+"'.");
-			
+		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) &lt; 0){
+			fn.message(lang.error, 
+				lang.error_when_calling+" fx.getRowWhere("+sTableName+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": " +sTableName+"."+sFieldName);			
 			return null;
-			}
+		}
 	}
 	
 	// apply the filters to the Database API instance
@@ -235,10 +235,10 @@ fx.getAllRowsWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 	{		
 		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) &lt; 0)
 			{
-			fn.message("Fout", 
-					"Verkeerde aanroep van fx.getAllRowsWhere("+sTableName+"). " +
-					"De opgegeven kolom '"+sFieldName+"' komt niet voor in tabel '"+sTableName+"'.");
-			
+			fn.message(lang.error, 
+					lang.error_when_calling+" fx.getAllRowsWhere("+sTableName+").&lt;BR>"+ 
+					lang.error_function_called_with_illegal_value+". "+
+					lang.error_function_called_with_illegal_value_input+ ": " +sTableName+"."+sFieldName);			
 			return null;
 			}
 	}
@@ -350,8 +350,7 @@ fx.selectAllRows = function(sSomeTable){
  */
 fx.selectRow = function(sSomeTable, iRowNumber){
 
-	if (iRowNumber == null &amp;&amp; fx.isApiInstance(sSomeTable))
-	{
+	if (iRowNumber == null &amp;&amp; fx.isApiInstance(sSomeTable)){
 		iRowNumber = fx.getRowNumberOnScreen(sSomeTable);
 		sSomeTable = fx.getTableName(sSomeTable);
 	}
@@ -362,15 +361,14 @@ fx.selectRow = function(sSomeTable, iRowNumber){
 	
 	// NOTE the operation is performed onto the node
 	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
-	if ( iRowNumber>=0 &amp;&amp; !nRowSelector.hasClass("selected"))
-		{
+	if ( iRowNumber>=0 &amp;&amp; !nRowSelector.hasClass("selected")){
 		nRowSelector.toggleClass('selected');
-		}
-	else if (iRowNumber&lt;0)
-		{
-		fn.message("Fout", "fx.selectRow("+sSomeTable+") " +
-				"is aangeroepen met een negatieve waarde voor iRowNumber: "+iRowNumber);
-		};
+	}
+	else if (iRowNumber&lt;0){
+		fn.message(lang.error, lang.error_when_calling+" fx.selectRow("+sSomeTable+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": " +iRowNumber);
+	};
 };
 
 
@@ -540,17 +538,15 @@ fx.getNumberOfSelectedRows = function(oSomeTable){
 fx.getCell = function(mixed, sColumnName){
 	
 	// input is an API instance
-	if ( fx.isApiInstance(mixed) )
-		{
+	if ( fx.isApiInstance(mixed) ){
 		
 		// in this case sColumnName is compulsory
-		if (typeof sColumnName == 'undefined')
-			{
-			fn.message("Fout", "fx.getCell() is verkeerd aangeroepen. " +
-					"Wanneer mixed een API instance van een row bevat, " +
-					"moet sColumnName verplicht worden opgegeven.");
+		if (typeof sColumnName == 'undefined'){
+			fn.message(lang.error, lang.error_when_calling+ " fx.getCell().&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_expected+ ": sColumnName.");
 			return;
-			}
+		}
 		
 		var sTableName =	fx.getTableName(mixed);
 		var oTable = 		mt.getDataTableObjectOf(sTableName);
@@ -559,11 +555,10 @@ fx.getCell = function(mixed, sColumnName){
 		var iColIndex = 	fn.getColumnNumberOf(sTableName, sColumnName);
 		
 		return oTable.cell( iRowIndex, iColIndex );		
-		}
+	}
 	
 	// input is a node
-	else
-		{
+	else {
 		
 		var sTableName =	fn.getTableName(mixed);
 		var oTable = 		mt.getDataTableObjectOf(sTableName);
@@ -578,12 +573,11 @@ fx.getCell = function(mixed, sColumnName){
 		
 		// if some column name was specified,
 		// we want to get an API instance of a named cell out of a row node
-		else
-			{
+		else {
 			return oTable.cell( mixed );
-			}
-			
 		}
+			
+	}
 };
 
 
@@ -736,7 +730,10 @@ fx.getRow = function(nRow){
 	
 	if ( fx.isApiInstance(nRow) )
 		{
-		fn.message("Fout", "fx.getRow() is aangeroepen met een API instance, maar deze functie verwacht een node als argument!");
+		fn.message(lang.error, lang.error_when_calling+" fx.getRow().&lt;BR>"+ 
+			lang.error_function_called_with_illegal_value+". "+
+			lang.error_function_called_with_illegal_value_input+ ": API instance. " +
+			lang.error_function_called_with_illegal_value_expected+ ": node.");
 		return;
 		}
 	
@@ -1061,6 +1058,10 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 	
 	if ( !fx.isApiInstance(oArgument))
 		{
+		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
+		console.log("oArgument:"+oArgument);
+		
 		// try to compute name of table in which error occurs
 		var sTableName = "";
 		var sArgType = "";
@@ -1093,11 +1094,14 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 		catch (err){
 			sTableName = "";
 			sArgType = "onbekende type";
-		}		
+		}
+		
 		
 		// give error information
-		fn.message("Fout", sFunctionName + "("+sTableName+") is aangeroepen met een "+sArgType+" als argument. " +
-				"Dit is niet toegestaan! Gebruik een API instance.");
+		fn.message(lang.error, lang.error_when_calling+ " "+ sFunctionName + "("+sTableName+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": "+sArgType+". " +
+				lang.error_function_called_with_illegal_value_expected+ ": API instance.");
 		return;
 		}
 }
@@ -1117,7 +1121,7 @@ fx._checkApiInstance = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 14 2021 17:47:22 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Jul 06 2022 11:53:02 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

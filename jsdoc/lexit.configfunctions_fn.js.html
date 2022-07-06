@@ -226,8 +226,7 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 				"lexit_function": "fn.getLibrary"
 				});
 		else
-			fn.message("Fout",
-			"Fout bij aanroep van fn.getLibrary(): " +				
+			fn.message(lang.error, lang.error_when_calling+" fn.getLibrary(): " +				
 			textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 	});
 	
@@ -250,8 +249,6 @@ var setSchemaTimeOut = null;
  */
 fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	
-	// force webservice to clean its counter cache etc
-	// update the database
 	var url = WEBSERV_URL+"/table/set_schema"; 
 	$.ajax( {
 		"type": "GET",
@@ -277,7 +274,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		// we must remove the TimeOut that was set to keep the previously set schema, 
 	 		// and set a new TimeOut as final step.
 	 		
-	 		if (setSchemaNameCache != sNewSchema &amp;&amp; setSchemaTimeOut != null)
+	 		if (setSchemaTimeOut != null)
 	 			{
 	 			clearTimeout(setSchemaTimeOut);
 	 			}
@@ -290,7 +287,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 						// the developers most probably expect that a schema is set once and for all, 
 						// and do not know of the necessity to re-call the function regularly, as this is just
 						// a trick to deal with the short life of the ContextObject. As a consequence, the
-						// callback give as a parameter is called only at the first round, to meet this 
+						// callback given as a parameter is called only at the first round, to meet this 
 						// probable expectation (of developers) of the function behavior. 
 						fn.setSchema(sNewSchema, null, fnErrorHandler);						
 						}, 
@@ -311,8 +308,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 					"sNewSchema": sNewSchema
 					});
 			else
-				fn.message("Fout",
-				"Fout bij aanroep van fn.setSchema("+sNewSchema+"): " +				
+				fn.message(lang.error, lang.error_when_calling+ " fn.setSchema("+sNewSchema+"): " +				
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -1169,8 +1165,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 					"sSomeTablename": sSomeTablename
 					});
 			else
-				fn.message("Fout",
-				"Fout bij aanroep van fn.cleanTableCache("+sSomeTablename+"): " +				
+				fn.message(lang.error, lang.error_when_calling+ " fn.cleanTableCache("+sSomeTablename+"): " +				
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -1454,14 +1449,10 @@ fn.getRowNodeWhere = function(sSomeTable, aFieldsAndValues){
 	// pre-check: are the given fields correct?
 	for (sFieldName in aFieldsAndValues)
 	{		
-		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) &lt; 0)
-			{
-			fn.message("Fout", 
-					"Verkeerde aanroep van fn.getRowNodeWhere("+sTableName+"). " +
-					"De opgegeven kolom '"+sFieldName+"' komt niet voor in tabel '"+sTableName+"'.");
-			
+		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) &lt; 0) {
+			fn.message(lang.error, lang.error_when_calling+ " fn.getRowNodeWhere("+sTableName+"). " + lang.error_column_doesnot_exist+": '"+sFieldName+"'");			
 			return null;
-			}
+		}
 	}
 	
 	// apply the filters and return the first row node
@@ -1582,8 +1573,8 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 		}
 	else if (iRowNumber&lt;0)
 		{
-		fn.message("Fout", "fn.selectRowNode("+sSomeTable+") " +
-				"is aangeroepen met een negatieve waarde voor iRowNumber: "+iRowNumber);
+		fn.message(lang.error, lang.error_when_calling+ " fn.selectRowNode("+sSomeTable+"). &lt;BR>" +
+				lang.error_function_called_with_illegal_value+ ": "+iRowNumber);
 		};
 };
 
@@ -1630,6 +1621,18 @@ fn.getSelectedRowNodesFrom = function(someTable){
 		
 	return fx.getSelectedRowsFrom(someTable).nodes().toArray();
 };
+
+
+/**
+ * Get the first row node of a table
+ * 
+ * @param {(String|API-object-instance)} someTable - Table name or object
+ * @returns {Node} A row node
+ */
+fn.getFirstRowNodeFrom = function(someTable){
+
+	return fx.getFirstRowFrom(someTable).node();
+}
 
 
 /**
@@ -1762,22 +1765,22 @@ fn.getCellInRowNode = function(nRow, sColumnName){
 	fn._checkApiInstance("fn.getCellInRowNode", nRow);
 	fn._checkjQueryObject("fn.getCellInRowNode", nRow);
 	
-	if ( !fn.isRowNode(nRow) )
-		{
-		fn.message("Let op", "De functie fn.getCellInRowNode("+fn.getTableName(nRow)+") is aangeroepen " +
-				"met een cell node, " +
-				"maar deze functie verwacht een row node als argument.");
+	if ( !fn.isRowNode(nRow) ) {
+		fn.message(lang.beware, 
+				lang.error_when_calling+ " fn.getCellInRowNode("+ fn.getTableName(nRow)+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": cell node. " +
+				lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return null;
-		}
-	else
-		{
+	}
+	else {
 		var sTable = 			fn.getTableName(nRow);
 		var iThisCellNumber =	fn.getVisibleColumnNumberOf(sTable, sColumnName);
 		
 		
 		// get(0) makes sure we get the node out of the jQuery object
 		return $('td:eq('+iThisCellNumber+')', nRow).get(0);
-		}	
+	}	
 };
 
 
@@ -2127,27 +2130,27 @@ fn.getDataFromSiblingNode = function(nCell, sOtherColumnName){
 
 	var colNr = $.inArray(sOtherColumnName, mt.getListOfColumnsOf(sTable));
 	
-	if (  !fn.isCellNode(nCell) )
-		{
-		fn.message("Fout", "fn.getDataFromSiblingNode("+sTable+") " +
-				"is aangeroepen met een row node, maar deze functie werkt met cell nodes.");
+	if (  !fn.isCellNode(nCell) ) {
+		fn.message(lang.error, lang.error_when_calling+ " fn.getDataFromSiblingNode("+sTable+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": row node. " +
+				lang.error_function_called_with_illegal_value_expected+ ": cell node.");
 		return "";		
-		}
-	else if (colNr&lt;0)
-		{
-		fn.message("Fout", "fn.getDataFromSiblingNode("+sTable+") " +
-				"is aangeroepen met een niet bestaande kolomnaam: '"+sOtherColumnName+"'.");
+	}
+	else if (colNr&lt;0) {
+		fn.message(lang.error, lang.error_when_calling+ " fn.getDataFromSiblingNode("+sTable+").&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": '"+ sOtherColumnName+"'.");
 		return "";
-		}
-	else
-		{
+	}
+	else {
 		var nRowNodeForThisCellNode =	fn.getRowNode(nCell);
 		var oRowData = 					oTable.row( nRowNodeForThisCellNode ).data();
 		
 		// data can return an object or an array 
 		return (typeof oRowData == 'object') ?
 			oRowData[sOtherColumnName] : oRowData[colNr];
-		}	
+	}	
 };
 
 
@@ -2167,9 +2170,11 @@ fn.getDataFromCellNode = function(nCell){
 	
 	if (fn.isRowNode(nCell))
 		{
-		fn.message("Fout", 
-				"Verkeerde aanroep van fn.getDataFromCellNode("+fn.getTableName(nCell)+"). " +
-				"nCell bevat geen cell node, maar een row node.");
+		fn.message(lang.error, 
+				lang.error_when_calling+ " fn.getDataFromCellNode("+fn.getTableName(nCell)+").&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": row node. " +
+				lang.error_function_called_with_illegal_value_expected+ ": cell node.");
 		return;
 		}	
 	
@@ -2194,9 +2199,11 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 	
 	if (fn.isCellNode(nRow))
 		{
-		fn.message("Fout", 
-				"Verkeerde aanroep van fn.getDataFromCellInRowNode("+fn.getTableName(nRow)+"). " +
-				"nRow bevat geen row node, maar een cell node.");
+		fn.message(lang.error, 
+				lang.error_when_calling+ " fn.getDataFromCellInRowNode("+fn.getTableName(nRow)+").&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": cell node. " +
+				lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return;
 		}
 	
@@ -2208,8 +2215,9 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 	
 	if (colNr&lt;0)
 		{
-		fn.message("Fout", "fn.getDataFromCellInRowNode("+sTable+") " +
-				"is aangeroepen met een niet bestaande kolomnaam: '"+sColumnName+"'.");
+		fn.message(lang.error, lang.error_when_calling+" fn.getDataFromCellInRowNode("+sTable+").&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+": '"+ sColumnName+"'.");
 		
 		return "";
 		}
@@ -2229,7 +2237,7 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 /**
  * Get the content of a whole column, given its name
  * 
- * @param {Node} sSomeTable - A table name or object
+ * @param {String} sSomeTable - A table name or object
  * @param {String} sColumnName - Name of a column 
  * @returns {String[]} Content of the cells of the column
  * 
@@ -2257,13 +2265,13 @@ fn.getDataFromRowNode = function(nRow){
 	fn._checkApiInstance("fn.getDataFromRowNode", nRow);
 	fn._checkjQueryObject("fn.getDataFromRowNode", nRow);
 
-	if ( !fn.isRowNode(nRow) )
-		{
-		fn.message("Fout", 
-				"Verkeerde aanroep van fn.getDataFromRowNode("+fn.getTableName(nRow)+"). " +
-				"nRow bevat geen row node.");
+	if ( !fn.isRowNode(nRow) ){
+		fn.message(lang.error, 
+				lang.error_when_calling+" fn.getDataFromRowNode("+fn.getTableName(nRow)+").&lt;BR>" +
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return;
-		}
+	}
 	
 	var sTable = fn.getTableName(nRow);
 	var oTable = mt.getDataTableObjectOf(sTable);
@@ -2537,28 +2545,23 @@ fn.putDataIntoCellNode = function(nRow, sColumnName, sContent){
 	var sTable = fn.getTableName(nRow);
 	var oTable = mt.getDataTableObjectOf(sTable);
 	
-	if ( fn.isCellNode(nRow) )
-		{
-		fn.message("Fout", 
-				"Let op: fn.putDataIntoCellNode("+sTable+") " +
-				"is aangeroepen met een cell node, " +
-				"terwijl de functie een row node vereist.");
+	if ( fn.isCellNode(nRow) ){
+		fn.message(lang.error, 
+				lang.error_when_calling+ " fn.putDataIntoCellNode("+sTable+").&lt;BR>"+
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_input+ ": cell node. " +
+				lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return;
-		}
+	}
 	
 	var sNodeId = fn.getRowNodeId(nRow);
 	
-	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
-		{
-		fn.message("Fout",
-				"Fout bij aanroep van fn.putDataIntoCellNode("+sTable+"). "+
-				"Tabel '"+sTable+"' heeft geen IDs. " +
-				"Rijen aanwijzen zonder IDs is onmogelijk. " +
-				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft; " +
-				"LET erop dat multicolumns primary keys niet ondersteund worden]");
+	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '') {
+		fn.message(lang.error,
+				lang.error_when_calling+ " fn.putDataIntoCellNode("+sTable+").&lt;BR>"+ 
+				lang.error_table_has_no_row_ids);
 		return;
-		}
+	}
 	
 	// put content into right cell, given column name
 	// since we update the screen cells, we use the 'visible' column index here
@@ -2594,27 +2597,22 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 	var oTable = mt.getDataTableObjectOf(sTable);
 		
 	var sNodeId = fn.getRowNodeId(nMixed);	
-	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
-		{
-		fn.message("Fout",
-				"Fout bij aanroep van fn.updateDatabaseGivenANode("+sTable+"). "+
-				"Tabel '"+sTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
-				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft; " +
-				"LET erop dat multicolumns primary keys niet ondersteund worden]");
+	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == ''){
+		fn.message(lang.error,
+				lang.error_when_calling+ " fn.updateDatabaseGivenANode("+sTable+").&lt;BR>"+ 
+				lang.error_table_has_no_row_ids);
 		return;
-		}
+	}
 	
 	
 	// convert associative array into separate arrays of column names and values
 	var aColumnNames = new Array();
 	var aColumnValues = new Array();
 	
-	for (var sFieldName in aColumnNamesAndValues)
-		{
+	for (var sFieldName in aColumnNamesAndValues){
 		aColumnNames.push(sFieldName);
 		aColumnValues.push(aColumnNamesAndValues[sFieldName]);
-		}
+	}
 	
 	
 	// update the database
@@ -2649,8 +2647,8 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 					"nMixed": nMixed, "aColumnNamesAndValues": aColumnNamesAndValues
 					});
 			else
-				fn.message("Fout", 
-				"Fout bij aanroep van fn.updateDatabaseGivenANode("+sTable+"): "+
+				fn.message(lang.error, 
+				lang.error_when_calling+ " fn.updateDatabaseGivenANode("+sTable+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );		
@@ -2733,8 +2731,8 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch, "aFieldsAndValuesToUpdate": aFieldsAndValuesToUpdate
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.updateDatabaseGivenFieldValues("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.updateDatabaseGivenFieldValues("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -2808,8 +2806,8 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToAdd": aFieldsAndValuesToAdd, "returnField": returnField
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.insertIntoDatabase("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.insertIntoDatabase("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -2869,8 +2867,8 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 					"sSomeTablename": sSomeTablename, "aListOfColumnsToSkip": aListOfColumnsToSkip, "pkSubstitute": pkSubstitute, "pkValue": pkValue
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.duplicateRecord("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.duplicateRecord("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -2938,8 +2936,8 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 					"sSomeTablename": sSomeTablename, "aFieldsAndValues": aFieldsAndValues
 					});
 			else
-				fn.message("Fout", 
-	 				"Fout bij aanroep van fn.getIdFromDatabase("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 				lang.error_when_calling+" fn.getIdFromDatabase("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -2967,16 +2965,12 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	var oTable = mt.getDataTableObjectOf(sTable);
 	
 	var sNodeId = fn.getRowNodeId(nRow);	
-	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == '')
-		{
-		fn.message("Fout",
-				"Fout bij aanroep van fn.removeFromDatabaseGivenANode("+sTable+"). "+
-				"Tabel '"+sTable+"' heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
-				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
-				"omdat de tabel geen primary key noch pkid-veld heeft; " +
-				"LET erop dat multicolumns primary keys niet ondersteund worden]");
+	if (typeof sNodeId == 'undefined' || $.trim(sNodeId) == ''){
+		fn.message(lang.error,
+				lang.error_when_calling+ " fn.removeFromDatabaseGivenANode("+sTable+").&lt;BR>"+ 
+				lang.error_table_has_no_row_ids);
 		return;
-		}
+	}
 	
 	
 	// update the database
@@ -3007,8 +3001,8 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 					"nRow": nRow
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.removeFromDatabaseGivenANode("+sTable+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+" fn.removeFromDatabaseGivenANode("+sTable+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3073,8 +3067,8 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch
 					});
 			else
-				fn.message("Fout",
-	 			"Fout bij aanroep van fn.removeFromDatabaseGivenFieldValues("+sSomeTablename+"): "+
+				fn.message(lang.error,
+	 			lang.error_when_calling+ " fn.removeFromDatabaseGivenFieldValues("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3110,14 +3104,14 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	
 	var sTable = fn.getTableName(nRow);
 	
-	if ( fn.isCellNode(nRow))
-		{
-		fn.message("Fout", 
-				"Let op: fn.callRecord("+sTable+") " +
-				"is aangeroepen met een cell node, " +
-				"terwijl de functie een row node vereist.");
+	if ( fn.isCellNode(nRow)){
+		fn.message(lang.error, 
+			lang.error_when_calling+ " fn.callRecord("+sTable+").&lt;BR>"+ 
+			lang.error_function_called_with_illegal_value+". "+
+			lang.error_function_called_with_illegal_value_input+ ": cell node. " +
+			lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return;
-		}	
+	}
 	
 	// we need to extract the record id from the row node
 	var sRecordId = fn.getRowNodeId(nRow);
@@ -3125,9 +3119,10 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	// if that failed, give a error
 	if ( $.isNullOrUndefined(sRecordId) || sRecordId == '' )
 		{
-		fn.message("Fout", 
-				"Let op: fn.callRecord("+sTable+") " +
-				"verreist een record id.");
+		fn.message(lang.error, 
+				lang.error_when_calling+ " fn.callRecord("+sTable+").&lt;BR>"+ 
+				lang.error_function_called_with_illegal_value+". "+
+				lang.error_function_called_with_illegal_value_expected+": record id.");
 		return;
 		}
 	
@@ -3161,8 +3156,8 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 					"nRow": nRow, "aColumnsToUpdate": aColumnsToUpdate
 					});
 			else
-				fn.message("Fout",
-	 			"Fout bij aanroep van fn.callRecord("+sTable+"): "+
+				fn.message(lang.error,
+	 			lang.error_when_calling+" fn.callRecord("+sTable+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3260,8 +3255,8 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 					"sSomeTablename": sSomeTablename, "sRecordId": sRecordId
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.getRecord("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+" fn.getRecord("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3317,8 +3312,8 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 					"sSomeTablename": sSomeTablename, "aRecordIds": aRecordIds
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.getRecords("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.getRecords("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3387,8 +3382,8 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.getRecord("+sSomeTablename+"): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.getRecord("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -3541,8 +3536,8 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 					"sFunctionName": sFunctionName, "aFunctionArguments": aFunctionArguments
 					});
 			else
-				fn.message("Fout", 
-	 			"Fout bij aanroep van fn.callFunction(" + sFunctionName + "): "+
+				fn.message(lang.error, 
+	 			lang.error_when_calling+" fn.callFunction(" + sFunctionName + "): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));			
 			}
 		} );
@@ -3609,7 +3604,7 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 			        source: function(request, response){
 			            	
 			           	fn.callFunction(sFunctionName, [ request.term ], 
-			          		function(func_resp){  
+			          		function(func_resp){
 			            		
 			           			var sOutputLabel = sFunctionName.indexOf(".")>-1 ?
 			           					sFunctionName.substring(sFunctionName.indexOf(".")+1) : sFunctionName;
@@ -3623,8 +3618,13 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 			                        };
 			                    }));
 			            	});
-			            }
-		          });
+					},
+					open: function(event, ui){
+
+						// make sure that the autocomplete won't disappear behind the table (it did happen in the past...)
+						$(event.target).putInFront();
+					}
+		        });
 		          
 		      }
 		  );
@@ -3713,7 +3713,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		position: fn._computeDialogPosition(),
 		buttons: [
 		          {			
-		        	  text: "OK",
+		        	  text: lang.ok,
 		        	  click: function() {
 						$( this ).dialog( "close" );
 						
@@ -3813,8 +3813,10 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
 	if (fnFunction == null)
 		{
-		fn.message("Fout", "Illegale aanroep van fn.confirm(). " +
-				"Er is geen callback gedefinieerd (fnFunction=null).");
+		fn.message(lang.error, 
+			lang.error_when_calling+" fn.confirm().&lt;BR>"+
+			lang.error_function_called_with_illegal_value+". "+
+			lang.error_function_called_with_illegal_value_expected+ ":  callback (fnFunction=null).");
 		}
 	else
 		{
@@ -3840,7 +3842,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 			position: fn._computeDialogPosition(),
 			buttons: [
 			          {
-			        	 text: "Ja",
+			        	 text: lang.yes,
 			        	 click: function() {
 								$( this ).dialog( "close" );					
 								fnFunction();
@@ -3848,7 +3850,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 					    id: 'dialog_accept_button'
 			          },
 			          {
-			        	  text: "Nee",
+			        	  text: lang.no,
 			        	  click: function() {
 								$( this ).dialog( "close" );
 								if (fnCancelFunction!=null)
@@ -3868,20 +3870,35 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 fn._computeDialogPosition = function(){
 	
 	var sTable = kf.getActiveTable();
+
+	// No table open yet? Return empty settings, which will result in default window centering
 	if (sTable == null)	return {};
+
+
+	// if we do have a table open, try to find the active row
+
+	var nElementToPositionAgainst = $("#"+sTable+"_dynamic");
 	
 	var nRow = $("#"+sTable+"_wrapper table tbody tr:not('.group').selected:eq(0)");	
 	if ( nRow != null)
 		nRow = nRow.get(0); // get DOM element out of jquery object
 	else
 		nRow = fn.getFirstSelectedRowNodeFrom(sTable); // last rescue?
-	
+
+
 	// in some cases, the row is empty
-	if (nRow == null || nRow.length == 0)
-		{
+	if (nRow == null || nRow.length == 0){
 		// this will cause the dialog to be centered
-		return {}; 
-		}
+		return {
+			my: "center",
+			at: "center",
+			of: nElementToPositionAgainst,
+			using: function(oComputedPosition, oElementAndTarget){				
+				var nDialog = oElementAndTarget.element.element.get(0);
+				$(nDialog).css("left", $(window).width() / 2 - (oElementAndTarget.element.width / 2)).css("top", oComputedPosition.top);
+			}
+		}; 
+	}
 	
 	// but if we have a non-empty row, position the dialog relative to that row
 	var oOffset = $(nRow).offset();
@@ -3891,7 +3908,13 @@ fn._computeDialogPosition = function(){
 	return {
 		my: iRowPosition &lt; iMiddleOfScreen ? 'center top' : 'center bottom',
     	at: iRowPosition &lt; iMiddleOfScreen ? 'center bottom' : 'center top',
-    	of: nRow
+		of: nRow,
+		within: nElementToPositionAgainst,
+		using: function(oComputedPosition, oElementAndTarget){			
+			var nDialog = oElementAndTarget.element.element.get(0);
+			$(nDialog).css("left", $(window).width() / 2 - (oElementAndTarget.element.width / 2)).css("top", oComputedPosition.top);
+			
+		}
     }
 };
 
@@ -4011,8 +4034,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			.attr("type", "checkbox" )
 			.val(aValues[i])
 			.prop("checked", aValues[i])
-			.change(function(){
-				$(this).val( $(this).prop("checked") );
+			.change(function(){ 
+				$(this).val( $(this).prop("checked") ); 
+				// beware: the checked attribute is string typed somehow
 			});
 		}
 		
@@ -4066,7 +4090,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	// Put a OK button only if we have a callback function, even an empty one
 	if (fnFunction != null){
 		aButtons.push({
-       	 text: "OK",
+       	 text: lang.ok,
     	 click: function(){
     		 
     		var aPromptResponse = {}; 
@@ -4106,7 +4130,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	// A cancel button is always needed
 	aButtons.push({
-    	text: "Annuleren",
+    	text: lang.cancel,
     	click: function() {
     		$( this ).dialog( "close" );
     		// call callback upon Cancel
@@ -4159,9 +4183,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		for (var i=0; i&lt;aDatePickersIds.length; i++){
 			$( "#" + aDatePickersIds[i] ).datepicker({
 				dateFormat: "dd-mm-yy"
-			});		
-		
-			
+			});
 		}
 	}, 1000);
 
@@ -4225,7 +4247,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	var sFilter = $("&lt;p>&lt;/p>")
 		.append(
 			$("&lt;span>&lt;/span>")
-				.text("Filter: ")
+				.text(lang.filter+ ": ")
 		)
 		.append(
 			$("&lt;input>&lt;/input>")
@@ -4260,7 +4282,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	// user instructions
 	if (mSelectionMode == false)
 		{
-		var sP = $("&lt;p>&lt;/p>").html("Houd CTRL ingedrukt bij meervoudige keuze:");	
+		var sP = $("&lt;p>&lt;/p>").html(lang.hold_ctrl_for_multiple_choice+ ":");	
 		promptDiv.append(sP);
 		}	
 	
@@ -4289,7 +4311,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	// Put a OK button only if we have a callback function, even an empty one
 	if (fnFunction != null){
 		aButtons.push({
-      	  text: "OK",
+      	  text: lang.ok,
     	  click: function(){
     		  
 			var aNewChosenOptions = new Array();
@@ -4314,7 +4336,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	// A cancel button is always needed
 	aButtons.push({
-	  text: "Annuleren",
+	  text: lang.cancel,
 	  click: function() {
 		  // call close function
           $( this ).dialog( "close" );
@@ -4507,7 +4529,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	// Put a OK button only if we have a callback function, even an empty one
 	if (fnFunction != null){
 		aButtons.push({
-      	  text: "OK",
+      	  text: lang.ok,
     	  click: function(){
     		  
     		for (var i=0; i&lt;aFieldNames.length; i++)
@@ -4541,7 +4563,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	// A cancel button is always needed
 	
 	aButtons.push({
-  	  text: "Annuleren",
+  	  text: lang.cancel,
 	  click: function() {
 		  $( this ).dialog( "close" );
 		  // call callback upon Cancel
@@ -4652,21 +4674,19 @@ fn.getPromptBoxOrder = function(){
  */
 fn.processPromptBoxOrder = function(aPromptBoxOrder, aArrayToResort){
 	
-	if (aPromptBoxOrder.length != aArrayToResort.length)
-		{
-		fn.message("Fout", "fn.processPromptBoxOrder() is aangeroepen met twee arrays van verschillende lengtes.");
-		}
-	else
-		{
+	if (aPromptBoxOrder.length != aArrayToResort.length) {
+		fn.message(lang.error, 
+			lang.error_when_calling+ " fn.processPromptBoxOrder().&lt;BR>" + lang.error_function_called_with_illegal_value+ ": array length");
+	}
+	else {
 		var aNewArray = new Array();
 		
-		for (var i=0; i&lt;aPromptBoxOrder.length; i++)
-			{
+		for (var i=0; i&lt;aPromptBoxOrder.length; i++) {
 			aNewArray.push( aArrayToResort[ aPromptBoxOrder[i] ] );
-			}
+		}
 		
 		return aNewArray;
-		}
+	}
 	
 };
 
@@ -4917,27 +4937,33 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	var iColNr = fn.getVisibleColumnNumberOf(sSomeTable, sCellName);
 	
 	// carry on only if the search box exists (is visible column) 
-	if (iColNr>-1)
-		{
-		var oTableConfig = conf.getTableConfig(sSomeTableName);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
-		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+	if (iColNr>-1) {
 		
 		// determine right selector for searchbox (input or select type)
 		
 		var searchBoxSelector = $("#"+sSomeTableName+"_searchbox_"+sCellName);		
 			
-		if (searchBoxSelector.attr("disabled") != "disabled")
-			{			
+		if (searchBoxSelector.attr("disabled") != "disabled") {		
+
 			// put value
 			searchBoxSelector.val( sSomeData );
 
-			// special case: if we have a checkbox, we also need to (un)check it			
-			if (searchBoxSelector.attr("type")=="checkbox" &amp;&amp; sf.isCheckboxTrueValue(sSomeData))
+			// special cases:
+
+			// if we have a checkbox, we also need to (un)check it			
+			if (searchBoxSelector.attr("type")=="checkbox" &amp;&amp; sf.isCheckboxTrueValue(sSomeData)) {
 				searchBoxSelector.prop("checked", "checked");
-			
+			}
+
+			// if we have a select box, we also need to set the right value
+			if (searchBoxSelector.find("option").length > 0) {
+				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
+				searchBoxSelector.find("option").filter(function(i, e) {
+					return e.text == sSomeData
+				}).attr("selected", "selected");
 			}
 		}
+	}
 };
 
 
@@ -4957,19 +4983,15 @@ fn.getValueOfFilterBox = function(sSomeTable, sCellName){
 	var iColNr = fn.getVisibleColumnNumberOf(sSomeTable, sCellName);
 	
 	// carry on only if the search box exists (is visible column)
-	if (iColNr>-1)
-		{
-		var oTableConfig = conf.getTableConfig(sSomeTableName);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
-		var oColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+	if (iColNr>-1) {
 		
 		// determine right selector for searchbox (input or select type)
-		var searchDivSelector = $("#"+sSomeTableName+"_searchboxes div:eq("+iColNr+")");
-		var searchBoxSelector = (oColumnSelectionBox!=null) ? 
-				searchDivSelector.find("select").eq(0).find(":selected") : searchDivSelector.find("input").eq(0);
-		
+		var searchDivSelector = $("#"+sSomeTableName+"_searchboxes td:eq("+iColNr+")");
+		var searchBoxSelector = (searchDivSelector.find("option").length > 0) ? 
+				searchDivSelector.find("select").find(":selected") : searchDivSelector.find("input").eq(0);
+
 		return $.trim(searchBoxSelector.val());
-		}	
+	}	
 	return "";
 };
 
@@ -5355,17 +5377,12 @@ fn.getHighlight = function(sString, aaIndexes, sColor){
 	// check if indexes are given the right way:
 	// when only one pair of positions needs to be given, it's easy to forget to put that array in an array
 	// (that is: [] is wrong, [[]] is correct)
-	if ( $.isArray(aaIndexes) )
-		{
-		if ( !$.isArray( aaIndexes[0]) )
-			{
-			fn.message("Fout", 
-					"De highlightposities in fn.getHighlight() zijn niet correct opgegeven. " +
-					"De posities moeten worden opgegeven als een array van arrays: " +
-					"[[a1,b1], [a2,b2], [a3,b3]].");
+	if ( $.isArray(aaIndexes) ){
+		if ( !$.isArray( aaIndexes[0]) ){
+			fn.message(lang.error, lang.error_highlight);
 			return sString;
-			}			
-		}
+		}			
+	}
 	
 	// make sure the indexes are sorted correctly
 	aaIndexes = sortArrayOfArray(aaIndexes);
@@ -5375,8 +5392,7 @@ fn.getHighlight = function(sString, aaIndexes, sColor){
 	var iTotalIndexCorrection = 0;
 	var iIndexCorrectionForEachStep = (sPreTag+sPostTag).length;
 	
-	for (var i=0; i&lt;aaIndexes.length; i++)
-		{
+	for (var i=0; i&lt;aaIndexes.length; i++){
 		var aIndexes = aaIndexes[i];
 		
 		// prevent wrong highlighting 
@@ -5400,7 +5416,7 @@ fn.getHighlight = function(sString, aaIndexes, sColor){
 		
 		// apply index correction
 		iTotalIndexCorrection += iIndexCorrectionForEachStep;		
-		}
+	}
 	
 	return sString;
 };
@@ -5470,8 +5486,8 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
 					});
 			else
-				fn.message("Fout",
-				"Fout bij aanroep van fn.callService(): " +				
+				fn.message(lang.error,
+				lang.error_when_calling+" fn.callService(): " +				
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		}
@@ -5595,7 +5611,7 @@ fn.setCurrentUser = function(sName, fnErrorHandler){
 					"sName": sName
 					});
 			else
-				fn.message("Fout", "Bij het aanroepen van fn.setCurrentUser('"+sName+"') is een fout opgetreden: "+
+				fn.message(lang.error, lang.error_when_calling+ " fn.setCurrentUser('"+sName+"'): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
@@ -5688,25 +5704,29 @@ fn.getLastDbResponse = function(){
 // and give an error if it was!
 fn._checkApiInstance = function(sFunctionName, oArgument){
 	
-	if (fx.isApiInstance(oArgument))
-		{
-		fn.message("Fout", sFunctionName + "('"+fx.getTableName(oArgument)+"') is aangeroepen met een API instance. " +		
-				"Dit is niet toegestaan! Gebruik een functie uit de fx-namespace, of vervang de API instance door een node.");
+	if (fx.isApiInstance(oArgument)){
+		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
+		console.log("oArgument:"+oArgument);
+
+		fn.message(lang.error, sFunctionName + "('"+fx.getTableName(oArgument)+"') "+lang.error_function_called_with_api_instance+".");
 		return;
-		}
+	}
 	
 }
 
 
 fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
-	if (oArgument instanceof jQuery)
-		{
+	if (oArgument instanceof jQuery){
+		// give info in console
+		console.log("sFunctionName:"+sFunctionName);
+		console.log("oArgument:"+oArgument);
+
 		// get(0) makes sure we get the node out of the jQuery object
-		fn.message("Fout", sFunctionName + "('"+fn.getTableName(oArgument.get(0))+"') is aangeroepen met een jQuery object. " +
-		"Dit is niet toegestaan! Gebruik een node.");
+		fn.message(lang.error, sFunctionName + "('"+fn.getTableName(oArgument.get(0))+"') "+lang.error_function_called_with_jquery_object+".");
 		return;
-		}
+	}
 }
 </code></pre>
         </article>
@@ -5724,7 +5744,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 14 2021 17:47:22 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Jul 06 2022 11:53:01 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>
