@@ -519,6 +519,15 @@ function generateSeries(iStartValue, iEndValue, bAscending){
 // ARRAY FUNCTIONS
 //*******************************************************
 
+function getAssociativeArrayAsString(aArr){
+	var aOutput = [];
+
+	for (oneKey in aArr){
+		aOutput.push( oneKey+"="+aArr[oneKey] );
+	}
+	return aOutput.join("&");
+}
+
 
 // check array equality
 function arrays_equal(a,b) { 

@@ -5439,52 +5439,132 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 	
 	if (sResponseDataType == undefined)
 		sResponseDataType = "xml";
+
+	if (oExtraParams == undefined)
+		oExtraParams = {};
+
+	var bAimedServiceIsOnSameHost = sUrl.indexOf(document.domain)>-1;
+	var bCrossDomainValueIsSet = ( typeof oExtraParams["crossDomain"] !== 'undefined' );
+
+
+	// if the called url is NOT on the same server as Lex'it,
+	// we run the risk to get 'strict-origin-when-cross-origin' errors
+	//
+	// so we have 2 possibilities:
+	// [1] if cross-domain calls are allowed, we'll just call the service directly
+	// [2] if cross-domain calls are NOT allowed, we'll use the Lex'it-webservice as a kind of proxy,
+	//     so as to avoid 'strict-origin-when-cross-origin' errors
+	//
+	// In previous Lex'it versions, Lex'it would detect if the Lex'it host
+	// and the aimed service host were NOT the same and automatically
+	// set oExtraParams["crossDomain"] = true
+	//
+	// For sake of backwards compatibility, we keep it that way,
+	// EXCEPT when oExtraParams["crossDomain"] was explicitly set to 'false'
+	// in the fn.callService(). In that case, that will overrule the 
+	// old default behavior of the function. 
 	
-	var ajaxParams = {
-		"type": sMethod,
-		"url": sUrl,
-		"data": aParameters,
-	 	"success": function(xml) {
-	 		// callback if it is set
-	 		if (fnCallback!=null)
-	 				fnCallback(xml);
-	 		},
-		"error": function(jqXHR, textStatus, errorThrown){
-			
+	
+	// Detect that the aimed service is not on the same host
+	// and the "crossDomain" parameter given is explicitly set to 'false' 
+
+	if ( !bAimedServiceIsOnSameHost && bCrossDomainValueIsSet && oExtraParams["crossDomain"] == false){
+
+		var sData = getAssociativeArrayAsString(aParameters);
+		
+		var ajaxParams = {
+			url: WEBSERV_URL+"/table/call_external_service",
+			method: "GET",
+			data: {
+				"url": sUrl,
+				"type": sMethod,
+				"data": sData
+			}			
+		};
+
+		// if some extra parameters were given, add them to the ajax call
+		
+		for (oneParam in oExtraParams) {
+			ajaxParams[oneParam] = oExtraParams[oneParam];
+		}
+		
+		$.ajax( ajaxParams )
+		.done(function( xml ) {
+
+			// callback if it is set
+			if (fnCallback!=null)
+					fnCallback(xml);
+    
+		})
+		.fail(function( jqXHR, textStatus ) {
+
 			if (fnErrorHandler!=null)
 				fnErrorHandler({
-					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+					"jqXHR": jqXHR, "textStatus": textStatus, 
 					"lexit_function": "fn.callService",
-					"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+					"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
 					});
 			else
 				fn.message(lang.error,
-				lang.error_when_calling+" fn.callService(): " +				
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+					lang.error_when_calling+" fn.callService(): " +	
+					textStatus+"; "+getJqXHRInfo(jqXHR));
+		});
+		
+
+	}
+
+
+	// other cases:
+	// - the aimed service is at the same host as Lex'it (no problem at all!)
+	// or
+	// - it is not at the same host, but fn.callService() wasn't called with "crossDomain"=false,
+	//   so we'll set that automatically to 'true' (old default behavior) 
+	else {
+
+		if ( !bAimedServiceIsOnSameHost ){
+			oExtraParams["crossDomain"] = true;
+		}		
+
+		var ajaxParams = {
+			"type": sMethod,
+			"url": sUrl,
+			"data": aParameters,
+			"success": function(xml) {
+				// callback if it is set
+				if (fnCallback!=null)
+						fnCallback(xml);
+			},
+			"error": function(jqXHR, textStatus, errorThrown){
+				
+				if (fnErrorHandler!=null)
+					fnErrorHandler({
+						"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+						"lexit_function": "fn.callService",
+						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+						});
+				else
+					fn.message(lang.error,
+					lang.error_when_calling+" fn.callService(): " +				
+					textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		}
-	
-	// if the called url isn't on the same server, we need a cross domain call
-	
-	if (sUrl.indexOf(document.domain)<0)
-		{
-		ajaxParams["crossDomain"] = true;
+		
+		if (sResponseDataType != null) {
+			ajaxParams["dataType"] = sResponseDataType;
 		}
-	
-	if (sResponseDataType != null)
-		{
-		ajaxParams["dataType"] = sResponseDataType;
+		
+		// if some extra parameters were given, add them to the ajax call
+		
+		for (oneParam in oExtraParams){
+			ajaxParams[oneParam] = oExtraParams[oneParam];
 		}
+		
+		$.ajax( ajaxParams );
+
+	}	
 	
-	// if some extra parameters were sent, add them to the ajax call
-	
-	for (oneParam in oExtraParams)
-		{
-		ajaxParams[oneParam] = oExtraParams[oneParam];
-		}
-	
-	$.ajax( ajaxParams );
 };
+
 
 
 

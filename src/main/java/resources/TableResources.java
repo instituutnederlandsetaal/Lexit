@@ -36,6 +36,7 @@ import table.TableRecordsObject;
 import table.TablesListObject;
 import table.UniqueValuesObject;
 import util.Database;
+import util.ServiceCaller;
 import util.Util;
 
 /**
@@ -82,12 +83,12 @@ public class TableResources {
 		try {
 			fileToSend = readConfigJsFile(co);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
 	}
+	
 	
 	
 	
@@ -722,6 +723,42 @@ public class TableResources {
 				
 		return tro;
 	}
+	
+	
+	
+	
+	// call a webservice through the Lex'it webservice, to avoid 'strict-origin-when-cross-origin' errors
+	// call:
+	// .../table/call_external_service
+	@Path("call_external_service")
+	@GET
+	@Produces({MediaType.TEXT_PLAIN})
+	public Response callExternalServiceGet(
+			@QueryParam("url") String url,
+			@DefaultValue("GET") @QueryParam("type") String requestMethod, 
+			@QueryParam("data") String urlParameters, 
+			@DefaultValue("UTF-8") @QueryParam("encoding") String charEncoding, 
+			@DefaultValue("application/x-www-form-urlencoded") @QueryParam("contentType") String contentType
+			) {
+		
+//		// get the url and create a service called with it
+//		ConcurrentHashMap<String, String> aUrlAndParameters = Util.getHashFromString(urlAndParameters, "&");
+//		String url = aUrlAndParameters.get("url");
+//		System.out.println("url = "+url);
+		ServiceCaller sc = new ServiceCaller(url);
+		
+		// rebuild the parameters list and call the service with it
+//		aUrlAndParameters.remove("url");
+//		String urlParameters = Util.getStringFromHash(aUrlAndParameters, "&");		
+		String response = sc.call(requestMethod, urlParameters, charEncoding, contentType);
+		
+		// return the service response
+		return Response.ok(response, MediaType.TEXT_PLAIN).build();
+	}
+	
+	
+	
+	
 	
 	
 	// .../table/call_function

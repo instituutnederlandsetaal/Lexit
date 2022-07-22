@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
@@ -560,6 +561,37 @@ public class Util {
 	// ******************************************************************
 	// ARRAYS
 	// ******************************************************************
+	
+	
+	// get string into hash
+	public static ConcurrentHashMap<String, String> getHashFromString(String strRepresentation, String separator){
+		
+		ConcurrentHashMap<String, String> converted = new ConcurrentHashMap<String, String>();
+		
+		String[] parts = strRepresentation.split(separator);
+		for (int i=0; i<parts.length; i++) {
+			String[] part = parts[i].split("=");
+			
+			System.out.println("adding "+part[0] +"="+ part[1]);
+			converted.put(part[0], part[1]);
+		}
+		
+		return converted;
+	}
+	
+	// get hash into string
+	public static String getStringFromHash(ConcurrentHashMap<String, String> hashRepresentation, String separator) {
+		
+		ArrayList<String> aConverted = new ArrayList<String>(); 
+		
+		for (Map.Entry<String, String> entry : hashRepresentation.entrySet()) {
+			String key = entry.getKey().toString();
+			String value = entry.getValue();
+			aConverted.add(key+"="+value);
+		}
+		
+		return Util.join(aConverted, "&");
+	}
 	
 	
 	// concat two arrays
