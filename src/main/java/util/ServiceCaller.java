@@ -38,7 +38,7 @@ public class ServiceCaller {
 		
 		String xmlResponse;
 	
-		
+		// -----------------------------------------------------------------
 		// POST request
 		
 		if (requestMethod.equalsIgnoreCase("post")){
@@ -117,7 +117,7 @@ public class ServiceCaller {
 			xmlResponse = sb.toString();
 		}
 		
-		
+		// -----------------------------------------------------------------
 		// Any other type of requestMethod
 		// will be considered a GET request
 		

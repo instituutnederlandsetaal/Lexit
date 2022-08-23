@@ -741,15 +741,10 @@ public class TableResources {
 			@DefaultValue("application/x-www-form-urlencoded") @QueryParam("contentType") String contentType
 			) {
 		
-//		// get the url and create a service called with it
-//		ConcurrentHashMap<String, String> aUrlAndParameters = Util.getHashFromString(urlAndParameters, "&");
-//		String url = aUrlAndParameters.get("url");
-//		System.out.println("url = "+url);
+		// create a service caller 
 		ServiceCaller sc = new ServiceCaller(url);
 		
-		// rebuild the parameters list and call the service with it
-//		aUrlAndParameters.remove("url");
-//		String urlParameters = Util.getStringFromHash(aUrlAndParameters, "&");		
+		// call the service with it
 		String response = sc.call(requestMethod, urlParameters, charEncoding, contentType);
 		
 		// return the service response
