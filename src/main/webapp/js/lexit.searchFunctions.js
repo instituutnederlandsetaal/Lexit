@@ -936,9 +936,14 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	
 	if (	isASelectBox && 
 			fnColumnSearchQueryTransformFunction == null && // custom query transformation has priority on general transformation
-			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !isRegex(sValue) ) 
+			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !isRegex(sValue) && (mt.getListOfColumnTypesOf(sTableName))[iColumnIndex] != "integer") 
 		)
 		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
+	
+	
+	
+	
+
 	
 	// apply custom query transformation if general transformation was canceled
 	if (fnColumnSearchQueryTransformFunction != null)

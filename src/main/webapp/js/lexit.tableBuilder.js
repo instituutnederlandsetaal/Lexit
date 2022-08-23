@@ -388,7 +388,12 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 						if (textRendering != null){
 							var sTextVal = $("td:eq("+iColNumber+")", oCurrentRow.node()).text();
 							sTextVal = textRendering(sTextVal);
-							$("td:eq("+iColNumber+")", oCurrentRow.node()).text(sTextVal);
+							if (hasTags(sTextVal)) {
+								$("td:eq("+iColNumber+")", oCurrentRow.node()).html(sTextVal);
+							}
+							else {
+								$("td:eq("+iColNumber+")", oCurrentRow.node()).text(sTextVal);
+							}
 						}
 					}
 

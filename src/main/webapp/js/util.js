@@ -375,6 +375,13 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.split(search).join(replacement);
 };
 
+
+// check if a string contains (html) tags
+// see: https://stackoverflow.com/questions/15458876/check-if-a-string-is-html-or-not
+function hasTags(text){
+	return /<\/?[a-z][\s\S]*>/i.test(text);
+}
+
 //remove html tags from a string
 function removeTags(text){
 	if (typeof text == 'string')
