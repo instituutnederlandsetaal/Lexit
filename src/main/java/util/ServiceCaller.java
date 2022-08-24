@@ -12,7 +12,9 @@ import java.net.URL;
 public class ServiceCaller {
 	
 	String url = "";
-	private boolean debug = true;
+	
+	// debug modus
+	private boolean debug = false;
 	
 	public ServiceCaller(String url) {
 		this.url = url;
