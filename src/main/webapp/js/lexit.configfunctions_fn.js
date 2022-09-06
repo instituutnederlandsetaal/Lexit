@@ -3837,6 +3837,102 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
 };
 
+/**
+ * Build a dialog with a set of tabs, each with its own html content
+ * 
+ * @param {String} sTitle 
+ * @param {String} sMessage (null if no message should be shown)
+ * @param {Array} oTitles2HtmlContent : associative array from tab title to tab HTML content
+ * @param {Function} fnFunction [fnFunction=null] - Function called after the user clicked on 'OK' 
+ * @param {Array} oExtraSettings : associative array for extra jquery UI settings for the dialog
+ */
+fn.showTabs = function(sTitle, sMessage, oTitles2HtmlContent, fnFunction, oExtraSettings){
+	
+	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var nDiv = $("<div></div>").attr("id", dialogDivId).attr("title", sTitle);
+	
+	$(document.body).append(nDiv);
+
+	// display message on top if available
+
+	if (sMessage != null && sMessage != ''){
+		var sP = $("<p></p>").html(sMessage);
+		$("#"+dialogDivId).append(sP);
+	}
+
+	// now build the tabs
+
+	var nTabsDiv = $("<div></div>").attr("id", "tabs");
+	$("#"+dialogDivId).append(nTabsDiv);
+	var nTabsTitles = $("<ul></ul>");
+	$(nTabsDiv).append(nTabsTitles);	
+	
+	var iTabNr = 1;
+	for (var sOneTitle in oTitles2HtmlContent){
+
+		// id of tab
+		var sTabId = "tabs-"+iTabNr;
+
+		// append tab title
+		var nLi = $("<li></li>").html("<a href='#"+sTabId+"'>"+ sOneTitle +"</a>");
+		$(nTabsTitles).append(nLi);
+
+		// append tab content
+		var nTabDiv = $("<div></div>").attr("id", sTabId);
+		$(nTabsDiv).append(nTabDiv);
+		$(nTabDiv).html(oTitles2HtmlContent[sOneTitle]);
+
+		iTabNr++;
+	}
+
+	// activate the tabs
+	$( "#tabs" ).tabs();
+
+	var oDialogConfig = {
+		modal: true,
+		width: "auto",
+		open: function(event, ui){
+			
+			// add shadows
+			$(".ui-dialog").addClass("ui-dialog-shadow");
+			$( this ).closest(".ui-dialog").putInFront();		
+			
+		},
+		close: function(event, ui){
+			$( this ).remove();
+		},
+		position: fn._computeDialogPosition(),
+		buttons: [
+		          {			
+		        	  text: lang.ok,
+		        	  click: function() {
+						$( this ).dialog( "close" );
+						
+						if (fnFunction != null){
+							fnFunction();
+						}
+		        	  },
+		        	  id: 'dialog_accept_button'
+		          }
+		]
+	};
+
+	// if extra settings have been given, add those to the dialog config
+	if (oExtraSettings != null){
+
+		for (sOneSetting in oExtraSettings){
+
+			oDialogConfig[sOneSetting] = oExtraSettings[sOneSetting];
+		}
+	}	
+	
+	// open dialog now
+	$( "#"+dialogDivId ).dialog(oDialogConfig);
+	
+	fn._activeEnterForThisDialog(dialogDivId);
+}
+
+
 // compute automatically a convenient position for a dialog, given the current active row in a table
 // in such a way that the dialog does NOT hide the row
 fn._computeDialogPosition = function(){
