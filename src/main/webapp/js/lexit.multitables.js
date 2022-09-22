@@ -230,6 +230,7 @@ mt.removeAllTableRecords = function(){
 	hNodeColorsMap = new Hashtable();
 	hNodeHighlightColorsMap = new Hashtable();
 	hSortingColumnForColorMap = new Hashtable();
+	hbTableCallbackWasCalledAlready = new Hashtable();
 	
 };
 
@@ -290,7 +291,7 @@ mt.removeTableRecord = function(sSomeTablename){
 	hNodeColorsMap.remove(sSomeTablename);
 	hNodeHighlightColorsMap.remove(sSomeTablename);
 	hSortingColumnForColorMap.remove(sSomeTablename);
-	
+	hbTableCallbackWasCalledAlready.remove(sSomeTablename);
 	
 	dbTableNames = jQuery.grep(dbTableNames, function(value) {
 		  return value != sSomeTablename;

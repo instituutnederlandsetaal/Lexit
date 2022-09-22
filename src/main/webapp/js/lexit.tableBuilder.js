@@ -405,8 +405,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			var sGroupingColumn = conf.getGroupingColumn(aTableSettings);
 			var iGroupingColumn = $.inArray(sGroupingColumn, mt.getListOfColumnsOf(sSomeTableName));
 			
-			if ( iGroupingColumn >=0 && mt.getViewType(sSomeTableName) =='table' )
-				{
+			if ( iGroupingColumn >=0 && mt.getViewType(sSomeTableName) =='table' ){
 				// https://datatables.net/examples/advanced_init/row_grouping.html
 				var api = this.api();
 	            var rows = api.rows( {page:'current'} ).nodes();
@@ -421,7 +420,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	                    last = group;
 	                }
 	            } );
-				}
+			}
 			
 			// remove focus from table selector to prevent unpredictable events when using keys
 			// (this is because the table selector might now have focus, so attempting to navigate the
@@ -442,21 +441,19 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			gui.putTooltipsOfColumnButtons(sSomeTableName);					
 			gui.removeProcessingMsg(sSomeTableName);
 			
-			
+
 			// table setting callback
-			if (aTableSettings!=null && conf.getCallback(aTableSettings) != null)
-				{
+			if (aTableSettings!=null && conf.getCallback(aTableSettings) != null) {
 				// if the initialisation callback must be repeated upon each draw, call it again
 				// (t.i. we always call the callback, except if repeating is forbidden
 				//                                    and the callback was called already)
 				if ( !( conf.getRepeatCallback(aTableSettings) == false && 
-						mt.getCallbackWasCalledAlready(sSomeTableName) == true))
-					{
+						mt.getCallbackWasCalledAlready(sSomeTableName) == true)){
 					conf.getCallback(aTableSettings)( mt.getDataTableObjectOf(sSomeTableName) );
 					mt.setCallbackWasCalledAlready(sSomeTableName);
-					}
+				}
 									
-				}			
+			}			
 			
 			// search boxes css
 			gui.setSearchboxesCss(sSomeTableName);
