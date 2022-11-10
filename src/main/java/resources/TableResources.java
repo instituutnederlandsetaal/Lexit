@@ -757,7 +757,6 @@ public class TableResources {
 	
 	
 	// .../table/call_function
-	// get a record, given its id
 	@Path("call_function")
 	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
