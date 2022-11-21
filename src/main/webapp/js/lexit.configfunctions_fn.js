@@ -3594,7 +3594,9 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 					open: function(event, ui){
 
 						// make sure that the autocomplete won't disappear behind the table (it did happen in the past...)
-						$(event.target).putInFront();
+						setTimeout(function(){
+							$(".ui-front").css("z-index", getHighestZindex()+1);
+						}, 100);
 					}
 		        });
 		          

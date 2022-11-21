@@ -58,7 +58,7 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				    			.css("height", $(this).height()) 
 				    			.css("width", $(this).width()) 
 				    			.addClass('draggableHelper')
-				    			.css("z-index", 9999999) // always in front
+				    			.css("z-index", getHighestZindex()+1 ) // always in front
 				    			); 
 				    }, 
 				    // dragging is finished: put the table at the chosen place
@@ -75,10 +75,9 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				        // but refreshing all tables seems to help
 				        // NB: as a consequence the undo stack of each table will be emptied
 				        var aAllTables = mt.getListOfLoadedTables();
-				        for (var i=0; i<aAllTables.length; i++)
-				        	{
+				        for (var i=0; i<aAllTables.length; i++){
 				        	fn.refreshTable(aAllTables[i]);				        	
-				        	}
+				        }
 				    }
 				});
 			}
