@@ -232,20 +232,29 @@ gui.applyRowGrouping = function(sSomeTableName){
 	// https://datatables.net/examples/advanced_init/row_grouping.html
 	
 	if (iGroupingColumn>=0) {
-		// Order by the grouping
-	    $('#'+sSomeTableName+' tbody').on( 'click', 'tr.group', function () {
-	    	
-	    	var oTable = mt.getDataTableObjectOf(sSomeTableName);
-	    	
-	        var currentOrder = oTable.order();
-	        if ( currentOrder.length>0 && 
-	        		currentOrder[0][0] === iGroupingColumn && currentOrder[0][1] === 'asc' ) {
-	        	oTable.order( [ iGroupingColumn, 'desc' ] ).draw();
-	        }
-	        else {
-	        	oTable.order( [ iGroupingColumn, 'asc' ] ).draw();
-	        }
-	    });
+
+		var oTableConfig = conf.getTableConfig(sSomeTableName);
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, sGroupingColumn);
+		var bSortable = conf.getSortability(oColumnConfig);
+
+		// Order by grouping column if config allows so
+		if (bSortable){
+			
+			$('#'+sSomeTableName+' tbody').on( 'click', 'tr.group', function () {
+				
+				var oTable = mt.getDataTableObjectOf(sSomeTableName);
+				
+				var currentOrder = oTable.order();
+				if ( currentOrder.length>0 && 
+						currentOrder[0][0] === iGroupingColumn && currentOrder[0][1] === 'asc' ) {
+					oTable.order( [ iGroupingColumn, 'desc' ] ).draw();
+				}
+				else {
+					oTable.order( [ iGroupingColumn, 'asc' ] ).draw();
+				}
+			});
+		}
+		
 	}
 };
 
