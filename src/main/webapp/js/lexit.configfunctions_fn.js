@@ -4336,7 +4336,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 						// read new unique values given filter
 						var sFilter = 	$("#"+promptDivId+"_valuefilter").val();
 						var aAllOptionsFiltered = aAllOptions.filter(function(value){
-							return value.toLowerCase().match(sFilter);
+							return value.toLowerCase().match(sFilter.toLowerCase());
 							});
 						fn._promptSelect_AppendOptions(selectableUl, aAllOptionsFiltered, aAlreadyChosen);					    	
 						
