@@ -122,7 +122,7 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 fn.setBackgroundColor = function(sColor){
 	
 	$(document).find("body").css("background-color", sColor);
-}
+};
 
 
 
@@ -137,12 +137,12 @@ fn.setBackgroundColor = function(sColor){
 fn.doAtFocusGain = function(fnFunction){
 
 	fnDoAtFocusGain = fnFunction;
-}
+};
 
 fn.doAtFocusLoss = function(fnFunction){
 
 	fnDoAtFocusLoss = fnFunction;
-}
+};
 
 
 
@@ -152,7 +152,7 @@ fn.doAtFocusLoss = function(fnFunction){
  */
 fn.forceExactCount = function(){
 	bForceExactCount = true;
-}
+};
 
 /**
  * Load a library with extra functions for a given project
@@ -179,29 +179,84 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 	var sPathToLibrary = sPrefix + paramsHash.get("db") + ".library.js";
 	
 	// BUT if some path was specified, we'll follow that instead
-	if (sPath != null)
-		{
+	if (sPath != null) {
 		sPathToLibrary = sPath;
-		}
+	}
 	
 	$.getScript(sPathToLibrary)
-	.done(function(){
-		
-		if (fnCallback != null)
-			fnCallback();		
-	})
-	.fail(function(jqXHR, textStatus, errorThrown){
-		
-		if (fnErrorHandler!=null)
-			fnErrorHandler({
-				"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
-				"lexit_function": "fn.getLibrary"
-				});
-		else
-			fn.message(lang.error, lang.error_when_calling+" fn.getLibrary(): " +				
-			textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
-	});
+		.done(function(){
+			
+			if (fnCallback != null)
+				fnCallback();		
+		})
+		.fail(function(jqXHR, textStatus, errorThrown){
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.getLibrary"
+					});
+			else
+				fn.message(lang.error, lang.error_when_calling+" fn.getLibrary(): " +				
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+		});
 	
+};
+
+
+/**
+ * Load a CSS file dynamically
+ * 
+ * @param {String} [sPath=null] - Path to the library (see extra info below)
+ * @param {Function} [fnCallback=null] - Function to be called after loading the library
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs 
+ */
+fn.getCssFile = function(sPath, fnCallback, fnErrorHandler){
+
+	$.get(sPath)
+		.done(function(sCss){
+
+			fn.addCss(sCss);
+			
+			if (fnCallback != null)
+				fnCallback();		
+		})
+		.fail(function(jqXHR, textStatus, errorThrown){
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.getCssFile"
+					});
+			else
+				fn.message(lang.error, lang.error_when_calling+" fn.getCssFile(): " +				
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+		});
+};
+
+
+/**
+ * Add some CSS definition dynamically
+ * 
+ * @param {String} sSomeCssCode 
+ */
+fn.addCss = function(sSomeCssCode){
+	
+	// append styling to document
+
+	// trick: https://stackoverflow.com/questions/524696/how-to-create-a-style-tag-with-javascript
+	var docHead = document.head || document.getElementsByTagName('head')[0];
+	var style = document.createElement('style');
+
+	docHead.appendChild(style);
+	style.type = 'text/css';
+	if (style.styleSheet){
+		// This is required for IE8 and below.
+		style.styleSheet.cssText = sSomeCssCode;
+	} 
+	else {
+		style.appendChild(document.createTextNode(sSomeCssCode));
+	}
 }
 
 
@@ -246,10 +301,9 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		// we must remove the TimeOut that was set to keep the previously set schema, 
 	 		// and set a new TimeOut as final step.
 	 		
-	 		if (setSchemaTimeOut != null)
-	 			{
+	 		if (setSchemaTimeOut != null) {
 	 			clearTimeout(setSchemaTimeOut);
-	 			}
+	 		}
 	 		
 	 		setSchemaNameCache = sNewSchema;
 	 		setSchemaTimeOut = setTimeout(
@@ -268,7 +322,7 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		// callback if it is set
 	 		if (fnCallback!=null)
 	 				fnCallback();
-	 		},
+	 	},
 		"error": function(jqXHR, textStatus, errorThrown){
 
 			fn.refreshTable(kf.getActiveTable());
@@ -282,8 +336,8 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 			else
 				fn.message(lang.error, lang.error_when_calling+ " fn.setSchema("+sNewSchema+"): " +				
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
-			}
-		} );
+		}
+	} );
 };
 
 
@@ -380,6 +434,7 @@ fn.tableIsHidden = function(sSomeTable){
  * @returns {Array} An associative array with the table position {"top": ..., "left": ...}
  * 
  * @see fn.getTableExtraSettings
+ * @see fn.callTable
  * @see fn.callDatabase
  */
 fn.getTablePosition = function(sSomeTablename){
@@ -404,6 +459,7 @@ fn.getTablePosition = function(sSomeTablename){
  *  "displaylength": ..., "size": ...}
  *  
  *  @see fn.getTablePosition
+ *  @see fn.callTable
  *  @see fn.callDatabase
  */
 fn.getTableExtraSettings = function(sSomeTablename){
@@ -511,12 +567,11 @@ fn.getSortingColumns = function(sSomeTablename){
 	if (aSortingSettings.length==0) return null;
 	
 	var aSortingColumns = new Array();
-	for (var i=0; i<aSortingSettings.length; i++)
-		{
+	for (var i=0; i<aSortingSettings.length; i++) {
 		var iSortingColumn = aSortingSettings[i][0];
 		var sSortColumn = mt.getListOfColumnsOf(sSomeTablename)[iSortingColumn];
 		aSortingColumns.push(sSortColumn);
-		}
+	}
 		
 	return aSortingColumns;
 };
@@ -551,11 +606,10 @@ fn.getSortingDirections = function(sSomeTablename){
 	var aSortingSettings = mt.getDataTableObjectOf(sSomeTablename).order();
 	
 	var aSortingDirs = new Array();
-	for (var i=0; i<aSortingSettings.length; i++)
-		{
+	for (var i=0; i<aSortingSettings.length; i++) {
 		var iSortingDir = aSortingSettings[i][1];		
 		aSortingDirs.push(iSortingDir);
-		}
+	}
 	
 	return aSortingDirs;
 };
@@ -595,12 +649,11 @@ fn.setSorting = function(sSomeTablename, oSortingColumnsAndDirections){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	var aNewSettings = new Array();
-	for (aOnePair in oSortingColumnsAndDirections)
-		{
+	for (aOnePair in oSortingColumnsAndDirections) {
 		var iColumnNumber = $.inArray(aOnePair, mt.getListOfColumnsOf(sSomeTablename));
 		var sSortingDirection = oSortingColumnsAndDirections[aOnePair];
 		aNewSettings.push([iColumnNumber, sSortingDirection]);
-		}
+	}
 	mt.getDataTableObjectOf(sSomeTablename).order( aNewSettings );
 };
 
@@ -652,25 +705,22 @@ fn.saveTableState = function(sTableName){
 	
 	// Column filters 
 	var aFilters = {};
-	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ )
-		{
+	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ ) {
 		var sColumnName = 		mt.getListOfColumnsOf(sTableName)[i];
 		var sValue =			fn.getValueOfFilterBox(sTableName, sColumnName);
 		if (sValue != null && sValue != '')
 			aFilters[sColumnName] = sValue;
-		}
+	}
 	
 	// Sorting
 	var aSorting = {};
 	var aSortColumns = fn.getSortingColumns(sTableName);
 	var aSortDirections = fn.getSortingDirections(sTableName);
-	if (aSortColumns != null)
-		{
-		for (var i=0; i<aSortColumns.length; i++)
-			{
+	if (aSortColumns != null){
+		for (var i=0; i<aSortColumns.length; i++) {
 			aSorting[ aSortColumns[i] ] = aSortDirections[i];
-			}
 		}
+	}
 	
 	
 	// Save the table state
@@ -706,19 +756,17 @@ fn.restoreTableState = function(sTableName){
 	fn.setSorting(sTableName, oTableState["sorting"]);
 	
 	// Restore the column filters
-	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ )
-		{
+	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ ) {
 		var sColumnName = 		mt.getListOfColumnsOf(sTableName)[i];
 		
-		if (typeof aFilters[sColumnName] != 'undefined' && aFilters[sColumnName] != '')
-			{
+		if (typeof aFilters[sColumnName] != 'undefined' && aFilters[sColumnName] != '') {
 			// restore per column
 			oTable.columns(i).search( aFilters[sColumnName] );
 			
 			// put values into filter boxes
 			fn.putDataIntoFilterBox(sTableName, sColumnName, aFilters[sColumnName]);
-			}
-		}	
+		}
+	}	
 	
 	var iPageNumber = parseInt(oTableState["start"]);
 	
@@ -762,6 +810,7 @@ fn.restoreTableState = function(sTableName){
  * 
  * @see fn.callDatabaseInNewTab
  * @see fn.getTableExtraSettings
+ * @see fn.callTable
  */
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	
@@ -789,7 +838,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
-    else{
+    else {
         setTimeout(function(){
         	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
@@ -798,6 +847,16 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
     }
 	
 };
+
+/**
+ * Synonym of fn.callDatabase
+ * 
+ * @see fn.callDatabase
+ */
+fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
+};
+
 
 // subroutine of fn.callDatabase
 fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
@@ -832,8 +891,7 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 		tb.loadTable(sSomeTablename, fnFunction, oExtraSettings);
 	}	
 	// if the table exists already, just call it with the right settings
-	else
-	{		
+	else {		
 		if (fnFunction != null) 
 			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);		
 		fn._callTableWithFilter(sSomeTablename, aContentToMatch);
@@ -879,16 +937,24 @@ fn.callDatabaseInNewTab = function(sSomeTablename, aContentToMatch, oExtraSettin
 	var sDb = sProjectName == null ? hParams.get("db") : sProjectName;
 	var sUrl = sBaseUrl+"?db="+sDb+"&table="+sSomeTablename;
 	
-	for (var sOneKey in aContentToMatch)
-		{
+	for (var sOneKey in aContentToMatch) {
 		sUrl += "&"+sOneKey+"="+aContentToMatch[sOneKey];
-		}
-	for (var sOneKey in oExtraSettings)
-		{
+	}
+	for (var sOneKey in oExtraSettings) {
 		sUrl += "&"+"setting."+sOneKey+"="+oExtraSettings[sOneKey];
-		}
+	}
 	window.open( encodeURI(sUrl), '_blank');
 };
+
+/**
+ * Synonym of fn.callDatabaseInNewTab
+ *  
+ * @see fn.callDatabaseInNewTab 
+ */
+fn.callTableInNewTab = function(sSomeTablename, aContentToMatch, oExtraSettings, sProjectName){
+	fn.callDatabaseInNewTab(sSomeTablename, aContentToMatch, oExtraSettings, sProjectName);
+};
+
 
 // get base url of the software (help function of fn.callDatabaseInNewTab)
 fn._getBaseUrl = function(){
@@ -919,12 +985,11 @@ fn.changeTableColumnsVisibility = function(sSomeTablename, aListOfVisibleColumns
 	var aAllColumns = mt.getListOfColumnsOf(sSomeTablename);
 	
 	// set the columns visibility		
-	for (var i=0; i<aAllColumns.length; i++)
-		{
+	for (var i=0; i<aAllColumns.length; i++) {
 		var sColName = aAllColumns[i];
 		var bVisible = $.inArray(sColName, aListOfVisibleColumns)>-1;
 		conf.changeTableConfigValue(sSomeTablename, sColName, "visible", bVisible);	
-		}
+	}
 	
 	// save position etc, so as to be able to put table back at same position
 	var iCurrentLeft =		$("#"+sSomeTablename+"_dynamic").offset().left;
@@ -945,13 +1010,11 @@ fn.changeTableColumnsVisibility = function(sSomeTablename, aListOfVisibleColumns
 			"displaylength": iDisplayLength
 	};	
 	// add custom extra settings
-	if (oExtraSettings != null)
-		{
-		for (sSettingName in oExtraSettings)
-			{
+	if (oExtraSettings != null) {
+		for (sSettingName in oExtraSettings) {
 			oExtraSettingsBase[sSettingName] = oExtraSettings[sSettingName];
-			}
-		}	
+		}
+	}	
 	
 	tb.destroyTable(sSomeTablename, function(){
 		
@@ -983,9 +1046,8 @@ fn.changeTableColumnsVisibility = function(sSomeTablename, aListOfVisibleColumns
 				oExtraSettingsBase
 		);
 	});
-	
 		
-}
+};
 
 
 // *****************************************************************
@@ -1089,10 +1151,9 @@ fn.resetTable = function(sSomeTablename, fnCallback){
 	if (fnCallback != null) 
 		mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnCallback);
 
-	if ( fn.tableExists(sSomeTablename) )
-		{
+	if ( fn.tableExists(sSomeTablename) ) {
 		$("#"+sSomeTablename+"_resetbutton button").click();
-		}
+	}
 		
 };
 
@@ -1126,7 +1187,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 	 		// callback if it is set
 	 		if (fnCallback!=null)
 	 				fnCallback();
-	 		},
+	 	},
 		"error": function(jqXHR, textStatus, errorThrown){
 			fn.refreshTable(sSomeTablename);
 			
@@ -1139,8 +1200,8 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 			else
 				fn.message(lang.error, lang.error_when_calling+ " fn.cleanTableCache("+sSomeTablename+"): " +				
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
-			}
-		} );
+		}
+	} );
 };
 
 
@@ -1343,7 +1404,7 @@ fn.setActiveTable = function(sSomeTablename){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	kf.setActiveTable(sSomeTablename);
-}
+};
 
 
 // *****************************************************************
@@ -1419,8 +1480,7 @@ fn.getRowNodeWhere = function(sSomeTable, aFieldsAndValues){
 	var sTableName = (typeof sSomeTable == 'object' ? fn.getTableName(sSomeTable) : sSomeTable);
 	
 	// pre-check: are the given fields correct?
-	for (sFieldName in aFieldsAndValues)
-	{		
+	for (sFieldName in aFieldsAndValues) {
 		if ($.inArray(sFieldName, mt.getListOfColumnsOf(sTableName)) < 0) {
 			fn.message(lang.error, lang.error_when_calling+ " fn.getRowNodeWhere("+sTableName+"). " + lang.error_column_doesnot_exist+": '"+sFieldName+"'");			
 			return null;
@@ -1452,13 +1512,12 @@ fn.getAllRowNodesWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 	
 	var oRows = fx.getAllRowsWhere(sTableName, aFieldsAndValues, bOnlyFirstRow);
 	
-	if (bOnlyFirstRow)
-		{
+	if (bOnlyFirstRow) {
 		if (oRows.count() == 1)
 			return oRows.node();
 		else
 			return null;
-		}
+	}
 	
 	return oRows.nodes().toArray();
 };
@@ -1527,8 +1586,7 @@ fn.selectAllRowNodes = function(sSomeTable){
 fn.selectRowNode = function(sSomeTable, iRowNumber){
 
 	// special case: if 1st parameter is a node
-	if (iRowNumber == null && fn.isRowNode(sSomeTable))
-	{
+	if (iRowNumber == null && fn.isRowNode(sSomeTable)) {
 		if (!$(sSomeTable).hasClass("selected"))
 			$(sSomeTable).toggleClass('selected');
 	}
@@ -1539,15 +1597,13 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 	
 	// NOTE the operation is performed onto the node
 	var nRowSelector = $("#"+sSomeTable+" tbody tr:not('.group'):eq("+iRowNumber+")");
-	if ( iRowNumber>=0 && !nRowSelector.hasClass("selected"))
-		{
+	if ( iRowNumber>=0 && !nRowSelector.hasClass("selected")) {
 		nRowSelector.toggleClass('selected');
-		}
-	else if (iRowNumber<0)
-		{
+	}
+	else if (iRowNumber<0) {
 		fn.message(lang.error, lang.error_when_calling+ " fn.selectRowNode("+sSomeTable+"). <BR>" +
 				lang.error_function_called_with_illegal_value+ ": "+iRowNumber);
-		};
+	};
 };
 
 
@@ -1562,8 +1618,7 @@ fn.selectRowNode = function(sSomeTable, iRowNumber){
 fn.unselectRowNode = function(sSomeTable, iRowNumber){
 
 	// special case: if 1st parameter is a node
-	if (iRowNumber == null && fn.isRowNode(sSomeTable))
-	{
+	if (iRowNumber == null && fn.isRowNode(sSomeTable)) {
 		if ($(sSomeTable).hasClass("selected"))
 			$(sSomeTable).toggleClass('selected');
 	}
@@ -1604,7 +1659,7 @@ fn.getSelectedRowNodesFrom = function(someTable){
 fn.getFirstRowNodeFrom = function(someTable){
 
 	return fx.getFirstRowFrom(someTable).node();
-}
+};
 
 
 /**
@@ -1616,7 +1671,7 @@ fn.getFirstRowNodeFrom = function(someTable){
 fn.getFirstSelectedRowNodeFrom = function(someTable){
 	
 	return fx.getFirstSelectedRowFrom(someTable).node();
-}
+};
 
 
 /**
@@ -1651,8 +1706,7 @@ fn.getActiveRowNode = function(sSomeTable){
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
 		
-	if (kf.getActiveTable() != sSomeTable) 
-		{
+	if (kf.getActiveTable() != sSomeTable) {
 		var oFirstSelectedRow =	fx.getFirstSelectedRowFrom(sSomeTable);
 		var aAllRows = 			fx.getAllRows(sSomeTable);
 		
@@ -1661,19 +1715,16 @@ fn.getActiveRowNode = function(sSomeTable){
 		// else if there is no selected row, pick the top row
 		// else if table is empty, return null
 		
-		if ( oFirstSelectedRow.any() )
-			{
+		if ( oFirstSelectedRow.any() ) {
 			return oFirstSelectedRow.node();
-			}
-		else if ( aAllRows.any() )
-			{
-			return mt.getDataTableObjectOf(sSomeTable).row(0).node();
-			}
-		else
-			{
-			return null;
-			}
 		}
+		else if ( aAllRows.any() ) {
+			return mt.getDataTableObjectOf(sSomeTable).row(0).node();
+		}
+		else {
+			return null;
+		}
+	}
 	
 	return mt.getDataTableObjectOf(sSomeTable).row( kf.getActiveRowNumber() ).node();
 };
@@ -1773,10 +1824,9 @@ fn.getCellNodeType = function(nMixed, sColumnName){
 	
 	// if some column name was specified,
 	// we extract the named cell out of the row node
-	if (typeof sColumnName != 'undefined')
-		{
+	if (typeof sColumnName != 'undefined') {
 		nMixed = fn.getCellInRowNode(nMixed, sColumnName);		
-		}
+	}
 	
 	// at this point, we are sure we have a cell node, which we actually need
 	if ( $(nMixed).hasClass("editable_text") || $(nMixed).hasClass("not_editable_text"))
@@ -1833,8 +1883,7 @@ fn.uncheckCheckboxes = function(nMixed, aListOfColumns, fnCallback){
 	nMixed = 			fn.getRowNode(nMixed);
 	var iRowNumber =	fn.getRowNodeNumberOnScreen(nMixed);
 	
-	for (var i=0; i<aListOfColumns.length; i++)
-		{
+	for (var i=0; i<aListOfColumns.length; i++) {
 		// get the the setting of the checkbox
 		var sColumnName =			aListOfColumns[i];			
 		var iVisibleColumnNumber =	fn.getVisibleColumnNumberOf(oTable, sColumnName);
@@ -1847,15 +1896,14 @@ fn.uncheckCheckboxes = function(nMixed, aListOfColumns, fnCallback){
 		var bSetting = (nCell.prop("checked") == true);
 		
 		// if checkbox is checked, uncheck it! 
-		if (bSetting)
-			{			
+		if (bSetting) {			
 			// focus is needed for the checkbox handler, which need to know
 			// if the checkbox was clicked, or only the surrounding cell
 			nCell.focus();
 			nCell.click();
 			nCell.blur();	
-			}
 		}
+	}
 	
 	if (fnCallback!=null)
 			fnCallback();
@@ -2169,15 +2217,14 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 	fn._checkApiInstance("fn.getDataFromCellInRowNode", nRow);
 	fn._checkjQueryObject("fn.getDataFromCellInRowNode", nRow);
 	
-	if (fn.isCellNode(nRow))
-		{
+	if (fn.isCellNode(nRow)) {
 		fn.message(lang.error, 
 				lang.error_when_calling+ " fn.getDataFromCellInRowNode("+fn.getTableName(nRow)+").<BR>" +
 				lang.error_function_called_with_illegal_value+". "+
 				lang.error_function_called_with_illegal_value_input+ ": cell node. " +
 				lang.error_function_called_with_illegal_value_expected+ ": row node.");
 		return;
-		}
+	}
 	
 	var sTable = fn.getTableName(nRow);
 	var oTable = mt.getDataTableObjectOf(sTable);
@@ -2185,22 +2232,20 @@ fn.getDataFromCellInRowNode = function(nRow, sColumnName){
 	// get column number given column name	
 	var colNr = $.inArray(sColumnName, mt.getListOfColumnsOf(sTable));
 	
-	if (colNr<0)
-		{
+	if (colNr<0) {
 		fn.message(lang.error, lang.error_when_calling+" fn.getDataFromCellInRowNode("+sTable+").<BR>" +
 				lang.error_function_called_with_illegal_value+". "+
 				lang.error_function_called_with_illegal_value_input+": '"+ sColumnName+"'.");
 		
 		return "";
-		}
-	else
-		{
+	}
+	else {
 		var oRowData = oTable.row( nRow ).data();
 		
 		// data can return an object or an array
 		return (typeof oRowData == 'object') ?
 			oRowData[sColumnName] : oRowData[colNr];
-		}	
+	}	
 	
 };
 
@@ -2249,7 +2294,7 @@ fn.getDataFromRowNode = function(nRow){
 	var oTable = mt.getDataTableObjectOf(sTable);
 		
 	return oTable.row(nRow).data();
-}
+};
 
 
 
@@ -2295,8 +2340,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
     
     // IE before version 9
     else if (typeof document.selection != "undefined" &&
-            (sel = document.selection).type != "Control") 
-    {
+            (sel = document.selection).type != "Control")  {
         range = sel.createRange();
         priorRange = document.body.createTextRange();
         priorRange.moveToElementText(nCell);
@@ -2375,8 +2419,7 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
     
     // IE before version 9
     else if (typeof document.selection != "undefined" &&
-            (sel = document.selection).type != "Control") 
-    {
+            (sel = document.selection).type != "Control")  {
         range = sel.createRange();
         wholeRange = document.body.createTextRange();
         wholeRange.moveToElementText(nCell);
@@ -2559,6 +2602,8 @@ fn.putDataIntoCellNode = function(nRow, sColumnName, sContent){
  * @param {Array} aColumnNamesAndValues - An associative array of fields and values to update in the row 
  * @param {Function} fnCallback - Function called after the update
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * @see fn.updateTableGivenANode
  */
 fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
 	
@@ -2627,6 +2672,15 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 
 };
 
+/**
+ * Synonym of fn.updateDatabaseGivenANode
+ * 
+ * @see fn.updateDatabaseGivenANode
+ */
+fn.updateTableGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
+	fn.updateDatabaseGivenANode(nMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler);
+};
+
 
 // ***********************************************************************************
 // *     UPDATE THE DATABASE GIVEN SOME FIELD VALUES (instead of row id = pk id)     *
@@ -2656,16 +2710,14 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 	var aValuesToUpdate = new Array();
 	
 	
-	for (var sFieldName in aFieldsAndValuesToMatch)
-		{
+	for (var sFieldName in aFieldsAndValuesToMatch) {
 		aColNamesToMatch.push(sFieldName);
 		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
-		}
-	for (var sFieldName in aFieldsAndValuesToUpdate)
-		{
+	}
+	for (var sFieldName in aFieldsAndValuesToUpdate) {
 		aColNamesToUpdate.push(sFieldName);
 		aValuesToUpdate.push(aFieldsAndValuesToUpdate[sFieldName]);
-		}
+	}
 	
 	// update the database
 	var url = WEBSERV_URL+"/table/setvalue_without_id"; 
@@ -2711,6 +2763,16 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 };
 
 
+/**
+ * Synonym of fn.updateDatabaseGivenFieldValues
+ * 
+ * @see fn.updateDatabaseGivenFieldValues
+ */
+fn.updateTableGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, aFieldsAndValuesToUpdate, fnCallback, fnErrorHandler){
+	fn.updateDatabaseGivenFieldValues(sSomeTablename, aFieldsAndValuesToMatch, aFieldsAndValuesToUpdate, fnCallback, fnErrorHandler);
+};
+
+
 // *****************************************************************
 // *     INSERT DATA INTO THE DATABASE                             *
 // *****************************************************************
@@ -2726,6 +2788,8 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
  * @param {String} returnField - Field from which the value should be returned after insertion (eg. an ID, otherwise NULL)
  * @param {Function} [fnCallback=null] - Function called after the update
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * @see fn.insertIntoTable
  */
 fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnField, fnCallback, fnErrorHandler){
 	
@@ -2735,11 +2799,10 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	var aColNamesToAdd = new Array();
 	var aValuesToAdd = new Array();	
 	
-	for (var sFieldName in aFieldsAndValuesToAdd)
-		{
+	for (var sFieldName in aFieldsAndValuesToAdd) {
 		aColNamesToAdd.push(sFieldName);
 		aValuesToAdd.push(aFieldsAndValuesToAdd[sFieldName]);
-		}
+	}
 	
 	// insert record into the database
 	var url = WEBSERV_URL+"/table/insertvalue"; 
@@ -2783,6 +2846,15 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
+};
+
+/**
+ * Synonym of fn.insertIntoDatabase
+ * 
+ * @see fn.insertIntoDatabase
+ */
+fn.insertIntoTable = function(sSomeTablename, aFieldsAndValuesToAdd, returnField, fnCallback, fnErrorHandler){
+	fn.insertIntoDatabase(sSomeTablename, aFieldsAndValuesToAdd, returnField, fnCallback, fnErrorHandler);
 };
 
 
@@ -2859,6 +2931,9 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
  * @param {Array} aFieldsAndValues - An associative array of fields and values to match
  * @param {Function} fnCallback - Function called after the update
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * @see fn.getIdFromTable
+ * @see fn.getIdOfRecord
  */
 fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler){
 	
@@ -2868,11 +2943,10 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 	var aColNamesToMatch = new Array();
 	var aValuesToMatch = new Array();	
 	
-	for (var sFieldName in aFieldsAndValues)
-		{
+	for (var sFieldName in aFieldsAndValues) {
 		aColNamesToMatch.push(sFieldName);
 		aValuesToMatch.push(aFieldsAndValues[sFieldName]);
-		}
+	}
 	
 	// insert record into the database
 	var url = WEBSERV_URL+"/table/get_id_of_record"; 
@@ -2914,6 +2988,28 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 			}
 		} );
 };
+
+
+/**
+ * Synonym of fn.getIdFromDatabase
+ * 
+ * @see fn.getIdFromDatabase
+ * @see fn.getIdOfRecord
+ */
+fn.getIdFromTable = function(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler){
+	fn.getIdFromDatabase(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler);
+};
+
+/**
+ * Synonym of fn.getIdFromDatabase
+ * 
+ * @see fn.getIdFromTable
+ * @see fn.getIdOfRecord
+ */
+fn.getIdOfRecord = function(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler){
+	fn.getIdFromDatabase(sSomeTablename, aFieldsAndValues, fnCallback, fnErrorHandler);
+};
+
 
 
 // *****************************************************************
@@ -2982,6 +3078,15 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	
 };
 
+/**
+ * Synonym of fn.removeFromDatabaseGivenANode
+ * 
+ * @see fn.removeFromDatabaseGivenANode
+ */
+fn.removeFromTableGivenANode = function(nRow, fnCallback, fnErrorHandler){
+	fn.removeFromDatabaseGivenANode(nRow, fnCallback, fnErrorHandler);
+};
+
 
 /**
  * Remove some records from the database
@@ -3000,11 +3105,10 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 	var aColNamesToMatch = new Array();
 	var aValuesToMatch = new Array();	
 	
-	for (var sFieldName in aFieldsAndValuesToMatch)
-		{
+	for (var sFieldName in aFieldsAndValuesToMatch) {
 		aColNamesToMatch.push(sFieldName);
 		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
-		}
+	}
 	
 	// delete record from the database
 	var url = WEBSERV_URL+"/table/delete_row_without_id";
@@ -3044,6 +3148,15 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );
+};
+
+/**
+ * Synonym of fn.removeFromDatabaseGivenFieldValues
+ *  
+ * @see  fn.removeFromDatabaseGivenFieldValues
+ */
+fn.removeFromTableGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler){
+	fn.removeFromDatabaseGivenFieldValues(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler);
 };
 
 
@@ -3089,14 +3202,13 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	var sRecordId = fn.getRowNodeId(nRow);
 	
 	// if that failed, give a error
-	if ( $.isNullOrUndefined(sRecordId) || sRecordId == '' )
-		{
+	if ( $.isNullOrUndefined(sRecordId) || sRecordId == '' ) {
 		fn.message(lang.error, 
 				lang.error_when_calling+ " fn.callRecord("+sTable+").<BR>"+ 
 				lang.error_function_called_with_illegal_value+". "+
 				lang.error_function_called_with_illegal_value_expected+": record id.");
 		return;
-		}
+	}
 	
 	
 	var url = WEBSERV_URL+"/table/get_record";
@@ -3192,7 +3304,7 @@ fn._callRecord = function(nRow, aColumnsToUpdate, xml, fnCallback){
  * 
  * @see fn.getRecords
  * @see fn.getRecordGivenFieldValues
- * @see fn.callDatabase
+ * @see fn.callTable
  * @see fn.callRecord
  */
 fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
@@ -3217,7 +3329,7 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 	 		var recordOutput = fn._getRecordFromXmlResponse(xml);
 	 		if (fnCallback != null)
 	 			fnCallback(recordOutput);
-	 		},
+	 	},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		
 	 		if (fnErrorHandler!=null)
@@ -3230,8 +3342,8 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 				fn.message(lang.error, 
 	 			lang.error_when_calling+" fn.getRecord("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
-			}
-		} );
+		}
+	} );
 	
 };
 
@@ -3317,11 +3429,10 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 	var aColNamesToMatch = new Array();
 	var aValuesToMatch = new Array();
 	
-	for (var sFieldName in aFieldsAndValuesToMatch)
-		{
+	for (var sFieldName in aFieldsAndValuesToMatch) {
 		aColNamesToMatch.push(sFieldName);
 		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
-		}
+	}
 	
 	var url = WEBSERV_URL+"/table/get_record_without_id";
 	
@@ -3482,17 +3593,15 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 	 		
 	 		// [1] single return value
 	 		// (in that case, the key is the function name)
-	 		if (typeof oFieldsAndValues[ sColumnNameToReadFrom ] != 'undefined')
-	 			{
+	 		if (typeof oFieldsAndValues[ sColumnNameToReadFrom ] != 'undefined') {
 	 			functionCallOuput = oFieldsAndValues[ sColumnNameToReadFrom ].split(ARG_INTERNAL_SEPARATOR);
-	 			}
+	 		}
 	 		
 	 		// [2] more return values
 	 		// (in that case, the keys are the returned columns names)
-	 		else if (countProperties(oFieldsAndValues)>1)
-	 			{
+	 		else if (countProperties(oFieldsAndValues)>1) {
 	 			functionCallOuput = new cloneObject(oFieldsAndValues);
-	 			}
+	 		}
 	 			 		
 	 		// if some callback function is given, call it now		 		
 	 		if (fnCallback!=null) 
@@ -3653,7 +3762,7 @@ fn._activeEnterForThisDialog = function(dialogDivId){
 				}
 		});
 	}, 100);
-}
+};
 
 
 /**
@@ -3691,10 +3800,9 @@ fn.message = function(sTitle, sMessage, fnFunction){
 		        	  click: function() {
 						$( this ).dialog( "close" );
 						
-						if (fnFunction != null)
-							{
+						if (fnFunction != null) {
 							fnFunction();
-							}
+						}
 		        	  },
 		        	  id: 'dialog_accept_button'
 		          }
@@ -3785,15 +3893,13 @@ fn.askToChoose = function(sTitle, sMessage, oOptions){
  */
 fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	
-	if (fnFunction == null)
-		{
+	if (fnFunction == null) {
 		fn.message(lang.error, 
 			lang.error_when_calling+" fn.confirm().<BR>"+
 			lang.error_function_called_with_illegal_value+". "+
 			lang.error_function_called_with_illegal_value_expected+ ":  callback (fnFunction=null).");
-		}
-	else
-		{
+	}
+	else {
 		var sP = $("<p></p>").html(sMessage);
 		var dialogDivId = "dialog-message"+getUniqueNumber();
 		var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
@@ -3832,10 +3938,10 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 								}
 			          }
 			]		
-			});
+		});
 		
-			fn._activeEnterForThisDialog(dialogDivId);
-		}
+		fn._activeEnterForThisDialog(dialogDivId);
+	}
 	
 };
 
@@ -3932,7 +4038,7 @@ fn.showTabs = function(sTitle, sMessage, oTitles2HtmlContent, fnFunction, oExtra
 	$( "#"+dialogDivId ).dialog(oDialogConfig);
 	
 	fn._activeEnterForThisDialog(dialogDivId);
-}
+};
 
 
 // compute automatically a convenient position for a dialog, given the current active row in a table
@@ -4021,11 +4127,10 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 
 	// deal with title/message input
 	var sMessage = "";
-	if ( $.isArray(sTitle) )
-		{
+	if ( $.isArray(sTitle) ) {
 		sMessage = sTitle[1];
 		sTitle = sTitle[0];
-		}
+	}
 	var sMessageP = $("<p></p>").html(sMessage);	
 
 	if (bTextarea == null) 
@@ -4041,8 +4146,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	var promptForm = $("<form></form>");
 	var promptFieldSet = $("<fieldset></fieldset>");
-	for (var i=0; i<aFieldNames.length; i++)
-		{
+	for (var i=0; i<aFieldNames.length; i++) {
 		// should the input field be editable?
 		var bFixedValue = false;
 		// datepicker?
@@ -4051,7 +4155,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		var bOneTextarea = false;
 
 		if (aValues != null && 
-				(aValues[i] instanceof String || typeof aValues[i] === "string") ) {// make sure we have a string, or this will crash!
+				(aValues[i] instanceof String || typeof aValues[i] === "string") ) { // make sure we have a string, or this will crash!
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
@@ -4239,11 +4343,10 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// enter when selecting from autocomplete mustn't trigger closing dialog
 				// (in case an autocomplete has been set for this prompt)
 				!$(".ui-autocomplete-input").elementExists() 
-				)
-			{		
+				) {		
 			$( "#dialog_accept_button" ).click();
 			return false;
-			}
+		}
 	});
 	
 	$( "#"+promptDivId ).dialog( "open" );
@@ -4287,11 +4390,10 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	// deal with title/message input
 	var sMessage = "";
-	if ( $.isArray(sTitle) )
-		{
+	if ( $.isArray(sTitle) ) {
 		sMessage = sTitle[1];
 		sTitle = sTitle[0];
-		}
+	}
 	var sMessageP = $("<p></p>").html(sMessage);
 	
 	var promptDiv = $("<div></div>")
@@ -4459,17 +4561,15 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
 				
 				// if some function was set, execute it and give the selected text as an argument
-				if (typeof mSelectionMode == 'function')
-					{
+				if (typeof mSelectionMode == 'function') {
 					mSelectionMode(ui.selected.innerText);
-					}
+				}
 				
 				// if only one choice is allowed, dialog must be closed upon selection
-				else
-					{
+				else {
 					$( "#dialog_accept_button" ).click();		
 					return false;
-					}
+				}
 				
 			} );			
 		}		
@@ -4482,39 +4582,36 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 	
 	selectableUl.empty();
 	
-	for (var i=0; i<aAllOptions.length; i++)
-	{
-	var sOption = aAllOptions[i];
-	
-	// null represent an empty space, which can be used to put room between groups of options not belonging together
-	if (sOption == null)
-		{
-		selectableUl.append($("<br/>"));
+	for (var i=0; i<aAllOptions.length; i++) {
+		var sOption = aAllOptions[i];
+		
+		// null represent an empty space, which can be used to put room between groups of options not belonging together
+		if (sOption == null) {
+			selectableUl.append($("<br/>"));
 		}
-	
-	// normal case: build option
-	else
-		{
-		// one element 		
-		var liElement = $("<li></li>")
-			.addClass( "ui-widget-content" )
-			.css("margin", "3px")
-			.css("padding", "0.4em")
-			.css("font-size", "12px")
-			.css("min-height", "18px");	
 		
-		// if some item was pre-selected, assign it the selected class
-		if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
-			{
-			liElement.addClass("ui-selected");
-			}
-		
-		var spanElement = $("<span></span>").text( $.trim(sOption) );
-		liElement.append(spanElement);
-		selectableUl.append(liElement);
-		}	
+		// normal case: build option
+		else {
+			// one element 		
+			var liElement = $("<li></li>")
+				.addClass( "ui-widget-content" )
+				.css("margin", "3px")
+				.css("padding", "0.4em")
+				.css("font-size", "12px")
+				.css("min-height", "18px");	
+			
+			// if some item was pre-selected, assign it the selected class
+			if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
+				{
+				liElement.addClass("ui-selected");
+				}
+			
+			var spanElement = $("<span></span>").text( $.trim(sOption) );
+			liElement.append(spanElement);
+			selectableUl.append(liElement);
+		}
 	}
-}
+};
 
 
 
@@ -4542,11 +4639,10 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	// deal with title/message input
 	var sMessage = "";
-	if ( $.isArray(sTitle) )
-		{
+	if ( $.isArray(sTitle) ) {
 		sMessage = sTitle[1];
 		sTitle = sTitle[0];
-		}
+	}
 	var sMessageP = $("<p></p>").html(sMessage);
 	
 	var promptDiv = $("<div></div>")
@@ -4602,8 +4698,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
       	  text: lang.ok,
     	  click: function(){
     		  
-    		for (var i=0; i<aFieldNames.length; i++)
-    		{
+    		for (var i=0; i<aFieldNames.length; i++) {
     			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
     			
     			// compute output for fn.getPromptBoxInput
@@ -4776,7 +4871,7 @@ fn.processPromptBoxOrder = function(aPromptBoxOrder, aArrayToResort){
 fn.getNewPositionOfElementAt = function(iOriginalIndex){
 	var aNewPositions = fn.getPromptBoxOrder();
 	return $.inArray(iOriginalIndex, aNewPositions);
-}
+};
 
 
 
@@ -4883,8 +4978,7 @@ fn.getIndexOfButtonNamed = function(sTableName, sName){
 	
 	var aTableSettings = conf.getTableSettings(sTableName);	
 	
-	for (sOneSetting in aTableSettings)
-		{
+	for (sOneSetting in aTableSettings) {
 		// if we found a button and it has the required name, return its index
 		if ( $.startsWith(sOneSetting, "button") && 
 				aTableSettings[sOneSetting]["name"] == sName)
@@ -4912,7 +5006,7 @@ fn.getNameOfButtonAtIndex = function(sTableName, iIndex){
 	var aTableSettings = conf.getTableSettings(sTableName);
 	
 	return aTableSettings["button_"+iIndex]["name"];
-}
+};
 
 
 /**
@@ -5288,16 +5382,14 @@ fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
 	// gather the compulsory filters 
 	
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
-	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++)
-		{
+	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++) {
 		var aColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfColumnsOf(sSomeTablename)[i]);		
 		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
-		if (keepfilter)
-			{
+		if (keepfilter) {
 			filterColumnNames.push(mt.getListOfColumnsOf(sSomeTablename)[i]);
 			filterValues.push(conf.getFilter(aColumnConfig));
-			}
 		}
+	}
 	
 	
 	// now request the corresponding row number
@@ -5710,7 +5802,7 @@ fn.getCurrentSessionId = function(){
  */
 fn.getCurrentTabId = function(){
 	return fn.getCurrentProject() + "_" + $("#page_id").attr("name");
-}
+};
 
 
 /**
@@ -5830,7 +5922,7 @@ fn.triggerKeyStrikeOnElement = function(iKeyCode, nElement, nSubElement){
 		$(nElement).trigger(e);
 	else
 		$(nElement).find(nSubElement).trigger(e);
-}
+};
 
 
 
@@ -5863,7 +5955,7 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 		return;
 	}
 	
-}
+};
 
 
 fn._checkjQueryObject = function(sFunctionName, oArgument){
@@ -5877,4 +5969,4 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 		fn.message(lang.error, sFunctionName + "('"+fn.getTableName(oArgument.get(0))+"') "+lang.error_function_called_with_jquery_object+".");
 		return;
 	}
-}
+};

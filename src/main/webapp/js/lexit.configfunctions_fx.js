@@ -963,12 +963,23 @@ fx.putDataIntoCell = function(oRow, sColumnName, sContent){
  * @param {Array} aColumnNamesAndValues - An associative array of fields and values to update in the row
  * @param {Function} fnCallback - Function called after the update
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * @see fx.updateTableGivenACellOrRow
  */
 fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
 	
 	fx._checkApiInstance("fx.updateDatabaseGivenACellOrRow", oMixed);
 	
 	fn.updateDatabaseGivenANode(oMixed.node(), aColumnNamesAndValues, fnCallback, fnErrorHandler);
+};
+
+/**
+ * Synonym of fx.updateDatabaseGivenACellOrRow
+ *  
+ * @see  fx.updateDatabaseGivenACellOrRow
+ */
+fx.updateTableGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler){
+	fx.updateDatabaseGivenACellOrRow(oMixed, aColumnNamesAndValues, fnCallback, fnErrorHandler);
 };
 
 
@@ -984,12 +995,23 @@ fx.updateDatabaseGivenACellOrRow = function(oMixed, aColumnNamesAndValues, fnCal
  * @param {API-object-instance} oRow -  An API instance of a row 
  * @param {Function} fnCallback - Function called after the operation
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * 
+ * @see fx.removeFromTableGivenARow
  */
 fx.removeFromDatabaseGivenARow = function(oRow, fnCallback, fnErrorHandler){
 	
 	fx._checkApiInstance("fx.removeFromDatabaseGivenARow", oRow);
 	
 	fn.removeFromDatabaseGivenANode(oRow.node(), fnCallback, fnErrorHandler);	
+};
+
+/**
+ * Synonym of fx.removeFromDatabaseGivenARow 
+ * 
+ * @see fx.removeFromDatabaseGivenARow
+ */
+fx.removeFromTableGivenARow = function(oRow, fnCallback, fnErrorHandler){
+	fx.removeFromDatabaseGivenARow(oRow, fnCallback, fnErrorHandler);
 };
 
 
