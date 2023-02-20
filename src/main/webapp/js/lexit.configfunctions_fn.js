@@ -860,8 +860,39 @@ fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSetti
 
 // subroutine of fn.callDatabase
 fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+
+	// check possible pre-init function for existence
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	var fnPreInit = conf.getPreInitCallback(aTableSettings);
+
+	var bTableAlreadyLoaded = fn.tableExists(sSomeTablename);
+
 	
-	
+	// If pre-init function does exist, make sure it's executed before calling the table
+	if ( !bTableAlreadyLoaded && fnPreInit != null ){
+
+
+		// N.B. executing fnPreInit with a DataTables object would be the right (default) choice,
+		// but we can't since the table wasn't created yet. So we use the table name instead.
+
+		// trick: https://stackoverflow.com/questions/7691762/how-to-add-a-callback-to-a-function-in-javascript
+		$.when($.ajax(fnPreInit(sSomeTablename))).then(function () {
+
+			fn._callDatabaseSub(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
+
+		});
+
+	}
+
+	// if the pre-init function was dealt with already, carry on with calling the table
+	else {
+		fn._callDatabaseSub(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
+	}
+};
+
+
+fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+
 	// the content to match must be at least an empty array
 	if (aContentToMatch == null)
 		aContentToMatch = {};
@@ -896,7 +927,6 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);		
 		fn._callTableWithFilter(sSomeTablename, aContentToMatch);
 	}
-	
 };
 
 

@@ -2081,6 +2081,16 @@ conf.getCloseCallback = function(aTableSettings){
 	return aTableSettings["close_callback"];
 };
 
+
+// retrieve function to be executed before a table is loaded
+conf.getPreInitCallback = function(aTableSettings){
+	
+	if (typeof aTableSettings["preinit_callback"] == 'undefined')
+		return null;
+	return aTableSettings["preinit_callback"];
+};
+
+
 // retrieve callback function
 // default is null
 
