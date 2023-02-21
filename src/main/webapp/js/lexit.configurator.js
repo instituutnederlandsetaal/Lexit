@@ -579,6 +579,28 @@ conf.changeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName
 	oTableConfigurationList[sSomeTableName] =	oTableConfig;
 };
 
+/**
+ * Remove a setting from the configuration of a column
+ * 
+ * @param {*} sSomeTableName 
+ * @param {*} sColumnName 
+ * @param {*} sSettingName 
+ */
+conf.removeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName){
+
+	var oTableConfig = conf.getTableConfig(sSomeTableName);
+	if (oTableConfig == null) 
+		oTableConfig = new Object();		
+	
+	var aSettingForThisColumn = 				conf.getColumnConfig(oTableConfig, sColumnName);
+	if (aSettingForThisColumn.hasOwnProperty(sSettingName)){
+		delete aSettingForThisColumn[sSettingName];
+	}
+		
+	oTableConfig[sColumnName] = 				aSettingForThisColumn;
+	oTableConfigurationList[sSomeTableName] =	oTableConfig;
+};
+
 
 // retrieve list of tables that must be hidden in tables pulldown menu at application start
 
