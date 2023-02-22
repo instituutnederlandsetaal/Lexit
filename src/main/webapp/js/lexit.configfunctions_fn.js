@@ -4079,6 +4079,8 @@ fn._computeDialogPosition = function(){
 
 	// No table open yet? Return empty settings, which will result in default window centering
 	if (sTable == null)	return {};
+	// active table might have been closed!
+	if (!fn.tableExists(sTable)) return {};
 
 
 	// if we do have a table open, try to find the active row
