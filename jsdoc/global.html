@@ -289,7 +289,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">array</span>
 
 
             
@@ -312,7 +312,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">object</span>
 
 
             
@@ -713,7 +713,7 @@
 
             
 
-            <td class="description last">Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.</td>
+            <td class="description last">Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? (default: true)</td>
         </tr>
 
     
@@ -736,7 +736,7 @@
 
             
 
-            <td class="description last">Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? Default: true.</td>
+            <td class="description last">Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? (default: true)</td>
         </tr>
 
     
@@ -1120,7 +1120,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line260">line 260</a>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line308">line 308</a>
     </li></ul></dd>
     
 
@@ -1260,7 +1260,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">integer</span>
 
 
             
@@ -1283,7 +1283,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">array</span>
 
 
             
@@ -1362,7 +1362,7 @@
 
             
 
-            <td class="description last">Volgorde waarin de kolommen moeten worden weergegeven,wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)</td>
+            <td class="description last">Volgorde waarin de kolommen moeten worden weergegeven,wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)</td>
         </tr>
 
     
@@ -1375,7 +1375,7 @@
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">object</span>
 
 
             
@@ -1431,7 +1431,7 @@
 
             
 
-            <td class="description last">Breedte van de tabel. Synoniem: "width"</td>
+            <td class="description last">Breedte van de tabel. (synoniem: "width")</td>
         </tr>
 
     
@@ -1454,7 +1454,7 @@
 
             
 
-            <td class="description last">Breedte van de tabel. Synoniem: "size"</td>
+            <td class="description last">Breedte van de tabel. (s)ynoniem: "size")</td>
         </tr>
 
     
@@ -1477,7 +1477,7 @@
 
             
 
-            <td class="description last">hoogte van de header boven de tabel; default is 50px</td>
+            <td class="description last">hoogte van de header boven de tabel (default is 50px)</td>
         </tr>
 
     
@@ -1500,7 +1500,7 @@
 
             
 
-            <td class="description last">hoogte van de footer onder de tabel; default is 50px</td>
+            <td class="description last">hoogte van de footer onder de tabel(default is 50px)</td>
         </tr>
 
     
@@ -1523,7 +1523,7 @@
 
             
 
-            <td class="description last">Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)beschikbaar moet zijn; default is true</td>
+            <td class="description last">Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)beschikbaar moet zijn(default is true)</td>
         </tr>
 
     
@@ -1546,7 +1546,7 @@
 
             
 
-            <td class="description last">callback bij initialisatie</td>
+            <td class="description last">callback na een Table draw Met 'repeat_callback:false', wordt de callback alleen aangeroepen als de tabel open gaat.Met 'repeat_callback:true', wordt de callback bij elke Tabel draw (verversen, bladeren, ...) opnieuw aangeroepen.</td>
         </tr>
 
     
@@ -1569,7 +1569,30 @@
 
             
 
-            <td class="description last">herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)</td>
+            <td class="description last">herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>preinit_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback die uitgevoerd moet worden vóór dat een tabel getoond wordt en met data wordt gevuld(dit maakt het mogelijk om bewerkingen op de tabel-data uit te voeren voordat deze getoond wordt)</td>
         </tr>
 
     
@@ -1582,7 +1605,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1605,7 +1628,7 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1638,7 +1661,7 @@
 
             
 
-            <td class="description last">bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)</td>
+            <td class="description last">bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)</td>
         </tr>
 
     
@@ -1661,7 +1684,7 @@
 
             
 
-            <td class="description last">de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)</td>
+            <td class="description last">de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)</td>
         </tr>
 
     
@@ -1684,7 +1707,7 @@
 
             
 
-            <td class="description last">ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)</td>
+            <td class="description last">ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)</td>
         </tr>
 
     
@@ -1707,7 +1730,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "RESET" (default: true)</td>
+            <td class="description last">toon/verberg knop "RESET" (default: true)</td>
         </tr>
 
     
@@ -1730,7 +1753,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)</td>
+            <td class="description last">toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)</td>
         </tr>
 
     
@@ -1753,7 +1776,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Formulier/Tabel view" (default: true)</td>
+            <td class="description last">toon/verberg knop "Formulier/Tabel view" (default: true)</td>
         </tr>
 
     
@@ -1776,7 +1799,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ververs" (default: true)</td>
+            <td class="description last">toon/verberg knop "Ververs" (default: true)</td>
         </tr>
 
     
@@ -1799,7 +1822,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Zoek & Bewerk" (default: true)</td>
+            <td class="description last">toon/verberg knop "Zoek & Bewerk" (default: true)</td>
         </tr>
 
     
@@ -1822,7 +1845,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Selectie" (default: true)</td>
+            <td class="description last">toon/verberg knop "Selectie" (default: true)</td>
         </tr>
 
     
@@ -1845,7 +1868,7 @@
 
             
 
-            <td class="description last">zet de knop "Selectie" alvast aan/uit (default: false = uit)</td>
+            <td class="description last">zet de knop "Selectie" alvast aan/uit (default: false, d.w.z. Selectie-modus is UIT)</td>
         </tr>
 
     
@@ -1868,7 +1891,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ongedaan maken" (default: true)</td>
+            <td class="description last">toon/verberg knop "Ongedaan maken" (default: true)</td>
         </tr>
 
     
@@ -1891,7 +1914,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ga naar" (default: true)</td>
+            <td class="description last">toon/verberg knop "Ga naar" (default: true)</td>
         </tr>
 
     
@@ -1914,7 +1937,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "?" (default: true)</td>
+            <td class="description last">toon/verberg knop "?" (default: true)</td>
         </tr>
 
     
@@ -1950,7 +1973,7 @@
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">object</span>
 
 
             
@@ -1983,7 +2006,7 @@
 
             
 
-            <td class="description last">wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden</td>
+            <td class="description last">Wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden.Als waarde moet dan de naam van de menu-optie worden gegeven, die vooraf geselecteerd moet zijn.</td>
         </tr>
 
     
@@ -2506,7 +2529,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Jul 06 2022 11:53:02 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Feb 23 2023 12:21:14 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

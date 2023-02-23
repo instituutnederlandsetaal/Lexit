@@ -15,6 +15,7 @@ var conf = {};
 var oTableSettingsList_example = {
 
 		/**
+		 * @type {string}
 		 * @description Als men in het tabellen-menu de tabellen wil groeperen in subcategorieën (bijv. een
 		 * categorie 'klustabellen', een categorie 'opzoektabellen' enz.) dan voldoet het om
 		 * de tabellen in kwestie een 'group' toe te kennen. Alle tabellen die dezelfde groepsnaam
@@ -24,6 +25,7 @@ var oTableSettingsList_example = {
 		
 		
 		/**
+		 * @type {string}
 		 * @description By default heeft de header van een tabel een licht grijze achtergrond. Met 'header_color'
 		 * kan echter een eigen kleur worden opgegeven. Wanneer er op het scherm allerlei tabellen onder elkaar staan,
 		 * maakt een eigen kleur een tabel sneller herkenbaar. Als men niet zelf een kleur wil kiezen, kan Lex'it
@@ -32,12 +34,14 @@ var oTableSettingsList_example = {
 		"header_color": "...",
 		
 		/**
+		 * @type {string}
 		 * @description Als een tabel een lelijke 'technische' naam heeft, kan die in de interface toch
 		 * met een mooie naam worden weergegeven; geef deze naam op met deze setting.
 		 */
 		"nice_name": "...",      
 		
 		/**
+		 * @type {integer}
 		 * @description By default toont een tabel 10 rijen tegelijk. Dit aantal kan in de GUI door de gebruiker
 		 * handmatig worden gewijzigd. Maar indien men standaard een ander aantal rijen wil zien,
 		 * zonder dat telkens weer handmatig te hoeven instellen, kan men dit aantal met 'displaylength'
@@ -47,12 +51,14 @@ var oTableSettingsList_example = {
 		
 		
 		/**
+		 * @type {array}
 		 * @description Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).
 		 * Voor 'alles tonen' moet waarde -1 worden opgegeven.
 		 */
 		"displaylength_menu": [1, 5, 10, 50],
 		
 		/**
+		 * @type {string}
 		 * @description Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).
 		 * Default is 'table'
 		 */
@@ -60,6 +66,7 @@ var oTableSettingsList_example = {
 		
 		
 		/**
+		 * @type {string}
 		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.
 		 * Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.
 		 */
@@ -68,13 +75,14 @@ var oTableSettingsList_example = {
 		/** 
 		 * @type {array} 
 		 * @description Volgorde waarin de kolommen moeten worden weergegeven,
-		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)
+		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database 
+		 * (default: null)
 		 * */
 		"columns_order": ["colname1", "colname2", "colnameX"],
 		
 		
 		/** 
-		 * @type {array} 
+		 * @type {object} 
 		 * @description kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,
 		 * opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}
 		 * */
@@ -94,132 +102,167 @@ var oTableSettingsList_example = {
 		"grouping_column": "...",
 		
 		/**
-		 * @description Breedte van de tabel. Synoniem: "width"
+		 * @type {string}
+		 * @description Breedte van de tabel. 
+		 * (synoniem: "width")
 		 */
 		"size": "60%",
 		
 		/**
-		 * @description Breedte van de tabel. Synoniem: "size"
+		 * @type {string}
+		 * @description Breedte van de tabel. 
+		 * (s)ynoniem: "size")
 		 */
 		"width": "60%",
 		
 		/**
-		 * @description hoogte van de header boven de tabel; default is 50px
+		 * @type {string}
+		 * @description hoogte van de header boven de tabel 
+		 * (default is 50px)
 		 */
 		"header_height": "150px",
 		
 		/**
-		 * @description hoogte van de footer onder de tabel; default is 50px
+		 * @type {string}
+		 * @description hoogte van de footer onder de tabel
+		 * (default is 50px)
 		 */
 		"footer_height": "30px",
 		
 		/**
 		 * @type {boolean}
 		 * @description Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)
-		 * beschikbaar moet zijn; default is true
+		 * beschikbaar moet zijn
+		 * (default is true)
 		 */
 		"main_search": true,		
 
 		/** 
 		 * @type {function} 
-		 * @description callback bij initialisatie
+		 * @description callback na een Table draw 
+		 * Met 'repeat_callback:false', wordt de callback alleen aangeroepen als de tabel open gaat.
+		 * Met 'repeat_callback:true', wordt de callback bij elke Tabel draw (verversen, bladeren, ...) opnieuw aangeroepen.
 		 * */
-		"callback": function(){ doSomething(); },
+		"callback": function(t){ doSomething(); },
 		
 		/** 
 		 * @type {boolean} 
-		 * @description herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)
+		 * @description herhaal de callback elke keer dat de tabel opnieuw wordt getekend 
+		 * (default: false)
 		 * */
 		"repeat_callback": true,
+
+
+		/**
+		 * @type {function} 
+		 * @description callback die uitgevoerd moet worden vóór dat een tabel getoond wordt en met data wordt gevuld
+		 * (dit maakt het mogelijk om bewerkingen op de tabel-data uit te voeren voordat deze getoond wordt)
+		 */
+		"preinit_callback": function(t){ doSomething(); },
 		
 		/**
+		 * @type {function} 
 		 * @description callback die uitgevoerd moet worden bij het aanklikken van de resetknop, maar dan net
 		 * voordat de tabel wordt herladen (zodat bijvoorbeeld filters aangepast kunnen worden enz)
 		 */
-		"prereset_callback": function(){ doSomething(); },
+		"prereset_callback": function(t){ doSomething(); },
 		
 		
 		/**
+		 * @type {function} 
 		 * @description callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)
 		 */
-		"close_callback": function(){ doSomething(); },
+		"close_callback": function(t){ doSomething(); },
 
 
 		/** 
 		 * @type {boolean} 
-		 * @description bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)
+		 * @description bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld 
+		 * (default: false)
 		 * */
 		"exact_count": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)
+		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] 
+		 * (default: true)
 		 * */
 		"get_focus_on_tab": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)
+		 * @description ververs de table als de window waarin die getoond wordt weer focus krijgt 
+		 * (default: true)
 		 * */
 		"refresh_upon_focus": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "RESET" (default: true)
+		 * @description toon/verberg knop "RESET" 
+		 * (default: true)
 		 * */
 		"reset_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)
+		 * @description toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen 
+		 * (default: true)
 		 * */
 		"columns_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Formulier/Tabel view" (default: true)
+		 * @description toon/verberg knop "Formulier/Tabel view" 
+		 * (default: true)
 		 * */
 		"viewtype_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ververs" (default: true)
+		 * @description toon/verberg knop "Ververs" 
+		 * (default: true)
 		 * */
 		"refresh_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Zoek & Bewerk" (default: true)
+		 * @description toon/verberg knop "Zoek & Bewerk" 
+		 * (default: true)
 		 * */
 		"replace_button": true,  
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Selectie" (default: true)
+		 * @description toon/verberg knop "Selectie" 
+		 * (default: true)
 		 * */
 		"selection_button": true,  
 		
 		/** 
 		 * @type {boolean} 
-		 * @description zet de knop "Selectie" alvast aan/uit (default: false = uit)
+		 * @description zet de knop "Selectie" alvast aan/uit 
+		 * (default: false, d.w.z. Selectie-modus is UIT)
 		 * */
 		"selection_button_active": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ongedaan maken" (default: true)
+		 * @description toon/verberg knop "Ongedaan maken" 
+		 * (default: true)
 		 * */
 		"undo_button": true,     
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ga naar" (default: true)
+		 * @description toon/verberg knop "Ga naar" 
+		 * (default: true)
 		 * */
 		"goto_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "?" (default: true)
+		 * @description toon/verberg knop "?" 
+		 * (default: true)
 		 * */
 		"help_button": true,
 
@@ -228,16 +271,21 @@ var oTableSettingsList_example = {
 		 * @type {function} 
 		 * @description zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt
 		 * */
-		"contextmenu": function(){doSomething(); },
+		"contextmenu": {
+			"items": {"some-key": "some-label"}, 
+			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
+		},
 		
 		/** 
-		 * @type {array} 
+		 * @type {object} 
 		 * @description zorg ervoor dat een pulldownmenu verschijnt als een button in de tabelheader wordt aangeklikt
 		 * */
 		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },
 		
 		/** 
-		 * @description wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden
+		 * @type {string}
+		 * @description Wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden.
+		 * Als waarde moet dan de naam van de menu-optie worden gegeven, die vooraf geselecteerd moet zijn.
 		 * */
 		"selected": "...",
 		
@@ -245,13 +293,13 @@ var oTableSettingsList_example = {
 		 *  @type {function} 
 		 *  @description ken een functie toe aan een toets at keyup
 		 *  */
-		"keyup" : function(confTable){ doSomething(); },
+		"keyup" : function(t){ doSomething(); },
 		
 		/** 
 		 * @type {function} 
 		 * @description ken een functie toe aan een toets at keydown
 		 * */
-		"keydown" : function(confTable){ doSomething(); }
+		"keydown" : function(t){ doSomething(); }
 };
 
 /**
@@ -264,15 +312,16 @@ var oTableConfigurationList_example = {
 		 * @description Functie die moet worden getriggerd als men in een gegeven kolom klikt e.d.
 
 		 * */
-		"click": function(t){ doSomething(); },
+		"click": function(t, n, event){ doSomething(); },
 		
 		/**
 		 * @type {function}
 		 * @description Functie die moet worden getriggerd als men in een gegeven kolom dubbelklikt e.d.
 		 */
-		"dblclick": function(t){ doSomething(); },
+		"dblclick": function(t, n, event){ doSomething(); },
 		
 		/**
+		 * @type {string}
 		 * @description Achtergrondkleur van de kolom als html kleurcode (zoals "#123ABC"). Als men slechts één 
 		 * kleurcode opgeef, dan berekent Lex'it automatisch een andere nuance van die kleur voor de oneven rijen 
 		 * (het werkt echter niet bij letterlijke kleurnamen (zoals "green"). Het is ook mogelijk om de kleur van 
@@ -282,6 +331,7 @@ var oTableConfigurationList_example = {
 		"bgcolor": "",
 		
 		/**
+		 * @type {string}
 		 * @description Plaats een button in een kolom, met de als string opgegeven naam. Het is ook mogelijk om 
 		 * de inhoud van de kolom als Button-naam te gebruiken: daartoe moet in de configuratie als naam een lege 
 		 * string worden gegeven ("button": ""). De functionaliteit van de button moet worden opgegeven met 
@@ -290,6 +340,7 @@ var oTableConfigurationList_example = {
 		"button": "",
 		
 		/**
+		 * @type {string}
 		 * @description Zet een tooltip bij een button, te zien bij mouseover. Dit is handig om de 
 		 * functie van een knop te verklaren als de naam van de knop dat onvoldoende doet (bijv. 
 		 * vanwege een te korte naam).
@@ -297,12 +348,14 @@ var oTableConfigurationList_example = {
 		"button_tooltip": "",
 		
 		/**
+		 * @type {string}
 		 * @description Zet een tooltip bij een cell, te zien bij mouseover. Dit is handig om zichtbaar te 
 		 * maken dat klikken op een cell een functie heeft.
 		 */
 		"cell_tooltip": "",
 		
 		/**
+		 * @type {array}
 		 * @description Maak van de zoekbox van betreffende kolom een select-box. De waarden om uit te kiezen 
 		 * kunnen op twee manieren worden opgegeven: 
 		 * [1] Als lege array, in welk geval de tool zelf de verschillende unieke waardes ophaalt in de database 
@@ -316,6 +369,7 @@ var oTableConfigurationList_example = {
 		"choosefrom": ["val1", "val2"],
 		
 		/**
+		 * @type {object}
 		 * @description Declareer labels voor de waardes van een select-box. Op die manier kunnen de onbegrijpelijke waardes
 		 * die de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.
 		 */
@@ -323,6 +377,7 @@ var oTableConfigurationList_example = {
 
 
 		/**
+		 * @type {string}
 		 * @description Een editeerbare cel waarin slechts een gesloten aantal waardes zijn toegestaan, wordt normaal gesproken
 		 * bewerkt via een Select-box. Met deze parameter declareert men welke mouse-event het weergeven van de Select-box moet triggeren.
 		 * Default is dat 'mouseover'.
@@ -331,6 +386,7 @@ var oTableConfigurationList_example = {
 		
 		
 		/**
+		 * @type {string}
 		 * @description Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.
 		 * Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.
 		 * 
@@ -341,12 +397,15 @@ var oTableConfigurationList_example = {
 		
 		
 		/**
+		 * @type {string}
 		 * @description Wanneer een kolom een technische, niet gebruikersvriendelijke naam heeft, kan men deze voor  
 		 * de gebruiker een mooiere naam geven. Dat doet men met deze parameter.
 		 */
 		"nice_name": "",
 		
 		/**
+		 * @type {string}
+		 * @deprecated
 		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
 		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
 		 * waarden zijn 'asc', 'desc' of null (default).
@@ -361,7 +420,10 @@ var oTableConfigurationList_example = {
 		 * @description Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, 
 		 * zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)
 		 */
-		"contextmenu": {},
+		"contextmenu": {
+			"items": {"some-key": "some-label"}, 
+			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
+		},
 		
 		/**
 		 * @type {object}
@@ -382,7 +444,7 @@ var oTableConfigurationList_example = {
 		 * Let wel: dit is iets anders dan de 'editfunc'. 'editfunc' is bedoeld om de werking van de editfunctie te 
 		 * wijzigen. 'editcallback' wordt als laatste uitgevoerd, na 'editfunc'.
 		 */
-		"editcallback": function(){},
+		"editcallback": function(t, n, newValue){},
 		
 		/**
 		 * @type {function}
@@ -391,7 +453,7 @@ var oTableConfigurationList_example = {
 		 * willen bewerken, maar wanneer de schermtabel een view is, moeten juist andere tabellen worden bewerkt en dat 
 		 * kan in editfunc worden gedeclareerd.
 		 */
-		"editfunc": function(){},
+		"editfunc": function(t, n, newValue){},
 		
 		/**
 		 * @type {array}
@@ -410,7 +472,7 @@ var oTableConfigurationList_example = {
 		 * @type {function}
 		 * @description Handler dat aangeroepen wordt wanneer het bewerken van een editable veld een fout veroorzaakt. 
 		 */
-		"editerrorhandler": function(){},
+		"editerrorhandler": function(err){},
 		
 		/**
 		 * @type {boolean}
@@ -431,30 +493,35 @@ var oTableConfigurationList_example = {
 		
 		
 		/**
+		 * @type {string}
 		 * @description 'max-width' attribuut bij ellipsis.
 		 */
 		"ellipsis_width": "200px",
 
 
 		/**
+		 * @type {string}
 		 * @description 'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar. 
 		 */
 		"ellipsis_height": "150px",
 		
 		/**
 		 * @type {boolean}
-		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? Default: true.
+		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? 
+		 * (default: true)
 		 */
 		"ellipsis_unwrap": true,
 		
 		
 		/**
 		 * @type {boolean}
-		 * @description Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? Default: true.
+		 * @description Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? 
+		 * (default: true)
 		 */
 		"ellipsis_keep_selected_unwrapped": true,
 		
 		/**
+		 * @type {string}
 		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
 		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
 		 */
@@ -492,7 +559,7 @@ var oTableConfigurationList_example = {
 		 * @description Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.
 		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
 		 */
-		"searchform": function(){},
+		"searchform": function(text){},
 
 		/**
 		 * @type {function}
@@ -502,31 +569,37 @@ var oTableConfigurationList_example = {
 		"render": function(text){},
 		
 		/**
+		 * @type {string}
 		 * @description Kleur die de tekst moet hebben in een gegeven kolom.
 		 */
 		"textcolor": "",
 		
 		/**
+		 * @type {string}
 		 * @description Font-family in een gegeven kolom.
 		 */
 		"textfont": "",
 		
 		/**
+		 * @type {string}
 		 * @description Font-size in een gegeven kolom.
 		 */
 		"textsize": "",
 		
 		/**
+		 * @type {string}
 		 * @description Font-style in een gegeven kolom.
 		 */
 		"textstyle": "",
 		
 		/**
+		 * @type {string}
 		 * @description Font-weight in een gegeven kolom. Zie voorbeeld bij 'textstyle'. 
 		 */
 		"textweight": "",
 		
 		/**
+		 * @type {string}
 		 * @description Bij het gebruik van selectboxen kan het zijn dat een gebruiker een waarde per ongeluk klikt.
 		 * Om dat te voorkomen, kan men in de configuratie afdwingen dat de gebruiker bij het maken van zijn keuze 
 		 * tegelijkertijd een opgegeven toets indrukt. Wanneer de gebruiker deze toets bij het maken van een keuze 
@@ -544,6 +617,7 @@ var oTableConfigurationList_example = {
 		"visible": true,
 		
 		/**
+		 * @type {string}
 		 * @description Breedte van een kolom. Dit kan worden gespecificeerd in 'px', maar men kan ook een relatieve waarde (in '%') opgeven.
 		 */
 		"width": "10%"
@@ -561,11 +635,13 @@ var aRestoreObjects = new Array();
 
 
 /**
- * Modify the value of a configuration setting
+ * Modify the value of a configuration setting. To get rid of it, use conf.removeTableConfigValue().
+ * Beware: in some cases, you might need to call fn.clearAllFilters() to have this effective in the GUI.
  * @param {String} sSomeTableName - Table name
  * @param {String} sColumnName - Column name
  * @param {String} sSettingName - Name of the setting to modify
  * @param {String} value - Value to assign to the setting
+ * @see conf.removeTableConfigValue
  */
 conf.changeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName, value){
 	
@@ -580,11 +656,13 @@ conf.changeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName
 };
 
 /**
- * Remove a setting from the configuration of a column
+ * Remove a setting from the configuration of a column.
+ * Beware: in some cases, you might need to call fn.clearAllFilters() to have this effective in the GUI.
  * 
  * @param {*} sSomeTableName 
  * @param {*} sColumnName 
  * @param {*} sSettingName 
+ * @see conf.changeTableConfigValue
  */
 conf.removeTableConfigValue = function(sSomeTableName, sColumnName, sSettingName){
 
