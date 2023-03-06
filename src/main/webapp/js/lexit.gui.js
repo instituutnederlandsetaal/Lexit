@@ -1202,14 +1202,14 @@ gui.showProcessingMsg = function(sSomeTablename, bRefreshing){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	showSpinner("#"+sSomeTablename+"_wrapper", bRefreshing);	
-	$("*").css("cursor", "progress");
+	$("body").css("cursor", "progress");
 };
 gui.removeProcessingMsg = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	removeSpinner("#"+sSomeTablename+"_wrapper");
-	$("*").css("cursor", "auto");
+	$("body").css("cursor", "auto");
 };
 
 
