@@ -309,10 +309,10 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	
 	var nReference = $( "#"+sSomeTablename+"_wrapper div.dataTables_scrollBody table");
 	var nReferentialTr = $("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tbody").find("tr:not('.group')").eq(0);
-	var iBaseLeft = parseInt(nReference.position().left) + 10;
+	var iBaseLeft = parseInt(nReference.position().left) + 5;
 	var iBaseTop = parseInt(nReference.position().top);
 	
-	var iBaseHeight = 25 + // fixed to 25, instead of 'parseInt(nReferentialTr.css("height"))',
+	var iBaseHeight = 30 + // fixed, instead of 'parseInt(nReferentialTr.css("height"))',
 	                       // which sometimes causes very ugly layout because of 
 	                       // long, thus multilines column names.
 		parseInt(nReferentialTr.css("padding-top")) +
@@ -338,84 +338,68 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 		
 		var thisCell = this;
 
-		// hide the normal table cells (we'll render the content otherwise...)
-		$(thisCell).hide();
-
 		var y = i%iNumberOfFormRows ;
 		var x = Math.floor(i/iNumberOfFormRows);
 		
+		// ------------
 		// cell labels
+		// ------------
+
 		var nReferentialColumn = $("#"+sSomeTablename+"_wrapper thead").find("th").eq(i);
 		var sColumnTitle = nReferentialColumn.text();
+		var oTableConfig = conf.getTableConfig(sSomeTablename);
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnTitle);
+		var sColNameToRender = conf.getColumnNiceName( oColumnConfig );
+		if (sColNameToRender == null) sColNameToRender = sColumnTitle;
+		
+
 		var eCellLabel = $("<div></div>")			
 			.addClass(sSomeTablename+"_cell_label")
 			.css("width", iMaxColumnTitleWidth)
 			.css("background-color", "#E2E4FF")
-			.append($("<span></span>").text(sColumnTitle));	
+			.append($("<b></b>").text(sColNameToRender));	
 		
-		var iNewTop  = iBaseTop + y*iBaseHeight;
-		var iNewLeft = iBaseLeft + x*(2*iMaxColumnTitleWidth) + x*10;
+		var iNewTop  = iBaseTop + y*(iBaseHeight+2);
+		var iNewLeft = iBaseLeft + x*(2.5*iMaxColumnTitleWidth) + x*40;
 		
 		eCellLabel
 			.css("position", "absolute")
 			.css("left", iNewLeft)
 			.css("top", iNewTop + iRoomAboveAll )
-			.css("padding-left", "3px");
+			.css("padding", "0px 0px 0px 3px")
+			.css("margin", "0px 0px 0px 0px")
+			.css("height", (iBaseHeight+2)+"px")
+			.css("border", "1px dotted black");
 		// tooltip for content, since long text can't be fully read in form view type
 		eCellLabel
 			.addClass("tooltip")
 			.attr("title", $(this).text());
 		$("#"+sSomeTablename+"_wrapper").append(eCellLabel);
 		
-		// cells 
-		
-		var nCellContent = $(thisCell).html();
+		// ------------
+		// cells values
+		// ------------
 
-		var eCellValue = $("<div></div>")			
+		var sBgColor = conf.getBackgroundColor(oColumnConfig);
+		var sBgColorToRender = (sBgColor == null ? "#FFFFFF" : ((sBgColor+",").split(","))[0] ); // deal with doubled color codes in config
+
+		$(thisCell)
+			.css("display", "block")
 			.addClass(sSomeTablename+"_cell_value")
-			.css("width", iMaxColumnTitleWidth)
-			.css("background-color", "#FFFFFF")
+			.css("background-color", sBgColorToRender)
 			.css("border", "1px dotted black")
-			.append(nCellContent);
-		 
-		$(eCellValue)
-			.css("position", "absolute")
-			.css("left", iNewLeft + iMaxColumnTitleWidth)
-			.css("top", iNewTop + iRoomAboveAll );
-		$(eCellValue)
-			.css("width", iMaxColumnTitleWidth+"px")
-			.css("height", iBaseHeight+"px")
-			.css("padding-left", "3px")	
-			.css("empty-cells", "show")
-			.css("overflow", "hidden")
-			.css("display", "inline-block")
-			.css("white-space", "nowrap")
-			.addClass("tooltip")
-			.attr("title", $(thisCell).text());
-			
-		$("#"+sSomeTablename+"_wrapper").append(eCellValue);		
-	
-		$(eCellValue).find("input").css("pointer-events", "none");	// enough to disable anything inside!
+			.css("position", "relative")
+			.css("left", iNewLeft + parseInt( $(eCellLabel).css("width") ) + 15 +"px")
+			.css("top", 3-(x*(iNumberOfFormRows*(iBaseHeight+2))))
+			.css("padding", "0px 0px 0px 3px")
+			.css("margin", "0px 0px 0px 0px")
+			.css("width", (iMaxColumnTitleWidth*1.5)+"px")
+			.css("height", (iBaseHeight)+"px" );
+
+	 
+		//$(eCellValue).find("input").css("pointer-events", "none");	// enough to disable anything inside if needed!
 		
 	});
-	
-	
-	// give the tbody a height to force the bottom pagination pane to shift to the bottom
-	
-	// compute the needed height
-	// var iLowestYpos = 9999;
-	// var iHighestYpos = 0;
-	// $("#"+sSomeTablename+"_wrapper").find("td").each(function(){
-		
-	// 	var iYpos = $(this).position().top;
-	// 	if (iYpos<iLowestYpos) iLowestYpos = iYpos;
-	// 	if (iYpos>iHighestYpos) iHighestYpos = iYpos;
-	// });		
-	// // Set the needed height
-	// $("#"+sSomeTablename+"_wrapper").css("height", "auto");
-	// var iOriginalTableWrapperHeight = parseInt($("#"+sSomeTablename+"_wrapper").css("height"));
-	// var iNewHeight = iOriginalTableWrapperHeight+(iHighestYpos-iLowestYpos+iBaseHeight + iRoomAboveAll);
-	// $("#"+sSomeTablename+"_wrapper").css("height", iNewHeight+"px");
 	
 	
 	// activate tipTip jquery plugin for nice cross-browser tooltips
