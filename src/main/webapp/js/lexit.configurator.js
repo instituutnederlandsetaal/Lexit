@@ -1793,6 +1793,15 @@ conf.getExactCount = function(aTableSettings){
 };
 
 
+// get the full export button setting, if available
+// default is null
+conf.getFullExportButtonSettings = function(aTableSettings){
+	if (typeof aTableSettings["full_export_button"] == 'undefined')
+		return null;
+	return aTableSettings["full_export_button"];
+};
+
+
 
 // retrieve the background color
 conf.getHeaderColor = function(aTableSettings){

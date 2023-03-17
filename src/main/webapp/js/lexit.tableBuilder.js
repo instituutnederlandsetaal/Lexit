@@ -649,43 +649,93 @@ tb.addExportButtons = function(sSomeTableName){
 	
 	var exportCommonFunction = {
 			
-			exportOptions: {
-				format: { // process checkboxes content before export
-					body: function ( data, column, row ) {
-						return tb._rightExportValue(data);
-						} 
-				},
-				columns: ':visible' // export only visible columns
-			}
+		exportOptions: {
+			format: { // process checkboxes content before export
+				body: function ( data, column, row ) {
+					return tb._rightExportValue(data);
+					} 
+			},
+			columns: ':visible' // export only visible columns
+		}
 	};
 	
 	// constructor
 	// (see above)
+
+
+	// normal export buttons
+
+	var aButtonsList = [
+		$.extend(true, {}, exportCommonFunction, {
+			extend: 'copyHtml5', text: lang.export_toclipboard
+		}),
+		$.extend(true, {}, exportCommonFunction, {
+			extend: 'excelHtml5', text: lang.export_excel, action: tb.newExportAction 
+		}),
+		$.extend(true, {}, exportCommonFunction, {
+			extend: 'pdfHtml5', text: lang.export_pdf
+		}),
+		$.extend(true, {}, exportCommonFunction, {
+			extend: 'print', text: lang.export_print
+		})
+	];
+
+	// full export button required too? 
+
+	var aFullButtonSettings = conf.getFullExportButtonSettings(conf.getTableSettings(sSomeTableName));
+	if (aFullButtonSettings != null){
+
+		var sFullExportName = aFullButtonSettings["nice_name"];
+		if (sFullExportName == null) sFullExportName = "Excel full Export";
+		var mPosition =  aFullButtonSettings["position"];
+
+		var oButton =  $.extend(true, {}, exportCommonFunction, {
+			extend: 'excelHtml5', text: sFullExportName, action: tb.newExportAction
+		});
+		if (mPosition == null || mPosition == 'first'){
+			aButtonsList.unshift(oButton);
+		} 
+		else if (mPosition == 'last') {
+			aButtonsList.push(oButton)
+		}
+
+	}
+	
+
+	// add the buttons 
+	
 	new $.fn.dataTable.Buttons( oTable, {
-	    buttons: [
-	            	$.extend(true, {}, exportCommonFunction, {
-		            	extend: 'copyHtml5', text: lang.export_toclipboard
-					}),
-					$.extend(true, {}, exportCommonFunction, {
-						extend: 'excelHtml5', text: lang.export_excel, action: tb.newExportAction 
-					}),
-					$.extend(true, {}, exportCommonFunction, {
-						extend: 'pdfHtml5', text: lang.export_pdf
-					}),
-					$.extend(true, {}, exportCommonFunction, {
-						extend: 'print', text: lang.export_print
-					})
-	    ]
+	    buttons: aButtonsList
 	} );	
 
 	// attach the buttons to the bottom pane
 	oTable.buttons().container()
-	//.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane', oTable.table().container() ) );
-	.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
+		.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
 	
 	// put buttons on the right side
 	$('#'+sSomeTableName+'_wrapper div.export_pane').find('div.dt-buttons')
 		.css("float", "right");
+
+	// add button groups label
+	if (aFullButtonSettings != null){
+
+		// this is a 2-members array as [<label of normal export buttons group>, <label of full export button group>]
+		var aButtonGroupsLabel = aFullButtonSettings["buttons_groups_labels"];
+		var eNormalButtonsGroup = $("<a></a>").attr("href", "#").text(aButtonGroupsLabel[0]);
+		var eFullExportButtonGroup = $("<a></a>").attr("href", "#").text(aButtonGroupsLabel[1]);
+		$(eNormalButtonsGroup).css("display", "inline-block").css("text-decoration", "none").css("position", "relative").css("padding", "0.5em").css("top", "-0.7em");
+		$(eFullExportButtonGroup).css("display", "inline-block").css("text-decoration", "none").css("position", "relative").css("padding", "0.5em").css("top", "-0.7em");
+
+		if (mPosition == null || mPosition == 'first'){
+			eFullExportButtonGroup.insertBefore( "div.dt-buttons a:eq(0)" );
+			eNormalButtonsGroup.insertAfter( "div.dt-buttons a:eq(0)" );
+		} 
+		else if (mPosition == 'last') {
+			eNormalButtonsGroup.insertBefore( "div.dt-buttons a:eq(0)" );
+			eFullExportButtonGroup.insertBefore( "div.dt-buttons a:last" );
+		} 
+	}
+
 }
 
 // --------------------------------------------------------------------------
@@ -716,16 +766,16 @@ tb.oldExportAction = function (self, e, dt, button, config) {
 
 tb.newExportAction = function (e, dt, button, config) {
     var self = this;
-    var oldStart = dt.settings()[0]._iDisplayStart;
+	var oldStart = dt.settings()[0]._iDisplayStart;	
+	var sButtonLabel = $(button.get(0)).find("span").text();
     
     // DEFAULT EXPORT (t.i. only screen output)
     
     // Shift key is not pressed -> default export 
-    if ( !kf.isPressed("shift"))
-    	{
+    if ( sButtonLabel == lang.export_excel && !kf.isPressed("shift")){
     	tb.oldExportAction(self, e, dt, button, config);
     	return true;
-    	}
+    }
     
     
     // FULL export (t.i. all database content that meets the filters)
