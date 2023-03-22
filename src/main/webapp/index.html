@@ -707,8 +707,10 @@
 					if (	sWarning != '' &&   
 							// except if it should be kept private to home
 							!(bPrivate && (document.URL).regexIndexOf( INL_HOMEURL )<0 ) 
-						)
+						){
 						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
+						console.log("warning for project '"+paramsHash.get("db")+"': "+sWarning);
+						}
 				}
 				
 				// redirect to other URL (rare, but it has been required in the past)

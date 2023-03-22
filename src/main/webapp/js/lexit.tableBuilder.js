@@ -728,7 +728,7 @@ tb.addExportButtons = function(sSomeTableName){
 
 		if (mPosition == null || mPosition == 'first'){
 			eFullExportButtonGroup.insertBefore( "div.dt-buttons a:eq(0)" );
-			eNormalButtonsGroup.insertAfter( "div.dt-buttons a:eq(0)" );
+			eNormalButtonsGroup.insertAfter( "div.dt-buttons a:eq(1)" );
 		} 
 		else if (mPosition == 'last') {
 			eNormalButtonsGroup.insertBefore( "div.dt-buttons a:eq(0)" );
