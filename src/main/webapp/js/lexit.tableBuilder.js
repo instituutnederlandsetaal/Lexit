@@ -727,8 +727,8 @@ tb.addExportButtons = function(sSomeTableName){
 		$(eFullExportButtonGroup).css("display", "inline-block").css("text-decoration", "none").css("position", "relative").css("padding", "0.5em").css("top", "-0.7em");
 
 		if (mPosition == null || mPosition == 'first'){
-			eFullExportButtonGroup.insertBefore( "div.dt-buttons a:eq(0)" );
-			eNormalButtonsGroup.insertAfter( "div.dt-buttons a:eq(1)" );
+			eFullExportButtonGroup.insertBefore( "#"+sSomeTableName+"_wrapper div.export_pane div.dt-buttons a:eq(0)" );
+			eNormalButtonsGroup.insertAfter( "#"+sSomeTableName+"_wrapper div.export_pane div.dt-buttons a:eq(1)" );
 		} 
 		else if (mPosition == 'last') {
 			eNormalButtonsGroup.insertBefore( "#"+sSomeTableName+"_wrapper div.export_pane div.dt-buttons a:eq(0)" );
