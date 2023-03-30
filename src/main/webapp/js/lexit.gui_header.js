@@ -43,7 +43,9 @@ head.setHeaderSensitivity = function(sSomeTableName){
 	// make table draggable when the mouse pointer is in the header
 	var bDraggingNow = false; 
 	$("#"+sSomeTableName+"_wrapper div.top").mouseenter(function(){
-		if ( !$("#"+sSomeTableName+"_dynamic").hasClass("draggable") )
+		
+		if ( conf.getTableDraggable(conf.getTableSettings(sSomeTableName)) 
+			&& !$("#"+sSomeTableName+"_dynamic").hasClass("draggable") )
 			{
 			$("#"+sSomeTableName+"_dynamic").addClass("draggable");
 			$("#"+sSomeTableName+"_dynamic").draggable({
@@ -86,7 +88,8 @@ head.setHeaderSensitivity = function(sSomeTableName){
 	$("#"+sSomeTableName+"_wrapper div.top").mouseleave(function(){
 		// if table is draggable, but the user is not dragging at the moment,
 		// and we are leaving the header, make the table NOT draggable
-		if ( $("#"+sSomeTableName+"_dynamic").hasClass("draggable")
+		if ( conf.getTableDraggable(conf.getTableSettings(sSomeTableName)) 
+				&& $("#"+sSomeTableName+"_dynamic").hasClass("draggable")
 				&& !bDraggingNow )
 			{			
 			$("#"+sSomeTableName+"_dynamic").draggable("destroy");
@@ -426,7 +429,7 @@ head.putResetButton = function(sSomeTablename){
 			
 	var resetButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#DBB8FF")
+		.css("background-color", "#F5BCA9")
 		.append($("<span></span>").addClass("ui-icon ui-icon-home"))
 		.attr("title", lang.reset_button).addClass("tooltip")
 		.addClass("header_button")

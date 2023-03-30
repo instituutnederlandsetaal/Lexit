@@ -48,6 +48,12 @@ body {
 	top: 5px;
 	left: 50vw;
 	text-align: right;
+	
+}
+
+.dataTables_wrapper .top button {
+	border: 1px solid #000000;
+	margin: 1px;
 }
 
 .header_button {

@@ -475,8 +475,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		"rowCallback": function( nRow, aData, iDisplayIndex ){
 			
 			var aListOfColumns = mt.getListOfVisibleColumnsOf(sSomeTableName);
-			for (var i=0; i<aListOfColumns.length; i++)
-				{
+			for (var i=0; i<aListOfColumns.length; i++){
 				// retrieve column client configuration
 				var oColumnConfig =	conf.getColumnConfig(oTableConfig, aListOfColumns[i]);
 				// if the config requires some background or text color, set it here
@@ -502,8 +501,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				if (sTextStyle!=null) 	$('td:eq('+i+')', nRow).css( "font-style", sTextStyle );
 				if (sTextFont!=null) 	$('td:eq('+i+')', nRow).css( "font-family", sTextFont );
 				if (sTextSize!=null) 	$('td:eq('+i+')', nRow).css( "font-size", sTextSize );				
-				}  
-		    },
+			}  
+		},
 
 		"pagingType": "full_numbers",
 		"columnDefs": mt.getDatatablesPropsOf(sSomeTableName) 

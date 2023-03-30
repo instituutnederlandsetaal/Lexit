@@ -38,7 +38,20 @@ var oTableSettingsList_example = {
 		 * @description Als een tabel een lelijke 'technische' naam heeft, kan die in de interface toch
 		 * met een mooie naam worden weergegeven; geef deze naam op met deze setting.
 		 */
-		"nice_name": "...",      
+		"nice_name": "...",     
+		
+		
+		/**
+		 * @type {integer}
+		 * @description Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven verticale positie worden geplaatst.
+		 */
+		"top": 50,
+
+		/**
+		 * @type {integer}
+		 * @description Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven horitale positie worden geplaatst.
+		 */
+		"left": 50,
 		
 		/**
 		 * @type {integer}
@@ -299,7 +312,21 @@ var oTableSettingsList_example = {
 		 * @type {function} 
 		 * @description ken een functie toe aan een toets at keydown
 		 * */
-		"keydown" : function(t){ doSomething(); }
+		"keydown" : function(t){ doSomething(); },
+
+		/** 
+		 * @type {boolean} 
+		 * @description maak de tabel versleepbaar 
+		 * (default: true)
+		 * */
+		"draggable": true,
+
+		/** 
+		 * @type {boolean} 
+		 * @description maak de tabel resizable 
+		 * (default: true)
+		 * */
+		"resizable": true
 };
 
 /**
@@ -2248,3 +2275,33 @@ conf.getDefaultSortingFromTableSettings = function(aTableSettings){
 	
 	return null;
 };
+
+
+// get draggable setting
+conf.getTableDraggable = function(aTableSettings){
+
+	if (typeof aTableSettings["draggable"] == 'undefined')
+		return true;
+	return aTableSettings["draggable"];
+};
+
+// get resizable setting
+conf.getTableResizable = function(aTableSettings){
+	
+	if (typeof aTableSettings["resizable"] == 'undefined')
+		return true;
+	return aTableSettings["resizable"];
+};
+
+// table absolute position
+conf.getTablePresetPosition = function(aTableSettings){
+
+	if ((typeof aTableSettings["top"] == 'undefined') && (typeof aTableSettings["left"] == 'undefined')){
+		return null;
+	}
+	
+	var top = (typeof aTableSettings["top"] == 'undefined') ? "0px" : aTableSettings["top"];
+	var left = (typeof aTableSettings["left"] == 'undefined') ? "0px" : aTableSettings["left"];
+	return [left, top];
+};
+

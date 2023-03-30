@@ -5847,6 +5847,28 @@ fn.getCurrentProject = function(){
 };
 
 
+
+/**
+ * Get the list of columns of a table
+ * and convert each column names to its nice name (if any is set in the configuration)
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object 
+ */
+fn.getListOfColumnsNiceNames = function(sSomeTable){
+
+	var sTableName = (typeof sSomeTable == 'object') ? fn.getTableName(sSomeTable) : sSomeTable;
+	var oTableConfig = conf.getTableConfig(sTableName);
+	var aColsList = mt.getListOfVisibleColumnsOf(sTableName);
+	
+	var aColsNiceNames = [];
+	for (var i=0; i<aColsList.length; i++){
+		var aColumnConfig =	conf.getColumnConfig(oTableConfig, aColsList[i]);
+		var sNiceName = conf.getColumnNiceName(aColumnConfig);
+		aColsNiceNames[i] = (sNiceName == null ? aColsList[i] : sNiceName);
+	}
+	return aColsNiceNames;
+}
+
+
 /**
  * Set the user name (the name of the user who has logged in is normally got from webservice
  * at initialisation time, but it is possible to set it here by giving a string, if needed that way)

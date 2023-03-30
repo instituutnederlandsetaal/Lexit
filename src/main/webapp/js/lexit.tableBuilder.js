@@ -83,7 +83,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// (this is needed as otherwise the table, not having a fixed position, 
 	//  will get suddenly repositioned when another table is being repositioned by the user)
 	
-	// 3 possibilities:
+	// 4 possibilities:
+
+	var aConfigPresetPosition = conf.getTablePresetPosition(aTableSettings);
 	
 	// [1] if a specific table screen position is required, set it now
 	if (oExtraTableSettings["left"] != null && oExtraTableSettings["top"] != null)
@@ -100,9 +102,17 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		var sLastLoadedTable = mt.getListOfLoadedTables()[iPreviousTableIndex];		
 		fn.pileupTables(sLastLoadedTable, sSomeTableName);
 		}
-	// [3] else just make the default position absolute	
-	else
-		{		
+	// [3] or if configuration has top/left declared
+	else if (aConfigPresetPosition != null){
+		var iCurrentLeft = aConfigPresetPosition[0];
+		var iCurrentTop = aConfigPresetPosition[1];
+		$("#"+sSomeTableName+"_dynamic")
+			.css("position", "absolute")
+			.css("top", iCurrentTop)
+			.css("left", iCurrentLeft);
+	}
+	// [4] else just make the default position absolute	
+	else {		
 		var iCurrentLeft = $("#"+sSomeTableName+"_dynamic").offset().left;
 		var iCurrentTop = $("#"+sSomeTableName+"_dynamic").offset().top;
 		$("#"+sSomeTableName+"_dynamic")
@@ -113,7 +123,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 		
 
-	$("#"+sSomeTableName+"_dynamic") // a table container should be resizable
+	// make table resizable or not
+	if (conf.getTableResizable(aTableSettings)){
+
+		$("#"+sSomeTableName+"_dynamic") // a table container should be resizable
 		.resizable({
 			"resize": function(event, ui){
 
@@ -125,6 +138,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				gui.setSearchboxesCss(sSomeTableName); 
 			}
 		}); 
+	}
 	
 			
 	
@@ -1315,15 +1329,16 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 tb.destroyTable = function(sSomeTablename, fnFunction, bRemoveContainerDiv){
 	
 	// Resizable etc. needs to be destroyed
-	$("#"+sSomeTablename+"_dynamic").resizable("destroy");
+	if (conf.getTableResizable(conf.getTableSettings(sSomeTablename))) {
+		$("#"+sSomeTablename+"_dynamic").resizable("destroy");
+	}
 	
 	// If the table is draggable at the moment (that's only the case when the mouse
 	// is in the header, as the draggable is destroyed at 'mouseleave'), destroy it as well
-	if ( $("#"+sSomeTablename+"_dynamic").hasClass("draggable") )
-		{
+	if ( conf.getTableDraggable(conf.getTableSettings(sSomeTablename)) && $("#"+sSomeTablename+"_dynamic").hasClass("draggable") ) {
 		$("#"+sSomeTablename+"_dynamic").draggable("destroy");
 		$("#"+sSomeTablename+"_dynamic").removeClass("draggable");
-		}
+	}
 	
 	// Remove config functions
 	// (since they are assigned with jQuery "live", they would keep alive otherwise)
