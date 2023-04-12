@@ -14,6 +14,9 @@ lang.isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 
 // general
 lang.ok = "Ok";
+lang.send = "Verzend";
+lang.save = "Opslaan";
+lang.undo = "Herstel";
 lang.yes = "Ja";
 lang.no = "Nee";
 lang.click_to_edit = "Klik om te bewerken";
@@ -1409,6 +1412,9 @@ lang.setLanguage = function(sLanguageCode){
 		
 		// general
 		lang.ok = "Ok";
+		lang.send = "Send";
+		lang.save = "Save";
+		lang.undo = "Undo";
 		lang.yes = "Yes";
 		lang.no = "No";
 		lang.click_to_edit = "Click to edit";

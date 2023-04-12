@@ -258,11 +258,49 @@ gui.applyRowGrouping = function(sSomeTableName){
 	}
 };
 
+// build formgrid
+gui.buildFormViewIfRequired = function(sSomeTablename){
 
+	// do we have configuration for a form grid
+	var oTableSettings =    conf.getTableSettings(sSomeTablename);
+	var oFormGrid =         conf.getFormGrid(oTableSettings);
+
+	// if we don't, fall back to the old type of form view
+	if (oFormGrid == null) {
+		gui.buildFormViewIfRequiredOLD(sSomeTablename);
+
+	}
+
+	// otherwise do build the formgrid defined in config, if required now
+	else {
+
+		// we do this only in the 'form' view type of course!
+		if (mt.getViewType(sSomeTablename) == 'table') {
+
+			// undo form view settings
+
+			// if form view is not built yet, build it!
+			if ( $("#"+sSomeTablename+"_form").elementExists() ){
+				$("#"+sSomeTablename+"_form").remove();
+				$("#"+sSomeTablename+"_search_and_sort").remove();
+			}
+
+			$("#"+sSomeTablename+"_dynamic .dataTables_scroll").css("display", "block");
+			$("#"+sSomeTablename+"_dynamic .bottom_pane").show();
+			$("#"+sSomeTablename+"_dynamic .export_pane").show();
+
+		}
+		else {
+
+			form.manageViewGrid(sSomeTablename);
+		}
+	}
+
+};
 
 
 // build the form view
-gui.buildFormViewIfRequired = function(sSomeTablename){
+gui.buildFormViewIfRequiredOLD = function(sSomeTablename){
 	
 	// we do this only in the 'form' view type of course!
 	if (mt.getViewType(sSomeTablename) == 'table') {

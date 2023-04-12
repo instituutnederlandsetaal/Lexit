@@ -93,6 +93,29 @@ $.fn.preBind = function (type, data, fn) {
     return this;
 };
 
+
+// https://stackoverflow.com/questions/2337521/copy-events-from-one-element-to-other-using-jquery
+function copyEvents(source, destination) {
+    // Get source events
+    var events = source.data('events');
+
+    // Iterate through all event types
+    $.each(events, function(eventType, eventArray) {
+        // Iterate through every bound handler
+        $.each(eventArray, function(index, event) {
+            // Take event namespaces into account
+            var eventToBind = event.namespace.length > 0
+                ? (event.type + '.' + event.namespace)
+                : (event.type);
+
+            // Bind event
+            destination.bind(eventToBind, event.data, event.handler);
+        });
+    });
+}
+
+
+
 //*******************************************************
 // Elements
 //*******************************************************

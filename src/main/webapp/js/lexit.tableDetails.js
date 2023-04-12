@@ -155,8 +155,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	var aColumnOrder = conf.getColumnOrder(aTableSettings);
 	
 	// if a column order was given, reorder the column types accordingly
-	if (aColumnOrder != null)
-		{
+	if (aColumnOrder != null) {
 		// first check if the list of columns returned by database is
 		// the same as the list of columns from the table configuration settings
 		var firstArray = cloneArray(aAllColumns);
@@ -165,28 +164,26 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		secondArray.sort();
 		
 		// the arrays are identical, we can proceed with the reordering of column types		
-		if (arrays_equal(firstArray, secondArray))
-			{
+		if (arrays_equal(firstArray, secondArray)) {
 			
 			var aNewColumnTypes = new Array();
 			var oaNewAllowedValues = new Array();
 			// build new types list etc in right order
-			for (var i=0; i<aColumnOrder.length; i++)
-				{
+			for (var i=0; i<aColumnOrder.length; i++) {
 				var iIndexOfCurrentColumnInOldColumnsArray = $.inArray(aColumnOrder[i], aAllColumns);				
 				var sColTypeForCurrentColumn = aColumnsTypes[iIndexOfCurrentColumnInOldColumnsArray];
 				var aAllowedValuesForCurrentColumn = oaAllowedValuesForColumns[iIndexOfCurrentColumnInOldColumnsArray];
 				aNewColumnTypes.push(sColTypeForCurrentColumn);
 				oaNewAllowedValues.push(aAllowedValuesForCurrentColumn);
 				
-				}			
+			}			
 			aAllColumns = aColumnOrder;
 			aColumnsTypes = aNewColumnTypes;
 			oaAllowedValuesForColumns = oaNewAllowedValues;
-			}
+		}
 		// if the arrays are not identical, we should give an error message
-		else
-			{
+		else {
+			
 			var sCause = (aColumnOrder.length != aAllColumns.length) ?
 					lang.columns_list_number_mismatch1+": "+aAllColumns.length+".<BR><BR>"+
 					lang.columns_list_number_mismatch2+": "+aColumnOrder.length 
@@ -194,8 +191,8 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 					lang.columns_list_name_mismatch1+ ":<BR>{"+ firstArray.join(", ") +"}.<BR><BR>"+
 					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}";
 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ ": " +sCause+".");
-			}
 		}
+	}
 	
 	
 	// assign list of columns names and types to table we're going to build

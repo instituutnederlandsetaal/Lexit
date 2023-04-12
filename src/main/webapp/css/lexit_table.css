@@ -62,6 +62,21 @@ body {
 	font-size: 80%;
 }
 
+.formview_button {
+	font-family: "Helvetica Narrow","Arial Narrow",Tahoma,Arial,Helvetica,sans-serif;
+	letter-spacing: 0px;
+	font-size: 90%;
+	border: 1px solid #000000;
+	margin: 1px;
+	width: 100px;
+}
+
+.formview_textarea {
+	border-radius: 5px;
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
 .dataTables_info {
 	position: absolute;  /* fixed position left under the table name */
 	top: 30px;

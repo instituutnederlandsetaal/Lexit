@@ -2305,3 +2305,11 @@ conf.getTablePresetPosition = function(aTableSettings){
 	return [left, top];
 };
 
+
+// get table form view declaration
+conf.getFormGrid = function(aTableSettings){
+
+	if (typeof aTableSettings["formgrid"] == 'undefined')
+		return null;
+	return aTableSettings["formgrid"];
+};
