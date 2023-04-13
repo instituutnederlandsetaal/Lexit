@@ -149,9 +149,10 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 							.text(sNiceName)
 							.addClass( form.getSortingModeOfTableColumn(sTableName, sCellName) )
 							.attr("id", sCellName)
-							.click(function(){
+							.click(function(e){
 
 								var eFormSortCol = $(this);
+								var bShiftClicked = e.shiftKey;
 								var sThisCellName = eFormSortCol.attr("id");
 								var eSortTh = $("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table.display.dataTable thead tr:eq(0)").find("th."+sTableName+"."+sThisCellName);
 
@@ -166,7 +167,12 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 								});
 
 								// click sort column to trigger new sorting
-								eSortTh.click();
+								// and take shift press into account (for secondary sort)
+								//
+								// trick: https://stackoverflow.com/questions/28895866/shift-mouse-click-trigger
+								var shiftClick = jQuery.Event("click");
+								shiftClick.shiftKey = bShiftClicked;
+								eSortTh.trigger(shiftClick);
 								
 							})
 					)
@@ -500,17 +506,71 @@ form.buildViewGrid = function(sTableName){
 		// ------------------------------------------
 		// put the labels/cells at the right positions
 		// ------------------------------------------
-		$("#form_cell_"+sCellName)
+		$("#"+sTableName+"_wrapper #form_cell_"+sCellName)
 				.css("position", "absolute")
 				.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-				.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")
-				;
-		$("#form_cellvalue_"+sCellName+" textarea")
-				.css("width", (aCellSize[0] * iGridWidthUnit) +"px")
-				.css("height", (aCellSize[1] *iGridHeightUnit) +"px")
+				.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
+		$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
+				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
+				.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
 				.addClass("formview_textarea");
 		
 	}
+
+
+	// =============
+	//   BUTTONS
+	// =============
+
+
+	// ------------------------------------------
+	// custom buttons loop
+	// ------------------------------------------
+
+	var oCustomButtons =  oFormGrid["buttons"];
+	for (var sButtonName in oCustomButtons){
+
+		var sButtonId = 		sButtonName.toLowerCase().replace(/ /g, "_");
+		var sButtonColor =		oCustomButtons[sButtonName]["color"];
+		var sButtonBgColor = 	oCustomButtons[sButtonName]["bgcolor"];
+		var aButtonPosition = 	oCustomButtons[sButtonName]["position"];
+		var aButtonDefinition =	oCustomButtons[sButtonName]["definition"];
+		if (aButtonDefinition == null) aButtonDefinition = [1, 0.5]; // default
+
+		// build button
+
+		var customButton = $("<button>")
+			.addClass("formview_button")
+			.append( 
+				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).text(sButtonName) 
+			)
+			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "blue") )
+			.attr("id", "form_button_"+sButtonId)
+			.attr("name", sButtonName)
+			.click(function(){
+
+				// retrieve button config by its name
+				var sThisButtonName = $(this).attr("name");
+				var fnCallback = oCustomButtons[sThisButtonName]["click"]; 
+				fnCallback(mt.getDataTableObjectOf(sTableName));
+			});
+		eFormParent.append(
+			$("<div></div>")
+				.attr("id", "form_buttondiv_"+sButtonId)
+				.append(customButton)
+		);
+
+		// put button at right position
+
+		$("#"+sTableName+"_wrapper div#form_buttondiv_"+sButtonId)
+			.css("position", "absolute")
+			.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
+			.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
+		$("#"+sTableName+"_wrapper button#form_button_"+sButtonId)
+			.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
+			.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
+	}
+
 
 	// ------------------------------------------
 	// buttons for reset or validation
@@ -548,19 +608,6 @@ form.buildViewGrid = function(sTableName){
 
 				// set the send-button color back into default mode
 				form.setSendButtonToSetting(sTableName, "neutral");
-				// $("#"+sTableName+"_formsbuttons button#send_button")
-				// 	.css("background-color", form.send_button_color_neutral);
-				// $("#"+sTableName+"_formsbuttons button#send_button")
-				// 	.find("span:eq(0)")
-				// 	.css("color", "#000000");
-
-				// $("#"+sTableName+"_formsbuttons button#send_button")
-				// 	.find("span:eq(1)")
-				// 	.remove();
-				// $("#"+sTableName+"_formsbuttons button#send_button")
-				// 	.append( 
-				// 		$("<span></span>").addClass(form.send_button_icon_neutral) 
-				// 	);
 			});
 		});
 	buttondsDiv.append(formResetButton);
@@ -586,7 +633,7 @@ form.buildViewGrid = function(sTableName){
 			var nRow = fn.getActiveRowNode(sTableName);
 
 			for (var sCellName in oCells){
-				var cellSelector = $("#form_cellvalue_"+sCellName);
+				var cellSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
 				if ( cellSelector.hasClass("modified") ){
 
 					// special case: read value of checkbox
@@ -630,6 +677,8 @@ form.buildViewGrid = function(sTableName){
 	// append the buttons
 	$(eFormParent).append(buttondsDiv);	
 
+
+
 	// ------------------------------------------------------------------------
 	// force tooltip to fade, otherwise it sometimes keep in sight
 	// ------------------------------------------------------------------------
@@ -663,6 +712,14 @@ form.manageViewGrid = function(sTableName){
 	$("#"+sTableName+"_dynamic .dataTables_scroll").css("display", "none");
 	$("#"+sTableName+"_dynamic .bottom_pane").hide();
 	$("#"+sTableName+"_dynamic .export_pane").hide();
+
+	// hide some buttons that don't work (or don't make sense) in formview
+	$("#"+sTableName+"_dynamic .top div#"+sTableName+"_undo_button_div").css("display", "none");
+	$("#"+sTableName+"_dynamic .top div#"+sTableName+"_goto_button").css("display", "none");
+	$("#"+sTableName+"_dynamic .top div#"+sTableName+"_colselect_button").css("display", "none");
+	$("#"+sTableName+"_dynamic .top div#"+sTableName+"_searchandreplacebutton").css("display", "none");
+	$("#"+sTableName+"_dynamic .top button#selectionbutton").parent().css("display", "none");
+	$("#"+sTableName+"_dynamic .top button#"+sTableName+"_selectionbutton").parent().css("display", "none");
 
 
 	// restore the buttons default settings (needed when browsing table etc)
@@ -707,33 +764,33 @@ form.manageViewGrid = function(sTableName){
 
 				if (sf.isCheckboxTrueValue(sData)){
 
-					$("#form_cellvalue_"+sCellName+" input")
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" input")
 						.prop("checked", true)
 						.val(trueValue)
 						.attr("disabled", !bEditable);
 				}
 				else {
-					$("#form_cellvalue_"+sCellName+" input")
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" input")
 						.prop("checked", false)
 						.val(falseValue)
 						.attr("disabled", !bEditable);
 				}
-				$("#form_cellvalue_"+sCellName)
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 						.removeClass("modified");
 			}
 			else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
 
-					$("#form_cellvalue_"+sCellName+" select")					
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" select")					
 						.val(sData)
 						.attr("disabled", !bEditable);
-					$("#form_cellvalue_"+sCellName)
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 						.removeClass("modified");
 			}
 			else {
-				$("#form_cellvalue_"+sCellName+" textarea")
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
 					.val(sData)
 					.attr("disabled", !bEditable);
-				$("#form_cellvalue_"+sCellName)
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 					.removeClass("modified");
 			}
 			
@@ -744,7 +801,7 @@ form.manageViewGrid = function(sTableName){
 
 			if (bEditable){
 
-				$("#form_cellvalue_"+sCellName+" textarea").keyup(function(){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea").keyup(function(){
 
 					$(this).parent().addClass("modified");
 
@@ -757,7 +814,7 @@ form.manageViewGrid = function(sTableName){
 
 				});
 
-				$("#form_cellvalue_"+sCellName+" select").change(function(){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" select").change(function(){
 
 					$(this).parent().addClass("modified");
 
@@ -770,7 +827,7 @@ form.manageViewGrid = function(sTableName){
 
 				});
 
-				$("#form_cellvalue_"+sCellName+" input").click(function(){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" input").click(function(){
 
 					$(this).parent().addClass("modified");
 

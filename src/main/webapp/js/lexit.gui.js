@@ -285,9 +285,19 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 				$("#"+sSomeTablename+"_search_and_sort").remove();
 			}
 
+			// make main table visible again
 			$("#"+sSomeTablename+"_dynamic .dataTables_scroll").css("display", "block");
+			$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_undo_button").css("display", "inline");
 			$("#"+sSomeTablename+"_dynamic .bottom_pane").show();
 			$("#"+sSomeTablename+"_dynamic .export_pane").show();
+
+			// make buttons visible again
+			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_undo_button_div").css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_goto_button").css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_colselect_button").css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_searchandreplacebutton").css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top button#selectionbutton").parent().css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_selectionbutton").parent().css("display", "inline");
 
 		}
 		else {
