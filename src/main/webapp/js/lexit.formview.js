@@ -776,7 +776,8 @@ form.manageViewGrid = function(sTableName){
 						.attr("disabled", !bEditable);
 				}
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
-						.removeClass("modified");
+					.css("background-color", "white")
+					.removeClass("modified");
 			}
 			else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
 
@@ -784,6 +785,7 @@ form.manageViewGrid = function(sTableName){
 						.val(sData)
 						.attr("disabled", !bEditable);
 					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
+						.css("background-color", "white")
 						.removeClass("modified");
 			}
 			else {
@@ -791,6 +793,7 @@ form.manageViewGrid = function(sTableName){
 					.val(sData)
 					.attr("disabled", !bEditable);
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
+					.css("background-color", "white")
 					.removeClass("modified");
 			}
 			
