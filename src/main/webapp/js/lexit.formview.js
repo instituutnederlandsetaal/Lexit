@@ -911,3 +911,77 @@ form.synchronizeSorting = function(sTableName){
 
 	});
 }
+
+
+form.resetSearchFields = function(sTableName){
+
+	if (mt.getViewType(sTableName) == 'table') 
+		return;
+
+	// get configuration
+	var oTableConfig = 		conf.getTableConfig(sTableName);
+	var oTableSettings =    conf.getTableSettings(sTableName);
+	var oFormGrid =         conf.getFormGrid(oTableSettings);
+	if (oFormGrid == null) return;
+
+	// cells loop
+	var oCells = 			oFormGrid["cells"];
+	var iFormColIndex =		0;
+	for (var sCellName in oCells){
+
+		// get selector of current search field in underlying table
+		var aVisibleCols = mt.getListOfVisibleColumnsOf(sTableName);
+		var iTableColIndex = $.inArray(sCellName, aVisibleCols);
+		var eThisTableSearchBox = $("#"+sTableName+"_searchboxes td:eq("+ iTableColIndex +")");
+		var eThisFormSearchBox = $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:eq("+ iFormColIndex +")");
+
+		// check column type 
+		// (needed to be able to read AND set the search value correctly)
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
+		var iColumnIndex = $.inArray(sCellName, mt.getListOfColumnsOf(sTableName));
+		var sColumnType = mt.getListOfColumnTypesOf(sTableName)[iColumnIndex];
+		// Do we have a select box?
+		var bCheckBoxType = $.inArray(sColumnType, ["bit varying(1)", "boolean"])>=0;
+		// Or do we have a select box?		
+		var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+		if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
+
+
+		// now read AND set searchboxes the proper way, given column data type
+
+		if (bCheckBoxType){
+
+			var bIsBooleanType = (sColumnType == "boolean");
+			var trueValue = bIsBooleanType ? true : "\"1\"";
+			var falseValue = bIsBooleanType ? false : "\"\"";
+			var inputTag = eThisTableSearchBox.find("input").eq(0);
+
+			eThisFormSearchBox.find("input").eq(0)
+				.attr("cycle_value", inputTag.attr("cycle_value"))
+				.prop("checked", inputTag.prop("checked"))
+				.val( sf.isCheckboxTrueValue(inputTag.val()) ? trueValue : falseValue);
+
+			eThisFormSearchBox
+				.css("background-color", eThisTableSearchBox.css("background-color"));
+		}
+		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
+
+			var inputTag =  eThisTableSearchBox.find("select").eq(0);
+	
+			eThisFormSearchBox.find("select").eq(0)							
+				.val(inputTag.val());
+		}
+		else {
+
+			var inputTag =  eThisTableSearchBox.find("input").eq(0);
+
+			eThisFormSearchBox.find("input").eq(0)
+				.val(inputTag.val());			
+		}
+			
+		
+		// increase current form column index
+		iFormColIndex++;
+	}
+
+}

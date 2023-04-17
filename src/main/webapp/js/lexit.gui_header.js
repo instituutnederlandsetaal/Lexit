@@ -478,7 +478,10 @@ head.putResetButton = function(sSomeTablename){
 					mt.getDataTableObjectOf(sSomeTablename).draw();
 				
 					// put the current search filters values into the search boxes
-					sf.putCurrentValueInAllSearchBoxes(sSomeTablename);					
+					sf.putCurrentValueInAllSearchBoxes(sSomeTablename);
+					
+					// finally set the form searchbox too (if needed)
+					form.resetSearchFields(sSomeTablename);
 			});
 			
 			
