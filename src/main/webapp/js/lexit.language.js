@@ -216,6 +216,7 @@ lang.editcallback_warning1 = "Gebruik van 'editcallback' bij 'editfunc' is niet 
 							"Gebruik het callbackargument van uw fn.updateDatabase-functie in 'editfunc'";
 lang.editcallback_warning2 = "Tabel";
 lang.editcallback_warning3 = "Kolom";
+lang.formlist_synchronize_forgotten = "Het aanroepen van table 'TABLENAME' in het formulier is niet mogelijk.<BR><BR>De 'synchronize_with' parameter is mogelijk niet correct gedeclareerd.";
 
 
 lang.helpText = 
@@ -1614,6 +1615,7 @@ lang.setLanguage = function(sLanguageCode){
 							"Put the callback argument of your fn.updateDatabase function in 'editfunc' instead ";
 		lang.editcallback_warning2 = "Table";
 		lang.editcallback_warning3 = "Column";
+		lang.formlist_synchronize_forgotten = "Couln't read the form list targetting table 'TABLENAME'.<BR><BR>The 'synchronize_with' parameter might not be set properly.";
 
 	}
 

@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+// this class allows for storage of one single table row, 
+// as a list of two-membered arrays  [0:column name, 1:value]
+
 @XmlRootElement(name="results")
 public class TableRecordObject {
 	

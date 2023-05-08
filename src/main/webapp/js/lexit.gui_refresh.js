@@ -139,8 +139,12 @@ refr.updateLayout = function(bRefreshTable){
 
 			
 			// refresh table content if required
-			// (table should be visible and refresh upon focus must be allowed)
-			if (bRefreshTable && !fn.tableIsHidden(sTableName) && conf.getRefreshUponFocus(aTbableSettings) ){
+			// (table should be visible, refresh upon focus must be allowed, and it mustn't be in editable formview)
+			if (bRefreshTable && 
+				!fn.tableIsHidden(sTableName) && 
+				conf.getRefreshUponFocus(aTbableSettings) &&
+				!(mt.getViewType(sTableName) =='form' && $("#"+sTableName+"_wrapper div#"+sTableName+"_form").find(".modified").length>0)
+			){
 				fn.refreshTable(sTableName);				
 			}
 			

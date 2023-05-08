@@ -7,6 +7,14 @@
 var form = {};
 
 
+// ##################################################
+
+var iWait = 500;  // need to fix that to init of view, just quick and dirty now
+
+// ##################################################
+
+
+
 // icons/colors of buttons
 
 form.reset_button_color_active = "#F5BCA9";
@@ -23,6 +31,9 @@ form.send_button_icon_alliswel = "ui-icon ui-icon-check";
 
 
 
+// give the undo/reset-button a special background-color etc. 
+// given a given status (parameter: sSetting)
+//
 form.setResetButtonToSetting = function(sTableName, sSetting){
 
 	// default is neutral
@@ -53,8 +64,12 @@ form.setResetButtonToSetting = function(sTableName, sSetting){
 
 
 
-
+// set the save/send-button a special background-color etc. 
+// given a given status (parameter: sSetting)
+//
 form.setSendButtonToSetting = function(sTableName, sSetting){
+
+	//console.log(sTableName+"  "+sSetting);
 
 	// default is neutral
 	var sColor = "#000000";
@@ -89,7 +104,8 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 
 
 
-
+// build the searchboxes for the form
+//
 form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWidthUnit){
 
 	// ------------------------------------------
@@ -100,7 +116,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		$("<table></table>")
 			.attr("id", sTableName+"_search_and_sort_table")
 			.css("margin", "auto")
-			.css("width", "50p%")
+			.css("min-width", "50%")
 	);
 
 	$("#"+sTableName+"_search_and_sort_table")
@@ -200,8 +216,9 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 
 
 		// assign it the grid width unit (same width for each)
+		var factor = oFormGrid["searchbox_width_factor"] != null ? parseInt( oFormGrid["searchbox_width_factor"] ) : 1;
 		$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last")
-			.css("width", iGridWidthUnit+"px")
+			.css("width", (factor * iGridWidthUnit) +"px")
 			.css("text-align", "center");
 
 
@@ -282,17 +299,6 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 						.val(sVal)
 						.trigger("change");
 			});
-
-		
-
-		
-
-		//$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table.display.dataTable thead tr:eq(0)").find("th."+sTableName+"."+sCellName).clone().appendTo("#"+sTableName+"_search_and_sort_table tr:eq(0)");
-		//$("#"+sTableName+"_search_and_sort_table tr:eq(0)").css("width", iGridWidthUnit+"px");
-		//
-		//$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td").find("input#"+sTableName+"_searchbox_"+sCellName).clone().appendTo("#"+sTableName+"_search_and_sort_table tr:eq(1)");
-
-
 		
 	}
 
@@ -380,8 +386,10 @@ form.buildViewGrid = function(sTableName){
 	
 	
 	// parent element to build form into	
+	var sFormId = sTableName+"_form";
 	var eFormParent = $("<div></div>")
-		.attr("id", sTableName+"_form")
+		.attr("id", sFormId)
+		.addClass("formgrid")
 		.css("margin", 0)
 		.css("position", "relative")
 		.css("top", (iSearchBarHeight)+"px")
@@ -415,7 +423,7 @@ form.buildViewGrid = function(sTableName){
 	// keep the normal table view hidden
 	// ------------------------------------------
 
-	$("#"+sTableName+"_dynamic .dataTables_scroll").css("display", "none");
+	$("#"+sTableName+"_wrapper > .dataTables_scroll").css("display", "none"); // direct child (otherwise form lists will be hidden too)
 	$("#"+sTableName+"_dynamic .bottom_pane").hide();
 	$("#"+sTableName+"_dynamic .export_pane").hide();	
 	
@@ -519,6 +527,62 @@ form.buildViewGrid = function(sTableName){
 
 
 	// =============
+	//   Lists
+	// =============
+
+	// ------------------------------------------
+	// lists loop
+	// ------------------------------------------
+
+	var oLists =  oFormGrid["lists"];
+	for (var sListLabel in oLists){
+
+		var sListId = 			form.buildListTableId(sFormId, sListLabel);
+		var aListPosition = 	oLists[sListLabel]["position"];
+		var aListDefinition =	oLists[sListLabel]["definition"];
+
+		// table to build
+
+		var sTableFeedingList = oLists[sListLabel]["table"]["name"];
+		var oSortSettings = 	oLists[sListLabel]["table"]["columns_sorting"];
+		var iDisplayLength = 	oLists[sListLabel]["table"]["displaylength"];
+
+		// columns
+		var aColumnsToDisplay = form.getListColumnsToDisplay(oLists, sListLabel)
+
+		// build the list div
+
+		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
+		if (sBgColor == null) sBgColor = "#FFFFFF";
+
+		var listDiv = $("<div></div>")
+			.addClass("formview_list")
+			.css("background-color", sBgColor)
+			.attr("id", sListId+"_div");
+		eFormParent.append(listDiv);
+		
+
+		// put the list div at right position
+
+		//$("#"+sTableName+"_wrapper div#"+sListId)
+		listDiv
+			.css("position", "absolute")
+			.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
+			.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px")
+			.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
+			.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
+
+		// build the HTML table for the list,
+		// attach it to the div,
+		// and instantiate it as a Datatable
+		lists.register(sListLabel, sFormId, sTableFeedingList, aColumnsToDisplay, (parseFloat(aListDefinition[1]) *iGridHeightUnit) +"px", oSortSettings);
+	}
+
+	// now build all lists
+	lists.buildLists();
+
+
+	// =============
 	//   BUTTONS
 	// =============
 
@@ -604,6 +668,9 @@ form.buildViewGrid = function(sTableName){
 		.attr("id", "reset_button")
 		.click(function(){
 
+			// remove list of rows to be deleted, if any
+			$("#"+sTableName+"_form").find(".formview_list").removeAttr("remove_ids"); 
+
 			fn.refreshTable(sTableName, function(){
 
 				// set the send-button color back into default mode
@@ -648,7 +715,7 @@ form.buildViewGrid = function(sTableName){
 				}
 			}
 
-			// if we DO have modified content, send it to the database
+			// if we DO have modified content in the cells, send that to the database
 			
 			if (Reflect.ownKeys(oColumnNamesAndValues).length > 0){
 				
@@ -669,6 +736,75 @@ form.buildViewGrid = function(sTableName){
 
 					});
 				});
+			}
+
+			// if we DO have added/modified/delete content in the list, send that to the database
+
+			if ($("div#"+sTableName+"_form").find(".modified,.added,.rows_to_be_deleted").length>0){
+
+				console.log("hello");
+
+
+				// get array of the lists having rows to be deleted
+				var aListsToProcessForDeletion = $("div#"+sTableName+"_form div.formview_list.rows_to_be_deleted");	
+
+				// process each of the lists
+				$(aListsToProcessForDeletion).each(function(){
+
+					var eThisList = $(this);
+
+					form.removeRows(eThisList, function(){
+
+						// give the send-button a new color to show update was performed
+						// and show that reset is NOT possible anymore 
+						form.setSendButtonToSetting(sTableName, "alliswel");
+						form.setResetButtonToSetting(sTableName, "off");
+
+						// set a draw callback to make sure that the send-button's color will be set back into default mode 
+						// as soon as one browses etc.
+
+						fn.addDrawCallback(sTableName, function(){
+
+							form.setSendButtonToSetting(sTableName, "neutral");
+
+						});
+
+					});
+				});
+				
+				
+
+				// get array of the lists to process for updates/inserts
+				var aListsToProcessForUpdates = $("div#"+sTableName+"_form div.formview_list").find(".modified,.added").parents("div.formview_list");				
+
+				// process each of the lists
+				$(aListsToProcessForUpdates).each(function(){
+
+					var eThisList = $(this);
+					
+					form.addNewRows(eThisList, function(){
+						
+						form.updateModifiedRows(eThisList, function(){
+							
+							// give the send-button a new color to show update was performed
+							// and show that reset is NOT possible anymore 
+							form.setSendButtonToSetting(sTableName, "alliswel");
+							form.setResetButtonToSetting(sTableName, "off");
+
+							// set a draw callback to make sure that the send-button's color will be set back into default mode 
+							// as soon as one browses etc.
+
+							fn.addDrawCallback(sTableName, function(){
+
+								form.setSendButtonToSetting(sTableName, "neutral");
+
+							});
+
+						});						
+
+					});
+				});
+
 			}
 
 		});
@@ -692,8 +828,11 @@ form.buildViewGrid = function(sTableName){
 
 
 
-// manage the view grid
-// both construction at first call and updating view at each draw
+// Manage the form grid:
+//
+// both construction at first call 
+// and 
+// updating view at each draw
 //
 form.manageViewGrid = function(sTableName){
 
@@ -709,7 +848,7 @@ form.manageViewGrid = function(sTableName){
 	}
 
 	// keep the normal table view hidden
-	$("#"+sTableName+"_dynamic .dataTables_scroll").css("display", "none");
+	$("#"+sTableName+"_wrapper > .dataTables_scroll").css("display", "none"); // direct child (otherwise form lists will be hidden too)
 	$("#"+sTableName+"_dynamic .bottom_pane").hide();
 	$("#"+sTableName+"_dynamic .export_pane").hide();
 
@@ -727,9 +866,21 @@ form.manageViewGrid = function(sTableName){
 	form.setResetButtonToSetting(sTableName, "off");
 
 
+	// prepare lists update
+	var oLists = 	oFormGrid["lists"];
+	var oListLabel2Filters = {};
+	if (oLists != null){
+		for (var sOneList in oLists){
+			oListLabel2Filters[sOneList] = {}; // instantiate filters to apply to this list
+		}
+	}
+
 	// cells loop
-	var oCells = 			oFormGrid["cells"];
+	var oCells = 	oFormGrid["cells"];
 	for (var sCellName in oCells){
+
+		var sBgColor = oFormGrid["cells"][sCellName]["bgcolor"];
+		if (sBgColor == null) sBgColor = "#FFFFFF";
 
 		// get the current row content
 		var nRow = fn.getActiveRowNode(sTableName);
@@ -739,6 +890,30 @@ form.manageViewGrid = function(sTableName){
 
 			// get the data
 			var sData = fn.getDataFromCellInRowNode(nRow, sCellName);
+
+			// do we have to synchronize a list with this cells?
+			var oSynch = oCells[sCellName]["synchronize_with"];
+			// if so, gather the filters to apply to each list
+			if (oSynch!=null){
+				
+				// loop through list labels
+				for (var sListLabel in oSynch){
+					// get known filters till now for this label
+					var aFilters = oListLabel2Filters[sListLabel];
+					
+					if (aFilters != null){						
+						// read the list column name to feed with the current cell value (t.i.: as a filter)
+						var sColNameInList = oSynch[sListLabel];
+
+						// add this column name and the value as a filter (exact match)
+						aFilters[sColNameInList] = "^"+sData+"$";
+
+						// add this to the list of filter for this list
+						oListLabel2Filters[sListLabel] = aFilters;
+					}
+
+				}
+			}
 
 			// check column type
 			var oColumnConfig = conf.getColumnConfig(oTableConfig, sCellName);
@@ -776,7 +951,7 @@ form.manageViewGrid = function(sTableName){
 						.attr("disabled", !bEditable);
 				}
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
-					.css("background-color", "white")
+					.css("background-color", sBgColor)
 					.removeClass("modified");
 			}
 			else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
@@ -785,7 +960,7 @@ form.manageViewGrid = function(sTableName){
 						.val(sData)
 						.attr("disabled", !bEditable);
 					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
-						.css("background-color", "white")
+						.css("background-color", sBgColor)
 						.removeClass("modified");
 			}
 			else {
@@ -793,7 +968,7 @@ form.manageViewGrid = function(sTableName){
 					.val(sData)
 					.attr("disabled", !bEditable);
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
-					.css("background-color", "white")
+					.css("background-color", sBgColor)
 					.removeClass("modified");
 			}
 			
@@ -804,6 +979,7 @@ form.manageViewGrid = function(sTableName){
 
 			if (bEditable){
 
+				//console.log("set keyup "+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea");
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea").keyup(function(){
 
 					$(this).parent().addClass("modified");
@@ -847,11 +1023,33 @@ form.manageViewGrid = function(sTableName){
 		}
 		
 
-	}
+	} // end of cell loop
+
+
+	setTimeout(function(){
+
+		// now update the lists
+		for (var sListLabel in oListLabel2Filters){
+
+			var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
+
+			// feed the lists
+			lists.feedList(sListLabel,  oListLabel2Filters[sListLabel], function(){
+
+				// make the list editable
+				form.makeListEditable(sListLabel, sTableToFeedTheListWith);
+			});
+		}
+
+	}, iWait);
+	iWait = 0; // after first call
+	
 };
 
 
-
+// determine how the underlying table is sorted for a given column
+// (used as subroutine for form.synchronizeSorting )
+//
 form.getSortingModeOfTableColumn = function(sTableName, sCellName){
 	
 	var eSortTh = $("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table.display.dataTable thead tr:eq(0)").find("th."+sTableName+"."+sCellName);
@@ -862,6 +1060,8 @@ form.getSortingModeOfTableColumn = function(sTableName, sCellName){
 };
 
 
+// determine how the form is sorted
+//
 form.getSortingModeOfFormColumn = function(sTableName, sCellName){
 
 	var eSortSpan = $("#"+sTableName+"_search_and_sort_table tr:eq(0) td span#"+sCellName);
@@ -872,6 +1072,8 @@ form.getSortingModeOfFormColumn = function(sTableName, sCellName){
 
 };
 
+// reset the sorting of the form (back to start settings)
+//
 form.resetFormSorting = function(sTableName){
 
 	$("#"+sTableName+"_search_and_sort_table tr:eq(0) td span").each(function(){
@@ -887,6 +1089,8 @@ form.resetFormSorting = function(sTableName){
 	});
 }
 
+// determine how the underlying table is sorted (for all columns at once)
+//
 form.synchronizeSorting = function(sTableName){
 
 	$("#"+sTableName+"_search_and_sort_table tr:eq(0) td span").each(function(){
@@ -912,7 +1116,8 @@ form.synchronizeSorting = function(sTableName){
 	});
 }
 
-
+// empty/reset the searchbox of the form
+//
 form.resetSearchFields = function(sTableName){
 
 	if (mt.getViewType(sTableName) == 'table') 
@@ -984,4 +1189,528 @@ form.resetSearchFields = function(sTableName){
 		iFormColIndex++;
 	}
 
+}
+
+
+
+// get list of columns
+// set to be visible in the form config
+form.getListColumnsToDisplay = function(oLists, sListLabel){
+
+	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
+
+	// columns
+	var aColumnsToDisplay = new Array();
+	for (var sColumnName in aTableColumnsConfig){
+		var bVisible = aTableColumnsConfig[sColumnName]["visible"];
+		if (bVisible != false) aColumnsToDisplay.push(sColumnName);
+	}
+	return aColumnsToDisplay;
+}
+
+
+// get list of columns
+// named in the form config
+form.getListColumnsToUse = function(oLists, sListLabel){
+
+	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
+
+	// columns
+	var aColumnsToDisplay = new Array();
+	for (var sColumnName in aTableColumnsConfig){
+		aColumnsToDisplay.push(sColumnName); 
+	}
+	return aColumnsToDisplay;
+}
+
+
+
+
+// make a form list editable
+//
+form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){	
+
+	// get Datatable object of this list
+	var sFormId =	lists.getFormIdFormListLabel(sListLabel);
+	var sFormTable = sFormId.replace(/_form$/, "");
+	var sTableId = 	form.buildListTableId(sFormId, sListLabel);	
+	var oTable = 	lists.getListObjectOf(sTableId);
+
+	var oTableConfig = conf.getTableConfig(sTableToFeedTheListWith);
+
+	$("#"+sTableId+" thead th").each(function(i){
+
+		var eThisCol = this;
+		var sColName = $(eThisCol).text();
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
+		var bEditable = conf.getEditability(oColumnConfig);
+		if (bEditable){
+
+			var iColIndex = $("#"+sTableId+" thead").find("th").index(eThisCol);
+			
+			$("#"+sTableId+" tbody tr").each(function(){
+				$(this).find("td").eq(iColIndex).addClass("editable");
+			});
+		}
+	});
+
+
+	$(oTable.cells('td.editable').nodes()).off();
+	
+	$(oTable.cells('td.editable').nodes()).editable(
+		function(value, settings){
+
+			$(this).addClass("modified");
+
+			// redraw table
+			var sThisTable = $(this).closest('table')[0].id;
+			var oTable = lists.getListObjectOf(sThisTable); //$("#"+sThisTable).DataTable();
+			oTable.draw(false);
+
+			return(value);
+		},
+		{
+			"onblur": function(value){
+
+				this.reset(value);
+			},
+			"callback": function(value, settings){
+				
+				var sThisTable = $(this).closest('table')[0].id;
+				var oTable = lists.getListObjectOf(sThisTable);//$("#"+sThisTable).DataTable();
+
+				// assign value
+				oTable.cell(this).data(value);				
+			},
+			"width": "100%",
+			"type": "textarea", // this gives more room than the default 'input' field of jEditable
+			"placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
+		}
+
+	).click(function(event) {
+
+		var nThis = this; 
+		var sThisTable = 	form.getTableOfList(nThis);
+
+		// get configured key from config
+		var oListConfig =	form.getConfigOfList(nThis);
+		var oKeys = 		oListConfig["keys"];
+		var fnCallBack = 	(oKeys != null ? oKeys[ kf._getPressedKey() ] : null);
+
+		// special case: a configured key was pressed
+		if (fnCallBack != null){
+
+			event.preventDefault();
+
+			// execute key function 
+			fnCallBack(nThis);	
+			
+		}
+
+		// normal case: edit
+		else {
+
+			//console.log("normal case");
+			
+			// we must use keydown to prevent default behaviour
+			$(this).find('textarea')
+				.css("overflow", "hidden") // no scrollbars!
+				.keydown(function(event) { 
+					
+					// auto-adapt the size of the textarea
+					// (http://stackoverflow.com/questions/995168/textarea-to-resize-based-on-content-length)
+					$(this).css("height", "1px");
+					$(this).css("height", (this.scrollHeight)+"px");	    	
+					
+					if (event.which == 13) {
+						$(this).closest('form').submit();
+
+						// attract attention from user to send button, which must be pressed 
+						// since some content was modified,
+						// and show that reset is possible now
+															
+						form.setSendButtonToSetting(sFormTable, "payattention");
+						form.setResetButtonToSetting(sFormTable, "active");
+					}					
+				});
+		}
+	});
+}
+
+
+
+// process added rows in a list
+//
+form.addNewRows = function(oThisList, fnCallback){
+	
+	var sListDiv = oThisList.attr("id");
+	var sListId = sListDiv.replace(/_div$/, "");
+	var sFormListLabel = (sListId.split("___")[1]);
+	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel)
+	
+	var oTable = lists.getListObjectOf(sListId);
+
+	var aAllColumns = formListsTableCols.get(sTableToUpdate);
+
+	var iTotalNumberToBeAdded = $("#"+sListId).find("tr.added").length;
+	var iTotalNumberOfProcessed = 0;
+
+	if (iTotalNumberToBeAdded>0){
+
+		// rows loop
+
+		oTable.rows(".added").every(function(iRowNr){
+
+			$(this).removeClass("added");
+
+			// gather values of all cells
+
+			var aColNamesToAdd = new Array();
+			var aValuesToAdd = new Array();
+
+			var oRowData = oTable.row( iRowNr ).data();		
+			for (var iColNr=0; iColNr<aAllColumns.length; iColNr++){
+
+				var sColName = aAllColumns[iColNr];
+				var sColValue = oRowData[iColNr];
+
+				// cell which a not marked to be skipped
+				// (this mark is added in function lists.addButtonToListHeader)
+				// must be added to the record
+				if (sColValue != "_NULL_"){
+					aColNamesToAdd.push(sColName);
+					aValuesToAdd.push(sColValue);
+				}			
+			}
+			
+			// insert record into the database
+			var url = WEBSERV_URL+"/table/insertvalue"; 
+			
+			// make sure we send no null values, as join can't deal with it
+			aValuesToAdd = convertNullToString(aValuesToAdd);
+			
+			$.ajax( {
+				"type": "GET",
+				"async": false,
+				"url": url,
+				"data": {
+					"db_name": getHttpParams().get("db"),
+					"table_name": sTableToUpdate,
+					"column_name": aColNamesToAdd.join(ARG_INTERNAL_SEPARATOR),
+					"value": aValuesToAdd.join(ARG_INTERNAL_SEPARATOR),
+					"dummy": getUniqueNumber()
+					},
+				"dataType": "xml", // get response as xml
+				"success": function(xml) {
+
+					iTotalNumberOfProcessed += 1;
+						
+					// when done, do callback
+					if (iTotalNumberOfProcessed == iTotalNumberToBeAdded){
+						
+						oTable.draw(false);
+						
+						if (fnCallback!=null)
+							fnCallback();
+					}
+				},
+				"error": function(jqXHR, textStatus, errorThrown){	
+					
+					fn.message(lang.error, 
+						lang.error_when_calling+ " form.addNewRows("+sTableToUpdate+"): "+
+						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+					
+				}
+			});
+
+		});
+
+	}
+	else {
+		oTable.draw(false);
+		if (fnCallback!=null)
+			fnCallback();
+	}
+	
+};
+
+// process modified rows in a list
+//
+form.updateModifiedRows = function(oThisList, fnCallback){
+
+	var sListDiv = oThisList.attr("id");
+	var sListId = sListDiv.replace(/_div$/, "");
+	var sFormListLabel = (sListId.split("___")[1]);
+	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel)
+	
+	var oTable = lists.getListObjectOf(sListId); 
+
+	var iTotalNumberOfModified = $("#"+sListId).find("td.modified").length;
+	var iTotalNumberOfProcessed = 0;
+
+	
+	if (iTotalNumberOfModified >0){
+
+		// rows loop
+		// (exclude added rows)
+
+		oTable.rows(":not(.added)").every(function(rowNr){
+
+			var thisRow = this.node();
+			var rowId = $(thisRow).attr("id");
+					
+			// is there any modified value in this row?
+
+			var aModified = $(thisRow).find("td.modified");
+
+			if (aModified.length>0){
+
+				var aColumnNames = new Array();
+				var aColumnValues = new Array();
+
+				// gather for modified values for this row
+				$(aModified).each(function(){
+					
+					var thisCell = this;
+					var iColIndex = $(thisRow).find("td").index(thisCell);
+					var sColName = $("#"+sListId+" thead th").eq(iColIndex).text();				
+					var sColValue = $(thisCell).text();
+
+					aColumnNames.push(sColName);
+					aColumnValues.push(sColValue);
+				});
+
+				
+				// update the database
+				var url = WEBSERV_URL+"/table/setvalue"; 
+
+				// make sure we send no null values, as join can't deal with it
+				aColumnValues = convertNullToString(aColumnValues);
+
+				$.ajax( {
+					"type": "GET",
+					"url": url,
+					"data": {
+						"db_name": getHttpParams().get("db"),
+						"row_id": rowId,
+						"table_name": sTableToUpdate,
+						"column_name": aColumnNames.join(ARG_INTERNAL_SEPARATOR),
+						"new_value": aColumnValues.join(ARG_INTERNAL_SEPARATOR), 
+						"dummy": getUniqueNumber()
+						},
+					"dataType": "xml", // get response as xml
+					"success": function(xml) {
+
+						iTotalNumberOfProcessed += (aColumnValues.length);
+							
+						// when done, do callback
+						if (iTotalNumberOfProcessed == iTotalNumberOfModified){
+
+							oTable.draw(false);
+
+							if (fnCallback!=null)
+								fnCallback();
+						}
+						
+					},
+					"error": function(jqXHR, textStatus, errorThrown){
+						fn.message(lang.error, 
+							lang.error_when_calling+ " form.updateRow("+sTable+"): "+
+							textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+					}
+				});
+
+
+			} // end of modified row processing
+
+			else {
+				oTable.draw(false);
+				if (fnCallback!=null)
+					fnCallback();
+			}
+
+		});
+
+	}
+	else {
+		oTable.draw(false);
+		if (fnCallback!=null)
+			fnCallback();
+	}
+	
+			
+
+};
+
+
+// process rows to be deleted from a list
+//
+form.removeRows = function(oThisList, fnCallback){
+
+	var sListDiv = oThisList.attr("id");
+	var sListId = sListDiv.replace(/_div$/, "");
+	var sFormListLabel = (sListId.split("___")[1]);
+	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel);
+
+	var sIdsToRemove = $("#"+sListDiv).attr("remove_ids"); 
+
+	if (sIdsToRemove != null){
+
+		var aIdsToRemove = sIdsToRemove.split(",");
+		for (var i=0; i<aIdsToRemove.length; i++){
+
+			var sNodeId = aIdsToRemove[i];
+
+			var url = WEBSERV_URL+"/table/delete_row"; 
+			$.ajax( {
+				"type": "GET",
+				"url": url,
+				"data": {
+					"row_id": sNodeId,
+					"db_name": getHttpParams().get("db"),
+					"table_name": sTableToUpdate,
+					"dummy": getUniqueNumber()
+					},
+				"dataType": "xml", // get response as xml
+				"success": function(xml) {
+					if ( i == (aIdsToRemove.length-1) ){
+
+						oTable.draw(false);
+
+						if (fnCallback!=null)
+							fnCallback();
+					}
+				},
+				"error": function(jqXHR, textStatus, errorThrown){
+
+					fn.message(lang.error, 
+						lang.error_when_calling+" form.removeRows("+sTableToUpdate+"): "+
+						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				}
+			});
+		}
+
+	}
+	else {
+
+		oTable.draw(false);
+		if (fnCallback!=null)
+			fnCallback();
+	}
+	
+	
+}
+
+
+// --------------------------------------------------------------------
+
+// find the table of the current form
+
+
+form.getTableOfForm = function(elem){
+	var sThisElemId = $(elem).closest('div.formgrid')[0].id;
+	var sThisTable = sThisElemId.replace(/_form$/g, "");
+	return sThisTable;
+};
+
+
+// --------------------------------------------------------------------
+// the table of a list has a name like:
+//
+// 			'formview_list_<LISTNAME>___<TABLENAME>'
+//
+
+// setters
+form.buildListTableId = function(sFormId, sListLabel ){
+	return sFormId+"___"+sListLabel.toLowerCase().replace(/ /g, "_");
+}
+
+// getters
+form.getTableOfList = function(elem){
+
+	var eDiv = $(elem).closest('div.formview_list')[0];	
+	var eChild = $(eDiv).find("div.dataTables_wrapper")[0];	
+	var sChildId = $(eChild).attr("id");	
+	var aThisTable = (sChildId.split("___")[1]).split("_")[0];
+	return aThisTable;
+};
+form.getDivIdOfList = function(elem){
+
+	var divId = $(elem).closest('div.formview_list')[0].id;
+	return divId;
+};
+
+
+
+
+// list div has id like 'formview_list_<LISTNAME>'
+//
+form.getConfigOfList = function(elem){
+
+	// get the form table
+	// and retrieve its config
+	var sTableOfFrom = form.getTableOfForm(elem);
+	var oTableSettings = conf.getTableSettings(sTableOfFrom);
+	var oFormGrid = conf.getFormGrid(oTableSettings);
+
+	// get the list id
+	// and retrieve its config in the form config
+	var sListDivId = form.getDivIdOfList(elem);	
+	var sListId = (sListDivId.split("___")[1]).replace(/_div$/g, "");
+	var aList = oFormGrid["lists"];
+	return aList[sListId];
+};
+
+// --------------------------------------------------------------------
+
+
+form.getVisibleColumns = function(elem){
+
+	var aColumnList = new Array();
+
+	var sTableId =$(elem).closest('table')[0].id;			
+	$("#"+sTableId+" thead th").each(function(i){
+		aColumnList.push( $(this).text() );
+	});
+	return aColumnList;
+};
+
+form.getIndexOfVisibleCell = function(elem){
+
+	var nRow =$(elem).closest('tr')[0];
+	var iColIndex = $(nRow).find("td").index(elem);			
+	return iColIndex;
+};
+
+
+form.getIndexOfColumnName = function(elem, sColumnName){
+
+	var aColumns = form.getVisibleColumnsOfList(elem);			
+	var iColIndex = $.inArray(sColumnName, aColumns);
+	return iColIndex;
+};
+
+
+// depricated!!!
+form.getValueOfCell = function(elem, sColumnName){
+
+	var nRow = $(elem).closest("tr")[0];
+	var sTable = form.getTableOfList(elem);
+	
+	var oTable = lists.getListObjectOf(sTable);
+
+	var oRowData = oTable.row( nRow ).data();
+};
+
+// read value of a cell in the form
+form.getDataFromCell = function(sTableName, sCellName){
+
+	var sData;
+	// get the current row content
+	var nRow = fn.getActiveRowNode(sTableName);
+	// if there are no results, the row might be null
+	if (nRow != null){
+		sData = fn.getDataFromCellInRowNode(nRow, sCellName);
+	}
+	return sData;
 }

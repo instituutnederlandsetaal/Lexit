@@ -3397,7 +3397,7 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	var sRecords = aRecordIds.join(ARG_INTERNAL_SEPARATOR);
+	var sRecordIds = aRecordIds.join(ARG_INTERNAL_SEPARATOR);
 	
 	var url = WEBSERV_URL+"/table/get_records";
 	
@@ -3408,7 +3408,7 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 		"data": {
 			"db_name": getHttpParams().get("db"),
 			"table_name": sSomeTablename,
-			"ids": sRecords,
+			"ids": sRecordIds,
 			"dummy": getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
@@ -3496,7 +3496,58 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 					});
 			else
 				fn.message(lang.error, 
-	 			lang.error_when_calling+ " fn.getRecord("+sSomeTablename+"): "+
+	 			lang.error_when_calling+ " fn.getRecordGivenFieldValues("+sSomeTablename+"): "+
+				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+			}
+		} );
+	
+};
+
+
+
+fn.getRecordsGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	var aColNamesToMatch = new Array();
+	var aValuesToMatch = new Array();
+	
+	for (var sFieldName in aFieldsAndValuesToMatch) {
+		aColNamesToMatch.push(sFieldName);
+		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
+	}
+	
+	var url = WEBSERV_URL+"/table/get_records_without_ids";
+	
+	$.ajax( {
+		"type": "GET",
+		"url": url,
+		"async": false, // needed to block code execution while awaiting the server response
+		"data": {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sSomeTablename,
+			"column_name_to_match": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
+			"value_to_match": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR),
+			"dummy": getUniqueNumber() 
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {	 		
+	 		var recordsOutput = fn._getRecordsFromXmlResponse(xml);
+	 		if (fnCallback != null)
+	 			fnCallback(recordsOutput);
+	 		},
+	 	"error": function(jqXHR, textStatus, errorThrown){
+	 		
+	 		if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.getRecords",
+					"sSomeTablename": sSomeTablename, "aFieldsAndValuesToMatch": aFieldsAndValuesToMatch
+					});
+			else
+				fn.message(lang.error, 
+	 			lang.error_when_calling+ " fn.getRecordsGivenFieldValues("+sSomeTablename+"): "+
 				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 			}
 		} );

@@ -1096,6 +1096,118 @@ public class Database {
 	}
 	
 	
+	
+	/**
+	 * Get multiple table records, given a table name and some record ids
+	 * @param tableName
+	 * @param ids
+	 * @return
+	 */
+	public  TableRecordsObject getRecordsWithoutIds(String tableName, String[] columnNamesToMatch, String[] valuesToMatch){
+		
+		String[] columnsNames = getColumnNames(tableName);
+		String schema = getSchema(tableName);
+		
+		// If the table has an ID, it will be used to distinguish between rows
+		// Otherwise we will use a row counter for the same goal instead.
+		
+		String idColumn = getPrimaryKeyColumn(tableName);
+		
+		// if table has no ID column: assign a fake one
+		if (idColumn == null) {
+			idColumn = Constants.PRIMARYKEY_FIELDNAME;		
+		}		
+		
+		// index of ID column (might be -1 if the table has none)		
+		int idColumnIndex = Util.getIndexOf(idColumn, columnsNames);
+		
+		
+		// prepare results
+		
+		TableRecordsObject tro = new TableRecordsObject();				
+		
+		ArrayList<String[]> res;
+		
+		// set datatypes of arguments
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
+		String[] valueTypes = getTypesOfColumns(tableName, columnNamesToMatch);
+		for (int i = 0; i<columnNamesToMatch.length; i++)
+		{
+			ato.setType(i, valueTypes[i]);
+		}	
+		
+		
+		// beware: 
+		// ------
+		// since this is a read-only command, operators are allowed in the arguments
+		// (operators would of course be too dangerous in write commands)
+		
+		
+		// matching pairs with suitable operator
+		String[] matchingPairs = new String[columnNamesToMatch.length];
+		for (int i=0; i<columnNamesToMatch.length; i++)
+		{
+			matchingPairs[i] = 
+					getSafeFieldName(columnNamesToMatch[i]) + " " + 
+					getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
+			valuesToMatch[i] = removeFrontOperator(valuesToMatch[i]);
+		}			
+		
+		// set arguments
+		String[] args = valuesToMatch;
+		
+		String getRecord = 
+			"SELECT * " +
+			"FROM " + getSafeTableName(tableName, schema) + " " +				
+			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
+		
+		
+		PostgresDatabaseCommunication dc = connectDatabase();
+		
+		try {
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			
+			ResultSet rs = dc.sendPreparedQuery(getRecord, args, ato);
+			
+			res = getResultsInAList(rs, columnsNames);	
+			
+			if (res.size()>0)
+			{
+				// process each row
+				for (int i=0; i<res.size(); i++)
+				{
+					String[] recordCell = res.get(i);
+					
+					if (recordCell != null)
+					{
+						for (int j=0; j<columnsNames.length; j++)
+						{
+							String idOfthisRow = (idColumnIndex >-1 ? 
+									recordCell[idColumnIndex]	// natural primary key 
+									:
+									"pkid_"+i);					// counter as id
+							tro.addIdColumnAndValue(idOfthisRow, columnsNames[j], recordCell[j]);
+						}
+					}
+				}
+			}	
+			
+
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecord, e);
+		} 
+		
+		finally {
+			closeDatabase(dc);
+		}
+		
+		return tro;
+	
+	}
+	
+	
 	/**
 	 * Call a database function, given its name and a list of arguments
 	 * @param functionName

@@ -691,8 +691,7 @@ public class TableResources {
 				
 		return tro;
 	}
-	
-	
+
 	
 	// .../table/get_record_without_id
 	// get a record, given its id
@@ -716,14 +715,44 @@ public class TableResources {
 		
 		String userName = sc.getUserPrincipal().getName();
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
-			throw new RuntimeException("Permission denied to "+userName);
-		
+			throw new RuntimeException("Permission denied to "+userName);		
 		
 		TableRecordObject tro = getDatabaseObject(co).getRecordWithoutId(tableName, columnNamesToMatch, valuesToMatch);
 				
 		return tro;
 	}
 	
+	
+
+	// .../table/get_records_without_ids
+	// get multiple records with specifying any id
+	@Path("get_records_without_ids")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public TableRecordsObject getRecordsWithoutIds(
+			@QueryParam("table_name") String tableName,
+			@QueryParam("column_name_to_match") String columnNameToMatch,
+			@QueryParam("value_to_match") String valueToMatch,
+			@QueryParam("db_name") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest
+			){
+		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
+		Util.debug(co, "### Get multiple records without id from "+tableName);
+		
+		String userName = sc.getUserPrincipal().getName();
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+userName);
+		
+		String[] columnNamesToMatch = columnNameToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		String[] valuesToMatch = valueToMatch.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
+		
+		TableRecordsObject tro = getDatabaseObject(co).getRecordsWithoutIds(tableName, columnNamesToMatch, valuesToMatch);
+				
+		return tro;
+	}
 	
 	
 	
