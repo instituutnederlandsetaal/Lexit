@@ -368,11 +368,18 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 							for (var sListToRead in oCopyFrom){ 
 
 								// read from a list cell
-								if (sListToRead != "form")
-									oToBeCopied[sOneColumnToFeed] = lists.getDataFromCellInList(sListToRead, 0, oCopyFrom[sListToRead]);
+								if (sListToRead != "form"){
+									// get the selected row to copy the values from
+									var oSelectedRow = lists.getSelectedRowsFromList(sListToRead);
+									var iRowNumber = $(oSelectedRow.nodes()).index();
+									// read value from that row
+									oToBeCopied[sOneColumnToFeed] = lists.getDataFromCellInList(sListToRead, iRowNumber, oCopyFrom[sListToRead]);
+								}									
 								// or read from a form cell
-								else
+								else {
 									oToBeCopied[sOneColumnToFeed] = form.getDataFromCell(sThisForm, oCopyFrom[sListToRead]);
+								}
+									
 							}
 						}
 											
@@ -490,12 +497,22 @@ lists.assignShowAndDeleteFunction = function(oTable){
 				}
 				// general: default behaviour
 				else {
-					for (var sListToCall in oDo){
-						var aColsAndVals = new Array();
-						aColsAndVals[ oDo[sListToCall] ] = "^"+sRowId+"$";
-						
-						lists.feedList(sListToCall,  aColsAndVals);
+
+					// if the row has an empty id, we've nothing to look up in other lists or so
+					if (sRowId == null || sRowId == ''){
+
+						fn.message(lang.beware, lang.formlist_save_first_after_row_creation);
 					}
+					else {
+
+						for (var sListToCall in oDo){
+							var aColsAndVals = new Array();
+							aColsAndVals[ oDo[sListToCall] ] = sRowId;
+							
+							lists.feedList(sListToCall,  aColsAndVals);
+						}
+					}
+					
 				}
 			}
 
@@ -644,6 +661,16 @@ lists.getDataFromCellInList = function(sListLabel, iRowNumber, sColName){
 	var sOutput = oRowData[colNr];
 
 	return sOutput;
+}
+
+lists.getSelectedRowsFromList = function(sListLabel){
+
+	// get the DataTable object of the list
+	var sFormId = lists.getFormIdFormListLabel(sListLabel);
+	var sThisListLabelId = form.buildListTableId(sFormId, sListLabel);
+	var oTable = formListsDataTables.get(sThisListLabelId);
+
+	return oTable.rows(".selected");
 }
 
 

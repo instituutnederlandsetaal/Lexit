@@ -15,6 +15,9 @@ var iWait = 500;  // need to fix that to init of view, just quick and dirty now
 
 
 
+
+
+
 // icons/colors of buttons
 
 form.reset_button_color_active = "#F5BCA9";
@@ -69,22 +72,53 @@ form.setResetButtonToSetting = function(sTableName, sSetting){
 //
 form.setSendButtonToSetting = function(sTableName, sSetting){
 
-	//console.log(sTableName+"  "+sSetting);
-
 	// default is neutral
 	var sColor = "#000000";
 	var sBgColor = form.send_button_color_neutral;
 	var sIcon = form.send_button_icon_neutral;
+	
 
 	// otherwise
 	if (sSetting == 'payattention'){
 		sColor = "white";
 		sBgColor = form.send_button_color_payattention;	
 		sIcon = form.send_button_icon_payattention;
+
+		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
+
+			// add blink function for send_button
+			var blink = function(elem) {
+
+				$(elem).animate({
+						opacity: '0'
+					}, function(){			
+						$(this).animate({
+							opacity: '1'
+						}, blink(elem));			
+					});		
+			};
+
+			blink( $("#"+sTableName+"_formsbuttons #send_button").get(0) );
+		}
+
+		$("#"+sTableName+"_formsbuttons #send_button").addClass("payattention");
 	}
 	else if (sSetting == 'alliswel'){
 		sBgColor = form.send_button_color_alliswel;
 		sIcon = form.send_button_icon_alliswel;
+		
+		if ( $("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
+
+			$("#"+sTableName+"_formsbuttons #send_button").stop();
+			$("#"+sTableName+"_formsbuttons #send_button").removeClass("payattention");
+		}
+	}
+	else {
+		if ( $("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
+
+			$("#"+sTableName+"_formsbuttons #send_button").stop();
+			$("#"+sTableName+"_formsbuttons #send_button").removeClass("payattention");
+		}
 	}
 
 	$("#"+sTableName+"_formsbuttons #send_button")
@@ -100,6 +134,9 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		.append( 
 			$("<span></span>").addClass(sIcon) 
 		);
+
+
+	
 }
 
 
@@ -486,7 +523,7 @@ form.buildViewGrid = function(sTableName){
 
 		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){			
 
-			var aNewSelectBoxValues = [...aSelectBoxValues];
+			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
 			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
 			var eSelectBox = $("<select></select>")
 				.css("padding", "5px");
@@ -742,10 +779,10 @@ form.buildViewGrid = function(sTableName){
 
 			if ($("div#"+sTableName+"_form").find(".modified,.added,.rows_to_be_deleted").length>0){
 
-				console.log("hello");
 
+				// get array of the lists having rows to be DELETED
+				//                                          =======
 
-				// get array of the lists having rows to be deleted
 				var aListsToProcessForDeletion = $("div#"+sTableName+"_form div.formview_list.rows_to_be_deleted");	
 
 				// process each of the lists
@@ -774,7 +811,9 @@ form.buildViewGrid = function(sTableName){
 				
 				
 
-				// get array of the lists to process for updates/inserts
+				// get array of the lists to process for UPDATES/INSERTS
+				//                                       ===============
+
 				var aListsToProcessForUpdates = $("div#"+sTableName+"_form div.formview_list").find(".modified,.added").parents("div.formview_list");				
 
 				// process each of the lists
@@ -796,7 +835,7 @@ form.buildViewGrid = function(sTableName){
 
 							fn.addDrawCallback(sTableName, function(){
 
-								form.setSendButtonToSetting(sTableName, "neutral");
+								form.setSendButtonToSetting(sTableName, "neutral");								
 
 							});
 
@@ -906,7 +945,7 @@ form.manageViewGrid = function(sTableName){
 						var sColNameInList = oSynch[sListLabel];
 
 						// add this column name and the value as a filter (exact match)
-						aFilters[sColNameInList] = "^"+sData+"$";
+						aFilters[sColNameInList] = sData;
 
 						// add this to the list of filter for this list
 						oListLabel2Filters[sListLabel] = aFilters;
@@ -1549,6 +1588,7 @@ form.removeRows = function(oThisList, fnCallback){
 
 	var sListDiv = oThisList.attr("id");
 	var sListId = sListDiv.replace(/_div$/, "");
+	var oTable = lists.getListObjectOf(sListId);
 	var sFormListLabel = (sListId.split("___")[1]);
 	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel);
 
@@ -1557,6 +1597,7 @@ form.removeRows = function(oThisList, fnCallback){
 	if (sIdsToRemove != null){
 
 		var aIdsToRemove = sIdsToRemove.split(",");
+		
 		for (var i=0; i<aIdsToRemove.length; i++){
 
 			var sNodeId = aIdsToRemove[i];
@@ -1573,7 +1614,8 @@ form.removeRows = function(oThisList, fnCallback){
 					},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
-					if ( i == (aIdsToRemove.length-1) ){
+
+					if ( i >= (aIdsToRemove.length-1) ){
 
 						oTable.draw(false);
 

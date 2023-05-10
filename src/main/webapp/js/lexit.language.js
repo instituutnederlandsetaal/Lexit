@@ -217,6 +217,7 @@ lang.editcallback_warning1 = "Gebruik van 'editcallback' bij 'editfunc' is niet 
 lang.editcallback_warning2 = "Tabel";
 lang.editcallback_warning3 = "Kolom";
 lang.formlist_synchronize_forgotten = "Het aanroepen van table 'TABLENAME' in het formulier is niet mogelijk.<BR><BR>De 'synchronize_with' parameter is mogelijk niet correct gedeclareerd.";
+lang.formlist_save_first_after_row_creation = "U heeft net een rij toegevoegd. Om verder te kunnen gaan, moet u eerst klikken op 'Opslaan'.";
 
 
 lang.helpText = 
@@ -1616,6 +1617,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.editcallback_warning2 = "Table";
 		lang.editcallback_warning3 = "Column";
 		lang.formlist_synchronize_forgotten = "Couln't read the form list targetting table 'TABLENAME'.<BR><BR>The 'synchronize_with' parameter might not be set properly.";
+		lang.formlist_save_first_after_row_creation = "You've just added a row. To be able to carry on, you must click the 'Save' button first.";
 
 	}
 

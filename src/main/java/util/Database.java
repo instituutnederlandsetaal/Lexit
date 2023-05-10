@@ -1098,7 +1098,7 @@ public class Database {
 	
 	
 	/**
-	 * Get multiple table records, given a table name and some record ids
+	 * Get multiple table records, given a table name and some values to match
 	 * @param tableName
 	 * @param ids
 	 * @return
