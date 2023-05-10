@@ -373,6 +373,10 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 									var oSelectedRow = lists.getSelectedRowsFromList(sListToRead);
 									var iRowNumber = $(oSelectedRow.nodes()).index();
 									// read value from that row
+									if (iRowNumber < 0){
+										fn.message(lang.beware, (lang.formlist_select_a_row_first).replace(/LISTNAME/, sListToRead));
+										return true;
+									}
 									oToBeCopied[sOneColumnToFeed] = lists.getDataFromCellInList(sListToRead, iRowNumber, oCopyFrom[sListToRead]);
 								}									
 								// or read from a form cell
@@ -458,9 +462,12 @@ lists.assignShowAndDeleteFunction = function(oTable){
 
 		var thisCell = this;
 
+		// remember previously selected row, so as to be able to restore it if needed
+		var previouslySelected = $( $(thisCell).closest("table")[0] ).find("tr.selected");
+
 		// remove previous row selection
 		// and select the row we just clicked
-		$( $(thisCell).closest("table")[0] ).find("tr").removeClass("selected");
+		$( previouslySelected ).removeClass("selected");
 		$( $(thisCell).closest("tr")[0] ).addClass("selected");
 
 		
@@ -498,10 +505,39 @@ lists.assignShowAndDeleteFunction = function(oTable){
 				// general: default behaviour
 				else {
 
+					// check if some lists have been modified, before those get overwritten!
+					var aModifiedLists = new Array();
+					for (var sListToCall in oDo){
+						var sDivId = form.buildListTableId(sThisTable+"_form", sListToCall);
+						if ($("#"+sDivId).find(".modified,.added").length>0 || $("div#"+sDivId+"_div").hasClass("rows_to_be_deleted"))
+							aModifiedLists.push(sListToCall);
+					}
+
 					// if the row has an empty id, we've nothing to look up in other lists or so
+					// so, the user needs to save first, which will trigger data-reload and row id retrieval!
 					if (sRowId == null || sRowId == ''){
 
 						fn.message(lang.beware, lang.formlist_save_first_after_row_creation);
+						// restore original row selection
+						$( $(thisCell).closest("table")[0] ).find("tr.selected").each(function(){
+							$(this).removeClass("selected");
+						});
+						$( previouslySelected ).addClass("selected");
+
+						return true;
+					}
+					// if the list contains modified rows etc, the use must save first or that will be lost
+					else if (aModifiedLists.length>0){
+						var sModifiedLists = aModifiedLists.join(", ");
+						fn.message(lang.beware, (lang.formlist_save_first_before_overwriting).replace(/LISTSNAMES/, sModifiedLists));
+
+						// restore original row selection
+						$( $(thisCell).closest("table")[0] ).find("tr.selected").each(function(){
+							$(this).removeClass("selected");
+						});
+						$( previouslySelected ).addClass("selected");
+
+						return true;
 					}
 					else {
 
@@ -646,6 +682,9 @@ lists.getDataTableId = function(oTable){
 // read value of a cell in a list
 //
 lists.getDataFromCellInList = function(sListLabel, iRowNumber, sColName){
+
+	if (iRowNumber<0)
+		return null;
 
 	// get the DataTable object of the list
 	var sFormId = lists.getFormIdFormListLabel(sListLabel);

@@ -94,7 +94,10 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 					}, function(){			
 						$(this).animate({
 							opacity: '1'
-						}, blink(elem));			
+						}, function(){
+							if ( $(elem).hasClass("payattention") )
+								blink(elem);
+						});
 					});		
 			};
 
@@ -108,15 +111,11 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		sIcon = form.send_button_icon_alliswel;
 		
 		if ( $("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
-
-			$("#"+sTableName+"_formsbuttons #send_button").stop();
 			$("#"+sTableName+"_formsbuttons #send_button").removeClass("payattention");
 		}
 	}
 	else {
 		if ( $("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
-
-			$("#"+sTableName+"_formsbuttons #send_button").stop();
 			$("#"+sTableName+"_formsbuttons #send_button").removeClass("payattention");
 		}
 	}
@@ -707,6 +706,11 @@ form.buildViewGrid = function(sTableName){
 
 			// remove list of rows to be deleted, if any
 			$("#"+sTableName+"_form").find(".formview_list").removeAttr("remove_ids"); 
+			$("#"+sTableName+"_form").find(".modified,.added,.rows_to_be_deleted").each(function(){
+				$(this).removeClass("modified");
+				$(this).removeClass("added");
+				$(this).removeClass("rows_to_be_deleted");
+			});
 
 			fn.refreshTable(sTableName, function(){
 
@@ -732,53 +736,89 @@ form.buildViewGrid = function(sTableName){
 		.attr("id", "send_button")		
 		.click(function(){
 
+			
+			// first get some config
+
 			var oColumnNamesAndValues = {};
 
-			var nRow = fn.getActiveRowNode(sTableName);
+			var sTableName = 		form.getTableOfForm(this);
+			var oTableSettings =    conf.getTableSettings(sTableName);
+			var oFormGrid =         conf.getFormGrid(oTableSettings);
+			var oCells =  			oFormGrid["cells"];
 
-			for (var sCellName in oCells){
-				var cellSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
-				if ( cellSelector.hasClass("modified") ){
 
-					// special case: read value of checkbox
-					if (cellSelector.find("input").length>0){
-						oColumnNamesAndValues[sCellName] = cellSelector.find("input").prop("checked");
-					}
-					// general case
-					else {
-						oColumnNamesAndValues[sCellName] = cellSelector.children().first().val();
-					}
-
-				}
-			}
-
-			// if we DO have modified content in the cells, send that to the database
+			// We'll need to build some promises, with all the jobs to be carried on 
 			
-			if (Reflect.ownKeys(oColumnNamesAndValues).length > 0){
-				
-				fn.updateDatabaseGivenANode(nRow, oColumnNamesAndValues, function(){
+			// trick: https://dev.to/doctolib/using-promises-as-a-queue-co5
+			class PromiseQueue {
 
-					// give the send-button a new color to show update was performed
-					// and show that reset is NOT possible anymore 
-					form.setSendButtonToSetting(sTableName, "alliswel");
-					form.setResetButtonToSetting(sTableName, "off");
+				queue = Promise.resolve(true);
 
-
-					// set a draw callback to make sure that the send-button's color will be set back into default mode 
-					// as soon as one browses etc.
-
-					fn.addDrawCallback(sTableName, function(){
-
-						form.setSendButtonToSetting(sTableName, "neutral");
-
+				addJob(operation) {
+					return new Promise((resolve, reject) => {
+						this.queue = this.queue
+							.then(operation)
+							.then(resolve)
+							.catch(() => {
+								fn.message("Oups", "SOMETHING WENT WRONG!");
+							});
 					});
-				});
-			}
+				};
+			};
 
-			// if we DO have added/modified/delete content in the list, send that to the database
+			// instantiate the jobs list
 
-			if ($("div#"+sTableName+"_form").find(".modified,.added,.rows_to_be_deleted").length>0){
+			const fnDoAllUpdates = new PromiseQueue();
 
+
+			// part #1 ----------------------------------------------------------------------------------------------------------------------------------------
+			//
+			// form cells
+
+			var fnUpdateFormCells = function(){
+
+				var nRow = fn.getActiveRowNode(sTableName);				
+
+				for (var sCellName in oCells){
+					var cellSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
+					if ( cellSelector.hasClass("modified") ){
+
+						// special case: read value of checkbox
+						if (cellSelector.find("input").length>0){
+							oColumnNamesAndValues[sCellName] = cellSelector.find("input").prop("checked");
+						}
+						// general case
+						else {
+							oColumnNamesAndValues[sCellName] = cellSelector.children().first().val();
+						}
+
+					}
+				}
+
+				// if we DO have modified content in the cells, send that to the database
+				
+				if (Reflect.ownKeys(oColumnNamesAndValues).length > 0){
+					
+					fn.updateDatabaseGivenANode(nRow, oColumnNamesAndValues);
+				}
+
+			};
+
+			// add this job to the jobs list
+			fnDoAllUpdates.addJob(fnUpdateFormCells);
+			
+			
+
+			// 
+			// process the lists too
+			//
+
+
+			// part #2 ----------------------------------------------------------------------------------------------------------------------------------------
+			//
+			// form lists with deleted rows
+
+			var fnDeleteRows = function(){
 
 				// get array of the lists having rows to be DELETED
 				//                                          =======
@@ -789,62 +829,110 @@ form.buildViewGrid = function(sTableName){
 				$(aListsToProcessForDeletion).each(function(){
 
 					var eThisList = $(this);
-
 					form.removeRows(eThisList, function(){
-
-						// give the send-button a new color to show update was performed
-						// and show that reset is NOT possible anymore 
-						form.setSendButtonToSetting(sTableName, "alliswel");
-						form.setResetButtonToSetting(sTableName, "off");
-
-						// set a draw callback to make sure that the send-button's color will be set back into default mode 
-						// as soon as one browses etc.
-
-						fn.addDrawCallback(sTableName, function(){
-
-							form.setSendButtonToSetting(sTableName, "neutral");
-
-						});
-
+						// remove the deletion mark
+						$(eThisList).removeClass("rows_to_be_deleted");
 					});
 				});
+			};
+
+			// add this job to the jobs list
+			fnDoAllUpdates.addJob(fnDeleteRows);
 				
 				
+
+
+			// part #3 ----------------------------------------------------------------------------------------------------------------------------------------
+			//
+			// form lists with added rows
+
+			var fnAddNewRows = function(){
+
+				var aListsToProcessForInserts = $("div#"+sTableName+"_form div.formview_list").find(".added").parents("div.formview_list");
+
+				$(aListsToProcessForInserts).each(function(){
+
+					var eThisList = $(this);					
+					form.addNewRows(eThisList, function(){
+						// remove the addition mark
+						$("div#"+sTableName+"_form div.formview_list").find(".added").each(function(){
+							$(this).removeClass("added");
+						});						
+					});
+				});
+			};
+
+			// add this job to the jobs list
+			fnDoAllUpdates.addJob(fnAddNewRows);
+
+
+
+			// part #4 ----------------------------------------------------------------------------------------------------------------------------------------
+			//
+			// form lists with modified rows
+
+			var fnUpdateModifiedRows = function(){
 
 				// get array of the lists to process for UPDATES/INSERTS
 				//                                       ===============
 
-				var aListsToProcessForUpdates = $("div#"+sTableName+"_form div.formview_list").find(".modified,.added").parents("div.formview_list");				
+				var aListsToProcessForUpdates = $("div#"+sTableName+"_form div.formview_list").find(".modified").parents("div.formview_list");				
 
 				// process each of the lists
 				$(aListsToProcessForUpdates).each(function(){
 
-					var eThisList = $(this);
-					
-					form.addNewRows(eThisList, function(){
-						
-						form.updateModifiedRows(eThisList, function(){
-							
-							// give the send-button a new color to show update was performed
-							// and show that reset is NOT possible anymore 
-							form.setSendButtonToSetting(sTableName, "alliswel");
-							form.setResetButtonToSetting(sTableName, "off");
+					var eThisList = $(this);						
+					form.updateModifiedRows(eThisList, function(){
+						// remove the update mark
+						$("div#"+sTableName+"_form div.formview_list").find(".modified").each(function(){
+							$(this).removeClass("modified");
+						});		
+					});			
+				});
+			};
 
-							// set a draw callback to make sure that the send-button's color will be set back into default mode 
-							// as soon as one browses etc.
+			// add this job to the jobs list
+			fnDoAllUpdates.addJob(fnUpdateModifiedRows);
 
-							fn.addDrawCallback(sTableName, function(){
 
-								form.setSendButtonToSetting(sTableName, "neutral");								
+			
 
-							});
+			// last part ----------------------------------------------------------------------------------------------------------------------------------------
+			//
+			// the 'all went well' confirmation feedback
 
-						});						
+			var fnAllWentWell = function(){
 
+				fn.addDrawCallback(sTableName, function(){
+
+					// give the send-button a new color to show update was performed
+					// and show that reset is NOT possible anymore 
+					form.setSendButtonToSetting(sTableName, "alliswel");
+					form.setResetButtonToSetting(sTableName, "off");
+
+					// set a draw callback to make sure that the send-button's color will be set back into default mode 
+					// as soon as one browses etc.
+
+					fn.addDrawCallback(sTableName, function(){
+						form.setSendButtonToSetting(sTableName, "neutral");
 					});
+
 				});
 
-			}
+				// click the reset the button to load current data (with new IDs etc)
+				$("div#"+sTableName+"_form button#reset_button").click();
+				
+			};
+
+			// add this job to the jobs list
+			fnDoAllUpdates.addJob(fnAllWentWell);
+
+
+
+			// Start! ----------------------------------------------------------------------------------------------------------------------------------------
+
+			return fnDoAllUpdates;
+
 
 		});
 	buttondsDiv.append(formSendButton);
@@ -1685,7 +1773,7 @@ form.getDivIdOfList = function(elem){
 
 
 
-// list div has id like 'formview_list_<LISTNAME>'
+// list div has ID like 'formview_list_<LISTNAME>'
 //
 form.getConfigOfList = function(elem){
 
@@ -1732,17 +1820,6 @@ form.getIndexOfColumnName = function(elem, sColumnName){
 	return iColIndex;
 };
 
-
-// depricated!!!
-form.getValueOfCell = function(elem, sColumnName){
-
-	var nRow = $(elem).closest("tr")[0];
-	var sTable = form.getTableOfList(elem);
-	
-	var oTable = lists.getListObjectOf(sTable);
-
-	var oRowData = oTable.row( nRow ).data();
-};
 
 // read value of a cell in the form
 form.getDataFromCell = function(sTableName, sCellName){

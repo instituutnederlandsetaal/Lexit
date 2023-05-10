@@ -217,7 +217,9 @@ lang.editcallback_warning1 = "Gebruik van 'editcallback' bij 'editfunc' is niet 
 lang.editcallback_warning2 = "Tabel";
 lang.editcallback_warning3 = "Kolom";
 lang.formlist_synchronize_forgotten = "Het aanroepen van table 'TABLENAME' in het formulier is niet mogelijk.<BR><BR>De 'synchronize_with' parameter is mogelijk niet correct gedeclareerd.";
-lang.formlist_save_first_after_row_creation = "U heeft net een rij toegevoegd. Om verder te kunnen gaan, moet u eerst klikken op 'Opslaan'.";
+lang.formlist_save_first_after_row_creation = "U heeft deze rij net toegevoegd. Om hiermee samenhangende data te kunnen zien/toevoegen, moet u de rij eerst opslaan door op 'Opslaan' te klikken.";
+lang.formlist_save_first_before_overwriting = "U staat op het punt nieuw data in 'LISTSNAMES' te laden, terwijl de huidige data niet opgeslagen is.<BR>Om verder te kunnen gaan, moet u eerst klikken op 'Opslaan'.";
+lang.formlist_select_a_row_first = "U moet eerst een rij selecteren in de 'LISTNAME' lijst.";
 
 
 lang.helpText = 
@@ -1617,7 +1619,9 @@ lang.setLanguage = function(sLanguageCode){
 		lang.editcallback_warning2 = "Table";
 		lang.editcallback_warning3 = "Column";
 		lang.formlist_synchronize_forgotten = "Couln't read the form list targetting table 'TABLENAME'.<BR><BR>The 'synchronize_with' parameter might not be set properly.";
-		lang.formlist_save_first_after_row_creation = "You've just added a row. To be able to carry on, you must click the 'Save' button first.";
+		lang.formlist_save_first_after_row_creation = "You've just added this row. To be able to see/edit content connected to it, you must save the row first by click the 'Save' button.";
+		lang.formlist_save_first_before_overwriting = "You've about to load new data in 'LISTSNAMES', while it contains unsaved content.<BR>To be able to carry on, you must click the 'Save' button first.";
+		lang.formlist_select_a_row_first = "You need to first select a row in the 'LISTNAME' list.";
 
 	}
 
