@@ -829,10 +829,7 @@ form.buildViewGrid = function(sTableName){
 				$(aListsToProcessForDeletion).each(function(){
 
 					var eThisList = $(this);
-					form.removeRows(eThisList, function(){
-						// remove the deletion mark
-						$(eThisList).removeClass("rows_to_be_deleted");
-					});
+					form.removeRows(eThisList);
 				});
 			};
 
@@ -853,12 +850,7 @@ form.buildViewGrid = function(sTableName){
 				$(aListsToProcessForInserts).each(function(){
 
 					var eThisList = $(this);					
-					form.addNewRows(eThisList, function(){
-						// remove the addition mark
-						$("div#"+sTableName+"_form div.formview_list").find(".added").each(function(){
-							$(this).removeClass("added");
-						});						
-					});
+					form.addNewRows(eThisList);
 				});
 			};
 
@@ -882,12 +874,7 @@ form.buildViewGrid = function(sTableName){
 				$(aListsToProcessForUpdates).each(function(){
 
 					var eThisList = $(this);						
-					form.updateModifiedRows(eThisList, function(){
-						// remove the update mark
-						$("div#"+sTableName+"_form div.formview_list").find(".modified").each(function(){
-							$(this).removeClass("modified");
-						});		
-					});			
+					form.updateModifiedRows(eThisList);			
 				});
 			};
 
