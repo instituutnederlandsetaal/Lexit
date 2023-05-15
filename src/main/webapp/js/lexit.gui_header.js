@@ -552,6 +552,9 @@ head.putViewTypeButton = function(sSomeTablename){
 		.attr("title", lang.view_type_button).addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){
+
+			var nCurrentSelection = fn.getFirstSelectedRowNodeFrom(sSomeTablename);
+			var sIdOfSelection = fn.getRowNodeId(nCurrentSelection);
 			
 			// change view type
 			mt.toggleViewType(sSomeTablename);
@@ -559,8 +562,8 @@ head.putViewTypeButton = function(sSomeTablename){
 			// set the right display length for the view type:
 			
 			// 1: switch from form to table view
-			if (mt.getViewType(sSomeTablename) == 'table')
-				{				
+			if (mt.getViewType(sSomeTablename) == 'table') {
+
 				// reset position or pagination pane
 				$("#"+sSomeTablename+"_wrapper").css("height", "auto");
 				// remove cell labels of form view
@@ -577,11 +580,23 @@ head.putViewTypeButton = function(sSomeTablename){
 				mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex).draw(false);
 				
 				// disable display length selection (since form view must allow only 1 record length)
-				$("#"+sSomeTablename+"_length select").removeAttr('disabled');				
+				$("#"+sSomeTablename+"_length select").removeAttr('disabled');
+				
+				// select the row that was shown in form
+				if (sIdOfSelection != null){
+					setTimeout(function(){
+						fn.unselectAllRowNodes(sSomeTablename);
+						var nRowToSelect = fn.getRowNodeWhereIdIs(sSomeTablename, sIdOfSelection);						
+						fn.selectRowNode(nRowToSelect);
+					}, 500);
+					
 				}
+					
+			}
+
 			// 2: switch from table to form view
-			else
-				{
+			else {
+
 				// get the selected row: we will show exactly that row once we get into the form view.
 				// if no row was selected, take the first screen row
 				var oRow = fx.getFirstSelectedRowFrom(sSomeTablename);				
@@ -598,7 +613,7 @@ head.putViewTypeButton = function(sSomeTablename){
 				
 				// display length selection re-enabled
 				$("#"+sSomeTablename+"_length select").attr("disabled","disabled");
-				}
+			}
 			
 			// clean the undo stack
 			un.cleanUndoStack(sSomeTablename);

@@ -591,20 +591,22 @@ form.buildViewGrid = function(sTableName){
 		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
 		if (sBgColor == null) sBgColor = "#FFFFFF";
 
+		var mainListDiv = $("<div></div>").append(	$("<span></span>").css("font-weight", "bold").text(sListLabel) );
 		var listDiv = $("<div></div>")
 			.addClass("formview_list")
 			.css("background-color", sBgColor)
 			.attr("id", sListId+"_div");
-		eFormParent.append(listDiv);
+		eFormParent.append(mainListDiv);
+		mainListDiv.append(listDiv);
 		
 
 		// put the list div at right position
 
-		//$("#"+sTableName+"_wrapper div#"+sListId)
-		listDiv
+		mainListDiv
 			.css("position", "absolute")
 			.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-			.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px")
+			.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		listDiv
 			.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
 			.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
 
@@ -1039,7 +1041,15 @@ form.manageViewGrid = function(sTableName){
 			var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 			if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
 
-			var bEditable = conf.getEditability(oColumnConfig);
+
+			// is the cell editable?
+			//
+			// NB: formgrid config (if set!) wins from default config
+			//
+			var bEditable = oFormGrid["cells"][sCellName]["editable"] != null ?
+				oFormGrid["cells"][sCellName]["editable"]	 
+				:
+				conf.getEditability(oColumnConfig);
 
 
 

@@ -148,9 +148,12 @@ lists.buildLists = function(iListNr){
 		eTable.append(eThead);
 		eTable.append(eTbody);
 
-		// append the table to some div
+		// append the table 
+		// to some div
 		// (usually in a div in a formgrid)
-		$("#"+sTableId+"_div").append(eTable);
+		$("#"+sTableId+"_div")
+			
+			.append(eTable);
 
 		// instantiate a Datatable
 		//   WITHOUT header, searching, page length changing, but WITH sorting and paging
@@ -166,6 +169,7 @@ lists.buildLists = function(iListNr){
 		if (oButtons != null) {
 			aColumnDefs.push({ targets: [aAllColumns.length], width: "30px", sortable: false});
 		}
+
 		
 
 		var oDataTablesConfig = {
@@ -174,7 +178,7 @@ lists.buildLists = function(iListNr){
 			scrollY: (parseInt(sDisplayHeight) - 30)+"px",
 			scrollCollapse: true,
 			paging: false,
-			order: lists.getDataTableOrder(aColumnsToDisplay, oSortSettings),
+			order: lists.getDataTableOrder(aAllColumns, oSortSettings),
 			autoWidth: false, 
 			columnDefs: aColumnDefs,
 			"language": {
@@ -599,15 +603,15 @@ lists.assignShowAndDeleteFunction = function(oTable){
 
 // set table order the DataTable way
 // given an associative array like {col1: asc/desc, ...}
-lists.getDataTableOrder = function(aColumnsToDisplay, oSortSettings){
+lists.getDataTableOrder = function(aColumns, oSortSettings){
 
 	var aDataTableOrder = 	new Array();	
 	
-	for (var i=0; i<aColumnsToDisplay.length; i++){
+	for (var i=0; i<aColumns.length; i++){
 
 		// get column index, given the column name
-		var sColName = aColumnsToDisplay[i];		
-		var iColIndex = $.inArray(sColName, aColumnsToDisplay);
+		var sColName = aColumns[i];		
+		var iColIndex = $.inArray(sColName, aColumns);
 		
 		if (oSortSettings[sColName] != null){
 			aDataTableOrder.push([ iColIndex, oSortSettings[sColName] ]);
