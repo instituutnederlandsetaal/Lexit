@@ -46,51 +46,45 @@ else
   window.onfocus = window.onblur = onchange;
 
 function onchange (evt) {
+	
+	var idOfThisInstance = $("#page_id").attr("name");
+	var idInCookie = $.cookie('active_lexit_window'); 
 	 
-	 var idOfThisInstance = $("#page_id").attr("name");
-	 var idInCookie = $.cookie('active_lexit_window'); 
-	 
-  evt = evt || window.event;
+	evt = evt || window.event;
   
-  var sWindowVisibility = "";
+	var sWindowVisibility = "";
 
-  if (evt.type == "focus" || evt.type == "focusin")
-  	{        	
- 	 sWindowVisibility = "visible";            
-  	}
-  else if (evt.type == "blur" || evt.type == "focusout")
-  	{
- 	 sWindowVisibility = "hidden";
-  	}
-  else  
-  	{
- 	 sWindowVisibility = this[hidden] ? "hidden" : "visible";        	
+	if (evt.type == "focus" || evt.type == "focusin"){        	
+		sWindowVisibility = "visible";            
+	}
+  	else if (evt.type == "blur" || evt.type == "focusout"){
+		 sWindowVisibility = "hidden";
+	}
+  	else {
+ 		sWindowVisibility = this[hidden] ? "hidden" : "visible";        	
   	}
   
-  // activate the page layout trigger only when
-  // the window gets visible for the first time 
-  // (that is: when the current page id is different from the
-  //  active page id registered in the cookie; from now, the current
-  //  page id will be saved into the cookie, so in the next round
-  //  we will know for sure that the window doesn't get visible
-  //  for the first time = parasite blur/focus events)
-  if ( sWindowVisibility=="visible")
- 	 {    	 
- 	 refr.fireUpdateAtFocusGain();
- 	 }
+	// activate the page layout trigger only when
+	// the window gets visible for the first time 
+	// (that is: when the current page id is different from the
+	//  active page id registered in the cookie; from now, the current
+	//  page id will be saved into the cookie, so in the next round
+	//  we will know for sure that the window doesn't get visible
+	//  for the first time = parasite blur/focus events)
+	if ( sWindowVisibility=="visible"){    	 
+		refr.fireUpdateAtFocusGain();
+	}
   
-  if ( sWindowVisibility=="hidden")
- 	 {    	 
- 	 refr.fireUpdateAtFocusLoss();
- 	 }
+  	if ( sWindowVisibility=="hidden"){    	 
+ 		refr.fireUpdateAtFocusLoss();
+ 	}
   
-  // save currently visible window in the cookie, for the next round
-  if ( sWindowVisibility=="visible" )
- 	 {
-	  $.cookie('active_lexit_window', idOfThisInstance);
-	  // and tell the webservice which tab the user is working in
-	  sendActiveTabIdToService(idOfThisInstance);
- 	 }
+  	// save currently visible window in the cookie, for the next round
+  	if ( sWindowVisibility=="visible" ) {
+	  	$.cookie('active_lexit_window', idOfThisInstance);
+	  	// and tell the webservice which tab the user is working in
+	  	sendActiveTabIdToService(idOfThisInstance);
+ 	}
   
 }
 })();
@@ -99,12 +93,11 @@ function onchange (evt) {
 // to detect if focus or blur had genuinely occured 
 
 refr.fireUpdateAtFocusGain = function(){	
-
 	// gain of focus might trigger a custom function
 	if (typeof fnDoAtFocusGain === "function")
 		fnDoAtFocusGain();
-	else
 	// default: update the layout upon focus
+	else
 		refr.updateLayout(true);	
 };
 
@@ -130,6 +123,7 @@ refr.updateLayout = function(bRefreshTable){
 		for (var i=0; i<mt.getListOfLoadedTables().length; i++){			
 			var sTableName = mt.getListOfLoadedTables()[i];
 			var aTbableSettings = conf.getTableSettings(sTableName);
+			var bTableInUnsavedFormView = (fn.getViewType(sTableName) == 'form' && form.isUnsaved(sTableName) ); 
 			
 			$("#"+sTableName).css("width", "100%");
 						
@@ -139,16 +133,14 @@ refr.updateLayout = function(bRefreshTable){
 
 			
 			// refresh table content if required
-			// (table should be visible, refresh upon focus must be allowed, and it mustn't be in editable formview)
+			// (table should be visible, refresh upon focus must be allowed, and it mustn't be an editable unsaved formview)
 			if (bRefreshTable && 
 				!fn.tableIsHidden(sTableName) && 
 				conf.getRefreshUponFocus(aTbableSettings) &&
-				!(mt.getViewType(sTableName) =='form' && $("#"+sTableName+"_wrapper div#"+sTableName+"_form").find(".modified").length>0)
+				!bTableInUnsavedFormView
 			){
 				fn.refreshTable(sTableName);				
-			}
-			
+			}		
 		}
-	}
-	
+	}	
 };

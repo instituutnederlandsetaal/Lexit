@@ -573,7 +573,7 @@ form.buildViewGrid = function(sTableName){
 	var oLists =  oFormGrid["lists"];
 	for (var sListLabel in oLists){
 
-		var sListId = 			form.buildListTableId(sFormId, sListLabel);
+		var sListId = 			lists.buildListTableId(sFormId, sListLabel);
 		var aListPosition = 	oLists[sListLabel]["position"];
 		var aListDefinition =	oLists[sListLabel]["definition"];
 
@@ -992,6 +992,7 @@ form.manageViewGrid = function(sTableName){
 	}
 
 	// cells loop
+	
 	var oCells = 	oFormGrid["cells"];
 	for (var sCellName in oCells){
 
@@ -1094,6 +1095,31 @@ form.manageViewGrid = function(sTableName){
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 					.css("background-color", sBgColor)
 					.removeClass("modified");
+			}
+
+
+
+			// is the cell clickable?
+
+			if (oFormGrid["cells"][sCellName]["click"] != null){
+
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).off("click");
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).on("click", function(){
+
+					var nFormCell = this;
+
+					var sCellId = 			$(nFormCell).closest("div[id^='form_cellvalue_'")[0].id;
+					var sCellName = 		sCellId.replace(/^form_cellvalue_/, "");
+					var sFormTable = 		form.getTableOfForm(nFormCell);
+					var aTableSettings = 	conf.getTableSettings(sFormTable);
+					var oFormGrid = 		conf.getFormGrid(aTableSettings);
+					var fnFunction =  		oFormGrid["cells"][sCellName]["click"];				
+
+					// call function
+					fnFunction( mt.getDataTableObjectOf(sFormTable), nFormCell );
+				});
+
+
 			}
 			
 
@@ -1355,10 +1381,14 @@ form.getListColumnsToUse = function(oLists, sListLabel){
 form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){	
 
 	// get Datatable object of this list
-	var sFormId =	lists.getFormIdFormListLabel(sListLabel);
+	var sFormId =	lists.getFormIdFromListLabel(sListLabel);
 	var sFormTable = sFormId.replace(/_form$/, "");
-	var sTableId = 	form.buildListTableId(sFormId, sListLabel);	
+	var sTableId = 	lists.buildListTableId(sFormId, sListLabel);	
 	var oTable = 	lists.getListObjectOf(sTableId);
+
+	var aTableSettings = conf.getTableSettings(sFormTable);
+	var oForm = conf.getFormGrid(aTableSettings);
+	var oColumnsConfig = oForm["lists"][sListLabel]["table"]["columns"];
 
 	var oTableConfig = conf.getTableConfig(sTableToFeedTheListWith);
 
@@ -1368,13 +1398,50 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		var sColName = $(eThisCol).text();
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
 		var bEditable = conf.getEditability(oColumnConfig);
+		var bClickable = false; // in this case, we don't use the table config, since it mostly doesn't meet the form logic
+
+		var iColIndex = $("#"+sTableId+" thead").find("th").index(eThisCol);
+
+		// formgrid config overwrites the table config
+		if (oColumnsConfig[sColName] != null){
+
+			if (oColumnsConfig[sColName]["editable"] != null)
+				bEditable = oColumnsConfig[sColName]["editable"];
+
+			if (oColumnsConfig[sColName]["click"] != null)
+				bClickable = true;
+		}
+			
+
+		// if column must be editable:
 		if (bEditable){
 
-			var iColIndex = $("#"+sTableId+" thead").find("th").index(eThisCol);
-			
 			$("#"+sTableId+" tbody tr").each(function(){
 				$(this).find("td").eq(iColIndex).addClass("editable");
 			});
+		}
+
+		// if column must be clickable:
+		if (bClickable){
+
+			$('table#'+sTableId+' tbody tr').off("click", 'td:eq('+iColIndex+')');
+			$('table#'+sTableId+' tbody tr').on("click", 'td:eq('+iColIndex+')', function(event){
+
+				var nCell = this;
+
+				var sListLabel = lists.getLabelOfList(nCell);
+				var sFormId =	lists.getFormIdFromListLabel(sListLabel);
+				var sFormTable = sFormId.replace(/_form$/, "");
+				var aTableSettings = conf.getTableSettings(sFormTable);
+				var oFormGrid = conf.getFormGrid(aTableSettings);
+
+				// get function and call it with the needed arguments
+				var fnFunction = oFormGrid["lists"][sListLabel]["table"]["columns"][sColName]["click"];
+				fnFunction(sListLabel, nCell);
+
+
+			});
+
 		}
 	});
 
@@ -1388,7 +1455,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 			// redraw table
 			var sThisTable = $(this).closest('table')[0].id;
-			var oTable = lists.getListObjectOf(sThisTable); //$("#"+sThisTable).DataTable();
+			var oTable = lists.getListObjectOf(sThisTable);
 			oTable.draw(false);
 
 			return(value);
@@ -1401,7 +1468,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			"callback": function(value, settings){
 				
 				var sThisTable = $(this).closest('table')[0].id;
-				var oTable = lists.getListObjectOf(sThisTable);//$("#"+sThisTable).DataTable();
+				var oTable = lists.getListObjectOf(sThisTable);
 
 				// assign value
 				oTable.cell(this).data(value);				
@@ -1413,8 +1480,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 	).click(function(event) {
 
-		var nThis = this; 
-		var sThisTable = 	form.getTableOfList(nThis);
+		var nThis = this;
 
 		// get configured key from config
 		var oListConfig =	form.getConfigOfList(nThis);
@@ -1427,14 +1493,11 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			event.preventDefault();
 
 			// execute key function 
-			fnCallBack(nThis);	
-			
+			fnCallBack(nThis);				
 		}
 
 		// normal case: edit
 		else {
-
-			//console.log("normal case");
 			
 			// we must use keydown to prevent default behaviour
 			$(this).find('textarea')
@@ -1470,7 +1533,7 @@ form.addNewRows = function(oThisList, fnCallback){
 	var sListDiv = oThisList.attr("id");
 	var sListId = sListDiv.replace(/_div$/, "");
 	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel)
+	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel)
 	
 	var oTable = lists.getListObjectOf(sListId);
 
@@ -1565,7 +1628,7 @@ form.updateModifiedRows = function(oThisList, fnCallback){
 	var sListDiv = oThisList.attr("id");
 	var sListId = sListDiv.replace(/_div$/, "");
 	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel)
+	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel)
 	
 	var oTable = lists.getListObjectOf(sListId); 
 
@@ -1675,7 +1738,7 @@ form.removeRows = function(oThisList, fnCallback){
 	var sListId = sListDiv.replace(/_div$/, "");
 	var oTable = lists.getListObjectOf(sListId);
 	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFormListLabel(sFormListLabel);
+	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel);
 
 	var sIdsToRemove = $("#"+sListDiv).attr("remove_ids"); 
 
@@ -1732,40 +1795,15 @@ form.removeRows = function(oThisList, fnCallback){
 // --------------------------------------------------------------------
 
 // find the table of the current form
-
+//   ( t.i. NOT the tables feeding the lists)
 
 form.getTableOfForm = function(elem){
+
 	var sThisElemId = $(elem).closest('div.formgrid')[0].id;
 	var sThisTable = sThisElemId.replace(/_form$/g, "");
 	return sThisTable;
 };
 
-
-// --------------------------------------------------------------------
-// the table of a list has a name like:
-//
-// 			'formview_list_<LISTNAME>___<TABLENAME>'
-//
-
-// setters
-form.buildListTableId = function(sFormId, sListLabel ){
-	return sFormId+"___"+sListLabel.toLowerCase().replace(/ /g, "_");
-}
-
-// getters
-form.getTableOfList = function(elem){
-
-	var eDiv = $(elem).closest('div.formview_list')[0];	
-	var eChild = $(eDiv).find("div.dataTables_wrapper")[0];	
-	var sChildId = $(eChild).attr("id");	
-	var aThisTable = (sChildId.split("___")[1]).split("_")[0];
-	return aThisTable;
-};
-form.getDivIdOfList = function(elem){
-
-	var divId = $(elem).closest('div.formview_list')[0].id;
-	return divId;
-};
 
 
 
@@ -1776,15 +1814,15 @@ form.getConfigOfList = function(elem){
 
 	// get the form table
 	// and retrieve its config
-	var sTableOfFrom = form.getTableOfForm(elem);
-	var oTableSettings = conf.getTableSettings(sTableOfFrom);
-	var oFormGrid = conf.getFormGrid(oTableSettings);
+	var sTableOfFrom = 		form.getTableOfForm(elem);
+	var oTableSettings =	conf.getTableSettings(sTableOfFrom);
+	var oFormGrid = 		conf.getFormGrid(oTableSettings);
 
 	// get the list id
 	// and retrieve its config in the form config
-	var sListDivId = form.getDivIdOfList(elem);	
-	var sListId = (sListDivId.split("___")[1]).replace(/_div$/g, "");
-	var aList = oFormGrid["lists"];
+	var sListDivId = 	lists.getDivIdOfList(elem);	
+	var sListId = 		(sListDivId.split("___")[1]).replace(/_div$/g, "");
+	var aList = 		oFormGrid["lists"];
 	return aList[sListId];
 };
 
@@ -1818,15 +1856,59 @@ form.getIndexOfColumnName = function(elem, sColumnName){
 };
 
 
-// read value of a cell in the form
-form.getDataFromCell = function(sTableName, sCellName){
+// read/set value of a cell in the form
+form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
 
-	var sData;
-	// get the current row content
-	var nRow = fn.getActiveRowNode(sTableName);
-	// if there are no results, the row might be null
-	if (nRow != null){
-		sData = fn.getDataFromCellInRowNode(nRow, sCellName);
+	// if we want the current value IN THE UNDERLYING TABLE 
+	// represented by the form (which is not necessarily the value
+	// shown in the form, since that might be being edited)
+	if (bUnderlying != null && bUnderlying == true){
+
+		var sData;
+		// get the current row content
+		var nRow = fn.getActiveRowNode(sFormTable);
+		// if there are no results, the row might be null
+		if (nRow != null){
+			sData = fn.getDataFromCellInRowNode(nRow, sCellName);
+		}
+
+		return sData;
 	}
-	return sData;
+
+	// if we want to get the current value IN THE FORM
+
+	else {
+		//console.log($("div#"+sFormTable+"_form div#form_cellvalue_"+sCellName).children().first().get(0));
+		return $("div#"+sFormTable+"_form div#form_cellvalue_"+sCellName).children().first().val();
+	}
+}
+
+form.setDataInCell = function(sFormTable, sCellName, sValue){
+
+	$("div#"+sFormTable+"_form div#form_cellvalue_"+sCellName)
+		.addClass("modified")
+		.children().first().val(sValue);
+	
+	// attract attention from user to send button, which must be pressed 
+	// since some content was modified,
+	// and show that reset is possible now									
+	
+	form.setSendButtonToSetting(sFormTable, "payattention");
+	form.setResetButtonToSetting(sFormTable, "active");
+}
+
+
+form.getNameOfCell = function(nCellValueNode){
+	return (nCellValueNode.id).replace(/^form_cellvalue_/, "");
+}
+
+
+
+// is form in 'unsaved' state?
+form.isUnsaved = function(sTableName){
+	var eFormButtons = $("#"+sTableName+"_formsbuttons");
+	return ( eFormButtons.length>0 && 
+			eFormButtons.find("#send_button").length>0 && 
+			eFormButtons.find("#send_button").hasClass("payattention")
+	);
 }

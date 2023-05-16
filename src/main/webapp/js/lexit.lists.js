@@ -34,15 +34,13 @@ lists.register = function(sFormListLabel, sFormId, sTableToFeedListWith, aColumn
 }
 // read the id of the form of a list is part of
 // given the list label
-lists.getFormIdFormListLabel = function(sFormListLabel){
+lists.getFormIdFromListLabel = function(sFormListLabel){
 	return formListLabel2formId.get(sFormListLabel);
 }
-lists.getTableNameFormListLabel = function(sFormListLabel){
+lists.getTableNameFromListLabel = function(sFormListLabel){
 	return formListLabel2tableName.get(sFormListLabel);
 }
-lists.getTableNameFormListLabel = function(sFormListLabel){
-	return formListLabel2tableName.get(sFormListLabel);
-}
+
 lists.getColumnsToDisplay = function(sFormListLabel){
 	return formListLabel2ColumnsToDisplay.get(sFormListLabel);
 }
@@ -68,14 +66,14 @@ lists.buildLists = function(iListNr){
 	var sFormListLabel = aAllLists[iListNr];
 
 
-	var sFormId =			lists.getFormIdFormListLabel(sFormListLabel);
+	var sFormId =			lists.getFormIdFromListLabel(sFormListLabel);
 	var sFormTable = 		sFormId.replace(/_form$/, ""); // table of the form
 	var oTableSettings =    conf.getTableSettings(sFormTable);
 	var oFormGrid =         conf.getFormGrid(oTableSettings);
 	var oThisList = 		oFormGrid["lists"][sFormListLabel];
 	var oButtons = 			oThisList["buttons"];
 
-	var sTableNameOfList =	lists.getTableNameFormListLabel(sFormListLabel);
+	var sTableNameOfList =	lists.getTableNameFromListLabel(sFormListLabel);
 	var aColumnsToDisplay =	lists.getColumnsToDisplay(sFormListLabel);
 	var sDisplayHeight = 	lists.getDisplayHeight(sFormListLabel);
 	var oSortSettings =		lists.getSortSettings(sFormListLabel);
@@ -96,7 +94,7 @@ lists.buildLists = function(iListNr){
 
 		// build the table HTML
 
-		var sTableId = form.buildListTableId(sFormId, sFormListLabel);
+		var sTableId = lists.buildListTableId(sFormId, sFormListLabel);
 		var eTable = $("<table></table>")
 			.attr("id", sTableId)
 			.addClass("display")
@@ -224,8 +222,8 @@ lists.feedList = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
 
 	
 
-	var sFormId = 		lists.getFormIdFormListLabel(sListLabel);
-	var sTableName = 	lists.getTableNameFormListLabel(sListLabel);
+	var sFormId = 		lists.getFormIdFromListLabel(sListLabel);
+	var sTableName = 	lists.getTableNameFromListLabel(sListLabel);
 
 	var sFormTable = sFormId.replace(/_form$/, ""); // table of the form
 	var oTableSettings =    conf.getTableSettings(sFormTable);
@@ -249,7 +247,7 @@ lists.feedList = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
 					// get table object
 					//console.log("lists.feedList");
 					
-					var sTableId = form.buildListTableId(sFormId, sListLabel);
+					var sTableId = lists.buildListTableId(sFormId, sListLabel);
 					var oTable = lists.getListObjectOf(sTableId);
 
 					// make table empty (remove rows of previous draw)
@@ -337,11 +335,11 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 			.addClass("add")
 			.click(function(){
 
-				var sThisForm = ($(this).closest('div.formgrid')[0].id).replace(/_form$/, "");
+				var sThisFormTable = ($(this).closest('div.formgrid')[0].id).replace(/_form$/, "");
 				var sThisListLabelId = ($(this).closest('div.formview_list')[0].id).replace(/_div$/, "");
 				var oTable = formListsDataTables.get(sThisListLabelId);
 				var sThisListLabel = sThisListLabelId.split("___")[1];
-				var sThisListTableName = 	lists.getTableNameFormListLabel(sThisListLabel);
+				var sThisListTableName = 	lists.getTableNameFromListLabel(sThisListLabel);
 				var aAllColumns = formListsTableCols.get(sThisListTableName);
 
 
@@ -359,7 +357,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 					for (var sOneColumnToFeed in oCopy){
 
 						// if a value must be copied, oCopyFrom will contain an array {listlabel: column}
-						// but if a column must be skipped instead (t.i. not fed but skipped), oCopyFrom will have s null value
+						// but if a column must be skipped instead (t.i. not fed but skipped), oCopyFrom will have a null value
 						var oCopyFrom = oCopy[sOneColumnToFeed];
 
 						if (oCopyFrom == null){
@@ -371,7 +369,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 							// this must contain only one pair actually!
 							for (var sListToRead in oCopyFrom){ 
 
-								// read from a list cell
+								// read from a LIST cell
 								if (sListToRead != "form"){
 									// get the selected row to copy the values from
 									var oSelectedRow = lists.getSelectedRowsFromList(sListToRead);
@@ -382,10 +380,11 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 										return true;
 									}
 									oToBeCopied[sOneColumnToFeed] = lists.getDataFromCellInList(sListToRead, iRowNumber, oCopyFrom[sListToRead]);
-								}									
-								// or read from a form cell
+								}	
+
+								// or read from a FORM cell
 								else {
-									oToBeCopied[sOneColumnToFeed] = form.getDataFromCell(sThisForm, oCopyFrom[sListToRead]);
+									oToBeCopied[sOneColumnToFeed] = form.getDataFromCell(sThisFormTable, oCopyFrom[sListToRead], true);
 								}
 									
 							}
@@ -443,7 +442,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 						// since some content was modified,
 						// and show that reset is possible now
 															
-						var sFormTable = lists.getFormIdFormListLabel(sThisListLabel);
+						var sFormTable = lists.getFormIdFromListLabel(sThisListLabel);
 						sFormTable = sFormTable.replace(/_form$/, "");
 						form.setSendButtonToSetting(sFormTable, "payattention");
 						form.setResetButtonToSetting(sFormTable, "active");
@@ -512,7 +511,7 @@ lists.assignShowAndDeleteFunction = function(oTable){
 					// check if some lists have been modified, before those get overwritten!
 					var aModifiedLists = new Array();
 					for (var sListToCall in oDo){
-						var sDivId = form.buildListTableId(sThisTable+"_form", sListToCall);
+						var sDivId = lists.buildListTableId(sThisTable+"_form", sListToCall);
 						if ($("#"+sDivId).find(".modified,.added").length>0 || $("div#"+sDivId+"_div").hasClass("rows_to_be_deleted"))
 							aModifiedLists.push(sListToCall);
 					}
@@ -590,7 +589,7 @@ lists.assignShowAndDeleteFunction = function(oTable){
 					// since some content was modified,
 					// and show that reset is possible now
 														
-					var sFormTable = lists.getFormIdFormListLabel(sThisListLabel);
+					var sFormTable = lists.getFormIdFromListLabel(sThisListLabel);
 					sFormTable = sFormTable.replace(/_form$/, "");
 					form.setSendButtonToSetting(sFormTable, "payattention");
 					form.setResetButtonToSetting(sFormTable, "active");
@@ -683,37 +682,104 @@ lists.getDataTableId = function(oTable){
 }
 
 
-// read value of a cell in a list
+// read/set value of a cell in a list
 //
-lists.getDataFromCellInList = function(sListLabel, iRowNumber, sColName){
-
-	if (iRowNumber<0)
-		return null;
+lists.getDataFromCellInList = function(sListLabel, mMixed, sColName){
 
 	// get the DataTable object of the list
-	var sFormId = lists.getFormIdFormListLabel(sListLabel);
-	var sThisListLabelId = form.buildListTableId(sFormId, sListLabel);
+	var sFormId = lists.getFormIdFromListLabel(sListLabel);
+	var sThisListLabelId = lists.buildListTableId(sFormId, sListLabel);
 	var oTable = formListsDataTables.get(sThisListLabelId);
 
-	var sListTableName = 	lists.getTableNameFormListLabel(sListLabel);
-	var aAllColumns = formListsTableCols.get(sListTableName)
+	// we have 2 possible inputs: 
+	// 1. a row-number + a cell name
+	// or
+	// 2. a cell node
+	
+	// 1: row number
+	if (typeof mMixed == 'number'){
 
+		var iRowNumber = mMixed;
+		var sListTableName = 	lists.getTableNameFromListLabel(sListLabel);
+		var aAllColumns = formListsTableCols.get(sListTableName)
 
-	var colNr = $.inArray(sColName, aAllColumns);
-	var oRowData = oTable.row( iRowNumber ).data();
-	var sOutput = oRowData[colNr];
+		var colNr = $.inArray(sColName, aAllColumns);
+		var oRowData = oTable.row( iRowNumber ).data();
+		return oRowData[colNr];
+	}
+	// 2: cell node
+	else {
+		var oRowData = oTable.cell( mMixed ).data();
+		return oRowData;
+	}
 
-	return sOutput;
+	// otherwise
+	return null;
 }
+
+lists.setDataInCellOfList = function(sListLabel, nCell, sValue){
+
+	// get the DataTable object of the list
+	var sFormId = lists.getFormIdFromListLabel(sListLabel);
+	var sFormTable = sFormId.replace(/_form$/, "");
+	var sThisListLabelId = lists.buildListTableId(sFormId, sListLabel);
+	var oTable = formListsDataTables.get(sThisListLabelId);
+	
+	// assign value
+	oTable.cell(nCell).data(sValue);
+	
+	// mark cell as modified
+	$(nCell).addClass("modified");
+
+	// attract attention from user to send button, which must be pressed 
+	// since some content was modified,
+	// and show that reset is possible now									
+	
+	form.setSendButtonToSetting(sFormTable, "payattention");
+	form.setResetButtonToSetting(sFormTable, "active");
+}
+
+
+
+// row selection
 
 lists.getSelectedRowsFromList = function(sListLabel){
 
 	// get the DataTable object of the list
-	var sFormId = lists.getFormIdFormListLabel(sListLabel);
-	var sThisListLabelId = form.buildListTableId(sFormId, sListLabel);
+	var sFormId = lists.getFormIdFromListLabel(sListLabel);
+	var sThisListLabelId = lists.buildListTableId(sFormId, sListLabel);
 	var oTable = formListsDataTables.get(sThisListLabelId);
 
 	return oTable.rows(".selected");
 }
+
+
+// --------------------------------------------------------------------
+// the table of a list has a name like:
+//
+// 			'formview_list_<LISTNAME>___<TABLENAME>'
+//
+
+// setters
+lists.buildListTableId = function(sFormId, sListLabel ){
+	return sFormId+"___"+sListLabel.toLowerCase().replace(/ /g, "_");
+}
+
+// getters
+lists.getLabelOfList = function(elem){
+
+	var eDiv = $(elem).closest('div.formview_list')[0];	
+	var eChild = $(eDiv).find("div.dataTables_wrapper")[0];	
+	var sChildId = $(eChild).attr("id");	
+	var sListLabel = (sChildId.split("___")[1]).split("_")[0];
+	return sListLabel;
+};
+lists.getDivIdOfList = function(elem){
+
+	var divId = $(elem).closest('div.formview_list')[0].id;
+	return divId;
+};
+
+
 
 
