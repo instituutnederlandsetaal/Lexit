@@ -433,7 +433,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 						oTable.draw(false);
 
 						// editability
-						form.makeListEditable(sThisListLabel, sThisListTableName)
+						form.makeListEditable(sThisListLabel, sThisListTableName);
 
 						// assign functions to 'show' and 'delete' icons
 						lists.assignShowAndDeleteFunction(oTable);
@@ -548,7 +548,13 @@ lists.assignShowAndDeleteFunction = function(oTable){
 							var aColsAndVals = new Array();
 							aColsAndVals[ oDo[sListToCall] ] = sRowId;
 							
+							// fill the table
 							lists.feedList(sListToCall,  aColsAndVals);
+
+							// make it editable
+							setTimeout(function(){
+								form.makeListEditable(sListToCall, lists.getTableNameFromListLabel(sListToCall));
+							}, 500);
 						}
 					}
 					
