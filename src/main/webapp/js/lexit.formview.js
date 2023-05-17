@@ -747,6 +747,20 @@ form.buildViewGrid = function(sTableName){
 			var oTableSettings =    conf.getTableSettings(sTableName);
 			var oFormGrid =         conf.getFormGrid(oTableSettings);
 			var oCells =  			oFormGrid["cells"];
+			var oLists =			oFormGrid["lists"];
+
+
+			// Register the selected rows in lists
+			// (so we'll be able to restore selection after saving)
+			var aSelectedRowsInLists = {};
+			for (var sListLabel in oLists){
+				var aRows = (lists.getSelectedRowsFromList(sListLabel)).nodes();
+				var nRow = aRows[0];
+				if (nRow != null && nRow.id != null){
+					aSelectedRowsInLists[sListLabel] = nRow.id;
+				}
+			}
+			
 
 
 			// We'll need to build some promises, with all the jobs to be carried on 
@@ -761,8 +775,9 @@ form.buildViewGrid = function(sTableName){
 						this.queue = this.queue
 							.then(operation)
 							.then(resolve)
-							.catch(() => {
+							.catch((err) => {
 								fn.message("Oups", "SOMETHING WENT WRONG!");
+								console.log(err);
 							});
 					});
 				};
@@ -892,12 +907,7 @@ form.buildViewGrid = function(sTableName){
 
 			var fnAllWentWell = function(){
 
-				fn.addDrawCallback(sTableName, function(){
-
-					// give the send-button a new color to show update was performed
-					// and show that reset is NOT possible anymore 
-					form.setSendButtonToSetting(sTableName, "alliswel");
-					form.setResetButtonToSetting(sTableName, "off");
+				fn.addDrawCallback(sTableName, function(){					
 
 					// set a draw callback to make sure that the send-button's color will be set back into default mode 
 					// as soon as one browses etc.
@@ -910,6 +920,22 @@ form.buildViewGrid = function(sTableName){
 
 				// click the reset the button to load current data (with new IDs etc)
 				$("div#"+sTableName+"_form button#reset_button").click();
+
+				// give the send-button a new color to show update was performed
+				// and show that reset is NOT possible anymore 
+				form.setSendButtonToSetting(sTableName, "alliswel");
+				form.setResetButtonToSetting(sTableName, "off");
+
+
+				// restore row selection in lists		
+
+				setTimeout(function(){
+					for (var sListLabel in aSelectedRowsInLists){
+						var sRowId = aSelectedRowsInLists[sListLabel];
+						lists.setRowInList(sListLabel, sRowId);						
+						lists.clickOpenInList(sListLabel);
+					}
+				}, 500);				
 				
 			};
 

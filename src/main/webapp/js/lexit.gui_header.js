@@ -553,6 +553,9 @@ head.putViewTypeButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 
+			// remove focus from button to prevent 'enter' strike to reactivate it
+			$(this).blur();
+
 			var nCurrentSelection = fn.getFirstSelectedRowNodeFrom(sSomeTablename);
 			var sIdOfSelection = fn.getRowNodeId(nCurrentSelection);
 			

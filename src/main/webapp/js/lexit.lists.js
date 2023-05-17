@@ -753,11 +753,29 @@ lists.getSelectedRowsFromList = function(sListLabel){
 	return oTable.rows(".selected");
 }
 
+lists.setRowInList = function(sListLabel, sRowId){
+
+	// get the DataTable object of the list
+	var sFormId = lists.getFormIdFromListLabel(sListLabel);
+	var sThisListLabelId = lists.buildListTableId(sFormId, sListLabel);
+	var eRow = $("#"+sThisListLabelId).find("tr#"+sRowId);
+	if ( !eRow.hasClass("selected"))
+		eRow.addClass("selected");
+}
+
+lists.clickOpenInList = function(sListLabel){
+
+	// get the DataTable object of the list
+	var sFormId = lists.getFormIdFromListLabel(sListLabel);
+	var sThisListLabelId = lists.buildListTableId(sFormId, sListLabel);
+	var eRow = $("#"+sThisListLabelId).find("tr.selected").find("img.open").click();
+} 
+
 
 // --------------------------------------------------------------------
-// the table of a list has a name like:
+// the table of a list has an id like:
 //
-// 			'formview_list_<LISTNAME>___<TABLENAME>'
+// 			'<FORM_ID>___<LISTLABEL>'
 //
 
 // setters
