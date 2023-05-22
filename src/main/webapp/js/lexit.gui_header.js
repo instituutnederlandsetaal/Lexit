@@ -474,7 +474,16 @@ head.putResetButton = function(sSomeTablename){
 						mt.getDataTableObjectOf(sSomeTablename).order.neutral();
 					else
 						mt.getDataTableObjectOf(sSomeTablename).order(aSorting);
+
+					// make sure that the form sorting labels are updated too
+					// (can only be done after re-ordering the table)
+					fn.addDrawCallback(sSomeTablename, function(){
+						setTimeout(function(){
+							form.synchronizeSorting(sSomeTablename);
+						}, 1000);						
+					});
 					
+					// update the table now!
 					mt.getDataTableObjectOf(sSomeTablename).draw();
 				
 					// put the current search filters values into the search boxes
@@ -482,6 +491,8 @@ head.putResetButton = function(sSomeTablename){
 					
 					// finally set the form searchbox too (if needed)
 					form.resetSearchFields(sSomeTablename);
+					
+					
 			});
 			
 			

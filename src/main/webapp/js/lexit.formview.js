@@ -164,8 +164,9 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// add the search/sort cells 
 	// ------------------------------------------
 
-	var aSearchFields = mt.getListOfVisibleColumnsOf(sTableName);
-	var aSearchFieldsNiceNames = fn.getListOfColumnsNiceNames(sTableName);
+	// get visible columns
+	var aSearchFields = 			mt.getListOfVisibleColumnsOf(sTableName);
+	var aSearchFieldsNiceNames = 	fn.getListOfColumnsNiceNames(sTableName);
 
 	var aTinySearchFields = [];
 	var aTinySearchFieldsNiceNames = [];
@@ -179,11 +180,11 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	var oCells =  oFormGrid["cells"];
 	for (var sCellName in oCells){
 
-		aTinySearchFields.push(sCellName);
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
+		if (iNameIndex<0) continue;
+		aTinySearchFields.push(sCellName);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
 		aTinySearchFieldsNiceNames.push( sNiceName );
-
 
 		// --------------------------------------
 		// add sort button
@@ -212,7 +213,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 								fn.addDrawCallback(sTableName, function(){
 
 									setTimeout(function(){
-										form.synchronizeSorting(sTableName)
+										form.synchronizeSorting(sTableName);
 									}, 500);
 									
 
@@ -377,8 +378,8 @@ form.buildViewGrid = function(sTableName){
 	mt.getDataTableObjectOf(sTableName).displayRow(iNowIndex);
 
 	// get column names
-	var aSearchFields = mt.getListOfVisibleColumnsOf(sTableName);
-	var aSearchFieldsNiceNames = fn.getListOfColumnsNiceNames(sTableName);
+	var aSearchFields = form.getListOfVisibleColumnsOf(sTableName);
+	var aSearchFieldsNiceNames = form.getListOfColumnsNiceNames(sTableName);
 
 	// ------------------------------------------
 	// form layout
@@ -1248,26 +1249,14 @@ form.getSortingModeOfFormColumn = function(sTableName, sCellName){
 
 };
 
-// reset the sorting of the form (back to start settings)
-//
-form.resetFormSorting = function(sTableName){
 
-	$("#"+sTableName+"_search_and_sort_table tr:eq(0) td span").each(function(){
-
-		var thisOne = $(this);
-		var sFormClasses = thisOne.attr("class");
-		if (sFormClasses == null) sFormClasses = "";
-		var aFormClasses = sFormClasses.split(" ").filter(classname => $.startsWith(classname, "sorting"));										
-		var sCurrentSortClass = aFormClasses[0];
-		thisOne.removeClass(sCurrentSortClass);
-		thisOne.addClass("sorting");
-
-	});
-}
 
 // determine how the underlying table is sorted (for all columns at once)
 //
 form.synchronizeSorting = function(sTableName){
+
+	if (mt.getViewType(sTableName) == 'table') 
+		return;
 
 	$("#"+sTableName+"_search_and_sort_table tr:eq(0) td span").each(function(){
 
@@ -1311,7 +1300,7 @@ form.resetSearchFields = function(sTableName){
 	for (var sCellName in oCells){
 
 		// get selector of current search field in underlying table
-		var aVisibleCols = mt.getListOfVisibleColumnsOf(sTableName);
+		var aVisibleCols = form.getListOfVisibleColumnsOf(sTableName);
 		var iTableColIndex = $.inArray(sCellName, aVisibleCols);
 		var eThisTableSearchBox = $("#"+sTableName+"_searchboxes td:eq("+ iTableColIndex +")");
 		var eThisFormSearchBox = $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:eq("+ iFormColIndex +")");
@@ -1853,6 +1842,71 @@ form.getConfigOfList = function(elem){
 };
 
 // --------------------------------------------------------------------
+
+
+// compute list of visible columns
+// given the table config AND the form config
+//
+form.getListOfVisibleColumnsOf = function(sTableName){
+
+	// get visibility according to table config
+
+	var aVisibleColumns = cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
+
+	// then get the form config:
+	// visibility settings there will overwrite the table config
+
+	var aTableSettings = conf.getTableSettings(sTableName);
+	var oGrid = conf.getFormGrid(aTableSettings);
+	for (var sCell in oGrid["cells"]){
+
+		var bVisibility = oGrid["cells"][sCell]["visible"];
+		var iIndex = $.inArray(sCell, aVisibleColumns);
+
+		// form cell must be visible, but is hidden according to table config: 
+		// add it to list of visible cells
+		if (bVisibility == true && iIndex < 0){
+			aVisibleColumns.push(sCell);
+		}
+		// form cell must be hidden, but is visible according to table config: 
+		// remove it from the list of visible cells
+		else if (bVisibility == false && iIndex >= 0) {
+			aVisibleColumns.splice(iIndex, 1);
+		}
+		
+	}
+
+	return aVisibleColumns;
+}
+
+// compute list of nice names of columns
+// given the table config AND the form config
+//
+form.getListOfColumnsNiceNames = function(sSomeTable){
+
+	var sTableName = (typeof sSomeTable == 'object') ? fn.getTableName(sSomeTable) : sSomeTable;
+	var oTableConfig = conf.getTableConfig(sTableName);
+	var aTableSettings = conf.getTableSettings(sTableName);
+	var oGrid = conf.getFormGrid(aTableSettings);
+	
+	var aColsList = form.getListOfVisibleColumnsOf(sTableName);
+	
+	var aColsNiceNames = [];
+	for (var i=0; i<aColsList.length; i++){
+		var sColName = aColsList[i];
+		var aColumnConfig =	conf.getColumnConfig(oTableConfig, sColName);
+		
+		var sNiceNameInTable = conf.getColumnNiceName(aColumnConfig);
+		var sNiceNameInForm = (oGrid["cells"][sColName] != null ? oGrid["cells"][sColName]["nice_name"] : null);
+		
+		aColsNiceNames[i] = sColName;
+		if (sNiceNameInTable != null)
+			aColsNiceNames[i] = sNiceNameInTable;
+		if (sNiceNameInForm != null)
+			aColsNiceNames[i] = sNiceNameInForm;
+	}
+	return aColsNiceNames;
+}
 
 
 form.getVisibleColumns = function(elem){
