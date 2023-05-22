@@ -63,8 +63,12 @@ lists.buildLists = function(iListNr){
 	if (iListNr == null) iListNr = 0;
 
 	var aAllLists = lists.getListOfLists();
-	var sFormListLabel = aAllLists[iListNr];
 
+	// if the form has no lists, leave straight away
+	if (aAllLists.length == 0)
+		return;
+	
+	var sFormListLabel = aAllLists[iListNr];
 
 	var sFormId =			lists.getFormIdFromListLabel(sFormListLabel);
 	var sFormTable = 		sFormId.replace(/_form$/, ""); // table of the form
