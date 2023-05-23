@@ -72,14 +72,14 @@ body {
 }
 
 .formview_textarea {
-	border-radius: 5px;
+	/* border-radius: 5px; */
 	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
     -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
 .formview_list {
 	border: 1px solid grey;
-	border-radius: 5px;
+	/* border-radius: 5px; */
 	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
     -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }

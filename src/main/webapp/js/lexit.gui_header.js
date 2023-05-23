@@ -568,7 +568,7 @@ head.putViewTypeButton = function(sSomeTablename){
 			$(this).blur();
 
 			var nCurrentSelection = fn.getFirstSelectedRowNodeFrom(sSomeTablename);
-			var sIdOfSelection = fn.getRowNodeId(nCurrentSelection);
+			var sIdOfSelection = (nCurrentSelection != null ? fn.getRowNodeId(nCurrentSelection) : null);
 			
 			// change view type
 			mt.toggleViewType(sSomeTablename);
