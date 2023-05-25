@@ -1118,7 +1118,7 @@ form.manageViewGrid = function(sTableName){
 			else {
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
 					.val(sData)
-					.attr("disabled", !bEditable);
+					.css("pointer-events", bEditable ? "auto" : "none"); // trick to allow click event, which 'disabled' doesn't
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 					.css("background-color", sBgColor)
 					.removeClass("modified");
