@@ -1315,26 +1315,46 @@ function getJqXHRInfo(jqXHR){
 	
 	// if Lex'it is running on home address or is in test mode, give jqXHR info
 		
-	if ( document.URL.regexIndexOf( INL_HOMEURL )>-1 || bTest)
-		{
-		if ( jqXHR != null )
-			{
-			if ( $.isNullOrUndefined(jqXHR["responseText"]) )
-				{
+	if ( document.URL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
+
+		if ( jqXHR != null ) {
+			if ( $.isNullOrUndefined(jqXHR["responseText"]) ) {
 				return JSON.stringify(jqXHR);
-				}
-			else
-				{
-				var regex = /\<style.+?\<\/style\>/gi
-				return '<div style="overflow: auto; height:400px">'+(jqXHR["responseText"]).replace(regex, '')+'</div>';
-				}
-			}	
+			}
+			else {				
+				// get tomcat text response 
+				var message = parseServiceResponseText(jqXHR["responseText"]);
+				// get ride of style
+				message = message.replace(/\<style.+?\<\/style\>/gi, '');
+				// put that in a dialog
+				return '<div style="overflow: auto; max-height:400px">'+ message +'</div>';
+			}
+		}	
 		return "no jqXHR info";	
-		}
+	}
 	
 	// otherwise we will not
 	
 	return "";		
+}
+
+
+// If we got some message when accessing the webservice,
+// see if it contains a custom message between <lexit> tags.
+// If it does, return only that!
+// Otherwise return the message as is.
+//
+function parseServiceResponseText(sErrormessage){
+
+	var iMessageStart = sErrormessage.regexIndexOf("(\<|&lt;)lexit(\>|&gt;)");
+	var iMessageEnd = sErrormessage.regexIndexOf("(\<|&lt;)(/|&#47;)lexit(\>|&gt;)");
+
+	if (iMessageStart < iMessageEnd){
+		return "<BR><B>" + sErrormessage.substring(iMessageStart, iMessageEnd).replace(/(\<|&lt;)lexit(\>|&gt;)/, "") + "</B>"; // allow custom message to stand out 
+	}
+	else {
+		return sErrormessage;
+	}
 }
 
 
@@ -1348,6 +1368,8 @@ function translateBoolean(mSomeValue){
 	if (mSomeValue==0 || mSomeValue=='0' || mSomeValue==false || mSomeValue=='f' || mSomeValue=='false')	
 		return false;
 }
+
+
 
 
 //*******************************************************

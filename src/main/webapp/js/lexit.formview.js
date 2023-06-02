@@ -1717,7 +1717,7 @@ form.updateModifiedRows = function(oThisList, fnCallback){
 					},
 					"error": function(jqXHR, textStatus, errorThrown){
 						fn.message(lang.error, 
-							lang.error_when_calling+ " form.updateRow("+sTable+"): "+
+							lang.error_when_calling+ " form.updateRow("+sTableToUpdate+"): "+
 							textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
 					}
 				});
