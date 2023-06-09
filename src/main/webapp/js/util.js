@@ -1318,10 +1318,10 @@ function getJqXHRInfo(jqXHR){
 	if ( document.URL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
 
 		if ( jqXHR != null ) {
-			if ( $.isNullOrUndefined(jqXHR["responseText"]) ) {
+			if ( $.isNullOrUndefined(jqXHR["responseText"]) ) {				
 				return JSON.stringify(jqXHR);
 			}
-			else {				
+			else {
 				// get tomcat text response 
 				var message = parseServiceResponseText(jqXHR["responseText"]);
 				// get ride of style

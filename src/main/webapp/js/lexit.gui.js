@@ -737,7 +737,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						}
 						else {
 							fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
+									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
 									function(){
 										gui.refreshTable(sSomeTablename);
 										//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
@@ -933,7 +933,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					}
 					else {
 						fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
+							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
 							function(){
 								gui.refreshTable(sSomeTablename);
 							}
@@ -1113,7 +1113,7 @@ gui.makeTableEditable = function(sSomeTablename){
 									}
 									else {
 										fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-												lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
+												lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
 												function(){
 													gui.refreshTable(sSomeTablename);
 												}
