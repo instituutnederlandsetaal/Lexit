@@ -908,8 +908,8 @@ form.buildViewGrid = function(sTableName){
 
 			var fnAllWentWell = function(){
 
-				fn.addDrawCallback(sTableName, function(){					
-
+				fn.addDrawCallback(sTableName, function(){	
+					
 					// set a draw callback to make sure that the send-button's color will be set back into default mode 
 					// as soon as one browses etc.
 
@@ -919,13 +919,22 @@ form.buildViewGrid = function(sTableName){
 
 				});
 
-				// click the reset the button to load current data (with new IDs etc)
+				// click the form reset the button to load current data (with new IDs etc)
 				$("div#"+sTableName+"_form button#reset_button").click();
 
 				// give the send-button a new color to show update was performed
 				// and show that reset is NOT possible anymore 
 				form.setSendButtonToSetting(sTableName, "alliswel");
 				form.setResetButtonToSetting(sTableName, "off");
+
+
+				// make sure that the tables underlying the form's lists
+				// are refreshed, in case those are loaded in the GUI already
+				for (var sListLabel in oLists){
+					var sTableToRefresh = lists.getTableNameFromListLabel(sListLabel);
+					if (fn.tableExists(sTableToRefresh))
+						fn.refreshTable(sTableToRefresh);
+				}
 
 
 				// restore row selection in lists		
