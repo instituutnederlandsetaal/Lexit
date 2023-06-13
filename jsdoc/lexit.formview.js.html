@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lexit.formview.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lexit.formview.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * The form namespace contains functions to build forms with.
  * 
  * Basic forms contain cells (corresponding to the columns of a table row).
@@ -64,7 +92,7 @@ form.setResetButtonToSetting = function(sTableName, sSetting){
 		.remove();
 	$("#"+sTableName+"_formsbuttons #reset_button")
 		.append( 
-			$("<span></span>").addClass(sIcon) 
+			$("&lt;span>&lt;/span>").addClass(sIcon) 
 		);
 }
 
@@ -134,7 +162,7 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		.remove();
 	$("#"+sTableName+"_formsbuttons #send_button")
 		.append( 
-			$("<span></span>").addClass(sIcon) 
+			$("&lt;span>&lt;/span>").addClass(sIcon) 
 		);
 
 
@@ -152,15 +180,15 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// ------------------------------------------
 
 	eSearchDiv.append(
-		$("<table></table>")
+		$("&lt;table>&lt;/table>")
 			.attr("id", sTableName+"_search_and_sort_table")
 			.css("margin", "auto")
 			.css("min-width", "50%")
 	);
 
 	$("#"+sTableName+"_search_and_sort_table")
-		.append("<tr></tr>")  // #1 : sort row
-		.append("<tr></tr>"); // #2 : search row
+		.append("&lt;tr>&lt;/tr>")  // #1 : sort row
+		.append("&lt;tr>&lt;/tr>"); // #2 : search row
 
 
 	// ------------------------------------------
@@ -184,7 +212,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	for (var sCellName in oCells){
 
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
-		if (iNameIndex<0) continue;
+		if (iNameIndex&lt;0) continue;
 		aTinySearchFields.push(sCellName);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
 		aTinySearchFieldsNiceNames.push( sNiceName );
@@ -195,11 +223,11 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 
 		$("#"+sTableName+"_search_and_sort_table tr:eq(0)")
 			.append(
-				$("<td></td>")
+				$("&lt;td>&lt;/td>")
 					.css("width", iGridWidthUnit+"px")
 					.css("text-align", "center")
 					.append(
-						$("<span></span>")
+						$("&lt;span>&lt;/span>")
 							.css("font-weight", "bold")
 							.css("padding-right", "18px")
 							.text(sNiceName)
@@ -241,7 +269,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 
 		// build a new cell ...
 		$("#"+sTableName+"_search_and_sort_table tr:eq(1)")
-			.append( $("<td></td>") );
+			.append( $("&lt;td>&lt;/td>") );
 
 		// ... and copy the original Lex'it searchsearch to this new cell
 		$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
@@ -414,7 +442,7 @@ form.buildViewGrid = function(sTableName){
 	var iHeaderHeight = parseInt( $( "#"+sTableName+"_wrapper .top" ).css("height") );
 
 	// search div on top of form
-	var eSearchDiv = $("<div></div>")
+	var eSearchDiv = $("&lt;div>&lt;/div>")
 		.attr("id", sTableName+"_search_and_sort")
 		.css("margin", 0)
 		.css("position", "relative")
@@ -427,7 +455,7 @@ form.buildViewGrid = function(sTableName){
 	
 	// parent element to build form into	
 	var sFormId = sTableName+"_form";
-	var eFormParent = $("<div></div>")
+	var eFormParent = $("&lt;div>&lt;/div>")
 		.attr("id", sFormId)
 		.addClass("formgrid")
 		.css("margin", 0)
@@ -486,12 +514,12 @@ form.buildViewGrid = function(sTableName){
 
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
-		var eCell = $("<div></div>")
+		var eCell = $("&lt;div>&lt;/div>")
 				.attr("id", "form_cell_"+sCellName)
 				.append(
-					$("<span></span>").css("font-weight", "bold").text(sNiceName)
+					$("&lt;span>&lt;/span>").css("font-weight", "bold").text(sNiceName)
 				);
-		var eCellField = $("<div></div>")
+		var eCellField = $("&lt;div>&lt;/div>")
 				.attr("id", "form_cellvalue_"+sCellName);
 		$(eFormParent).append(eCell);
 		$(eCell).append(eCellField);
@@ -516,7 +544,7 @@ form.buildViewGrid = function(sTableName){
 
 		if (bCheckBoxType){
 			eCellField.append(
-				$("<input></input>")
+				$("&lt;input>&lt;/input>")
 					.attr("type", "checkbox")
 					.css("padding", "5px")
 			);
@@ -524,15 +552,15 @@ form.buildViewGrid = function(sTableName){
 
 		// selectbox
 
-		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){			
+		else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){			
 
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
 			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
-			var eSelectBox = $("<select></select>")
+			var eSelectBox = $("&lt;select>&lt;/select>")
 				.css("padding", "5px");
-			for (var i=0; i<aNewSelectBoxValues.length; i++){
+			for (var i=0; i&lt;aNewSelectBoxValues.length; i++){
 				eSelectBox.append(
-					$("<option></option>")
+					$("&lt;option>&lt;/option>")
 						.attr("value", aNewSelectBoxValues[i])
 						.text(aNewSelectBoxValues[i])
 				)
@@ -544,7 +572,7 @@ form.buildViewGrid = function(sTableName){
 
 		else {
 			eCellField.append(
-				$("<textarea></textarea>")
+				$("&lt;textarea>&lt;/textarea>")
 					.css("padding", "5px")
 			);
 		}
@@ -595,8 +623,8 @@ form.buildViewGrid = function(sTableName){
 		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
 		if (sBgColor == null) sBgColor = "#FFFFFF";
 
-		var mainListDiv = $("<div></div>").append(	$("<span></span>").css("font-weight", "bold").text(sListLabel) );
-		var listDiv = $("<div></div>")
+		var mainListDiv = $("&lt;div>&lt;/div>").append(	$("&lt;span>&lt;/span>").css("font-weight", "bold").text(sListLabel) );
+		var listDiv = $("&lt;div>&lt;/div>")
 			.addClass("formview_list")
 			.css("background-color", sBgColor)
 			.attr("id", sListId+"_div");
@@ -645,10 +673,10 @@ form.buildViewGrid = function(sTableName){
 
 		// build button
 
-		var customButton = $("<button>")
+		var customButton = $("&lt;button>")
 			.addClass("formview_button")
 			.append( 
-				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).text(sButtonName) 
+				$("&lt;span>&lt;/span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).text(sButtonName) 
 			)
 			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "blue") )
 			.attr("id", "form_button_"+sButtonId)
@@ -661,7 +689,7 @@ form.buildViewGrid = function(sTableName){
 				fnCallback(mt.getDataTableObjectOf(sTableName));
 			});
 		eFormParent.append(
-			$("<div></div>")
+			$("&lt;div>&lt;/div>")
 				.attr("id", "form_buttondiv_"+sButtonId)
 				.append(customButton)
 		);
@@ -688,7 +716,7 @@ form.buildViewGrid = function(sTableName){
 		iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
 		iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
 	}  
-	var buttondsDiv = $("<div></div>")
+	var buttondsDiv = $("&lt;div>&lt;/div>")
 		.attr("id", sTableName+"_formsbuttons")
 		.css("position", "absolute")
 		.css("left", iButtonDivLeft +"px")
@@ -698,13 +726,13 @@ form.buildViewGrid = function(sTableName){
 	// build a RESET button
 	// ------------------------------------
 
-	var formResetButton = $("<button>")
+	var formResetButton = $("&lt;button>")
 		.addClass("formview_button")
 		.append( 
-			$("<span></span>").css("color", "#000000").text(lang.undo) 
+			$("&lt;span>&lt;/span>").css("color", "#000000").text(lang.undo) 
 		)
 		.append( 
-			$("<span></span>").addClass(form.reset_button_icon_neutral) 
+			$("&lt;span>&lt;/span>").addClass(form.reset_button_icon_neutral) 
 		)
 		.css("background-color", form.reset_button_color_neutral)
 		.attr("id", "reset_button")
@@ -730,13 +758,13 @@ form.buildViewGrid = function(sTableName){
 	// build a SEND/VALIDATE button
 	// ------------------------------------
 
-	var formSendButton = $("<button>")
+	var formSendButton = $("&lt;button>")
 		.addClass("formview_button")
 		.append( 
-			$("<span></span>").css("color", "#000000").text(lang.save) 
+			$("&lt;span>&lt;/span>").css("color", "#000000").text(lang.save) 
 		)
 		.append( 
-			$("<span></span>").addClass(form.send_button_icon_neutral) 
+			$("&lt;span>&lt;/span>").addClass(form.send_button_icon_neutral) 
 		)
 		.css("background-color", form.send_button_color_neutral)
 		.attr("id", "send_button")		
@@ -760,7 +788,7 @@ form.buildViewGrid = function(sTableName){
 			for (var sListLabel in oLists){
 				var aRows = (lists.getSelectedRowsFromList(sListLabel)).nodes();
 				var nRow = aRows[0];
-				if (nRow != null && nRow.id != null){
+				if (nRow != null &amp;&amp; nRow.id != null){
 					aSelectedRowsInLists[sListLabel] = nRow.id;
 				}
 			}
@@ -1118,7 +1146,7 @@ form.manageViewGrid = function(sTableName){
 					.css("background-color", sBgColor)
 					.removeClass("modified");
 			}
-			else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
+			else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){
 
 					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" select")					
 						.val(sData)
@@ -1476,7 +1504,7 @@ form.addNewRows = function(oThisList, fnCallback){
 			var aValuesToAdd = new Array();
 
 			var oRowData = oTable.row( iRowNr ).data();		
-			for (var iColNr=0; iColNr<aAllColumns.length; iColNr++){
+			for (var iColNr=0; iColNr&lt;aAllColumns.length; iColNr++){
 
 				var sColName = aAllColumns[iColNr];
 				var sColValue = oRowData[iColNr];
@@ -1666,7 +1694,7 @@ form.removeRows = function(oThisList, fnCallback){
 
 		var aIdsToRemove = sIdsToRemove.split(",");
 		
-		for (var i=0; i<aIdsToRemove.length; i++){
+		for (var i=0; i&lt;aIdsToRemove.length; i++){
 
 			var sNodeId = aIdsToRemove[i];
 
@@ -1778,7 +1806,7 @@ form.resetSearchFields = function(sTableName){
 			eThisFormSearchBox
 				.css("background-color", eThisTableSearchBox.css("background-color"));
 		}
-		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){
+		else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){
 
 			var inputTag =  eThisTableSearchBox.find("select").eq(0);
 	
@@ -1862,7 +1890,7 @@ form.getTableOfForm = function(elem){
  */
 form.getConfigOfList = function(elem){
 
-	// list div has ID like 'formview_list_<LISTNAME>'
+	// list div has ID like 'formview_list_&lt;LISTNAME>'
 
 	// get the form table
 	// and retrieve its config
@@ -1905,12 +1933,12 @@ form.getListOfVisibleColumnsOf = function(sTableName){
 
 		// form cell must be visible, but is hidden according to table config: 
 		// add it to list of visible cells
-		if (bVisibility == true && iIndex < 0){
+		if (bVisibility == true &amp;&amp; iIndex &lt; 0){
 			aVisibleColumns.push(sCell);
 		}
 		// form cell must be hidden, but is visible according to table config: 
 		// remove it from the list of visible cells
-		else if (bVisibility == false && iIndex >= 0) {
+		else if (bVisibility == false &amp;&amp; iIndex >= 0) {
 			aVisibleColumns.splice(iIndex, 1);
 		}
 		
@@ -1936,7 +1964,7 @@ form.getListOfColumnsNiceNames = function(sSomeTable){
 	var aColsList = form.getListOfVisibleColumnsOf(sTableName);
 	
 	var aColsNiceNames = [];
-	for (var i=0; i<aColsList.length; i++){
+	for (var i=0; i&lt;aColsList.length; i++){
 		var sColName = aColsList[i];
 		var aColumnConfig =	conf.getColumnConfig(oTableConfig, sColName);
 		
@@ -1965,7 +1993,7 @@ form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
 	// if we want the current value IN THE UNDERLYING TABLE 
 	// represented by the form (which is not necessarily the value
 	// shown in the form, since that might be being edited)
-	if (bUnderlying != null && bUnderlying == true){
+	if (bUnderlying != null &amp;&amp; bUnderlying == true){
 
 		var sData;
 		// get the current row content
@@ -2024,8 +2052,8 @@ form.getNameOfCell = function(nCellValueNode){
  */
 form.isUnsaved = function(sTableName){
 	var eFormButtons = $("#"+sTableName+"_formsbuttons");
-	return ( eFormButtons.length>0 && 
-			eFormButtons.find("#send_button").length>0 && 
+	return ( eFormButtons.length>0 &amp;&amp; 
+			eFormButtons.find("#send_button").length>0 &amp;&amp; 
 			eFormButtons.find("#send_button").hasClass("payattention")
 	);
 };
@@ -2082,4 +2110,26 @@ form.getIndexOfColumnName = function(elem, sColumnName){
 };
 
 
-// --------------------------------------------------------------------
+// --------------------------------------------------------------------</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 
 
 
-jsdoc C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fn.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fx.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configurator.js C:\git_projects\Lexit\src\main\webapp\js\lexit.keys.js C:\git_projects\Lexit\src\main\webapp\js\lexit.multitables.js -d N:\databaseproject\Lex'it_API
+jsdoc C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fn.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configfunctions_fx.js C:\git_projects\Lexit\src\main\webapp\js\lexit.configurator.js C:\git_projects\Lexit\src\main\webapp\js\lexit.keys.js C:\git_projects\Lexit\src\main\webapp\js\lexit.multitables.js C:\git_projects\Lexit\src\main\webapp\js\lexit.lists.js C:\git_projects\Lexit\src\main\webapp\js\lexit.formview.js -d N:\databaseproject\Lex'it_API
 
 then copy content of N:\databaseproject\Lex'it_API
 to:

@@ -218,7 +218,7 @@ var oTableSettingsList_example = {
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Kolommen", zodat gebruiker de zichtbare kolommen kan kiezen 
+		 * @description toon/verberg knop "Kolommenselectie", zodat gebruiker de zichtbare kolommen kan kiezen 
 		 * (default: true)
 		 * */
 		"columns_button": true,
@@ -246,14 +246,14 @@ var oTableSettingsList_example = {
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Selectie" 
+		 * @description toon/verberg knop "Rijselectie" 
 		 * (default: true)
 		 * */
 		"selection_button": true,  
 		
 		/** 
 		 * @type {boolean} 
-		 * @description zet de knop "Selectie" alvast aan/uit 
+		 * @description zet de knop "Rijselectie" alvast aan/uit 
 		 * (default: false, d.w.z. Selectie-modus is UIT)
 		 * */
 		"selection_button_active": true,

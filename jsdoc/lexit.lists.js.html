@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lexit.lists.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lexit.lists.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * The lists namespace contains functions to build tables as part of a form.
  * 
  * A list is filled with the content of a table matching some values.
@@ -88,7 +116,7 @@ lists.buildLists = function(iListNr){
 		// get visible columns indexes for DataTable settings
 
 		var aIndexesOfVisibleColumns = new Array();
-		for (var i=0; i<aColumnsToDisplay.length; i++){
+		for (var i=0; i&lt;aColumnsToDisplay.length; i++){
 			
 			var iColIndex = $.inArray(aColumnsToDisplay[i], aAllColumns);
 			aIndexesOfVisibleColumns.push(iColIndex);
@@ -98,26 +126,26 @@ lists.buildLists = function(iListNr){
 		// build the table HTML
 
 		var sTableId = lists.buildListTableId(sFormId, sFormListLabel);
-		var eTable = $("<table></table>")
+		var eTable = $("&lt;table>&lt;/table>")
 			.attr("id", sTableId)
 			.addClass("display")
 			.css("width", "100%");
 
 		// THEAD
-		var eThead = $("<thead></thead>");
-		var eTheadTr = $("<tr></tr>");		
-		for (var i=0; i<aAllColumns.length; i++){	
+		var eThead = $("&lt;thead>&lt;/thead>");
+		var eTheadTr = $("&lt;tr>&lt;/tr>");		
+		for (var i=0; i&lt;aAllColumns.length; i++){	
 			eTheadTr.append(
-				$("<th></th>").text(aAllColumns[i])
+				$("&lt;th>&lt;/th>").text(aAllColumns[i])
 			);
 		}
 
 		// TBODY
-		var eTbody = $("<tbody></tbody>");
-		var eTbodyTr = $("<tr></tr>");
-		for (var i=0; i<aAllColumns.length; i++){	
+		var eTbody = $("&lt;tbody>&lt;/tbody>");
+		var eTbodyTr = $("&lt;tr>&lt;/tr>");
+		for (var i=0; i&lt;aAllColumns.length; i++){	
 			eTbodyTr.append(
-				$("<td></td>")
+				$("&lt;td>&lt;/td>")
 			);
 		}
 		
@@ -131,10 +159,10 @@ lists.buildLists = function(iListNr){
 
 			// add the buttons column
 			eTheadTr.append(
-				$("<th></th>").append(eElem) 
+				$("&lt;th>&lt;/th>").append(eElem) 
 			);
 			eTbodyTr.append(
-				$("<td></td>") 
+				$("&lt;td>&lt;/td>") 
 			);
 
 			// add buttons column to list of visible columns
@@ -208,7 +236,7 @@ lists.buildLists = function(iListNr){
 
 
 		// build following list
-		if (iListNr+1 < aAllLists.length){
+		if (iListNr+1 &lt; aAllLists.length){
 			lists.buildLists(iListNr+1);
 		}
 
@@ -263,7 +291,7 @@ lists.feedList = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
 					for (var sRowId in records){
 
 						var aRecord = [];
-						for (var i=0; i<aAllColumns.length; i++){	
+						for (var i=0; i&lt;aAllColumns.length; i++){	
 							
 							aRecord.push( records[sRowId][aAllColumns[i]] );
 						}
@@ -309,13 +337,13 @@ lists.addButtonsToRow = function(oButtons, aRecord){
 	if (oButtons != null){
 
 		if (oButtons["delete"]!=null){
-			aButtonContent.push("<img src='images/formlist_cross.png' class='delete'>");
+			aButtonContent.push("&lt;img src='images/formlist_cross.png' class='delete'>");
 		}
 		if (oButtons["show"]!=null){
-			aButtonContent.push("<img src='images/formlist_show.png' class='open'>");
+			aButtonContent.push("&lt;img src='images/formlist_show.png' class='open'>");
 		}
 		
-		var sButtonContent = "<center style='white-space: nowrap'>" + aButtonContent.join("<span>&nbsp;&nbsp;</span>") + "</center>";
+		var sButtonContent = "&lt;center style='white-space: nowrap'>" + aButtonContent.join("&lt;span>&amp;nbsp;&amp;nbsp;&lt;/span>") + "&lt;/center>";
 		aRecord.push(sButtonContent);
 		
 	}
@@ -325,7 +353,7 @@ lists.addButtonsToRow = function(oButtons, aRecord){
 
 lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 	
-	var eElem = $("<span>&nbsp;</span>");
+	var eElem = $("&lt;span>&amp;nbsp;&lt;/span>");
 
 	if (oButtons["add"] != null){
 
@@ -333,7 +361,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 
 		// buttons:	https://icons-for-free.com/add+to+photos+48px-131985225754447532/   
 		//			https://icons-for-free.com/add+character+increase+math+plus+sign+icon-1320184998988139546/
-		eElem = $("<img>")
+		eElem = $("&lt;img>")
 			.attr("src", "images/formlist_add.png") 
 			.addClass("add")
 			.click(function(){
@@ -378,7 +406,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 									var oSelectedRow = lists.getSelectedRowsFromList(sListToRead);
 									var iRowNumber = $(oSelectedRow.nodes()).index();
 									// read value from that row
-									if (iRowNumber < 0){
+									if (iRowNumber &lt; 0){
 										fn.message(lang.beware, (lang.formlist_select_a_row_first).replace(/LISTNAME/, sListToRead));
 										return true;
 									}
@@ -417,7 +445,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 
 						// build record to insert
 						var aRecord = new Array();
-						for (var j=0; j<aAllColumns.length; j++){
+						for (var j=0; j&lt;aAllColumns.length; j++){
 
 							var sColumnName = aAllColumns[j];
 							var valToAssign = resp[sColumnName];
@@ -615,7 +643,7 @@ lists.getDataTableOrder = function(aColumns, oSortSettings){
 
 	var aDataTableOrder = 	new Array();	
 	
-	for (var i=0; i<aColumns.length; i++){
+	for (var i=0; i&lt;aColumns.length; i++){
 
 		// get column index, given the column name
 		var sColName = aColumns[i];		
@@ -835,7 +863,7 @@ lists.clickOpenInList = function(sListLabel){
 // --------------------------------------------------------------------
 // the table of a list has an id like:
 //
-// 			'<FORM_ID>___<LISTLABEL>'
+// 			'&lt;FORM_ID>___&lt;LISTLABEL>'
 //
 
 /**
@@ -878,3 +906,26 @@ lists.getDivIdOfList = function(elem){
 
 
 
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
