@@ -1031,17 +1031,24 @@ fx.removeFromTableGivenARow = function(oRow, fnCallback, fnErrorHandler){
  * @returns {Boolean} true if the object is an API instance, otherwise false
  */
 fx.isApiInstance = function(obj){
-	
-	// if the obj is NOT an API instance, calling a typical API function will cause an error,
-	// which we will catch so as to return false to the test!
+
 	try {
-		var test = obj.page.info();
+		return (obj instanceof $.fn.dataTable.Api);
 	}
 	catch (err){
-		return false;
+	 	return false;
 	}
+
+	// // if the obj is NOT an API instance, calling a typical API function will cause an error,
+	// // which we will catch so as to return false to the test!
+	// try {
+	// 	var test = obj.page.info();
+	// }
+	// catch (err){
+	// 	return false;
+	// }
 	
-	return true;
+	// return true;
 }
 
 /**
