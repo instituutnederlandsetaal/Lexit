@@ -235,12 +235,12 @@ lang.helpText =
 				
 				"<div id='tabs-1'>" +
 				"<TABLE>"+
-				"<TR>"+
+				"<TR class='tabs-1-reset'>"+
 				"<TD><span class='ui-icon ui-icon-home'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Reset</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-reset'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -248,12 +248,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-refresh'>"+
 				"<TD><span class='ui-icon ui-icon-refresh'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Ververs</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-refresh'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -263,12 +263,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-search'>"+
 				"<TD><span class='ui-icon ui-icon-search'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Zoeken en bewerken</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-search'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -280,12 +280,12 @@ lang.helpText =
 				"<BR><BR></TD>" +
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-goto'>"+
 				"<TD><span class='ui-icon ui-icon-circle-arrow-e'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Ga naar</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-goto'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -303,12 +303,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-rowselect'>"+
 				"<TD><span class='ui-icon ui-icon-pin-s'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Rijselectie</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-rowselect'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -321,12 +321,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-undo'>"+
 				"<TD><span class='ui-icon ui-icon-arrowreturnthick-1-w'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Undo</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-undo'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -336,12 +336,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-colselect'>"+
 				"<TD><span class='ui-icon ui-icon-wrench'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Kolommenselectie</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-colselect'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -352,12 +352,12 @@ lang.helpText =
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-viewmode'>"+
 				"<TD><span class='ui-icon ui-icon-image'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Weergavemodus</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-viewmode'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -852,12 +852,12 @@ lang.setLanguage = function(sLanguageCode){
 				
 				"<div id='tabs-1'>" +
 				"<TABLE>"+
-				"<TR>"+
+				"<TR class='tabs-1-reset'>"+
 				"<TD><span class='ui-icon ui-icon-home'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Reset</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-reset'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -865,12 +865,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-refresh'>"+
 				"<TD><span class='ui-icon ui-icon-refresh'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Refresh</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-refresh'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -879,12 +879,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-search'>"+
 				"<TD><span class='ui-icon ui-icon-search'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Search & Replace</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-search'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -893,12 +893,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>" +
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-goto'>"+
 				"<TD><span class='ui-icon ui-icon-circle-arrow-e'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Go to</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-goto'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -909,12 +909,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-rowselect'>"+
 				"<TD><span class='ui-icon ui-icon-pin-s'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Row selection</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-rowselect'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -923,12 +923,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-undo'>"+
 				"<TD><span class='ui-icon ui-icon-arrowreturnthick-1-w'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Undo</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-undo'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -937,12 +937,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-colselect'>"+
 				"<TD><span class='ui-icon ui-icon-wrench'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>Columns selection</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-colselect'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +
@@ -951,12 +951,12 @@ lang.setLanguage = function(sLanguageCode){
 				"<BR><BR></TD>"+
 				"</TR>"+
 				
-				"<TR>"+
+				"<TR class='tabs-1-viewmode'>"+
 				"<TD><span class='ui-icon ui-icon-image'></span></TD>"+
 				"<TD>&nbsp;&nbsp;</TD>"+
 				"<TD><B>View mode</B></TD>"+
 				"</TR>" +
-				"<TR>"+
+				"<TR class='tabs-1-viewmode'>"+
 				"<TD></TD>" +
 				"<TD></TD>" +
 				"<TD>" +

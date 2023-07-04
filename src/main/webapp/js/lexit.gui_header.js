@@ -950,7 +950,22 @@ head.putHelpButton = function(sSomeTablename){
 		.attr("title", lang.help_button).addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){
+
+			// detect which buttons are visible at the moment, 
+			// so as to be able to filter out the help sections about buttons that are switched off by configuration
+			// (we won't read the config, since buttons can be hidden by other means than config settings)
 			
+			var nTable = $(this).closest("div.dataTables_wrapper");
+			var sTableName = $(nTable).attr("id").replace(/_wrapper/, "");
+
+			var bResetButton = 		$(nTable).find("div#"+sTableName+"_resetbutton").length > 0;			
+			var bRefreshButton =	$(nTable).find("div#"+sTableName+"_refreshbutton").length > 0;
+			var bReplaceButton = 	$(nTable).find("div#"+sTableName+"_searchandreplacebutton").length > 0;
+			var bGotoButton = 		$(nTable).find("div#"+sTableName+"_goto_button").length > 0;
+			var bRowSelect =		$(nTable).find("button#selectionbutton").length > 0;
+			var bUndoButton = 		$(nTable).find("div#"+sTableName+"_undo_button_div").length > 0;
+			var bColSelect =		$(nTable).find("div#"+sTableName+"_colselect_button").length > 0;
+			var bViewMode = 		$(nTable).find("div#"+sTableName+"_viewtypebutton").length > 0;
 			
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
@@ -968,7 +983,17 @@ head.putHelpButton = function(sSomeTablename){
 			$("#"+helpDivId).dialog({
 				open: function( event, ui ){
 					$(".ui-dialog").addClass("ui-dialog-shadow");
-		        	$( this ).closest(".ui-dialog").putInFront();
+					$( this ).closest(".ui-dialog").putInFront();
+					
+					// hide button help for buttons that are hidden by config
+					if (!bResetButton) $('.tabs-1-reset').css("display", "none");
+					if (!bRefreshButton) $('.tabs-1-refresh').css("display", "none");
+					if (!bReplaceButton) $('.tabs-1-search').css("display", "none");
+					if (!bGotoButton) $('.tabs-1-goto').css("display", "none");
+					if (!bRowSelect) $('.tabs-1-rowselect').css("display", "none");
+					if (!bUndoButton) $('.tabs-1-undo').css("display", "none");
+					if (!bColSelect) $('.tabs-1-colselect').css("display", "none");
+					if (!bViewMode) $('.tabs-1-viewmode').css("display", "none");
 		        },
 		        close: function(event, ui){
 		        	$( this ).remove();
