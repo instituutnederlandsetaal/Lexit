@@ -1021,10 +1021,12 @@ head.putTableCloseButton = function(sSomeTablename){
 	
 	var tableCloseButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#DF3A01")		
+		.css("background-color", "#FF8585")  //"#DF3A01")		
 		.css("font-weight", "bold")
 		.css("font-size", "7pt")
 		.css("margin-right", "10px")
+		.css("-webkit-border-radius", "15px")
+		.css("-moz-border-radius", "15px")
 		.append($("<span></span>").addClass("ui-icon ui-icon-closethick"))
 		.bind("click", function(){
 			
