@@ -228,7 +228,7 @@ lang.helpText =
 				"<li><a href='#tabs-1'>Overzicht van de knoppen</a></li>"+
 				"<li><a href='#tabs-2'>Zoeken</a></li>"+
 				"<li><a href='#tabs-5'>Sorteren</a></li>"+
-				"<li><a href='#tabs-3'>Bewerken</a></li>"+
+				"<li><a href='#tabs-3'>Bewerken</a></li>"+		// beware when changing tabs-numbering: it's been referred to the '#tabs-XXX' part elsewhere in the Lex'it JS-code
 				"<li><a href='#tabs-4'>Sneltoetsen</a></li>"+				
 				"<li><a href='#tabs-info'>Info</a></li>"+
 				"</ul>" +
@@ -845,7 +845,7 @@ lang.setLanguage = function(sLanguageCode){
 				"<li><a href='#tabs-1'>Button overview</a></li>"+
 				"<li><a href='#tabs-2'>Searching</a></li>"+
 				"<li><a href='#tabs-5'>Sorting</a></li>"+
-				"<li><a href='#tabs-3'>Editing</a></li>"+
+				"<li><a href='#tabs-3'>Editing</a></li>"+	// beware when changing tabs-numbering: it's been referred to the '#tabs-XXX' part elsewhere in the Lex'it JS-code
 				"<li><a href='#tabs-4'>Hotkeys </a></li>"+				
 				"<li><a href='#tabs-info'>Info</a></li>"+
 				"</ul>" +

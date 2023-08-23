@@ -966,6 +966,9 @@ head.putHelpButton = function(sSomeTablename){
 			var bUndoButton = 		$(nTable).find("div#"+sTableName+"_undo_button_div").length > 0;
 			var bColSelect =		$(nTable).find("div#"+sTableName+"_colselect_button").length > 0;
 			var bViewMode = 		$(nTable).find("div#"+sTableName+"_viewtypebutton").length > 0;
+
+			// is the table editable? (if not, the 'Edit' tab must we hidden)
+			var bTableEditable = 	fn.tableIsEditable(sTableName);
 			
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
@@ -994,6 +997,9 @@ head.putHelpButton = function(sSomeTablename){
 					if (!bUndoButton) $('.tabs-1-undo').css("display", "none");
 					if (!bColSelect) $('.tabs-1-colselect').css("display", "none");
 					if (!bViewMode) $('.tabs-1-viewmode').css("display", "none");
+
+					// hide 'Editing' tab if the table isn't editable at all
+					if (!bTableEditable) $('[href="#tabs-3"]').closest('li').hide();
 		        },
 		        close: function(event, ui){
 		        	$( this ).remove();

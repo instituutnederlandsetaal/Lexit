@@ -4,7 +4,24 @@
 
 var sf = {};
 
+// --------------------------------------------------
+//
+// Content of this name space:
+//
+// GO-TO FUNCTION
+// ENABLE SEARCH
+// CLEAR SEARCH
+// START SEARCH
+// HELP FUNCTIONS for reading or setting values the right way, etc
+// QUERY BUILDER
+//
+// --------------------------------------------------
 
+
+
+// ========================================================================================
+// GO-TO FUNCTION
+// ========================================================================================
 
 // given some term in a search box, 
 // find the page on which this term is to be found and display it
@@ -174,36 +191,35 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 	
 	var url = WEBSERV_URL+"/table/get_row_number";
 	
-	$.ajax(
-			{
-				type: "GET",
-				url: url,
-				data: {
-					"db_name": getHttpParams().get("db"),
-					"table_name": sSomeTablename, 
-					"column_name": sColumnName,
-					"column_value": sColumnValue,
-					"occurence_nr": mt.getOccurenceNr(sSomeTablename),
-					"sort_columns": aSortColumns.join(","),
-					"sort_directions": aSortDirections.join(","),
-					"filter_column_names": filterColumnNames.join(ARG_INTERNAL_SEPARATOR),
-					"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR),
-					"display_length": fn.getCurrentDisplayLength(sSomeTablename)
-					
-				},
-				dataType: "xml",
-				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-				success: function(xml) {
-					fn.closeDialog(); // close automatically the GoTo message about building an index
-					gui.removeProcessingMsg(sSomeTablename);
-					sf.goToPageGiveXmlResponse(xml, sSomeTablename);
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					fn.closeDialog(); // close automatically the GoTo message about building an index
-					gui.removeProcessingMsg(sSomeTablename);
-					fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", lang.loading_xml_failed+": "+textStatus+" "+errorThrown);
-				}
-			});
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"db_name": getHttpParams().get("db"),
+			"table_name": sSomeTablename, 
+			"column_name": sColumnName,
+			"column_value": sColumnValue,
+			"occurence_nr": mt.getOccurenceNr(sSomeTablename),
+			"sort_columns": aSortColumns.join(","),
+			"sort_directions": aSortDirections.join(","),
+			"filter_column_names": filterColumnNames.join(ARG_INTERNAL_SEPARATOR),
+			"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR),
+			"display_length": fn.getCurrentDisplayLength(sSomeTablename)
+			
+		},
+		dataType: "xml",
+		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		success: function(xml) {
+			fn.closeDialog(); // close automatically the GoTo message about building an index
+			gui.removeProcessingMsg(sSomeTablename);
+			sf.goToPageGiveXmlResponse(xml, sSomeTablename);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			fn.closeDialog(); // close automatically the GoTo message about building an index
+			gui.removeProcessingMsg(sSomeTablename);
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", lang.loading_xml_failed+": "+textStatus+" "+errorThrown);
+		}
+	});
 };
 
 
@@ -245,8 +261,7 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 	
 	
 	// slow implementation (when no PK available)
-	else
-		{
+	else {
 		var iRowNumber = parseInt(sServerResponse);
 		
 		// if a 'next' occurence has been searched for, but it returned the 1st page of the table,
@@ -255,19 +270,23 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 		if (	iRowNumber < fn.getCurrentDisplayLength(sSomeTablename) // result is page 1 
 				&& 
 				mt.getOccurenceNr(sSomeTablename) > 0 // it was not the first call
-			)
-			{
+			) {
 			// reset GoTo memory, so we won't keep requesting 'next' occurences
 			mt.resetGoToMemoryForTable(sSomeTablename);
-			}
+		}
 		
 		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
-		}
+	}
 	
 };
 
 
 
+
+
+// ========================================================================================
+// ENABLE SEARCH
+// ========================================================================================
 
 // enable the search fields (normally called only at initialisation, or at each draw in 'optimal mode')
 // job: 
@@ -389,32 +408,28 @@ sf.enableSearchFields = function(someTablename){
 		var inputTag;
 		
 		// 1. selection box
-		if (isASelectBox)
-			{
+		if (isASelectBox) {
 			// We have two possible selection box types
 			//    [1] set in client configuration (conf.getSelectionBox)
 			var aListOfOptions = aColumnSelectionBox;
 			// or [2] set in Postgres database (Postgres ENUM type)
-			if (aColumnSelectionBox == null)
-				{
+			if (aColumnSelectionBox == null) {
 				aListOfOptions = cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(someTablename)[i]);
 				
 				// empty value as neutral choice
 				aListOfOptions.unshift("");
-				}
+			}
 			
 			// add 'ALLES' value to be able to choose everything except neutral value(s)
 			var sAllOptions = "";
 			var aAllAllowedValues = new Array(); 
-			for (var j=0; j<aListOfOptions.length; j++)
-				{
-				if (aListOfOptions[j] != '' && aListOfOptions[j] != '-')
-					{
+			for (var j=0; j<aListOfOptions.length; j++) {
+				if (aListOfOptions[j] != '' && aListOfOptions[j] != '-') {
 					// don't forget to escape the regex chars, otherwise choosing the ALLES option
 					// will sometimes not give the expected results
 					aAllAllowedValues.push( escapeRegexChars(aListOfOptions[j]) );						
-					}
 				}
+			}
 			sAllOptions = "^("+aAllAllowedValues.join("|")+")$";
 			
 			// build select tag
@@ -422,49 +437,51 @@ sf.enableSearchFields = function(someTablename){
 				.attr("disabled", !columnSearchable);
 			
 			inputTag.append(
-					$("<option></option>")
-						.attr("value", aListOfOptions[0] )
-						.text( lang.choose )
-				);
-			for (var j=1; j<aListOfOptions.length; j++)
-				{
+				$("<option></option>")
+					.attr("value", aListOfOptions[0] )
+					.text( lang.choose )
+			);
+			for (var j=1; j<aListOfOptions.length; j++) {
 				var sLabel = aListOfOptions[j];
 				if (typeof aColumnSelectionLabels != 'undefined' && aColumnSelectionLabels != null && typeof aColumnSelectionLabels[ aListOfOptions[j] ] != 'undefined')
 					sLabel = aColumnSelectionLabels[ aListOfOptions[j] ];
+				
+				// escape regex chars in select values, otherwise those values will be interpreted as regexes
+				// (the escape is undone when reading the selected value by fn.getValueOfFilterBox() )
+				var sThisValue = fn.escapeRegexChars( aListOfOptions[j] );
+				sThisValue = sThisValue.replaceAll("\\\|", "|"); // exception to the rule (we alle regex pipes in select-values, so as to be able to query for alternative values in one single query)
+
 				inputTag.append(
-						$("<option></option>")							
-							.attr("value", aListOfOptions[j] )
-							.text( sLabel )
-					);
-				}
-			// finally add the 'ALLES' option
-			if (sAllOptions != null)
-				{
-				inputTag.append(
-						$("<option></option>")							
-							.attr("value", sAllOptions )
-							.text( lang.EVERYTHING )
-					);
-				}
-			
+					$("<option></option>")							
+						.attr("value", sThisValue) 	 
+						.text( sLabel )
+				);
 			}
+			// finally add the 'ALLES' option
+			if (sAllOptions != null) {
+				inputTag.append(
+					$("<option></option>")							
+						.attr("value", sAllOptions )
+						.text( lang.EVERYTHING )
+				);
+			}
+			
+		}
 		
 		// 2. checkbox
-		else if (isACheckBox)
-			{
+		else if (isACheckBox) {
 			inputTag = $("<input/>")
 				.attr("type", "checkbox")
 				.attr("disabled", !columnSearchable)
 				.attr("title", lang.neutral)
 				.attr("cycle_value", 0);
-			}
+		}
 		
 		// 3. text field
-		else
-			{
+		else {
 			inputTag = $("<input/>")
 				.attr("disabled", !columnSearchable);			
-			}
+		}
 		
 
 		
@@ -494,31 +511,27 @@ sf.enableSearchFields = function(someTablename){
 		inputTag.val(sStartValueOfThisColumn);		
 		
 		// for selection box
-		if (isASelectBox)
-			{			
+		if (isASelectBox) {			
 			inputTag.val(sStartValueOfThisColumn);
-			}
+		}
 		
 		// for checkboxes, we also need to (un)check the checkbox
-		if (isACheckBox)
-			{
+		if (isACheckBox) {
+
 			var iCycleValue;
-			if (sStartValueOfThisColumn == '')
-				{
+			if (sStartValueOfThisColumn == '') {
 				iCycleValue = 0;
-				}
-			else if (sf.isCheckboxTrueValue(sStartValueOfThisColumn))
-				{
+			}
+			else if (sf.isCheckboxTrueValue(sStartValueOfThisColumn)) {
 				iCycleValue = 1;
 				inputTag.prop("checked", "checked");
-				}
-			else if (sf.isCheckboxFalseValue(sStartValueOfThisColumn))
-				{
+			}
+			else if (sf.isCheckboxFalseValue(sStartValueOfThisColumn)) {
 				iCycleValue = 2;
-				}
+			}
 
 			sf.setCheckboxRight(sCurrentSearchBoxDiv, iCycleValue);	
-			}
+		}
 			
 	});
 	
@@ -553,8 +566,8 @@ sf.enableSearchFields = function(someTablename){
 		var isASelectBox = aColumnSelectionBox != null || mt.getListOfTypesOfVisibleColumnsOf(someTablename)[i]==USER_DEFINED;
 		
 		// add click event for checkbox filters
-		if (isACheckBox)
-			{
+		if (isACheckBox) {
+
 			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes td:eq("+i+")");
 			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes td:eq("+i+")", function(){				
 				
@@ -582,10 +595,10 @@ sf.enableSearchFields = function(someTablename){
 				
 				});
 			
-			}
+		}
 		// add change event for selection box filters
-		else if (isASelectBox)
-			{
+		else if (isASelectBox) {
+
 			$("#"+someTablename+"_dynamic").off('change', "#"+someTablename+"_searchboxes td:eq("+i+") select");
 			$("#"+someTablename+"_dynamic").on('change', "#"+someTablename+"_searchboxes td:eq("+i+") select", function(){
 				
@@ -601,9 +614,9 @@ sf.enableSearchFields = function(someTablename){
 				mt.getDataTableObjectOf(someTablename).column(iTrueIndex).search($(this).val()).draw();
 				
 				});				
-			}
-		else 
-			{
+		}
+		else {
+
 			$("#"+someTablename+"_dynamic").off('click', "#"+someTablename+"_searchboxes td:eq("+i+")");
 			$("#"+someTablename+"_dynamic").on('click', "#"+someTablename+"_searchboxes td:eq("+i+")", function(){
 				
@@ -611,13 +624,12 @@ sf.enableSearchFields = function(someTablename){
 				mt.rememberLastSearchBoxClickUpon(someTablename, i);
 				
 				// special: ctrl+click on text search box to call query builder
-				if(kf._getPressedKey() == 'ctrl')
-					{
+				if(kf._getPressedKey() == 'ctrl') {
 					sf.getQueryBuilder(someTablename, sCurrentColumnName);					
-					}				
-				});
+				}				
+			});
 			
-			}
+		}
 		
 	});
 
@@ -627,141 +639,13 @@ sf.enableSearchFields = function(someTablename){
 
 
 
-// make sure the current filter values are visible in all search boxes
-sf.putCurrentValueInAllSearchBoxes = function(sTablename){
-	
-	// get the table filters settings
-	var oFilterSettings = mt.getDataTableObjectOf(sTablename).getSearchFilters();
-	var oTableConfig = conf.getTableConfig(sTablename);
-	
-	// process each visible column
-	$("#"+sTablename+"_searchboxes td").each(function(i){
-		
-		// get column name and config
-		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sTablename)[i];
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCurrentColumnName);
-		
-		// get the current filter setting		
-		var sCurrentValueOfThisColumn = "";
-		if (oFilterSettings[sCurrentColumnName] != null)
-			sCurrentValueOfThisColumn = oFilterSettings[sCurrentColumnName];
-				
-		// do we have a selection box?
-		var aColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
-		
-		// if we have a checkbox column, we need checkbox-filters!
-		var eColumnNameSelector = $('#'+sTablename+' thead th').eq(i);
-		var isACheckBox = (eColumnNameSelector.hasClass("editable_checkbox") || eColumnNameSelector.hasClass("not_editable_checkbox"));		
-		// or do we have a selectbox?
-		var isASelectBox = aColumnSelectionBox != null || mt.getListOfTypesOfVisibleColumnsOf(sTablename)[i]==USER_DEFINED;
-		
-		
-		
-		// what kind of filter should we have?
-		var inputTag;
-		
-		// 1. selection box
-		if (isASelectBox)
-			{
-			inputTag =  $(this).find("select").eq(0);
-			inputTag.val(sCurrentValueOfThisColumn);			
-			}	
-		
-		
-		// 2. checkbox
-		else if (isACheckBox)
-			{
-			inputTag = $(this).find("input").eq(0);
-			
-			var iCycleValue;
-			if (sCurrentValueOfThisColumn == '')
-				{
-				iCycleValue = 0;
-				}
-			else
-				{
-				iCycleValue = inputTag.attr("cycle_value");
-				}			
-			sf.setCheckboxRight($(this), iCycleValue);			
-			if (sf.isCheckboxTrueValue(sCurrentValueOfThisColumn))
-				inputTag.prop("checked", "checked");
-			}
-		
-		// 3. text field
-		else
-			{
-			inputTag = $(this).find("input").eq(0);
-			
-			// insert the value only if the field is empty
-			// (this is a hack, to be able to have the searchbox keep its search value even after a refresh:
-			//  the reason we need that, is that we sometimes want to call 'go-to' some more times without having
-			//  to type the search value over and over again!)
-			if (inputTag.val() == '')
-				inputTag.val(sCurrentValueOfThisColumn);
-			}
-	});
-	
-};
 
 
 
-// give the checkbox filter the right color etc., 
-// so as to make the filter setting visible to the user
 
-sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
-
-	// checkboxes have a cycle value 
-	// values of several settings depend on the phase in the cycle (0 to 2)
-	// we have three possible settings, following each other in a cycle
-	//  0: unchecked  -> no value
-	//  1: checked    -> true
-	//  2: unchecked  -> false
-	//
-	// BEWARE: keep this IN the function (not outside), otherwise
-	// the code will be executed before setLanguge can bet called,
-	// causing checkboxes to keep default tooltip, instead of in the
-	// chosen language
-	var aCheckboxBackgroundColors =	["#FFFFFF",	"#D8F6CE",	"#F5A9A9"];
-	var aCheckboxCheckvalue =     	["",		"1",		"0"];
-	var aCheckboxCheckvalueTitle =	[lang.neutral,lang.on,  lang.off];
-	var aCheckboxVisibleSetting = 	[false,  	true,		false];
-	
-	var inputTag = sSearchBoxesDiv.find("input").eq(0);
-	
-	inputTag.attr("cycle_value", iCycleValue);
-		
-	// set value of the filter depending on the checkbox being checked/unchecked
-	
-	// put the right color, to make the true checkbox value visible
-	// since 'false' and 'no value' would otherwise look the same (unchecked)
-	sSearchBoxesDiv.css("background-color", aCheckboxBackgroundColors[iCycleValue]);
-	inputTag.attr("title", aCheckboxCheckvalueTitle[iCycleValue]);
-	
-	// the value of the checkbox needs to be set (doesn't happen upon checking the box!)
-	inputTag.val( aCheckboxCheckvalue[iCycleValue] );
-	
-	// check or uncheck the checkbox (visible)
-	inputTag.prop("checked", aCheckboxVisibleSetting[iCycleValue]);
-	
-};
-
-// the value that should be given to a checkbox filter depends
-// on the column datatype (boolean or something else)
-// here we compute the right value according to the cycle value of the checkbox (neutral, on, off)
-sf.buildCorrectCheckboxFilterValue = function(sTablename, sVisibleColumnNumber, iCycleValue){
-	
-	// what is required data type here?
-	// we need to know that to be able to set the checkbox value properly
-	var bIsBooleanType = mt.getListOfTypesOfVisibleColumnsOf(sTablename)[sVisibleColumnNumber] == "boolean";
-	var trueValue = bIsBooleanType ? true : 1;
-	var falseValue = bIsBooleanType ? false : 0;
-	
-	var aCheckboxFilterValue = ["", trueValue, falseValue];
-	return aCheckboxFilterValue[iCycleValue];
-};
-
-
-
+// ========================================================================================
+// CLEAR SEARCH
+// ========================================================================================
 
 
 // clear all column filters
@@ -811,6 +695,11 @@ sf.clearSearchField = function(someTablename){
 };
 		
 		
+
+
+// ========================================================================================
+// START SEARCH
+// ========================================================================================
 
 // start search in whole table (input is main search field)
 
@@ -869,19 +758,17 @@ sf.startMultiColumnSearch = function(someTablename){
 		
 		// ** TEXT or SELECT filter **
 		// Filter on the column if string non empty 
-		if (!isACheckBox && jQuery.trim(oneSearchBoxValue)!='')
-			{
+		if (!isACheckBox && jQuery.trim(oneSearchBoxValue)!='') {
 			// get the true index (we want the index in all column, not the index in visible columns)
 			var iTrueIndex = $.inArray(mt.getListOfVisibleColumnsOf(someTablename)[i], mt.getListOfColumnsOf(someTablename));
 			
 			// set the filter, with the correct column index			
 			mt.getDataTableObjectOf(someTablename).column(iTrueIndex).search(oneSearchBoxValue);
-			}
+		}
 		
 		// ** CHECKBOX filter **
 		// Filter on the column if it is a checkbox and it has a filter value activated (colored)
-		if (isACheckBox)
-			{
+		if (isACheckBox) {
 			var bIsBooleanType = mt.getListOfTypesOfVisibleColumnsOf(someTablename)[i] == "boolean";
 			var trueValue = bIsBooleanType ? true : 1;
 			var falseValue = bIsBooleanType ? false : 0;
@@ -894,8 +781,7 @@ sf.startMultiColumnSearch = function(someTablename){
 			// if the checkbox has no value, empty the filter
 			else
 				mt.getDataTableObjectOf(someTablename).column(iTrueIndex).search("");
-			}
-		
+		}		
 			
 	});
 	
@@ -903,6 +789,146 @@ sf.startMultiColumnSearch = function(someTablename){
 	
 	// start search with collected multi-column filters
 	mt.getDataTableObjectOf(someTablename).draw();
+};
+
+
+
+
+// ========================================================================================
+// HELP FUNCTIONS
+// for reading or setting values the right way, etc
+// ========================================================================================
+
+
+
+// make sure the current filter values are visible in all search boxes
+sf.putCurrentValueInAllSearchBoxes = function(sTablename){
+	
+	// get the table filters settings
+	var oFilterSettings = mt.getDataTableObjectOf(sTablename).getSearchFilters();
+	var oTableConfig = conf.getTableConfig(sTablename);
+	
+	// process each visible column
+	$("#"+sTablename+"_searchboxes td").each(function(i){
+		
+		// get column name and config
+		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sTablename)[i];
+		var oColumnConfig = conf.getColumnConfig(oTableConfig, sCurrentColumnName);
+		
+		// get the current filter setting		
+		var sCurrentValueOfThisColumn = "";
+		if (oFilterSettings[sCurrentColumnName] != null)
+			sCurrentValueOfThisColumn = oFilterSettings[sCurrentColumnName];
+				
+		// do we have a selection box?
+		var aColumnSelectionBox = conf.getSelectionBox(oColumnConfig);
+		
+		// if we have a checkbox column, we need checkbox-filters!
+		var eColumnNameSelector = $('#'+sTablename+' thead th').eq(i);
+		var isACheckBox = (eColumnNameSelector.hasClass("editable_checkbox") || eColumnNameSelector.hasClass("not_editable_checkbox"));		
+		// or do we have a selectbox?
+		var isASelectBox = aColumnSelectionBox != null || mt.getListOfTypesOfVisibleColumnsOf(sTablename)[i]==USER_DEFINED;
+		
+		
+		
+		// what kind of filter should we have?
+		var inputTag;
+		
+		// 1. selection box
+		if (isASelectBox) {
+			inputTag =  $(this).find("select").eq(0);
+			inputTag.val(sCurrentValueOfThisColumn);			
+		}	
+		
+		
+		// 2. checkbox
+		else if (isACheckBox) {
+			inputTag = $(this).find("input").eq(0);
+			
+			var iCycleValue;
+			if (sCurrentValueOfThisColumn == '') {
+				iCycleValue = 0;
+			}
+			else {
+				iCycleValue = inputTag.attr("cycle_value");
+			}			
+			sf.setCheckboxRight($(this), iCycleValue);			
+			if (sf.isCheckboxTrueValue(sCurrentValueOfThisColumn))
+				inputTag.prop("checked", "checked");
+		}
+		
+		// 3. text field
+		else {
+			inputTag = $(this).find("input").eq(0);
+			
+			// insert the value only if the field is empty
+			// (this is a hack, to be able to have the searchbox keep its search value even after a refresh:
+			//  the reason we need that, is that we sometimes want to call 'go-to' some more times without having
+			//  to type the search value over and over again!)
+			if (inputTag.val() == '')
+				inputTag.val(sCurrentValueOfThisColumn);
+		}
+	});
+	
+};
+
+
+
+
+// give the checkbox filter the right color etc., 
+// so as to make the filter setting visible to the user
+
+sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
+
+	// checkboxes have a cycle value 
+	// values of several settings depend on the phase in the cycle (0 to 2)
+	// we have three possible settings, following each other in a cycle
+	//  0: unchecked  -> no value
+	//  1: checked    -> true
+	//  2: unchecked  -> false
+	//
+	// BEWARE: keep this IN the function (not outside), otherwise
+	// the code will be executed before setLanguge can bet called,
+	// causing checkboxes to keep default tooltip, instead of in the
+	// chosen language
+	var aCheckboxBackgroundColors =	["#FFFFFF",	"#D8F6CE",	"#F5A9A9"];
+	var aCheckboxCheckvalue =     	["",		"1",		"0"];
+	var aCheckboxCheckvalueTitle =	[lang.neutral,lang.on,  lang.off];
+	var aCheckboxVisibleSetting = 	[false,  	true,		false];
+	
+	var inputTag = sSearchBoxesDiv.find("input").eq(0);
+	
+	inputTag.attr("cycle_value", iCycleValue);
+		
+	// set value of the filter depending on the checkbox being checked/unchecked
+	
+	// put the right color, to make the true checkbox value visible
+	// since 'false' and 'no value' would otherwise look the same (unchecked)
+	sSearchBoxesDiv.css("background-color", aCheckboxBackgroundColors[iCycleValue]);
+	inputTag.attr("title", aCheckboxCheckvalueTitle[iCycleValue]);
+	
+	// the value of the checkbox needs to be set (doesn't happen upon checking the box!)
+	inputTag.val( aCheckboxCheckvalue[iCycleValue] );
+	
+	// check or uncheck the checkbox (visible)
+	inputTag.prop("checked", aCheckboxVisibleSetting[iCycleValue]);
+	
+};
+
+
+// the value that should be given to a checkbox filter depends
+// on the column datatype (boolean or something else)
+// here we compute the right value according to the cycle value of the checkbox (neutral, on, off)
+sf.buildCorrectCheckboxFilterValue = function(sTablename, sVisibleColumnNumber, iCycleValue){
+	
+	// what is required data type here?
+	// we need to know that to be able to set the checkbox value properly
+	var bIsBooleanType = mt.getListOfTypesOfVisibleColumnsOf(sTablename)[sVisibleColumnNumber] == "boolean";
+	var trueValue = bIsBooleanType ? true : 1;
+	var falseValue = bIsBooleanType ? false : 0;
+	
+	var aCheckboxFilterValue = ["", trueValue, falseValue];
+	return aCheckboxFilterValue[iCycleValue];
 };
 
 
@@ -951,6 +977,11 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	
 	return sValue;
 };
+
+
+// ========================================================================================
+// QUERY BUILDER
+// ========================================================================================
 
 
 // generate query builder

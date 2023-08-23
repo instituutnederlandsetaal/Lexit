@@ -261,7 +261,11 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 
 			// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
 			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
-				return e.text == sSelectedValueInUnderlyingTable
+
+				return e.text 
+					== 
+					sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
+
 			}).attr("selected", "selected");
 		}
 
@@ -540,6 +544,7 @@ form.buildViewGrid = function(sTableName){
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
 			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
 			var eSelectBox = $("<select></select>")
+				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
 				.css("padding", "5px");
 			for (var i=0; i<aNewSelectBoxValues.length; i++){
 				eSelectBox.append(

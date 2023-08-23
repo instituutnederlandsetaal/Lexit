@@ -1721,7 +1721,7 @@ conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
 		var bVisible = 		conf.getVisibility(aColumnConfig);
 		
 		aRestoreObjects[sTablename]["columns"][sColName] = {"visible": bVisible};		
-		}
+	}
 	
 	// save original columns
 	var oTableSettings = 	conf.getTableSettings(sTablename);

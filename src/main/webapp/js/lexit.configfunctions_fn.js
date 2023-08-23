@@ -792,6 +792,25 @@ fn.restoreTableState = function(sTableName){
 };
 
 
+
+/**
+ * Determine if a table if editable 
+ * 
+ * @param {String} sTableName
+ * @returns {boolean} true if table is editable
+ * 
+ * @see conf.tableIsEditable
+ */
+fn.tableIsEditable = function(sTableName){
+
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+
+	return conf.tableIsEditable(sTableName);
+
+};
+
+
 // *************************************************
 // *  READ A TABLE FROM THE DATABASE               *
 // *  load a table into the datatables interface   *
@@ -5237,7 +5256,9 @@ fn.getValueOfFilterBox = function(sSomeTable, sCellName){
 		var searchBoxSelector = (searchDivSelector.find("option").length > 0) ? 
 				searchDivSelector.find("select").find(":selected") : searchDivSelector.find("input").eq(0);
 
-		return $.trim(searchBoxSelector.val());
+		return ( 
+			$.trim(searchBoxSelector.val()) 
+			).replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
 	}	
 	return "";
 };
