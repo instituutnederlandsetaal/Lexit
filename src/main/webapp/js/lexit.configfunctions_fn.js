@@ -1356,6 +1356,38 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 			fnCallback();
 };
 
+/**
+ * Center a table horizontally
+ * 
+ * @param {String} sSomeTablename  - Table name 
+ */
+fn.centerTable = function(sSomeTablename){
+	
+	// center
+
+	$("#"+sSomeTablename+"_dynamic")
+		.css("left", "50%")
+		.css("display", "block")
+		.css("transform", "translate(-50%, 0)");
+
+
+	// get rid of some settings
+	// causing buttons etc to be misplaced
+
+	$("#"+sSomeTablename+"_dynamic")
+		.css("margin", "unset");
+	
+	$("#"+sSomeTablename+"_filter")
+		.css("width", "unset");
+	$("#"+sSomeTablename+"_paginate")
+		.css("width", "unset");
+
+	$("#"+sSomeTablename+"_wrapper .bottom_pane")
+		.css("width", "unset");
+	$("#"+sSomeTablename+"_wrapper .bottom_pane .dataTables_paginate.paging_full_numbers")
+		.css("width", "unset");
+}
+
 
 /**
  * Since tables with a narrow width are put on the screen on the same line,
