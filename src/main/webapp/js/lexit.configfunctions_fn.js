@@ -85,6 +85,7 @@ EXTRA FUNCTIONS
  * @param {String} sColor - Color code (eg. #3970b3)
  * @param {String} sFontSize - Font size (eg. 50px)
  * @param {String} sFontWeight - Font weight (eg. bold)
+ * @see fn.setProjectFont
  */
 fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 	
@@ -118,6 +119,7 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
  * Set background color 
  * 
  * @param {String} sColor - Color code (eg. #3970b3)
+ * @see fn.setProjectFont
  */
 fn.setBackgroundColor = function(sColor){
 	
@@ -239,6 +241,7 @@ fn.getCssFile = function(sPath, fnCallback, fnErrorHandler){
  * Add some CSS definition dynamically
  * 
  * @param {String} sSomeCssCode 
+ * @see fn.setProjectFont
  */
 fn.addCss = function(sSomeCssCode){
 	
@@ -257,7 +260,32 @@ fn.addCss = function(sSomeCssCode){
 	else {
 		style.appendChild(document.createTextNode(sSomeCssCode));
 	}
-}
+};
+
+/**
+ * Set the font family and size in whole GUI at once
+ * @param {String} sFontFamily 
+ * @param {String} sFontSize 
+ * @see fn.setProjectTitle
+ * @see fn.addCss
+ */
+fn.setProjectFont = function(sFontFamily, sFontSize){
+
+	fn.addCss("table.display.dataTable thead th {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("table.display.dataTable tbody td {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.top div:first-child span {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div#indicator {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_length {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_info {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_filter > label {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("a.paginate_button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.export_pane a.dt-button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.ui-dialog {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.ui-dialog-content {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("button.ui-button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+};
+
+
 
 
 
