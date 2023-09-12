@@ -283,6 +283,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 	fn.addCss("div.ui-dialog {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
 	fn.addCss("div.ui-dialog-content {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
 	fn.addCss("button.ui-button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("#tiptip_content {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
 };
 
 

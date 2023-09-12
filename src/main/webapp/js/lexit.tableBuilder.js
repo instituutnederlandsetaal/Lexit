@@ -1243,7 +1243,13 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 								: sClassPrefix + "not_editable_selectbox",
 				"visible": 		columnVisible,
 				"sortable": 	columnVisible && columnHasDataType ? columnSortable : false,
-				"orderSequence": columnVisible && columnHasDataType ? [ "asc", "desc" ] : []
+				"orderSequence": columnVisible && columnHasDataType ? 
+						( columnType.toLowerCase().match(/^(character varying|varchar|char|text)/) != null ? 
+								[ "asc", "desc", "asc_reverse", "desc_reverse" ]	// text type 
+								: 
+								[ "asc", "desc" ] 	 								// other type
+						)
+						: []
 				} );
 			
 		

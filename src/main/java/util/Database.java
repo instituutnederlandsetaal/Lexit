@@ -2814,21 +2814,52 @@ public class Database {
 		
 		
 		// sorting
-		if ( weMustSort )
-		{
+		if ( weMustSort ) {
 			String sortPart = " ORDER BY ";
 			String sortSeparator = "";
-			for (int s = 0; s < aSortCol.length; s++)
-			{
-				// apply reverse sorting if required
-				if (aSortDir[s].toLowerCase().contains("_reverse"))
-				{
-					sortPart += sortSeparator + "REVERSE("+getSafeFieldName(aSortCol[s]) + ") " + aSortDir[s].replaceAll("(_reverse|_REVERSE)", "");
+			
+			
+			for (int s = 0; s < aSortCol.length; s++) {
+				
+				// Read sort settings for this column
+				String thisColSort = String.valueOf(aSortCol[s]);
+				String thisSortDir = String.valueOf(aSortDir[s]);
+				
+				// Should we apply reverse sorting?
+				boolean reverseSort = thisSortDir.toLowerCase().contains("_reverse");
+				thisSortDir = thisSortDir.replaceAll("(_reverse|_REVERSE)", "");
+				
+				// Do we have custom sort?
+				// (this is to be detected by the presence of a '_lexit_custom_sort' column)
+				String thisColCustomSort = thisColSort+"_lexit_custom_sort";
+				String thisColCustomReverseSort = thisColSort+"_lexit_custom_reversesort";
+				boolean customSortDefined = (Util.getIndexOf(thisColCustomSort, allColumns)>-1 || Util.getIndexOf(getSafeFieldName(thisColCustomSort), allColumns)>-1);				
+				boolean customReverseSortDefined = (Util.getIndexOf(thisColCustomReverseSort, allColumns)>-1 || Util.getIndexOf(getSafeFieldName(thisColCustomReverseSort), allColumns)>-1);
+				
+				// Reverse sorting if required
+				if (reverseSort) {
+					
+					// if custom reverse sort is defined, apply it
+					if (customReverseSortDefined) {
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomReverseSort) + " " + thisSortDir;
+					}
+					// otherwise do reverse sort the default way
+					else {
+						sortPart += sortSeparator + "REVERSE("+getSafeFieldName(thisColSort) + ") " + thisSortDir;
+					}
+					
 				}
-				// normal sorting
-				else
-				{
-					sortPart += sortSeparator + getSafeFieldName(aSortCol[s]) + " " + aSortDir[s];
+				// No reverse sorting
+				else {
+					
+					// if custom sort is defined, apply it
+					if (customSortDefined) {
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomSort) + " " + thisSortDir;
+					}
+					// otherwise do sort the default way
+					else {
+						sortPart += sortSeparator + getSafeFieldName(thisColSort) + " " + thisSortDir;
+					}
 				}
 				sortSeparator = ", ";
 			}
@@ -4168,7 +4199,7 @@ public class Database {
 			return fieldName;
 		
 		return "\""+fieldName+"\"";
-	}
+	}	
 	
 	// in SQL we need a double escape \\, make sure we get it if the string only contains \
 	private  String getDoubleEscape(String str){
