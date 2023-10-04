@@ -659,10 +659,14 @@ gui.makeTableEditable = function(sSomeTablename){
 			var sColumnName = mt.getListOfColumnsOf(sSomeTablename)[aPos.column];
 			var sColumnType = mt.getListOfColumnTypesOf(sSomeTablename)[aPos.column];
 			var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+			var fnEditPreprocess = conf.getEditPreprocess(oColumnConfig);
 			var fnEditFunction = conf.getEditFunction(oColumnConfig);
 			var fnEditCallback = conf.getEditCallback(oColumnConfig);
 			var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
 			var sEditTrigger = conf.getEditTrigger(oColumnConfig);
+
+			// if a preprocess function was declared.... preprocess the value!
+			var sPreprocessedValue = ( fnEditPreprocess != null ? fnEditPreprocess(value) : value);
 			
 			// Special case: we apply the custom edit function
 			// If an edit trigger is defined, the edit function is called only 
@@ -670,9 +674,9 @@ gui.makeTableEditable = function(sSomeTablename){
 			// as 'edittrigger', which triggers the custom edit function!
 			if (fnEditFunction != null &&
 					// no trigger is needed, or trigger is matched
-					( sEditTrigger==null || new RegExp(sEditTrigger).test(value) ) )
-				{
-				conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
+					( sEditTrigger==null || new RegExp(sEditTrigger).test(value) ) ) {
+						
+				conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, sPreprocessedValue);
 				// callcack function, if it is set in configuration
 				if (fnEditCallback!=null)
 					fn.message(lang.error, 
@@ -684,7 +688,7 @@ gui.makeTableEditable = function(sSomeTablename){
 	 			gui.setSearchboxesCss(sSomeTablename);	 			
 				// refresh the tables that config file requires to be refreshed upon editing of current cell
 				conf.refreshTables(oColumnConfig);				
-				}
+			}
 			
 			// normal case: we apply the normal edit function 
 			else {
@@ -700,7 +704,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						"db_name": getHttpParams().get("db"),
 						"table_name": sSomeTablename,
 						"column_name": sColumnName,
-						"new_value": value,
+						"new_value": sPreprocessedValue,
 						"value_type": sColumnType,
 						"dummy": getUniqueNumber()
 						},
@@ -712,7 +716,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				 			
 				 			// callcack function, if it is set in configuration
 				 			if (fnEditCallback!=null)
-								fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
+								fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, sPreprocessedValue);
 				 			
 				 			// new input might affect column and searchboxes alignment 
 				 			gui.setSearchboxesCss(sSomeTablename);				 			
@@ -732,7 +736,7 @@ gui.makeTableEditable = function(sSomeTablename){
 							fn.removeProcessingMsg(sSomeTablename);
 							fnEditErrorHandler({
 								"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
-								"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": value
+								"tableName": sSomeTablename, "columnName": sColumnName, "columnValue": sPreprocessedValue
 								});
 						}
 						else {

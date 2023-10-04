@@ -493,6 +493,12 @@ var oTableConfigurationList_example = {
 		 * null is, dan wordt 'editfunc' altijd getriggerd.
 		 */
 		"edittrigger": "",
+
+		/**
+		 * @description Function voor het voorbewerken (preprocessen) van een ingevoerde waarde, vóór dat Lex'it deze invoert in de database.
+		 * @see searchpreprocess 
+		 */
+		"editpreprocess": "",
 		
 		
 		/**
@@ -585,8 +591,10 @@ var oTableConfigurationList_example = {
 		 * @type {function}
 		 * @description Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.
 		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
+		 * @see searchform
+		 * @see editpreprocess
 		 */
-		"searchform": function(text){},
+		"searchpreprocess": function(text){},
 
 		/**
 		 * @type {function}
@@ -1324,9 +1332,11 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 
 conf.getSearchForm = function(aColumnConfig){
 	
-	if (typeof aColumnConfig["searchform"] == 'undefined')
-		return null;
-	return aColumnConfig["searchform"];
+	if (typeof aColumnConfig["searchform"] != 'undefined')
+		return aColumnConfig["searchform"];
+	else if (typeof aColumnConfig["searchpreprocess"] != 'undefined')
+		return aColumnConfig["searchpreprocess"];
+	return null;
 };
 
 
@@ -1340,6 +1350,16 @@ conf.getEditFunction = function(aColumnConfig){
 	if (typeof aColumnConfig["editfunc"] == 'undefined')
 		return null;
 	return aColumnConfig["editfunc"];
+};
+
+
+// retrieve function to preprocess info BEFORE
+// saving it in the database
+conf.getEditPreprocess = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["editpreprocess"] == 'undefined')
+		return null;
+	return aColumnConfig["editpreprocess"];
 };
 
 // retrieve edit callback function for one column
