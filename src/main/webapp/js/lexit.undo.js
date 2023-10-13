@@ -49,8 +49,7 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 	// on its top: it can happen in IE (since addEvent is called upon 'click'
 	// in IE because it doesn't recognize 'change' like other browsers!!)
 	
-	if (thisStack.length>0)
-		{
+	if (thisStack.length>0) {
 		var copyOfStack = cloneArray(thisStack);
 		var oDataOnTop = copyOfStack.pop();	
 		
@@ -62,7 +61,7 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 				iColumnNumberOnTop == iColumnNr &&
 				sOldValueOnTop == sOldValue)
 			return; // undo event is already on top of stack
-		}
+	}
 	
 	// add recovery data onto the undo stack	
 	
@@ -164,18 +163,15 @@ un.undoEvent = function(sSomeTableName){
 	
 	// if we have a custom edit function, 
 	// restore the node according to this custom function
-	if ( fnEditFunction != null )
-		{		
+	if ( fnEditFunction != null ) {		
 		// we can only update the screen cell if the node is still in sight
-		if (nNode != null)
-			{
+		if (nNode != null) {
 			conf.getEditFunction(oColumnConfig)(mt.getDataTableObjectOf(sSomeTableName), nNode, sOldValue);
 			conf.refreshTables(oColumnConfig);
-			}		
-		}
+		}		
+	}
 	// otherwise, just restore the node the normal way
-	else
-		{
+	else {
 		gui.showProcessingMsg(sSomeTableName);		
 		var url = WEBSERV_URL+"/table/setvalue";
 		$.ajax( {
@@ -193,36 +189,30 @@ un.undoEvent = function(sSomeTableName){
 		 	"dataType": "xml", // get response as xml
 		 	"success": function(xml) {
 		 		gui.removeProcessingMsg(sSomeTableName);
-		 		if (gui.getDbResponse(xml))
-		 			{
+		 		if (gui.getDbResponse(xml)) {
 		 			// it can only update the screen cell if the node is still in sight
-		 			if (nNode != null)
-		 				{
+		 			if (nNode != null) {
 		 				fn.putDataIntoCellNode(nNodeToRestore, sColumnName, sOldValue);
 			 			// refresh the tables that config file requires 
 		 				// to be refreshed upon editing of current cell
 			 			conf.refreshTables(oColumnConfig);
-		 				}
 		 			}
-		 		else
-		 			{
+		 		}
+		 		else {
 		 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", 
 		 					lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]");
-		 			}
-		 		},
+		 		}
+		 	},
 			"error": function(jqXHR, textStatus, errorThrown){
 				
 				fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", 
-						lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
-						function(){
-							gui.refreshTable(sSomeTableName);
-							}
-					); 
-				}
+					lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown,
+					function(){
+						gui.refreshTable(sSomeTableName);
+					}
+				); 
+			}
 		 		
-		 		
-			} );
-		}
-	
-	
+		});
+	}	
 };

@@ -202,7 +202,7 @@ public class TableResources {
 	}
 	
 	
-	// get the name of the user which had logged in
+	// get host and database name of a project 
 	// call:
 	// .../table/get_dbinfo?db=...
 	@Path("get_dbinfo")
@@ -217,7 +217,7 @@ public class TableResources {
 		
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName);
 		
-		if ( !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
 		
 		// output allowed

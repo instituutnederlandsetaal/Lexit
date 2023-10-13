@@ -176,7 +176,8 @@ lists.buildLists = function(sFormTable, iListNr){
 			.append(eTable);
 
 		// instantiate a Datatable
-		//   WITHOUT header, searching, page length changing, but WITH sorting and paging
+		//     WITHOUT header, searching, page length changing, 
+		// but WITH sorting and paging
 		// (example https://datatables.net/examples/basic_init/filter_only.html)
 		// 
 
@@ -232,7 +233,7 @@ lists.buildLists = function(sFormTable, iListNr){
 		
 
 		var oTable = $("#"+sFormAndList).DataTable( oDataTablesConfig );
-		// save DT object in cache
+		// save DataTable object in cache
 		hFormAndList2DataTable.put(sFormAndList, oTable);
 
 
@@ -247,11 +248,10 @@ lists.buildLists = function(sFormTable, iListNr){
 
 
 
-// feed a list (= load data from datbase)
+// feed a list (= load data from database),
 // given a table name and some values to match
 //
 lists.feed = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
-
 	
 
 	var sFormContainerId = 	lists.getFormContainerId(sListLabel);
@@ -263,7 +263,7 @@ lists.feed = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
 	var oThisList = 		oFormGrid["lists"][sListLabel];
 	var oButtons = 			oThisList["buttons"];
 
-	// read the database given a table name and some values to
+	// read the database given a table name and some values to match
 
 	// (don't try if we have no values to match, which can happen when a search returned no results = NO ID to match)
 	if (Reflect.ownKeys(aFieldsAndValuesToMatch).length > 0){
