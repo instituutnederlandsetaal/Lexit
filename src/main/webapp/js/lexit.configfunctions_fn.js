@@ -1527,6 +1527,8 @@ fn.setActiveTable = function(sSomeTablename){
  * 
  * @param {Node} nRow - A row node 
  * @returns {Integer} The number of a row node
+ * 
+ * @see fn.getRowNodeNumberOnScreen
  */
 fn.getRowNodeIndex = function(nRow){
 	
@@ -1546,6 +1548,8 @@ fn.getRowNodeIndex = function(nRow){
  * 
  * @param {Node} nRow - A row node 
  * @returns {Integer} Row number within current display range
+ * 
+ * @see fn.getRowNodeIndex
  */
 fn.getRowNodeNumberOnScreen = function(nRow){
 	
@@ -5255,6 +5259,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
  * @param {String} sSomeData - Search value to put in the search box
  * 
  * @see fn.setAutoComplete
+ * @see fn.setFilters
  */
 fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	
@@ -5423,6 +5428,7 @@ fn.resetAllFilters = function(sSomeTable, bUpdateSearchBoxesValues){
  * 
  * @see fn.addFilters
  * @see fn.getFilters
+ * @see fn.putDataIntoFilterBox
  */
 fn.setFilters = function(sSomeTable, oFilters, bUpdateSearchBoxesValues){
 	
@@ -5442,6 +5448,7 @@ fn.setFilters = function(sSomeTable, oFilters, bUpdateSearchBoxesValues){
  * 
  * @see fn.setFilters
  * @see fn.addFilters
+ * @see fn.getValueOfFilterBox
  */
 fn.getFilters = function(sSomeTable){
 	
