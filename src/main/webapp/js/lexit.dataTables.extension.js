@@ -157,24 +157,34 @@ $.fn.dataTable.Api.register('setSearchFilters()', function(oFilters, bUpdateSear
 	oTable.search("");
 	
 	/* Empty the column filters */
-	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ )
-		{
+	for ( var i=0, iLen=mt.getListOfColumnsOf(sTableName).length ; i<iLen ; i++ ) {
 		oTable.columns(i).search("");
-		}
-	
-	/* Set the search text for the column filters */
-	for (var sColumnName in oFilters)
-		{		
-		var sValue = oFilters[sColumnName];
-		if (sValue == null) 
-			sValue = "";
-		
-		var iColIndex = $.inArray(sColumnName, mt.getListOfColumnsOf(sTableName));
-		oTable.columns(iColIndex).search(sValue);
-		
+	}
+
+	/* If we have a global filter set, set it */
+	if (oFilters["anycolumn"] != null){
+		oTable.search( oFilters["anycolumn"] );
+
 		if (bUpdateSearchBoxesValues)
-			fn.putDataIntoFilterBox(sTableName, sColumnName, sValue);
+			fn.putDataIntoGlobalFilterBox(sTableName, sValue);
+	}
+
+	/* Otherwise, set the search text for the column filters */
+	else {
+
+		for (var sColumnName in oFilters) {		
+			var sValue = oFilters[sColumnName];
+			if (sValue == null) 
+				sValue = "";
+			
+			var iColIndex = $.inArray(sColumnName, mt.getListOfColumnsOf(sTableName));
+			oTable.columns(iColIndex).search(sValue);
+			
+			if (bUpdateSearchBoxesValues)
+				fn.putDataIntoFilterBox(sTableName, sColumnName, sValue);
 		}
+
+	}
 	
 });
 

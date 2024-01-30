@@ -5260,6 +5260,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
  * 
  * @see fn.setAutoComplete
  * @see fn.setFilters
+ * @see fn.putDataIntoGlobalFilterBox
  */
 fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	
@@ -5297,6 +5298,28 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 		}
 	}
 };
+
+
+/**
+ * Put some data into a GLOBAL search filter box in the GUI
+ * (beware: no effect on the filters variables as long as 'enter' wasn't pressed)
+ * 
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object 
+ * @param {String} sSomeData - Search value to put in the search box 
+ * 
+ * @see fn.putDataIntoFilterBox
+ */
+fn.putDataIntoGlobalFilterBox = function(sSomeTable, sSomeData){
+
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+	var sSomeTableName = fn.getTableName(sSomeTable);
+
+	var searchBoxSelector = $("#"+sSomeTableName+"_dynamic #"+sSomeTableName+"_filter.dataTables_filter").find("input");
+
+	// put value
+	searchBoxSelector.val( sSomeData );
+}
 
 
 /**

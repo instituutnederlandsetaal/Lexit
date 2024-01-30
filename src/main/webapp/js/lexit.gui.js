@@ -764,6 +764,16 @@ gui.makeTableEditable = function(sSomeTablename){
 			"onblur": function(value){
 				gui._closeJEditable(this, value);
 			},
+			"data": function(value, settings) {
+				// encoding fix: https://stackoverflow.com/questions/6444668/jeditable-encoding-turns-into-amp-when-editing
+				return String(value)
+					.replace(/&gt;/g, '>')
+					.replace(/&lt;/g, '<')
+					.replace(/&#39;/g, "'")
+					.replace(/&quot;/g, '"')
+					.replace(/&amp;/g, '&')
+					.replace(/&nbsp;/g, ' ');
+			},
 			// we need to update the datatable object in the callback, because
 			// if we do it in the previous step of jeditable, it somehow breaks something
 			// so the final call 'return(value);' can't help prevent multiple firing anymore...

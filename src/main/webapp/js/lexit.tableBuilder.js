@@ -235,8 +235,16 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	// datatables object building
 	
+	// global search at initialisation, if set
+	var sGlobalSearch = (mt.getFilterValues(sSomeTableName) != null ? mt.getFilterValues(sSomeTableName)["anycolumn"] : "");
+	var oGlobalSearch = (sGlobalSearch != null ? {"search": sGlobalSearch} : {});
+	
+
+	// DataTable object!
+
 	var oTable = $('#'+sSomeTableName).DataTable( {	
-		"scrollX": true,		
+		"scrollX": 		true,		
+		"search": 		oGlobalSearch,
 		"searchCols":	aoSearchColsArray,
 		"autoWidth": 	false,  
 		"destroy": 		true, // remove previously build datatable with same table name
@@ -546,6 +554,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 
 		
 	} ); //end of datatable definition
+
 	
 	
 	// apply row grouping, if required
