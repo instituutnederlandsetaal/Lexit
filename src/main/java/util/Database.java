@@ -2870,6 +2870,9 @@ public class Database {
 		// range
 		if (iDisplayLength>-1)
 			query += " LIMIT " + iDisplayLength +" OFFSET " + iDisplayStart;
+		
+		
+		
 				
 		
 		// ******************************************
@@ -3273,6 +3276,11 @@ public class Database {
 		// argument
 		String arg = " ? ";
 		
+		// unaccent
+		if (columnValue.contains("unaccent(")) {
+			arg = " unaccent(?) ";
+		}
+		
 		// get column type
 		String columnType = (columnName==null ? 
 					"text" : getTypeOfColumn(tableName, columnName));
@@ -3330,6 +3338,8 @@ public class Database {
 		
 		if (value == null)
 			return value;
+		
+		value = value.replaceAll("(unaccent\\()([^\\)]+)(\\))", "$2");
 		
 		if (value.startsWith("<=") || value.startsWith(">="))
 			return value.substring(2);
