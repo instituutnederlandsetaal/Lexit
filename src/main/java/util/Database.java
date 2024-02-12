@@ -3276,21 +3276,24 @@ public class Database {
 		// argument
 		String arg = " ? ";
 		
-		// unaccent
-		if (columnValue.contains("unaccent(")) {
-			arg = " unaccent(?) ";
-		}
-		
 		// get column type
 		String columnType = (columnName==null ? 
 					"text" : getTypeOfColumn(tableName, columnName));
-				
-		
+			
+		// now the column value...
+		//
+		// IMPORTANT: FIRST DEAL WITH NULL!
+		//
 		// always check null value first (to prevent NullPointerException)
 		if (columnValue == null || columnValue.toLowerCase().equals("null") )
 			return " IS " + arg;		
 		if (columnValue.toLowerCase().equals("!null"))
 			return " IS NOT " + arg;
+		
+		// unaccent
+		if (columnValue.contains("unaccent(")) {
+			arg = " unaccent(?) ";
+		}
 		
 		// negation operator
 		boolean negation = false;
