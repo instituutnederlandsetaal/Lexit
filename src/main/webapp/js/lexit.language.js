@@ -829,6 +829,10 @@ lang.helpText =
 
 // Other languages
 
+/**
+ * Set the project language
+ * @param {String} sLanguageCode - the language code ('nl' for Dutch; 'en' for 'English)
+ */
 lang.setLanguage = function(sLanguageCode){
 
 	if (sLanguageCode == null) sLanguageCode = "nl";
