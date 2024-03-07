@@ -287,6 +287,32 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 };
 
 
+/**
+ * Add a balk on top of the screen, just like in any IvdNT website
+ * @param {Boolean} bSetting - apply if true, otherwise unapply
+ */
+fn.setBalk = function(bSetting){
+	
+	if (bSetting){
+		$("body").removeClass("default").addClass("huisstijl");
+		$("#headergroup").removeClass("default").addClass("huisstijl");
+		$("#home_logo").removeClass("default").addClass("huisstijl");
+		$("#square_logo").removeClass("default").addClass("huisstijl");
+		$("#projectname").removeClass("default").addClass("huisstijl");
+		$("#indicators").removeClass("default").addClass("huisstijl");
+		$("#headerlinks").removeClass("default").addClass("huisstijl");
+	}
+	else {
+		$("body").removeClass("huisstijl").removeClass("huisstijl")
+		$("#headergroup").removeClass("huisstijl").addClass("default");
+		$("#home_logo").removeClass("huisstijl").addClass("default");
+		$("#square_logo").removeClass("huisstijl").addClass("default");
+		$("#projectname").removeClass("huisstijl").addClass("default");
+		$("#indicators").removeClass("huisstijl").addClass("default");
+		$("#headerlinks").removeClass("huisstijl").addClass("default");
+	}
+	
+};
 
 
 

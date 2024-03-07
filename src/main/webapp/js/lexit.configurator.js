@@ -1976,6 +1976,11 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 		return "white";
 	return aButtonSettings["textcolor"];
 };
+conf.getHeaderButtonClass = function(aButtonSettings){
+	if (typeof aButtonSettings["class"] == 'undefined')
+		return "white";
+	return aButtonSettings["class"];
+}; 
 
 // this function is called when a button is being clicked upon
 conf.getHeaderButtonFunction = function(aButtonSettings){

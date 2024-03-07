@@ -334,6 +334,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		var sSelectedItem = 	conf.getHeaderButtonMenuSelected(aButtonSettings);
 		var sButtonBgColor = 	conf.getHeaderButtonBgColor(aButtonSettings);
 		var sButtonTextColor = 	conf.getHeaderButtonTextColor(aButtonSettings);
+		var sButtonClass = 		conf.getHeaderButtonClass(aButtonSettings);
 		var sToolTip = 			conf.getHeaderButtonToolTip(aButtonSettings);
 		
 		var customButton;
@@ -406,6 +407,10 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		// add tooltip
 		if (sToolTip != null)
 			customButton.attr("title", sToolTip).addClass("tooltip");
+		
+		// add class
+		if (sButtonClass != null)
+			customButton.addClass(sButtonClass);
 		
 		// add label (for select buttons) 
 		if (aButtonMenu != null)
@@ -1055,5 +1060,72 @@ head.putTableCloseButton = function(sSomeTablename){
 	
 };
 
+
+
+head.showGeneralHelp = function(){
+
+	$("#page #headergroup #headerlinks").find("span#help_link").bind("click", function(){
+
+			// default
+			
+			var bResetButton = 		true;			
+			var bRefreshButton =	true;
+			var bReplaceButton = 	true;
+			var bGotoButton = 		true;
+			var bRowSelect =		true;
+			var bUndoButton = 		true;
+			var bColSelect =		true;
+			var bViewMode = 		true;
+
+			var bTableEditable = 	true;
+			
+			// we'll be combining jquerui tabs and dialog
+			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
+			
+			var helpDivId = "dialog"+getUniqueNumber();
+			
+			var helpDiv = $("<div></div>")
+				.attr("id", helpDivId)
+				.attr("title", lang.help_button)
+				.css("font-size", "12px");			
+			
+			helpDiv.append(lang.helpText);			
+			$(document.body).append(helpDiv);
+			
+			$("#"+helpDivId).dialog({
+				open: function( event, ui ){
+					$(".ui-dialog").addClass("ui-dialog-shadow");
+					$( this ).closest(".ui-dialog").putInFront();
+					
+					// hide button help for buttons that are hidden by config
+					if (!bResetButton) $('.tabs-1-reset').css("display", "none");
+					if (!bRefreshButton) $('.tabs-1-refresh').css("display", "none");
+					if (!bReplaceButton) $('.tabs-1-search').css("display", "none");
+					if (!bGotoButton) $('.tabs-1-goto').css("display", "none");
+					if (!bRowSelect) $('.tabs-1-rowselect').css("display", "none");
+					if (!bUndoButton) $('.tabs-1-undo').css("display", "none");
+					if (!bColSelect) $('.tabs-1-colselect').css("display", "none");
+					if (!bViewMode) $('.tabs-1-viewmode').css("display", "none");
+
+					// hide 'Editing' tab if the table isn't editable at all
+					if (!bTableEditable) $('[href="#tabs-3"]').closest('li').hide();
+		        },
+		        close: function(event, ui){
+		        	$( this ).remove();
+		        },
+				width: 800, 
+				height: 600
+				}
+			);
+			
+			$("#"+helpDivId).tabs();
+			
+		});	
+}
+
+// assign functions
+setTimeout(function(){
+	head.showGeneralHelp();	
+}, 1000);
 
 

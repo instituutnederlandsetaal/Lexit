@@ -1617,7 +1617,7 @@ lang.setLanguage = function(sLanguageCode){
 					"Remove this column name from the config file";
 		lang.sort_column_warning2 = "Table";
 		lang.sort_column_warning3 = "Column";
-		lang.display_differs_from_selection = "Diplay differs from selection. Please refresh the table";
+		lang.display_differs_from_selection = "Display differs from selection. Please refresh the table";
 		lang.editcallback_warning1 = "Parameter 'editcallback' can't be used in combination with 'editfunc'. " +
 							"Put the callback argument of your fn.updateDatabase function in 'editfunc' instead ";
 		lang.editcallback_warning2 = "Table";

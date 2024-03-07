@@ -1,8 +1,126 @@
 
 
-body {
+body.default {
     font-family: 'Times New Roman', Times, serif, gtb;
 }
+
+
+/* ################ Default style ################ */
+
+#square_logo.default {
+	display: none
+}
+
+#home_logo.default {
+	position:absolute; 
+	right:10px; 
+	top:10px;
+}
+
+#projectname.default {
+	text-align: center;
+}
+
+#indicators.default #indicator {
+	display: inline;
+}
+
+#indicators.default #tablechoice {
+	display: inline;
+}
+
+#headerlinks.default {
+	display: none;
+}
+
+
+/* ################ Huisstijl style ################ */
+
+body.huisstijl {
+	font-family: Verdana, sans-serif, gtb;
+	margin: 0px;
+}
+
+#headergroup.huisstijl {
+	width: 100%;
+	height: 65px;
+	margin: 0px;
+	padding: 0px;
+	border-bottom: 1px black solid; 
+	-webkit-box-shadow: 0 5px 5px #888888; 
+	-moz-box-shadow: 0 5px 5px #888888; 
+	box-shadow: 0px 4px 5px 1px #888888;
+}
+
+
+#square_logo.huisstijl {
+	display: block !important;
+	position: absolute;
+	top: 7px;
+	left: 10px;
+	width: 50px; 
+	height: 50px; 
+	border:1px solid #ccc; 
+	margin-right:10px;
+}
+
+#home_logo.huisstijl {
+	display:inline-block;
+	position: absolute;
+	top: 0px;
+	left: 60px;
+}
+
+#home_logo.huisstijl img {
+	content: url('../images/INT-logo-1regel.png');
+	width: 14%;
+	height: 14%;
+}
+	
+#projectname.huisstijl {
+	display: inline-block;
+	position: absolute;
+	top: 20px;
+	left: 69px;
+	text-align: left !important;
+}
+
+#projectname.huisstijl span {
+	font-weight: normal !important;
+	font-size: 30px !important;
+}
+
+
+
+#indicators.huisstijl {
+	position: relative;
+	left: 8px;
+	top: 10px;
+}
+
+#indicators.huisstijl #indicator {
+	display: none;
+}
+
+#headerlinks.huisstijl {
+	display: inline-block;
+	position: absolute;
+	top: 20px;
+	right: 60px;
+
+}
+
+#headerlinks.huisstijl span {
+	padding-right: 20px;
+	text-decoration: none;
+}
+#headerlinks.huisstijl span:hover {
+	padding-right: 20px;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -47,8 +165,7 @@ body {
 	width: 45vw;
 	top: 5px;
 	left: 50vw;
-	text-align: right;
-	
+	text-align: right;	
 }
 
 .dataTables_wrapper .top button {
@@ -197,7 +314,7 @@ table.display tr.heading2 td {
 */
 table.display tr.group td {
 	color: #F2F2F2 !important;
-	background-color: #848484 !important;
+	background-color: #D8D8D8 !important;
 }
 
 table.display td {
@@ -263,6 +380,7 @@ th:active {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables row classes
  */
+ 
 table.display tr.odd.gradeA {
 	background-color: #ddffdd;
 }
@@ -305,6 +423,7 @@ tr.even {
 }
 
 /* cursor visible upon mouseover */
+
 tr.odd:hover td {
 	background-color: #878AB5 !important;
 }
@@ -386,14 +505,11 @@ td.details {
 	width: 40%;
 }
 
-.paging_full_numbers {
-	position: sticky;
-	width: 45vw; 
-	left: 50vw;
-	height: 22px;
-	line-height: 22px;
-	margin: 7px;
-}
+
+
+/*
+ * Panes 
+ */
 
 .bottom_pane {
 	position: sticky;
@@ -413,6 +529,24 @@ td.details {
 	height: 30px;
 	padding-right: 15px;
 	top: 30px;
+}
+
+
+
+
+
+/* 
+ *	Paging buttons 
+ */
+ 
+ 
+.paging_full_numbers {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	height: 22px;
+	line-height: 22px;
+	margin: 7px;
 }
 
 .paging_full_numbers a:active {
@@ -595,48 +729,6 @@ tr.even.gradeU td.sorting_3 {
 }
 
 
-/*
- * Row highlighting example
- */
-.ex_highlight #example tbody tr.even:hover, #example tbody tr.even td.highlight {
-	background-color: #ECFFB3;
-}
-
-.ex_highlight #example tbody tr.odd:hover, #example tbody tr.odd td.highlight {
-	background-color: #E6FF99;
-}
-
-.ex_highlight_row #example tr.even:hover {
-	background-color: #ECFFB3;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_1 {
-	background-color: #DDFF75;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_2 {
-	background-color: #E7FF9E;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_3 {
-	background-color: #E2FF89;
-}
-
-.ex_highlight_row #example tr.odd:hover {
-	background-color: #E6FF99;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_1 {
-	background-color: #D6FF5C;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_2 {
-	background-color: #E0FF84;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_3 {
-	background-color: #DBFF70;
-}
 
 
 /*

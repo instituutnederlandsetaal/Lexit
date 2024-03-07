@@ -114,7 +114,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// [4] else just make the default position absolute	
 	else {		
 		var iCurrentLeft = $("#"+sSomeTableName+"_dynamic").offset().left;
-		var iCurrentTop = $("#"+sSomeTableName+"_dynamic").offset().top;
+		if (iCurrentLeft == 0) iCurrentLeft = $("#indicators").offset().left; // make sure the table is horizontally aligned with indicators div
+		
+		var iCurrentTop = $("#"+sSomeTableName+"_dynamic").offset().top + 10; // bit of room under the indicators
 		$("#"+sSomeTableName+"_dynamic")
 			.css("position", "absolute")
 			.css("top", iCurrentTop)
