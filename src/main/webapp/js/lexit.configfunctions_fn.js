@@ -3829,6 +3829,17 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 // *           INTERACTION               *
 // ***************************************
 
+
+/**
+ * Check if the current page is visible / has focus now
+ * 
+ */
+fn.pageIsVisible = function(){
+	return refr.pageIsVisible();
+};
+
+
+
 /**
  * Add an autocomplete functionality to a given filter box, or to a table cell
  * 

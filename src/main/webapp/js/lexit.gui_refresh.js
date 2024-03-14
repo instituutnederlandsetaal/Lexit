@@ -13,9 +13,20 @@ var refr = {};
 var lastLayoutUpdateTime = null; // seconds
 var layoutUpdateLatency = 0; // seconds
 
+var bPageHasFocusNow = true;
+
 $(window).resize(function(){
 	refr.updateLayout(false);
 });
+
+
+refr.pageIsVisible = function(){
+	
+	return bPageHasFocusNow;
+};
+
+
+
 
 
 //Check loss or gain of focus
@@ -72,10 +83,12 @@ function onchange (evt) {
 	//  we will know for sure that the window doesn't get visible
 	//  for the first time = parasite blur/focus events)
 	if ( sWindowVisibility=="visible"){    	 
+		bPageHasFocusNow = true;
 		refr.fireUpdateAtFocusGain();
 	}
   
   	if ( sWindowVisibility=="hidden"){    	 
+		bPageHasFocusNow = false;
  		refr.fireUpdateAtFocusLoss();
  	}
   
