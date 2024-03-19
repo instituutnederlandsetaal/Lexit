@@ -457,6 +457,10 @@
 						}
 					}).column(2).order('desc').draw();
 					
+					
+					// remove unneeded links
+					$("#headerlinks").hide();
+					
 				}
 				
 				// remove rows from previous cycle
@@ -482,10 +486,10 @@
 				
 				// refresh after few seconds
 				setTimeout(function(){ buildSpy(); }, 2000);
-				},
+			},
 			error: function(jqXHR, textStatus, errorThrown){
 				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
-				}
+			}
 		});
 	};
 	
