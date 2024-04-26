@@ -1064,7 +1064,7 @@ head.putTableCloseButton = function(sSomeTablename){
 
 head.showGeneralHelp = function(){
 
-	$("#page #headergroup #headerlinks").find("span#help_link").bind("click", function(){
+	$("#page #headergroup #headerlinks").find("span:contains(Help)").bind("click", function(){
 
 			// default
 			
