@@ -1,0 +1,9 @@
+target/
+**/webapp/*.bak
+**/webapp/*.BAK
+**/js/*.bak
+**/js/*.BAK
+/target/
+src/main/webapp/*.config.js
+etc/
+/etc/

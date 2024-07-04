@@ -1,0 +1,1247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link id="favicon" rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />	
+	
+	<title>
+	Lex'it
+	v2024.07.03
+	</title>
+	<!-- first version was GigantLex v2012 -->
+	
+	<style type="text/css" title="currentStyle">
+				
+				@import "css/lexit_table.css";		
+				@import "css/jquery-ui.css";
+				@import "css/jquery-ui.structure.css";
+				@import "css/jquery-ui.theme.css";
+				@import "css/tipTip.css";
+				@import "css/jquery.contextMenu.css";
+				@import "prettify/prettify.sunburst.css";
+				@import "css/buttons.dataTables.css";
+				
+	</style>
+	<!--
+				prettify.sunburst required by jquery.contextMenu
+	-->
+	
+	
+	
+	<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+	<!--
+				jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8
+	-->
+	
+	<!-- 
+	Javascript import with needed functionalities:
+	
+	jquery            : JS extension
+	jquery.extensions : jQuery extension with handy functions like endsWith(), startsWith() etc
+                        (https://bitbucket.org/mrshrinkray/jquery-extensions/wiki/Home)
+    jQuery-contextMenu: jQuery context menu extension (works with 'prettify')
+    					(http://medialize.github.com/jQuery-contextMenu/ 
+						 https://github.com/medialize/jQuery-contextMenu) 
+	dataTables        : Graphic user interface supporting table search, sorting, etc. for jQuery
+	                    (http://datatables.net/)
+	jeditable         : Edit In Place Plugin for jQuery
+	                    (http://www.appelsiini.net/projects/jeditable)
+	jshashtable       : reliable js implementation of HashMap
+	                    (http://www.timdown.co.uk/jshashtable/)
+	spin			  : good spinner
+	                    (http://fgnass.github.com/spin.js/)
+	tipTip		      : better tooltip function than standard html tooltips
+	                    (http://code.drewwilson.com/entry/tiptip-jquery-plugin)
+	util              : all kinds of INL-made utilities
+	-->
+		
+	<!-- 
+	
+	Lex'it javascript functions are spread among different name spaces:
+	
+	cm  : Context menus
+	conf: Configurator (process configuration)
+	fn	: User Functions, the functions designed to configurate the client
+	gui : Graphic User Interface functions
+	head: Table header
+	kf  : Key functions
+	mt	: Multitable (table properties registration, taking care 
+	      of doing that for more than one table at once)
+	refr: Refresh table when browser tab is regaining focus 
+	row : Row selection
+	sf  : Search functions
+	ssr	: simple search and replace function
+	tb	: Table Builder, builds the table html frame 
+	      and the Datatable object
+	td  : Functions about table details
+	ts  : Functions about table selection
+	un	: Undo function
+	-->
+	
+	
+	<!-- Datatables stuff -->
+	
+	<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+
+	<!-- language must be loaded first, since the other modules depend on it-->
+	<script type="text/javascript" language="javascript" src="js/lexit.language.js"></script>
+	
+	
+	<!-- Export facilities-->
+	
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="js/dataTables.buttons.js"></script>
+	<script type="text/javascript" language="javascript" src="js/buttons.html5.js"></script>
+	<script type="text/javascript" language="javascript" src="js/buttons.print.js"></script>
+	
+	
+	<!-- extensions -->
+	
+	<!-- hashes -->
+	<script type="text/javascript" language="javascript" src="js/jshashtable.js"></script>
+	<!-- general (Lex'it) util functions -->
+	<script type="text/javascript" language="javascript" src="js/util.js"></script>
+	<!-- editable html -->
+	<script type="text/javascript" language="javascript" src="js/jquery.jeditable.1.7.3.js"></script>
+	<!-- cookies management -->
+	<script type="text/javascript" language="javascript" src="js/jquery.cookie.js"></script>
+	<!-- jquery ui -->
+	<script type="text/javascript" language="javascript" src="js/jquery-ui.js"></script>
+	<!-- tooltips -->
+	<script type="text/javascript" language="javascript" src="js/jquery.tipTip.js"></script>
+	<!-- contextMenu -->
+	<script type="text/javascript" language="javascript" src="js/jquery.contextMenu.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.ui.position.js"></script>
+	<!-- <script type="text/javascript" language="javascript" src="prettify/prettify.js"></script> -->
+	<!-- spinner -->
+	<script type="text/javascript" language="javascript" src="js/spin.js"></script>
+	<!-- browser detection -->
+	<script type="text/javascript" language="javascript" src="js/browserdetection.js"></script>
+	
+	
+	
+	<!-- Lex'it code -->
+	
+	<script type="text/javascript" language="javascript" src="js/lexit.searchFunctions.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableDetails.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.simpleSearchAndReplace.js"></script>	
+	<script type="text/javascript" language="javascript" src="js/lexit.gui.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_header.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_refresh.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.gui_rowselect.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.keys.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableSelection.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.multitables.js"></script>	
+	<script type="text/javascript" language="javascript" src="js/lexit.formview.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.lists.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.usersmanagement.js"></script>
+	
+	<!-- extra custom dataTables functions as an extension to the standard installation -->
+	
+	<script type="text/javascript" language="javascript" src="js/lexit.dataTables.extension.js"></script> 
+	<script type="text/javascript" language="javascript" src="js/lexit.configurator.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.configfunctions_fn.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.configfunctions_fx.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.tableBuilder.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.undo.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.contextMenus.js"></script>
+		
+	<script type="text/javascript"  charset="utf-8">
+	
+	// *********************************************************************************************************
+	
+	// CONSTANTS
+	
+	// INL Home url, as a regex like: /(...)/
+	// current value should catch both 'inl' as 'ivdnt' domains
+	var INL_HOMEURL = /(inl\.loc|ivdnt\.loc|localhost)/;
+	
+	// base url for all http requests
+	var BASE_URL = "../lexit2";
+	var WEBSERV_URL = BASE_URL + "/webservice";
+	
+	// Argument separator within single string 
+	// this will be loaded from webservice (so we're sure the same value is used both in client and server)
+	// It will be set by setInternalSeparator() at initialization time
+	var ARG_INTERNAL_SEPARATOR = null;
+	
+	// Data type returned by database when a field type is user-defined
+	var USER_DEFINED = "USER-DEFINED";
+	
+	// Name of user that has logged in, and its session-ID. This is set by fn.setCurrentUser() at initialization time
+	var USERNAME = null;
+	var SESSION_ID = null;
+
+	
+	// *********************************************************************************************************
+	
+	// configuration file variables
+	var oTableSettingsList;
+	var oHiddenTablesList;
+	var oTableConfigurationList;
+	var aFullConfigFilesList = 	new Array(); 	// list of projects config files on server
+	
+	// spy datatables object
+	var oSpyTable;
+	
+	// about the database
+	var asTableNames = 			new Array();	// list of database tables names	
+	var asTableDescriptions =	new Array();	// list of database tables descriptions (visible to user)
+	var asTableComments = 		new Array();    // list of database tables comments (in the GUI called 'notities'),
+												// that can be typed in by clicking onto the table name (in the table header) in the GUI, 
+												// and which are also visible through html 'title' attribute
+	var asTableTypes = 			new Array();	// list of database tables types ('base table', 'view')
+	var abTableVisible = 		new Array();	// list of database tables visibility (available to user)	
+		
+	// state variables
+	var originalBgColor;
+	
+	// tooltips in table allowed by user or not (default is true)
+	var bTooltipsAllowedInTable = true;
+	
+	// Should we compute quick estimates (for sake of speed) ?
+	// Yes we do, so the value is 'false', 
+	// but this might be temporarily manually set to 'true' by user (for a table refresh)
+	var bForceExactCount = false;
+	
+	// In case only one single table is available to the user to choose from,
+	// this table will be opened automatically (default value 'true')
+	// This behaviour can be switched off by calling fn.preventAutomaticStartup() in config.js file
+	var bOpenSingleTableAtStartup = true;
+
+	// If some action needs to be performed (eg. to restore a given situation)
+	// as soon as a tab regains or looses focus, some function can be declared to do so,
+	// by calling fn.doAtFocusGain(). The function will be store in this variable.
+	// (default is null)
+	var fnDoAtFocusGain;
+	var fnDoAtFocusLoss;
+	
+	// http parameters	
+	var paramsHash;
+	
+	// go-to funtion parameter (all info at Database.getRowNumberOfRecord)
+	var aGoToRowIds = {};
+	
+	
+	// booleans: which mode are we running?
+	var bTest;				// test mode
+	var bSpyMode;			// global spy mode (who's logged in?)
+	var bAdmin;				// administrator mode
+	var bResetUserRights;	// reset user rights mode
+
+	// Lex'it language mode
+	var sLexitLanguage;
+
+	// font size memory
+	var iFontSize = "100%";
+
+	// are we on Mac or PC?
+	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+	
+	// tell IE won't work
+	var msie = /MSIE|Trident/.test(window.navigator.userAgent);
+		
+	if (msie > 0){		
+		alert("Internet Explorer is not supported.");
+	}	
+
+	
+	// *********************************************************************************************************
+	
+	// Start up !
+	
+	
+	$(document).ready(function() {
+
+		// put INL logo
+		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
+		
+		// get http parameters
+		paramsHash = getHttpParams();
+
+		// set language to be used
+		sLexitLanguage = (paramsHash!=null && paramsHash.get("lang")!=null ?
+				paramsHash.get("lang").toLowerCase() : "nl" );
+
+		lang.setLanguage(sLexitLanguage);
+
+		// first call of webservice, to ensure creation of session
+		//sayHello();
+		
+		// set neutral internal separator
+		setInternalSeparator(function(){
+
+			// compute mode
+			computeOperatingMode();
+
+			// set current user name
+			// and start app in the right mode			
+			fn.setCurrentUser(null, function(){
+				startInRightMode();	
+			});
+			
+		});
+
+
+					
+	});	 // end of start up
+	
+	
+	// *********************************************************************************************************
+	
+	// login function must be accessible from anywhere, to be able to call it programmatically if needed
+	// ( synonym: fn.startLexitLogin() )
+	function startLexitLogin(){
+				
+		fn.prompt("LOGIN", ["Username", "Password"], ["", ""], 
+				function(resp){
+			
+					var url = WEBSERV_URL+"/api/login"; 
+			
+					$.ajax({
+						"type": "POST",
+						headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+			            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+
+						"url": url,
+						"data": {
+							"username": resp["Username"],
+							"password": resp["Password"],
+							"dummy": getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							var sResp = fn.getDbResponse(xml);
+					 		if (sResp == 'Access denied'){
+					 			fn.closeDialog();
+					 			fn.message(sResp, sResp, function(){
+					 				lexitReload();
+					 			});
+					 		}
+					 		else {
+					 			setTimeout(function(){lexitReload();}, 500);
+					 			//lexitReload();			 		
+					 		}
+					 	},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+						}
+					});
+			
+				},
+				function(){
+					// if cancel then reload
+					lexitReload();
+					
+				}
+		);
+		
+		// set password type
+		setTimeout(	function(){	
+			$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
+			fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
+			
+		}, 100);
+		
+	};
+
+	// called by $(document).ready()
+
+	function startInRightMode(){
+		
+		// if nobody has logged in
+		
+		if (!bAdmin && (paramsHash != null && paramsHash.get("db") != null) && (fn.getCurrentUser() == null || fn.getCurrentUser() == "null")){
+			
+			// try to load a login page, if available / otherwise do normal login
+			
+			if (bTest) {
+				$.getScript(paramsHash.get("db")+".welcome.js")
+				.done(function(){					
+					// no nothing, as the login page is supposed to start the lexit login programmatically
+				})
+				.fail(function(jqxhr, settings, exception){
+					// if no login page is available, do normal login
+					startLexitLogin();
+				});
+			}
+			
+			// normal mode (production)
+			else {
+				var url = WEBSERV_URL+"/api/get_welcome_page";
+				
+				$.ajax({
+					"type": "GET",
+					"url": url,
+					"dataType": "script",
+					"data": {
+						"db_name": paramsHash.get("db"),
+						"dummy": getUniqueNumber()
+					},
+					"success": function(){						
+						// no nothing, as the login page is supposed to start the lexit login programmatically
+					},
+					"error": function(jqxhr, settings, exception){
+						// if no login page is available, do normal login
+						startLexitLogin();
+					}
+				});
+			}
+			
+			
+			
+			
+			
+		}
+		
+		// admin mode
+		
+		else if (bAdmin) {
+			
+			fn.prompt("ADMIN LOGIN", ["Username", "Password"], ["admin::disabled", ""], 
+					function(resp){
+				
+						// temporarily turn off the Chrome fix
+						// this is needed to allow reloading, without triggering a dialog in Chrome preventing it!
+						$(window).off('beforeunload'); 
+				
+						$.ajax({
+							"type": "POST",
+							"url": WEBSERV_URL+"/api/login",
+							"data": {
+								"username": "admin",
+								"password": resp["Password"],
+								"dummy": getUniqueNumber()
+							},
+							"dataType": "xml", // get response as xml
+							"success": function(xml) {
+								
+								var sResp = fn.getDbResponse(xml);
+						 		if (sResp == 'Access denied'){
+						 			fn.closeDialog();
+						 			fn.message(sResp, sResp, function(){
+						 				lexitReload();
+						 			});
+						 		}
+						 		else {
+						 			
+						 			lexitusers.updateOverviewOfUsersAndRoles( function(){lexitusers.showMenu();} );
+						 																	 		
+						 		}
+						 	},
+							"error": function(jqXHR, textStatus, errorThrown){
+								
+								fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+							}
+						});
+						
+						
+				
+					},
+					function(){
+						lexitReload();
+					}
+			);
+			
+			// set password type
+			setTimeout(	function(){	
+				$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
+				fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
+			}, 100);
+		}
+
+		// global spy mode (logging info)
+		else if (bSpyMode) {
+			buildSpy();
+		}
+
+		// reset user rights
+		else if (bResetUserRights){
+			var url = WEBSERV_URL+"/api/reset_user_rights";
+
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"dataType": "xml", // get response as xml
+				"success": function(xml) {
+					var sResp = fn.getDbResponse(xml);
+					fn.message(lang.reset, lang.response+ ": " + sResp);
+				},
+				"error": function(jqXHR, textStatus, errorThrown){
+
+					fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+				}
+			});
+		}
+
+		// test mode (development)
+		else if (bTest) {
+			$.getScript("projects_overview.js")
+					.done(function(){
+
+						// The ajax call gets the list of declared projects out of the projects overview file.
+						// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
+						// In the end, this function will call initialize();
+						getConfigFilesList();
+
+					})
+					.fail(function(jqxhr, settings, exception){
+						fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+					});
+		}
+
+		// normal mode (production)
+		else {
+			var url = WEBSERV_URL+"/api/get_projects_overview";
+
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"dataType": "script",
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"success": function(){
+
+					// The ajax call gets the list of declared projects out of the projects overview file.
+					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
+					// In the end, this function will call initialize();
+					getConfigFilesList();
+
+				},
+				"error": function(jqxhr, settings, exception){
+					fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+				}
+
+			});
+
+		}
+	}
+
+
+	// compute operating mode
+
+	function computeOperatingMode(){
+		
+		// administrator mode
+		
+		bAdmin = (paramsHash!=null &&
+				paramsHash.get("db")!=null && 
+				paramsHash.get("db")=='admin');
+
+		// Are we in development (test) mode?
+		// if so, we'll be loading the file from webcontent (with $.getScript)
+		// if not, we'll be loading the file from the configuration directory (with ajax call to webservice, which is the normal mode)
+
+		bTest = (paramsHash!=null &&
+				paramsHash.get("test")!=null &&
+				paramsHash.get("test")=='true');
+
+		// are we getting a look into the active users list?
+
+		bSpyMode = (paramsHash!=null &&
+				paramsHash.get("db")!=null &&
+				paramsHash.get("db")=='spy');
+
+		// are we resetting the user rights?
+
+		bResetUserRights = (paramsHash!=null &&
+				paramsHash.get("db")!=null &&
+				paramsHash.get("db")=='reset_user_rights');
+	}
+	
+		
+	// spy mode
+		
+	function buildSpy(){
+		
+		var url = WEBSERV_URL+"/api/get_users";
+		
+		$.ajax({
+			type: "GET",
+			url: url,
+			data: {},
+			dataType: "xml",
+			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+			success: function(xml) {
+				
+				// build the table if it doesn't exist yet
+				if ( !$("#spytable").elementExists() ) {
+					var spyDiv = $("<div></div>")
+					.attr("id", "#spytable");
+				
+					var spyTable = $("<table></table>")
+						.attr("id", "spytable")
+						.addClass("display")
+						.attr("cellspacing", "0")
+						.css("width", "90%");
+					
+					var thead = $("<thead></thead>");
+					var thead_tr = $("<tr></tr>");
+					thead_tr.append( $("<th></th>").text("project_name") );
+					thead_tr.append( $("<th></th>").text("active_user") );
+					thead_tr.append( $("<th></th>").text("session_id") );
+					thead_tr.append( $("<th></th>").text("active_tab") );
+					thead_tr.append( $("<th></th>").text("last_active") );
+					thead_tr.append( $("<th></th>").text("status") );
+					thead.append(thead_tr);
+					spyTable.append(thead);
+					
+					var tfoot = $("<tfoot></tfoot>");
+					var tfoot_tr = $("<tr></tr>");
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot.append(tfoot_tr);
+					spyTable.append(tfoot);
+					
+					var tbody = $("<tbody></tbody>");
+					
+					spyTable.append(tbody);
+					spyDiv.append(spyTable);				
+					$("#dynamic").append(spyDiv);
+					
+					spyDiv
+					.css("position", "absolute")
+					.css("top", "100px")				
+					.css("width", "80%");
+					
+					oSpyTable = $('#spytable').DataTable({
+						"dom": '<"top"f>t',
+						"pageLength": 100,
+						"language": {
+							"search": "Filter: "
+						}
+					}).column(2).order('desc').draw();
+					
+					
+					// remove unneeded links
+					$("#headerlinks").hide();
+					
+				}
+				
+				// remove rows from previous cycle
+				oSpyTable.rows().remove();
+				
+				// add the current info to the table
+				$(xml).find("user").each(function(){
+					
+					var UsersItems = $(this).find("item");
+					
+					oSpyTable.row.add([
+						UsersItems.eq(0).text(),
+						UsersItems.eq(1).text(),
+						UsersItems.eq(2).text(),
+						UsersItems.eq(3).text(),
+						UsersItems.eq(4).text(),
+						UsersItems.eq(5).text()
+						]);
+					});
+				
+				// sort by column 'last_active'
+				oSpyTable.draw();					
+				
+				// refresh after few seconds
+				setTimeout(function(){ buildSpy(); }, 2000);
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
+			}
+		});
+	};
+
+
+	function sayHello(){
+
+		var url = WEBSERV_URL+"/hello/lexit";
+
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				// nothing to do
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message(lang.error, lang.saying_hello_failed +"<br><br>" +lang.error +": ["+exception+"]");
+			}
+		});
+	}
+	
+	
+	// get internal separator in use in webservice  
+	// and set the same separator in this client
+	
+	function setInternalSeparator(fnCallback){
+		
+		var url = WEBSERV_URL+"/api/get_neutral_separator";
+		
+		$.ajax({
+			"async": false, // needed to block code execution while awaiting the server response
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				ARG_INTERNAL_SEPARATOR = fn.getDbResponse(xml);
+
+				fnCallback();
+			},
+			"error": function(jqxhr, settings, exception){
+
+				fn.message(lang.error, lang.reading_internal_separator_failed +"<br><br>" +lang.error +": ["+exception+"]");
+			}
+		});
+	}
+
+
+
+	// tell the webservice which tab is currently active
+	// in the current session
+
+	function sendActiveTabIdToService(sPageId){
+		
+		if (	USERNAME == 'null' // this happens when the fn.setCurrentUser() function returned null username (as a string indeed)
+				|| 
+				paramsHash == null || paramsHash.get("db") == null || paramsHash.get("db") == 'spy'
+			)
+			return;
+
+		var url = WEBSERV_URL+"/api/set_active_tab_id";
+
+		$.ajax({
+			"async": false, // needed to block code execution while awaiting the server response
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"db_name": paramsHash.get("db"),
+				"active_tab_id": sPageId,
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				// nothing to do
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
+			}
+		});
+	}
+	
+	
+	// Get full list of projects config files from server.
+	// We'll need this to be able to show projects which are not declared (yet?) in the projects overview file:
+	// the list will lack descriptions, but at least the projects will be shown and will be clickable!
+	
+	function getConfigFilesList(){
+
+		// if some project was selected already, no need to get the list, 
+		// initialize straight away!
+		if (paramsHash!=null &&	paramsHash.get("db")!=null){
+			initialize();
+		}
+		else {
+
+			// this might take a while, so put spinner
+			showSpinner("#dynamic", true);
+			
+			var url = WEBSERV_URL+"/api/get_configfiles_list";
+			
+			$.ajax({
+				"type": "GET",
+				"url": url,
+				"dataType": "xml", // get response as xml
+				"data": {
+					"dummy": getUniqueNumber()
+				},
+				"success": function(xml){
+					
+					var sList = fn.getDbResponse(xml);
+					aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
+
+					// remove spinner
+					removeSpinner("#dynamic");
+					
+					// go!
+					initialize();
+				},
+				"error": function(jqxhr, settings, exception){
+					fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
+				}
+			});
+
+		}
+
+	}
+	
+	// end of : called by $(document).ready()
+	
+	
+	
+	// *********************************************************************************************************
+	
+	// Initialize the application.
+	// This happens once the libraries are fully loaded and we have a list of all projects 
+	// ( which is which this function will be called by getConfigFilesList )
+	
+	function initialize(){	
+		
+		// generate unique id for this page
+		// we will need this to detect page focus/blur in a reliable way
+		var sPageId = getUniqueNumber();
+		$("#page_id").attr("name", sPageId);
+		$.cookie('active_lexit_window', sPageId);
+		sendActiveTabIdToService(sPageId);
+		
+		// user instruction for accessing tables
+		$("#indicator").empty().append(
+				$("<span></span>")
+				.html(lang.choose_a_table)
+				);
+		
+		// get url parameters		
+		if (paramsHash == null || paramsHash.get("db") == null) {
+			showListOfProjects();
+		}
+		else {			
+			// Normal case: start opening project
+		
+			// Assign key functions
+			// This needs to be called here because it has global scope
+			// and recalling it at each new table creation will alter other key functions 
+			// which then malfunction (because of unbinds)
+			kf.addKeyFunctions();
+			
+			
+			// load the specific client configuration file for the required database
+			// and get the list of tables (getScript never reads this file from cache)
+			
+			
+			// test mode (development)
+			if (bTest) {
+				$.getScript(paramsHash.get("db")+".config.js")
+				.done(function(){
+					
+					var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
+					ts.getListOfTables( paramsHash.get("table"), 
+							oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );
+					
+					// prevent Chrome bug (sometimes pressing backslash causes navigating away)
+					if (bowser.chrome)
+						$(window).bind('beforeunload', function(){   
+							return false;
+						});
+				})
+				.fail(function(jqxhr, settings, exception){
+					fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
+				});
+			}
+			
+			// normal mode (production)
+			else {
+				var url = WEBSERV_URL+"/api/get_configfile";
+				
+				$.ajax({
+					"type": "GET",
+					"url": url,
+					"dataType": "script",
+					"data": {
+						"db_name": paramsHash.get("db"),
+						"dummy": getUniqueNumber()
+					},
+					"success": function(){
+						
+						var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
+						ts.getListOfTables( paramsHash.get("table"), 
+								oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings );
+						
+						// prevent Chrome bug (sometimes pressing backslash causes navigating away)
+						if (bowser.chrome)
+							$(window).bind('beforeunload', function(){   
+								return false;
+							});
+					},
+					"error": function(jqxhr, settings, exception){
+						fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
+					}
+				});
+			}
+			
+			
+			
+			// show message or warning for this project, if available
+			
+			var oProjectObject = getProjectObject(paramsHash.get("db"));
+
+			// set a default project name for display on screen (and set front character in uppercase)
+			// this default name might be overwritten by configuration in project_overview.js, if some project 'name' was set there
+			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
+
+			if (typeof oProjectObject != 'undefined') {
+				
+				// message
+				if (typeof oProjectObject["message"] != 'undefined') {
+					var sWarning = oProjectObject["message"];
+					var bPrivate = (typeof oProjectObject["private"] != 'undefined') ?
+						oProjectObject["private"] : false; // default is 'false'
+					var fnMsgCallback = (typeof oProjectObject["message_callback"] != 'undefined') ?
+								oProjectObject["message_callback"] : null;
+						 
+					// show warning message if available
+					if (	sWarning != '' &&   
+							// except if it should be kept private to home
+							!(bPrivate && (document.URL).regexIndexOf( INL_HOMEURL )<0 ) 
+						){
+						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
+						console.log("warning for project '"+paramsHash.get("db")+"': "+sWarning);
+						}
+				}
+				
+				// redirect to other URL (rare, but it has been required in the past)
+				if (typeof oProjectObject["redirect"] != 'undefined') {
+					window.location.href = oProjectObject["redirect"];
+				}
+
+				// is some project name was set, overwrite the default one
+				if (typeof oProjectObject["name"] != 'undefined') {
+					sProjectName = oProjectObject["name"];
+				}
+			}
+
+
+			// show the project name at the top of the screen
+			fn.setProjectTitle(sProjectName);
+		}
+		
+	};
+	
+	
+	
+	// *********************************************************************************************************
+	
+	// called by initialize()
+	
+	
+	// get table filters from url if available (... &filter_a=... & filter_b=...)
+	function getTableFiltersAndSettings(paramsHash){
+		
+		var oContentToMatch = new Array();
+		var oExtraSettings = new Array();
+		for (var i=0; i<paramsHash.keys().length; i++) {
+			var sOneParam = paramsHash.keys()[i];
+			// read all parameters, except 'db' and 'table', since we process those elsewhere
+			if ( $.inArray(sOneParam, ["db", "table"])<0 ) {
+				// table setting parameters
+				if ($.startsWith(sOneParam, "setting.")) {
+					var sTrueSettingName = sOneParam.replace("setting.", "");
+					oExtraSettings[sTrueSettingName] = paramsHash.get(sOneParam);					
+				}
+				// table filters
+				else {
+					oContentToMatch[sOneParam] = paramsHash.get(sOneParam);
+				}				
+			}
+		}
+		
+		return { 
+			contentToMatch: oContentToMatch,
+			extraSettings: oExtraSettings
+		};
+	}
+	
+	
+	
+	
+	// get technical database info and show it in a pop-up 
+	function showDatabaseInfo(sDbName){
+		
+		var url = WEBSERV_URL+"/api/get_dbinfo";
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"data": {
+				"db": sDbName,
+				"dummy": getUniqueNumber()
+			},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {
+				var sResp = fn.getDbResponse(xml);
+		 		fn.message(lang.database_info, sResp);
+		 	},
+			"error": function(jqXHR, textStatus, errorThrown){
+				
+				fn.message(lang.error, "'"+sDbName+"' " +lang.file_is_missing+ ": " + textStatus+" "+errorThrown);
+			}
+		});
+		
+	}
+
+	
+	// generate a welcome page with a project overview 
+	// (projects have to be declared and described in file 'projects_overview.js' so as to be show here)
+	function showListOfProjects(){
+		
+		var sCurrentURL = document.URL;
+		
+		// keep this list private to internal environment
+		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
+
+			$("#indicator").empty().append(
+				$("<span></span>")
+					.html("<br><h2>" +lang.welcome+ "</h2>" +lang.choose_a_project+ ":<br><br>")
+			);
+			
+			var docOpenTitle = $("<span></span>").html("<b>" +lang.production+ "</b>");
+			var docOpen = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#D0F5A9");
+			
+			var goodiesTitle = $("<span></span>").html("<b>" +lang.goodies+ "</b>");
+			var goodies = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#A9E2F3");
+			
+			var docDevelopmentTitle = $("<span></span>").html("<b>" +lang.in_development+ "</b>");
+			var docDevelopment = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#EFEFFB");
+			
+			var docClosedTitle = $("<span></span>").html("<b>" +lang.project_closed+ "</b>");
+			var docClosed = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#F8E0E0");
+			
+			var docUnknownTitle = $("<span></span>").html("<b>" +lang.project_unknown+ "</b>");
+			var docUnknown = $("<table></table>")
+				.css("border", "dotted black 1px")
+				.css("background", "#F2F2F2");
+			
+			
+			// process list of all config files
+			var aKnownConfigFilesList = new Array();
+			
+			// get list of known projects in projects overview
+			for (var i=0; i<aProjectList.length; i++) {
+				aKnownConfigFilesList.push(aProjectList[i]["config_filename"]);				
+			}
+			
+			// now, if some configfile is no part of the projects overview list, 
+			// it will be added to it as part of the 'unknown projects' category
+			// (so it will appear as such in the menu)
+			for (var i=0; i<aFullConfigFilesList.length; i++) {
+
+				var sOneConfigFile = aFullConfigFilesList[i];
+				
+				// if server return some description/message, set it
+
+				var aOneConfigFile = sOneConfigFile.split(":::");
+				var sOneDescription = lang.unknown;	// default: 'unknown'
+				if (aOneConfigFile.length>1){
+					sOneConfigFile  = aOneConfigFile[0];
+					sOneDescription = aOneConfigFile[1];
+				}
+
+				// add unknown project
+
+				if (aKnownConfigFilesList.indexOf(sOneConfigFile) < 0) {
+					aProjectList.push({
+						"name": sOneConfigFile,
+						"config_filename": sOneConfigFile,
+						"description": sOneDescription,
+						"unknown": true
+				 	});
+				}
+			}
+			
+			
+			// build menu now!
+			for (var i=0; i<aProjectList.length; i++){
+
+				// set project name to be rendered and a project link to be clicked upon
+
+				var sProjectLinkPart = aProjectList[i]["config_filename"];
+				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"")+
+					( sCurrentURL.indexOf("lang=")>-1 ? "&lang="+sCurrentURL.substring(sCurrentURL.indexOf("lang=")+"lang=".length, sCurrentURL.indexOf("lang=")+"lang=".length+2):"");
+				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
+				
+				var sProjectDescription =
+					"<td style='text-align: left; width: 10px'>"+
+					(typeof aProjectList[i]["goody"] == 'undefined' ? 
+							"<A style='text-decoration: none; color: #A4A4A4;' "+ 
+							"   title='"+sProjectName+"' "+
+							"   href='#' "+
+							"   onclick='showDatabaseInfo(\""+sProjectLinkPart+"\"); return false;' "+
+							"   target='_blank'>&#9830;</A>" : "")+
+					"</td>"+
+					"<td style='text-align: right; width: 400px'>"+
+					"<A href='"+sProjectLink+"'><B>"+sProjectName+
+					"</B></A></td><td>" +					 
+					"</td>"+
+					"<td style='text-align: left; width: 700px'>" +
+					(typeof aProjectList[i]["description"] != 'undefined' && aProjectList[i]["description"] != "" ? 
+						" : <I>"+aProjectList[i]["description"]+"</I>" : "") + 
+					"</td>";
+				
+				var eProjectDiv = $("<tr></tr>").html(sProjectDescription);
+				
+				// Put the project in the right category:
+				
+				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"]) {
+					goodies.append(eProjectDiv)
+				}
+					
+				// project is closed
+				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"]) {
+					docClosed.append(eProjectDiv)
+				}
+				
+				// project is unknown
+				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"]) {
+					docUnknown.append(eProjectDiv);
+				}
+				
+				// project is open
+				else {
+					// production
+					if (typeof aProjectList[i]["production"] != 'undefined' && aProjectList[i]["production"])
+						docOpen.append(eProjectDiv);
+					// development
+					else
+						docDevelopment.append(eProjectDiv);
+				}
+			}
+			
+			// make sure each table is still visible, when it's empty 
+							
+			$("#page").append(docOpenTitle);
+			$("#page").append(_deEmptyMenuList(docOpen));
+			$("#page").append($("<br>"));			
+			$("#page").append(goodiesTitle);
+			$("#page").append(_deEmptyMenuList(goodies));
+			$("#page").append($("<br>"));
+			$("#page").append(docDevelopmentTitle);
+			$("#page").append(_deEmptyMenuList(docDevelopment));
+			$("#page").append($("<br>"));
+			$("#page").append(docClosedTitle);
+			$("#page").append(_deEmptyMenuList(docClosed));	
+			$("#page").append($("<br>"));
+			$("#page").append(docUnknownTitle);
+			$("#page").append(_deEmptyMenuList(docUnknown));
+			
+			
+		}
+		else {
+			fn.message(lang.error, lang.access_denied);
+		}
+		
+	}
+	
+	// subroutine: make sure an empty menu list is visible, by addind an empty line
+	function _deEmptyMenuList(docList){
+		
+		var eEmptyCell = "<td style='text-align: right; width: 400px'>&nbsp;</td>"+
+		"<td>&nbsp;</td><td style='text-align: left; width: 700px'>&nbsp;</td>";
+		var eEmptyLine = $("<tr></tr>").html(eEmptyCell);
+		
+		return ( !$(docList).find("tr").length ) ? docList.append(eEmptyLine) : docList;
+		
+	}
+	
+	
+	// get all the properties belonging to the description of a project
+	function getProjectObject(sDbName){
+		
+		var oObjectToReturn;
+		
+		for (var i=0; i<aProjectList.length; i++) {
+			if (aProjectList[i]["config_filename"] != sDbName) {
+				continue;
+			}
+			else {
+				oObjectToReturn = new cloneObject(aProjectList[i]);
+				break;
+			}
+		}
+		return oObjectToReturn;
+	}
+	
+	function lexitReload(){
+		// temporarily turn off the Chrome fix
+		// this is needed to allow reloading, without triggering a dialog in Chrome preventing it!
+		$(window).off('beforeunload');
+		location.reload();
+	}
+	
+	
+	// end of : called by initialize()
+	
+	// *********************************************************************************************************
+		
+	</script>
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	
+	  ga('create', 'UA-47548163-1', 'inl.nl');
+	  ga('send', 'pageview');
+	
+	</script>	
+	
+</head>
+
+<body class="default">
+	<div id="page">
+		<div id="headergroup" class="default">
+			<div id="square_logo" class="default"></div>
+			<div id="home_logo" class="default"></div>
+			<div id="projectname" class="default"></div>
+			<div id="headerlinks" class="default">
+				<span id="help_link">Help</span>
+				<span id="about_link">About</span>
+				<span id="contribute_link">Contribute</span>
+			</div>
+		</div>
+		
+		<div id="indicators" class="default">
+			<div id="indicator"></div>
+			<div id="tablechoice"></div>			
+		</div>
+				
+		<div id="container">
+	
+			<div id="dynamic">
+			
+				<!--  this is the table container -->
+				
+			</div>	
+			<div id="temporary_stuff">
+				<!-- this is some container for temporary stuff -->
+			</div>	
+		</div>
+	</div>
+	<div id="page_id" style="visibility: hidden"></div>	
+</body>
+</html>
