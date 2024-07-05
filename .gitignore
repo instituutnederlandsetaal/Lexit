@@ -5,5 +5,4 @@ target/
 **/js/*.BAK
 /target/
 src/main/webapp/*.config.js
-etc/
-/etc/
+src/main/webapp/*.library.js

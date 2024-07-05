@@ -1,0 +1,19 @@
+#
+#
+# WARNING: The Lex'it schema is an access control database, which means
+# that it holds the usernames, passwords and access roles of all Lex'it users.
+#
+# Be very cautious: Leave the management of this database to Lex'it. 
+# Use the admin GUI to add users and define their roles. The admin GUI can be 
+# accessed at:
+#
+# 	http://<your_host>:8080/lexit2/?db=admin
+#
+# NB: the recommended default database name is LEXIT_SCHEMA, but you might want
+# to call it otherwise (see: value of db parameter).
+#
+db=LEXIT_SCHEMA
+schema=public
+host=yourhost.com
+user=username
+pass=password
