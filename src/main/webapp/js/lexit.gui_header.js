@@ -352,9 +352,6 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 			customButton = $("<button/>")
 			.attr("id", sSomeTableName+"_button_"+i)
 			.attr("type", "button")
-			.css("background-color", sButtonBgColor)
-			.css("color", sButtonTextColor)
-			.addClass("header_button")
 			.attr("name", i) // give button its number as name attribute
 			.html(sButtonName)
 			.bind("click", function(){
@@ -368,11 +365,9 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		// menu button
 		else {
 			customButton = $("<select/>")
-			.attr("id", sSomeTableName+"_button_"+i)
-			.css("background-color", sButtonBgColor)
-			.css("color", sButtonTextColor)			
-			.attr("name", i) // give button its number as name attribute
-			.addClass("header_button");
+			.attr("id", sSomeTableName+"_button_"+i)						
+			.attr("name", i); // give button its number as name attribute
+			
 			
 			// append all the options
 			for (sOneOption in aButtonMenu)
@@ -415,9 +410,16 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		if (sToolTip != null)
 			customButton.attr("title", sToolTip).addClass("tooltip");
 		
-		// add class
-		if (sButtonClass != null)
+		
+		// apply style...
+		customButton.css("background-color", sButtonBgColor)
+			.css("color", sButtonTextColor)
+			.addClass("header_button")
+			
+		// ... and add class if available!
+		if (sButtonClass != null) {
 			customButton.addClass(sButtonClass);
+		}		
 		
 		// add label (for select buttons) 
 		if (aButtonMenu != null)

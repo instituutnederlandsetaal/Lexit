@@ -468,7 +468,8 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 						}
 					}
 
-					fn.prompt("Add row", aColumnsForGUI, aPreFilledInValues, function(resp){
+					var sAddRowTitle = (oAdd["title"] != null ? oAdd["title"] : lang.formlist_add_row);
+					fn.prompt(sAddRowTitle, aColumnsForGUI, aPreFilledInValues, function(resp){
 
 						// First: if we have a list of values to be copied, add those to the record.
 						// (in theory, this might replace some values typed in the dialog)

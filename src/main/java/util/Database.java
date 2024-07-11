@@ -1261,6 +1261,12 @@ public class Database {
 					
 					args[i] = ( !args[i].startsWith("'") ) ? (args[i]).replaceAll("([^'])(')$", "$1$2$2") : args[i];
 					
+					
+					// special case
+					// (single quote must be escaped, and it needs quotes around it (otherwise it would be interpreted as empty string)
+					args[i] = (args[i]).replaceAll("^(')$", "''''");
+					
+					
 					// last step:
 					// add quotes around string iff they are missing!
 					if (!(args[i].startsWith("'") && args[i].endsWith("'")) ) {
@@ -3692,7 +3698,7 @@ public class Database {
 		try {
 			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };		
+			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
 			
 			ResultSet rs = dc.sendPreparedQuery(commentsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"name", "comment"});

@@ -2051,7 +2051,7 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 };
 conf.getHeaderButtonClass = function(aButtonSettings){
 	if (typeof aButtonSettings["class"] == 'undefined')
-		return "white";
+		return null;
 	return aButtonSettings["class"];
 }; 
 

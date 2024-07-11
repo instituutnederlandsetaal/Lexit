@@ -485,6 +485,44 @@ form.buildViewGrid = function(sTableName){
 	$("#"+sTableName+"_dynamic .bottom_pane").hide();
 	$("#"+sTableName+"_dynamic .export_pane").hide();	
 	
+	
+	// ------------------------------------------
+	// text blocks loop
+	// ------------------------------------------
+	
+	var oTextBlocks =  oFormGrid["textblocks"];
+	for (var sTextBlockName in oTextBlocks){
+
+		var oTextBlock = 	oTextBlocks[sTextBlockName];
+		var aPosition = 	oTextBlock["position"];
+		var aBlockSize = 	oTextBlock["definition"];
+		var sBlockClass = 	oTextBlock["class"];
+		var sBlockText = 	oTextBlock["text"];
+		
+		if (aPosition == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{position}}"));
+			return;
+		}
+		if (aBlockSize == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{definition}}"));
+			return;
+		}
+		
+		var eTextBlock = $("<div></div>")
+				.attr("id", "form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+				.addClass(sBlockClass)
+				.append(
+					$("<span></span>").text(sBlockText)
+				);		
+		$(eFormParent).append(eTextBlock);
+		
+		$("#"+sTableName+"_wrapper #form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
+					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
+	}
 
 
 	// ------------------------------------------
@@ -1148,7 +1186,6 @@ form.manageViewGrid = function(sTableName){
 				conf.getEditability(oColumnConfig);
 
 
-
 			// show the data the proper way, given column data type
 
 			// checkbox
@@ -1455,7 +1492,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 		var iColIndex = $("#"+sFormAndListLabel+" thead").find("th").index(eThisCol);
 
-		// formgrid config overwrites the table config
+		// formgrid config overrides the table config
 		if (oColumnsConfig[sColName] != null){
 
 			if (oColumnsConfig[sColName]["editable"] != null)
