@@ -743,6 +743,7 @@
 			},
 			"error": function(jqxhr, settings, exception){
 				fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
+				lexitReload();
 			}
 		});
 	}
