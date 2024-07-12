@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.07.10
+	v2024.07.12
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -356,6 +356,15 @@
 	// called by $(document).ready()
 
 	function startInRightMode(){
+		
+		// prevent work in project when logged in as admin
+		// (this is needed, since a user might temporarily log in as admin so as to manage his/her access rights, and then open a project,
+		//  which he/she would there operate as an admin, which is not allowed: the admin user is for admin mode only!)
+		
+		if (USERNAME == 'admin' && !bAdmin && !bSpyMode) {
+			startLexitLogin();
+		}
+		
 		
 		// if nobody has logged in
 		

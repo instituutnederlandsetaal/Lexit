@@ -542,7 +542,7 @@ public class TableResources {
 	@Path("getcolumns")
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public TableMetadataInspector showResource( 
+	public TableMetadataInspector getColumns( 
 			@QueryParam("table") String tableName,
 			@QueryParam("db_name") String dbName,
 			@Context ServletContext context,
