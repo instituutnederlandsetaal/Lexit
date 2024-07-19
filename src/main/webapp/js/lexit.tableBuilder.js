@@ -505,11 +505,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			
 			// if the current table is the arrow keys active table
 			// then we should highlight the active row
-			if (kf.getActiveTable() == sSomeTableName && mt.getViewType(sSomeTableName) == 'table')
-				{
+			if (kf.getActiveTable() == sSomeTableName && mt.getViewType(sSomeTableName) == 'table') {
 				var nActiveRowNode = fn.getActiveRowNode(sSomeTableName);
 				$(nActiveRowNode).toggleClass('selected');				
-				}
+			}
 			
 			
 		},
@@ -533,14 +532,14 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				var sTextSize = 	conf.getTextSize(oColumnConfig);
 				
 				// background color can be the same for both odd and even rows, of different for odd and even rows
-				if (mBgColor!=null)
-					{
+				if (mBgColor!=null) {
 					var colorIndex = (iDisplayIndex%2);
 					if (typeof mBgColor=='string')
 						$('td:eq('+i+')', nRow).css( "background", mBgColor );
 					else
 						$('td:eq('+i+')', nRow).css( "background", mBgColor[colorIndex] );
-					};		
+				};	
+				
 				// other settings
 				if (sTextColor!=null)	$('td:eq('+i+')', nRow).css( "color",  sTextColor);
 				if (sTextWeight!=null) 	$('td:eq('+i+')', nRow).css( "font-weight", sTextWeight );

@@ -212,7 +212,7 @@ lists.buildLists = function(sFormTable, iListNr){
 			order: lists.getDataTableOrder(aAllColumns, oSortSettings),
 			autoWidth: false, 
 			columnDefs: aColumnDefs,
-			"language": {
+			language: {
 				"thousands": ".",
 				"search": lang.header_main_search,
 				"infoEmpty": lang.header_info_empty,
@@ -229,6 +229,16 @@ lists.buildLists = function(sFormTable, iListNr){
 				"loadingRecords": lang.loading_records,
 				"processing": "" // no processing message, we have a spinner
 			},
+			drawCallback: function( settings ) {
+				
+				var oListConfig = lists.getConfig(this);
+				
+				// if some callback was set, call it now
+				var fnCallback = oListConfig["callback"];
+				if (fnCallback != null) {
+					fnCallback( oListConfig["table"]["name"] );
+				}
+			}
 		};
 		
 
@@ -1026,10 +1036,10 @@ lists.getDataFromCell = function(sListLabel, mMixed, sColName){
 	var sThisListTableId = 	lists.buildTableId(sFormContainerId, sListLabel);
 	var oTable = 			lists.getDataTableObjectOf(sThisListTableId);
 
-	// we have 2 possible inputs: 
+	// we have these possible inputs: 
 	// 1. a row-number + a cell name
-	// or
-	// 2. a cell node
+	// 2/ a row node   + a cell name
+	// 3. a cell node
 	
 	// 1: row number
 	if (typeof mMixed == 'number'){
@@ -1042,10 +1052,60 @@ lists.getDataFromCell = function(sListLabel, mMixed, sColName){
 		var oRowData = oTable.row( iRowNumber ).data();
 		return oRowData[colNr];
 	}
-	// 2: cell node
+	// 2: row node
+	else if (typeof mMixed == 'object'){
+
+		var iRowNumber = oTable.row( mMixed ).index();
+		var sListTableName = 	lists.getFeedingTable(sListLabel);
+		var aAllColumns = 		lists.getAllColumns(sListTableName)
+
+		var colNr = $.inArray(sColName, aAllColumns);
+		var oRowData = oTable.row( iRowNumber ).data();
+		return oRowData[colNr];
+	}
+	// 3: cell node
 	else {
 		var oRowData = oTable.cell( mMixed ).data();
 		return oRowData;
+	}
+
+	// otherwise
+	return null;
+};
+
+
+lists.getCell = function(sListLabel, mMixed, sColName){
+
+	// get the DataTable object of the list
+	var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+	var sThisListTableId = 	lists.buildTableId(sFormContainerId, sListLabel);
+	var oTable = 			lists.getDataTableObjectOf(sThisListTableId);
+
+	// we have 2 possible inputs: 
+	// 1. a row-number + a cell name
+	// 2/ a row node   + a cell name
+	
+	// 1: row number
+	if (typeof mMixed == 'number'){
+
+		var iRowNumber = mMixed;
+		var sListTableName = 	lists.getFeedingTable(sListLabel);
+		var aAllColumns = 		lists.getAllColumns(sListTableName)
+
+		var colNumber = $.inArray(sColName, aAllColumns);
+		var cell = oTable.cell( iRowNumber, colNumber ).node();
+		return cell;
+	}
+	// 2: row node
+	else if (typeof mMixed == 'object'){
+
+		var iRowNumber = 		oTable.row( mMixed ).index();
+		var sListTableName = 	lists.getFeedingTable(sListLabel);
+		var aAllColumns = 		lists.getAllColumns(sListTableName)
+
+		var colNumber = $.inArray(sColName, aAllColumns);		
+		var cell = oTable.cell( iRowNumber, colNumber ).node();
+		return cell;
 	}
 
 	// otherwise
@@ -1107,17 +1167,73 @@ lists.getSelectedRows = function(sListLabel){
 /**
  * Select a particular row in a list, given its id
  * @param {String} label of the list 
- * @param {String} id of the row (primary key in database terms) 
+ * @param {Array|String} associative array of column names and values OR id of the row (primary key in database terms) 
  */
-lists.selectRow = function(sListLabel, sRowId){
+lists.selectRow = function(sListLabel, mMixed){
 
-	// get the DataTable object of the list
-	var sFormContainerId = lists.getFormContainerId(sListLabel);
-	var sThisListLabelId = lists.buildTableId(sFormContainerId, sListLabel);
-	var eRow = $("#"+sThisListLabelId).find("tr#"+sRowId);
-	if ( !eRow.hasClass("selected"))
-		eRow.addClass("selected");
+	var eRow = lists.getRow(sListLabel, mMixed);
+	if ( eRow!= null && !$(eRow).hasClass("selected"))
+		$(eRow).addClass("selected");
 }
+
+/**
+ * Get a particular row in a list, given its id
+ * @param {String} label of the list 
+ * @param {Array|String} associative array of column names and values OR id of the row (primary key in database terms) 
+ */
+lists.getRow = function(sListLabel, mMixed) {
+	
+	// input is array of fields and values
+	
+	if (typeof mMixed === 'object') {
+		
+		var oFieldsAndValuesToMatch = mMixed;
+
+		// get the DataTable object of the list
+		var sFormContainerId = 		lists.getFormContainerId(sListLabel);
+		var sThisListLabelId = 		lists.buildTableId(sFormContainerId, sListLabel);
+		var oTable = 				$("#"+sThisListLabelId).DataTable();
+		
+		var sThisListLabel = 		lists.getLabelFromDataTableObject(oTable);
+		var sThisListTableName =	lists.getFeedingTable(sThisListLabel);
+		var aAllColumns = 			lists.getAllColumns(sThisListTableName);
+
+		// get the row id
+		var sRowId = null;
+		var aRows = oTable.rows().data();
+		for (var i = 0; i < aRows.length; i++) {
+			var bMatch = true;
+			for (var sColName in oFieldsAndValuesToMatch) {
+				var iColIndex = $.inArray(sColName, aAllColumns);
+				if (aRows[i][iColIndex] != oFieldsAndValuesToMatch[sColName]) {
+					bMatch = false;
+					break;
+				}
+			}
+			if (bMatch) {
+				sRowId = oTable.row(i).node().id;
+				break;
+			}
+		}
+		
+		if (sRowId == null) return null;
+		return $("#" + sThisListLabelId).find("tr#" + sRowId).get(0);
+	}
+	
+	// input is row ID
+	
+	else {
+		
+		var sRowId = mMixed;
+
+		// get the DataTable object of the list
+		var sFormContainerId = lists.getFormContainerId(sListLabel);
+		var sThisListLabelId = lists.buildTableId(sFormContainerId, sListLabel);
+		return $("#" + sThisListLabelId).find("tr#" + sRowId).get(0);
+	}
+}
+
+
 
 /**
  * Programmatically click on the 'open' icon in the currently selected row of a list

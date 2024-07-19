@@ -405,6 +405,15 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	} );
 };
 
+/**
+ * Get the current schema name
+ * (this is to be used to keep track of what was set with fn.setSchema)
+ */
+fn.getCurrentSchema = function(){
+	
+	return setSchemaNameCache;	
+}
+
 
 
 
@@ -441,6 +450,19 @@ fn.tableExists = function(sSomeTablename){
 	return $("div#"+sSomeTablename+"_wrapper").elementExists();
 		
 };
+
+
+
+/**
+ * Synonym of fn.tableExists
+ * 
+ * @see fn.tableExists
+ */
+fn.tableIsOpen = function(sSomeTablename){
+	
+	return fn.tableExists(sSomeTablename);
+		
+}
 
 
 /**
@@ -1192,6 +1214,8 @@ fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComme
 	if (sTableDescription == null)	sTableDescription = '';
 	if (sType == null)	sType = '';
 	if (sTableComment == null)	sTableComment = '';
+	if (oConfiguration == null)	oConfiguration = {};
+	if (oSettings == null)	oSettings = {};
 	
 	
 	// register each table details
@@ -1513,7 +1537,7 @@ fn.removeProcessingMsg = function(sSomeTablename){
  * Remove/close a table
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
- * @param {Function} fnCallback - Some function to call after the table if closed 
+ * @param {Function} fnCallback - Some function to call after the table is closed 
  */
 fn.closeTable = function(sSomeTablename, fnCallback){
 	if (typeof sSomeTablename == 'object')
@@ -1522,6 +1546,30 @@ fn.closeTable = function(sSomeTablename, fnCallback){
 	
 	if (fnCallback != null)
 		fnCallback();
+};
+
+
+/**
+ * Close all tables
+ * @param {Function} fnCallback - Some function to call after the tables are closed 
+ */
+fn.closeAllTables = function(fnCallback){
+	
+	const queue = new FunctionQueue();
+	
+	var aTables = $("div#container div#dynamic div.table_div");				
+	$(aTables).each(function() {
+		var that = this;
+		queue.enQueue(function(){			
+			$(that).find("div[id$='tableclosebutton']").find("button").click(); // close button
+		});
+	});
+	
+	if (fnCallback != null){
+		queue.enQueue(function(){			
+			fnCallback();
+		});		
+	}	
 };
 
 
@@ -1570,6 +1618,7 @@ fn.setActiveTable = function(sSomeTablename){
 	
 	kf.setActiveTable(sSomeTablename);
 };
+
 
 
 // *****************************************************************

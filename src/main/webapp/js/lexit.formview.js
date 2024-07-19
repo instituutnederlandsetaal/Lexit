@@ -406,7 +406,8 @@ form.buildViewGrid = function(sTableName){
 	// get pixel size
 	var aSize =             oFormGrid["size"];
 	if (aSize == null){
-		fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "formgrid:{size}"));
+		aSize = [0, 0] // default
+		//fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "formgrid:{size}"));
 	}
 	var iFormWidth = 		parseInt(aSize[0]);
 	var iFormHeight = 		parseInt(aSize[1]);
@@ -415,8 +416,10 @@ form.buildViewGrid = function(sTableName){
 	// get table size (the form grid pixel size must fit into it)	
 	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
 	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") );
-	if (iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
-	if (iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
+	
+	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
+	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
+	if (iFormHeight == 0 || iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
 
 	var sFormPositionSetting = oFormGrid["align"];
 	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
@@ -427,8 +430,10 @@ form.buildViewGrid = function(sTableName){
 		sFormPosPix = (iTableWidth - iFormWidth) - 10;
 	}
 
+	// do we need a search bar?
+	var bSearchBar = oFormGrid["searchbar"] != null ? oFormGrid["searchbar"] : true;
 	
-	var iSearchBarHeight = 40;
+	var iSearchBarHeight = bSearchBar ? 40 : 0;
 	var iHeaderHeight = parseInt( $( "#"+sTableName+"_wrapper .top" ).css("height") );
 
 	// search div on top of form
@@ -1224,8 +1229,11 @@ form.manageViewGrid = function(sTableName){
 			}
 			// textbox
 			else {
+				var fnRender = oFormGrid["cells"][sCellName]["render"];
+				var sTextData = (fnRender != null ? fnRender(sData) : sData); 
+				
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
-					.val(sData)
+					.val(sTextData)
 					.css("background-color", sBgColor)
 					.css("pointer-events", bEditable ? "auto" : "none"); // trick to allow click event, which 'disabled' doesn't
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
