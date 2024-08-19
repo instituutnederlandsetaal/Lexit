@@ -2155,7 +2155,7 @@ form.getNameOfCell = function(nCellValueNode){
 
 
 /**
- * Determine wether the form is in 'unsaved' state or not
+ * Determine whether the form is in 'unsaved' state or not
  * @param {String} name of the table underlying the form
  * @returns {Boolean} true if the form is not saved yet, otherwise false 
  */

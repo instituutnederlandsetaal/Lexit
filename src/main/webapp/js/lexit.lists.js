@@ -233,8 +233,13 @@ lists.buildLists = function(sFormTable, iListNr){
 				
 				var oListConfig = lists.getConfig(this);
 				
-				// if some callback was set, call it now
+				// is there a callback to call?
+				// NB: the callback can be set at list level or at table level
 				var fnCallback = oListConfig["callback"];
+				if (fnCallback == null) {
+					fnCallback = oListConfig["table"]["callback"];
+				}
+				// if a callback is indeed found, call it
 				if (fnCallback != null) {
 					fnCallback( oListConfig["table"]["name"] );
 				}
@@ -770,7 +775,7 @@ lists.getDisplayHeight = function(sFormListLabel){
 /**
  * Get the sort settings of a list, as set in the configuration
  * @param {String} the label of a list
- * @returns {String} the sort settings to be applied 
+ * @returns {Array} the sort settings (as an associative array) to be applied 
  */
 lists.getSortSettings = function(sFormListLabel){
 	return hFormListLabel2SortSettings.get(sFormListLabel);
@@ -967,7 +972,7 @@ lists.getColumnsToUse = function(oLists, sListLabel){
 
 
 /**
- * Get the list of (both visible and unvisible) columns of a list 
+ * Get the list of (both visible and invisible) columns of a list 
  * (from the database at first call; and from call at following calls)
  * @param {String} name of the table underlying the list 
  * @param {Function} a callback function which processed the response 
