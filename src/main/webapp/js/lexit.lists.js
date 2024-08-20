@@ -424,7 +424,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 								// read from a LIST cell
 								if (sListToRead != "form"){
 									// get the selected row to copy the values from
-									var oSelectedRow = lists.getSelectedRows(sListToRead);
+									var oSelectedRow = lists.getSelectedRows(sListToRead, true);
 									var iRowNumber = $(oSelectedRow.nodes()).index();
 									// read value from that row
 									if (iRowNumber < 0){
@@ -866,11 +866,17 @@ lists.getContainerIdFromNode = function(nNode){
 
 /**
  * Get the form container ID, given the label of any list in the form
- * @param {String} sFormListLabel 
+ * @param {String|Node} the label of a form list or any node in the form 
  * @returns {String} ID of the form (that should have the form [feeding-table] + ['_form'-suffix])
  */
-lists.getFormContainerId = function(sFormListLabel){
-	return hFormListLabel2formId.get(sFormListLabel);
+lists.getFormContainerId = function(mixed){
+	
+	if (typeof mixed == 'string'){	
+		return hFormListLabel2formId.get(mixed);
+	}
+	else {
+		return $(mixed).closest('div.formgrid')[0].id;
+	}
 }
 
 
@@ -1030,7 +1036,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 /**
  * Read the value of a cell in a list
  * @param {String} label of the list
- * @param {(Integer|Node)} node of a cell, or row number where it is to be found in the list (in this casem a column name must be provided)
+ * @param {(Integer|Node)} node of a cell, or row node / row number (in this case, a column name must be provided)
  * @param {String} [sColName=null] column name of the cell (only needed when second parameter is a Node)
  * @returns {String} value of the cell
  */
@@ -1079,6 +1085,13 @@ lists.getDataFromCell = function(sListLabel, mMixed, sColName){
 };
 
 
+/**
+ * Get a cell in a list
+ * @param {String} label of the list
+ * @param {(Integer|Node)} row node / row number
+ * @param {String} [sColName=null] column name of the cell
+ * @returns {Node} a cell node
+ */
 lists.getCell = function(sListLabel, mMixed, sColName){
 
 	// get the DataTable object of the list
@@ -1112,6 +1125,8 @@ lists.getCell = function(sListLabel, mMixed, sColName){
 		var cell = oTable.cell( iRowNumber, colNumber ).node();
 		return cell;
 	}
+	// 3: of course no cell node procedure here (compare lists.getDataFromCell )  
+	//    because a cell node can be provided, as we are retrieving it!
 
 	// otherwise
 	return null;
@@ -1158,14 +1173,19 @@ lists.setDataInCell = function(sListLabel, nCell, sValue){
  * @param {String} label of the list
  * @returns {API-object-instance} DataTable object representing the rows 
  */
-lists.getSelectedRows = function(sListLabel){
+lists.getSelectedRows = function(sListLabel, bGetDataTableObject){
 
 	// get the DataTable object of the list
 	var sFormContainerId =	lists.getFormContainerId(sListLabel);
 	var sThisListTableId =	lists.buildTableId(sFormContainerId, sListLabel);
 	var oTable = 			lists.getDataTableObjectOf(sThisListTableId);
 
-	return oTable.rows(".selected");
+	// return a DataTable object if required
+    if (bGetDataTableObject != null && bGetDataTableObject == true) 
+    	return oTable.rows(".selected");
+    	
+    // default: return row nodes
+	return oTable.rows(".selected").nodes();
 }
 
 

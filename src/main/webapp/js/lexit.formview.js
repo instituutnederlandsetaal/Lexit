@@ -857,7 +857,7 @@ form.buildViewGrid = function(sTableName){
 			// (so we'll be able to restore selection after saving)
 			var aSelectedRowsInLists = {};
 			for (var sListLabel in oLists){
-				var aRows = (lists.getSelectedRows(sListLabel)).nodes();
+				var aRows = lists.getSelectedRows(sListLabel);
 				var nRow = aRows[0];
 				if (nRow != null && nRow.id != null){
 					aSelectedRowsInLists[sListLabel] = nRow.id;
