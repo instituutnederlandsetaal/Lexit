@@ -42,8 +42,10 @@ var lists = {};
 hFormAndList2DataTable = new Hashtable();
 
 // Cache of the lists.getAllColumns() function 
-// This contains the columns of the form's lists
+// This contains the columns of the form's lists, their types, and their custom values (enum) if available
 hListTable2Cols = new Hashtable();
+hListTable2ColTypes = new Hashtable();
+hListTable2CustomVals = new Hashtable();
 
 // from [form list label] To [form ID] 
 hFormListLabel2formId = new Hashtable();
@@ -747,17 +749,15 @@ lists.getListOfListLabels = function(sTableName){
  */
 lists.getConfig = function(elem){
 
-	// list div has ID like 'formview_list_<LISTNAME>'
-
 	// get the form table
 	// and retrieve its config
 	var sTableOfFrom = 		form.getFeedingTable(elem);
 	var oTableSettings =	conf.getTableSettings(sTableOfFrom);
 	var oFormGrid = 		conf.getFormGrid(oTableSettings);
-
+	
 	// get the list label
 	// and retrieve its config in the form config
-	var sListLabel =	lists.getLabelFromNode(elem);
+	var sListLabel =	lists.getLabelFromNode(elem);	
 	var aList = 		oFormGrid["lists"];
 	return aList[sListLabel];
 };
@@ -1010,11 +1010,17 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 			success: function(xml) {
 				
 				var aColumns = new Array();
+				var aColumnTypes = new Array();
+				var aColumnCustomVals = new Array();
 				$(xml).find("column").each(function(){
 					aColumns.push( $(this).find("column_name").text() );
+					aColumnTypes.push( $(this).find("column_type").text() );
+					aColumnCustomVals.push( $(this).find("customtype_values").text() );
 				});
 
 				hListTable2Cols.put(sSomeTableName, aColumns);
+				hListTable2ColTypes.put(sSomeTableName, aColumnTypes);
+				hListTable2CustomVals.put(sSomeTableName, aColumnCustomVals);
 
 				if (fnCallback != null){
 					fnCallback(aColumns);
@@ -1025,6 +1031,38 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 			}
 		});
 	}	
+};
+
+
+/**
+ * Get the type of a column, given the feeding table name and the column name
+ * @param {String} name of the table underlying the list
+ * @param {String} name of the column
+ */
+lists.getColumnType = function(sTableName, sColumnName){
+	
+	var aCols = hListTable2Cols.get(sTableName);
+	var idx = $.inArray(sColumnName, aCols);
+	var aColTypes = hListTable2ColTypes.get(sTableName);
+	return aColTypes[idx];	
+};
+
+/**
+ * Get the allowed values of a column, given the feeding table name and the column name
+ * (this is about ENUM types)
+ * @param {String} name of the table underlying the list
+ * @param {String} name of the column
+ */
+lists.getAllowedValuesOfColumn = function(sTableName, sColumnName){
+	
+	var aCols = hListTable2Cols.get(sTableName);
+	var idx = $.inArray(sColumnName, aCols);
+	var aColVals = hListTable2CustomVals.get(sTableName);
+	var sTheseVals = aColVals[idx];
+	if (sTheseVals == null || sTheseVals == "")
+		return null;
+	else
+		return sTheseVals.split("|");
 };
 
 
@@ -1163,6 +1201,8 @@ lists.setDataInCell = function(sListLabel, nCell, sValue){
 
 
 
+
+
 // --------------------------------------------
 // ROWS functions
 // --------------------------------------------
@@ -1288,6 +1328,7 @@ lists.clickOpenInSelectedRow = function(sListLabel){
  * @returns {String} the DIV id 
  */
 lists.buildTableContainerId = function(sFormContainerId, sListLabel ){
+	lists.checkLabelForm(sListLabel);
 	return lists.buildTableId(sFormContainerId, sListLabel) + "_container";
 }
 
@@ -1301,7 +1342,18 @@ lists.buildTableContainerId = function(sFormContainerId, sListLabel ){
  * @returns {String} the DIV id 
  */
 lists.buildTableId = function(sFormContainerId, sListLabel ){
+	lists.checkLabelForm(sListLabel);
 	return sFormContainerId+"___"+sListLabel.toLowerCase().replace(/ /g, "_");
+}
+
+
+/**
+ * Check if the label of a list is valid
+ * @param {String} label of the list 
+ */
+lists.checkLabelForm = function(sListLabel) {
+	if (sListLabel != (sListLabel.toLowerCase().replace(/ /g, "_")) )
+	    fn.message(lang.beware, lang.formlist_label_must_be_lowercase_and_no_spaces.replace(/LISTNAME/, sListLabel));
 }
 
 

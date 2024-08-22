@@ -668,6 +668,7 @@ form.buildViewGrid = function(sTableName){
 
 		var aListPosition = 	oLists[sListLabel]["position"];
 		var aListDefinition =	oLists[sListLabel]["definition"];
+		var sListLabelInGUI =	oLists[sListLabel]["nice_name"];
 
 		// table to build
 
@@ -684,7 +685,8 @@ form.buildViewGrid = function(sTableName){
 				$("<div></div>")
 					.addClass("formview_listlabel")
 					.attr("id", "formview_listlabel_"+sListLabel)
-					.css("font-weight", "bold").text(sListLabel) 
+					.css("font-weight", "bold")
+					.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
 			);
 		var listContainer = $("<div></div>")
 			.addClass("formview_list")
@@ -1128,17 +1130,26 @@ form.manageViewGrid = function(sTableName){
 			oListLabel2Filters[sOneList] = {}; // instantiate filters to apply to this list
 		}
 	}
+	
 
+	
+	// get the current row content
+	// fore looping through the cells
+	
+	var nRow = fn.getActiveRowNode(sTableName);
+	if (nRow == null){
+		console.log("The active row of table "+sTableName+" is null, so editable view mode is not possible.");
+	}
+	
+	
 	// cells loop
 	
 	var oCells = 	oFormGrid["cells"];
+	
 	for (var sCellName in oCells){
 
 		var sBgColor = oFormGrid["cells"][sCellName]["bgcolor"];
-		if (sBgColor == null) sBgColor = "#FFFFFF";
-
-		// get the current row content
-		var nRow = fn.getActiveRowNode(sTableName);
+		if (sBgColor == null) sBgColor = "#FFFFFF";		
 
 		// if there are no results, the row might be null
 		if (nRow != null){
@@ -1315,8 +1326,7 @@ form.manageViewGrid = function(sTableName){
 				});
 
 			}
-		}
-		
+		}		
 
 	} // end of cell loop
 
@@ -2127,19 +2137,24 @@ form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
  * @param {String} name of the table underlying the form 
  * @param {String} name of the cell/column 
  * @param {String} value to assign to the cell (beware: in the GUI, so it's not saved yet in the underlying table) 
+ * @param {Boolean} [bAttractAttention=true] attract attention of user by blinking the send button, and show that reset is possible now 
  */
-form.setDataInCell = function(sFormTable, sCellName, sValue){
+form.setDataInCell = function(sFormTable, sCellName, sValue, bAttractAttention){
 
 	$("div#"+sFormTable+"_form div#form_cellvalue_"+sCellName)
 		.addClass("modified")
 		.children().first().val(sValue);
 	
 	// attract attention from user to send button, which must be pressed 
-	// since some content was modified,
-	// and show that reset is possible now									
+	// since some content was modified, and show that reset is possible now
+	//
+	// (one can preven this by setting bAttractAttention to false)									
 	
-	form.setSendButtonToSetting(sFormTable, "payattention");
-	form.setResetButtonToSetting(sFormTable, "active");
+	if (bAttractAttention == null || bAttractAttention == true){
+		form.setSendButtonToSetting(sFormTable, "payattention");
+		form.setResetButtonToSetting(sFormTable, "active");		
+	}
+	
 }
 
 

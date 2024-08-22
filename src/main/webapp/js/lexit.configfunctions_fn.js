@@ -1496,6 +1496,14 @@ fn.centerTable = function(sSomeTablename){
 		.css("width", "unset");
 }
 
+/**
+ * Put a table in front of anything else
+ * @param {String} sSomeTablename  - Table name 
+ */
+fn.putTableInFront = function(sSomeTableName){
+	$("#"+sSomeTableName+"_dynamic").putInFront();
+}
+
 
 /**
  * Since tables with a narrow width are put on the screen on the same line,
@@ -2235,6 +2243,8 @@ fn.getVisibleColumnNumberOf = function(sSomeTable, sCellName){
 	
 	return $.inArray(sCellName, mt.getListOfVisibleColumnsOf(sSomeTable));
 };
+
+
 
 
 // *****************************************************************

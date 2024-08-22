@@ -232,6 +232,7 @@ lang.formlist_save_first_after_row_creation = "U heeft deze rij net toegevoegd. 
 lang.formlist_save_first_before_overwriting = "U staat op het punt nieuw data in 'LISTSNAMES' te laden, terwijl de huidige data niet opgeslagen is.<BR>Om verder te kunnen gaan, moet u eerst klikken op 'Opslaan'.";
 lang.formlist_select_a_row_first = "U moet eerst een rij selecteren in de 'LISTNAME' lijst.";
 lang.formlist_missing_parameter = "In de formgrid van 'TABLENAME' ontbreekt deze parameter: 'PARAM'.";
+lang.formlist_label_must_be_lowercase_and_no_spaces = "De label 'LISTNAME' bevat hoofdletters en/of spaties, wat niet is toegestaan. Gebruik de 'nice_name' parameter.";
 
 lang.helpText = 
 				
@@ -1665,6 +1666,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.formlist_save_first_before_overwriting = "You've about to load new data in 'LISTSNAMES', while it contains unsaved content.<BR>To be able to carry on, you must click the 'Save' button first.";
 		lang.formlist_select_a_row_first = "You need to first select a row in the 'LISTNAME' list.";
 		lang.formlist_missing_parameter = "Missing parameter in the 'TABLENAME' formgrid: 'PARAM'.";
+		lang.formlist_label_must_be_lowercase_and_no_spaces = "The 'LISTNAME' list label contains capitals and/or spaces, which is not allowed. Use the 'nice_name' parameter.";
 
 	}
 
