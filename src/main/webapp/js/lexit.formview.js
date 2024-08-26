@@ -541,6 +541,7 @@ form.buildViewGrid = function(sTableName){
 		var aPosition = oCell["position"];
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
+		var sPlaceholder = oCell["tooltip"];
 		
 		if (aPosition == null){
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cells:{"+sCellName+":{position}}"));
@@ -629,6 +630,7 @@ form.buildViewGrid = function(sTableName){
 			eCellField.append(
 				$("<textarea></textarea>")
 					.css("padding", "5px")
+					.attr("placeholder", sPlaceholder ?? "")
 			);
 		}
 		
@@ -1570,8 +1572,39 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		},
 		{
 			"onblur": function(value){
-
-				this.reset(value);
+				
+				var sThisTable =	$(this).closest('table')[0].id;
+				var oGrid = lists.getConfig(this);
+				var bEnterValidation = oGrid["enter_validation"] ?? false;
+				
+				
+				// if Enter validation is required, blur triggers reset
+				
+				if (bEnterValidation){
+					
+					this.reset(value);
+				}
+				
+				// If no validation is needed, submit right away
+				else {
+					
+					// mark modification
+					$(this).addClass("modified");
+					
+					// submit
+					$(this).closest('form').submit();
+					
+					// attract attention
+					form.setSendButtonToSetting(sFormTable, "payattention");
+					form.setResetButtonToSetting(sFormTable, "active");
+					
+					// assign value
+					
+					var oTable = 		lists.getDataTableObjectOf(sThisTable);						
+					oTable.cell(this).data(value);
+	
+					
+				}
 			},
 			"callback": function(value, settings){
 				
@@ -1579,7 +1612,8 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 				var oTable = 		lists.getDataTableObjectOf(sThisTable);
 
 				// assign value
-				oTable.cell(this).data(value);				
+				oTable.cell(this).data(value);	
+				
 			},
 			"width": "100%",
 			"type": "textarea", // this gives more room than the default 'input' field of jEditable
