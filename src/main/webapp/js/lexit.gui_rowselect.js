@@ -85,10 +85,14 @@ row._rowSelectionHandler = function(sSomeTablename, nRow){
 // remove any row selection from table
 row.clearRowSelection = function(sSomeTablename){
 	
-	mt.getDataTableObjectOf(sSomeTablename).rows().every(function(){
+	var oTable = mt.getDataTableObjectOf(sSomeTablename);
+	
+	if (oTable != null){
 		
-		$(this.node()).removeClass("selected");		
-	});
+		oTable.rows().every(function(){		
+			$(this.node()).removeClass("selected");		
+		});		
+	}
 };
 
 // remove any row selection from all the loaded tables

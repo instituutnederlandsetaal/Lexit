@@ -5609,6 +5609,18 @@ fn.getFilters = function(sSomeTable){
 
 
 /**
+ * Get the filters values for a given table upon call (t.i.: as part of the fn.callTable() call).
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ */
+fn.getFiltersUponCall = function(sSomeTable){
+	
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+		
+	return mt.getFilterValues(sSomeTable);
+}
+
+/**
  * Set the global filter for a given table.
  * (beware: this has no effect on the filter boxes in the GUI)
  * 

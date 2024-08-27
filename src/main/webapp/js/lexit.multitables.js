@@ -247,7 +247,7 @@ mt.createTableRecordWithFilter = function(sSomeTablename, fnCallTableWithFilter,
 	dbTableNames.push(sSomeTablename);
 	hsViewType.put(sSomeTablename, 'table');
 	hsfTableFilterFunction.put(sSomeTablename, fnCallTableWithFilter );
-	hsfTableFilterValues.put(sSomeTablename, aCallTableWithFilterValues);
+	hsfTableFilterValues.put(sSomeTablename, aCallTableWithFilterValues);	
 };
 
 
