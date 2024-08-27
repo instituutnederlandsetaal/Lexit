@@ -503,6 +503,7 @@ form.buildViewGrid = function(sTableName){
 		var aBlockSize = 	oTextBlock["definition"];
 		var sBlockClass = 	oTextBlock["class"];
 		var sBlockText = 	oTextBlock["text"];
+		var fnBlockClick = 	oTextBlock["click"];
 		
 		if (aPosition == null){
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{position}}"));
@@ -527,6 +528,27 @@ form.buildViewGrid = function(sTableName){
 					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
 					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
 					.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
+	
+	
+		// click events if declared
+		
+		if (fnBlockClick != null){
+			$("#form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+				.click(function(){
+					
+					// get config given this node
+					var sTableName = 		form.getFeedingTable(this);
+					var sTextBlockName = 	$(this).attr("id").replace(/^form_textblock_/g, "");
+					
+					var oTableSettings =    conf.getTableSettings(sTableName);
+					var oFormGrid =         conf.getFormGrid(oTableSettings);
+					var oTextBlocks = 		oFormGrid["textblocks"];
+					var fnBlockClick = 		oTextBlocks[sTextBlockName]["click"];
+					
+					// call function with table object as parameter
+					fnBlockClick( mt.getDataTableObjectOf(sTableName) );
+				});
+		}
 	}
 
 
@@ -752,9 +774,15 @@ form.buildViewGrid = function(sTableName){
 			.attr("id", "form_button_"+sButtonId)
 			.attr("name", sButtonName)
 			.click(function(){
+				
+				// get config given this node
+				var sTableName = 		form.getFeedingTable(this);
+				var oTableSettings =    conf.getTableSettings(sTableName);
+				var oFormGrid =         conf.getFormGrid(oTableSettings);
 
 				// retrieve button config by its name
 				var sThisButtonName = $(this).attr("name");
+				var oCustomButtons = oFormGrid["buttons"]
 				var fnCallback = oCustomButtons[sThisButtonName]["click"]; 
 				fnCallback(mt.getDataTableObjectOf(sTableName));
 			});
