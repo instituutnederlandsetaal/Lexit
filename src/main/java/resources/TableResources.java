@@ -1809,9 +1809,9 @@ public class TableResources {
 			Date date=new Date(co.getTimeLastUsed());
 			String sessionId = co.getSessionIdForSpy();
 			String activeTabId = co.getActiveTabIdForSpy();
-			SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd 'om' HH:mm:ss");
+			SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
 			String lastActive = df2.format(date);
-			String activeRecently = (co.isLeftUnused() ? "Slaapstand" : "Nu actief");
+			String activeRecently = (co.userIsGone() ? "Sleep mode" : "Active now");
 			
 			ulo.addUserData(new String[]{dbName, (userName != null ? userName : "UNKNOWN"), sessionId, (activeTabId != null ? activeTabId : "UNKNOWN"), lastActive, activeRecently});
 		}

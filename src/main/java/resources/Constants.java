@@ -46,6 +46,12 @@ public class Constants {
 			60 * // minutes
 			60 * // seconds
 			1000; // milliseconds
+	
+	// amount of time beyond which a user is considered to be 'gone'
+	public static long TIME_GONE = 	
+			5 *     // minutes
+			60 *     // seconds
+			1000;    // milliseconds
 
 	// are we debugging?
 	// t.i. show some output in the console to see what happens

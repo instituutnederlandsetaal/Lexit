@@ -76,6 +76,12 @@ public class ContextObject {
 		return ( (new Date().getTime()) - getTimeLastUsed() > Constants.MAX_DB_OBJECT_DURATION );			
 	}
 	
+	// is the user gone?
+	public boolean userIsGone(){			
+		
+		return ( (new Date().getTime()) - getTimeLastUsed() > Constants.TIME_GONE );			
+	}
+	
 	
 	// object age management
 	
