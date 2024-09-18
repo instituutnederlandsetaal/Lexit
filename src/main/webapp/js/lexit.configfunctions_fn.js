@@ -1734,7 +1734,7 @@ fn.toggleViewType = function(sSomeTablename, fnCallback){
 		fn.addDrawCallback(sSomeTablename, function(){
 			fnCallback();
 		});
-	}
+	}	
 	
 	// do the toggle 
 	head._toggleViewType(sSomeTablename);

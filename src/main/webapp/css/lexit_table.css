@@ -797,9 +797,13 @@ table.dataTable input[type=checkbox]
 }
 
 .table_div {
+	min-height: 500px;
 	border-radius: 15px;
 	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
     -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+.table_div.smallheight {
+	min-height: 0px !important;
 }
 
 .blinking {text-decoration: blink;}

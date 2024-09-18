@@ -33,6 +33,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 
 	var aTableSettings =				conf.getTableSettings(sSomeTableName);
 	var bIgnoreInitialisationFilters =	false;
+	var bTopPagination = 				(aTableSettings["pagination_on_top"] ?? true);
+	var bBottomPagination = 			(aTableSettings["pagination_at_bottom"] ?? true);
+	var bExportButtonsAvailable =		(aTableSettings["export_buttons"] ?? true);
+	var bKeepSmallHeight =				(aTableSettings["keep_small"] ?? false);
 	
 	// table or view?
 	var iIndexOfTable =					$.inArray(sSomeTableName, asTableNames);
@@ -49,10 +53,19 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		(aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
 	mt.setViewType(sSomeTableName, sViewtype);
 	
-	
+	// ignore initialisation filters or not
 	if (oExtraTableSettings["ignore_initialisation_filters"] != null)
 		bIgnoreInitialisationFilters = oExtraTableSettings["ignore_initialisation_filters"];
-	
+		
+	// pagination on top / at bottom
+	if (oExtraTableSettings["pagination_on_top"] != null)
+		bTopPagination = oExtraTableSettings["pagination_on_top"];
+	if (oExtraTableSettings["pagination_at_bottom"] != null)
+		bBottomPagination = oExtraTableSettings["pagination_at_bottom"];
+		
+	// export buttons setting
+	if (oExtraTableSettings["export_buttons"] != null)
+		bExportButtonsAvailable = oExtraTableSettings["export_buttons"];
 	
 	// build the table HTML "frame"		
 
@@ -74,8 +87,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		.addClass("table_div") // table div recognizable as such
 		.addClass("ui-widget-content") // needed for resizable, draggable etc
 		.css("width", sTableWidth)
-		.css("min-height", "500px") // div stretches automatically if contents makes it necessary
 		.css("margin-right", "10px");
+	
+	// if the table is set to be kept small, add the needed class
+	if (bKeepSmallHeight)
+		$("#"+sSomeTableName+"_dynamic").addClass("smallheight");
 	
 	
 	// The table will be given an absolute position
@@ -203,12 +219,13 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// i - Table information summary
 	// p - pagination control
 	// r - processing display element
-	var sTopPaneSettings = '<"top"iflp<"clear">>t<"bottom_pane"p>'+
-							'<"export_pane">';
+	var sTopPaneSettings = '<"top"ifl' +(bTopPagination ? 'p':'')+ '<"clear">>t<"bottom_pane"' +(bBottomPagination ? 'p':'') +'>'+
+							(bExportButtonsAvailable ? '<"export_pane">' : '');
 	
 	
 	// if some values where given as argument, build the appropriate sDom value
 	if ( sPane != null) {
+		
 		// start of the sDom string
 		sTopPaneSettings = '<"top"';
 		
@@ -218,14 +235,17 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			if (sPane.indexOf( sAcceptedSettings.charAt(i) )>-1)
 				sTopPaneSettings+=sAcceptedSettings.charAt(i);
 		}
+		
 		// next part of the string (rendering [t]able and p[r]ocessing message is default)
 		sTopPaneSettings += '<"clear">>rt';
+		
 		// if pagination is required, we also need the bottom pagination pane
 		if (sPane.indexOf("p")>-1) {
 			sTopPaneSettings += '<"bottom_pane"p>';
 		}			
 		
-		sSomeTableName += '<"export_pane">'; 
+		// at last, add export pane if needed
+		sTopPaneSettings += (bExportButtonsAvailable ? '<"export_pane">' : ''); 
 	}
 	
 	
@@ -645,7 +665,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	head.setHeaderSensitivity(sSomeTableName);
 	
 	// add the export buttons
-	tb.addExportButtons(sSomeTableName);
+	if (bExportButtonsAvailable){
+		tb.addExportButtons(sSomeTableName);	
+	}
+	
 	
 	// Force tooltip to fadeout 
 	// This is sometimes needed when we choosed a new table to load from the pulldown menu

@@ -410,7 +410,6 @@ form.buildViewGrid = function(sTableName){
 	var aSize =             oFormGrid["size"];
 	if (aSize == null){
 		aSize = [0, 0] // default
-		//fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "formgrid:{size}"));
 	}
 	var iFormWidth = 		parseInt(aSize[0]);
 	var iFormHeight = 		parseInt(aSize[1]);
@@ -418,7 +417,7 @@ form.buildViewGrid = function(sTableName){
 
 	// get table size (the form grid pixel size must fit into it)	
 	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
-	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );;
+	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
 	
 	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
 	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;

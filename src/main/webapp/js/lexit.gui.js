@@ -264,6 +264,18 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 	// do we have configuration for a form grid
 	var oTableSettings =    conf.getTableSettings(sSomeTablename);
 	var oFormGrid =         conf.getFormGrid(oTableSettings);
+		
+	// if the table was set to have a small height, we need to remove the 'smallheight' class
+	// before going to form view, otherwise it won't behave as excepted!
+	var bKeepSmall = (oTableSettings["keep_small"] ?? false);
+	if (bKeepSmall){
+		if (mt.getViewType(sSomeTablename) == 'form'){ 
+			$("#"+sSomeTablename+"_dynamic").removeClass("smallheight");
+		}
+		else {
+			$("#"+sSomeTablename+"_dynamic").addClass("smallheight");
+		}
+	}
 
 	// if we don't, fall back to the old type of form view
 	if (oFormGrid == null) {
