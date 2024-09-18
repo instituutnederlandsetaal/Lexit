@@ -61,14 +61,13 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		(aTableSettings!=null ? conf.getSize(aTableSettings) : "100%");
 	
 	// add table container div (or update it if it exists already)
-	if ( !$("#"+sSomeTableName+"_dynamic").elementExists() )
-		{
+	if ( !$("#"+sSomeTableName+"_dynamic").elementExists() ) {
 		$("#dynamic").append(
 				$("<div></div>")
 				.attr("id", sSomeTableName+"_dynamic")
 				.css("z-index", 0)
 				);		
-		}
+	}
 	
 	// give the table container its needed attributes
 	$("#"+sSomeTableName+"_dynamic")
@@ -158,11 +157,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var tfoot_tr_tag = $("<tr></tr>");
 	
 	
-	for (var i=0; i< mt.getListOfColumnsOf(sSomeTableName).length; i++)
-		{
+	for (var i=0; i< mt.getListOfColumnsOf(sSomeTableName).length; i++) {
 		thead_tr_tag.append($("<th></th>").text(mt.getListOfColumnsOf(sSomeTableName)[i]));
 		tfoot_tr_tag.append($("<th></th>").text());
-		}
+	}
 	thead_tag.append(thead_tr_tag);
 	tfoot_tag.append(tfoot_tr_tag);
 	
@@ -210,28 +208,25 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	
 	// if some values where given as argument, build the appropriate sDom value
-	if ( sPane != null)
-		{
+	if ( sPane != null) {
 		// start of the sDom string
 		sTopPaneSettings = '<"top"';
 		
 		// loop through the possible settings and check if they are part of the given argument
 		var sAcceptedSettings = "iflp";
-		for (var i=0; i<sAcceptedSettings.length; i++)
-			{
+		for (var i=0; i<sAcceptedSettings.length; i++) {
 			if (sPane.indexOf( sAcceptedSettings.charAt(i) )>-1)
 				sTopPaneSettings+=sAcceptedSettings.charAt(i);
-			}
+		}
 		// next part of the string (rendering [t]able and p[r]ocessing message is default)
 		sTopPaneSettings += '<"clear">>rt';
 		// if pagination is required, we also need the bottom pagination pane
-		if (sPane.indexOf("p")>-1)
-			{
+		if (sPane.indexOf("p")>-1) {
 			sTopPaneSettings += '<"bottom_pane"p>';
-			}			
+		}			
 		
 		sSomeTableName += '<"export_pane">'; 
-		}
+	}
 	
 	
 	
@@ -519,8 +514,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		"rowCallback": function( nRow, aData, iDisplayIndex ){
 			
 			var aListOfColumns = mt.getListOfVisibleColumnsOf(sSomeTableName);
-			for (var i=0; i<aListOfColumns.length; i++)
-				{
+			for (var i=0; i<aListOfColumns.length; i++) {
 				// retrieve column client configuration
 				var oColumnConfig =	conf.getColumnConfig(oTableConfig, aListOfColumns[i]);
 				// if the config requires some background or text color, set it here
@@ -546,8 +540,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				if (sTextStyle!=null) 	$('td:eq('+i+')', nRow).css( "font-style", sTextStyle );
 				if (sTextFont!=null) 	$('td:eq('+i+')', nRow).css( "font-family", sTextFont );
 				if (sTextSize!=null) 	$('td:eq('+i+')', nRow).css( "font-size", sTextSize );				
-				}  
-		    },
+			}  
+		},
 
 		"pagingType": "full_numbers",
 		"columnDefs": mt.getDatatablesPropsOf(sSomeTableName) 
@@ -927,15 +921,19 @@ tb.processExtraParamsFromServerResponse = function(json, sSomeTableName){
 		// count quality. To make sure we will get just that, we replace _PLUSMN_ in the
 		// string by _TOTALPLUSMN_	
 		if (sSubTotal.indexOf("_TOTALPLUSMN_")<0)
-			sSubTotal = sSubTotal.replace("_PLUSMN_", "_TOTALPLUSMN_");
-		
+			sSubTotal = sSubTotal.replace("_PLUSMN_", "_TOTALPLUSMN_");		
 		
 		// query count part (size of resultset)
 		sSubTotal = sSubTotal.replace("_PLUSMN_", (json.bQueryCountIsExact ? "" : "±"));
 		// total table count (size of whole table)
 		sSubTotal = sSubTotal.replace("_TOTALPLUSMN_", (json.bTotalCountIsExact ? "" : "±"));
 		// put the count string back into place
-		$("#"+sSomeTableName+"_info").text(sSubTotal);
+				
+		// ensure that updating the string happens after the DOM is fully loaded, otherwise it might not be rendered in some rare cases
+		$(document).ready(function(){
+			$("#"+sSomeTableName+"_info").text(sSubTotal);	
+		});
+		
 		
 		// counting is done, so give bForceExactCount its default value (false) back now
 		// (as this might have been set to true by the user by pressing 'pause/break',

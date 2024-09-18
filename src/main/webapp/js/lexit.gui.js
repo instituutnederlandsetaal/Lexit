@@ -1516,15 +1516,13 @@ gui.refreshTable = function(oTable){
 	// prevents IE from selecting the whole page upon clicking on a button
 	clearSelection();
 	
-	if (typeof oTable == 'string')
-		{
+	if (typeof oTable == 'string') {
 		sTable = oTable; // (primitives are not passed by reference, so this is ok)
 		oTable = mt.getDataTableObjectOf(oTable);		
-		}
-	else
-		{
+	}
+	else {
 		sTable = fn.getTableName(oTable);
-		}
+	}
 	
 	// do redraw, but keep paging
 	oTable.draw(false); 

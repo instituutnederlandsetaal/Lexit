@@ -374,7 +374,6 @@ public class PostgresDatabaseCommunication {
 				String oneType = ato.getType(i);
 				// a string containing 'NULL' must be interpreted as null
 				if (oneArg.equals("NULL")) oneArg = null;
-						
 				
 				if (oneType.equals("date"))
 				{
@@ -437,6 +436,13 @@ public class PostgresDatabaseCommunication {
 						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
+				}
+				else if (oneType.equals("jsonb"))
+				{	
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.VARCHAR);
+					else 
+						prest.setString(i+1, "[{"+oneArg+"}]");
 				}
 				else
 				{
@@ -552,6 +558,13 @@ public class PostgresDatabaseCommunication {
 						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
+				}
+				else if (oneType.equals("jsonb"))
+				{	
+					if (oneArg == null) 
+						prest.setNull(i+1, java.sql.Types.VARCHAR);
+					else 
+						prest.setString(i+1, "[{"+oneArg+"}]");
 				}
 				else
 				{
@@ -812,5 +825,4 @@ public class PostgresDatabaseCommunication {
 			typeName.startsWith("double precision"); 
 	};
 	
-
 }

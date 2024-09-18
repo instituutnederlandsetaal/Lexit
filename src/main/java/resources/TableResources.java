@@ -1640,7 +1640,7 @@ public class TableResources {
 			String oneSearchColumn = aAllColumnSearchValues[i].trim();
 			if ( !oneSearchColumn.isEmpty())
 			{				
-				aSearchColumnNames.add( aAllColumns[i] );  
+				aSearchColumnNames.add( aAllColumns[i] ); 				
 				aSearchColumnValues.add(  setRightSearchValue(oneSearchColumn)  );
 				aCaseSensitiveColumnSearch.add( setRightCaseSensitivity(oneSearchColumn) );
 			}
@@ -1677,14 +1677,23 @@ public class TableResources {
 			return null;
 		}
 		
-		// if we have an operator in front, split the search string into operator string and searched value
-		// (like  '!word' ->  '!' and 'word')
+		// remove quotes if they are there
+		//
+		// important: if we have an operator in front, split the search string into operator string and searched value
+		// (like  '!word' ->  '!' and 'word') so as to process the quotes properly
 		String cleanValue = Database.removeFrontOperator(value);
 		String operator   = value.substring(0, value.length()-cleanValue.length());
 		
 		if ( (cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) || 
 			 (cleanValue.startsWith("'") && cleanValue.endsWith("'")) )
 		{
+			// in a jsonb query, we might have quotes which have to be kept!
+			// (like {"name": "Piet"})			
+			if (cleanValue.matches(".*\"[^\"]+\"[ \\s]*:[ \\s]*\"[^\"]+\".*"))
+				return value;
+			
+			// at this point, we are sure we do have to remove the quotes, 
+			// do it!
 			cleanValue = cleanValue.substring(1, cleanValue.length()-1);
 			if (cleanValue.isEmpty()) cleanValue = "^$";
 			

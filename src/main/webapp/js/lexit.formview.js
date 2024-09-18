@@ -88,7 +88,9 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
 
 			// add blink function for send_button
-			var blink = function(elem) {
+			var blink = function(elem, iCount) {
+				
+				if (iCount == null) iCount = 0;
 
 				$(elem).animate({
 						opacity: '0'
@@ -96,8 +98,8 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 						$(this).animate({
 							opacity: '1'
 						}, function(){
-							if ( $(elem).hasClass("payattention") )
-								blink(elem);
+							if ( $(elem).hasClass("payattention") && iCount < 3) // blink 3 times (is enough, more is irritating)
+								blink(elem, iCount+1);
 						});
 					});		
 			};
@@ -166,12 +168,8 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// ------------------------------------------
 
 	// get visible columns
-	var aSearchFields = 			mt.getListOfVisibleColumnsOf(sTableName);
-	var aSearchFieldsNiceNames = 	fn.getListOfColumnsNiceNames(sTableName);
-
-	var aTinySearchFields = [];
-	var aTinySearchFieldsNiceNames = [];
-
+	var aSearchFields = 			form.getVisibleColumnsOf(sTableName);
+	var aSearchFieldsNiceNames = 	form.getColumnsNiceNames(sTableName); 
 
 
 	// --------------------------------------
@@ -179,13 +177,14 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// --------------------------------------
 
 	var oCells =  oFormGrid["cells"];
+	
 	for (var sCellName in oCells){
-
+		
+		// if the cell is not visible in current config, skip it
+		if ($.inArray(sCellName, aSearchFields) < 0) continue;
+		
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
-		if (iNameIndex<0) continue;
-		aTinySearchFields.push(sCellName);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
-		aTinySearchFieldsNiceNames.push( sNiceName );
 
 		// --------------------------------------
 		// add sort button
@@ -391,8 +390,12 @@ form.buildViewGrid = function(sTableName){
 	if (oFormGrid == null) return;
 
 	// set 1-row mode at current table row position
-	var iNowIndex = fn.getCurrentDisplayStart(sTableName);
 	mt.getDataTableObjectOf(sTableName).page.len(1);
+	
+	// now we can query the current row index
+	// NB: if we call that function before setting the 1-row mode, it will return -1,
+	//     seemingly because the table is not yet fully initialized
+	var iNowIndex = fn.getCurrentDisplayStart(sTableName);	
 	mt.getDataTableObjectOf(sTableName).displayRow(iNowIndex);
 
 	// get column names
@@ -415,7 +418,7 @@ form.buildViewGrid = function(sTableName){
 
 	// get table size (the form grid pixel size must fit into it)	
 	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
-	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") );
+	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );;
 	
 	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
 	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
@@ -434,6 +437,7 @@ form.buildViewGrid = function(sTableName){
 	var bSearchBar = oFormGrid["searchbar"] != null ? oFormGrid["searchbar"] : true;
 	
 	var iSearchBarHeight = bSearchBar ? 40 : 0;
+	var iSearchOpacity = bSearchBar ? 1 : 0;
 	var iHeaderHeight = parseInt( $( "#"+sTableName+"_wrapper .top" ).css("height") );
 
 	// search div on top of form
@@ -444,7 +448,8 @@ form.buildViewGrid = function(sTableName){
 		.css("top", "10px")
 		.css("left", sFormPosPix + "px")
 		.css("width", iFormWidth +"px")
-		.css("height", iSearchBarHeight+"px");
+		.css("height", iSearchBarHeight+"px")
+		.css("opacity", iSearchOpacity);
 	$( "#"+sTableName+"_wrapper" ).append(eSearchDiv);	
 	
 	
@@ -515,14 +520,14 @@ form.buildViewGrid = function(sTableName){
 		}
 		
 		var eTextBlock = $("<div></div>")
-				.attr("id", "form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+				.attr("id", sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
 				.addClass(sBlockClass)
 				.append(
 					$("<span></span>").text(sBlockText)
 				);		
 		$(eFormParent).append(eTextBlock);
 		
-		$("#"+sTableName+"_wrapper #form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+		$("#"+sTableName+"_wrapper #"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
 					.css("position", "absolute")
 					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
 					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
@@ -533,12 +538,12 @@ form.buildViewGrid = function(sTableName){
 		// click events if declared
 		
 		if (fnBlockClick != null){
-			$("#form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+			$("#"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
 				.click(function(){
 					
 					// get config given this node
 					var sTableName = 		form.getFeedingTable(this);
-					var sTextBlockName = 	$(this).attr("id").replace(/^form_textblock_/g, "");
+					var sTextBlockName = 	$(this).attr("id").replace(/^.+_form_textblock_/g, "");
 					
 					var oTableSettings =    conf.getTableSettings(sTableName);
 					var oFormGrid =         conf.getFormGrid(oTableSettings);
@@ -550,7 +555,79 @@ form.buildViewGrid = function(sTableName){
 				});
 		}
 	}
+	
+	
+	// ------------------------------------------
+	// cell groups blocks loop
+	// ------------------------------------------
+	
+	
+	
+	var oCellBlocks =  oFormGrid["cellgroups"];
+	for (var sCellBlockName in oCellBlocks){
 
+		var oCellBlock = 	oCellBlocks[sCellBlockName];
+		var aPosition = 	oCellBlock["position"];
+		var aBlockSize = 	oCellBlock["definition"];
+		var sBlockClass = 	oCellBlock["class"];
+		
+		var sBlockText = 	oCellBlock["text"];
+		var sBlockTextClass = oCellBlock["textclass"];
+		var sBlockTextHtmlTag = oCellBlock["htmltag"];
+		
+		
+		if (aPosition == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cellgroups:{"+sCellBlockName+":{position}}"));
+			return;
+		}
+		if (aBlockSize == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cellgroups:{"+sCellBlockName+":{definition}}"));
+			return;
+		}
+		
+		// if some text is given, prepend a text block to the cell block
+		if (sBlockText != null){
+			
+			var eTextBlock;
+			if (sBlockTextHtmlTag != null){
+				eTextBlock = $("<"+sBlockTextHtmlTag+"></"+sBlockTextHtmlTag+">")
+					.text(sBlockText)
+			}
+			else {
+				eTextBlock = $("<div></div>")
+					.attr("id", sTableName+"_form_cellblock_text_"+sCellBlockName.replace(/ /g, "_"))
+					.addClass(sBlockTextClass != null ? sBlockTextClass : sBlockClass)
+					.append(
+						$("<span></span>").text(sBlockText)
+					);		
+				
+			}
+			
+			$(eFormParent).append(eTextBlock);
+			
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_text_"+sCellBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")  		
+					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+		}
+		
+		// now add the cell block
+		var eCellBlock = $("<div></div>")
+				.attr("id", sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_"))
+				.addClass(sBlockClass);		
+		$(eFormParent).append(eCellBlock);
+		
+		
+		$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					.css("top", (parseFloat(aPosition[1] + (sBlockText != null ? 1:0)) * iGridHeightUnit) +"px") // if text is given, add one iGridHeightUnit
+					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					
+	}
 
 	// ------------------------------------------
 	// cells loop
@@ -558,14 +635,19 @@ form.buildViewGrid = function(sTableName){
 
 	var oCells =  oFormGrid["cells"];
 	for (var sCellName in oCells){
+		
+		// if the cell is not visible in current config, skip it
+		if ($.inArray(sCellName, aSearchFields) < 0) continue;
 
 		var oCell = 	oCells[sCellName];
+		var sCellBlockName = oCell["cellgroup"];
 		var aPosition = oCell["position"];
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
 		var sPlaceholder = oCell["tooltip"];
 		
-		if (aPosition == null){
+		
+		if (aPosition == null && sCellBlockName == null){
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cells:{"+sCellName+":{position}}"));
 			return;
 		}
@@ -581,8 +663,10 @@ form.buildViewGrid = function(sTableName){
 
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
+		
+		
 		var eCell = $("<div></div>")
-				.attr("id", "form_cell_"+sCellName)
+				.attr("id", sTableName+"_form_cell_"+sCellName)
 				.append(
 					$("<div></div>")
 						.addClass("form_celllabel")
@@ -593,7 +677,16 @@ form.buildViewGrid = function(sTableName){
 		var eCellField = $("<div></div>")
 				.addClass("form_cellvalue")
 				.attr("id", "form_cellvalue_"+sCellName);
-		$(eFormParent).append(eCell);
+		
+		// a cell can be attached to a group (div container!)
+		// or just to the form parent
+		if (sCellBlockName == null){
+			$(eFormParent).append(eCell);
+		}
+		else {
+			$("#"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_")).append(eCell);
+		}
+		
 		$(eCell).append(eCellField);
 		
 		// custom class if configured
@@ -663,17 +756,22 @@ form.buildViewGrid = function(sTableName){
 		// ------------------------------------------
 		
 		if (aPosition != "hidden"){
-			$("#"+sTableName+"_wrapper #form_cell_"+sCellName)
+			
+			if (aPosition != null){
+				$("#"+sTableName+"_wrapper #"+sTableName+"_form_cell_"+sCellName)
 					.css("position", "absolute")
 					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
 					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
+			}
+					
+			// text area size
 			$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
-					.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
-					.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
-					.addClass("formview_textarea");				
+				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
+				.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
+				.addClass("formview_textarea");				
 		}
 		else {
-			$("#" + sTableName + "_wrapper #form_cell_" + sCellName).hide();
+			$("#" + sTableName + "_wrapper #"+sTableName+"_form_cell_"+sCellName).hide();
 		}
 		
 	}
@@ -788,7 +886,7 @@ form.buildViewGrid = function(sTableName){
 			});
 		eFormParent.append(
 			$("<div></div>")
-				.attr("id", "form_buttondiv_"+sButtonId)
+				.attr("id", sTableName+"_form_button_"+sButtonId)
 				.append(customButton)
 		);
 		
@@ -799,7 +897,7 @@ form.buildViewGrid = function(sTableName){
 
 		// put button at right position
 
-		$("#"+sTableName+"_wrapper div#form_buttondiv_"+sButtonId)
+		$("#"+sTableName+"_wrapper div#"+sTableName+"_form_button_"+sButtonId)
 			.css("position", "absolute")
 			.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
 			.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
@@ -1053,8 +1151,10 @@ form.buildViewGrid = function(sTableName){
 
 				});
 
-				// click the form reset the button to load current data (with new IDs etc)
-				$("div#"+sTableName+"_form button#reset_button").click();
+				// click the form reset button to load current form data (with new IDs etc)
+				setTimeout(function(){
+					$("div#"+sTableName+"_form button#reset_button").click();
+				}, 500);
 
 				// give the send-button a new color to show update was performed
 				// and show that reset is NOT possible anymore 
@@ -1065,9 +1165,14 @@ form.buildViewGrid = function(sTableName){
 				// make sure that the tables underlying the form's lists
 				// are refreshed, in case those are loaded in the GUI already
 				for (var sListLabel in oLists){
+					
+					lists.refresh(sListLabel);
+					
 					var sTableToRefresh = lists.getFeedingTable(sListLabel);
-					if (fn.tableExists(sTableToRefresh))
+					if (fn.tableExists(sTableToRefresh)){
 						fn.refreshTable(sTableToRefresh);
+					}
+						
 				}
 
 
@@ -1183,6 +1288,13 @@ form.manageViewGrid = function(sTableName){
 
 		// if there are no results, the row might be null
 		if (nRow != null){
+			
+			// remove disabled color in case it was put there in previous round
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form").removeClass("form_overlay");
+			if ($("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div").elementExists()){
+				$("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div")
+					.removeClass("form_overlay");
+			}
 
 			// get the data
 			var sData = fn.getDataFromCellInRowNode(nRow, sCellName);
@@ -1316,6 +1428,12 @@ form.manageViewGrid = function(sTableName){
 				// textarea
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea").keyup(function(){
 
+					// some keys are not to be considered as 'content modification'
+					var sPressedKey = kf._getPressedKey();
+					var aNonCharKeys = ["uparrow", "downarrow", "leftarrow", "rightarrow", "shift", "ctrl", "alt", "home", "end", "pageup", "pagedown", "insert"];
+					if ($.inArray(sPressedKey, aNonCharKeys)>=0) return;
+					 
+					// past this point, we do have a content modification
 					$(this).parent().addClass("modified");
 
 					// attract attention from user to send button, which must be pressed 
@@ -1356,7 +1474,20 @@ form.manageViewGrid = function(sTableName){
 				});
 
 			}
-		}		
+		}	
+		
+		// if the row is empty, show the form is disabled
+		else {			
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form")
+				.addClass("form_overlay");
+			setTimeout(function(){				
+				if ($("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div").elementExists()){
+					$("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div")
+						.addClass("form_overlay");
+				}
+			}, 500);
+			
+		}	
 
 	} // end of cell loop
 
@@ -1587,7 +1718,8 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 	$(oTable.cells('td.editable').nodes()).off();
 	
 	$(oTable.cells('td.editable').nodes()).editable(
-		function(value, settings){
+		
+		function(value, settings){				// submit function
 
 			$(this).addClass("modified");
 
@@ -1599,11 +1731,17 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			return(value);
 		},
 		{
+			
 			"onblur": function(value){
 				
+				var sListLabel = 	lists.getLabelFromNode(this);
+				var sFormTable = 	form.getFeedingTable(this);
+				var sListTable = 	lists.getFeedingTable(sListLabel);
 				var sThisTable =	$(this).closest('table')[0].id;
+				var oTable = 		lists.getDataTableObjectOf(sThisTable);
+				
 				var oGrid = lists.getConfig(this);
-				var bEnterValidation = oGrid["enter_validation"] ?? false;
+				var bEnterValidation = oGrid["enter_validation"] ?? true;
 				
 				
 				// if Enter validation is required, blur triggers reset
@@ -1613,7 +1751,13 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 					this.reset(value);
 				}
 				
-				// If no validation is needed, submit right away
+				// but if no validation is needed, submit right away
+				//
+				// BUGGY BUGGY BUGGY BUGGY BUGGY
+				//
+				// BUGGY FOR NOW because click event gets detached, which is unwished for!
+				//
+				// BUGGY BUGGY BUGGY BUGGY BUGGY
 				else {
 					
 					// mark modification
@@ -1626,15 +1770,15 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 					form.setSendButtonToSetting(sFormTable, "payattention");
 					form.setResetButtonToSetting(sFormTable, "active");
 					
-					// assign value
-					
-					var oTable = 		lists.getDataTableObjectOf(sThisTable);						
+					// assign value											
 					oTable.cell(this).data(value);
-	
+					
+					// the previous statement kills jeditable, so restore it
+					//setTimeout(function(){ form.makeListEditable(sListLabel, sListTable);}, 500);
 					
 				}
 			},
-			"callback": function(value, settings){
+			"callback": function(value, settings){ 	// callback is called after submit function
 				
 				var sThisTable =	$(this).closest('table')[0].id;
 				var oTable = 		lists.getDataTableObjectOf(sThisTable);
@@ -1668,6 +1812,8 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 		// normal case: edit
 		else {
+			
+			var sFormTable = form.getFeedingTable(this);
 			
 			// we must use keydown to prevent default behaviour
 			$(this).find('textarea')
@@ -2094,31 +2240,34 @@ form.getFeedingTable = function(mixed){
 form.getVisibleColumnsOf = function(sTableName){
 
 	// get visibility according to table config
-
 	var aVisibleColumns = cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
 
 	// then get the form config:
-	// visibility settings there will overwrite the table config
+	// the form visibility settings there will overwrite the table config
+	// (at least if some formgrid was defined!)
 
 	var aTableSettings = conf.getTableSettings(sTableName);
 	var oGrid = conf.getFormGrid(aTableSettings);
-	for (var sCell in oGrid["cells"]){
+	
+	if (oGrid != null && oGrid["cells"] != null){
+		for (var sCell in oGrid["cells"]){
 
-		var bVisibility = oGrid["cells"][sCell]["visible"];
-		var iIndex = $.inArray(sCell, aVisibleColumns);
-
-		// form cell must be visible, but is hidden according to table config: 
-		// add it to list of visible cells
-		if (bVisibility == true && iIndex < 0){
-			aVisibleColumns.push(sCell);
+			var bVisibility = oGrid["cells"][sCell]["visible"];
+			var iIndex = $.inArray(sCell, aVisibleColumns);
+	
+			// form cell must be visible, but is hidden according to table config: 
+			// add it to list of visible cells
+			if (bVisibility == true && iIndex < 0){
+				aVisibleColumns.push(sCell);
+			}
+			// form cell must be hidden, but is visible according to table config: 
+			// remove it from the list of visible cells
+			else if (bVisibility == false && iIndex >= 0) {
+				aVisibleColumns.splice(iIndex, 1);
+			}
+			
 		}
-		// form cell must be hidden, but is visible according to table config: 
-		// remove it from the list of visible cells
-		else if (bVisibility == false && iIndex >= 0) {
-			aVisibleColumns.splice(iIndex, 1);
-		}
-		
-	}
+	}	
 
 	return aVisibleColumns;
 }
@@ -2243,4 +2392,9 @@ form.isUnsaved = function(sTableName){
 			eFormButtons.find("#send_button").hasClass("payattention")
 	);
 };
+
+
+
+
+
 

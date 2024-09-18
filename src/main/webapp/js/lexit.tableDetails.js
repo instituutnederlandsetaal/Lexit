@@ -13,23 +13,22 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 	
 	var url = WEBSERV_URL+"/api/getcolumns";
 	
-	$.ajax(
-			{
-				type: "GET",
-				url: url,
-				data: {
-					"table": sSomeTableName, 
-					"db_name": getHttpParams().get("db") 
-					},
-				dataType: "xml",
-				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-				success: function(xml) {
-					td.processColumnResponse(xml, sSomeTableName, fnFunction, oExtraTableSettings);
-					},
-				error: function(jqXHR, textStatus, errorThrown){
-					fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
-					}
-			});
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"table": sSomeTableName, 
+			"db_name": getHttpParams().get("db") 
+			},
+		dataType: "xml",
+		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		success: function(xml) {
+			td.processColumnResponse(xml, sSomeTableName, fnFunction, oExtraTableSettings);
+			},
+		error: function(jqXHR, textStatus, errorThrown){
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
+			}
+	});
 	
 	
 };
@@ -39,7 +38,7 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 // process the list of columns of a table, so as to build the table properly
 // (this is call by the previous function td.getColumnsOfTable)
 
-td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTableSettings){
+td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTableSettings, fnSecretCallback){
 	
 	var aAllColumns = new Array();	
 	var aColumnsTypes = new Array();
@@ -116,8 +115,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	
 	// the cookie contains a comma separated list of columns with their visibility settings and in the right order
 	// like this:  col1:true,col2:false,...
-	if (sChosenColumns != null)
-		{
+	if (sChosenColumns != null) {
 		var aCustomColumnOrder = new Array();
 		var aChosenColumns = sChosenColumns.split(",");
 		
@@ -126,25 +124,25 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		// (we need this check, as some database update could cause some table or view
 		//  to have more/less columns that before, so its number of columns won't
 		//  match the number of columns in the cookie, causing an error)
-		if (aChosenColumns.length == aAllColumns.length)
-			{
-			for (var i=0; i<aChosenColumns.length; i++)
-				{
+		if (aChosenColumns.length == aAllColumns.length) {
+			
+			for (var i=0; i<aChosenColumns.length; i++) {
+				
 				var sColumnName = aChosenColumns[i].split(":")[0];
 				aCustomColumnOrder.push(sColumnName);
 				
 				var sColumnVisibility = aChosenColumns[i].split(":")[1];						
 				conf.changeTableConfigValue(sSomeTableName, sColumnName, "visible", sColumnVisibility=='true');
-				}
-			conf.changeTableSettingValue(sSomeTableName, "column_order", aCustomColumnOrder);
 			}
+			conf.changeTableSettingValue(sSomeTableName, "column_order", null); // make sure we don't have double settings (the singular setting is deprecated)
+			conf.changeTableSettingValue(sSomeTableName, "columns_order", aCustomColumnOrder);
+		}
 		
 		// if the test hereabove fails, remove the cookie, as it is incompatible now
-		else 
-			{
+		else {
 			$.removeCookie(fn.getCurrentProject()+"_"+sSomeTableName+"_columns", { path: '/' });	
-			}
 		}
+	}
 	
 	
 	
@@ -153,6 +151,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	// retrieve the table settings and get the required column order, if any is given as a setting
 	var aTableSettings = conf.getTableSettings(sSomeTableName);
 	var aColumnOrder = conf.getColumnOrder(aTableSettings);
+	
 	
 	// if a column order was given, reorder the column types accordingly
 	if (aColumnOrder != null) {
@@ -203,7 +202,11 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	
 	removeSpinner('#indicators');
 	
-	tb.buildTable(sSomeTableName, fnFunction, oExtraTableSettings);
+	// usual route is table building, but if a callback function is given, we call this function instead
+	if (fnSecretCallback == null)
+		tb.buildTable(sSomeTableName, fnFunction, oExtraTableSettings);
+	else
+		fnSecretCallback();
 	
 };
 
@@ -426,7 +429,8 @@ td.selectColumns = function(sSomeTablename){
 	                     			conf.changeTableConfigValue(sSomeTablename, sNewColumnNameAfterResorting, "visible", columnChecked );
 	                     		}
 	                     		// change the column order settings according to the user's choices
-	                     		conf.changeTableSettingValue(sSomeTablename, "column_order", aColumnListInNewOrder);
+	                     		conf.changeTableSettingValue(sSomeTablename, "column_order", null); // make sure we don't have double settings (the singular setting is deprecated)
+	                     		conf.changeTableSettingValue(sSomeTablename, "columns_order", aColumnListInNewOrder);
 	                     		
 	                     		$( this ).dialog( "close" );
 	                     		 

@@ -769,7 +769,7 @@ fn.getCurrentDisplayLength = function(sSomeTablename){
 fn.getCurrentDisplayStart = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
-	
+		
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().start;
 };
 
@@ -1049,6 +1049,67 @@ fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
 	mt.getDataTableObjectOf(sSomeTablename).draw();
 	
 };
+
+/**
+ * Call a table silently, meaning that it won't be shown, but all its details will be loaded
+ * into the multiple table registry, so as to be able to retrieve these details if needed elsewhere!
+ * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been loaded yet) 
+ */
+fn.callTableSilently = function(sSomeTablename){
+	
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	var fnPreInit = conf.getPreInitCallback(aTableSettings);
+	var bTableAlreadyLoaded = fn.tableExists(sSomeTablename);
+	if ( !bTableAlreadyLoaded && fnPreInit != null ){
+		$.when($.ajax(fnPreInit(sSomeTablename))).then(function () {
+	
+			fn._callTableSilentlySub(sSomeTablename);
+	
+		});
+	}
+	else {
+			fn._callTableSilentlySub(sSomeTablename);
+	}
+};
+
+// help function of fn.callTableSilently
+fn._callTableSilentlySub = function(sSomeTableName){
+
+	var url = WEBSERV_URL+"/api/getcolumns";
+	
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"table": sSomeTableName, 
+			"db_name": getHttpParams().get("db") 
+		},
+		dataType: "xml",
+		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		success: function(xml) {
+			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
+			
+				// secret callback (officially not available in API) 
+				function(){fn._callTableBuildSilently(sSomeTableName);}
+			)
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
+		}
+	});
+};
+
+// help function of fn._callTableSilentlySub
+fn._callTableBuildSilently = function(sSomeTableName){
+
+	var aTableSettings =				conf.getTableSettings(sSomeTableName);	
+	var sViewtype = (aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
+	mt.setViewType(sSomeTableName, sViewtype);	
+	//mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
+	un.cleanUndoStack(sSomeTableName);	
+	tb.setColumnProperties(sSomeTableName, true);
+};
+
 
 
 
@@ -1379,16 +1440,20 @@ fn.addDrawCallback = function(sSomeTablename, fnFunction){
 
 
 /**
- * Scroll to a table if it happens to be outside the visible window
+ * Scroll to a table if it happens to be outside the visible window. 
+ * Most of the time, tables are piled up on top of each other, so some tables are not visible. 
+ * If some tables applied some left-padding or so, this function will not only scroll vertically, 
+ * but also a bit horizontally; that can be prevented by setting the bVerticalOnly param to true.
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {boolean} [bVerticalOnly=false] - set to true if you want to prevent horizontal scrolling   
  */
-fn.scrollToTable = function(sSomeTablename){
+fn.scrollToTable = function(sSomeTablename, bVerticalOnly){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	smoothScroll("html,body", "#"+sSomeTablename+"_dynamic");
+	smoothScroll("html,body", "#"+sSomeTablename+"_dynamic", bVerticalOnly);
 };
 
 
@@ -1396,8 +1461,8 @@ fn.scrollToTable = function(sSomeTablename){
 /**
  * Put a table to the right side of another table (alignment)
  * 
- * @param {String} sSomeTablename1 - Table name 
- * @param {String} sSomeTablename2 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename1 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
  * @see fn.pileupTables
@@ -1432,8 +1497,8 @@ fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 /**
  * Put a table right under another table
  * 
- * @param {String} sSomeTablename1 - Table name 
- * @param {String} sSomeTablename2 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename1 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
  * @see fn.alignTables
@@ -1467,9 +1532,12 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 /**
  * Center a table horizontally
  * 
- * @param {String} sSomeTablename  - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename  - Table name 
  */
 fn.centerTable = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	// center
 
@@ -1496,11 +1564,36 @@ fn.centerTable = function(sSomeTablename){
 		.css("width", "unset");
 }
 
+
+/**
+ * Position a table at a given absolute position
+ * @param {(String|API-object-instance)} sSomeTableName  - Table name
+ * @param {number} aXPos - array [x,y] with x,y being the screen absolute positions
+ */
+fn.putTableAtPosition = function(sSomeTableName, aPos){
+	
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+		
+	var iXPos = aPos[0];
+	var iYPos = aPos[1]
+	
+	$("#"+sSomeTableName+"_dynamic")
+		.css("position", "absolute")
+		.css("top", iYPos)
+		.css("left", iXPos);	
+}
+
+
 /**
  * Put a table in front of anything else
- * @param {String} sSomeTablename  - Table name 
+ * @param {(String|API-object-instance)} sSomeTableName  - Table name 
  */
 fn.putTableInFront = function(sSomeTableName){
+	
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+		
 	$("#"+sSomeTableName+"_dynamic").putInFront();
 }
 
@@ -1625,6 +1718,27 @@ fn.setActiveTable = function(sSomeTablename){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	kf.setActiveTable(sSomeTablename);
+};
+
+/**
+ * Toggle the viewtype of a table (form vs table view)
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Function} fnCallback - Some function to call after the viewtype has been toggled
+ */
+fn.toggleViewType = function(sSomeTablename, fnCallback){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	if (fnCallback != null){
+		fn.addDrawCallback(sSomeTablename, function(){
+			fnCallback();
+		});
+	}
+	
+	// do the toggle 
+	head._toggleViewType(sSomeTablename);
+	
 };
 
 

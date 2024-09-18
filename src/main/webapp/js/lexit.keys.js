@@ -362,7 +362,9 @@ kf.addKeyFunctions = function(){
 				// one exception is when we are within a textarea, because we want
 				// to be able to navigate in there!
 				( (kf.isPressed("uparrow") || kf.isPressed("downarrow")) 
-						&& !$("td form textarea").elementExists()) ||
+						&& !$("td form textarea").elementExists()
+						&& !($(e.target).is('textarea')) // not in a form
+					) ||
 				
 				// one another exception is when the cursor is in a searchbox of the active table,
 				// or when the cursor is in a field of a dialog box:
@@ -377,10 +379,10 @@ kf.addKeyFunctions = function(){
 				// f5 will be used to table refresh instead of page reload
 				kf.isPressed("f5")
 				
-			)
-			{			
+			) {
+						
 			e.preventDefault();
-			}
+		}
 		
 		// call user key functions
     	kf._callCustomKeyFunctions('keydown');
@@ -415,8 +417,10 @@ kf.addKeyFunctions = function(){
 		if (  (kf.isPressed("u") && e.ctrlKey && e.shiftKey) 
 				&& !$("div#context-menu-layer").elementExists() // don't interfere with context menu, text area etc
 				&& !$("td form textarea").elementExists()
+				&& !($(e.target).is('textarea')) // not in a form
 				&& !bSomeDialogBoxIsOpen
 			){
+				
 			e.preventDefault();
 			var sUploadForm =
 				"    <form id=\"fileUploadForm\">" +
@@ -536,24 +540,27 @@ kf.addKeyFunctions = function(){
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
+					&& !($(e.target).is('textarea')) // not in a form
 					&& !bSomeDialogBoxIsOpen
 					&& iNumberOfRows>0
 					)
 				{
+					
+				
 				
 				var iActiveRow = kf.getActiveRowNumber();				
 				var iMaximalIndex = fn.getNumberOfVisibleRows(sActiveTable) - 1;
 				var nActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
 				
-				if (kf.isPressed("uparrow") && iActiveRow > 0 )
-					{
+				if (kf.isPressed("uparrow") && iActiveRow > 0 ) {
+					
 					// remove highlight from current row
 					// except in selection mode when shiftkey is pressed
 					if ($(nActiveRowNode).hasClass('selected') && 
-							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) )
-						{
+							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) ){
+								
 						$(nActiveRowNode).toggleClass('selected');						
-						}
+					}
 					
 					// decrease row index
 					iActiveRow--;
@@ -565,23 +572,22 @@ kf.addKeyFunctions = function(){
 					
 					
 					// if row is out of viewport, scroll down
-					if( !$(newActiveRowNode).isOnScreen() )
-						{
+					if( !$(newActiveRowNode).isOnScreen() ) {
+						
 						var iPositionToGoTo = $(newActiveRowNode).position().top;
 						$('html, body').animate({scrollTop: iPositionToGoTo}, 800);
-						}
-						
 					}
+						
+				}
 				
-				else if (kf.isPressed("downarrow") && iActiveRow < iMaximalIndex )
-					{
+				else if (kf.isPressed("downarrow") && iActiveRow < iMaximalIndex ) {
 					// remove highlight from current row
 					// except in selection mode when shiftkey is pressed
 					if ($(nActiveRowNode).hasClass('selected') && 
-							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) )
-						{
+							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) ){
+								
 						$(nActiveRowNode).toggleClass('selected');
-						}
+					}
 					
 					// increase row index
 					iActiveRow++;
@@ -593,35 +599,32 @@ kf.addKeyFunctions = function(){
 					
 					
 					// if row is out of viewport, scroll up
-					if( !$(newActiveRowNode).isOnScreen() )
-						{
+					if( !$(newActiveRowNode).isOnScreen() ) {
 						var iPositionToGoTo = $(newActiveRowNode).position().top;
 						$('html, body').animate({scrollTop: iPositionToGoTo}, 800);
-						}
 					}
+				}
 				
 				else if (kf.isPressed("uparrow") && iActiveRow == 0 
 						&& $("#"+sActiveTable+"_paginate a.paginate_active:eq(0)").text()!="1"	
 						&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate") // pagination must be allowed
-						)
-					{
+						){
 					row.clearRowSelection(sActiveTable);
 					kf.setActiveRowNumber(iMaximalIndex);
 					
 					$('html, body').animate({scrollTop: mt.getDataTableObjectOf(sActiveTable).$("tr").last().position().top}, 800);
 					mt.getDataTableObjectOf(sActiveTable).page("previous").draw("page");					
-					}
+				}
 				
 				else if (kf.isPressed("downarrow") && iActiveRow == iMaximalIndex
 						&& !$("#"+sActiveTable+"_wrapper .dataTables_paginate").hasClass("dont_paginate") // pagination must be allowed
-						)
-					{
+						){
 					row.clearRowSelection(sActiveTable);
 					kf.setActiveRowNumber(0);
 					
 					$('html, body').animate({scrollTop: mt.getDataTableObjectOf(sActiveTable).$("tr").first().position().top}, 800);
 					mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
-					}
+				}
 			}
 			
 			
@@ -629,7 +632,8 @@ kf.addKeyFunctions = function(){
 			// (needed as last command)
 			// exception: when we are inside a textarea, where default behaviour of
 			//            arrow keys is needed for navigation in the textarea 
-			if (!$("td form textarea").elementExists())
+			if (	!$("td form textarea").elementExists() 
+				&& 	!($(e.target).is('textarea')))
 				return false;
 		}
 

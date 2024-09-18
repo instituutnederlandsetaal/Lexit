@@ -2557,6 +2557,10 @@ public class Database {
 		if (columnType.equals("tsvector")) // good enough for now (no conditions) 
 			return true;
 		
+		// jsonb 
+		if (columnType.equals("jsonb")) // good enough for now (no conditions) 
+			return true;
+		
 		// user-defined
 		// (searching a user-defined field with a string as '-' will cause a crash if we don't cast to text)
 		if ( columnType.equals("USER-DEFINED") && !Util.containsSomeLetters(value) )
@@ -3367,6 +3371,11 @@ public class Database {
 		if (columnType.endsWith("[]"))
 			return "@>" + arg;
 		
+		// json type
+		if (columnType.equals("jsonb")) {
+			return "@> " + arg + "::jsonb";
+		}
+		
 		// tsvector
 		if (columnType.equals("tsvector"))
 			return "@@ " + (negation ? "!!":"") + arg + "::tsquery ";
@@ -4061,7 +4070,6 @@ public class Database {
 			";";
 		
 		
-		
 		PostgresDatabaseCommunication dc = connectDatabase();
 		
 		try {
@@ -4075,8 +4083,7 @@ public class Database {
 			
 			// read names
 			columnNames = new String[res.size()];
-			for (int i=0; i<res.size(); i++)
-			{
+			for (int i=0; i<res.size(); i++) {
 				String[] oneRecord = res.get(i);
 				columnNames[i] = oneRecord[0];
 			}			
@@ -4632,15 +4639,16 @@ public class Database {
 		
 		// first check if the database access data are known
 		// (that is: location, username, password, etc)
-		if ( databaseAccessHash.size() == 0 )
+		if ( databaseAccessHash.size() == 0 ) {
 			try {
 				readPropertiesFile();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				throw new RuntimeException(e);
 			}
-			
-			return databaseAccessHash.get("schema");
+		}
+		
+		return databaseAccessHash.get("schema");
 	}
 	
 	/**

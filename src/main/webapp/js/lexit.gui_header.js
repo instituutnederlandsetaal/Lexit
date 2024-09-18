@@ -253,6 +253,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 	$("#"+sSomeTablename+"_info").before(
 			$("<div></div>")
 			.attr("id", sSomeTablename+"_table_name")
+			.addClass("table_name")
 			.css("margin-right", "10px")
 			.css("position", "absolute")
 			.css("top", "2px")
@@ -549,8 +550,8 @@ head.putColumnSelectionButton = function(sSomeTablename){
 
 
 
-//set the right color for the column selection button
-//if in optimal mode, the column setting button should look a bit darker
+// set the right color for the column selection button
+// if in optimal mode, the column setting button should look a bit darker
 head.setColorOfColumnSelectionButton = function(sTableName, bOptimal){
 	
 	$("#"+sTableName+"_colselect_button button")
@@ -561,9 +562,78 @@ head.setColorOfColumnSelectionButton = function(sTableName, bOptimal){
 };
 
 
+// hulp function for the head.putViewTypeButton() function
+head._toggleViewType = function(sSomeTablename){
+	
+	var nCurrentSelection = fn.getFirstSelectedRowNodeFrom(sSomeTablename);
+	var sIdOfSelection = (nCurrentSelection != null ? fn.getRowNodeId(nCurrentSelection) : null);
+	
+	// change view type
+	mt.toggleViewType(sSomeTablename);
+				
+	// set the right display length for the view type:
+	
+	// 1: switch from form to table view
+	if (mt.getViewType(sSomeTablename) == 'table') {
 
+		// reset position or pagination pane
+		$("#"+sSomeTablename+"_wrapper").css("height", "auto");
+		// remove cell labels of form view
+		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove();
+		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
+		
+		// get the current display start: we will show the corresponding page 
+		// once we get into the table view mode
+		var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename);
+		
+		// set display length back to default
+		mt.getDataTableObjectOf(sSomeTablename).page.len(10);				
+		// set the right page (is calculated with row index)
+		mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex).draw(false);
+		
+		// disable display length selection (since form view must allow only 1 record length)
+		$("#"+sSomeTablename+"_length select").removeAttr('disabled');
+		
+		// select the row that was shown in form
+		if (sIdOfSelection != null){
+			setTimeout(function(){
+				fn.unselectAllRowNodes(sSomeTablename);
+				var nRowToSelect = fn.getRowNodeWhereIdIs(sSomeTablename, sIdOfSelection);						
+				fn.selectRowNode(nRowToSelect);
+			}, 500);
+			
+		}
+			
+	}
 
+	// 2: switch from table to form view
+	else {
 
+		// get the selected row: we will show exactly that row once we get into the form view.
+		// if no row was selected, take the first screen row
+		var oRow = fx.getFirstSelectedRowFrom(sSomeTablename);				
+		var iRowNumber = (oRow!=null) ? fx.getRowNumberOnScreen(oRow) : 0;
+		var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename) + iRowNumber;				
+		
+		// set display length to '1' record (default for forms)
+		mt.getDataTableObjectOf(sSomeTablename).page.len(1);
+		
+		// set the right page to show in the form view mode
+		// this is now the same as the row index, since the display length is set to '1'
+		mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex).draw(false);
+		
+		// display length selection re-enabled
+		$("#"+sSomeTablename+"_length select").attr("disabled","disabled");
+	}
+	
+	// clean the undo stack
+	un.cleanUndoStack(sSomeTablename);
+	
+	// clear highlighted rows
+	row.clearRowSelection(sSomeTablename);	
+};
+
+// put a view type toggle button in the table header
 head.putViewTypeButton = function(sSomeTablename){
 	
 	// is this button allowed according to configuration?
@@ -581,79 +651,17 @@ head.putViewTypeButton = function(sSomeTablename){
 			// remove focus from button to prevent 'enter' strike to reactivate it
 			$(this).blur();
 
-			var nCurrentSelection = fn.getFirstSelectedRowNodeFrom(sSomeTablename);
-			var sIdOfSelection = (nCurrentSelection != null ? fn.getRowNodeId(nCurrentSelection) : null);
-			
-			// change view type
-			mt.toggleViewType(sSomeTablename);
-						
-			// set the right display length for the view type:
-			
-			// 1: switch from form to table view
-			if (mt.getViewType(sSomeTablename) == 'table') {
-
-				// reset position or pagination pane
-				$("#"+sSomeTablename+"_wrapper").css("height", "auto");
-				// remove cell labels of form view
-				$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove();
-				$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
-				
-				// get the current display start: we will show the corresponding page 
-				// once we get into the table view mode
-				var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename);
-				
-				// set display length back to default
-				mt.getDataTableObjectOf(sSomeTablename).page.len(10);				
-				// set the right page (is calculated with row index)
-				mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex).draw(false);
-				
-				// disable display length selection (since form view must allow only 1 record length)
-				$("#"+sSomeTablename+"_length select").removeAttr('disabled');
-				
-				// select the row that was shown in form
-				if (sIdOfSelection != null){
-					setTimeout(function(){
-						fn.unselectAllRowNodes(sSomeTablename);
-						var nRowToSelect = fn.getRowNodeWhereIdIs(sSomeTablename, sIdOfSelection);						
-						fn.selectRowNode(nRowToSelect);
-					}, 500);
-					
-				}
-					
-			}
-
-			// 2: switch from table to form view
-			else {
-
-				// get the selected row: we will show exactly that row once we get into the form view.
-				// if no row was selected, take the first screen row
-				var oRow = fx.getFirstSelectedRowFrom(sSomeTablename);				
-				var iRowNumber = (oRow!=null) ?
-						fx.getRowNumberOnScreen(oRow) : 0;
-				var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename) + iRowNumber;				
-				
-				// set display length to '1' record (default for forms)
-				mt.getDataTableObjectOf(sSomeTablename).page.len(1);
-				
-				// set the right page to show in the form view mode
-				// this is now the same as the row index, since the display length is set to '1'
-				mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex).draw(false);
-				
-				// display length selection re-enabled
-				$("#"+sSomeTablename+"_length select").attr("disabled","disabled");
-			}
-			
-			// clean the undo stack
-			un.cleanUndoStack(sSomeTablename);
-			
-			// clear highlighted rows
-			row.clearRowSelection(sSomeTablename);			
+	        // toggle the view type
+			head._toggleViewType(sSomeTablename);
 
 		});
 	
 	$("#"+sSomeTablename+"_filter").append(
-			$("<div></div>").attr("id", sSomeTablename+"_viewtypebutton").css("display", "inline").append(viewtypeButton)
-			);	
+			$("<div></div>")
+				.attr("id", sSomeTablename+"_viewtypebutton")
+				.css("display", "inline")
+				.append(viewtypeButton)
+		);	
 };
 
 
@@ -1073,8 +1081,12 @@ head.putTableCloseButton = function(sSomeTablename){
 		});
 	
 	$("#"+sSomeTablename+"_table_name").prepend(
-			$("<div></div>").attr("id", sSomeTablename+"_tableclosebutton").css("display", "inline").append(tableCloseButton)
-			);
+		$("<div></div>")
+			.attr("id", sSomeTablename+"_tableclosebutton")
+			.css("display", "inline")
+			.addClass("tableclosebutton")
+			.append(tableCloseButton)
+	);
 	
 };
 

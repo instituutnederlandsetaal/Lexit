@@ -264,6 +264,26 @@ lists.buildLists = function(sFormTable, iListNr){
 };
 
 
+/**
+ * Refresh a list
+ */
+lists.refresh = function(sListLabel, fnCallback){
+	
+	var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+	var sTableId =	lists.buildTableId(sFormContainerId, sListLabel);
+	var oTable = 	lists.getDataTableObjectOf(sTableId);
+
+	const queue = new FunctionQueue();
+	queue.enQueue(function(){
+		oTable.draw(false);
+	});
+	queue.enQueue(function(){
+		if (fnCallback != null) fnCallback();
+	});
+	
+}
+
+
 
 // feed a list (= load data from database),
 // given a table name and some values to match

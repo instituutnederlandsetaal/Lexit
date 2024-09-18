@@ -149,8 +149,9 @@ $.fn.isOnScreen = function(){
 };
 
 //scroll smoothly to a given anchor within a given div
-function smoothScroll(div, anchor)
-{
+function smoothScroll(div, anchor, bVerticalOnly) {
+	
+	bVerticalOnly = bVerticalOnly || false;
 	
 	// get the offset (currentPos) and the number of pixels  
 	// to add or subtract from the offset 
@@ -161,7 +162,7 @@ function smoothScroll(div, anchor)
 	var yTtarget = $(anchor).position().top;	
 	var xTtarget = $(anchor).position().left;
 	var yToGo = (yTtarget-currentYPos);
-	var xToGo = (xTtarget-currentXPos);
+	var xToGo = bVerticalOnly ? 0 : (xTtarget-currentXPos);
 	
 	// Go to the anchor by resetting the scrollbar position
 	$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
