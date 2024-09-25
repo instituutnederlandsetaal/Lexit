@@ -113,6 +113,7 @@ EXTRA FUNCTIONS
  * @param {String} sColor - Color code (eg. #3970b3)
  * @param {String} sFontSize - Font size (eg. 50px)
  * @param {String} sFontWeight - Font weight (eg. bold)
+ * @see fn.setProjectFont
  */
 fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 	
@@ -146,6 +147,7 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
  * Set background color 
  * 
  * @param {String} sColor - Color code (eg. #3970b3)
+ * @see fn.setProjectFont
  */
 fn.setBackgroundColor = function(sColor){
 	
@@ -267,6 +269,7 @@ fn.getCssFile = function(sPath, fnCallback, fnErrorHandler){
  * Add some CSS definition dynamically
  * 
  * @param {String} sSomeCssCode 
+ * @see fn.setProjectFont
  */
 fn.addCss = function(sSomeCssCode){
 	
@@ -285,7 +288,84 @@ fn.addCss = function(sSomeCssCode){
 	else {
 		style.appendChild(document.createTextNode(sSomeCssCode));
 	}
-}
+};
+
+
+/**
+ * set a CSS variable, to be used in calc(...) etc., like in 
+ * :root {
+ *    --main-padding: 20px;
+ *    --sidebar-width: 200px;
+ * }
+ * @param {String} variable name (without the '--' part, as it is preprended automatically)
+ * @param {String} variable value
+ */
+fn.setCssVariable = function(sVariableName, value) {
+	sVariableName = "--"+sVariableName;
+	document.documentElement.style.setProperty(sVariableName, value);
+};
+
+/**
+ * Set the font family and size in whole GUI at once
+ * @param {String} sFontFamily 
+ * @param {String} sFontSize 
+ * @see fn.setProjectTitle
+ * @see fn.addCss
+ */
+fn.setProjectFont = function(sFontFamily, sFontSize){
+
+	fn.addCss("table.display.dataTable thead th {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("table.display.dataTable tbody td {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.top div:first-child span {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div#indicator {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_length {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_info {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss(".dataTables_filter > label {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("a.paginate_button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.export_pane a.dt-button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.ui-dialog {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("div.ui-dialog-content {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("button.ui-button {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+	fn.addCss("#tiptip_content {font-family: "+sFontFamily+" !important; font-size: "+sFontSize+" !important;}");
+};
+
+
+/**
+ * Add a balk on top of the screen, just like in any IvdNT website
+ * @param {Boolean} bSetting - apply if true, otherwise unapply
+ * @pparam {Boolean} bAppendHelp - append the help button if true
+ */
+fn.setBalk = function(bSetting, bAppendHelp){
+	
+	if (bAppendHelp == null) bAppendHelp = false;
+	
+	if (bSetting){
+		$("body").removeClass("default").addClass("huisstijl");
+		$("#headergroup").removeClass("default").addClass("huisstijl");
+		$("#home_logo").removeClass("default").addClass("huisstijl");
+		$("#square_logo").removeClass("default").addClass("huisstijl");
+		$("#projectname").removeClass("default").addClass("huisstijl");
+		$("#indicators").removeClass("default").addClass("huisstijl");
+		$("#headerlinks").removeClass("default").addClass("huisstijl");
+		
+		if (bAppendHelp){
+			// assign functions
+			setTimeout(function(){
+				head.showGeneralHelp();	
+			}, 500);
+		}
+	}
+	else {
+		$("body").removeClass("huisstijl").removeClass("huisstijl")
+		$("#headergroup").removeClass("huisstijl").addClass("default");
+		$("#home_logo").removeClass("huisstijl").addClass("default");
+		$("#square_logo").removeClass("huisstijl").addClass("default");
+		$("#projectname").removeClass("huisstijl").addClass("default");
+		$("#indicators").removeClass("huisstijl").addClass("default");
+		$("#headerlinks").removeClass("huisstijl").addClass("default");
+	}
+	
+};
 
 
 
@@ -302,9 +382,9 @@ var setSchemaTimeOut = null;
  * @param {Function} [fnCallback=null] - Some function to call after the new schema has been set
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
+fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	
-	var url = WEBSERV_URL+"/table/set_schema"; 
+	var url = WEBSERV_URL+"/api/set_schema"; 
 	$.ajax( {
 		"type": "GET",
 		"url": url,
@@ -368,6 +448,15 @@ fn.setSchema  = function(sNewSchema, fnCallback, fnErrorHandler){
 	} );
 };
 
+/**
+ * Get the current schema name
+ * (this is to be used to keep track of what was set with fn.setSchema)
+ */
+fn.getCurrentSchema = function(){
+	
+	return setSchemaNameCache;	
+}
+
 
 
 
@@ -404,6 +493,19 @@ fn.tableExists = function(sSomeTablename){
 	return $("div#"+sSomeTablename+"_wrapper").elementExists();
 		
 };
+
+
+
+/**
+ * Synonym of fn.tableExists
+ * 
+ * @see fn.tableExists
+ */
+fn.tableIsOpen = function(sSomeTablename){
+	
+	return fn.tableExists(sSomeTablename);
+		
+}
 
 
 /**
@@ -710,7 +812,7 @@ fn.getCurrentDisplayLength = function(sSomeTablename){
 fn.getCurrentDisplayStart = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
-	
+		
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().start;
 };
 
@@ -820,6 +922,25 @@ fn.restoreTableState = function(sTableName){
 };
 
 
+
+/**
+ * Determine if a table if editable 
+ * 
+ * @param {String} sTableName
+ * @returns {boolean} true if table is editable
+ * 
+ * @see conf.tableIsEditable
+ */
+fn.tableIsEditable = function(sTableName){
+
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+
+	return conf.tableIsEditable(sTableName);
+
+};
+
+
 // *************************************************
 // *  READ A TABLE FROM THE DATABASE               *
 // *  load a table into the datatables interface   *
@@ -862,11 +983,15 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	
 	var iTableIndex = $.inArray(sSomeTablename, asTableNames);
 	
-    if( (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+	if( (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
     else {
+		// reload the list of tables (might be needed when fn.setSchema was called)
+		ts.reinit();
+		ts.getListOfTables(null, "", "");
+		
         setTimeout(function(){
         	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
@@ -967,6 +1092,67 @@ fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
 	mt.getDataTableObjectOf(sSomeTablename).draw();
 	
 };
+
+/**
+ * Call a table silently, meaning that it won't be shown, but all its details will be loaded
+ * into the multiple table registry, so as to be able to retrieve these details if needed elsewhere!
+ * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been loaded yet) 
+ */
+fn.callTableSilently = function(sSomeTablename){
+	
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	var fnPreInit = conf.getPreInitCallback(aTableSettings);
+	var bTableAlreadyLoaded = fn.tableExists(sSomeTablename);
+	if ( !bTableAlreadyLoaded &amp;&amp; fnPreInit != null ){
+		$.when($.ajax(fnPreInit(sSomeTablename))).then(function () {
+	
+			fn._callTableSilentlySub(sSomeTablename);
+	
+		});
+	}
+	else {
+			fn._callTableSilentlySub(sSomeTablename);
+	}
+};
+
+// help function of fn.callTableSilently
+fn._callTableSilentlySub = function(sSomeTableName){
+
+	var url = WEBSERV_URL+"/api/getcolumns";
+	
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"table": sSomeTableName, 
+			"db_name": getHttpParams().get("db") 
+		},
+		dataType: "xml",
+		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		success: function(xml) {
+			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
+			
+				// secret callback (officially not available in API) 
+				function(){fn._callTableBuildSilently(sSomeTableName);}
+			)
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
+		}
+	});
+};
+
+// help function of fn._callTableSilentlySub
+fn._callTableBuildSilently = function(sSomeTableName){
+
+	var aTableSettings =				conf.getTableSettings(sSomeTableName);	
+	var sViewtype = (aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
+	mt.setViewType(sSomeTableName, sViewtype);	
+	//mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
+	un.cleanUndoStack(sSomeTableName);	
+	tb.setColumnProperties(sSomeTableName, true);
+};
+
 
 
 
@@ -1132,6 +1318,8 @@ fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComme
 	if (sTableDescription == null)	sTableDescription = '';
 	if (sType == null)	sType = '';
 	if (sTableComment == null)	sTableComment = '';
+	if (oConfiguration == null)	oConfiguration = {};
+	if (oSettings == null)	oSettings = {};
 	
 	
 	// register each table details
@@ -1174,6 +1362,21 @@ fn.declareNewTable = function(sTableName, sTableDescription, sType, sTableCommen
 fn.preventAutomaticStartup = function(){
 	bOpenSingleTableAtStartup = false;
 };
+
+/**
+ * Determine if a table is uploaded (t.i. as a CSV/XLS file or so)
+ *
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {boolean} true if the table wass uploaded
+ */
+fn.tableIsUploaded = function(sSomeTablename){
+
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	var aTabbleDetails = mt.getAvailableTableDetails(sSomeTablename);
+	return (aTabbleDetails != null &amp;&amp; aTabbleDetails[2].indexOf("_UPLOADED_")>-1);
+}
 
 
 /**
@@ -1231,7 +1434,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 	
 	// force webservice to clean its counter cache etc
 	// update the database
-	var url = WEBSERV_URL+"/table/cleancache"; 
+	var url = WEBSERV_URL+"/api/cleancache"; 
 	$.ajax( {
 		"type": "GET",
 		"url": url,
@@ -1280,16 +1483,20 @@ fn.addDrawCallback = function(sSomeTablename, fnFunction){
 
 
 /**
- * Scroll to a table if it happens to be outside the visible window
+ * Scroll to a table if it happens to be outside the visible window. 
+ * Most of the time, tables are piled up on top of each other, so some tables are not visible. 
+ * If some tables applied some left-padding or so, this function will not only scroll vertically, 
+ * but also a bit horizontally; that can be prevented by setting the bVerticalOnly param to true.
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {boolean} [bVerticalOnly=false] - set to true if you want to prevent horizontal scrolling   
  */
-fn.scrollToTable = function(sSomeTablename){
+fn.scrollToTable = function(sSomeTablename, bVerticalOnly){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	smoothScroll("html,body", "#"+sSomeTablename+"_dynamic");
+	smoothScroll("html,body", "#"+sSomeTablename+"_dynamic", bVerticalOnly);
 };
 
 
@@ -1297,11 +1504,11 @@ fn.scrollToTable = function(sSomeTablename){
 /**
  * Put a table to the right side of another table (alignment)
  * 
- * @param {String} sSomeTablename1 - Table name 
- * @param {String} sSomeTablename2 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename1 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
- * @see fn.pileupTables
+ * @see fn.pileupTables, fn.centerTable, fn.putTableAtPosition
  */
 fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	
@@ -1333,11 +1540,11 @@ fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 /**
  * Put a table right under another table
  * 
- * @param {String} sSomeTablename1 - Table name 
- * @param {String} sSomeTablename2 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename1 - Table name 
+ * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
- * @see fn.alignTables
+ * @see fn.alignTables, fn.centerTable, fn.putTableAtPosition
  */
 fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	
@@ -1364,6 +1571,78 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	if (fnCallback!=null)
 			fnCallback();
 };
+
+/**
+ * Center a table horizontally
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename  - Table name 
+ * 
+ * @see fn.alignTables, fn.pileupTables, fn.putTableAtPosition
+ */
+fn.centerTable = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// center
+
+	$("#"+sSomeTablename+"_dynamic")
+		.css("left", "50%")
+		.css("display", "block")
+		.css("transform", "translate(-50%, 0)");
+
+
+	// get rid of some settings
+	// causing buttons etc to be misplaced
+
+	$("#"+sSomeTablename+"_dynamic")
+		.css("margin", "unset");
+	
+	$("#"+sSomeTablename+"_filter")
+		.css("width", "unset");
+	$("#"+sSomeTablename+"_paginate")
+		.css("width", "unset");
+
+	$("#"+sSomeTablename+"_wrapper .bottom_pane")
+		.css("width", "unset");
+	$("#"+sSomeTablename+"_wrapper .bottom_pane .dataTables_paginate.paging_full_numbers")
+		.css("width", "unset");
+}
+
+
+/**
+ * Position a table at a given absolute position
+ * @param {(String|API-object-instance)} sSomeTableName  - Table name
+ * @param {number} aXPos - array [x,y] with x,y being the screen absolute positions
+ * 
+ * @see fn.alignTables, fn.pileupTables, fn.centerTable
+ */
+fn.putTableAtPosition = function(sSomeTableName, aPos){
+	
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+		
+	var iXPos = aPos[0];
+	var iYPos = aPos[1]
+	
+	$("#"+sSomeTableName+"_dynamic")
+		.css("position", "absolute")
+		.css("top", iYPos)
+		.css("left", iXPos);	
+}
+
+
+/**
+ * Put a table in front of anything else
+ * @param {(String|API-object-instance)} sSomeTableName  - Table name 
+ */
+fn.putTableInFront = function(sSomeTableName){
+	
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+		
+	$("#"+sSomeTableName+"_dynamic").putInFront();
+}
 
 
 /**
@@ -1406,7 +1685,7 @@ fn.removeProcessingMsg = function(sSomeTablename){
  * Remove/close a table
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
- * @param {Function} fnCallback - Some function to call after the table if closed 
+ * @param {Function} fnCallback - Some function to call after the table is closed 
  */
 fn.closeTable = function(sSomeTablename, fnCallback){
 	if (typeof sSomeTablename == 'object')
@@ -1415,6 +1694,30 @@ fn.closeTable = function(sSomeTablename, fnCallback){
 	
 	if (fnCallback != null)
 		fnCallback();
+};
+
+
+/**
+ * Close all tables
+ * @param {Function} fnCallback - Some function to call after the tables are closed 
+ */
+fn.closeAllTables = function(fnCallback){
+	
+	const queue = new FunctionQueue();
+	
+	var aTables = $("div#container div#dynamic div.table_div");				
+	$(aTables).each(function() {
+		var that = this;
+		queue.enQueue(function(){			
+			$(that).find("div[id$='tableclosebutton']").find("button").click(); // close button
+		});
+	});
+	
+	if (fnCallback != null){
+		queue.enQueue(function(){			
+			fnCallback();
+		});		
+	}	
 };
 
 
@@ -1464,6 +1767,43 @@ fn.setActiveTable = function(sSomeTablename){
 	kf.setActiveTable(sSomeTablename);
 };
 
+/**
+ * Toggle the viewtype of a table (form vs table view)
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Function} fnCallback - Some function to call after the viewtype has been toggled
+ */
+fn.toggleViewType = function(sSomeTablename, fnCallback){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	if (fnCallback != null){
+		fn.addDrawCallback(sSomeTablename, function(){
+			fnCallback();
+		});
+	}	
+	
+	// do the toggle 
+	head._toggleViewType(sSomeTablename);
+	
+};
+
+
+/**
+ * Change the table name in the header. 
+ * Beware: this function is only about modifying the title element rendered in the table header, from the moment this function 
+ * is called until the table is closed. 
+ * This means that if the table is closed and then reopened, the table will regain the name stated in the configuration.
+ * If you need to change the name in the configuration (which will have long term effect),
+ * use this command instead: conf.changeTableSettingValue(sTableName, "nice_name", sNameToBeShown); 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {String} sNameToBeShown - the name to be put into the header, instead of the name stated in the configuration
+ */
+fn.setTableNameInHeader = function(sSomeTablename, sNameToBeShown){
+	$("#"+sSomeTablename+"_wrapper").find("span#"+sSomeTablename+"_tablename").text(sNameToBeShown);
+}
+
+
 
 // *****************************************************************
 // *     GENERAL ROW FUNCTIONS                                     *
@@ -1475,6 +1815,8 @@ fn.setActiveTable = function(sSomeTablename){
  * 
  * @param {Node} nRow - A row node 
  * @returns {Integer} The number of a row node
+ * 
+ * @see fn.getRowNodeNumberOnScreen
  */
 fn.getRowNodeIndex = function(nRow){
 	
@@ -1494,6 +1836,8 @@ fn.getRowNodeIndex = function(nRow){
  * 
  * @param {Node} nRow - A row node 
  * @returns {Integer} Row number within current display range
+ * 
+ * @see fn.getRowNodeIndex
  */
 fn.getRowNodeNumberOnScreen = function(nRow){
 	
@@ -2075,6 +2419,8 @@ fn.getVisibleColumnNumberOf = function(sSomeTable, sCellName){
 	
 	return $.inArray(sCellName, mt.getListOfVisibleColumnsOf(sSomeTable));
 };
+
+
 
 
 // *****************************************************************
@@ -2691,7 +3037,7 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 	
 	
 	// update the database
-	var url = WEBSERV_URL+"/table/setvalue"; 
+	var url = WEBSERV_URL+"/api/setvalue"; 
 	
 	// make sure we send no null values, as join can't deal with it
 	aColumnValues = convertNullToString(aColumnValues);
@@ -2778,7 +3124,7 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 	}
 	
 	// update the database
-	var url = WEBSERV_URL+"/table/setvalue_without_id"; 
+	var url = WEBSERV_URL+"/api/setvalue_without_id"; 
 	
 	// make sure we send no null values, as join can't deal with it
 	aValuesToMatch = convertNullToString(aValuesToMatch);
@@ -2863,7 +3209,7 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	}
 	
 	// insert record into the database
-	var url = WEBSERV_URL+"/table/insertvalue"; 
+	var url = WEBSERV_URL+"/api/insertvalue"; 
 	
 	// make sure we send no null values, as join can't deal with it
 	aValuesToAdd = convertNullToString(aValuesToAdd);
@@ -2936,7 +3282,7 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
 	// duplicate record in the database
-	var url = WEBSERV_URL+"/table/duplicaterecord"; 
+	var url = WEBSERV_URL+"/api/duplicaterecord"; 
 	
 	$.ajax( {
 		"type": "GET",
@@ -3007,7 +3353,7 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 	}
 	
 	// insert record into the database
-	var url = WEBSERV_URL+"/table/get_id_of_record"; 
+	var url = WEBSERV_URL+"/api/get_id_of_record"; 
 	
 	// make sure we send no null values, as join can't deal with it
 	aValuesToMatch = convertNullToString(aValuesToMatch);
@@ -3100,7 +3446,7 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	
 	
 	// update the database
-	var url = WEBSERV_URL+"/table/delete_row"; 
+	var url = WEBSERV_URL+"/api/delete_row"; 
 	$.ajax( {
 		"type": "GET",
 		"url": url,
@@ -3169,7 +3515,7 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 	}
 	
 	// delete record from the database
-	var url = WEBSERV_URL+"/table/delete_row_without_id";
+	var url = WEBSERV_URL+"/api/delete_row_without_id";
 	
 	// make sure we send no null values, as join can't deal with it
 	aValuesToMatch = convertNullToString(aValuesToMatch);
@@ -3269,7 +3615,7 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 	}
 	
 	
-	var url = WEBSERV_URL+"/table/get_record";
+	var url = WEBSERV_URL+"/api/get_record";
 	
 	$.ajax( {
 		"type": "GET",
@@ -3370,7 +3716,7 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	var url = WEBSERV_URL+"/table/get_record";
+	var url = WEBSERV_URL+"/api/get_record";
 	
 	$.ajax( {
 		"type": "GET",
@@ -3427,7 +3773,7 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 	
 	var sRecordIds = aRecordIds.join(ARG_INTERNAL_SEPARATOR);
 	
-	var url = WEBSERV_URL+"/table/get_records";
+	var url = WEBSERV_URL+"/api/get_records";
 	
 	$.ajax( {
 		"type": "GET",
@@ -3492,7 +3838,7 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
 	}
 	
-	var url = WEBSERV_URL+"/table/get_record_without_id";
+	var url = WEBSERV_URL+"/api/get_record_without_id";
 	
 	// make sure we send no null values, as join can't deal with it
 	aValuesToMatch = convertNullToString(aValuesToMatch);
@@ -3546,7 +3892,7 @@ fn.getRecordsGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch
 		aValuesToMatch.push(aFieldsAndValuesToMatch[sFieldName]);
 	}
 	
-	var url = WEBSERV_URL+"/table/get_records_without_ids";
+	var url = WEBSERV_URL+"/api/get_records_without_ids";
 	
 	$.ajax( {
 		"type": "GET",
@@ -3658,7 +4004,7 @@ fn.getFunctionOutput = function(){
  */
 fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler){	
 	
-	var url = WEBSERV_URL+"/table/call_function";
+	var url = WEBSERV_URL+"/api/call_function";
 	
 	if (aFunctionArguments == null)
 		aFunctionArguments = [];
@@ -3746,6 +4092,17 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 // ***************************************
 // *           INTERACTION               *
 // ***************************************
+
+
+/**
+ * Check if the current page is visible / has focus now
+ * 
+ */
+fn.pageIsVisible = function(){
+	return refr.pageIsVisible();
+};
+
+
 
 /**
  * Add an autocomplete functionality to a given filter box, or to a table cell
@@ -3857,7 +4214,8 @@ fn._activeEnterForThisDialog = function(dialogDivId){
 			
 			if (e.keyCode === $.ui.keyCode.ENTER &amp;&amp; 
 					$("#"+dialogDivId).elementExists())
-				{		
+				{	
+					
 				// two possibilities: 
 				// click the button that has focus, 
 				// but it none has focus, click the default accept button
@@ -5203,6 +5561,8 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
  * @param {String} sSomeData - Search value to put in the search box
  * 
  * @see fn.setAutoComplete
+ * @see fn.setFilters
+ * @see fn.putDataIntoGlobalFilterBox
  */
 fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 	
@@ -5243,6 +5603,28 @@ fn.putDataIntoFilterBox = function(sSomeTable, sCellName, sSomeData){
 
 
 /**
+ * Put some data into a GLOBAL search filter box in the GUI
+ * (beware: no effect on the filters variables as long as 'enter' wasn't pressed)
+ * 
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object 
+ * @param {String} sSomeData - Search value to put in the search box 
+ * 
+ * @see fn.putDataIntoFilterBox
+ */
+fn.putDataIntoGlobalFilterBox = function(sSomeTable, sSomeData){
+
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+	var sSomeTableName = fn.getTableName(sSomeTable);
+
+	var searchBoxSelector = $("#"+sSomeTableName+"_dynamic #"+sSomeTableName+"_filter.dataTables_filter").find("input");
+
+	// put value
+	searchBoxSelector.val( sSomeData );
+}
+
+
+/**
  * Get the content of a given search filter box 
  * (beware: this is not the the filter variable in the engine, but only the content of the search box in the GUI)
  * 
@@ -5265,7 +5647,9 @@ fn.getValueOfFilterBox = function(sSomeTable, sCellName){
 		var searchBoxSelector = (searchDivSelector.find("option").length > 0) ? 
 				searchDivSelector.find("select").find(":selected") : searchDivSelector.find("input").eq(0);
 
-		return $.trim(searchBoxSelector.val());
+		return ( 
+			$.trim(searchBoxSelector.val()) 
+			).replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
 	}	
 	return "";
 };
@@ -5369,6 +5753,7 @@ fn.resetAllFilters = function(sSomeTable, bUpdateSearchBoxesValues){
  * 
  * @see fn.addFilters
  * @see fn.getFilters
+ * @see fn.putDataIntoFilterBox
  */
 fn.setFilters = function(sSomeTable, oFilters, bUpdateSearchBoxesValues){
 	
@@ -5388,6 +5773,7 @@ fn.setFilters = function(sSomeTable, oFilters, bUpdateSearchBoxesValues){
  * 
  * @see fn.setFilters
  * @see fn.addFilters
+ * @see fn.getValueOfFilterBox
  */
 fn.getFilters = function(sSomeTable){
 	
@@ -5397,6 +5783,18 @@ fn.getFilters = function(sSomeTable){
 	return sSomeTable.getSearchFilters();
 };
 
+
+/**
+ * Get the filters values for a given table upon call (t.i.: as part of the fn.callTable() call).
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ */
+fn.getFiltersUponCall = function(sSomeTable){
+	
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+		
+	return mt.getFilterValues(sSomeTable);
+}
 
 /**
  * Set the global filter for a given table.
@@ -5729,7 +6127,8 @@ fn.removeHighlight = function(sString){
  * @param {String} [sMethod=GET] - type of call: GET or POST
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
- * @param {Array} [oExtraParams=null] - additional ajax parameters, if needed
+ * @param {Array} [oExtraParams=null] - additional ajax parameters, if needed (like any jquery ajax parameter). 
+ * Additional custom parameter: boolean 'useLexitService', which forces use of the Lex'it service as a proxy. 
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
@@ -5745,41 +6144,59 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		oExtraParams = {};
 
 	var bAimedServiceIsOnSameHost = sUrl.indexOf(document.domain)>-1;
+	
+	// crossDomain parameter (part of the jquery ajax API)
+	//
+	// Beware: in Lex'it the default value is true, be in jQuery that is false instead. We keep it that way for backwards compatibility.  
 	var bCrossDomainValueIsSet = ( typeof oExtraParams["crossDomain"] !== 'undefined' );
-
-
+	
 	// if the called url is NOT on the same server as Lex'it,
 	// we run the risk to get 'strict-origin-when-cross-origin' errors
 	//
 	// so we have 2 possibilities:
-	// [1] if cross-domain calls are allowed, we'll just call the service directly
-	// [2] if cross-domain calls are NOT allowed, we'll use the Lex'it-webservice as a kind of proxy,
+	// [1] if crossDomain is enabled, we'll just call the service directly
+	// [2] if crossDomain is NOT enabled, we'll use the Lex'it-webservice as a proxy,
 	//     so as to avoid 'strict-origin-when-cross-origin' errors
 	//
 	// In previous Lex'it versions, Lex'it would detect if the Lex'it host
 	// and the aimed service host were NOT the same and automatically
-	// set oExtraParams["crossDomain"] = true
+	// set oExtraParams["crossDomain"] = true  (t.i. crossDomain enabled)
 	//
 	// For sake of backwards compatibility, we keep it that way,
 	// EXCEPT when oExtraParams["crossDomain"] was explicitly set to 'false'
 	// in the fn.callService(). In that case, that will overrule the 
-	// old default behavior of the function. 
+	// old default behavior of the function. 	
+	 
+	
+	// Kind of brutal force parameter: 'true' means force use the Lex'it service as a proxy, so as to avoid 'strict-origin-when-cross-origin' errors 
+	var bUseLexitServiceIsSet = ( typeof oExtraParams["useLexitService"] !== 'undefined' );	
+	
+	
+	// final decision on which service to use:
+	//
+	var bUseTheLexitServiceAsProxy = 
+		(!bAimedServiceIsOnSameHost &amp;&amp; bCrossDomainValueIsSet &amp;&amp; oExtraParams["crossDomain"] == false)
+		 ||
+		 ( bUseLexitServiceIsSet &amp;&amp; oExtraParams["useLexitService"] == true);
+
 	
 	
 	// Detect that the aimed service is not on the same host
-	// and the "crossDomain" parameter given is explicitly set to 'false' 
+	// and the "crossDomain" parameter given is explicitly set to 'false'
+	// (or if 'useLexitService' is set to 'true', we use the lex'it service anyhow) 
 
-	if ( !bAimedServiceIsOnSameHost &amp;&amp; bCrossDomainValueIsSet &amp;&amp; oExtraParams["crossDomain"] == false){
+	if ( bUseTheLexitServiceAsProxy ){
 
 		var sData = getAssociativeArrayAsString(aParameters);
 		
 		var ajaxParams = {
-			url: WEBSERV_URL+"/table/call_external_service",
+			url: WEBSERV_URL+"/api/call_external_service",
 			method: "GET",
 			data: {
 				"url": sUrl,
 				"type": sMethod,
-				"data": sData
+				"data": sData,
+				"dataType": sResponseDataType
 			}			
 		};
 
@@ -5790,40 +6207,46 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		}
 		
 		$.ajax( ajaxParams )
-		.done(function( xml ) {
-
-			// callback if it is set
-			if (fnCallback!=null)
-					fnCallback(xml);
-    
-		})
-		.fail(function( jqXHR, textStatus ) {
-
-			if (fnErrorHandler!=null)
-				fnErrorHandler({
-					"jqXHR": jqXHR, "textStatus": textStatus, 
-					"lexit_function": "fn.callService",
-					"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
-					});
-			else
-				fn.message(lang.error,
-					lang.error_when_calling+" fn.callService(): " +	
-					textStatus+"; "+getJqXHRInfo(jqXHR));
-		});
-		
+			.done(function( xml ) {
+				
+				if (sResponseDataType == 'json')  
+					xml = JSON.parse(xml);
+	
+				// callback if it is set
+				if (fnCallback!=null)
+						fnCallback(xml);
+	    
+			})
+			.fail(function( jqXHR, textStatus ) {
+	
+				if (fnErrorHandler!=null)
+					fnErrorHandler({
+						"jqXHR": jqXHR, "textStatus": textStatus, 
+						"lexit_function": "fn.callService",
+						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
+						});
+				else
+					fn.message(lang.error,
+						lang.error_when_calling+" fn.callService(): " +	
+						textStatus+"; "+getJqXHRInfo(jqXHR));
+			});		
 
 	}
 
 
-	// other cases:
+	// Other cases:
+	//
 	// - the aimed service is at the same host as Lex'it (no problem at all!)
 	// or
-	// - it is not at the same host, but fn.callService() wasn't called with "crossDomain"=false,
-	//   so we'll set that automatically to 'true' (old default behavior) 
+	// - the aimed service is NOT at the same host, but since fn.callService was NOT called with ["crossDomain":false], crossDomain will be automatically enabled
+	//
+	// So.... 
+	//     NO proxy needed at all, we can call the aimed service directly
+	
 	else {
 
 		if ( !bAimedServiceIsOnSameHost ){
-			oExtraParams["crossDomain"] = true;
+			oExtraParams["crossDomain"] = true; // for backwards compatibility (with projects built in earlier Lex'it versions)
 		}		
 
 		var ajaxParams = {
@@ -5902,6 +6325,14 @@ fn.getCurrentSessionId = function(){
 };
 
 
+/**
+ * Open a Lex'it login dialog
+ */
+fn.startLexitLogin = function(){
+	startLexitLogin();
+};
+
+
 
 /**
  * Get the page_id, t.a. the ID assigned to the tab
@@ -5953,16 +6384,17 @@ fn.getListOfColumnsNiceNames = function(sSomeTable){
  * at initialisation time, but it is possible to set it here by giving a string, if needed that way)
  *  
  * @param {String} sName - A user name
+ * @param {Function} [fnCallback=null] - Some function to call upon success
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  * @see fn.getCurrentUser
  */
-fn.setCurrentUser = function(sName, fnErrorHandler){
+fn.setCurrentUser = function(sName, fnCallback, fnErrorHandler){
 	
 	if (sName != null)
 		USERNAME = sName;
 	
-	var url = WEBSERV_URL+"/table/get_username"; 
+	var url = WEBSERV_URL+"/api/get_username"; 
 	$.ajax( {
 		"type": "GET",
 		"async": false, // needed to block code execution while awaiting the server response
@@ -5976,7 +6408,9 @@ fn.setCurrentUser = function(sName, fnErrorHandler){
 			var aUsernameAndSessionId = ( fn.getDbResponse(xml) ).split(ARG_INTERNAL_SEPARATOR);
 			USERNAME = aUsernameAndSessionId[0];
 			SESSION_ID = aUsernameAndSessionId[1];
-	 		},
+			if (fnCallback != null)
+				fnCallback();
+	 	},
 	 	"error": function(jqXHR, textStatus, errorThrown){
 	 		
 	 		if (fnErrorHandler!=null)
@@ -6119,7 +6553,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Sep 25 2024 15:48:44 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

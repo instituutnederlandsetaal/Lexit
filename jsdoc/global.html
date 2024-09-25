@@ -582,6 +582,29 @@
 
         <tr>
             
+                <td class="name"><code>editpreprocess</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function voor het voorbewerken (preprocessen) van een ingevoerde waarde, vóór dat Lex'it deze invoert in de database.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>editerrorhandler</code></td>
             
 
@@ -812,6 +835,98 @@
 
         <tr>
             
+                <td class="name"><code>query_builder_allowed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Als dit 'false' is, wordt de query builder by CTRL+klik in het zoekveld uitgeschakeld.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query_builder_values</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">declareer de in de query builder te tonen zoekwaarden (keys) en hun vertaling in voor de database begrijpelijke waarden om een welgevormde query samen te stellen (values).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query_builder_processor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">functie om de door query builder geformuleerde query aan te passen voordat deze wordt afgevuurd op de database.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query_builder_settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">settings voor de query builder (indien default gedrag aangepast moet worden).Parameter 'grid': true/false bepaalt of de zoekwaarden al dan niet als een grid getoond moeten worden.Parameter 'preselected' bepaalt welke waarde in de query builder alvast geselecteerd moet zijn.Parameter 'autostart': true/false bepaalt of de door de query builder geformuleerde query bij klikken op OK al dan niet direct moet worden afgevuurd op de database.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>searchable</code></td>
             
 
@@ -858,7 +973,7 @@
 
         <tr>
             
-                <td class="name"><code>searchform</code></td>
+                <td class="name"><code>searchpreprocess</code></td>
             
 
             <td class="type">
@@ -1120,7 +1235,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line335">line 335</a>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line360">line 360</a>
     </li></ul></dd>
     
 
@@ -1369,6 +1484,29 @@
 
         <tr>
             
+                <td class="name"><code>formgrid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Declareer een formulier, als custom weergave van een tabel (dit wordt in de handleiding uitgebreid uitgelegd).</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>info</code></td>
             
 
@@ -1385,7 +1523,7 @@
 
             
 
-            <td class="description last">Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.</td>
+            <td class="description last">Om in het tabeloverzicht meer info over een tabel te geven, legt men deze info hier vast.Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.</td>
         </tr>
 
     
@@ -1990,6 +2128,29 @@
 
         <tr>
             
+                <td class="name"><code>full_export_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">voeg een volledig export button aan de tabel voeter toe (zie handleiding voor meer info)</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>contextmenu</code></td>
             
 
@@ -2128,6 +2289,29 @@
 
         <tr>
             
+                <td class="name"><code>drag_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback opgeroepen na het verslepen van een table</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>resizable</code></td>
             
 
@@ -2145,6 +2329,29 @@
             
 
             <td class="description last">maak de tabel resizable (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>resize_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback opgeroepen na het resizen van een table</td>
         </tr>
 
     
@@ -2621,7 +2828,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Sep 25 2024 15:48:45 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -38,13 +38,11 @@
 var form = {};
 
 
-// ##################################################
-
-var iWait = 500;  // need to fix that to init of view, just quick and dirty now
-
-// ##################################################
-
-
+// ----------------------------------------------
+//
+// API at the botton of this file !!!
+//
+// ----------------------------------------------
 
 
 
@@ -118,7 +116,9 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
 
 			// add blink function for send_button
-			var blink = function(elem) {
+			var blink = function(elem, iCount) {
+				
+				if (iCount == null) iCount = 0;
 
 				$(elem).animate({
 						opacity: '0'
@@ -126,8 +126,8 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 						$(this).animate({
 							opacity: '1'
 						}, function(){
-							if ( $(elem).hasClass("payattention") )
-								blink(elem);
+							if ( $(elem).hasClass("payattention") &amp;&amp; iCount &lt; 3) // blink 3 times (is enough, more is irritating)
+								blink(elem, iCount+1);
 						});
 					});		
 			};
@@ -196,12 +196,8 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// ------------------------------------------
 
 	// get visible columns
-	var aSearchFields = 			mt.getListOfVisibleColumnsOf(sTableName);
-	var aSearchFieldsNiceNames = 	fn.getListOfColumnsNiceNames(sTableName);
-
-	var aTinySearchFields = [];
-	var aTinySearchFieldsNiceNames = [];
-
+	var aSearchFields = 			form.getVisibleColumnsOf(sTableName);
+	var aSearchFieldsNiceNames = 	form.getColumnsNiceNames(sTableName); 
 
 
 	// --------------------------------------
@@ -209,22 +205,24 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// --------------------------------------
 
 	var oCells =  oFormGrid["cells"];
+	
 	for (var sCellName in oCells){
-
+		
+		// if the cell is not visible in current config, skip it
+		if ($.inArray(sCellName, aSearchFields) &lt; 0) continue;
+		
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
-		if (iNameIndex&lt;0) continue;
-		aTinySearchFields.push(sCellName);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
-		aTinySearchFieldsNiceNames.push( sNiceName );
 
 		// --------------------------------------
 		// add sort button
 		// --------------------------------------
 
+		var iPercentage = (parseInt( $( "#"+sTableName+"_dynamic" ).css("width") ) / parseInt( $(window).width() ) );
 		$("#"+sTableName+"_search_and_sort_table tr:eq(0)")
 			.append(
 				$("&lt;td>&lt;/td>")
-					.css("width", iGridWidthUnit+"px")
+					.css("width", "calc("+iPercentage+" * (var(--"+sTableName+"_form_cellwidth)))")
 					.css("text-align", "center")
 					.append(
 						$("&lt;span>&lt;/span>")
@@ -271,7 +269,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		$("#"+sTableName+"_search_and_sort_table tr:eq(1)")
 			.append( $("&lt;td>&lt;/td>") );
 
-		// ... and copy the original Lex'it searchsearch to this new cell
+		// ... and copy the original Lex'it searchbox to this new cell
 		$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
 			.find("#"+sTableName+"_searchbox_"+sCellName)
 			.clone()
@@ -282,11 +280,31 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").css("background-color", "#DDDDDD").css("border", "1px solid #FFFFFF");
 		}
 
+		// if we have a selectbox, select the selected value
+		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
+			
+			var sSelectedValueInUnderlyingTable = 
+				$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
+					.find("#"+sTableName+"_searchbox_"+sCellName).val();
+
+			// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
+			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
+
+				return e.text 
+					== 
+					sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
+
+			}).attr("selected", "selected");
+		}
 
 		// assign it the grid width unit (same width for each)
-		var factor = oFormGrid["searchbox_width_factor"] != null ? parseInt( oFormGrid["searchbox_width_factor"] ) : 1;
+		var factor = oFormGrid["searchbox_width_factor"] != null ? 
+			parseInt( oFormGrid["searchbox_width_factor"] ) 
+			: 
+			iPercentage;
+			
 		$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last")
-			.css("width", (factor * iGridWidthUnit) +"px")
+			.css("width", "calc("+factor+" * (var(--"+sTableName+"_form_cellwidth)))")
 			.css("text-align", "center");
 
 
@@ -368,7 +386,8 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 						.trigger("change");
 			});
 		
-	}
+
+	}; // end of cell loop
 
 };
 
@@ -404,13 +423,17 @@ form.buildViewGrid = function(sTableName){
 	if (oFormGrid == null) return;
 
 	// set 1-row mode at current table row position
-	var iNowIndex = fn.getCurrentDisplayStart(sTableName);
 	mt.getDataTableObjectOf(sTableName).page.len(1);
+	
+	// now we can query the current row index
+	// NB: if we call that function before setting the 1-row mode, it will return -1,
+	//     seemingly because the table is not yet fully initialized
+	var iNowIndex = fn.getCurrentDisplayStart(sTableName);	
 	mt.getDataTableObjectOf(sTableName).displayRow(iNowIndex);
 
 	// get column names
-	var aSearchFields = form.getListOfVisibleColumnsOf(sTableName);
-	var aSearchFieldsNiceNames = form.getListOfColumnsNiceNames(sTableName);
+	var aSearchFields = form.getVisibleColumnsOf(sTableName);
+	var aSearchFieldsNiceNames = form.getColumnsNiceNames(sTableName);
 
 	// ------------------------------------------
 	// form layout
@@ -418,15 +441,20 @@ form.buildViewGrid = function(sTableName){
 
 	// get pixel size
 	var aSize =             oFormGrid["size"];
+	if (aSize == null){
+		aSize = [0, 0] // default
+	}
 	var iFormWidth = 		parseInt(aSize[0]);
 	var iFormHeight = 		parseInt(aSize[1]);
 	
 
 	// get table size (the form grid pixel size must fit into it)	
 	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
-	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") );
-	if (iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
-	if (iFormHeight > iTableHeight ) iFormWidth = iTableHeight;
+	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
+	
+	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
+	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
+	if (iFormHeight == 0 || iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
 
 	var sFormPositionSetting = oFormGrid["align"];
 	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
@@ -437,8 +465,11 @@ form.buildViewGrid = function(sTableName){
 		sFormPosPix = (iTableWidth - iFormWidth) - 10;
 	}
 
+	// do we need a search bar?
+	var bSearchBar = oFormGrid["searchbar"] != null ? oFormGrid["searchbar"] : true;
 	
-	var iSearchBarHeight = 40;
+	var iSearchBarHeight = bSearchBar ? 40 : 0;
+	var iSearchOpacity = bSearchBar ? 1 : 0;
 	var iHeaderHeight = parseInt( $( "#"+sTableName+"_wrapper .top" ).css("height") );
 
 	// search div on top of form
@@ -449,14 +480,15 @@ form.buildViewGrid = function(sTableName){
 		.css("top", "10px")
 		.css("left", sFormPosPix + "px")
 		.css("width", iFormWidth +"px")
-		.css("height", iSearchBarHeight+"px");
+		.css("height", iSearchBarHeight+"px")
+		.css("opacity", iSearchOpacity);
 	$( "#"+sTableName+"_wrapper" ).append(eSearchDiv);	
 	
 	
 	// parent element to build form into	
-	var sFormId = sTableName+"_form";
+	var sFormContainerId = sTableName+"_form";
 	var eFormParent = $("&lt;div>&lt;/div>")
-		.attr("id", sFormId)
+		.attr("id", sFormContainerId)
 		.addClass("formgrid")
 		.css("margin", 0)
 		.css("position", "relative")
@@ -479,6 +511,12 @@ form.buildViewGrid = function(sTableName){
 	// compute cell pixel size
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
+	
+	//fn.setCssVariable(sFormContainerId+"_formwidth", iFormWidth+"px");
+	//fn.setCssVariable(sFormContainerId+"_formheight", iFormHeight+"px");
+	
+	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 
 	// ------------------------------------------
 	// add search and sort bar
@@ -495,7 +533,151 @@ form.buildViewGrid = function(sTableName){
 	$("#"+sTableName+"_dynamic .bottom_pane").hide();
 	$("#"+sTableName+"_dynamic .export_pane").hide();	
 	
+	
+	// ------------------------------------------
+	// text blocks loop
+	// ------------------------------------------
+	
+	var oTextBlocks =  oFormGrid["textblocks"];
+	for (var sTextBlockName in oTextBlocks){
 
+		var oTextBlock = 	oTextBlocks[sTextBlockName];
+		var aPosition = 	oTextBlock["position"];
+		var aBlockSize = 	oTextBlock["definition"];
+		var sBlockClass = 	oTextBlock["class"];
+		var sBlockText = 	oTextBlock["text"];
+		var fnBlockClick = 	oTextBlock["click"];
+		
+		if (aPosition == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{position}}"));
+			return;
+		}
+		if (aBlockSize == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{definition}}"));
+			return;
+		}
+		
+		var eTextBlock = $("&lt;div>&lt;/div>")
+				.attr("id", sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+				.addClass(sBlockClass)
+				.append(
+					$("&lt;span>&lt;/span>").text(sBlockText)
+				);		
+		$(eFormParent).append(eTextBlock);
+		
+		$("#"+sTableName+"_wrapper #"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")		
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
+	
+	
+		// click events if declared
+		
+		if (fnBlockClick != null){
+			$("#"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
+				.click(function(){
+					
+					// get config given this node
+					var sTableName = 		form.getFeedingTable(this);
+					var sTextBlockName = 	$(this).attr("id").replace(/^.+_form_textblock_/g, "");
+					
+					var oTableSettings =    conf.getTableSettings(sTableName);
+					var oFormGrid =         conf.getFormGrid(oTableSettings);
+					var oTextBlocks = 		oFormGrid["textblocks"];
+					var fnBlockClick = 		oTextBlocks[sTextBlockName]["click"];
+					
+					// call function with table object as parameter
+					fnBlockClick( mt.getDataTableObjectOf(sTableName) );
+				});
+		}
+	}
+	
+	
+	// ------------------------------------------
+	// cell groups blocks loop
+	// ------------------------------------------
+	
+	
+	
+	var oCellBlocks =  oFormGrid["cellgroups"];
+	for (var sCellBlockName in oCellBlocks){
+
+		var oCellBlock = 	oCellBlocks[sCellBlockName];
+		var aPosition = 	oCellBlock["position"];
+		var aBlockSize = 	oCellBlock["definition"];
+		var sBlockClass = 	oCellBlock["class"];
+		
+		var sBlockText = 	oCellBlock["text"];
+		var sBlockTextClass = oCellBlock["textclass"];
+		var sBlockTextHtmlTag = oCellBlock["htmltag"];
+		
+		
+		if (aPosition == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cellgroups:{"+sCellBlockName+":{position}}"));
+			return;
+		}
+		if (aBlockSize == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cellgroups:{"+sCellBlockName+":{definition}}"));
+			return;
+		}
+		
+		// if some text is given, prepend a text block to the cell block
+		if (sBlockText != null){
+			
+			var eTextBlock;
+			if (sBlockTextHtmlTag != null){
+				eTextBlock = $("&lt;"+sBlockTextHtmlTag+">&lt;/"+sBlockTextHtmlTag+">")
+					.text(sBlockText)
+			}
+			else {
+				eTextBlock = $("&lt;div>&lt;/div>")
+					.attr("id", sTableName+"_form_cellblock_text_"+sCellBlockName.replace(/ /g, "_"))
+					.addClass(sBlockTextClass != null ? sBlockTextClass : sBlockClass)
+					.append(
+						$("&lt;span>&lt;/span>").text(sBlockText)
+					);		
+				
+			}
+			
+			$(eFormParent).append(eTextBlock);
+			
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_text_"+sCellBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")  		
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")  		
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+		}
+		
+		// now add the cell block
+		var eCellBlock = $("&lt;div>&lt;/div>")
+				.attr("id", sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_"))
+				.addClass(sBlockClass);		
+		$(eFormParent).append(eCellBlock);
+		
+		
+		$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_"))
+					.css("position", "absolute")
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+(aPosition[1]+ (sBlockText != null ? 1:0)) + " * (var(--"+sFormContainerId+"_cellheight)))") // if text is given, add one iGridHeightUnit
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
+					// .css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1] + (sBlockText != null ? 1:0)) * iGridHeightUnit) +"px") // if text is given, add one iGridHeightUnit
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					
+	}
 
 	// ------------------------------------------
 	// cells loop
@@ -503,10 +685,27 @@ form.buildViewGrid = function(sTableName){
 
 	var oCells =  oFormGrid["cells"];
 	for (var sCellName in oCells){
+		
+		// if the cell is not visible in current config, skip it
+		if ($.inArray(sCellName, aSearchFields) &lt; 0) continue;
 
 		var oCell = 	oCells[sCellName];
+		var sCellBlockName = oCell["cellgroup"];
 		var aPosition = oCell["position"];
 		var aCellSize = oCell["definition"];
+		var sCellClass = oCell["class"];
+		var sPlaceholder = oCell["tooltip"];
+		
+		
+		if (aPosition == null &amp;&amp; sCellBlockName == null){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cells:{"+sCellName+":{position}}"));
+			return;
+		}
+		if (aCellSize == null &amp;&amp; aPosition != "hidden"){
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "cells:{"+sCellName+":{definition}}"));
+			return;
+		}
+		
 
 		// ------------------------------------------
 		// build a label and its content cell attached
@@ -514,15 +713,36 @@ form.buildViewGrid = function(sTableName){
 
 		var iNameIndex = $.inArray(sCellName, aSearchFields);
 		var sNiceName = aSearchFieldsNiceNames[iNameIndex];
+		
+		
 		var eCell = $("&lt;div>&lt;/div>")
-				.attr("id", "form_cell_"+sCellName)
+				.attr("id", sTableName+"_form_cell_"+sCellName)
 				.append(
-					$("&lt;span>&lt;/span>").css("font-weight", "bold").text(sNiceName)
+					$("&lt;div>&lt;/div>")
+						.addClass("form_celllabel")
+						.attr("id", "form_celllabel_"+sCellName)
+						.css("font-weight", "bold")
+						.text(sNiceName)
 				);
 		var eCellField = $("&lt;div>&lt;/div>")
+				.addClass("form_cellvalue")
 				.attr("id", "form_cellvalue_"+sCellName);
-		$(eFormParent).append(eCell);
+		
+		// a cell can be attached to a group (div container!)
+		// or just to the form parent
+		if (sCellBlockName == null){
+			$(eFormParent).append(eCell);
+		}
+		else {
+			$("#"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_")).append(eCell);
+		}
+		
 		$(eCell).append(eCellField);
+		
+		// custom class if configured
+		if (sCellClass != null){
+			eCell.addClass(sCellClass);
+		}
 
 		// ------------------------------------------
 		// append the correct type of field, given 
@@ -557,6 +777,8 @@ form.buildViewGrid = function(sTableName){
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
 			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
 			var eSelectBox = $("&lt;select>&lt;/select>")
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
 				.css("padding", "5px");
 			for (var i=0; i&lt;aNewSelectBoxValues.length; i++){
 				eSelectBox.append(
@@ -574,6 +796,7 @@ form.buildViewGrid = function(sTableName){
 			eCellField.append(
 				$("&lt;textarea>&lt;/textarea>")
 					.css("padding", "5px")
+					.attr("placeholder", sPlaceholder ?? "")
 			);
 		}
 		
@@ -582,14 +805,29 @@ form.buildViewGrid = function(sTableName){
 		// ------------------------------------------
 		// put the labels/cells at the right positions
 		// ------------------------------------------
-		$("#"+sTableName+"_wrapper #form_cell_"+sCellName)
-				.css("position", "absolute")
-				.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-				.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
-		$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
-				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
-				.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
-				.addClass("formview_textarea");
+		
+		if (aPosition != "hidden"){
+			
+			if (aPosition != null){
+				$("#"+sTableName+"_wrapper #"+sTableName+"_form_cell_"+sCellName)
+					.css("position", "absolute")
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
+			}
+					
+			// text area size
+			$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				.css("min-height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")
+				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
+				//.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
+				.addClass("formview_textarea");			
+		}
+		else {
+			$("#" + sTableName + "_wrapper #"+sTableName+"_form_cell_"+sCellName).hide();
+		}
 		
 	}
 
@@ -605,51 +843,58 @@ form.buildViewGrid = function(sTableName){
 	var oLists =  oFormGrid["lists"];
 	for (var sListLabel in oLists){
 
-		var sListId = 			lists.buildListTableId(sFormId, sListLabel);
 		var aListPosition = 	oLists[sListLabel]["position"];
 		var aListDefinition =	oLists[sListLabel]["definition"];
+		var sListLabelInGUI =	oLists[sListLabel]["nice_name"];
 
 		// table to build
 
 		var sTableFeedingList = oLists[sListLabel]["table"]["name"];
 		var oSortSettings = 	oLists[sListLabel]["table"]["columns_sorting"];
-		var iDisplayLength = 	oLists[sListLabel]["table"]["displaylength"];
 
-		// columns
-		var aColumnsToDisplay = form.getListColumnsToDisplay(oLists, sListLabel)
 
 		// build the list div
 
 		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
 		if (sBgColor == null) sBgColor = "#FFFFFF";
 
-		var mainListDiv = $("&lt;div>&lt;/div>").append(	$("&lt;span>&lt;/span>").css("font-weight", "bold").text(sListLabel) );
-		var listDiv = $("&lt;div>&lt;/div>")
+		var listAndLabelContainer = $("&lt;div>&lt;/div>").append(
+				$("&lt;div>&lt;/div>")
+					.addClass("formview_listlabel")
+					.attr("id", "formview_listlabel_"+sListLabel)
+					.css("font-weight", "bold")
+					.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
+			);
+		var listContainer = $("&lt;div>&lt;/div>")
 			.addClass("formview_list")
 			.css("background-color", sBgColor)
-			.attr("id", sListId+"_div");
-		eFormParent.append(mainListDiv);
-		mainListDiv.append(listDiv);
+			.attr("id", lists.buildTableContainerId(sFormContainerId, sListLabel));
+		eFormParent.append(listAndLabelContainer);
+		listAndLabelContainer.append(listContainer);
 		
 
 		// put the list div at right position
 
-		mainListDiv
+		listAndLabelContainer
 			.css("position", "absolute")
-			.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-			.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
-		listDiv
-			.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
-			.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
+			.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
+			//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		listContainer
+			.css("width", "calc("+aListDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("height", "calc("+aListDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
+			//.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
 
 		// build the HTML table for the list,
 		// attach it to the div,
 		// and instantiate it as a Datatable
-		lists.register(sListLabel, sFormId, sTableFeedingList, aColumnsToDisplay, (parseFloat(aListDefinition[1]) *iGridHeightUnit) +"px", oSortSettings);
+		lists.register(sListLabel, sFormContainerId, sTableFeedingList, (parseFloat(aListDefinition[1]) *iGridHeightUnit) +"px", oSortSettings);
 	}
 
 	// now build all lists
-	lists.buildLists();
+	lists.buildLists(sTableName);
 
 
 	// =============
@@ -668,6 +913,10 @@ form.buildViewGrid = function(sTableName){
 		var sButtonColor =		oCustomButtons[sButtonName]["color"];
 		var sButtonBgColor = 	oCustomButtons[sButtonName]["bgcolor"];
 		var aButtonPosition = 	oCustomButtons[sButtonName]["position"];
+		var sButtonClass =	 	oCustomButtons[sButtonName]["class"];
+		if (aButtonPosition == null) {
+			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "buttons:{position}"));
+		}
 		var aButtonDefinition =	oCustomButtons[sButtonName]["definition"];
 		if (aButtonDefinition == null) aButtonDefinition = [1, 0.5]; // default
 
@@ -682,27 +931,42 @@ form.buildViewGrid = function(sTableName){
 			.attr("id", "form_button_"+sButtonId)
 			.attr("name", sButtonName)
 			.click(function(){
+				
+				// get config given this node
+				var sTableName = 		form.getFeedingTable(this);
+				var oTableSettings =    conf.getTableSettings(sTableName);
+				var oFormGrid =         conf.getFormGrid(oTableSettings);
 
 				// retrieve button config by its name
 				var sThisButtonName = $(this).attr("name");
+				var oCustomButtons = oFormGrid["buttons"]
 				var fnCallback = oCustomButtons[sThisButtonName]["click"]; 
 				fnCallback(mt.getDataTableObjectOf(sTableName));
 			});
 		eFormParent.append(
 			$("&lt;div>&lt;/div>")
-				.attr("id", "form_buttondiv_"+sButtonId)
+				.attr("id", sTableName+"_form_button_"+sButtonId)
 				.append(customButton)
 		);
+		
+		// custom class if configured
+		if (sButtonClass != null){
+			customButton.addClass(sButtonClass);
+		}
 
 		// put button at right position
 
-		$("#"+sTableName+"_wrapper div#form_buttondiv_"+sButtonId)
+		$("#"+sTableName+"_wrapper div#"+sTableName+"_form_button_"+sButtonId)
 			.css("position", "absolute")
-			.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
-			.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
+			.css("left", "calc("+aButtonPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("top", "calc("+aButtonPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
+			//.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
 		$("#"+sTableName+"_wrapper button#form_button_"+sButtonId)
-			.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
-			.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
+			.css("width", "calc("+aButtonDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("height", "calc("+aButtonDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
+			//.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
 	}
 
 
@@ -710,17 +974,19 @@ form.buildViewGrid = function(sTableName){
 	// buttons for reset or validation
 	// ------------------------------------------
 
-	var iButtonDivLeft = iGridWidthUnit;
-	var iButtonDivTop = (iFormHeight - iGridHeightUnit);
+	var iButtonDivLeft = "(var(--"+sFormContainerId+"_cellwidth))";
+	var iButtonDivTop = "calc("+ iFormHeight +" - (var(--"+sFormContainerId+"_cellheight)))";//(iFormHeight - iGridHeightUnit);
 	if (oFormGrid["buttonsbar_position"] != null){
-		iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
-		iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
+		//iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
+		//iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
+		iButtonDivLeft = "calc("+ oFormGrid["buttonsbar_position"][0] +" * (var(--"+sFormContainerId+"_cellwidth)))";
+		iButtonDivTop = "calc("+ oFormGrid["buttonsbar_position"][1] +" * (var(--"+sFormContainerId+"_cellheight)))";
 	}  
 	var buttondsDiv = $("&lt;div>&lt;/div>")
 		.attr("id", sTableName+"_formsbuttons")
 		.css("position", "absolute")
-		.css("left", iButtonDivLeft +"px")
-		.css("top", iButtonDivTop +"px");
+		.css("left", iButtonDivLeft )
+		.css("top", iButtonDivTop );
 
 	// ------------------------------------
 	// build a RESET button
@@ -775,7 +1041,7 @@ form.buildViewGrid = function(sTableName){
 
 			var oColumnNamesAndValues = {};
 
-			var sTableName = 		form.getTableOfForm(this);
+			var sTableName = 		form.getFeedingTable(this);
 			var oTableSettings =    conf.getTableSettings(sTableName);
 			var oFormGrid =         conf.getFormGrid(oTableSettings);
 			var oCells =  			oFormGrid["cells"];
@@ -786,7 +1052,7 @@ form.buildViewGrid = function(sTableName){
 			// (so we'll be able to restore selection after saving)
 			var aSelectedRowsInLists = {};
 			for (var sListLabel in oLists){
-				var aRows = (lists.getSelectedRowsFromList(sListLabel)).nodes();
+				var aRows = lists.getSelectedRows(sListLabel);
 				var nRow = aRows[0];
 				if (nRow != null &amp;&amp; nRow.id != null){
 					aSelectedRowsInLists[sListLabel] = nRow.id;
@@ -950,8 +1216,10 @@ form.buildViewGrid = function(sTableName){
 
 				});
 
-				// click the form reset the button to load current data (with new IDs etc)
-				$("div#"+sTableName+"_form button#reset_button").click();
+				// click the form reset button to load current form data (with new IDs etc)
+				setTimeout(function(){
+					$("div#"+sTableName+"_form button#reset_button").click();
+				}, 500);
 
 				// give the send-button a new color to show update was performed
 				// and show that reset is NOT possible anymore 
@@ -962,9 +1230,14 @@ form.buildViewGrid = function(sTableName){
 				// make sure that the tables underlying the form's lists
 				// are refreshed, in case those are loaded in the GUI already
 				for (var sListLabel in oLists){
-					var sTableToRefresh = lists.getTableNameFromListLabel(sListLabel);
-					if (fn.tableExists(sTableToRefresh))
+					
+					lists.refresh(sListLabel);
+					
+					var sTableToRefresh = lists.getFeedingTable(sListLabel);
+					if (fn.tableExists(sTableToRefresh)){
 						fn.refreshTable(sTableToRefresh);
+					}
+						
 				}
 
 
@@ -973,8 +1246,8 @@ form.buildViewGrid = function(sTableName){
 				setTimeout(function(){
 					for (var sListLabel in aSelectedRowsInLists){
 						var sRowId = aSelectedRowsInLists[sListLabel];
-						lists.setRowInList(sListLabel, sRowId);						
-						lists.clickOpenInList(sListLabel);
+						lists.selectRow(sListLabel, sRowId);						
+						lists.clickOpenInSelectedRow(sListLabel);
 					}
 				}, 500);				
 				
@@ -999,15 +1272,82 @@ form.buildViewGrid = function(sTableName){
 
 
 	// ------------------------------------------------------------------------
-	// force tooltip to fade, otherwise it sometimes keep in sight
+	// force tooltip to fade, otherwise it sometimes keeps in sight
 	// ------------------------------------------------------------------------
 
 	$("#tiptip_holder").fadeOut();
 	setTimeout(function(){
 		$("#tiptip_holder").fadeOut();
 	}, 500);
+	
+	
+	$("#"+sFormContainerId).css("width", iFormWidth +"px");
 
 };
+
+
+/**
+ * Update the form layout
+ * This can be called (e.g. in 'resize_callback') to make sure that the form keeps looking how it should after resizing etc.
+ * @param {String} table name
+ */
+form.updateLayout = function(sTableName){
+	
+	sTableName = fn.getTableName(sTableName);
+	
+	var sFormContainerId = sTableName+"_form";
+	
+	var oTableSettings =    conf.getTableSettings(sTableName);
+	var oFormGrid =         conf.getFormGrid(oTableSettings);
+	
+	var aSize =             oFormGrid["size"];
+	if (aSize == null){
+		aSize = [0, 0] // default
+	}
+	var iFormWidth = 		parseInt(aSize[0]);
+	var iFormHeight = 		parseInt(aSize[1]);
+	
+	// get definition size
+	var aDefinition =       oFormGrid["definition"];
+	var iDefWidth = 		aDefinition[0];
+	var iDefHeight = 		aDefinition[1];
+	
+
+	// get table size (the form grid pixel size must fit into it)	
+	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
+	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
+	
+	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
+	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
+	if (iFormHeight == 0 || iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
+	
+	// compute cell pixel size
+	var iGridWidthUnit = 	iFormWidth / iDefWidth;
+	var iGridHeightUnit = 	iFormHeight / iDefHeight;
+	
+	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
+	
+	
+	var sFormPositionSetting = oFormGrid["align"];
+	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
+	if (sFormPositionSetting == null ||  sFormPositionSetting == "left"){
+		sFormPosPix = 10;
+	}
+	else if (sFormPositionSetting == "right"){
+		sFormPosPix = (iTableWidth - iFormWidth) - 10;
+	}
+	
+	// set search fields width
+	$("#"+sTableName+"_search_and_sort").css("width", iFormWidth +"px");
+	
+	// set the container width
+	$("#"+sFormContainerId).css("width", iFormWidth +"px");
+	
+	// set the search fields width
+	var iPercentage = (parseInt( $( "#"+sTableName+"_dynamic" ).css("width") ) / parseInt( $(window).width() ) );
+	$("#"+sTableName+"_search_and_sort_table tr td").css("width", "calc("+iPercentage+" * (var(--"+sTableName+"_form_cellwidth)))");
+}
 
 
 
@@ -1057,20 +1397,36 @@ form.manageViewGrid = function(sTableName){
 			oListLabel2Filters[sOneList] = {}; // instantiate filters to apply to this list
 		}
 	}
+	
 
+	
+	// get the current row content
+	// fore looping through the cells
+	
+	var nRow = fn.getActiveRowNode(sTableName);
+	if (nRow == null){
+		console.log("The active row of table "+sTableName+" is null, so editable view mode is not possible.");
+	}
+	
+	
 	// cells loop
 	
 	var oCells = 	oFormGrid["cells"];
+	
 	for (var sCellName in oCells){
 
 		var sBgColor = oFormGrid["cells"][sCellName]["bgcolor"];
-		if (sBgColor == null) sBgColor = "#FFFFFF";
-
-		// get the current row content
-		var nRow = fn.getActiveRowNode(sTableName);
+		if (sBgColor == null) sBgColor = "#FFFFFF";		
 
 		// if there are no results, the row might be null
 		if (nRow != null){
+			
+			// remove disabled color in case it was put there in previous round
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form").removeClass("form_overlay");
+			if ($("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div").elementExists()){
+				$("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div")
+					.removeClass("form_overlay");
+			}
 
 			// get the data
 			var sData = fn.getDataFromCellInRowNode(nRow, sCellName);
@@ -1120,9 +1476,9 @@ form.manageViewGrid = function(sTableName){
 				conf.getEditability(oColumnConfig);
 
 
-
 			// show the data the proper way, given column data type
 
+			// checkbox
 			if (bCheckBoxType){
 
 				var bIsBooleanType = (mt.getListOfColumnTypesOf(sTableName)[i] == "boolean");
@@ -1146,6 +1502,7 @@ form.manageViewGrid = function(sTableName){
 					.css("background-color", sBgColor)
 					.removeClass("modified");
 			}
+			// selectbox
 			else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){
 
 					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" select")					
@@ -1155,12 +1512,16 @@ form.manageViewGrid = function(sTableName){
 						.css("background-color", sBgColor)
 						.removeClass("modified");
 			}
+			// textbox
 			else {
+				var fnRender = oFormGrid["cells"][sCellName]["render"];
+				var sTextData = (fnRender != null ? fnRender(sData) : sData); 
+				
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
-					.val(sData)
+					.val(sTextData)
+					.css("background-color", sBgColor)
 					.css("pointer-events", bEditable ? "auto" : "none"); // trick to allow click event, which 'disabled' doesn't
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
-					.css("background-color", sBgColor)
 					.removeClass("modified");
 			}
 
@@ -1177,7 +1538,7 @@ form.manageViewGrid = function(sTableName){
 
 					var sCellId = 			$(nFormCell).closest("div[id^='form_cellvalue_'")[0].id;
 					var sCellName = 		sCellId.replace(/^form_cellvalue_/, "");
-					var sFormTable = 		form.getTableOfForm(nFormCell);
+					var sFormTable = 		form.getFeedingTable(nFormCell);
 					var aTableSettings = 	conf.getTableSettings(sFormTable);
 					var oFormGrid = 		conf.getFormGrid(aTableSettings);
 					var fnFunction =  		oFormGrid["cells"][sCellName]["click"];				
@@ -1196,9 +1557,15 @@ form.manageViewGrid = function(sTableName){
 
 			if (bEditable){
 
-				//console.log("set keyup "+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea");
+				// textarea
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea").keyup(function(){
 
+					// some keys are not to be considered as 'content modification'
+					var sPressedKey = kf._getPressedKey();
+					var aNonCharKeys = ["uparrow", "downarrow", "leftarrow", "rightarrow", "shift", "ctrl", "alt", "home", "end", "pageup", "pagedown", "insert"];
+					if ($.inArray(sPressedKey, aNonCharKeys)>=0) return;
+					 
+					// past this point, we do have a content modification
 					$(this).parent().addClass("modified");
 
 					// attract attention from user to send button, which must be pressed 
@@ -1210,6 +1577,7 @@ form.manageViewGrid = function(sTableName){
 
 				});
 
+				// selectbox
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" select").change(function(){
 
 					$(this).parent().addClass("modified");
@@ -1223,6 +1591,7 @@ form.manageViewGrid = function(sTableName){
 
 				});
 
+                // checkbox
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" input").click(function(){
 
 					$(this).parent().addClass("modified");
@@ -1237,29 +1606,113 @@ form.manageViewGrid = function(sTableName){
 				});
 
 			}
-		}
+		}	
 		
+		// if the row is empty, show the form is disabled
+		else {			
+			$("#"+sTableName+"_wrapper #"+sTableName+"_form")
+				.addClass("form_overlay");
+			setTimeout(function(){				
+				if ($("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div").elementExists()){
+					$("#"+sTableName+"_wrapper #"+sTableName+"_form #"+sTableName+"_inbetween_div")
+						.addClass("form_overlay");
+				}
+			}, 500);
+			
+		}	
 
 	} // end of cell loop
 
 
-	setTimeout(function(){
+	// now update the lists
+	
+	// We'll need to build some promises, with all the jobs to be carried on 		
+	// trick: https://dev.to/doctolib/using-promises-as-a-queue-co5
+	class PromiseQueue {
 
-		// now update the lists
-		for (var sListLabel in oListLabel2Filters){
+		queue = Promise.resolve(true);
 
-			var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
-
-			// feed the lists
-			lists.feedList(sListLabel,  oListLabel2Filters[sListLabel], function(){
-
-				// make the list editable
-				form.makeListEditable(sListLabel, sTableToFeedTheListWith);
+		addJob(operation) {
+			return new Promise((resolve, reject) => {
+				this.queue = this.queue
+					.then(operation)
+					.then(resolve)
+					.catch((err) => {
+						fn.message("Oups", "SOMETHING WENT WRONG!");
+						console.log(err);
+					});
 			});
-		}
+		};
+	};
 
-	}, iWait);
-	iWait = 0; // after first call
+	// instantiate the jobs 
+	// for lists updates to perform
+
+	const fnDoListsUpdates = new PromiseQueue();
+
+	for (var sListLabel in oListLabel2Filters){
+		
+		// one list job
+		var fnUpdateOneFormList = function(sListLabel){
+			
+			var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+			var sTableId =			lists.buildTableId(sFormContainerId, sListLabel);
+			var oTable = 			null; // null on purpose, value will be read later on
+			var iWait =				100;
+			
+			// function to execute as soon as list is built and ready to be fed
+			var fnFeedTheList = function(sListLabel){
+				
+				// feed the lists
+				lists.feed(sListLabel, oListLabel2Filters[sListLabel], function(){
+
+					// make the list editable
+					var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
+					form.makeListEditable(sListLabel, sTableToFeedTheListWith);
+				});
+			};
+			
+			// wait till the Datatable object of the list is built (at first call only)
+				
+			var iInterval = setInterval(function(){
+
+				oTable = lists.getDataTableObjectOf(sTableId);
+				
+				// Datatable object available, so we can feed it now!
+				if (oTable != null){
+					clearInterval(iInterval);
+					fnFeedTheList(sListLabel);
+				}					
+			}, iWait);						
+		};
+
+		// add this job to the lists updates to perform
+		fnDoListsUpdates.addJob( fnUpdateOneFormList(sListLabel) );
+	};
+	
+	// Start! ----------------------------------------------------------------------------------------------------------------------------------------
+
+	return fnDoListsUpdates;
+
+
+
+	// setTimeout(function(){
+
+	// 	// now update the lists
+	// 	for (var sListLabel in oListLabel2Filters){
+
+	// 		var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
+
+	// 		// feed the lists
+	// 		lists.feed(sListLabel,  oListLabel2Filters[sListLabel], function(){
+
+	// 			// make the list editable
+	// 			form.makeListEditable(sListLabel, sTableToFeedTheListWith);
+	// 		});
+	// 	}
+
+	// }, iWait);
+	// iWait = 0; // after first call
 	
 };
 
@@ -1329,10 +1782,10 @@ form.synchronizeSorting = function(sTableName){
 form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){	
 
 	// get Datatable object of this list
-	var sFormId =	lists.getFormIdFromListLabel(sListLabel);
-	var sFormTable = sFormId.replace(/_form$/, "");
-	var sTableId = 	lists.buildListTableId(sFormId, sListLabel);	
-	var oTable = 	lists.getListObjectOf(sTableId);
+	var sFormContainerId =	lists.getFormContainerId(sListLabel);
+	var sFormTable = 		form.getFeedingTable(sFormContainerId);
+	var sFormAndListLabel =	lists.buildTableId(sFormContainerId, sListLabel);	
+	var oTable = 			lists.getDataTableObjectOf(sFormAndListLabel);
 
 	var aTableSettings = conf.getTableSettings(sFormTable);
 	var oForm = conf.getFormGrid(aTableSettings);
@@ -1340,7 +1793,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 	var oTableConfig = conf.getTableConfig(sTableToFeedTheListWith);
 
-	$("#"+sTableId+" thead th").each(function(i){
+	$("#"+sFormAndListLabel+" thead th").each(function(i){
 
 		var eThisCol = this;
 		var sColName = $(eThisCol).text();
@@ -1348,9 +1801,9 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		var bEditable = conf.getEditability(oColumnConfig);
 		var bClickable = false; // in this case, we don't use the table config, since it mostly doesn't meet the form logic
 
-		var iColIndex = $("#"+sTableId+" thead").find("th").index(eThisCol);
+		var iColIndex = $("#"+sFormAndListLabel+" thead").find("th").index(eThisCol);
 
-		// formgrid config overwrites the table config
+		// formgrid config overrides the table config
 		if (oColumnsConfig[sColName] != null){
 
 			if (oColumnsConfig[sColName]["editable"] != null)
@@ -1364,7 +1817,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		// if column must be editable:
 		if (bEditable){
 
-			$("#"+sTableId+" tbody tr").each(function(){
+			$("#"+sFormAndListLabel+" tbody tr").each(function(){
 				$(this).find("td").eq(iColIndex).addClass("editable");
 			});
 		}
@@ -1372,16 +1825,16 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		// if column must be clickable:
 		if (bClickable){
 
-			$('table#'+sTableId+' tbody tr').off("click", 'td:eq('+iColIndex+')');
-			$('table#'+sTableId+' tbody tr').on("click", 'td:eq('+iColIndex+')', function(event){
+			$('table#'+sFormAndListLabel+' tbody tr').off("click", 'td:eq('+iColIndex+')');
+			$('table#'+sFormAndListLabel+' tbody tr').on("click", 'td:eq('+iColIndex+')', function(event){
 
 				var nCell = this;
 
-				var sListLabel = lists.getLabelOfList(nCell);
-				var sFormId =	lists.getFormIdFromListLabel(sListLabel);
-				var sFormTable = sFormId.replace(/_form$/, "");
-				var aTableSettings = conf.getTableSettings(sFormTable);
-				var oFormGrid = conf.getFormGrid(aTableSettings);
+				var sListLabel = 		lists.getLabelFromNode(nCell);
+				var sFormContainerId =	lists.getFormContainerId(sListLabel);
+				var sFormTable = 		form.getFeedingTable(sFormContainerId);
+				var aTableSettings = 	conf.getTableSettings(sFormTable);
+				var oFormGrid = 		conf.getFormGrid(aTableSettings);
 
 				// get function and call it with the needed arguments
 				var fnFunction = oFormGrid["lists"][sListLabel]["table"]["columns"][sColName]["click"];
@@ -1397,29 +1850,74 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 	$(oTable.cells('td.editable').nodes()).off();
 	
 	$(oTable.cells('td.editable').nodes()).editable(
-		function(value, settings){
+		
+		function(value, settings){				// submit function
 
 			$(this).addClass("modified");
 
 			// redraw table
-			var sThisTable = $(this).closest('table')[0].id;
-			var oTable = lists.getListObjectOf(sThisTable);
+			var sThisTable =	$(this).closest('table')[0].id;
+			var oTable = 		lists.getDataTableObjectOf(sThisTable);
 			oTable.draw(false);
 
 			return(value);
 		},
 		{
+			
 			"onblur": function(value){
-
-				this.reset(value);
-			},
-			"callback": function(value, settings){
 				
-				var sThisTable = $(this).closest('table')[0].id;
-				var oTable = lists.getListObjectOf(sThisTable);
+				var sListLabel = 	lists.getLabelFromNode(this);
+				var sFormTable = 	form.getFeedingTable(this);
+				var sListTable = 	lists.getFeedingTable(sListLabel);
+				var sThisTable =	$(this).closest('table')[0].id;
+				var oTable = 		lists.getDataTableObjectOf(sThisTable);
+				
+				var oGrid = lists.getConfig(this);
+				var bEnterValidation = oGrid["enter_validation"] ?? true;
+				
+				
+				// if Enter validation is required, blur triggers reset
+				
+				if (bEnterValidation){
+					
+					this.reset(value);
+				}
+				
+				// but if no validation is needed, submit right away
+				//
+				// BUGGY BUGGY BUGGY BUGGY BUGGY
+				//
+				// BUGGY FOR NOW because click event gets detached, which is unwished for!
+				//
+				// BUGGY BUGGY BUGGY BUGGY BUGGY
+				else {
+					
+					// mark modification
+					$(this).addClass("modified");
+					
+					// submit
+					$(this).closest('form').submit();
+					
+					// attract attention
+					form.setSendButtonToSetting(sFormTable, "payattention");
+					form.setResetButtonToSetting(sFormTable, "active");
+					
+					// assign value											
+					oTable.cell(this).data(value);
+					
+					// the previous statement kills jeditable, so restore it
+					//setTimeout(function(){ form.makeListEditable(sListLabel, sListTable);}, 500);
+					
+				}
+			},
+			"callback": function(value, settings){ 	// callback is called after submit function
+				
+				var sThisTable =	$(this).closest('table')[0].id;
+				var oTable = 		lists.getDataTableObjectOf(sThisTable);
 
 				// assign value
-				oTable.cell(this).data(value);				
+				oTable.cell(this).data(value);	
+				
 			},
 			"width": "100%",
 			"type": "textarea", // this gives more room than the default 'input' field of jEditable
@@ -1431,7 +1929,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		var nThis = this;
 
 		// get configured key from config
-		var oListConfig =	form.getConfigOfList(nThis);
+		var oListConfig =	lists.getConfig(nThis);
 		var oKeys = 		oListConfig["keys"];
 		var fnCallBack = 	(oKeys != null ? oKeys[ kf._getPressedKey() ] : null);
 
@@ -1446,6 +1944,8 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 		// normal case: edit
 		else {
+			
+			var sFormTable = form.getFeedingTable(this);
 			
 			// we must use keydown to prevent default behaviour
 			$(this).find('textarea')
@@ -1476,18 +1976,18 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 
 // process added rows in a list
 //
-form.addNewRows = function(oThisList, fnCallback){
+form.addNewRows = function(eListContainer, fnCallback){
 	
-	var sListDiv = oThisList.attr("id");
-	var sListId = sListDiv.replace(/_div$/, "");
-	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel)
-	
-	var oTable = lists.getListObjectOf(sListId);
+	var sListContainerId =	eListContainer.attr("id");
 
-	var aAllColumns = formListsTableCols.get(sTableToUpdate);
+	var sListTableId =		lists.getTableIdFromContainerId(sListContainerId);
+	var oTable = 			lists.getDataTableObjectOf(sListTableId);
 
-	var iTotalNumberToBeAdded = $("#"+sListId).find("tr.added").length;
+	var sListLabel = 		lists.getLabelFromContainerId(sListContainerId);
+	var sTableToUpdate = 	lists.getFeedingTable(sListLabel);	
+	var aAllColumns = 		lists.getAllColumns(sTableToUpdate);
+
+	var iTotalNumberToBeAdded = $("#"+sListTableId).find("tr.added").length;
 	var iTotalNumberOfProcessed = 0;
 
 	if (iTotalNumberToBeAdded>0){
@@ -1512,14 +2012,14 @@ form.addNewRows = function(oThisList, fnCallback){
 				// cell which a not marked to be skipped
 				// (this mark is added in function lists.addButtonToListHeader)
 				// must be added to the record
-				if (sColValue != "_NULL_"){
+				if (sColValue != "&lt;NULL>"){
 					aColNamesToAdd.push(sColName);
 					aValuesToAdd.push(sColValue);
 				}			
 			}
 			
 			// insert record into the database
-			var url = WEBSERV_URL+"/table/insertvalue"; 
+			var url = WEBSERV_URL+"/api/insertvalue"; 
 			
 			// make sure we send no null values, as join can't deal with it
 			aValuesToAdd = convertNullToString(aValuesToAdd);
@@ -1571,16 +2071,18 @@ form.addNewRows = function(oThisList, fnCallback){
 
 // process modified rows in a list
 //
-form.updateModifiedRows = function(oThisList, fnCallback){
+form.updateModifiedRows = function(eListContainer, fnCallback){
 
-	var sListDiv = oThisList.attr("id");
-	var sListId = sListDiv.replace(/_div$/, "");
-	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel)
-	
-	var oTable = lists.getListObjectOf(sListId); 
+	var sListContainerId =	eListContainer.attr("id");
 
-	var iTotalNumberOfModified = $("#"+sListId).find("td.modified").length;
+	var sListTableId =		lists.getTableIdFromContainerId(sListContainerId);
+	var oTable = 			lists.getDataTableObjectOf(sListTableId);
+
+	var sListLabel = 		lists.getLabelFromContainerId(sListContainerId);
+	var sTableToUpdate = 	lists.getFeedingTable(sListLabel);	
+	 
+
+	var iTotalNumberOfModified = $("#"+sListTableId).find("td.modified").length;
 	var iTotalNumberOfProcessed = 0;
 
 	
@@ -1608,7 +2110,7 @@ form.updateModifiedRows = function(oThisList, fnCallback){
 					
 					var thisCell = this;
 					var iColIndex = $(thisRow).find("td").index(thisCell);
-					var sColName = $("#"+sListId+" thead th").eq(iColIndex).text();				
+					var sColName = $("#"+sListTableId+" thead th").eq(iColIndex).text();				
 					var sColValue = $(thisCell).text();
 
 					aColumnNames.push(sColName);
@@ -1617,7 +2119,7 @@ form.updateModifiedRows = function(oThisList, fnCallback){
 
 				
 				// update the database
-				var url = WEBSERV_URL+"/table/setvalue"; 
+				var url = WEBSERV_URL+"/api/setvalue"; 
 
 				// make sure we send no null values, as join can't deal with it
 				aColumnValues = convertNullToString(aColumnValues);
@@ -1680,15 +2182,17 @@ form.updateModifiedRows = function(oThisList, fnCallback){
 
 // process rows to be deleted from a list
 //
-form.removeRows = function(oThisList, fnCallback){
+form.removeRows = function(eListContainer, fnCallback){
 
-	var sListDiv = oThisList.attr("id");
-	var sListId = sListDiv.replace(/_div$/, "");
-	var oTable = lists.getListObjectOf(sListId);
-	var sFormListLabel = (sListId.split("___")[1]);
-	var sTableToUpdate = lists.getTableNameFromListLabel(sFormListLabel);
+	var sListContainerId =	eListContainer.attr("id");
 
-	var sIdsToRemove = $("#"+sListDiv).attr("remove_ids"); 
+	var sListTableId =		lists.getTableIdFromContainerId(sListContainerId);		
+	var oTable = 			lists.getDataTableObjectOf(sListTableId);	
+
+	var sListLabel = 		lists.getLabelFromContainerId(sListContainerId);
+	var sTableToUpdate = 	lists.getFeedingTable(sListLabel);
+
+	var sIdsToRemove = $("#"+sListContainerId).attr("remove_ids"); 
 
 	if (sIdsToRemove != null){
 
@@ -1698,7 +2202,7 @@ form.removeRows = function(oThisList, fnCallback){
 
 			var sNodeId = aIdsToRemove[i];
 
-			var url = WEBSERV_URL+"/table/delete_row"; 
+			var url = WEBSERV_URL+"/api/delete_row"; 
 			$.ajax( {
 				"type": "GET",
 				"url": url,
@@ -1772,7 +2276,7 @@ form.resetSearchFields = function(sTableName){
 	for (var sCellName in oCells){
 
 		// get selector of current search field in underlying table
-		var aVisibleCols = form.getListOfVisibleColumnsOf(sTableName);
+		var aVisibleCols = form.getVisibleColumnsOf(sTableName);
 		var iTableColIndex = $.inArray(sCellName, aVisibleCols);
 		var eThisTableSearchBox = $("#"+sTableName+"_searchboxes td:eq("+ iTableColIndex +")");
 		var eThisFormSearchBox = $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:eq("+ iFormColIndex +")");
@@ -1830,81 +2334,31 @@ form.resetSearchFields = function(sTableName){
 
 
 
-/**
- * Get the list of columns that are set to be visible in the form config
- * @param {Array} the lists object, an associative array associating list labels to list configurations
- * @param {String} the label of the list we want to get the columns' list of
- * @returns {Array} a list of column names 
- */
-form.getListColumnsToDisplay = function(oLists, sListLabel){
-
-	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
-
-	// columns
-	var aColumnsToDisplay = new Array();
-	for (var sColumnName in aTableColumnsConfig){
-		var bVisible = aTableColumnsConfig[sColumnName]["visible"];
-		if (bVisible != false) aColumnsToDisplay.push(sColumnName);
-	}
-	return aColumnsToDisplay;
-}
-
-
-/**
- * Get the list of columns named in the form config
- * @param {Array} the lists object, an associative array associating list labels to list configurations 
- * @param {String} the label of the list we want to get the columns' list of 
- * @returns {Array} a list of column names
- */
-form.getListColumnsToUse = function(oLists, sListLabel){
-
-	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
-
-	// columns
-	var aColumnsToDisplay = new Array();
-	for (var sColumnName in aTableColumnsConfig){
-		aColumnsToDisplay.push(sColumnName); 
-	}
-	return aColumnsToDisplay;
-}
 
 /**
  * Find the name of the table underlying the current form 
  * (t.i. NOT the tables feeding the lists)
- * @param {Node} a node in the form
+ * @param {(String|Node)} the string id of the form; or any node in the form
  * @returns {String} the name of the table
  */
-form.getTableOfForm = function(elem){
+form.getFeedingTable = function(mixed){
 
-	var sThisElemId = $(elem).closest('div.formgrid')[0].id;
-	var sThisTable = sThisElemId.replace(/_form$/g, "");
+	var sThisTable;
+
+	// based on element ID string
+	if (typeof mixed == 'string'){
+		sThisTable = mixed.replace(/_form$/g, "");
+	}
+
+	// based on node
+	else {
+		var sThisElemId = $(mixed).closest('div.formgrid')[0].id;
+		sThisTable = sThisElemId.replace(/_form$/g, "");
+	}	
 	return sThisTable;
 };
 
 
-
-/**
- * Get the configuration of a list, given whichever node from it
- * @param {Node} a node in the list
- * @returns {Array} an associative array, specifying the configuration of the list 
- */
-form.getConfigOfList = function(elem){
-
-	// list div has ID like 'formview_list_&lt;LISTNAME>'
-
-	// get the form table
-	// and retrieve its config
-	var sTableOfFrom = 		form.getTableOfForm(elem);
-	var oTableSettings =	conf.getTableSettings(sTableOfFrom);
-	var oFormGrid = 		conf.getFormGrid(oTableSettings);
-
-	// get the list id
-	// and retrieve its config in the form config
-	var sListDivId = 	lists.getDivIdOfList(elem);	
-	var sListId = 		(sListDivId.split("___")[1]).replace(/_div$/g, "");
-	var aList = 		oFormGrid["lists"];
-	return aList[sListId];
-};
 
 // --------------------------------------------------------------------
 
@@ -1915,34 +2369,37 @@ form.getConfigOfList = function(elem){
  * @param {String} name of the table underlying the form
  * @returns {Array} list of visible columns in the form 
  */
-form.getListOfVisibleColumnsOf = function(sTableName){
+form.getVisibleColumnsOf = function(sTableName){
 
 	// get visibility according to table config
-
 	var aVisibleColumns = cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
 
 	// then get the form config:
-	// visibility settings there will overwrite the table config
+	// the form visibility settings there will overwrite the table config
+	// (at least if some formgrid was defined!)
 
 	var aTableSettings = conf.getTableSettings(sTableName);
 	var oGrid = conf.getFormGrid(aTableSettings);
-	for (var sCell in oGrid["cells"]){
+	
+	if (oGrid != null &amp;&amp; oGrid["cells"] != null){
+		for (var sCell in oGrid["cells"]){
 
-		var bVisibility = oGrid["cells"][sCell]["visible"];
-		var iIndex = $.inArray(sCell, aVisibleColumns);
-
-		// form cell must be visible, but is hidden according to table config: 
-		// add it to list of visible cells
-		if (bVisibility == true &amp;&amp; iIndex &lt; 0){
-			aVisibleColumns.push(sCell);
+			var bVisibility = oGrid["cells"][sCell]["visible"];
+			var iIndex = $.inArray(sCell, aVisibleColumns);
+	
+			// form cell must be visible, but is hidden according to table config: 
+			// add it to list of visible cells
+			if (bVisibility == true &amp;&amp; iIndex &lt; 0){
+				aVisibleColumns.push(sCell);
+			}
+			// form cell must be hidden, but is visible according to table config: 
+			// remove it from the list of visible cells
+			else if (bVisibility == false &amp;&amp; iIndex >= 0) {
+				aVisibleColumns.splice(iIndex, 1);
+			}
+			
 		}
-		// form cell must be hidden, but is visible according to table config: 
-		// remove it from the list of visible cells
-		else if (bVisibility == false &amp;&amp; iIndex >= 0) {
-			aVisibleColumns.splice(iIndex, 1);
-		}
-		
-	}
+	}	
 
 	return aVisibleColumns;
 }
@@ -1954,14 +2411,19 @@ form.getListOfVisibleColumnsOf = function(sTableName){
  * @param {String} name of the table underlying the form
  * @returns {Array} list of columns of the form, with names replaced by nice names [if available] 
  */
-form.getListOfColumnsNiceNames = function(sSomeTable){
+form.getColumnsNiceNames = function(sSomeTable){
 
 	var sTableName = (typeof sSomeTable == 'object') ? fn.getTableName(sSomeTable) : sSomeTable;
 	var oTableConfig = conf.getTableConfig(sTableName);
 	var aTableSettings = conf.getTableSettings(sTableName);
 	var oGrid = conf.getFormGrid(aTableSettings);
 	
-	var aColsList = form.getListOfVisibleColumnsOf(sTableName);
+	var aColsList = form.getVisibleColumnsOf(sTableName);
+	
+	if (oGrid["cells"] == null){		
+		//fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, param));
+		return [];
+	}
 	
 	var aColsNiceNames = [];
 	for (var i=0; i&lt;aColsList.length; i++){
@@ -2018,19 +2480,24 @@ form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
  * @param {String} name of the table underlying the form 
  * @param {String} name of the cell/column 
  * @param {String} value to assign to the cell (beware: in the GUI, so it's not saved yet in the underlying table) 
+ * @param {Boolean} [bAttractAttention=true] attract attention of user by blinking the send button, and show that reset is possible now 
  */
-form.setDataInCell = function(sFormTable, sCellName, sValue){
+form.setDataInCell = function(sFormTable, sCellName, sValue, bAttractAttention){
 
 	$("div#"+sFormTable+"_form div#form_cellvalue_"+sCellName)
 		.addClass("modified")
 		.children().first().val(sValue);
 	
 	// attract attention from user to send button, which must be pressed 
-	// since some content was modified,
-	// and show that reset is possible now									
+	// since some content was modified, and show that reset is possible now
+	//
+	// (one can preven this by setting bAttractAttention to false)									
 	
-	form.setSendButtonToSetting(sFormTable, "payattention");
-	form.setResetButtonToSetting(sFormTable, "active");
+	if (bAttractAttention == null || bAttractAttention == true){
+		form.setSendButtonToSetting(sFormTable, "payattention");
+		form.setResetButtonToSetting(sFormTable, "active");		
+	}
+	
 }
 
 
@@ -2046,7 +2513,7 @@ form.getNameOfCell = function(nCellValueNode){
 
 
 /**
- * Determine wether the form is in 'unsaved' state or not
+ * Determine whether the form is in 'unsaved' state or not
  * @param {String} name of the table underlying the form
  * @returns {Boolean} true if the form is not saved yet, otherwise false 
  */
@@ -2060,57 +2527,10 @@ form.isUnsaved = function(sTableName){
 
 
 
-// --------------------------------------------------------------------
-//
-// DEPRECATED
-//
-// --------------------------------------------------------------------
-
-/**
- * Get the list of currently displayed columns in the form, given whichever node in the form
- * @deprecated
- * @param {Node} a node in the form
- * @returns {Array} list of currently visible columns
- */
-form.getVisibleColumns = function(elem){
-
-	var aColumnList = new Array();
-
-	var sTableId =$(elem).closest('table')[0].id;			
-	$("#"+sTableId+" thead th").each(function(i){
-		aColumnList.push( $(this).text() );
-	});
-	return aColumnList;
-};
-
-/**
- * Get the index of some visible cell in the form, in the list of visible columns
- * @deprecated
- * @param {Node} a node in the form 
- */
-form.getIndexOfVisibleCell = function(elem){
-
-	var nRow =$(elem).closest('tr')[0];
-	var iColIndex = $(nRow).find("td").index(elem);			
-	return iColIndex;
-};
 
 
-/**
- * Get the index of a column name, in the list of visible columns
- * @deprecated
- * @param {*} elem 
- * @param {*} sColumnName 
- */
-form.getIndexOfColumnName = function(elem, sColumnName){
 
-	var aColumns = form.getVisibleColumnsOfList(elem);			
-	var iColIndex = $.inArray(sColumnName, aColumns);
-	return iColIndex;
-};
-
-
-// --------------------------------------------------------------------</code></pre>
+</code></pre>
         </article>
     </section>
 
@@ -2126,7 +2546,7 @@ form.getIndexOfColumnName = function(elem, sColumnName){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Sep 25 2024 15:48:45 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

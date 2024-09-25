@@ -105,10 +105,17 @@ var oTableSettingsList_example = {
 		 */
 		"viewtype": "form",
 		
+		/**
+		 * @type {object}
+		 * @description Declareer een formulier, als custom weergave van een tabel (dit wordt in de handleiding uitgebreid uitgelegd).
+		 * @example: "formgrid": {"size": [], "definition": [], "cells": {}, etc.}
+		 */
+		"formgrid": {},
+		
 		
 		/**
 		 * @type {string}
-		 * @description Om in het tabeloverzicht meer info over een tabel te geven, leg men deze info hier vast.
+		 * @description Om in het tabeloverzicht meer info over een tabel te geven, legt men deze info hier vast.
 		 * Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.
 		 */
 		"info": "Deze tabel is ....",
@@ -304,8 +311,14 @@ var oTableSettingsList_example = {
 		 * @type {boolean} 
 		 * @description toon/verberg knop "?" 
 		 * (default: true)
-		 * */
+		 */
 		"help_button": true,
+		
+		/** 
+		 * @type {object} 
+		 * @description voeg een volledig export button aan de tabel voeter toe (zie handleiding voor meer info)
+		 */
+		"full_export_button": {},
 
 
 		/** 
@@ -348,13 +361,25 @@ var oTableSettingsList_example = {
 		 * (default: true)
 		 * */
 		"draggable": true,
+		
+		/** 
+		 * @type {function} 
+		 * @description callback opgeroepen na het verslepen van een table 
+		 * */
+		"drag_callback": function(t, ui){ doSomething(); },
 
 		/** 
 		 * @type {boolean} 
 		 * @description maak de tabel resizable 
 		 * (default: true)
 		 * */
-		"resizable": true
+		"resizable": true,
+		
+		/** 
+		 * @type {function} 
+		 * @description callback opgeroepen na het resizen van een table 
+		 * */
+		"resize_callback": function(t, ui){ doSomething(); }
 };
 
 /**
@@ -521,6 +546,12 @@ var oTableConfigurationList_example = {
 		 * null is, dan wordt 'editfunc' altijd getriggerd.
 		 */
 		"edittrigger": "",
+
+		/**
+		 * @description Function voor het voorbewerken (preprocessen) van een ingevoerde waarde, vóór dat Lex'it deze invoert in de database.
+		 * @see searchpreprocess 
+		 */
+		"editpreprocess": "",
 		
 		
 		/**
@@ -597,6 +628,35 @@ var oTableConfigurationList_example = {
 		 */
 		"keepfilter": true,
 		
+		
+		/**
+		 * @type {boolean}
+		 * @description Als dit 'false' is, wordt de query builder by CTRL+klik in het zoekveld uitgeschakeld.
+		 */
+		"query_builder_allowed": false,
+		
+		/**
+		 * @type {object}
+		 * @description declareer de in de query builder te tonen zoekwaarden (keys) en hun vertaling in voor de database begrijpelijke waarden om een welgevormde query samen te stellen (values).
+		 * @example {"Neuter": "n", "Masculine": "m", "Feminine": "f"}
+		 */
+		"query_builder_values": {"key": "value"},
+		
+		/**
+		 * @type {function}
+		 * @description functie om de door query builder geformuleerde query aan te passen voordat deze wordt afgevuurd op de database.
+		 */		
+		"query_builder_processor": function(query){}, 
+		
+		/**
+		 * @type {object}
+		 * @description settings voor de query builder (indien default gedrag aangepast moet worden).
+		 * Parameter 'grid': true/false bepaalt of de zoekwaarden al dan niet als een grid getoond moeten worden.
+		 * Parameter 'preselected' bepaalt welke waarde in de query builder alvast geselecteerd moet zijn.
+		 * Parameter 'autostart': true/false bepaalt of de door de query builder geformuleerde query bij klikken op OK al dan niet direct moet worden afgevuurd op de database.
+		 */
+		"query_builder_settings": {"grid": false, "preselected": "some_value", "autostart": true},
+		
 		/**
 		 * @type {boolean}
 		 * @description Doorzoekbaarheid van een kolom.
@@ -613,8 +673,10 @@ var oTableConfigurationList_example = {
 		 * @type {function}
 		 * @description Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.
 		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
+		 * @see searchform
+		 * @see editpreprocess
 		 */
-		"searchform": function(text){},
+		"searchpreprocess": function(text){},
 
 		/**
 		 * @type {function}
@@ -850,6 +912,12 @@ conf.getColumnConfig = function( oTableConfig, sColumnName){
 	oColumnConfig["column_name"] = sColumnName;
 	
 	return oColumnConfig;
+};
+
+conf.getQueryBuilderAllowed = function(oColumnConfig){
+	if (typeof oColumnConfig["query_builder_allowed"] == 'undefined')
+	    return true;
+	return oColumnConfig["query_builder_allowed"];
 };
 
 
@@ -1352,9 +1420,11 @@ conf.getDefaultSortingSettings  = function(sSomeTablename){
 
 conf.getSearchForm = function(aColumnConfig){
 	
-	if (typeof aColumnConfig["searchform"] == 'undefined')
-		return null;
-	return aColumnConfig["searchform"];
+	if (typeof aColumnConfig["searchform"] != 'undefined')
+		return aColumnConfig["searchform"];
+	else if (typeof aColumnConfig["searchpreprocess"] != 'undefined')
+		return aColumnConfig["searchpreprocess"];
+	return null;
 };
 
 
@@ -1368,6 +1438,16 @@ conf.getEditFunction = function(aColumnConfig){
 	if (typeof aColumnConfig["editfunc"] == 'undefined')
 		return null;
 	return aColumnConfig["editfunc"];
+};
+
+
+// retrieve function to preprocess info BEFORE
+// saving it in the database
+conf.getEditPreprocess = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["editpreprocess"] == 'undefined')
+		return null;
+	return aColumnConfig["editpreprocess"];
 };
 
 // retrieve edit callback function for one column
@@ -1749,7 +1829,7 @@ conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
 		var bVisible = 		conf.getVisibility(aColumnConfig);
 		
 		aRestoreObjects[sTablename]["columns"][sColName] = {"visible": bVisible};		
-		}
+	}
 	
 	// save original columns
 	var oTableSettings = 	conf.getTableSettings(sTablename);
@@ -1816,6 +1896,31 @@ conf.getTableSettings = function(sTablename){
 	return {};
 };
 
+
+// is the query build allowed at all in this table?
+// (one column where it is allowed is enough to allow the whole table)
+conf.queryBuilderAllowed = function(sSomeTablename){
+	
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	
+	var aRegexColumnConfig = conf.getColumnConfig(oTableConfig, "*");
+	
+	if (conf.getQueryBuilderAllowed(aRegexColumnConfig) == false)
+	    return false;
+	
+	var bAllowed = false;
+	var aCols = mt.getListOfVisibleColumnsOf(sSomeTablename);
+	for (var oneColumns in aCols) {
+		var aColumnConfig = conf.getColumnConfig(oTableConfig, oneColumns);
+		if (conf.getQueryBuilderAllowed(aColumnConfig)){
+			bAllowed = true;
+			break;
+		}
+	}
+	
+	return bAllowed;
+	
+};
 
 
 // Get the name of the group a table belongs to (or 'Default' of none is defined)
@@ -1984,6 +2089,11 @@ conf.getHeaderButtonTextColor = function(aButtonSettings){
 		return "white";
 	return aButtonSettings["textcolor"];
 };
+conf.getHeaderButtonClass = function(aButtonSettings){
+	if (typeof aButtonSettings["class"] == 'undefined')
+		return null;
+	return aButtonSettings["class"];
+}; 
 
 // this function is called when a button is being clicked upon
 conf.getHeaderButtonFunction = function(aButtonSettings){
@@ -2356,7 +2466,7 @@ conf.getFormGrid = function(aTableSettings){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 13 2023 11:17:02 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Sep 25 2024 15:48:45 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>
