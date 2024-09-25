@@ -63,6 +63,7 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				    			.css("z-index", getHighestZindex()+1 ) // always in front
 				    			); 
 				    }, 
+				    
 				    // dragging is finished: put the table at the chosen place
 				    stop: function( event, ui ) { 
 				    	bDraggingNow = false;
@@ -80,7 +81,15 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				        for (var i=0; i<aAllTables.length; i++){
 				        	fn.refreshTable(aAllTables[i]);				        	
 				        }
+				        
+				        // callback, if declared
+						var oTableSettings = conf.getTableSettings(sSomeTableName);
+						var fnDragCallback = oTableSettings["drag_callback"];
+						if (fnDragCallback!=null){
+							fnDragCallback(mt.getDataTableObjectOf(sSomeTableName), ui);
+						}
 				    }
+				    
 				});
 			}
 	});
@@ -643,7 +652,7 @@ head.putViewTypeButton = function(sSomeTablename){
 	var viewtypeButton = $("<button/>")
 		.attr("type", "button")
 		.css("background-color", "#F4FA58")
-		.append($("<span></span>").addClass("ui-icon ui-icon-image"))
+		.append($("<span></span>").addClass("ui-icon ui-icon-document"))
 		.attr("title", lang.view_type_button).addClass("tooltip")
 		.addClass("header_button")
 		.bind("click", function(){

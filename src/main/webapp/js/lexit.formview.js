@@ -190,10 +190,11 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		// add sort button
 		// --------------------------------------
 
+		var iPercentage = (parseInt( $( "#"+sTableName+"_dynamic" ).css("width") ) / parseInt( $(window).width() ) );
 		$("#"+sTableName+"_search_and_sort_table tr:eq(0)")
 			.append(
 				$("<td></td>")
-					.css("width", iGridWidthUnit+"px")
+					.css("width", "calc("+iPercentage+" * (var(--"+sTableName+"_form_cellwidth)))")
 					.css("text-align", "center")
 					.append(
 						$("<span></span>")
@@ -269,9 +270,13 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		}
 
 		// assign it the grid width unit (same width for each)
-		var factor = oFormGrid["searchbox_width_factor"] != null ? parseInt( oFormGrid["searchbox_width_factor"] ) : 1;
+		var factor = oFormGrid["searchbox_width_factor"] != null ? 
+			parseInt( oFormGrid["searchbox_width_factor"] ) 
+			: 
+			iPercentage;
+			
 		$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last")
-			.css("width", (factor * iGridWidthUnit) +"px")
+			.css("width", "calc("+factor+" * (var(--"+sTableName+"_form_cellwidth)))")
 			.css("text-align", "center");
 
 
@@ -478,6 +483,12 @@ form.buildViewGrid = function(sTableName){
 	// compute cell pixel size
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
+	
+	//fn.setCssVariable(sFormContainerId+"_formwidth", iFormWidth+"px");
+	//fn.setCssVariable(sFormContainerId+"_formheight", iFormHeight+"px");
+	
+	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 
 	// ------------------------------------------
 	// add search and sort bar
@@ -528,10 +539,14 @@ form.buildViewGrid = function(sTableName){
 		
 		$("#"+sTableName+"_wrapper #"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
 					.css("position", "absolute")
-					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
-					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")		
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
 	
 	
 		// click events if declared
@@ -606,10 +621,14 @@ form.buildViewGrid = function(sTableName){
 			
 			$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_text_"+sCellBlockName.replace(/ /g, "_"))
 					.css("position", "absolute")
-					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")  		
-					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")  		
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")  		
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
 		}
 		
 		// now add the cell block
@@ -621,10 +640,14 @@ form.buildViewGrid = function(sTableName){
 		
 		$("#"+sTableName+"_wrapper #"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_"))
 					.css("position", "absolute")
-					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					.css("top", (parseFloat(aPosition[1] + (sBlockText != null ? 1:0)) * iGridHeightUnit) +"px") // if text is given, add one iGridHeightUnit
-					.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+(aPosition[1]+ (sBlockText != null ? 1:0)) + " * (var(--"+sFormContainerId+"_cellheight)))") // if text is given, add one iGridHeightUnit
+					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
+					// .css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1] + (sBlockText != null ? 1:0)) * iGridHeightUnit) +"px") // if text is given, add one iGridHeightUnit
+					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
+					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
 					
 	}
 
@@ -726,7 +749,8 @@ form.buildViewGrid = function(sTableName){
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
 			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
 			var eSelectBox = $("<select></select>")
-				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
 				.css("padding", "5px");
 			for (var i=0; i<aNewSelectBoxValues.length; i++){
 				eSelectBox.append(
@@ -759,15 +783,19 @@ form.buildViewGrid = function(sTableName){
 			if (aPosition != null){
 				$("#"+sTableName+"_wrapper #"+sTableName+"_form_cell_"+sCellName)
 					.css("position", "absolute")
-					.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
+					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
+					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
 			}
 					
 			// text area size
 			$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
-				.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
-				.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
-				.addClass("formview_textarea");				
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				.css("min-height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")
+				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
+				//.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
+				.addClass("formview_textarea");			
 		}
 		else {
 			$("#" + sTableName + "_wrapper #"+sTableName+"_form_cell_"+sCellName).hide();
@@ -821,11 +849,15 @@ form.buildViewGrid = function(sTableName){
 
 		listAndLabelContainer
 			.css("position", "absolute")
-			.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-			.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+			.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
+			//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
 		listContainer
-			.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
-			.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
+			.css("width", "calc("+aListDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("height", "calc("+aListDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
+			//.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
 
 		// build the HTML table for the list,
 		// attach it to the div,
@@ -898,11 +930,15 @@ form.buildViewGrid = function(sTableName){
 
 		$("#"+sTableName+"_wrapper div#"+sTableName+"_form_button_"+sButtonId)
 			.css("position", "absolute")
-			.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
-			.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
+			.css("left", "calc("+aButtonPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("top", "calc("+aButtonPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
+			//.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
 		$("#"+sTableName+"_wrapper button#form_button_"+sButtonId)
-			.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
-			.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
+			.css("width", "calc("+aButtonDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+			.css("height", "calc("+aButtonDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			//.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
+			//.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
 	}
 
 
@@ -910,17 +946,19 @@ form.buildViewGrid = function(sTableName){
 	// buttons for reset or validation
 	// ------------------------------------------
 
-	var iButtonDivLeft = iGridWidthUnit;
-	var iButtonDivTop = (iFormHeight - iGridHeightUnit);
+	var iButtonDivLeft = "(var(--"+sFormContainerId+"_cellwidth))";
+	var iButtonDivTop = "calc("+ iFormHeight +" - (var(--"+sFormContainerId+"_cellheight)))";//(iFormHeight - iGridHeightUnit);
 	if (oFormGrid["buttonsbar_position"] != null){
-		iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
-		iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
+		//iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
+		//iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
+		iButtonDivLeft = "calc("+ oFormGrid["buttonsbar_position"][0] +" * (var(--"+sFormContainerId+"_cellwidth)))";
+		iButtonDivTop = "calc("+ oFormGrid["buttonsbar_position"][1] +" * (var(--"+sFormContainerId+"_cellheight)))";
 	}  
 	var buttondsDiv = $("<div></div>")
 		.attr("id", sTableName+"_formsbuttons")
 		.css("position", "absolute")
-		.css("left", iButtonDivLeft +"px")
-		.css("top", iButtonDivTop +"px");
+		.css("left", iButtonDivLeft )
+		.css("top", iButtonDivTop );
 
 	// ------------------------------------
 	// build a RESET button
@@ -1213,8 +1251,75 @@ form.buildViewGrid = function(sTableName){
 	setTimeout(function(){
 		$("#tiptip_holder").fadeOut();
 	}, 500);
+	
+	
+	$("#"+sFormContainerId).css("width", iFormWidth +"px");
 
 };
+
+
+/**
+ * Update the form layout
+ * This can be called (e.g. in 'resize_callback') to make sure that the form keeps looking how it should after resizing etc.
+ * @param {String} table name
+ */
+form.updateLayout = function(sTableName){
+	
+	sTableName = fn.getTableName(sTableName);
+	
+	var sFormContainerId = sTableName+"_form";
+	
+	var oTableSettings =    conf.getTableSettings(sTableName);
+	var oFormGrid =         conf.getFormGrid(oTableSettings);
+	
+	var aSize =             oFormGrid["size"];
+	if (aSize == null){
+		aSize = [0, 0] // default
+	}
+	var iFormWidth = 		parseInt(aSize[0]);
+	var iFormHeight = 		parseInt(aSize[1]);
+	
+	// get definition size
+	var aDefinition =       oFormGrid["definition"];
+	var iDefWidth = 		aDefinition[0];
+	var iDefHeight = 		aDefinition[1];
+	
+
+	// get table size (the form grid pixel size must fit into it)	
+	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
+	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
+	
+	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
+	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
+	if (iFormHeight == 0 || iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
+	
+	// compute cell pixel size
+	var iGridWidthUnit = 	iFormWidth / iDefWidth;
+	var iGridHeightUnit = 	iFormHeight / iDefHeight;
+	
+	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
+	
+	
+	var sFormPositionSetting = oFormGrid["align"];
+	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
+	if (sFormPositionSetting == null ||  sFormPositionSetting == "left"){
+		sFormPosPix = 10;
+	}
+	else if (sFormPositionSetting == "right"){
+		sFormPosPix = (iTableWidth - iFormWidth) - 10;
+	}
+	
+	// set search fields width
+	$("#"+sTableName+"_search_and_sort").css("width", iFormWidth +"px");
+	
+	// set the container width
+	$("#"+sFormContainerId).css("width", iFormWidth +"px");
+	
+	// set the search fields width
+	var iPercentage = (parseInt( $( "#"+sTableName+"_dynamic" ).css("width") ) / parseInt( $(window).width() ) );
+	$("#"+sTableName+"_search_and_sort_table tr td").css("width", "calc("+iPercentage+" * (var(--"+sTableName+"_form_cellwidth)))");
+}
 
 
 

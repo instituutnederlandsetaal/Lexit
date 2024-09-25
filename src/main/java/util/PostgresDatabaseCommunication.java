@@ -77,22 +77,30 @@ public class PostgresDatabaseCommunication {
         throw new RuntimeException("PostgreSQL JDBC Driver not found. Include it in your library path!", e);
         }
 
-        try {
+        try {        	
+        	
         	Properties props = new Properties();
         	props.setProperty("user", user);
         	props.setProperty("password", password);
         	props.setProperty("charSet", "UTF8");
+        	
+        	// needed for special illegal databases (wrong Psql version or so) which cause getConnection to hang indefinitely)
+        	props.setProperty("connectTimeout", "5");  // Connection timeout (in seconds)
+        	props.setProperty("socketTimeout", "5");   // Socket read timeout (in seconds)
+        	props.setProperty("loginTimeout", "5");    // Login timeout (in seconds)
+
         	//props.setProperty("sslmode", "disable"); // temporary fix: https://stackoverflow.com/questions/59190010/psycopg2-operationalerror-fatal-unsupported-frontend-protocol-1234-5679-serve
         	//props.setProperty("Integrated Security", "false");
         	//props.setProperty("tcpKeepAlive", "true");
         	//props.setProperty("prepareThreshold", "1");
+        	
         	this.db = DriverManager.getConnection(location, props);
         	
         	// make sure we never end up with idle connections
         	//this.sendUpdate("alter system set idle_in_transaction_session_timeout= 300000;");
 
         } catch (Exception e) {
-        throw new RuntimeException("Connection Failed! Check output console!", e);
+        	throw new RuntimeException("Connection failed! Check output console!", e);
         }
 
         if (this.db == null)

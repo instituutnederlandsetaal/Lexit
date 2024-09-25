@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.09.18
+	v2024.09.25
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -1018,33 +1018,44 @@
 		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
 
 			$("#indicator").empty().append(
-				$("<span></span>")
-					.html("<br><h2>" +lang.welcome+ "</h2>" +lang.choose_a_project+ ":<br><br>")
+				$("<div></div>")
+					.attr("id", "welcome_in_lexit")
+					.html("<h2>" +lang.welcome+ "</h2>&nbsp;&nbsp;&nbsp;" +lang.choose_a_project+ "!<br>")
 			);
 			
-			var docOpenTitle = $("<span></span>").html("<b>" +lang.production+ "</b>");
+			var docOpenTitle = $("<span></span>")
+				.addClass("lexit_menu_section")
+				.html("<b>" +lang.production+ "</b>");
 			var docOpen = $("<table></table>")
-				.css("border", "dotted black 1px")
+				.addClass("lexit_menu_section")
 				.css("background", "#D0F5A9");
 			
-			var goodiesTitle = $("<span></span>").html("<b>" +lang.goodies+ "</b>");
+			var goodiesTitle = $("<span></span>")
+				.addClass("lexit_menu_section")
+				.html("<b>" +lang.goodies+ "</b>");
 			var goodies = $("<table></table>")
-				.css("border", "dotted black 1px")
+				.addClass("lexit_menu_section")
 				.css("background", "#A9E2F3");
 			
-			var docDevelopmentTitle = $("<span></span>").html("<b>" +lang.in_development+ "</b>");
+			var docDevelopmentTitle = $("<span></span>")
+				.addClass("lexit_menu_section")
+				.html("<b>" +lang.in_development+ "</b>");
 			var docDevelopment = $("<table></table>")
-				.css("border", "dotted black 1px")
+				.addClass("lexit_menu_section")
 				.css("background", "#EFEFFB");
 			
-			var docClosedTitle = $("<span></span>").html("<b>" +lang.project_closed+ "</b>");
+			var docClosedTitle = $("<span></span>")
+				.addClass("lexit_menu_section")
+				.html("<b>" +lang.project_closed+ "</b>");
 			var docClosed = $("<table></table>")
-				.css("border", "dotted black 1px")
+				.addClass("lexit_menu_section")
 				.css("background", "#F8E0E0");
 			
-			var docUnknownTitle = $("<span></span>").html("<b>" +lang.project_unknown+ "</b>");
+			var docUnknownTitle = $("<span></span>")
+				.addClass("lexit_menu_section")
+				.html("<b>" +lang.project_unknown+ "</b>");
 			var docUnknown = $("<table></table>")
-				.css("border", "dotted black 1px")
+				.addClass("lexit_menu_section")
 				.css("background", "#F2F2F2");
 			
 			
@@ -1096,19 +1107,18 @@
 				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
 				
 				var sProjectDescription =
-					"<td style='text-align: left; width: 10px'>"+
+					"<td style='text-align: right; width: 37%'>"+
+					"<A href='"+sProjectLink+"'><B>"+sProjectName+
+					"</B></A></td>"+
+					"<td style='text-align: right; width: 3%; vertical-align: bottom;'>"+
 					(typeof aProjectList[i]["goody"] == 'undefined' ? 
 							"<A style='text-decoration: none; color: #A4A4A4;' "+ 
 							"   title='"+sProjectName+"' "+
 							"   href='#' "+
 							"   onclick='showDatabaseInfo(\""+sProjectLinkPart+"\"); return false;' "+
-							"   target='_blank'>&#9830;</A>" : "")+
+							"   target='_blank'><span class='ui-icon ui-icon-info'></span></A>" : "")+
 					"</td>"+
-					"<td style='text-align: right; width: 400px'>"+
-					"<A href='"+sProjectLink+"'><B>"+sProjectName+
-					"</B></A></td><td>" +					 
-					"</td>"+
-					"<td style='text-align: left; width: 700px'>" +
+					"<td style='text-align: left; width: 60%'>" +
 					(typeof aProjectList[i]["description"] != 'undefined' && aProjectList[i]["description"] != "" ? 
 						" : <I>"+aProjectList[i]["description"]+"</I>" : "") + 
 					"</td>";

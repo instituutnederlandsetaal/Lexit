@@ -333,13 +333,25 @@ var oTableSettingsList_example = {
 		 * (default: true)
 		 * */
 		"draggable": true,
+		
+		/** 
+		 * @type {function} 
+		 * @description callback opgeroepen na het verslepen van een table 
+		 * */
+		"drag_callback": function(t, ui){ doSomething(); },
 
 		/** 
 		 * @type {boolean} 
 		 * @description maak de tabel resizable 
 		 * (default: true)
 		 * */
-		"resizable": true
+		"resizable": true,
+		
+		/** 
+		 * @type {function} 
+		 * @description callback opgeroepen na het resizen van een table 
+		 * */
+		"resize_callback": function(t, ui){ doSomething(); }
 };
 
 /**

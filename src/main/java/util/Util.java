@@ -322,11 +322,13 @@ public class Util {
 		HashSet<String> hashList = new HashSet<String>();
 		
 		for (int i = 0; i < listOfFiles.length; i++) {
+			
 			if (listOfFiles[i].isFile())
 			{
 				String fileName = listOfFiles[i].getName();
-				if (fileName.endsWith(".config.js") || fileName.endsWith(".database") )
-				{
+				
+				if (fileName.endsWith(".config.js") || fileName.endsWith(".database") ) {
+					
 					fileName = fileName.substring(0, fileName.indexOf("."));
 					boolean dbExists = true;
 					
@@ -338,14 +340,15 @@ public class Util {
 					// remove remaining '/servlet|webapps' part of url
 					path = path.substring(0, path.lastIndexOf(File.separatorChar));					
 					// now add path to right file
-					path = path + File.separatorChar + Constants.DB_CONFIG_ROOT + File.separatorChar + Constants.DB_CONFIG_DIR + File.separatorChar + fileName + ".database";					
-					boolean fileExists = new File(path).exists();
+					path = path + File.separatorChar + Constants.DB_CONFIG_ROOT + File.separatorChar + Constants.DB_CONFIG_DIR + File.separatorChar + fileName + ".database";
 					
+					
+					boolean fileExists = new File(path).exists();
 						
 					// check if the database is available
 					// ----------------------------------
 					
-					if (fileExists) {
+					if (fileExists && fileName.endsWith(".database")) {						
 						dbExists = dbExists(path);
 					}
 					
@@ -356,7 +359,7 @@ public class Util {
 						fileName += ":::[BEWARE: the .database configuration file is missing]";
 					}
 					if ( !dbExists) {
-						fileName += ":::[BEWARE: the PSQL database is missing, it might have been archived]";
+						fileName += ":::[BEWARE: the PSQL connection failed: the database might be missing]";
 					}
 					
 					// add file to the list
@@ -384,7 +387,6 @@ public class Util {
 			postgresDc.closeConnection();
 		}
 		catch (Exception e) {
-			
 			// if connection fails, the database might be missing
 			return false;
 		}

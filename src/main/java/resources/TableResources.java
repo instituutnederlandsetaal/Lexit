@@ -450,15 +450,16 @@ public class TableResources {
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, null, userName);
 		
 		// trick to get the path where the other files are
-		String fileName = "projects_overview.js";		
-		String filepath = co.getContext().getRealPath(fileName);
+		String fileName = "projects_overview.js";
+		String filepath = co.getContext().getRealPath(fileName);			
+		
 		
 		filepath = filepath.replace(
-		File.separatorChar + Constants.BASE_URL + File.separator + fileName, 
-		File.separatorChar + Constants.CONFIG_DIR); // remove filename as we only need the path here
+			File.separatorChar + Constants.BASE_URL + File.separator + fileName, 
+			File.separatorChar + Constants.CONFIG_DIR); // remove filename as we only need the path here
 		
 		DbResponseObject response = new DbResponseObject();
-		response.setResponse(Util.getListOfFiles(filepath));
+		response.setResponse( Util.getListOfFiles(filepath) );
 		
 		return response;
 	}
@@ -1813,7 +1814,7 @@ public class TableResources {
 			String lastActive = df2.format(date);
 			String activeRecently = (co.userIsGone() ? "Sleep mode" : "Active now");
 			
-			ulo.addUserData(new String[]{dbName, (userName != null ? userName : "UNKNOWN"), sessionId, (activeTabId != null ? activeTabId : "UNKNOWN"), lastActive, activeRecently});
+			ulo.addUserData(new String[]{dbName, (userName != null ? userName : "SYSTEM"), sessionId, (activeTabId != null ? activeTabId : "N/A"), lastActive, activeRecently});
 		}
 		return ulo;
 	}

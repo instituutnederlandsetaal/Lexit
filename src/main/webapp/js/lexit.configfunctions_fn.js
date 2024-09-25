@@ -262,6 +262,21 @@ fn.addCss = function(sSomeCssCode){
 	}
 };
 
+
+/**
+ * set a CSS variable, to be used in calc(...) etc., like in 
+ * :root {
+ *    --main-padding: 20px;
+ *    --sidebar-width: 200px;
+ * }
+ * @param {String} variable name (without the '--' part, as it is preprended automatically)
+ * @param {String} variable value
+ */
+fn.setCssVariable = function(sVariableName, value) {
+	sVariableName = "--"+sVariableName;
+	document.documentElement.style.setProperty(sVariableName, value);
+};
+
 /**
  * Set the font family and size in whole GUI at once
  * @param {String} sFontFamily 
@@ -1465,7 +1480,7 @@ fn.scrollToTable = function(sSomeTablename, bVerticalOnly){
  * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
- * @see fn.pileupTables
+ * @see fn.pileupTables, fn.centerTable, fn.putTableAtPosition
  */
 fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	
@@ -1501,7 +1516,7 @@ fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
  * @param {(String|API-object-instance)} sSomeTablename2 - Table name 
  * @param {Function} fnCallback - Some function to call after the tables have been aligned
  * 
- * @see fn.alignTables
+ * @see fn.alignTables, fn.centerTable, fn.putTableAtPosition
  */
 fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	
@@ -1533,6 +1548,8 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
  * Center a table horizontally
  * 
  * @param {(String|API-object-instance)} sSomeTablename  - Table name 
+ * 
+ * @see fn.alignTables, fn.pileupTables, fn.putTableAtPosition
  */
 fn.centerTable = function(sSomeTablename){
 	
@@ -1569,6 +1586,8 @@ fn.centerTable = function(sSomeTablename){
  * Position a table at a given absolute position
  * @param {(String|API-object-instance)} sSomeTableName  - Table name
  * @param {number} aXPos - array [x,y] with x,y being the screen absolute positions
+ * 
+ * @see fn.alignTables, fn.pileupTables, fn.centerTable
  */
 fn.putTableAtPosition = function(sSomeTableName, aPos){
 	
@@ -1740,6 +1759,21 @@ fn.toggleViewType = function(sSomeTablename, fnCallback){
 	head._toggleViewType(sSomeTablename);
 	
 };
+
+
+/**
+ * Change the table name in the header. 
+ * Beware: this function is only about modifying the title element rendered in the table header, from the moment this function 
+ * is called until the table is closed. 
+ * This means that if the table is closed and then reopened, the table will regain the name stated in the configuration.
+ * If you need to change the name in the configuration (which will have long term effect),
+ * use this command instead: conf.changeTableSettingValue(sTableName, "nice_name", sNameToBeShown); 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {String} sNameToBeShown - the name to be put into the header, instead of the name stated in the configuration
+ */
+fn.setTableNameInHeader = function(sSomeTablename, sNameToBeShown){
+	$("#"+sSomeTablename+"_wrapper").find("span#"+sSomeTablename+"_tablename").text(sNameToBeShown);
+}
 
 
 

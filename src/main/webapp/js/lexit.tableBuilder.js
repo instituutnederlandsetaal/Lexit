@@ -153,6 +153,15 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 
 				// make sure the search field resize too
 				gui.setSearchboxesCss(sSomeTableName); 
+			},
+			
+			"stop": function(event, ui){
+				// if we have a resize callback, execute it
+				var oTableSettings = conf.getTableSettings(sSomeTableName);
+				var resizeCallback = oTableSettings["resize_callback"];
+				if (resizeCallback!=null) {
+					resizeCallback( mt.getDataTableObjectOf(sSomeTableName), ui );
+				}
 			}
 		}); 
 	}
