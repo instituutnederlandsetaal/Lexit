@@ -274,7 +274,8 @@ fn.addCss = function(sSomeCssCode){
  */
 fn.setCssVariable = function(sVariableName, value) {
 	sVariableName = "--"+sVariableName;
-	document.documentElement.style.setProperty(sVariableName, value);
+	if (typeof value !== "undefined")
+		document.documentElement.style.setProperty(sVariableName, value);
 };
 
 /**

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.09.25
+	v2024.09.26
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -1152,22 +1152,29 @@
 				}
 			}
 			
-			// make sure each table is still visible, when it's empty 
+			// add each table part and
+			// (make sure each table is visible even when it's empty) 
+			
+			$("#indicator").append(
+				$("<div></div>")
+					.attr("id", "welcome_menu_tables")
+			);
 							
-			$("#page").append(docOpenTitle);
-			$("#page").append(_deEmptyMenuList(docOpen));
-			$("#page").append($("<br>"));			
-			$("#page").append(goodiesTitle);
-			$("#page").append(_deEmptyMenuList(goodies));
-			$("#page").append($("<br>"));
-			$("#page").append(docDevelopmentTitle);
-			$("#page").append(_deEmptyMenuList(docDevelopment));
-			$("#page").append($("<br>"));
-			$("#page").append(docClosedTitle);
-			$("#page").append(_deEmptyMenuList(docClosed));	
-			$("#page").append($("<br>"));
-			$("#page").append(docUnknownTitle);
-			$("#page").append(_deEmptyMenuList(docUnknown));
+			$("#indicator").find("#welcome_menu_tables")
+				.append(docOpenTitle)
+				.append(_deEmptyMenuList(docOpen))
+				.append($("<br>"))		
+				.append(goodiesTitle)
+				.append(_deEmptyMenuList(goodies))
+				.append($("<br>"))
+				.append(docDevelopmentTitle)
+				.append(_deEmptyMenuList(docDevelopment))
+				.append($("<br>"))
+				.append(docClosedTitle)
+				.append(_deEmptyMenuList(docClosed))	
+				.append($("<br>"))
+				.append(docUnknownTitle)
+				.append(_deEmptyMenuList(docUnknown));
 			
 			
 		}

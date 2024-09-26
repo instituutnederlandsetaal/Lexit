@@ -23,9 +23,13 @@ div#page div#indicator div#welcome_in_lexit { /* Welcome to Lex'it div */
 	-moz-box-shadow: 4px 5px 5px  grey;
 }
 
-div#page div#indicator div#welcome_in_lexit h2 { /* Welcome to Lex'it  text*/
+div#page div#indicator div#welcome_in_lexit h2 { /* Welcome to Lex'it text */
 	font-size: 22px;
 }
+
+div#page div#indicator div#welcome_menu_tables {
+ 	margin-left: 20px;
+ }
 
 div#page span.lexit_menu_section {				/* section titles */
 	font-family: Verdana, sans-serif;

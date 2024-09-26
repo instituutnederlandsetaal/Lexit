@@ -484,9 +484,7 @@ form.buildViewGrid = function(sTableName){
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
 	
-	//fn.setCssVariable(sFormContainerId+"_formwidth", iFormWidth+"px");
-	//fn.setCssVariable(sFormContainerId+"_formheight", iFormHeight+"px");
-	
+	// set css variables for scaling
 	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
 	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 
@@ -1261,11 +1259,17 @@ form.buildViewGrid = function(sTableName){
 /**
  * Update the form layout
  * This can be called (e.g. in 'resize_callback') to make sure that the form keeps looking how it should after resizing etc.
- * @param {String} table name
+ * @param {String} table name of form container to update
+ * @param {Boolean} [bHorizontalScaling=true] perform horizontal scaling
+ * @param {Boolean} [bVerticalScaling=true] perform vertical scaling
  */
-form.updateLayout = function(sTableName){
+form.updateLayout = function(sTableName, bHorizontalScaling, bVerticalScaling){
 	
 	sTableName = fn.getTableName(sTableName);
+	
+	// default values
+	bHorizontalScaling = bHorizontalScaling ?? true;
+	bVerticalScaling = bVerticalScaling ?? true;
 	
 	var sFormContainerId = sTableName+"_form";
 	
@@ -1297,9 +1301,14 @@ form.updateLayout = function(sTableName){
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
 	
-	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
-	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 	
+	// set css variables for rescaling
+	if (bHorizontalScaling) {
+		fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	}
+	if (bVerticalScaling) {
+		fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
+	}
 	
 	var sFormPositionSetting = oFormGrid["align"];
 	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
