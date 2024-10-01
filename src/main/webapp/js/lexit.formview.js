@@ -585,7 +585,7 @@ form.buildViewGrid = function(sTableName){
 		
 		var sBlockText = 	oCellBlock["text"];
 		var sBlockTextClass = oCellBlock["textclass"];
-		var sBlockTextHtmlTag = oCellBlock["htmltag"];
+		var sBlockTextHtmlTag = oCellBlock["htmltag"] ?? "h3"; // h3 is jquery UI default
 		
 		
 		if (aPosition == null){
