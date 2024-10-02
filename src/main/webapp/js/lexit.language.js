@@ -175,6 +175,7 @@ lang.paginate_next = "Volgende";
 lang.paginate_last = "Laatste";
 
 // error message
+lang.check_the_console = "Check de console voor meer info.";
 lang.loading_xml_failed = "XML laden mislukt";
 lang.error = "Fout";
 lang.error_button_config = "Aan deze button is geen functie toegekend.";
@@ -1611,6 +1612,7 @@ lang.setLanguage = function(sLanguageCode){
 
 
 		// error message
+		lang.check_the_console = "Check the console for more information.";
 		lang.loading_xml_failed = "Loading XML failed";
 		lang.error = "Error";
 		lang.error_button_config = "This button has no function assigned yet.";

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.09.26
+	v2024.10.02
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -718,8 +718,16 @@
 			},
 			"error": function(jqxhr, settings, exception){
 
-				fn.message(lang.error, lang.reading_internal_separator_failed +"<br><br>" +lang.error +": ["+exception+"]");
-			}
+				fn.message(lang.error, "<B>"+lang.some_error_has_occurred +"</B>" +"<br>" +
+						"<br>"+
+						"HTTP status code: "+ jqxhr.status +"<br>"+
+						"Status text of the response: "+ jqxhr.statusText +"<br>"+
+						"<br>"+
+						"<B>"+lang.check_the_console+"</B>");
+				
+				console.log("jqxhr:", jqxhr);
+				console.log("HTTP headers: ", jqxhr.getAllResponseHeaders());					
+				console.log("Raw response: ", jqxhr.responseText);							}
 		});
 	}
 

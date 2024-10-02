@@ -1385,19 +1385,33 @@ public class TableResources {
 			@Context HttpServletRequest httpServletRequest
 			)
 	  {
+		
 		DbResponseObject dro = new DbResponseObject(); 
-		dro.setResponse( Constants.ARG_INTERNAL_SEPARATOR );
 		
-		// since the getNeutralSeparator function if always the very first server function to be called
-		// this is the time to initialize the LexitSchemaAccess object:
-		// it gives us access to the lex'it users login and roles
+		try {			
+			dro.setResponse( Constants.ARG_INTERNAL_SEPARATOR );
+			
+			// since the getNeutralSeparator function if always the very first server function to be called
+			// this is the time to initialize the LexitSchemaAccess object:
+			// it gives us access to the lex'it users login and roles
+			
+			//System.out.println(lexitInfo);
+			//System.out.println((lexitInfo == null));
+					
+			if (lexitInfo == null)
+				lexitInfo = new LexitSchemaAccess(context, false);
 		
-		//System.out.println(lexitInfo);
-		//System.out.println((lexitInfo == null));
-				
-		if (lexitInfo == null)
-			lexitInfo = new LexitSchemaAccess(context, false);
-				
+		}
+		catch (Exception e) {
+			
+			StringWriter stringWriter = new StringWriter();
+	        PrintWriter printWriter = new PrintWriter(stringWriter);
+	        e.printStackTrace(printWriter);
+			String stackTrace = stringWriter.toString();
+			
+			throw new RuntimeException(stackTrace);
+		}
+
 		return dro;
 	  }
 
