@@ -419,8 +419,9 @@ public class TableResources {
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		
-		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
-			throw new RuntimeException("Permission denied to "+co.getUsername());
+		// TURNED OFF, SINCE THIS FUNCTIONALITY IS TYPICALLY ACCESSED BEFORE LOGGING IN!
+		//if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+		//	throw new RuntimeException("Permission denied to "+co.getUsername());
 		
 		// output allowed
 		

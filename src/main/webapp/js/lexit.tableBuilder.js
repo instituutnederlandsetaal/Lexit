@@ -32,6 +32,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var oTableConfig =					conf.getTableConfig(sSomeTableName);
 
 	var aTableSettings =				conf.getTableSettings(sSomeTableName);
+	var sPagingType = 					conf.getTablePagingType(aTableSettings);
 	var bIgnoreInitialisationFilters =	false;
 	var bTopPagination = 				(aTableSettings["pagination_on_top"] ?? true);
 	var bBottomPagination = 			(aTableSettings["pagination_at_bottom"] ?? true);
@@ -175,6 +176,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		.attr("class", "display")
 		.css("width", "100%")
 		.attr("id", sSomeTableName);
+		
+	// if some class was declared, apply to the table
+	if (aTableSettings["class"] != null){
+		table.addClass(aTableSettings["class"]);
+	}
 	
 	var thead_tag = $("<thead></thead>");
 	var tfoot_tag = $("<tfoot></tfoot>");
@@ -572,7 +578,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			}  
 		},
 
-		"pagingType": "full_numbers",
+		"pagingType": sPagingType,
 		"columnDefs": mt.getDatatablesPropsOf(sSomeTableName) 
 		
 

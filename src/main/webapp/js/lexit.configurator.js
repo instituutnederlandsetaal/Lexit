@@ -69,6 +69,13 @@ var oTableSettingsList_example = {
 		 * Voor 'alles tonen' moet waarde -1 worden opgegeven.
 		 */
 		"displaylength_menu": [1, 5, 10, 50],
+				
+		/**
+		 * @type {string}
+		 * @description Bepaal de paging type van een tabel (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers).
+		 * Default is 'full_numbers'
+		 */
+		"pagingtype": "full_numbers",
 		
 		/**
 		 * @type {string}
@@ -2414,6 +2421,15 @@ conf.getTablePresetPosition = function(aTableSettings){
 	var left = (typeof aTableSettings["left"] == 'undefined') ? "0px" : aTableSettings["left"];
 	return [left, top];
 };
+
+
+// table paging type, as defined in: https://datatables.net/reference/feature/paging.type
+conf.getTablePagingType = function(aTableSettings){
+	
+	if (typeof aTableSettings["pagingtype"] == 'undefined')
+		return "full_numbers";
+	return aTableSettings["pagingtype"];
+}
 
 
 // get table form view declaration

@@ -1556,6 +1556,9 @@ fn.centerTable = function(sSomeTablename){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	var aTableSettings = conf.getTableSettings(sSomeTablename);
+	var sPagingType = conf.getTablePagingType(aTableSettings);
 	
 	// center
 
@@ -1578,7 +1581,7 @@ fn.centerTable = function(sSomeTablename){
 
 	$("#"+sSomeTablename+"_wrapper .bottom_pane")
 		.css("width", "unset");
-	$("#"+sSomeTablename+"_wrapper .bottom_pane .dataTables_paginate.paging_full_numbers")
+	$("#"+sSomeTablename+"_wrapper .bottom_pane .dataTables_paginate.paging_"+sPagingType)
 		.css("width", "unset");
 }
 
@@ -1773,6 +1776,9 @@ fn.toggleViewType = function(sSomeTablename, fnCallback){
  * @param {String} sNameToBeShown - the name to be put into the header, instead of the name stated in the configuration
  */
 fn.setTableNameInHeader = function(sSomeTablename, sNameToBeShown){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
 	$("#"+sSomeTablename+"_wrapper").find("span#"+sSomeTablename+"_tablename").text(sNameToBeShown);
 }
 

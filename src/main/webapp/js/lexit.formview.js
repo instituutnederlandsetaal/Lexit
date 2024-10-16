@@ -255,18 +255,24 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		// if we have a selectbox, select the selected value
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
 			
-			var sSelectedValueInUnderlyingTable = 
-				$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
-					.find("#"+sTableName+"_searchbox_"+sCellName).val();
-
-			// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
-			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
-
-				return e.text 
-					== 
-					sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
-
-			}).attr("selected", "selected");
+			// small pauze needed in some cases, or it will crash 
+			setTimeout(function(){
+				
+				var sSelectedValueInUnderlyingTable = 
+					$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
+						.find("#"+sTableName+"_searchbox_"+sCellName).val();
+	
+				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
+				$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
+	
+					return e.text 
+						== 
+						sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
+	
+				}).attr("selected", "selected");
+				
+			}, 100);
+			
 		}
 
 		// assign it the grid width unit (same width for each)

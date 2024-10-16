@@ -99,6 +99,7 @@ lists.buildLists = function(sFormTable, iListNr){
 	var oButtons = 			oThisList["buttons"];
 
 	var aColumnsToDisplay =	lists.getColumnsToDisplay(oLists, sFormListLabel);
+	var aColumnsToInAddForm =lists.getColumnsToDisplayInAddForm(oLists, sFormListLabel);
 	var sTableNameOfList =	lists.getFeedingTable(sFormListLabel);	
 	var sDisplayHeight = 	lists.getDisplayHeight(sFormListLabel);
 	var oSortSettings =		lists.getSortSettings(sFormListLabel);
@@ -150,7 +151,7 @@ lists.buildLists = function(sFormTable, iListNr){
 		if (oButtons != null) {
 
 			// build the button if needed
-			var eElem = lists.addButtonToListHeader(oButtons, aColumnsToDisplay);
+			var eElem = lists.addButtonToListHeader(oButtons, aColumnsToInAddForm);
 
 			// add the buttons column
 			eTheadTr.append(
@@ -480,8 +481,9 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 
 					// values that must be copied, don't need to be part of the form requesting values!
 					
+					var aToBeCopied = (oAdd["copy"] != null ? oAdd["copy"] : {});
 					var aColumnsForGUI = aColumnsToDisplay.filter(
-						sColName => !(oAdd["copy"]).hasOwnProperty(sColName) 
+						sColName => !aToBeCopied.hasOwnProperty(sColName) 
 					);
 					
 					
@@ -819,12 +821,17 @@ lists.getFeedingTable = function(sFormListLabel){
 
 /**
  * Get the DataTable object underlying a list
- * @param {String} name of the table underlying the list
+ * @param {String} table ID of the table underlying the list OR the label of the list
  * @returns {API-object-instance} DataTable object underlying a list
  */
-lists.getDataTableObjectOf = function(sTableId){
+lists.getDataTableObjectOf = function(mixed){
 	
-	var oTable = hFormAndList2DataTable.get(sTableId);
+	// if the input if a list label, build a table ID 
+	if (mixed.indexOf("___") == -1){
+		mixed = lists.getFormContainerId(mixed) + "___" + mixed;
+	}
+	
+	var oTable = hFormAndList2DataTable.get(mixed);
 	return oTable;
 };
 
@@ -944,7 +951,9 @@ lists.getLabelFromContainerId = function(sContainerId){
 
 
 /**
- * Get the list of columns that are set to be visible in the form config
+ * Get the list of columns that are set to be visible in the list config.
+ * Being part of the list depends on visibility setting of the column/cell only.
+ * 
  * @param {Array} the lists object, an associative array associating list labels to list configurations
  * @param {String} the label of the list we want to get the columns' list of
  * @returns {Array} a list of column names 
@@ -957,10 +966,36 @@ lists.getColumnsToDisplay = function(oLists, sListLabel){
 	var aColumnsToDisplay = new Array();
 	for (var sColumnName in aTableColumnsConfig){
 		var bVisible = aTableColumnsConfig[sColumnName]["visible"];
-		if (bVisible != false) aColumnsToDisplay.push(sColumnName);
+		if (bVisible != false)
+			aColumnsToDisplay.push(sColumnName);
 	}
 	return aColumnsToDisplay;
 };
+
+
+/**
+ * Get the list of columns that are to be filled in, in the add form of the list.
+ * Being part of the list depends here both on visibility and editability settings of the column/cell.
+ * 
+ * @param {Array} the lists object, an associative array associating list labels to list configurations
+ * @param {String} the label of the list we want to get the columns' list of
+ * @returns {Array} a list of column names 
+ */
+lists.getColumnsToDisplayInAddForm = function(oLists, sListLabel){
+
+	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
+
+	// columns
+	var aColumnsToDisplay = new Array();
+	for (var sColumnName in aTableColumnsConfig){
+		var bVisible = aTableColumnsConfig[sColumnName]["visible"];
+		var bEditable = aTableColumnsConfig[sColumnName]["editable"];
+		if (bVisible != false && bEditable != false)
+			aColumnsToDisplay.push(sColumnName);
+	}
+	return aColumnsToDisplay;
+};
+
 
 
 /**
@@ -1083,6 +1118,36 @@ lists.getAllowedValuesOfColumn = function(sTableName, sColumnName){
 		return null;
 	else
 		return sTheseVals.split("|");
+};
+
+
+
+/**
+ * Get the content of a whole column, given its name
+ * 
+ * @param {String} sListLabel -label of the list
+ * @param {String} sColumnName - Name of a column 
+ * @returns {String[]} Content of the cells of the column
+ */
+lists.getDataFromColumn = function(sListLabel, sColumnName){	
+	
+	var oTable = lists.getDataTableObjectOf(sListLabel);
+	
+	// Get column names
+	var aAllColumns = oTable.columns().header().toArray().map(function(header) {
+	    return $(header).text();
+	});
+	
+	var aRows = oTable.rows().data();
+	var aColumnData = [];
+	
+	for (var i = 0; i < aRows.length; i++) {
+		
+		var iColIndex = $.inArray(sColumnName, aAllColumns);
+		aColumnData.push(aRows[i][iColIndex]);
+	}
+
+	return aColumnData;
 };
 
 
