@@ -134,7 +134,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 				var sColumnVisibility = aChosenColumns[i].split(":")[1];						
 				conf.changeTableConfigValue(sSomeTableName, sColumnName, "visible", sColumnVisibility=='true');
 			}
-			conf.changeTableSettingValue(sSomeTableName, "column_order", null); // make sure we don't have double settings (the singular setting is deprecated)
+			delete oTableSettingsList[sSomeTableName]["column_order"];  // make sure we don't have double settings (the singular setting is deprecated)
 			conf.changeTableSettingValue(sSomeTableName, "columns_order", aCustomColumnOrder);
 		}
 		
@@ -429,7 +429,7 @@ td.selectColumns = function(sSomeTablename){
 	                     			conf.changeTableConfigValue(sSomeTablename, sNewColumnNameAfterResorting, "visible", columnChecked );
 	                     		}
 	                     		// change the column order settings according to the user's choices
-	                     		conf.changeTableSettingValue(sSomeTablename, "column_order", null); // make sure we don't have double settings (the singular setting is deprecated)
+	                     		delete oTableSettingsList[sSomeTablename]["column_order"]; // make sure we don't have double settings (the singular setting is deprecated)
 	                     		conf.changeTableSettingValue(sSomeTablename, "columns_order", aColumnListInNewOrder);
 	                     		
 	                     		$( this ).dialog( "close" );

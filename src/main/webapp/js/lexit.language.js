@@ -190,7 +190,7 @@ lang.error_table_has_no_row_ids = "De Tabel heeft geen IDs. Rijen aanwijzen zond
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
 				"omdat de tabel geen primary key noch pkid-veld heeft; " +
 				"LET erop dat multicolumns primary keys niet ondersteund worden]";
-lang.columns_list_mismatch = "De lijst kolommen in \"column_order\" (in de configuratie) komt niet overeen met de werkelijke kolommen.<BR><BR>Oorzaak";
+lang.columns_list_mismatch = "De lijst kolommen in \"columns_order\" (in de configuratie) komt niet overeen met de werkelijke kolommen.<BR><BR>Oorzaak";
 lang.columns_list_number_mismatch1 = "Het aantal kolommen verschilt.<BR><BR>Aantal kolommen in database";
 lang.columns_list_number_mismatch2 = "Aantal kolommen volgens configuratie"; 
 lang.columns_list_name_mismatch1 = "De kolomnamen verschillen.<BR><BR>De database-tabel bevat";
@@ -1627,7 +1627,7 @@ lang.setLanguage = function(sLanguageCode){
 				"[The response of the server has probably no value for DT_RowId " +
 				"because the table has nor primary key nor pkid column; " +
 				"BEWARE: multicolumns primary keys are not supported (yet)]";
-		lang.columns_list_mismatch = "The columns list in \"column_order\" (in the config file) doesn't match the true list of columns.<BR><BR>Cause";
+		lang.columns_list_mismatch = "The columns list in \"columns_order\" (in the config file) doesn't match the true list of columns.<BR><BR>Cause";
 		lang.columns_list_number_mismatch1 = "The number of columns isn't equal.<BR><BR>Number of columns in the database";
 		lang.columns_list_number_mismatch2 = "Number of columns according to the configuration";
 		lang.columns_list_name_mismatch1 = "Some column names are different.<BR><BR>The database table contains";

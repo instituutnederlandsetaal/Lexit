@@ -1703,6 +1703,42 @@ form.manageViewGrid = function(sTableName){
 	
 };
 
+/**
+ * Activate the jquery UI accordion function
+ * onto a form containing "cellgroups" sections
+ */
+form.activateAccordion = function(sTableName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	if (fn.getViewType(sTableName) == "form") {
+			
+		// add a dedicated div for the accordion view
+		// because we don't want some parts like the reset/save buttons to be in the accordion view as well
+		
+		if ($("#"+sTableName+"_inbetween_div").length == 0) {
+			
+			$( "#"+sTableName+"_form" ).append(
+				$("<div></div>")
+					.attr("id", sTableName+"_inbetween_div")
+					//.css("width", parseInt($( "#"+sTableName+"_dynamic" ).css("width")) *.9 ) // this creates problems with width
+			);
+			
+			// copy the form sections into the accordion div
+			// except the reset/save buttons!
+			
+			$("#"+sTableName+"_form").children().not("#"+sTableName+"_formsbuttons").appendTo("#"+sTableName+"_inbetween_div");
+		
+		    // make the accordion now
+			$( "#"+sTableName+"_inbetween_div" ).accordion({
+				animate: 100
+			});
+		}
+	}
+};
+
+
 
 // determine how the underlying table is sorted for a given column
 // (used as subroutine for form.synchronizeSorting )

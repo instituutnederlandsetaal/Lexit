@@ -539,6 +539,7 @@ fn.tableIsHidden = function(sSomeTable){
  * @see fn.getTableExtraSettings
  * @see fn.callTable
  * @see fn.callDatabase
+ * @see fn.putTableAtPosition
  */
 fn.getTablePosition = function(sSomeTablename){
 	
@@ -1589,17 +1590,25 @@ fn.centerTable = function(sSomeTablename){
 /**
  * Position a table at a given absolute position
  * @param {(String|API-object-instance)} sSomeTableName  - Table name
- * @param {number} aXPos - array [x,y] with x,y being the screen absolute positions
+ * @param {number} aXPos - array [x,y] with x,y being the screen absolute positions (or an associative array like {"top": 100, "left": 200})
  * 
- * @see fn.alignTables, fn.pileupTables, fn.centerTable
+ * @see fn.alignTables, fn.pileupTables, fn.centerTable, fn.getTablePosition
  */
 fn.putTableAtPosition = function(sSomeTableName, aPos){
 	
 	if (typeof sSomeTableName == 'object')
 		sSomeTableName = fn.getTableName(sSomeTableName);
 		
-	var iXPos = aPos[0];
-	var iYPos = aPos[1]
+	var iXPos, iYPos;
+	if (aPos["top"] != null && aPos["left"] != null){
+		iXPos = aPos["left"];
+		iYPos = aPos["top"]
+	}
+	else {
+		iXPos = aPos[0];
+		iYPos = aPos[1]	
+	}	
+	
 	
 	$("#"+sSomeTableName+"_dynamic")
 		.css("position", "absolute")
