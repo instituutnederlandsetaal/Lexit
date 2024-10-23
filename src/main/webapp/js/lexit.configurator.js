@@ -2012,13 +2012,88 @@ conf.getKeysSettings = function(aTableSettings, sKeyEventType){
 };
 
 
+
+/**
+ * We have 2 types of buttons in the table header
+ * - The old type: buttons to be attached to the default Lex'it buttons on the right side of the header, which we call 'custom buttons'
+ *   These buttons must be declare with a key like 'button_x', with x being the index of the button. 
+ * - The new type: buttons to be attached to the main header element ('top' class), which can be freely positioned in the header, and which we call 'free buttons'.
+ *   These buttons must be declare in an associative array (called 'buttons'), with associates a button label to some button config.
+ */
+
+
+
+// ===== new button type: free buttons =====
+
+conf.getFreeHeaderButtons = function(aTableSettings){
+	
+	if (typeof aTableSettings["buttons"] == 'undefined')
+		return null;
+	return aTableSettings["buttons"];
+}
+
+conf.getFreeHeaderButtonSettings = function(aTableSettings, sButtonName){
+	
+	if (typeof aTableSettings["buttons"] == 'undefined')
+		return null;
+	return aTableSettings["buttons"][sButtonName];
+}
+
+conf.getFreeHeaderButtonNiceName = function(aButtonSettings){
+	if (typeof aButtonSettings["nice_name"] == 'undefined')
+	    return null;
+	return aButtonSettings["nice_name"];
+};
+
+conf.getFreeHeaderButtonPosition = function(aButtonSettings){
+	if (typeof aButtonSettings["position"] == 'undefined')
+		return null;
+	return aButtonSettings["position"];
+};
+
+conf.getFreeHeaderButtonBgColor = function(aButtonSettings){
+	if (typeof aButtonSettings["bgcolor"] == 'undefined')
+		return "blue";
+	return aButtonSettings["bgcolor"];
+};
+
+conf.getFreeHeaderButtonTextColor = function(aButtonSettings){
+	if (typeof aButtonSettings["textcolor"] == 'undefined')
+		return "white";
+	return aButtonSettings["textcolor"];
+};
+
+conf.getFreeHeaderButtonClass = function(aButtonSettings){
+	if (typeof aButtonSettings["class"] == 'undefined')
+		return null;
+	return aButtonSettings["class"];
+};
+
+conf.getFreeHeaderButtonToolTip = function(aButtonSettings){
+	if (typeof aButtonSettings["tooltip"] == 'undefined')
+		return null;
+	return aButtonSettings["tooltip"];
+};
+
+conf.getFreeHeaderButtonFunction = function(aButtonSettings){
+	if (typeof aButtonSettings["click"] == 'undefined')
+		return function(){
+			fn.message(lang.error, lang.error_button_config);
+		};
+	return aButtonSettings["click"];
+};
+
+
+
+// ===== old button type: custonm buttons =====
+
 // get the number of user custom header buttons
 conf.getNumberOfHeaderButtons = function(aTableSettings){
 	
 	var counter = 0;	
 	for (sOneSetting in aTableSettings)
 	{
-	if ( $.startsWith(sOneSetting, "button") )
+	if ( $.startsWith(sOneSetting, "button_") ) // numbered header buttons
 		counter++;			
 	}
 	return counter;

@@ -5524,6 +5524,108 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 };
 
 
+// *******************************
+// **  modify the free buttons  **
+// *******************************
+
+/**
+ * set the button (nice) name at runtime
+ * 
+ * @param {(String|API-object-instance)} sTableName - A table name or object
+ * @param {String} sButtonLabel - a button label
+ * @param {String} sNewName - a new (nice) name
+ */
+fn.setFreeButtonName = function(sTableName, sButtonLabel, sNewName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+		
+	var aTableSettings = 	conf.getTableSettings(sTableName);
+	var aButtonSettings = 	conf.getFreeHeaderButtonSettings(aTableSettings, sButtonLabel);
+	
+	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
+	$("#"+sButtonId).html(sNewName);
+};
+
+/**
+ * Get the button name, given the button node
+ * 
+ * @param {Node} node - A free button node}
+ */
+fn.getFreeButtonName = function(nNode){
+	
+	return $(node).attr("name");
+};
+
+/**
+ * Get the Id of a free button, given the table name and button label
+ * or given the button node only
+ * 
+ * @param {(String|API-object-instance)} mixed - A table name or object OR a button node
+ * @param {String} [sButtonLabel] - a button label
+ */
+fn.getFreeButtonId = function(mixed, sButtonLabel){
+	
+	// if no button label was given, we assume it's a button node 
+	if (sButtonLabel == null){
+		return $(node).attr("name");
+	}
+	
+	// otherwise we have a table and a button label
+	if (typeof mixed == 'object')
+		mixed = fn.getTableName(mixed);
+	return mixed+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
+	
+};
+
+/**
+ * Set the value of some CSS property of a free button
+ * 
+ * @param {(String|API-object-instance)} sTableName - A table name or object 
+ * @param {String} sButtonLabel - a button label
+ * @param {String} sProperty - a CSS property
+ * @param {String} sValue - a CSS property value
+ */
+fn.setFreeButtonCss = function(sTableName, sButtonLabel, sProperty, sValue){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
+	$("#"+sButtonId).css(sProperty, sValue);
+};
+
+/**
+ * Get the value of some CSS property of a free button
+ * 
+ * @param {(String|API-object-instance)} sTableName - A table name or object 
+ * @param {String} sButtonLabel - a button label
+ * @param {String} sProperty - a CSS property
+ */
+fn.getFreeButtonCss = function(sTableName, sButtonLabel, sProperty){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
+	return $("#"+sButtonId).css(sProperty);
+}
+
+/**
+ * Get the node of a free button given its label
+ * 
+ * @param {(String|API-object-instance)} sTableName - A table name or object
+ * @param {String} sButtonLabel - a button label
+ */
+fn.getFreeButtomElementByName = function(sTableName, sButtonLabel){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
+	return $("#"+sButtonId);
+}
+
 
 
 // **********************************************************

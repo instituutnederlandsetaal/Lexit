@@ -605,7 +605,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	head.setMainSearch(sSomeTableName);	
 	
 	// add reset button to clear all search filters			
-	head.putResetButton(sSomeTableName);	
+	head.putResetButton(sSomeTableName);
 	
 	// add refresh button 		
 	head.putRefreshButton(sSomeTableName);	
@@ -634,8 +634,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// add help button
 	head.putHelpButton(sSomeTableName);
 	
-	// add custom user header buttons			
+	// add custom user header buttons (these buttons are appended to the default Lex'it buttons on the right side of the header)			
 	head.putCustomHeaderButtons(sSomeTableName);
+	
+	// add free header buttons (those buttons are freely positioned in the header)			
+	head.putFreeHeaderButtons(sSomeTableName);
 	
 	// add table close button			
 	head.putTableCloseButton(sSomeTableName);

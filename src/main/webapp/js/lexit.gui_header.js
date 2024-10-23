@@ -326,6 +326,78 @@ head.putExactCountEvent = function(sSomeTableName){
  *            BUTTONS           *
  ********************************/
 
+head.putFreeHeaderButtons = function(sSomeTableName){
+	
+	var aTableSettings = 			conf.getTableSettings(sSomeTableName);
+	var aFreeButtons = 				conf.getFreeHeaderButtons(aTableSettings);
+	if (aFreeButtons == null) return true;
+	
+	// loop through all free defined buttons and add those into the interface
+	for (sButtonName in aFreeButtons) {
+
+		var aButtonSettings = aFreeButtons[sButtonName];
+
+		var sButtonBgColor = 	conf.getFreeHeaderButtonBgColor(aButtonSettings);
+		var sButtonTextColor =	conf.getFreeHeaderButtonTextColor(aButtonSettings);
+		var sButtonClass = 		conf.getFreeHeaderButtonClass(aButtonSettings);
+		var sToolTip = 			conf.getFreeHeaderButtonToolTip(aButtonSettings);
+		var aButtonPosition =	conf.getFreeHeaderButtonPosition(aButtonSettings);
+		var sNiceName = 		conf.getFreeHeaderButtonNiceName(aButtonSettings) ?? sButtonName;
+		
+		var sButtonId = sSomeTableName+"_freebutton_"+(sButtonName.toLowerCase().replace(/ /g, "_"));
+		var sButtonDivId = sSomeTableName+"_freebutton_"+(sButtonName.toLowerCase().replace(/ /g, "_"));
+
+		var freeButton = $("<button/>")
+			.attr("id", sButtonId)
+			.attr("type", "button")
+			.attr("name", sButtonName)  // give button its label as name attribute
+			.html(sNiceName)
+			.css("background-color", sButtonBgColor)
+			.css("color", sButtonTextColor)
+			.addClass("header_button")
+			.bind("click", function() {
+				
+				// retrieve button function by its name
+				var aButtonSettings = 	conf.getFreeHeaderButtonSettings(aTableSettings, $(this).attr("name"));
+				var fnButtonFunction =	conf.getFreeHeaderButtonFunction(aButtonSettings);
+				
+				// execute the function
+				fnButtonFunction(mt.getDataTableObjectOf(sSomeTableName));
+			});
+
+		// add tooltip
+		if (sToolTip != null)
+			freeButton.attr("title", sToolTip).addClass("tooltip");
+
+		// add class if available
+		if (sButtonClass != null)
+			freeButton.addClass(sButtonClass);
+
+		// append the button to the top
+		var buttonDiv = $("<div></div>")
+				.attr("id", sButtonDivId)
+				.css("display", "inline")
+				.append(freeButton);
+		$("#" + sSomeTableName + "_wrapper div.top").append(buttonDiv);
+		
+		// set button position if declared
+		if (aButtonPosition != null){
+			if (typeof aButtonPosition["top"] != 'undefined'){
+				buttonDiv.css("position", "absolute")
+					.css("left", aButtonPosition["left"])
+					.css("top", aButtonPosition["top"]);
+			}
+			else {
+				buttonDiv.css("position", "absolute")
+					.css("left", aButtonPosition[0])
+					.css("top", aButtonPosition[1]);
+			}
+			
+		}
+	}
+	
+}
+
 // put user custom header buttons
 // These buttons are defined in the configuration file (user defined)
 head.putCustomHeaderButtons = function(sSomeTableName){
@@ -343,9 +415,10 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 				);
 	
 	// loop through all custom defined buttons and add those into the interface 
-	for (var i=0; i<iNumberOfCustomButtons; i++)
-		{
+	for (var i=0; i<iNumberOfCustomButtons; i++) {
+		
 		var aButtonSettings = 	conf.getHeaderButtonSettings(aTableSettings, i);
+		
 		var sButtonName = 		conf.getHeaderButtonName(aButtonSettings);
 		var aButtonMenu = 		conf.getHeaderButtonMenu(aButtonSettings);
 		var sSelectedItem = 	conf.getHeaderButtonMenuSelected(aButtonSettings);
@@ -357,8 +430,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		var customButton;
 		
 		// normal button
-		if (aButtonMenu == null)
-			{
+		if (aButtonMenu == null) {
 			customButton = $("<button/>")
 			.attr("id", sSomeTableName+"_button_"+i)
 			.attr("type", "button")
@@ -371,7 +443,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 				// execute the function
 				fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
 				});
-			}
+		}
 		// menu button
 		else {
 			customButton = $("<select/>")
@@ -380,8 +452,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 			
 			
 			// append all the options
-			for (sOneOption in aButtonMenu)
-			{
+			for (sOneOption in aButtonMenu) {
 				if (sSelectedItem == sOneOption)	// option to be selected by default
 					customButton.append(
 						$("<option></option>")							
@@ -414,7 +485,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		// append div for button
 		$("#"+sSomeTableName+"_filter").append(
 			$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+i).css("display", "inline")
-			);
+		);
 		
 		// add tooltip
 		if (sToolTip != null)
@@ -437,7 +508,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 			
 		// add button (had its own label)
 		$("#"+sSomeTableName+"_custombutton_"+i).append(customButton);
-		}
+	}
 	
 };
 

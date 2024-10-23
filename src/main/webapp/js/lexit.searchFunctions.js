@@ -488,8 +488,10 @@ sf.enableSearchFields = function(someTablename){
 		// the right filter type is set,	
 		// now append the search box to the user interface
 				
-		sCurrentSearchBoxDiv = $("<td></td>")
-			.append(inputTag.attr("id", someTablename+"_searchbox_"+sCurrentColumnName));
+		sCurrentSearchBoxDiv = 
+			$("<td></td>")
+				.addClass("searchbox")
+				.append( inputTag.attr("id", someTablename+"_searchbox_"+sCurrentColumnName) );
 		sSearchBoxesTr.append(sCurrentSearchBoxDiv);
 		
 		

@@ -570,6 +570,11 @@ td.details {
 	width: 40%;
 }
 
+/* selects in searchboxes tend to be not height enough*/
+td.searchbox select {
+	height: 21px;
+}
+
 
 
 /*
