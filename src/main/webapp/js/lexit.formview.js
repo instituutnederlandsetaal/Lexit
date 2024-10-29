@@ -823,6 +823,10 @@ form.buildViewGrid = function(sTableName){
 		var aListDefinition =	oLists[sListLabel]["definition"];
 		var sListLabelInGUI =	oLists[sListLabel]["nice_name"];
 
+		// a list can be assigned to a cellgroup too
+		var sCellBlockName = 	oLists[sListLabel]["cellgroup"];
+		
+		
 		// table to build
 
 		var sTableFeedingList = oLists[sListLabel]["table"]["name"];
@@ -834,29 +838,56 @@ form.buildViewGrid = function(sTableName){
 		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
 		if (sBgColor == null) sBgColor = "#FFFFFF";
 
-		var listAndLabelContainer = $("<div></div>").append(
-				$("<div></div>")
-					.addClass("formview_listlabel")
-					.attr("id", "formview_listlabel_"+sListLabel)
-					.css("font-weight", "bold")
-					.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
-			);
+		var listAndLabelContainer = 
+			$("<div></div>")
+				.addClass("formview_listlabel_container")
+				.append(
+					$("<div></div>")
+						.addClass("formview_listlabel")
+						.attr("id", "formview_listlabel_"+sListLabel)
+						.css("font-weight", "bold")
+						.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
+				);
 		var listContainer = $("<div></div>")
 			.addClass("formview_list")
 			.css("background-color", sBgColor)
 			.attr("id", lists.buildTableContainerId(sFormContainerId, sListLabel));
-		eFormParent.append(listAndLabelContainer);
+		
 		listAndLabelContainer.append(listContainer);
+		
+		// a list can be attached to a group (div container!)
+		// or just to the form parent
+		if (sCellBlockName == null){
+			eFormParent.append(listAndLabelContainer);
+		}
+		else {
+			var sCellBlockId = sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_");
+			$("#"+sCellBlockId).append(listAndLabelContainer);
+			
+			// add a click event to the cell block to redraw the list
+			// (this is needed to allows the list's headers to adapt in the container)
+			setTimeout(function(){
+				$('h3[aria-controls="'+sCellBlockId+'"]').bind("click", function(){
+					(lists.getDataTableObjectOf(sListLabel)).draw();
+				});
+			}, 500);
+
+
+		}
+		
+		
 		
 
 		// put the list div at right position
 
-		listAndLabelContainer
-			.css("position", "absolute")
-			.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
-			.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-			//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-			//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		if (aListPosition != null){
+			listAndLabelContainer
+				.css("position", "absolute")
+				.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+				//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
+				//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		}
 		listContainer
 			.css("width", "calc("+aListDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 			.css("height", "calc("+aListDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
@@ -1722,13 +1753,15 @@ form.activateAccordion = function(sTableName){
 			$( "#"+sTableName+"_form" ).append(
 				$("<div></div>")
 					.attr("id", sTableName+"_inbetween_div")
-					//.css("width", parseInt($( "#"+sTableName+"_dynamic" ).css("width")) *.9 ) // this creates problems with width
 			);
 			
 			// copy the form sections into the accordion div
 			// except the reset/save buttons!
 			
-			$("#"+sTableName+"_form").children().not("#"+sTableName+"_formsbuttons").appendTo("#"+sTableName+"_inbetween_div");
+			$("#"+sTableName+"_form").children()
+				.not("#"+sTableName+"_formsbuttons")		// exclude the reset/save buttons
+				//.not(".formview_listlabel_container")		// exclude the lists
+				.appendTo("#"+sTableName+"_inbetween_div");
 		
 		    // make the accordion now
 			$( "#"+sTableName+"_inbetween_div" ).accordion({

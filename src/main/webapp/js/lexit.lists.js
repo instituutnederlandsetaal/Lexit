@@ -254,7 +254,6 @@ lists.buildLists = function(sFormTable, iListNr){
 		// save DataTable object in cache
 		hFormAndList2DataTable.put(sFormAndList, oTable);
 
-
 		// build following list
 		if (iListNr+1 < aAllLists.length){
 			lists.buildLists(sFormTable, iListNr+1);
@@ -506,6 +505,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 							aPreFilledInValues.push( "" );
 						}
 					}
+					
 
 					var sAddRowTitle = (oAdd["title"] != null ? oAdd["title"] : lang.formlist_add_row);
 					fn.prompt(sAddRowTitle, aColumnsForGUI, aPreFilledInValues, function(resp){
@@ -821,12 +821,12 @@ lists.getFeedingTable = function(sFormListLabel){
 
 /**
  * Get the DataTable object underlying a list
- * @param {String} table ID of the table underlying the list OR the label of the list
+ * @param {String} label of a list   OR    table ID of the table underlying the list
  * @returns {API-object-instance} DataTable object underlying a list
  */
 lists.getDataTableObjectOf = function(mixed){
 	
-	// if the input if a list label, build a table ID 
+	// if the input is a list label, build a table ID 
 	if (mixed.indexOf("___") == -1){
 		mixed = lists.getFormContainerId(mixed) + "___" + mixed;
 	}
@@ -1382,6 +1382,18 @@ lists.getRow = function(sListLabel, mMixed) {
 		return $("#" + sThisListLabelId).find("tr#" + sRowId).get(0);
 	}
 }
+
+
+/**
+ * get the number of rows of a list, given its label
+ * @param {String} label of the list 
+ * @see fn.getNumberOfVisibleRows()
+ */
+lists.getNumberOfVisibleRows = function(sListLabel){
+	
+	var oTable = lists.getDataTableObjectOf(sListLabel);
+	return (oTable != null ? oTable.rows().count() : 0);
+};
 
 
 
