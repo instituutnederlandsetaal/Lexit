@@ -617,9 +617,34 @@ form.buildViewGrid = function(sTableName){
 					.addClass(sBlockTextClass != null ? sBlockTextClass : sBlockClass)
 					.append(
 						$("<span></span>").text(sBlockText)
-					);		
-				
+					);				
 			}
+			
+			// if the cellblock contains a list,
+			// add a click event to the cell block to redraw the list
+			// (this is needed to allows the list's headers to adapt in the container)
+			
+			eTextBlock.bind("click", function(){
+				
+				// read the aria-controls attribute of the clicked element: this is the id of the div container it opens
+				// (this will only be available if the accordion function is used)
+				var sDivId = $(this).attr("aria-controls");				
+				if (sDivId != null){
+					
+					// user the id of the container, find a list container inside
+					var sContainerId = $("#"+sDivId).find("div.formview_list").attr("id");
+					if (sContainerId != null){
+						
+						// if the list and its ID was found, use that to retrieve the list label
+						var sListLabel = lists.getLabelFromContainerId(sContainerId);						
+						setTimeout(function(){
+							
+							// use the list label to retrieve the list DataTable object and redraw it
+							(lists.getDataTableObjectOf(sListLabel)).draw();
+						}, 200);
+					}	
+				}				
+			});
 			
 			$(eFormParent).append(eTextBlock);
 			
@@ -668,6 +693,7 @@ form.buildViewGrid = function(sTableName){
 		var oCell = 	oCells[sCellName];
 		var sCellBlockName = oCell["cellgroup"];
 		var aPosition = oCell["position"];
+		var sOrder = oCell["order"];
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
 		var sPlaceholder = oCell["tooltip"];
@@ -692,17 +718,22 @@ form.buildViewGrid = function(sTableName){
 		
 		
 		var eCell = $("<div></div>")
-				.attr("id", sTableName+"_form_cell_"+sCellName)
-				.append(
-					$("<div></div>")
-						.addClass("form_celllabel")
-						.attr("id", "form_celllabel_"+sCellName)
-						.css("font-weight", "bold")
-						.text(sNiceName)
-				);
+				.attr("id", sTableName+"_form_cell_"+sCellName);
+		var eCellLabel = $("<div></div>")
+				.addClass("form_celllabel")
+				.attr("id", "form_celllabel_"+sCellName)
+				.css("font-weight", "bold")
+				.text(sNiceName)
 		var eCellField = $("<div></div>")
 				.addClass("form_cellvalue")
 				.attr("id", "form_cellvalue_"+sCellName);
+			
+		
+		// for flex support, apply order if available	
+		if (sOrder != null){
+			eCell.css("order", parseInt(sOrder));
+		}
+		
 		
 		// a cell can be attached to a group (div container!)
 		// or just to the form parent
@@ -713,7 +744,9 @@ form.buildViewGrid = function(sTableName){
 			$("#"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_")).append(eCell);
 		}
 		
-		$(eCell).append(eCellField);
+		$(eCell)
+			.append(eCellLabel)
+			.append(eCellField);
 		
 		// custom class if configured
 		if (sCellClass != null){
@@ -866,11 +899,13 @@ form.buildViewGrid = function(sTableName){
 			
 			// add a click event to the cell block to redraw the list
 			// (this is needed to allows the list's headers to adapt in the container)
+			/*
 			setTimeout(function(){
 				$('h3[aria-controls="'+sCellBlockId+'"]').bind("click", function(){
 					(lists.getDataTableObjectOf(sListLabel)).draw();
 				});
 			}, 500);
+			*/
 
 
 		}
