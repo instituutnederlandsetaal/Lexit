@@ -1683,6 +1683,35 @@ fn.closeTable = function(sSomeTablename, fnCallback){
 
 
 /**
+ * Close all tables but the named one
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Function} fnCallback - Some function to call after the tables are closed 
+ */
+fn.closeOtherTables = function(sSomeTablename, fnCallback){
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	const queue = new FunctionQueue();
+	
+	var aTables = $("div#container div#dynamic div.table_div");				
+	$(aTables).each(function() {
+		var that = this;
+		if ($(that).attr("id") != sSomeTablename+"_dynamic"){
+			queue.enQueue(function(){			
+				$(that).find("div[id$='tableclosebutton']").find("button").click(); // close button
+			});	
+		}		
+	});
+	
+	if (fnCallback != null){
+		queue.enQueue(function(){			
+			fnCallback();
+		});		
+	}
+};
+
+
+/**
  * Close all tables
  * @param {Function} fnCallback - Some function to call after the tables are closed 
  */

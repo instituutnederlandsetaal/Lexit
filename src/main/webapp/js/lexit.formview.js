@@ -767,7 +767,6 @@ form.buildViewGrid = function(sTableName){
 		// Or do we have a select box?		
 		var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 		if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
-		
 
 		// checkbox
 
@@ -781,10 +780,14 @@ form.buildViewGrid = function(sTableName){
 
 		// selectbox
 
-		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){			
-
+		else if (aSelectBoxValues != null && aSelectBoxValues.length>1){	
+					
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
-			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
+			
+			// remove the ^$ regex option if it is present 
+			var iIndexOfEmptyRegex = $.inArray("^$", aNewSelectBoxValues);
+			if (iIndexOfEmptyRegex>0) aNewSelectBoxValues.splice(iIndexOfEmptyRegex, 1);			
+			
 			var eSelectBox = $("<select></select>")
 				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
@@ -794,7 +797,7 @@ form.buildViewGrid = function(sTableName){
 					$("<option></option>")
 						.attr("value", aNewSelectBoxValues[i])
 						.text(aNewSelectBoxValues[i])
-				)
+				);
 			}
 			eCellField.append(eSelectBox);
 		}
