@@ -1629,6 +1629,26 @@ fn.putTableInFront = function(sSomeTableName){
 	$("#"+sSomeTableName+"_dynamic").putInFront();
 }
 
+/**
+ * get the name of the table in front
+ */
+fn.getTableInFront = function(){
+	
+	var sTableInFront = null;
+	var aTables = mt.getListOfLoadedTables();
+	var iHighestZindex = 0;
+	for (var i=0; i<aTables.length; i++) {
+		var iCurrentZindex = $("#"+aTables[i]+"_dynamic").css("z-index");
+		iCurrentZindex = (iCurrentZindex == 'auto' ? 0 : parseInt(iCurrentZindex) ); 
+		if (iCurrentZindex > iHighestZindex){
+			iHighestZindex = iCurrentZindex;
+			sTableInFront = aTables[i];
+		}
+	}
+	
+	return sTableInFront;
+};
+
 
 /**
  * Since tables with a narrow width are put on the screen on the same line,
@@ -5605,12 +5625,9 @@ fn.setFreeButtonName = function(sTableName, sButtonLabel, sNewName){
 	
 	if (typeof sTableName == 'object')
 		sTableName = fn.getTableName(sTableName);
-		
-	var aTableSettings = 	conf.getTableSettings(sTableName);
-	var aButtonSettings = 	conf.getFreeHeaderButtonSettings(aTableSettings, sButtonLabel);
 	
 	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
-	$("#"+sButtonId).html(sNewName);
+	$("button#"+sButtonId).html(sNewName);
 };
 
 /**
@@ -5658,7 +5675,7 @@ fn.setFreeButtonCss = function(sTableName, sButtonLabel, sProperty, sValue){
 		sTableName = fn.getTableName(sTableName);
 	
 	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
-	$("#"+sButtonId).css(sProperty, sValue);
+	$("button#"+sButtonId).css(sProperty, sValue);
 };
 
 /**
@@ -5674,7 +5691,7 @@ fn.getFreeButtonCss = function(sTableName, sButtonLabel, sProperty){
 		sTableName = fn.getTableName(sTableName);
 	
 	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
-	return $("#"+sButtonId).css(sProperty);
+	return $("button#"+sButtonId).css(sProperty);
 }
 
 /**
@@ -5689,7 +5706,7 @@ fn.getFreeButtomElementByName = function(sTableName, sButtonLabel){
 		sTableName = fn.getTableName(sTableName);
 	
 	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
-	return $("#"+sButtonId);
+	return $("button#"+sButtonId);
 }
 
 
