@@ -283,18 +283,24 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		// if we have a selectbox, select the selected value
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
 			
-			var sSelectedValueInUnderlyingTable = 
-				$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
-					.find("#"+sTableName+"_searchbox_"+sCellName).val();
-
-			// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
-			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
-
-				return e.text 
-					== 
-					sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
-
-			}).attr("selected", "selected");
+			// small pauze needed in some cases, or it will crash 
+			setTimeout(function(){
+				
+				var sSelectedValueInUnderlyingTable = 
+					$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
+						.find("#"+sTableName+"_searchbox_"+sCellName).val();
+	
+				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
+				$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
+	
+					return e.text 
+						== 
+						sSelectedValueInUnderlyingTable.replaceAll("\\", ""); // remove escaped regex chars (which were added by sf.enableSearchFields() )
+	
+				}).attr("selected", "selected");
+				
+			}, 100);
+			
 		}
 
 		// assign it the grid width unit (same width for each)
@@ -512,9 +518,7 @@ form.buildViewGrid = function(sTableName){
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
 	
-	//fn.setCssVariable(sFormContainerId+"_formwidth", iFormWidth+"px");
-	//fn.setCssVariable(sFormContainerId+"_formheight", iFormHeight+"px");
-	
+	// set css variables for scaling
 	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
 	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 
@@ -615,7 +619,7 @@ form.buildViewGrid = function(sTableName){
 		
 		var sBlockText = 	oCellBlock["text"];
 		var sBlockTextClass = oCellBlock["textclass"];
-		var sBlockTextHtmlTag = oCellBlock["htmltag"];
+		var sBlockTextHtmlTag = oCellBlock["htmltag"] ?? "h3"; // h3 is jquery UI default
 		
 		
 		if (aPosition == null){
@@ -641,9 +645,34 @@ form.buildViewGrid = function(sTableName){
 					.addClass(sBlockTextClass != null ? sBlockTextClass : sBlockClass)
 					.append(
 						$("&lt;span>&lt;/span>").text(sBlockText)
-					);		
-				
+					);				
 			}
+			
+			// if the cellblock contains a list,
+			// add a click event to the cell block to redraw the list
+			// (this is needed to allows the list's headers to adapt in the container)
+			
+			eTextBlock.bind("click", function(){
+				
+				// read the aria-controls attribute of the clicked element: this is the id of the div container it opens
+				// (this will only be available if the accordion function is used)
+				var sDivId = $(this).attr("aria-controls");				
+				if (sDivId != null){
+					
+					// user the id of the container, find a list container inside
+					var sContainerId = $("#"+sDivId).find("div.formview_list").attr("id");
+					if (sContainerId != null){
+						
+						// if the list and its ID was found, use that to retrieve the list label
+						var sListLabel = lists.getLabelFromContainerId(sContainerId);						
+						setTimeout(function(){
+							
+							// use the list label to retrieve the list DataTable object and redraw it
+							(lists.getDataTableObjectOf(sListLabel)).draw();
+						}, 200);
+					}	
+				}				
+			});
 			
 			$(eFormParent).append(eTextBlock);
 			
@@ -692,6 +721,7 @@ form.buildViewGrid = function(sTableName){
 		var oCell = 	oCells[sCellName];
 		var sCellBlockName = oCell["cellgroup"];
 		var aPosition = oCell["position"];
+		var sOrder = oCell["order"];
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
 		var sPlaceholder = oCell["tooltip"];
@@ -716,17 +746,22 @@ form.buildViewGrid = function(sTableName){
 		
 		
 		var eCell = $("&lt;div>&lt;/div>")
-				.attr("id", sTableName+"_form_cell_"+sCellName)
-				.append(
-					$("&lt;div>&lt;/div>")
-						.addClass("form_celllabel")
-						.attr("id", "form_celllabel_"+sCellName)
-						.css("font-weight", "bold")
-						.text(sNiceName)
-				);
+				.attr("id", sTableName+"_form_cell_"+sCellName);
+		var eCellLabel = $("&lt;div>&lt;/div>")
+				.addClass("form_celllabel")
+				.attr("id", "form_celllabel_"+sCellName)
+				.css("font-weight", "bold")
+				.text(sNiceName)
 		var eCellField = $("&lt;div>&lt;/div>")
 				.addClass("form_cellvalue")
 				.attr("id", "form_cellvalue_"+sCellName);
+			
+		
+		// for flex support, apply order if available	
+		if (sOrder != null){
+			eCell.css("order", parseInt(sOrder));
+		}
+		
 		
 		// a cell can be attached to a group (div container!)
 		// or just to the form parent
@@ -737,7 +772,9 @@ form.buildViewGrid = function(sTableName){
 			$("#"+sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_")).append(eCell);
 		}
 		
-		$(eCell).append(eCellField);
+		$(eCell)
+			.append(eCellLabel)
+			.append(eCellField);
 		
 		// custom class if configured
 		if (sCellClass != null){
@@ -758,7 +795,6 @@ form.buildViewGrid = function(sTableName){
 		// Or do we have a select box?		
 		var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 		if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
-		
 
 		// checkbox
 
@@ -772,10 +808,14 @@ form.buildViewGrid = function(sTableName){
 
 		// selectbox
 
-		else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){			
-
+		else if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length>1){	
+					
 			var aNewSelectBoxValues = aSelectBoxValues.map((x) => x);
-			aNewSelectBoxValues.splice($.inArray("^$", aNewSelectBoxValues), 1);
+			
+			// remove the ^$ regex option if it is present 
+			var iIndexOfEmptyRegex = $.inArray("^$", aNewSelectBoxValues);
+			if (iIndexOfEmptyRegex>0) aNewSelectBoxValues.splice(iIndexOfEmptyRegex, 1);			
+			
 			var eSelectBox = $("&lt;select>&lt;/select>")
 				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
@@ -785,7 +825,7 @@ form.buildViewGrid = function(sTableName){
 					$("&lt;option>&lt;/option>")
 						.attr("value", aNewSelectBoxValues[i])
 						.text(aNewSelectBoxValues[i])
-				)
+				);
 			}
 			eCellField.append(eSelectBox);
 		}
@@ -847,6 +887,10 @@ form.buildViewGrid = function(sTableName){
 		var aListDefinition =	oLists[sListLabel]["definition"];
 		var sListLabelInGUI =	oLists[sListLabel]["nice_name"];
 
+		// a list can be assigned to a cellgroup too
+		var sCellBlockName = 	oLists[sListLabel]["cellgroup"];
+		
+		
 		// table to build
 
 		var sTableFeedingList = oLists[sListLabel]["table"]["name"];
@@ -858,29 +902,58 @@ form.buildViewGrid = function(sTableName){
 		var sBgColor = oFormGrid["lists"][sListLabel]["bgcolor"];
 		if (sBgColor == null) sBgColor = "#FFFFFF";
 
-		var listAndLabelContainer = $("&lt;div>&lt;/div>").append(
-				$("&lt;div>&lt;/div>")
-					.addClass("formview_listlabel")
-					.attr("id", "formview_listlabel_"+sListLabel)
-					.css("font-weight", "bold")
-					.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
-			);
+		var listAndLabelContainer = 
+			$("&lt;div>&lt;/div>")
+				.addClass("formview_listlabel_container")
+				.append(
+					$("&lt;div>&lt;/div>")
+						.addClass("formview_listlabel")
+						.attr("id", "formview_listlabel_"+sListLabel)
+						.css("font-weight", "bold")
+						.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
+				);
 		var listContainer = $("&lt;div>&lt;/div>")
 			.addClass("formview_list")
 			.css("background-color", sBgColor)
 			.attr("id", lists.buildTableContainerId(sFormContainerId, sListLabel));
-		eFormParent.append(listAndLabelContainer);
+		
 		listAndLabelContainer.append(listContainer);
+		
+		// a list can be attached to a group (div container!)
+		// or just to the form parent
+		if (sCellBlockName == null){
+			eFormParent.append(listAndLabelContainer);
+		}
+		else {
+			var sCellBlockId = sTableName+"_form_cellblock_"+sCellBlockName.replace(/ /g, "_");
+			$("#"+sCellBlockId).append(listAndLabelContainer);
+			
+			// add a click event to the cell block to redraw the list
+			// (this is needed to allows the list's headers to adapt in the container)
+			/*
+			setTimeout(function(){
+				$('h3[aria-controls="'+sCellBlockId+'"]').bind("click", function(){
+					(lists.getDataTableObjectOf(sListLabel)).draw();
+				});
+			}, 500);
+			*/
+
+
+		}
+		
+		
 		
 
 		// put the list div at right position
 
-		listAndLabelContainer
-			.css("position", "absolute")
-			.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
-			.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-			//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-			//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		if (aListPosition != null){
+			listAndLabelContainer
+				.css("position", "absolute")
+				.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+				//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
+				//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
+		}
 		listContainer
 			.css("width", "calc("+aListDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 			.css("height", "calc("+aListDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
@@ -1289,11 +1362,17 @@ form.buildViewGrid = function(sTableName){
 /**
  * Update the form layout
  * This can be called (e.g. in 'resize_callback') to make sure that the form keeps looking how it should after resizing etc.
- * @param {String} table name
+ * @param {String} table name of form container to update
+ * @param {Boolean} [bHorizontalScaling=true] perform horizontal scaling
+ * @param {Boolean} [bVerticalScaling=true] perform vertical scaling
  */
-form.updateLayout = function(sTableName){
+form.updateLayout = function(sTableName, bHorizontalScaling, bVerticalScaling){
 	
 	sTableName = fn.getTableName(sTableName);
+	
+	// default values
+	bHorizontalScaling = bHorizontalScaling ?? true;
+	bVerticalScaling = bVerticalScaling ?? true;
 	
 	var sFormContainerId = sTableName+"_form";
 	
@@ -1325,9 +1404,14 @@ form.updateLayout = function(sTableName){
 	var iGridWidthUnit = 	iFormWidth / iDefWidth;
 	var iGridHeightUnit = 	iFormHeight / iDefHeight;
 	
-	fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
-	fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
 	
+	// set css variables for rescaling
+	if (bHorizontalScaling) {
+		fn.setCssVariable(sFormContainerId+"_cellwidth", iGridWidthUnit+"px");
+	}
+	if (bVerticalScaling) {
+		fn.setCssVariable(sFormContainerId+"_cellheight", iGridHeightUnit+"px");
+	}
 	
 	var sFormPositionSetting = oFormGrid["align"];
 	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
@@ -1715,6 +1799,44 @@ form.manageViewGrid = function(sTableName){
 	// iWait = 0; // after first call
 	
 };
+
+/**
+ * Activate the jquery UI accordion function
+ * onto a form containing "cellgroups" sections
+ */
+form.activateAccordion = function(sTableName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	
+	if (fn.getViewType(sTableName) == "form") {
+			
+		// add a dedicated div for the accordion view
+		// because we don't want some parts like the reset/save buttons to be in the accordion view as well
+		
+		if ($("#"+sTableName+"_inbetween_div").length == 0) {
+			
+			$( "#"+sTableName+"_form" ).append(
+				$("&lt;div>&lt;/div>")
+					.attr("id", sTableName+"_inbetween_div")
+			);
+			
+			// copy the form sections into the accordion div
+			// except the reset/save buttons!
+			
+			$("#"+sTableName+"_form").children()
+				.not("#"+sTableName+"_formsbuttons")		// exclude the reset/save buttons
+				//.not(".formview_listlabel_container")		// exclude the lists
+				.appendTo("#"+sTableName+"_inbetween_div");
+		
+		    // make the accordion now
+			$( "#"+sTableName+"_inbetween_div" ).accordion({
+				animate: 100
+			});
+		}
+	}
+};
+
 
 
 // determine how the underlying table is sorted for a given column
@@ -2546,7 +2668,7 @@ form.isUnsaved = function(sTableName){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Sep 25 2024 15:48:45 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Nov 11 2024 12:08:22 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>
