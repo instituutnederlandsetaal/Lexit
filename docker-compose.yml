@@ -1,0 +1,12 @@
+services:
+
+    lexit:
+        image: instituutnederlandsetaal/lexit:${LEXIT_VERSION}
+        restart: unless-stopped
+        build:
+            context: .
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./lexit2_config_folders/etc/lexit2_db_config:/usr/local/tomcat/etc/lexit2_db_config
+            - ./lexit2_config_folders/webapps/lexit2_config:/usr/local/tomcat/webapps/lexit2_config
