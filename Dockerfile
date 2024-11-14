@@ -1,3 +1,5 @@
+#syntax=docker/dockerfile:1.4
+
 # Lexit build stage
 FROM maven:3.9.9-eclipse-temurin-11-alpine AS lexit-build
 COPY --link pom.xml .classpath ./
