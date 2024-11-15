@@ -8,6 +8,7 @@ set -a && source .env && set +a
 echo "Pulling lexit-configs"
 git clone https://github.com/INL/lexit-configs lexit-configs 2> /dev/null || git -C lexit-configs fetch 
 git -C lexit-configs reset --hard
+git -C lexit-configs pull
 
 # remove any existing configs
 echo "Removing existing configs"
