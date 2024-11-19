@@ -19,32 +19,33 @@ ts.reinit = function(){
 // Request list of available tables and views from the database
 // In most cases, all input variables are null
 // But those variables can be set so as to be able to open a table upon startup and apply some filters to it 
-ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings){		
+ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings){
 	
 	showSpinner('#indicators');
-			
+				
 	var url = WEBSERV_URL+"/api/gettables";
 	
-	$.ajax(
-			{
-				type: "GET",
-				url: url,
-				data: {
-					"db_name": getHttpParams().get("db"),
-					"dummy": getUniqueNumber()
-				},
-				dataType: "xml",
-				contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-				success: function(xml) {
-					
-					removeSpinner('#indicators');
-					
-					ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					fn.message(lang.error, lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
-				}
-			});
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"db_name": getHttpParams().get("db"),
+			"dummy": getUniqueNumber()
+		},
+		dataType: "xml",
+		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		success: function(xml) {
+			
+			removeSpinner('#indicators');					
+			ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			
+			removeSpinner('#indicators');
+			fn.message(lang.error, lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
+			//fn.startLexitLogout(false);
+		}
+	});
 	
 };
 

@@ -92,6 +92,47 @@ public class TableResources {
  	}
  	
  	
+ 	@Path("logout")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject logout(
+ 			@QueryParam("username") String username,
+ 			@Context ServletContext context,
+ 			@Context SecurityContext sc,
+ 			@Context HttpServletRequest httpServletRequest			
+ 			) {
+ 		
+ 		
+ 		System.out.println("### Logging out user "+username);
+ 		
+		// get a list of the ContextObjects of the user to be logged out
+	
+		ArrayList<String> keysToDelete = new ArrayList<String>();
+
+		for (String key : nameToDatabaseObject.keySet()){
+			
+			Database tmpDbObj = nameToDatabaseObject.get(key);		
+			
+			// match the user? note it must be thrown away
+			if ( tmpDbObj.getContextObject().getUsername().equals(username) ) {
+				keysToDelete.add(key);
+			}
+		}
+		
+		// remove those ContextObjects
+		
+		for (String key : keysToDelete) {
+			// remove ContextObject since it's left unused
+			nameToDatabaseObject.remove(key);
+			Util.debug("Removed old Database object: "+key);
+		}
+ 		
+ 		DbResponseObject dro = new DbResponseObject();
+ 		dro.setResponse(username + " was logged out from Lex'it"); 		
+ 		return dro;
+ 	}
+ 	
+ 	
  	// reset user rights 
  	@Path("reset_user_rights")
  	@GET
@@ -103,8 +144,11 @@ public class TableResources {
  			) throws IOException {
  		
  		
- 		String userName = lexitInfo.getUserName(httpServletRequest);		
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "RaNdOmDaTaBaSe", userName);
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);		
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName); 		
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
  				
  		synchronized (TableResources.class){
  		
@@ -129,8 +173,15 @@ public class TableResources {
  	public DbResponseObject deleteUser(
  			@DefaultValue("") @QueryParam("username") String username,
  			@Context SecurityContext sc,
+ 			@Context ServletContext context,
  			@Context HttpServletRequest httpServletRequest
  			) throws IOException {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
  		
  		lexitInfo.deleteUser(username);
  		
@@ -147,9 +198,16 @@ public class TableResources {
 	public DbResponseObject deleteProjectRoleForUser(
 			@DefaultValue("") @QueryParam("username") String username,
 			@DefaultValue("") @QueryParam("db_name") String dbname, 
+			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
 			) throws IOException {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
 
 		lexitInfo.deleteProjectRoleForUser(username, dbname);
 
@@ -165,8 +223,16 @@ public class TableResources {
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject getUserDefaultRole(
  			@DefaultValue("") @QueryParam("username") String username,
+ 			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest) {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
+ 		
  		
  		String role = lexitInfo.getUsersDefaultRole(username);
  		
@@ -186,9 +252,17 @@ public class TableResources {
  			@DefaultValue("") @QueryParam("default_role") String defaultRole,
  			@DefaultValue("") @QueryParam("db_name") String dbName,
  			@DefaultValue("") @QueryParam("role") String role,
+ 			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
  			) throws IOException {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
+ 		
  		
  		lexitInfo.setUserWithRole(username, password, defaultRole, dbName, role);
  		
@@ -202,9 +276,17 @@ public class TableResources {
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject getListOfUsersAndRoles(
+ 			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
  			) {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
+ 		
  		
  		DbResponseObject response = new DbResponseObject();
  		
@@ -218,9 +300,16 @@ public class TableResources {
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject getListOfUsers(
+ 			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
  			) {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
  		
  		DbResponseObject response = new DbResponseObject();
  		
@@ -578,9 +667,8 @@ public class TableResources {
 			  @QueryParam("column_name") String columnName,
 			  @Context ServletContext context,
 			  @Context SecurityContext sc,
-				@Context HttpServletRequest httpServletRequest
-				)
-	  {
+			  @Context HttpServletRequest httpServletRequest
+			){
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		
@@ -1822,7 +1910,7 @@ public class TableResources {
 		
 			String dbName = co.getDbNameForSpy();
 			String userName = co.getUsername();
-			Date date=new Date(co.getTimeLastUsed());
+			Date date = new Date(co.getTimeLastUsed());
 			String sessionId = co.getSessionIdForSpy();
 			String activeTabId = co.getActiveTabIdForSpy();
 			SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
@@ -1846,11 +1934,20 @@ public class TableResources {
 		
 		// get the dbname (we need it to match the tomcat user role)		
 		String dbName = co.getDbName();
+		String userName = co.getUsername();
 		
-		if (action.equals(Constants.USER_READ_ACCESS))
+		
+		// admin project is allowed for admin, that's all
+		if (dbName.equals("admin") && action.equals(Constants.USER_IS_ADMIN)) {
+			return true;
+		}
+		
+		// normal lex'it projects (t.i. anything BUT the admin project) 
+		// are NOT allowed for admin,
+		// but are allowed to any other users, it they have the right role
+		else if (action.equals(Constants.USER_READ_ACCESS))
 		{
-			return
-			userHasRole(co, "admin") || 
+			return			 
 			userHasRole(co, "superuser") || 
 			userHasRole(co, "superreader") || 
 			userHasRole(co, dbName+"_all") || 
@@ -1860,7 +1957,6 @@ public class TableResources {
 		else if (action.equals(Constants.USER_WRITE_ACCESS))
 		{
 			return
-			userHasRole(co, "admin") ||
 			userHasRole(co, "superuser") || 
 			userHasRole(co, dbName+"_all") || 
 			userHasRole(co, dbName+"_write");
@@ -1868,7 +1964,6 @@ public class TableResources {
 		else if (action.equals(Constants.USER_ALL_ACCESS))
 		{
 			return 
-			userHasRole(co, "admin") ||
 			userHasRole(co, "superuser") || 
 			userHasRole(co, dbName+"_all");
 		}	

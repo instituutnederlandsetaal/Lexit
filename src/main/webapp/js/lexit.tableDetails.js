@@ -21,7 +21,7 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 			"db_name": getHttpParams().get("db") 
 			},
 		dataType: "xml",
-		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			td.processColumnResponse(xml, sSomeTableName, fnFunction, oExtraTableSettings);
 			},

@@ -23,6 +23,7 @@ public class Constants {
 	public final static String ARG_INTERNAL_SEPARATOR = "ArGsEpArAtOr"; 
 
 	// users rights
+	public final static String USER_IS_ADMIN = "admin";     // admin
 	public final static String USER_ALL_ACCESS = "all";     // read, write, delete
 	public final static String USER_WRITE_ACCESS = "write"; // read, write
 	public final static String USER_READ_ACCESS = "read";   // read

@@ -1061,7 +1061,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 				"db_name": getHttpParams().get("db") 
 				},
 			dataType: "xml",
-			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+			//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 			success: function(xml) {
 				
 				var aColumns = new Array();

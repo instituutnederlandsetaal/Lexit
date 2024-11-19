@@ -389,8 +389,9 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		setSchemaNameCache = sNewSchema;
 	 		setSchemaTimeOut = setTimeout(
 					function(){
-						// BEWARE: the callback must be fired ONLY at the first call of fn.setSchema().
-						// Calling it at every TimeOut could cause unexpected behavior to the developers:
+						// BEWARE: the CALLBACK must be fired ONLY at the first call of fn.setSchema(),
+						// which is why we set is to be null at the end of this function.
+						// Calling the callback at every TimeOut could cause unexpected behavior to the developers:
 						// the developers most probably expect that a schema is set once and for all, 
 						// and do not know of the necessity to re-call the function regularly, as this is just
 						// a trick to deal with the short life of the ContextObject. As a consequence, the
@@ -937,6 +938,9 @@ fn.tableIsEditable = function(sTableName){
  */
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	
+	// default value
+	var iWait = 250; // ms
+	
 	// make sure sSomeTablename contains a string
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
@@ -966,11 +970,9 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 		ts.reinit();
 		ts.getListOfTables(null, "", "");
 		
-        setTimeout(function(){
-        	
-        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
-        	
-        }, 250);
+        setTimeout(function(){        	
+        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
+        }, iWait);
     }
 	
 };
@@ -1102,7 +1104,7 @@ fn._callTableSilentlySub = function(sSomeTableName){
 			"db_name": getHttpParams().get("db") 
 		},
 		dataType: "xml",
-		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
 			
@@ -6503,6 +6505,15 @@ fn.getCurrentSessionId = function(){
  */
 fn.startLexitLogin = function(){
 	startLexitLogin();
+};
+
+/**
+ * Log out a user
+ * 
+ * @param {Function} fnCallback - some function to call after logging out
+ */
+fn.startLexitLogout = function(fnCallback){
+	startLexitLogout(fnCallback);
 };
 
 

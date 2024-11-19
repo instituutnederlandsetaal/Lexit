@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.11.04
+	v2024.11.18
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -273,8 +273,6 @@
 
 		lang.setLanguage(sLexitLanguage);
 
-		// first call of webservice, to ensure creation of session
-		//sayHello();
 		
 		// set neutral internal separator
 		setInternalSeparator(function(){
@@ -352,6 +350,52 @@
 		}, 100);
 		
 	};
+	
+	
+	// logout function must be accessible from anywhere, to be able to call it programmatically if needed
+	// ( synonym: fn.startLexitLogout() )
+	function startLexitLogout(fnCallback){
+		
+		if (fn.getCurrentUser() == null){
+			console.log("Username is already empty, which means that log out was performed already.");
+			return;
+		}		
+		
+		var url = WEBSERV_URL+"/api/logout";
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"data": {
+				"username": fn.getCurrentUser(),
+				"dummy": getUniqueNumber()
+			},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {
+				
+				// reset!
+				USERNAME = null;
+				SESSION_ID = null;
+				
+				// if a callback was set, call it
+				if (fnCallback != null){
+					fnCallback();
+				}
+				else {
+					fn.closeDialog();
+		 			fn.message("Log out", fn.getDbResponse(xml), function(){
+		 				lexitReload();
+		 			});
+				}
+				
+		 	},
+			"error": function(jqXHR, textStatus, errorThrown){
+				
+				fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+			}
+		});
+		
+	};
 
 	// called by $(document).ready()
 
@@ -361,14 +405,20 @@
 		// (this is needed, since a user might temporarily log in as admin so as to manage his/her access rights, and then open a project,
 		//  which he/she would there operate as an admin, which is not allowed: the admin user is for admin mode only!)
 		
-		if (USERNAME == 'admin' && !bAdmin && !bSpyMode) {
-			startLexitLogin();
-		}
+		//if (fn.getCurrentUser() == 'admin' && !bAdmin && !bSpyMode) {
+		//	startLexitLogout(function(){
+		//		fn.message("Log out", "You are now logged in as admin, which is not allowed to work in a project. You have been logged out.", function(){
+		//			startLexitLogin();
+		//		});
+		//	});
+		//}
 		
 		
-		// if nobody has logged in
+		// if nobody has logged in: start log in 
 		
-		if (!bAdmin && (paramsHash != null && paramsHash.get("db") != null) && (fn.getCurrentUser() == null || fn.getCurrentUser() == "null")){
+		//else 
+		if (!bAdmin && (paramsHash != null && paramsHash.get("db") != null) 
+				&& (fn.getCurrentUser() == null || fn.getCurrentUser() == "null" || fn.getCurrentUser() == "admin")){
 			
 			// try to load a login page, if available / otherwise do normal login
 			
@@ -404,10 +454,6 @@
 					}
 				});
 			}
-			
-			
-			
-			
 			
 		}
 		
@@ -469,6 +515,7 @@
 
 		// global spy mode (logging info)
 		else if (bSpyMode) {
+			
 			buildSpy();
 		}
 
@@ -493,8 +540,12 @@
 				}
 			});
 		}
+		
+		
 
-		// test mode (development)
+		// last case: 
+		
+		// show the list of projects in test mode (development)
 		else if (bTest) {
 			$.getScript("projects_overview.js")
 					.done(function(){
@@ -510,7 +561,7 @@
 					});
 		}
 
-		// normal mode (production)
+		// show the list of projects in normal mode (production)
 		else {
 			var url = WEBSERV_URL+"/api/get_projects_overview";
 
@@ -759,8 +810,22 @@
 				// nothing to do
 			},
 			"error": function(jqxhr, settings, exception){
-				fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
-				lexitReload();
+				
+				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
+				// so we reload the page, which will trigger the user to log in again
+				if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
+					lexitReload();
+				}
+				// otherwise, an error in this function indicates a problem with the webservice
+				// we we must tell the user firt about the error before reloading the page
+				else {
+					fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]",
+						function () {
+							lexitReload();
+						}
+					);
+				}
+				 
 			}
 		});
 	}
