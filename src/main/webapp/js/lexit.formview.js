@@ -959,6 +959,7 @@ form.buildViewGrid = function(sTableName){
 		var sButtonBgColor = 	oCustomButtons[sButtonName]["bgcolor"];
 		var aButtonPosition = 	oCustomButtons[sButtonName]["position"];
 		var sButtonClass =	 	oCustomButtons[sButtonName]["class"];
+		var sButtonNiceName = 	oCustomButtons[sButtonName]["nice_name"];
 		if (aButtonPosition == null) {
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "buttons:{position}"));
 		}
@@ -970,7 +971,7 @@ form.buildViewGrid = function(sTableName){
 		var customButton = $("<button>")
 			.addClass("formview_button")
 			.append( 
-				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).text(sButtonName) 
+				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).html(sButtonNiceName ?? sButtonName) 
 			)
 			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "blue") )
 			.attr("id", "form_button_"+sButtonId)
