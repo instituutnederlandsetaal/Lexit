@@ -265,23 +265,99 @@ lists.buildLists = function(sFormTable, iListNr){
 
 
 /**
- * Refresh a list
+ * Refresh a list, given its label.
+ * By default a hard refresh is done (t.i. force reloading of data from the database), 
+ * but a soft refresh can be requested [t.i. just redraw the list with the data in memory].
+ * @param {String} the label of the list to refresh
+ * @param {Function} a callback function to call after the list has been refreshed
+ * @param {Boolean} [bHardRefresh=true] a flag to force a hard refresh (true) or a soft refresh (false)
  */
-lists.refresh = function(sListLabel, fnCallback){
+lists.refresh = function(sListLabel, fnCallback, bHardRefresh){
 	
-	var sFormContainerId = 	lists.getFormContainerId(sListLabel);
-	var sTableId =	lists.buildTableId(sFormContainerId, sListLabel);
-	var oTable = 	lists.getDataTableObjectOf(sTableId);
-
-	const queue = new FunctionQueue();
-	queue.enQueue(function(){
-		oTable.draw(false);
-	});
-	queue.enQueue(function(){
-		if (fnCallback != null) fnCallback();
-	});
+	bHardRefresh = (bHardRefresh == null ? true : bHardRefresh);
+	
+	if (bHardRefresh){
+		
+		var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+		var sFormTable = 		form.getFeedingTable(sFormContainerId);
+		
+		var oTableSettings =    conf.getTableSettings(sFormTable);
+		var oFormGrid =         conf.getFormGrid(oTableSettings);
+		var oCells = 			oFormGrid["cells"];
+		var oThisList = 		oFormGrid["lists"][sListLabel];
+		
+		// var for storing the name of the form cell which we need to feed the list (some ID)
+		var sFormCellFeedingTheList; 
+		
+		// var for storing the fieldname in the table feeding the list
+		// which will be filtered by the value of the form cell (some ID)
+		// so as to fill the list with matching records having this value only
+		var sTargetedFieldInList; 
+		
+		// filter to be applied to the list, built with the values of sFormCellFeedingTheList and sTargetedFieldInList
+		var aListFilters = {};
+		
+		// find relevant feeding info for this list	
+		
+		for (var sCellName in oCells){
+			
+			// find out if this cell feeds a list
+			var oSynch = oCells[sCellName]["synchronize_with"];
+			if (oSynch != null){
+			
+				// is it feeding our list? [t.i.: sListLabel]
+				
+				for (var sSomeListLabel in oSynch){
+					if (sSomeListLabel == sListLabel){
+						sFormCellFeedingTheList = sCellName;		
+						sTargetedFieldInList = oSynch[sListLabel];
+						break; 
+					}
+				}
+			}
+			// stop if we found what we were looking for
+			if (sTargetedFieldInList != null) break;
+		}
+		
+		var sSomeID = form.getDataFromCell(sFormTable, sFormCellFeedingTheList);
+		
+		aListFilters[sTargetedFieldInList] = sSomeID;
+				
+		lists.feed(sListLabel, aListFilters, function(){	
+			
+			const queue = new FunctionQueue();
+			queue.enQueue(function(){
+				
+				// make the list editable									
+				form.makeListEditable(sListLabel, oThisList["table"]["name"]);
+			});
+			queue.enQueue(function(){
+				if (fnCallback != null) fnCallback();
+			});
+	
+		});
+	}
+	
+	// soft refresh
+	else {
+		
+		var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+		var sTableId =	lists.buildTableId(sFormContainerId, sListLabel);
+		var oTable = 	lists.getDataTableObjectOf(sTableId);
+	
+		const queue = new FunctionQueue();
+		queue.enQueue(function(){
+			oTable.clear().draw(false);
+		});
+		queue.enQueue(function(){
+			if (fnCallback != null) fnCallback();
+		});
+	}
+	
+	
 	
 }
+
 
 
 

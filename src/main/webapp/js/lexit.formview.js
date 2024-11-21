@@ -251,16 +251,25 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("input").attr("cycle_value") != null){
 			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").css("background-color", "#DDDDDD").css("border", "1px solid #FFFFFF");
 		}
+		
+		//console.log("--" +sCellName, $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").get(0));
 
 		// if we have a selectbox, select the selected value
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
 			
+			var searchBoxInUnderlyingTable = $("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
+					.find("#"+sTableName+"_searchbox_"+sCellName);				
+			var sSelectedValueInUnderlyingTable = searchBoxInUnderlyingTable.val();
+			
+			//console.log("-------+");
+			//console.log(sTableName);
+			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").get(0));
+			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").length);
+			//console.log(searchBoxInUnderlyingTable.get(0));
+			//console.log(sSelectedValueInUnderlyingTable);
+			
 			// small pauze needed in some cases, or it will crash 
 			setTimeout(function(){
-				
-				var sSelectedValueInUnderlyingTable = 
-					$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
-						.find("#"+sTableName+"_searchbox_"+sCellName).val();
 	
 				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
 				$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
@@ -1277,7 +1286,7 @@ form.buildViewGrid = function(sTableName){
 				// are refreshed, in case those are loaded in the GUI already
 				for (var sListLabel in oLists){
 					
-					lists.refresh(sListLabel);
+					lists.refresh(sListLabel, null, false);
 					
 					var sTableToRefresh = lists.getFeedingTable(sListLabel);
 					if (fn.tableExists(sTableToRefresh)){
@@ -1750,26 +1759,6 @@ form.manageViewGrid = function(sTableName){
 	// Start! ----------------------------------------------------------------------------------------------------------------------------------------
 
 	return fnDoListsUpdates;
-
-
-
-	// setTimeout(function(){
-
-	// 	// now update the lists
-	// 	for (var sListLabel in oListLabel2Filters){
-
-	// 		var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
-
-	// 		// feed the lists
-	// 		lists.feed(sListLabel,  oListLabel2Filters[sListLabel], function(){
-
-	// 			// make the list editable
-	// 			form.makeListEditable(sListLabel, sTableToFeedTheListWith);
-	// 		});
-	// 	}
-
-	// }, iWait);
-	// iWait = 0; // after first call
 	
 };
 
