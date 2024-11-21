@@ -13,6 +13,6 @@ LEXIT_SCHEMA_PASSWORD=
 # use the full path from the repository root. E.g. Intern/Cobaltje
 PROJECTS= # comma separated list of projects
 ```
-2. Fill in `projects_overview.js`
+2. `cp ../lexit2_config_folders/webapps/lexit2_config/projects_overview.js projects_overview.js` and fill it in.
 3. Run the lexit docker: `docker compose up -d`
 4. Run `./deploy-projects.sh`. This adds the specified projects to a docker mount of the container
