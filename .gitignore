@@ -6,3 +6,4 @@ target/
 /target/
 src/main/webapp/*.config.js
 src/main/webapp/*.library.js
+docker/
