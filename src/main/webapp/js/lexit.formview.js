@@ -2535,6 +2535,10 @@ form.getColumnsNiceNames = function(sSomeTable){
  * @param {Boolean} true: get value out of the underlying table - false: get value currently visible in the form (even if not saved yet)
  */
 form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
+	
+	// we need the table name
+	if (typeof sFormTable == 'object')
+		sFormTable = fn.getTableName(sFormTable);
 
 	// if we want the current value IN THE UNDERLYING TABLE 
 	// represented by the form (which is not necessarily the value
