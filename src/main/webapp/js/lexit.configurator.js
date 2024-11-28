@@ -1048,6 +1048,17 @@ conf.getSelectTriggerEvent = function(aColumnConfig){
 	return aColumnConfig["select_trigger_event"];
 }
 
+/**
+ * Retrieve delay (in ms) before the mouse event [triggering select box to appear] is effectively triggered
+ * Default: 250 ms
+ */
+conf.getSelectTriggerDelay = function(aColumnConfig){
+	if (typeof aColumnConfig["select_trigger_delay"] == 'undefined')
+		return 250; // ms
+	return aColumnConfig["select_trigger_delay"];
+}
+
+
 
 // retrieve visibility settings
 // default is visible:true
