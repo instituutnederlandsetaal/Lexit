@@ -1051,9 +1051,11 @@ fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExt
 		tb.loadTable(sSomeTablename, fnFunction, oExtraSettings);
 	}	
 	// if the table exists already, just call it with the right settings
-	else {		
-		if (fnFunction != null) 
-			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);		
+	else {
+		// add draw callback
+		if (fnFunction != null) {
+			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);
+		}		
 		fn._callTableWithFilter(sSomeTablename, aContentToMatch);
 	}
 };

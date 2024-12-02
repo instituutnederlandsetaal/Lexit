@@ -321,6 +321,18 @@ lists.refresh = function(sListLabel, fnCallback, bHardRefresh){
 		
 		var sSomeID = form.getDataFromCell(sFormTable, sFormCellFeedingTheList);
 		
+		// in case the form is not rendered yet (or any more), read from table directly
+		// as a kind of rescue...
+		if (sSomeID == null){
+			var nActiveRow = fn.getFirstSelectedRowNodeFrom(sFormTable);
+			if (nActiveRow == null && fn.getCurrentDisplayLength(sFormTable) == 1){
+				nActiveRow = fn.getFirstRowNodeFrom(t);
+			}
+			sSomeID = fn.getDataFromCellInRowNode(nActiveRow, sFormCellFeedingTheList);
+		}
+		
+		// set the filters to be applied
+		
 		aListFilters[sTargetedFieldInList] = sSomeID;
 				
 		lists.feed(sListLabel, aListFilters, function(){	
@@ -359,11 +371,62 @@ lists.refresh = function(sListLabel, fnCallback, bHardRefresh){
 }
 
 
+/**
+ * Show a processing message in a list, given its label
+ * @param {String} the label of the list to show the processing message in
+ */
+lists.showProcessingMsg = function(sListLabel, bAccordion){
+	
+	var sFormContainerId = 	lists.getFormContainerId(sListLabel);
+	var selector = bAccordion ? "#"+sFormContainerId+"_cellblock_"+sListLabel+"_label div.formview_listlabel_container" : "#formview_listlabel_"+sListLabel;
+	
+	// make sure the list is visible and some content (width) before showing the spinner
+	var fnShowSpinner = function(selector, iCounter){
+		
+		if ($(selector).width() > 0) {
+			showSpinner(selector);
+		}
+		else {
+			setTimeout(function(){
+				fnShowSpinner(selector, iCounter++);
+			}, 100);
+		}
+	};
+	fnShowSpinner(selector, 0);
+};
+
+/**
+ * Remove the processing message from a list, given its label
+ * @param {String} the label of the list to remove the processing message from
+ */
+lists.removeProcessingMsg = function(sListLabel, bAccordion){
+	
+	var sFormContainerId = 	lists.getFormContainerId(sListLabel);	
+	var selector = bAccordion ? "#"+sFormContainerId+"_cellblock_"+sListLabel+"_label div.formview_listlabel_container" : "#formview_listlabel_"+sListLabel;
+	
+	// remove the spinner, but it this function was called too fast if won't work so: check if it hasn't work and if so, recall the function
+	var fnRemoveSpinner = function(selector, iCounter){
+		
+		removeSpinner(selector);
+		
+		setTimeout(function(){
+			if (iCounter<10 && $(selector).length > 0) {
+				fnRemoveSpinner(selector, iCounter++);
+			}
+		}, 100);
+	};
+	fnRemoveSpinner(selector, 0);
+};
 
 
-// feed a list (= load data from database),
-// given a table name and some values to match
-//
+
+
+/**
+ * feed a list (= load data from database), given a table name and some values to match
+ * @param {String} the label of the list to feed
+ * @param {Array} an associative array of field names and values to match
+ * @param {Function} a callback function to call after the list has been fed
+ */
 lists.feed = function(sListLabel, aFieldsAndValuesToMatch, fnCallback){
 	
 
