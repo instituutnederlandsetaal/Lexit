@@ -1097,16 +1097,13 @@ public class TableResources {
 		
 		
 		// first check the function operation type (= writing/reading)
-		boolean functionDoesWritingOperations = 
-				getDatabaseObject(co).getFunctionOperationType(functionName).equals("writing");
+		String functionOperationType = getDatabaseObject(co).getFunctionOperationType(functionName);
 		
-		// if we have a writing function, we need to test for full access rights
-		if ( functionDoesWritingOperations && !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
-			throw new RuntimeException("Permission denied to "+userName);
+		System.out.println(functionName+ " >> "+functionOperationType + " >> "+userIsAllowedTo(co, functionOperationType));
 		
-		// otherwise, we the function is just reading, just test for reading access rights
-		else if (!functionDoesWritingOperations && !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
-			throw new RuntimeException("Permission denied to "+userName);		
+		// function type must match the user's access rights
+		if ( !userIsAllowedTo(co, functionOperationType))
+			throw new RuntimeException("Permission denied to "+userName);	
 		
 		TableRecordObject tro = 
 			getDatabaseObject(co).callFunction(functionName, argsStr);

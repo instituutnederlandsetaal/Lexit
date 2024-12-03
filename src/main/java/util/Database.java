@@ -3854,17 +3854,23 @@ public class Database {
 		// which describes the function operation type.
 		
 		String functionQuery = 		
-			"SELECT CASE (function_txt.fulltext ~ tables.writing_pattern) "+
-			"WHEN true THEN 'writing' ELSE 'reading' END " + 
-			"AS function_operation " +
+			"SELECT CASE "+
+			" WHEN function_txt.fulltext ~ tables.all_writing_pattern THEN '"+Constants.USER_ALL_ACCESS+"' "+
+			" WHEN function_txt.fulltext ~ tables.writing_pattern THEN '"+Constants.USER_WRITE_ACCESS+"' " +
+			" ELSE '"+Constants.USER_READ_ACCESS+"' "+
+			" END AS function_operation " +
 			"FROM " +
+			
+			// this retrieves the function text
 			"(SELECT LOWER(regexp_replace(p.prosrc, E'[ \t\n\r]+', ' ', 'g')) AS fulltext " + 
 			"FROM pg_proc p, pg_namespace n " +
 			"WHERE p.proname = ? " +  // function name
 			"AND n.nspname = ?) function_txt, " + // function schema name
-			"(SELECT '.*(update|delete from|insert into) " + 
-			"(|" + projectSchema + "\\.)" + // the schema name might be omitted here (eg. public)
-			"('||string_agg(c.relname, '|')||').*' AS writing_pattern " +
+			
+			// this generates the regex pattern matching writing operations
+			"(SELECT "+ // the schema name might be omitted here (eg. public), which is why we use '|' here
+			"'.*(delete from|update|insert into) (|"+projectSchema+"\\.)('||string_agg(c.relname, '|')||').*' AS all_writing_pattern, " +
+			"'.*(update|insert into) (|"+projectSchema+"\\.)('||string_agg(c.relname, '|')||').*' AS writing_pattern " + 
 			"FROM pg_catalog.pg_class c " +
 			"FULL JOIN pg_catalog.pg_namespace n " + 
 			"ON n.oid = c.relnamespace " +
@@ -3872,7 +3878,7 @@ public class Database {
 			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " + 
 			"AND n.nspname != 'information_schema' " +
 			"AND n.nspname = ? " + // project schema name
-			"ORDER BY 1) tables";
+			"ORDER BY 1) tables ";
 		
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String functionSchemaName = "public";
@@ -3895,7 +3901,7 @@ public class Database {
 			}
 		
 		
-		String functionOperationType = "writing";
+		String functionOperationType = "read";
 		
 		String schema = getSchemaName();
 		
