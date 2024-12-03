@@ -663,8 +663,7 @@ public class Database {
 	    	uvo = getUniqueValues_oldStyle(tableName, columnName, null, null);
 	      
 	    }
-	    finally
-	    {
+	    finally {
 	      closeDatabase(dc);
 	    }
 
@@ -734,8 +733,7 @@ public class Database {
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
     	}
-    	finally
-	    {
+    	finally {
 	      closeDatabase(dc);
 	    }
     	
@@ -869,8 +867,7 @@ public class Database {
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
     	}
-    	finally
-	    {
+    	finally {
 	      closeDatabase(dc);
 	    }
     	
@@ -2659,8 +2656,8 @@ public class Database {
 		// column (as very last sorting column).
 		
 		if (primaryKey != null && 
-				Util.getIndexOf(primaryKey, aSortCol)<0)
-		{
+				Util.getIndexOf(primaryKey, aSortCol)<0) {
+			
 			if (Constants.debug){
 				System.out.println("'"+primaryKey+"' is no part of "+Util.join(aSortCol, ", "));
 			}
@@ -2669,7 +2666,8 @@ public class Database {
 			aSortDir = Util.concatArr(aSortDir, new String[]{"ASC"});
 		}
 		
-		if (Constants.debug){
+		if (Constants.debug) {
+			
 			System.out.println();
 			System.out.println("Sort (possibly) enriched:");
 			System.out.println(Util.join(aSortCol, ", "));
@@ -2699,8 +2697,7 @@ public class Database {
 			ato = new ArgumentTypesObject();
 			
 			// build the query condition for each column (!!! the MAIN search will search EACH column of course !!!)
-			for (int i=0; i<columnsToSearch.length; i++)
-			{
+			for (int i=0; i<columnsToSearch.length; i++) {
 				// build current part
 				queryValues.add(sSearch);
 				
@@ -2725,8 +2722,8 @@ public class Database {
 				
 			}
 			// in a main search, finding in only one column is good enough, so we use 'OR' between columns
-			if (queryParts.size()>0)
-			{
+			if (queryParts.size()>0) {
+				
 				query += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";				
 			}
@@ -2739,8 +2736,8 @@ public class Database {
 		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
-		else if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()>0)
-		{
+		else if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()>0) {
+			
 			// main search means search all columns at once
 			columnsToSearch = getColumnNames(tableName);
 			ArrayList<String> queryParts = new ArrayList<String>();		
@@ -2748,8 +2745,8 @@ public class Database {
 			
 			// I. main search part: search all columns EXCEPT the filtered columns			
 			
-			for (int i=0; i<columnsToSearch.length; i++)
-			{
+			for (int i=0; i<columnsToSearch.length; i++) {
+				
 				// we skip the specific filtered columns as our main search address the other columns
 				if (aSearchColumnNames.contains(columnsToSearch[i]))
 					continue;
@@ -2758,16 +2755,15 @@ public class Database {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) )
-				{
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) ) {
+					
 					queryParts.add(
 							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
 							" AS text) "+ getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
-				else
-				{
+				else {
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
 							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], sSearch, false) 
@@ -2778,8 +2774,8 @@ public class Database {
 			}			
 			
 			// in a main search, finding in only one column is good enough, so we use 'OR' between columns
-			if (queryParts.size()>0)
-			{
+			if (queryParts.size()>0) {
+				
 				query += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";				
 			}
@@ -2789,38 +2785,33 @@ public class Database {
 			
 			// build the query condition for each column
 			queryParts = new ArrayList<String>();		
-			for (int i=0; i<aSearchColumnNames.size(); i++)
-			{
+			for (int i=0; i<aSearchColumnNames.size(); i++) {
 				// build current part
 				queryValues.add(aSearchColumnValues.get(i));
 				
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, aSearchColumnNames.get(i))) )
-				{
+				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, aSearchColumnNames.get(i))) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
 							" AS text) "+ getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
-				else
-				{
+				else {
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
 							" " + getSuitableOperatorAndArg(tableName, aSearchColumnNames.get(i), aSearchColumnValues.get(i), caseSensitiveColumn)  
 							);
 					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, aSearchColumnNames.get(i)));
 				}
-				
-				
-				
+								
 			}
 			
 			// the column filters are compulsory so we use 'AND'
-			if (queryParts.size()>0)
-			{
+			if (queryParts.size()>0) {
+				
 				query += "AND ("+ Util.join(queryParts, " AND ") + ") ";
 				countQuery += "AND ("+ Util.join(queryParts, " AND ") + ") ";				
 			}			
@@ -2832,8 +2823,8 @@ public class Database {
 		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
-		else if ( (sSearch!=null && sSearch.isEmpty()) && aSearchColumnValues.size()>0)
-		{
+		else if ( (sSearch!=null && sSearch.isEmpty()) && aSearchColumnValues.size()>0) {
+			
 			columnsToSearch = aSearchColumnNames.toArray(new String[aSearchColumnNames.size()]);
 			ArrayList<String> queryParts = new ArrayList<String>();
 			ato = new ArgumentTypesObject();
@@ -2847,16 +2838,14 @@ public class Database {
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, columnsToSearch[i])) )
-				{
+				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, columnsToSearch[i])) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
 							" AS text) " + getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
-				else
-				{
+				else {
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
 							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], aSearchColumnValues.get(i), caseSensitiveColumn) 
@@ -2866,8 +2855,8 @@ public class Database {
 				
 			}
 			// the column filters are compulsory so we use 'AND'
-			if (queryParts.size()>0)
-			{
+			if (queryParts.size()>0) {
+				
 				query += "WHERE ("+ Util.join(queryParts, " AND ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " AND ") + ") ";				
 			}
@@ -2953,8 +2942,7 @@ public class Database {
 		TableAndCountObject tableAndCount = new TableAndCountObject();
 		
 		// remove operators that were put in from (like '<33'  or '!woord') 
-		for (int i=0; i<queryValues.size(); i++)
-		{
+		for (int i=0; i<queryValues.size(); i++) {
 			queryValues.set(i, removeFrontOperator(queryValues.get(i)) );
 		}
 		
@@ -2988,8 +2976,7 @@ public class Database {
 			
 			
 			// [ beware: null is also a genuine search value, so it's considered non-empty ]
-			if ( ( sSearch == null || !sSearch.isEmpty() ) || aSearchColumnValues.size()>0 )
-			{
+			if ( ( sSearch == null || !sSearch.isEmpty() ) || aSearchColumnValues.size()>0 ) {
 				
 				// get time at which counting starts
 				long timeBeforeCount = new Date().getTime();
@@ -3000,16 +2987,15 @@ public class Database {
 				// read it from the cache (except if exact count is required by user just now)
 				
 				if (!bExactCountRequiredByUser && 
-						queryToCount.containsKey(queryForCache))
-				{
+						queryToCount.containsKey(queryForCache)) {
+					
 					Util.debug(co, "Query "+queryForCache+" found in cache");
 					count = queryToCount.get(queryForCache);
 					exactCount = queryToCountQuality.get(queryForCache);
 				}
 				
 				// try counting the normal way (exact count, slower than estimate)
-				else 
-				{
+				else  {
 					queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 					
 					Util.debug(co, "%%% FAST COUNT decision: "+queryCost+ "<"+maxAllowedCost +"?");					
@@ -3052,15 +3038,18 @@ public class Database {
 								}
 							count = getEstimateCount(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
-						}						
+						}
+						finally {
+							// not possible here!
+							//closeDatabase(dc);
+						}
 						
 					}
 					
 					// if counting the normal way is PREDICTED to be too slow
 					// (and exact count wasn't required by the user just now)
 					// get an estimate count
-					else
-					{
+					else {
 						Util.debug(co, "%%% We will use an estimate count");
 						count = getEstimateCount(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 						exactCount = false;
@@ -3071,16 +3060,15 @@ public class Database {
 				long timeAfterCount = new Date().getTime();
 				
 				// recompute the maximal allowed cost (to keep in tune with actual system)
-				if (recomputeMaxAllowedCost)
-				{
+				if (recomputeMaxAllowedCost) {
+					
 					recomputeMaxAllowedCost(queryCost, timeBeforeCount, timeAfterCount);
 					Util.debug(co, "$$$ RECOMPUTED maxAllowedCost = " + maxAllowedCost);
 				}				
 				Util.debug(co, "Counting took "+(timeAfterCount - timeBeforeCount)+" ms");
 											
 			}
-			else
-			{
+			else {
 				Util.debug(co, "## Query count is the same as total count");			
 			}
 			
@@ -3141,6 +3129,10 @@ public class Database {
 		if ((timeAtVeryEnd - timeAtVeryStart) > maxAllowedDuration 
 				&& !indexAvailableForSortCol)
 			tableAndCount.setNeededIndexForSortingColumns(Util.join(aSortCol, ", "));
+		
+		
+		// just to make sure
+		closeDatabase(dc);
 		
 		return tableAndCount;
 	}

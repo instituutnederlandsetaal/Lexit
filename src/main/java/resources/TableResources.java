@@ -1099,7 +1099,8 @@ public class TableResources {
 		// first check the function operation type (= writing/reading)
 		String functionOperationType = getDatabaseObject(co).getFunctionOperationType(functionName);
 		
-		System.out.println(functionName+ " >> "+functionOperationType + " >> "+userIsAllowedTo(co, functionOperationType));
+		// DEBUG
+		//System.out.println(functionName+ " >> "+functionOperationType + " >> "+userIsAllowedTo(co, functionOperationType));
 		
 		// function type must match the user's access rights
 		if ( !userIsAllowedTo(co, functionOperationType))

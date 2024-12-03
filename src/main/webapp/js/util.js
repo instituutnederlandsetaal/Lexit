@@ -1247,7 +1247,7 @@ function getHighestZindex(absoluteMax){
 	return parseInt(highest);
 }
 
-function getZindexOfTableInFrond(){
+function getZindexOfTableInFront(){
 	
 	// get highest z-index of all visible tables
 	var aTables = mt.getListOfLoadedTables();
