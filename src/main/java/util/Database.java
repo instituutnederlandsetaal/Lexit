@@ -3861,7 +3861,7 @@ public class Database {
 			
 			// this generates the regex pattern matching writing operations
 			"(SELECT "+ // the schema name might be omitted here (eg. public), which is why we use '|' here
-			"'.*(delete from|update|insert into) (|"+projectSchema+"\\.)('||string_agg(c.relname, '|')||').*' AS all_writing_pattern, " +
+			"'.*(delete from) (|"+projectSchema+"\\.)('||string_agg(c.relname, '|')||').*' AS all_writing_pattern, " +
 			"'.*(update|insert into) (|"+projectSchema+"\\.)('||string_agg(c.relname, '|')||').*' AS writing_pattern " + 
 			"FROM pg_catalog.pg_class c " +
 			"FULL JOIN pg_catalog.pg_namespace n " + 
@@ -3870,7 +3870,8 @@ public class Database {
 			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " + 
 			"AND n.nspname != 'information_schema' " +
 			"AND n.nspname = ? " + // project schema name
-			"ORDER BY 1) tables ";
+			"ORDER BY 1) tables "+
+			"LIMIT 1 ;";
 		
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String functionSchemaName = "public";
