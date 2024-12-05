@@ -8,16 +8,15 @@ set -a && source .env && set +a
 echo "Pulling lexit-configs"
 if [ -d "lexit-configs" ]; then
     git -C lexit-configs fetch
-    LOCAL=$(git -C lexit-configs rev-parse HEAD)
-    REMOTE=$(git -C lexit-configs rev-parse @{u})
-    if [ "$LOCAL" = "$REMOTE" ]; then
+    HEAD=$(git -C lexit-configs rev-parse HEAD)
+    if [ "$HEAD" = "$LEXIT_CONFIGS_VERSION" ]; then
         echo "Already up to date. Exiting."
         exit 0
     fi
-    git -C lexit-configs reset --hard
-    git -C lexit-configs pull
+    git -C lexit-configs reset --hard $LEXIT_CONFIGS_VERSION
 else
     git clone https://github.com/INL/lexit-configs lexit-configs
+    git -C lexit-configs reset --hard $LEXIT_CONFIGS_VERSION
 fi
 
 # remove any existing configs
