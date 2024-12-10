@@ -935,6 +935,7 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callDatabaseInNewTab
  * @see fn.getTableExtraSettings
  * @see fn.callTable
+ * @see fn.callTableSilently
  */
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	
@@ -981,6 +982,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
  * Synonym of fn.callDatabase
  * 
  * @see fn.callDatabase
+ * @see fn.callTableSilently
  */
 fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
@@ -1074,7 +1076,8 @@ fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
 /**
  * Call a table silently, meaning that it won't be shown, but all its details will be loaded
  * into the multiple table registry, so as to be able to retrieve these details if needed elsewhere!
- * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been loaded yet) 
+ * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been opened on screen yet)
+ * @param {String} sSomeTablename - Table name 
  */
 fn.callTableSilently = function(sSomeTablename){
 	

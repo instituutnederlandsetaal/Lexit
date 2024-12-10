@@ -1015,7 +1015,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					
 					// we will implement a function timeout, in such a way that the selectbox only appears when the user stays on the cells a little bit
 					// that prevents selectboxes to appear everywhere the mouse goes!
-					let mouseoverTimeout;;
+					let mouseoverTimeout;
 					
 					$(this).on(sSelectTriggerEvent, function(){
 						

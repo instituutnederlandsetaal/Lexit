@@ -219,9 +219,9 @@ lists.buildLists = function(sFormTable, iListNr){
 				"thousands": ".",
 				"search": lang.header_main_search,
 				"infoEmpty": lang.header_info_empty,
-				"emptyTable": lang.empty_table,
+				"emptyTable": "", // we don't want to show 'No results or so', but just an empty table
 				"info": lang.header_x_rows_found,
-				"zeroRecords": lang.no_results_modify_your_query,
+				"zeroRecords": "", // we don't want to show 'No results or so', but just an empty table
 				"infoFiltered": lang.header_info_filtered,
 				"paginate": {
 					"first": lang.paginate_first,
@@ -633,10 +633,18 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 					for (const sColNameForGUI of aColumnsForGUI) {	
 						
 						var oColumnConfig =	conf.getColumnConfig(oThisListTableConfig, sColNameForGUI);
-						var aAllowedValues = conf.getSelectionBox(oColumnConfig);				
+						
+						// [1] select values from 'choosefrom' in config.js
+						var aAllowedValues = conf.getSelectionBox(oColumnConfig);
+						// [2] ELSE  select values from Postgres ENUM type
+						if (aAllowedValues == null){
+							var iColNameIndex = 	$.inArray(sColNameForGUI, mt.getListOfColumnsOf(sThisListTableName));
+							aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sThisListTableName)[iColNameIndex];
+						}				
+						
 						
 						// select
-						if ( aAllowedValues != null ){
+						if ( aAllowedValues != null && aAllowedValues.length > 1){
 							aPreFilledInValues.push( aAllowedValues );
 						}
 						// text
@@ -851,7 +859,7 @@ lists.assignShowAndDeleteFunction = function(oTable){
 };
 
 
-// set table order the DataTable way
+// get the table sorting order in the DataTable way
 // given an associative array like {col1: asc/desc, ...}
 lists.getDataTableOrder = function(aColumns, oSortSettings){
 
