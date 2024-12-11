@@ -1104,6 +1104,8 @@ lists.getLabelFromContainerId = function(sContainerId){
  * @param {Array} the lists object, an associative array associating list labels to list configurations
  * @param {String} the label of the list we want to get the columns' list of
  * @returns {Array} a list of column names 
+ * 
+ * @see lists.getVisibleColumns
  */
 lists.getColumnsToDisplay = function(oLists, sListLabel){
 
@@ -1117,6 +1119,28 @@ lists.getColumnsToDisplay = function(oLists, sListLabel){
 			aColumnsToDisplay.push(sColumnName);
 	}
 	return aColumnsToDisplay;
+};
+
+
+/**
+ * Get the list of columns that are set to be visible in the list config.
+ * Being part of the list depends on visibility setting of the column/cell only.
+ * 
+ * @param {String} the label of the list we want to get the columns' list of
+ * @returns {Array} a list of column names 
+ * 
+ * @see lists.getColumnsToDisplay
+ */
+lists.getVisibleColumns = function(sListLabel){
+	
+	// get the form config this list is part of
+	var sFormContainerId = lists.getFormContainerId(sListLabel);
+	var sFormTable = form.getFeedingTable(sFormContainerId);
+	var oTableSettings = conf.getTableSettings(sFormTable);
+	var oFormGrid = conf.getFormGrid(oTableSettings);
+	var oLists = oFormGrid["lists"];
+		
+	return lists.getColumnsToDisplay(oLists, sListLabel);	
 };
 
 
@@ -1361,6 +1385,8 @@ lists.getDataFromCell = function(sListLabel, mMixed, sColName){
  * @param {(Integer|Node)} row node / row number
  * @param {String} [sColName=null] column name of the cell
  * @returns {Node} a cell node
+ * 
+ * @see lists.getSiblingCell
  */
 lists.getCell = function(sListLabel, mMixed, sColName){
 
@@ -1401,6 +1427,27 @@ lists.getCell = function(sListLabel, mMixed, sColName){
 	// otherwise
 	return null;
 };
+
+
+/**
+ * Get the sibling cell of a cell in a list
+ * @param {String} label of the list
+ * @param {Node} node of a cell
+ * @param {String} name of the column of the sibling cell
+ * @returns {Node} a cell node of the sibling
+ * 
+ * @see lists.getCell
+ */
+lists.getSiblingCell = function(sListLabel, nCell, sColName){
+	
+	var oTable = lists.getDataTableObjectOf(sListLabel);
+	var nRow = oTable.row(nCell).node();
+	var iColIndex = $.inArray(sColName, oTable.columns().header().toArray().map(function(header) {
+		return $(header).text();
+	}));
+	return oTable.cell(nRow, iColIndex).node();
+}
+
 
 
 /**
