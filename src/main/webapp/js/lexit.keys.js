@@ -492,26 +492,31 @@ kf.addKeyFunctions = function(){
 					mt.getDataTableObjectOf(sActiveTable).page("previous").draw("page");
 				}
 				else if (kf.isPressed("pagedown")){
+					
+					var iCurrentPage = 		mt.getDataTableObjectOf(sActiveTable).page.info().page+1;
+					var iTotalNrOfPages =	mt.getDataTableObjectOf(sActiveTable).page.info().pages;
+					
 					// it might occur that the estimated total number of pages is lower than the true number of pages;
 					// in such cases, one might get stuck on the last page, which is actually NOT the last page.
 					// So, to solve that, Lex'it checks if we are on the last page, and if so, it forces a hard refresh
 					// (so Lex'it gets the true number of pages) and only then, we will be able to go to the next page.
-					var iCurrentPage = 		mt.getDataTableObjectOf(sActiveTable).page.info().page+1;
-					var iTotalNrOfPages =	mt.getDataTableObjectOf(sActiveTable).page.info().pages;
 					
-					if (iTotalNrOfPages == iCurrentPage){
+					if (bForceExactCount == false && iTotalNrOfPages == iCurrentPage){
 						// force exact count!
 			    		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
 			    		bForceExactCount = true; 
 			    		
-						fn.refreshTable(sActiveTable, function(){
-							
-							// we need a short time out, otherwise this won't work
-							setTimeout(function(){
-								mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
-							}, 300);
-							
-							});
+						// we need a short time out, otherwise this won't work
+						setTimeout(function(){
+							mt.getDataTableObjectOf(sActiveTable).page("next").draw("page");
+						}, 300);	
+						
+					}
+					
+					// if the exact count is already forced, and we are already at the last page
+					// we don't need to refresh the table again
+					else if (bForceExactCount == true && iTotalNrOfPages == iCurrentPage){
+						 // do nothing!
 					}
 					// normal case: just go to the next page
 					else {
