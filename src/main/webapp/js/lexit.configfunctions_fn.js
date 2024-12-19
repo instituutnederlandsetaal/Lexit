@@ -308,7 +308,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @pparam {Boolean} bAppendHelp - append the help button if true
  */
-fn.setBalk = function(bSetting, bAppendHelp){
+fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo){
 	
 	if (bAppendHelp == null) bAppendHelp = false;
 	
@@ -326,6 +326,12 @@ fn.setBalk = function(bSetting, bAppendHelp){
 			setTimeout(function(){
 				head.showGeneralHelp();	
 			}, 500);
+		}
+		
+		if (sPathToCustomLogo != null) {
+			$("#square_logo").append(
+				$("<img>").attr("src", sPathToCustomLogo)
+			);
 		}
 	}
 	else {
@@ -5642,9 +5648,9 @@ fn.setFreeButtonName = function(sTableName, sButtonLabel, sNewName){
  * 
  * @param {Node} node - A free button node}
  */
-fn.getFreeButtonName = function(nNode){
+fn.getFreeButtonName = function(nButtonNode){
 	
-	return $(node).attr("name");
+	return $(nButtonNode).html();
 };
 
 /**
@@ -5658,7 +5664,7 @@ fn.getFreeButtonId = function(mixed, sButtonLabel){
 	
 	// if no button label was given, we assume it's a button node 
 	if (sButtonLabel == null){
-		return $(node).attr("name");
+		return $(mixed).attr("id");
 	}
 	
 	// otherwise we have a table and a button label

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2024.12.12
+	v2024.12.19
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -342,8 +342,12 @@
 				}
 		);
 		
-		// set password type
-		setTimeout(	function(){	
+		// set password type etc
+		setTimeout(	function(){
+			$("div[id^='dialog-message']").find("form").attr("id", "loginForm");
+			$("div[id^='dialog-message']").find("input#prompt_username").attr("autocomplete", "username");
+			$("div[id^='dialog-message']").find("input#prompt_password").attr("autocomplete", "current-password");
+			
 			$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
 			fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
 			

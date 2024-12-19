@@ -226,20 +226,18 @@ fx.getAllRowsWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 		// search the row
 		// (if one single required value is not found, the search fails)
 		var bFound = true;
-		for (sFieldName in aFieldsAndValues)
-			{
+		for (sFieldName in aFieldsAndValues) {
 			var sValueOfCell = fx.getDataFromCellInRow(oCurrentRow, sFieldName);
-					
+			
 			if (sValueOfCell != aFieldsAndValues[sFieldName])
 				bFound = false;						
-			}
+		}
 		
 		// if we found all the required values in this row
 		// add it to our result set
-		if (bFound)
-			{
+		if (bFound) {
 			aNodes.push( oCurrentRow.row(i).node() ); 		
-			}
+		}
 		
 	});
 	
