@@ -3,8 +3,8 @@
 ## First time deployment
 1. Create the following .env:
 ```sh
-LEXIT_VERSION= # a version from https://github.com/INL/Lexit/releases
-LEXIT_CONFIGS_VERSION= # a commit hash from https://github.com/INL/Lexit-configs/commits/master/
+LEXIT_VERSION= # docker tag: "dev" or a version from https://github.com/INL/Lexit/releases
+LEXIT_CONFIGS_VERSION= # a commit hash: from https://github.com/INL/Lexit-configs/commits/master/
 
 # used to construct LEXIT_SCHEMA.database
 LEXIT_SCHEMA_HOST=
@@ -13,7 +13,7 @@ LEXIT_SCHEMA_PASSWORD=
 
 # projects retrieved from https://github.com/INL/Lexit-configs
 # use the full path from the repository root. E.g. Intern/Cobaltje
-PROJECTS= # comma separated list of projects
+PROJECTS= # comma-or-newline-or-both separated list of projects. Use a string when using newlines.
 ```
 2. `cp ../lexit2_config_folders/webapps/lexit2_config/projects_overview.js projects_overview.js` and fill it in.
 3. Run the lexit docker: `docker compose up -d`
