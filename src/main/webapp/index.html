@@ -353,7 +353,7 @@
 			
 			$("div[id^='dialog-message']").find("input#prompt_username").focus();
 			
-		}, 500); // 100 proved to be too short, sometimes.
+		}, 100); 
 		
 	};
 	
@@ -405,26 +405,14 @@
 
 	// called by $(document).ready()
 
-	function startInRightMode(){
-		
-		// prevent work in project when logged in as admin
-		// (this is needed, since a user might temporarily log in as admin so as to manage his/her access rights, and then open a project,
-		//  which he/she would there operate as an admin, which is not allowed: the admin user is for admin mode only!)
-		
-		//if (fn.getCurrentUser() == 'admin' && !bAdmin && !bSpyMode) {
-		//	startLexitLogout(function(){
-		//		fn.message("Log out", "You are now logged in as admin, which is not allowed to work in a project. You have been logged out.", function(){
-		//			startLexitLogin();
-		//		});
-		//	});
-		//}
-		
-		
-		// if nobody has logged in: start log in 
-		
-		//else 
-		if (!bAdmin && (paramsHash != null && paramsHash.get("db") != null) 
-				&& (fn.getCurrentUser() == null || fn.getCurrentUser() == "null" || fn.getCurrentUser() == "admin")){
+	
+	function startInRightMode(){		
+				 
+		if (	// user tries to access a project other than the admin console
+				!bAdmin && (paramsHash != null && paramsHash.get("db") != null) 
+				&& 
+				// and no user is logged in, or the user had proviously logged in as admin (which is the same, since that only allows access to admin console)
+				(fn.getCurrentUser() == null || fn.getCurrentUser() == "null" || fn.getCurrentUser() == "admin")){
 			
 			// try to load a login page, if available / otherwise do normal login
 			
@@ -463,7 +451,7 @@
 			
 		}
 		
-		// admin mode
+		// admin mode (access to admin console only)
 		
 		else if (bAdmin) {
 			
@@ -554,17 +542,17 @@
 		// show the list of projects in test mode (development)
 		else if (bTest) {
 			$.getScript("projects_overview.js")
-					.done(function(){
+				.done(function(){
 
-						// The ajax call gets the list of declared projects out of the projects overview file.
-						// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
-						// In the end, this function will call initialize();
-						getConfigFilesList();
+					// The ajax call gets the list of declared projects out of the projects overview file.
+					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
+					// In the end, this function will call initialize();
+					getConfigFilesList();
 
-					})
-					.fail(function(jqxhr, settings, exception){
-						fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
-					});
+				})
+				.fail(function(jqxhr, settings, exception){
+					fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+				});
 		}
 
 		// show the list of projects in normal mode (production)
@@ -600,31 +588,19 @@
 
 	function computeOperatingMode(){
 		
-		// administrator mode
-		
-		bAdmin = (paramsHash!=null &&
-				paramsHash.get("db")!=null && 
-				paramsHash.get("db")=='admin');
+		// administrator mode		
+		bAdmin = (paramsHash!=null && paramsHash.get("db")=='admin');
 
 		// Are we in development (test) mode?
 		// if so, we'll be loading the file from webcontent (with $.getScript)
 		// if not, we'll be loading the file from the configuration directory (with ajax call to webservice, which is the normal mode)
-
-		bTest = (paramsHash!=null &&
-				paramsHash.get("test")!=null &&
-				paramsHash.get("test")=='true');
+		bTest = (paramsHash!=null && paramsHash.get("test")=='true');
 
 		// are we getting a look into the active users list?
-
-		bSpyMode = (paramsHash!=null &&
-				paramsHash.get("db")!=null &&
-				paramsHash.get("db")=='spy');
+		bSpyMode = (paramsHash!=null && paramsHash.get("db")=='spy');
 
 		// are we resetting the user rights?
-
-		bResetUserRights = (paramsHash!=null &&
-				paramsHash.get("db")!=null &&
-				paramsHash.get("db")=='reset_user_rights');
+		bResetUserRights = (paramsHash!=null && paramsHash.get("db")=='reset_user_rights');
 	}
 	
 		
@@ -645,7 +621,7 @@
 				// build the table if it doesn't exist yet
 				if ( !$("#spytable").elementExists() ) {
 					var spyDiv = $("<div></div>")
-					.attr("id", "#spytable");
+						.attr("id", "#spytable");
 				
 					var spyTable = $("<table></table>")
 						.attr("id", "spytable")

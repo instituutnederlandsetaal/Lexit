@@ -508,11 +508,7 @@ public class TableResources {
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		
-		// TURNED OFF, SINCE THIS FUNCTIONALITY IS TYPICALLY ACCESSED BEFORE LOGGING IN!
-		//if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
-		//	throw new RuntimeException("Permission denied to "+co.getUsername());
-		
-		// output allowed
+		// NO CHECK OF ACCESS RIGHTS HERE, SINCE THIS FUNCTIONALITY IS TYPICALLY ACCESSED BEFORE LOGGING IN!		
 		
 		String[] dbInfo = getDatabaseObject(co).getDatabaseInfo();
 		String infoStr = "database '"+dbInfo[0]+"' on host '"+dbInfo[1]+"'";
@@ -672,12 +668,10 @@ public class TableResources {
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		
-	    Util.debug(co, "### Get unique values for column " + columnName + " in " + tableName);
-	    
+	    Util.debug(co, "### Get unique values for column " + columnName + " in " + tableName);	    
 	    
 	    if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
-
 		
 	    return getDatabaseObject(co).getUniqueValues(tableName, columnName);
 	  }
@@ -689,17 +683,17 @@ public class TableResources {
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public UniqueValuesObject getUniqueValuesWithLimit(
-			  @QueryParam("db_name") String dbName, 
-			  @QueryParam("table_name") String tableName, 
-			  @QueryParam("column_name") String columnName,
-			  @QueryParam("column_value_filter") String columnValueFilter,	// regex filter box value in the Query Builder
-			  @QueryParam("other_columns_filters_and_values") String otherFiltersAndValues, // existing search box filters from table, which we expect to operate
-			  @QueryParam("limit") String limit,
-			  @DefaultValue("false") @QueryParam("sort_by_freq") String sortByFrequency,
-			  @Context ServletContext context,
-			  @Context SecurityContext sc,
-				@Context HttpServletRequest httpServletRequest
-				)
+			@QueryParam("db_name") String dbName, 
+			@QueryParam("table_name") String tableName, 
+			@QueryParam("column_name") String columnName,
+			@QueryParam("column_value_filter") String columnValueFilter,	// regex filter box value in the Query Builder
+			@QueryParam("other_columns_filters_and_values") String otherFiltersAndValues, // existing search box filters from table, which we expect to operate
+			@QueryParam("limit") String limit,
+			@DefaultValue("false") @QueryParam("sort_by_freq") String sortByFrequency,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest
+		)
 	  {
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
@@ -795,19 +789,16 @@ public class TableResources {
 		
 		// I.	- one single column name
 		//		- one or more row id's, and corresponding new values for that column in all these rows
-		if (columnNames.length==1)
-		{
+		if (columnNames.length==1) {
 			int numberOfRowsToUpdate = rowIds.length;
-			for (int i=0; i<numberOfRowsToUpdate; i++)
-			{
+			for (int i=0; i<numberOfRowsToUpdate; i++) {
 				getDatabaseObject(co).updateOneColumn(tableName, rowIds[i], columnName, newValues[i], dro);			
 			}			
 		}
 		
 		// II.	- one single row id
 		// 		- more column names, and corresponding new values for these columns in that row
-		else if (columnNames.length>1 && rowIds.length == 1)
-		{
+		else if (columnNames.length>1 && rowIds.length == 1) {
 			getDatabaseObject(co).updateWholeRecord(tableName, rowId, columnNames, newValues, dro);
 		}
 				
@@ -837,11 +828,9 @@ public class TableResources {
 		if ( !userIsAllowedTo(co, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+userName);
 		
-		DbResponseObject dro = new DbResponseObject(); 
+		DbResponseObject dro = new DbResponseObject(); 		
 		
-		
-		getDatabaseObject(co).updateComment(tableName, tableType, newComment, dro);
-				
+		getDatabaseObject(co).updateComment(tableName, tableType, newComment, dro);				
 		
 		return dro;
 	}
@@ -1228,16 +1217,12 @@ public class TableResources {
 		String[] newValues = newValue.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		String[] columnNames = columnName.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 				
-		if (returningField == null || returningField.toLowerCase().equals("null") || returningField.isEmpty())
-		{
-			getDatabaseObject(co).insertRecord(tableName, columnNames, newValues, dro);
-			
+		if (returningField == null || returningField.toLowerCase().equals("null") || returningField.isEmpty()) {
+			getDatabaseObject(co).insertRecord(tableName, columnNames, newValues, dro);			
 		}
-		else 
-		{
+		else {
 			// insert record and get its id
-			getDatabaseObject(co).insertRecordAndGetItsId(tableName, columnNames, newValues, returningField, dro);
-			
+			getDatabaseObject(co).insertRecordAndGetItsId(tableName, columnNames, newValues, returningField, dro);			
 		}
 		
 		return dro;
@@ -1359,8 +1344,7 @@ public class TableResources {
 		
 		getDatabaseObject(co).insertFromExistingRecordsWithoutId(tableName, 
 				filterColumnNames, filterValues, replacementColumnNames, replacementValues, 
-				returningField, dro);
-		
+				returningField, dro);		
 		
 		return dro;
 	}
@@ -1481,9 +1465,6 @@ public class TableResources {
 			// since the getNeutralSeparator function if always the very first server function to be called
 			// this is the time to initialize the LexitSchemaAccess object:
 			// it gives us access to the lex'it users login and roles
-			
-			//System.out.println(lexitInfo);
-			//System.out.println((lexitInfo == null));
 					
 			if (lexitInfo == null)
 				lexitInfo = new LexitSchemaAccess(context, false);
@@ -1564,8 +1545,8 @@ public class TableResources {
 		int iNumberOfSortedColumns = 0;
 		
 		
-		for (int i=0; i<requestBodyArr.length; i++)
-		{
+		for (int i=0; i<requestBodyArr.length; i++) {
+			
 			String onePair =	requestBodyArr[i];
 			String key = 		onePair.split("=")[0];
 			String value = 		(onePair.split("=").length>1) ? onePair.split("=")[1] : ""; // make sure we have at least an empty string (no null!)
@@ -1617,8 +1598,8 @@ public class TableResources {
 		ArrayList<String> aAllColumnsList = new ArrayList<String>();
 		ArrayList<String>  aAllColumnSearchValuesList = new ArrayList<String>();
 		
-		for (int i = 0; i<iNumberOfColumns ; i++)
-		{
+		for (int i = 0; i<iNumberOfColumns; i++) {
+			
 			String sColumnKey = "columns["+i+"][name]";
 			String sColumnSearchKey = "columns["+i+"][search][value]";
 			
@@ -1645,15 +1626,14 @@ public class TableResources {
 		
 		// it might happen that no sorting was set,
 		// in that case, we add a default sorted column
-		if (iNumberOfSortedColumns == 0)
-		{
+		if (iNumberOfSortedColumns == 0) {
 			tmpSortCol.add( aAllColumns[0] );
 			tmpSortDir.add( "asc" );
 		}
 		
 		// now set the sorted columns arrays
-		for (int i = 0; i<iNumberOfSortedColumns ; i++)
-		{
+		for (int i = 0; i<iNumberOfSortedColumns ; i++) {
+			
 			String sSortedColumn = "order["+i+"][column]";
 			String sSortedColumnDir = "order["+i+"][dir]";
 			
@@ -1661,10 +1641,9 @@ public class TableResources {
 			String sSortDir = requestBodyMap.get(sSortedColumnDir);
 			
 			// Sanity check
-			if (!sSortDir.toLowerCase().matches("^(asc|asc_reverse|desc|desc_reverse|nulls first|nulls last)$"))
-				{
+			if (!sSortDir.toLowerCase().matches("^(asc|asc_reverse|desc|desc_reverse|nulls first|nulls last)$")) {
 				throw new RuntimeException("Illegal sort direction in request: "+sSortDir);
-				}
+			}
 			
 			tmpSortCol.add( aAllColumns[iSortCol] );
 			tmpSortDir.add( sSortDir );
@@ -1721,8 +1700,8 @@ public class TableResources {
 		// gather search data for all columns
 		
 		// first add the row ids searched for (this occurs only when carrying out a GoTo operation [making use of row ids -when available- for speed!])
-		if ( bCallForGoToFunction )
-		{
+		if ( bCallForGoToFunction ) {
+			
 			String idsColumn = (sGoToRowIds.split(":"))[0];	// column name
 			String idsValues = (sGoToRowIds.split(":"))[1];	// ids
 			int idsColumnIdx = Util.getIndexOf(idsColumn, aAllColumns);
@@ -1737,11 +1716,11 @@ public class TableResources {
 		}
 		
 		// now gather the search data for all columns
-		for (int i=0; i<aAllColumnSearchValues.length; i++)
-		{
+		for (int i=0; i<aAllColumnSearchValues.length; i++) {
+			
 			String oneSearchColumn = aAllColumnSearchValues[i].trim();
-			if ( !oneSearchColumn.isEmpty())
-			{				
+			if ( !oneSearchColumn.isEmpty()) {
+				
 				aSearchColumnNames.add( aAllColumns[i] ); 				
 				aSearchColumnValues.add(  setRightSearchValue(oneSearchColumn)  );
 				aCaseSensitiveColumnSearch.add( setRightCaseSensitivity(oneSearchColumn) );
@@ -1774,8 +1753,7 @@ public class TableResources {
 	// - "" should be interpreted as an empty string
 	private static String setRightSearchValue(String value){
 		
-		if (value.equals("NULL")) 
-		{
+		if (value.equals("NULL")) {
 			return null;
 		}
 		
@@ -1820,8 +1798,7 @@ public class TableResources {
 		
 		// quotes?
 		if ( (cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) || 
-			 (cleanValue.startsWith("'") && cleanValue.endsWith("'")) )
-		{
+			 (cleanValue.startsWith("'") && cleanValue.endsWith("'")) ) {
 			return true;
 		}
 		return false;
@@ -1848,7 +1825,7 @@ public class TableResources {
 		
 		ArrayList<String> keysToDelete = new ArrayList<String>();
 
-		for (String key : nameToDatabaseObject.keySet()){
+		for (String key : nameToDatabaseObject.keySet()) {
 			
 			Database tmpDbObj = nameToDatabaseObject.get(key);			
 			// unused? note it must be thrown away
@@ -1864,13 +1841,6 @@ public class TableResources {
 			nameToDatabaseObject.remove(key);
 			Util.debug("Removed old Database object: "+key);
 		}
-		
-		// and remove 'old' session IDs
-		// (clean up when we have no database object left, so we're sure we don't need the session ID anymore)
-//		if (nameToDatabaseObject.size() > 0) {
-//			lexitInfo.cleanUpSessionIds(nameToDatabaseObject);
-//			Util.debug("Removed cached session IDs - usernames");
-//		}
 		
 		
 		// now get (or create) the database object needed
@@ -1890,6 +1860,7 @@ public class TableResources {
 		return newDbObj;
 	};
 	
+	
 	// this is to be used by the spy tool
 	//
 	// .../api/get_users
@@ -1900,8 +1871,8 @@ public class TableResources {
 		
 		UsersListObject ulo = new UsersListObject();
 		
-		for (String key : nameToDatabaseObject.keySet())
-		{
+		for (String key : nameToDatabaseObject.keySet()) {
+			
 			Database currentDbObj = nameToDatabaseObject.get(key);
 			
 			ContextObject co = currentDbObj.getContextObject();
@@ -1943,8 +1914,7 @@ public class TableResources {
 		// normal lex'it projects (t.i. anything BUT the admin project) 
 		// are NOT allowed for admin,
 		// but are allowed to any other users, it they have the right role
-		else if (action.equals(Constants.USER_READ_ACCESS))
-		{
+		else if (action.equals(Constants.USER_READ_ACCESS)) {
 			return			 
 			userHasRole(co, "superuser") || 
 			userHasRole(co, "superreader") || 
@@ -1952,15 +1922,13 @@ public class TableResources {
 			userHasRole(co, dbName+"_write") || 
 			userHasRole(co, dbName+"_read");
 		}
-		else if (action.equals(Constants.USER_WRITE_ACCESS))
-		{
+		else if (action.equals(Constants.USER_WRITE_ACCESS)) {
 			return
 			userHasRole(co, "superuser") || 
 			userHasRole(co, dbName+"_all") || 
 			userHasRole(co, dbName+"_write");
 		}
-		else if (action.equals(Constants.USER_ALL_ACCESS))
-		{
+		else if (action.equals(Constants.USER_ALL_ACCESS)) {
 			return 
 			userHasRole(co, "superuser") || 
 			userHasRole(co, dbName+"_all");
@@ -2072,7 +2040,7 @@ public class TableResources {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		try{
+		try {
 			FileInputStream fstream = new FileInputStream(filepath);
 			// Get the object of DataInputStream
 			DataInputStream in = new DataInputStream(fstream);
@@ -2085,7 +2053,7 @@ public class TableResources {
 			br.close();
 			in.close();
 		}
-		catch (Exception e){//Catch exception if any
+		catch (Exception e) { 
 			throw new RuntimeException("Error while reading the "+filepath+" file", e);
 		}
 		
