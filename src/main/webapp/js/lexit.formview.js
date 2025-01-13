@@ -1101,6 +1101,7 @@ form.buildViewGrid = function(sTableName){
 			var oFormGrid =         conf.getFormGrid(oTableSettings);
 			var oCells =  			oFormGrid["cells"];
 			var oLists =			oFormGrid["lists"];
+			var fnSaveCallback = 	oFormGrid["save_callback"];
 
 
 			// Register the selected rows in lists
@@ -1310,8 +1311,20 @@ form.buildViewGrid = function(sTableName){
 
 			// add this job to the jobs list
 			fnDoAllUpdates.addJob(fnAllWentWell);
+			
+			
+			
+			// if there is a save callback set, 
+			// add that as a job too
+			if (fnSaveCallback != null){
+				
+				var fnCallbackWhenSaving = function(){
+					fnSaveCallback( mt.getDataTableObjectOf(sTableName) );
+				};				
+				fnDoAllUpdates.addJob(fnCallbackWhenSaving);				
+			}
 
-
+			
 
 			// Start! ----------------------------------------------------------------------------------------------------------------------------------------
 
