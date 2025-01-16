@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.01.14
+	v2025.01.15
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -796,7 +796,7 @@
 				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
 				// so we reload the page, which will trigger the user to log in again
 				if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
-					lexitReload();
+					throw new Error("Execution stopped: "+lang.saving_active_tab_failed); // prevents infinite loop!
 				}
 				// otherwise, an error in this function indicates a problem with the webservice
 				// we we must tell the user firt about the error before reloading the page
@@ -918,6 +918,7 @@
 				})
 				.fail(function(jqxhr, settings, exception){
 					fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
+					throw new Error("Execution stopped: "+lang.opening_config_file_failed);
 				});
 			}
 			
@@ -947,6 +948,7 @@
 					},
 					"error": function(jqxhr, settings, exception){
 						fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
+						throw new Error("Execution stopped: "+lang.opening_config_file_failed);
 					}
 				});
 			}
