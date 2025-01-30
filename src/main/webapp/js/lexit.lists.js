@@ -42,8 +42,9 @@ var lists = {};
 hFormAndList2DataTable = new Hashtable();
 
 // Cache of the lists.getAllColumns() function 
-// This contains the columns of the form's lists, their types, and their custom values (enum) if available
+// This contains the columns of the form's lists, their nice_names, their types, and their custom values (enum) if available
 hListTable2Cols = new Hashtable();
+hListTable2NiceCols = new Hashtable();
 hListTable2ColTypes = new Hashtable();
 hListTable2CustomVals = new Hashtable();
 
@@ -107,6 +108,11 @@ lists.buildLists = function(sFormTable, iListNr){
 
 
 	lists.getAllColumns(sTableNameOfList, function(aAllColumns){
+		
+		// compute the nice names of the columns
+		// and store them in cache
+		lists._computeListsNiceNames(oFormGrid, sFormListLabel);
+		
 
 		// get visible columns indexes for DataTable settings
 
@@ -253,6 +259,21 @@ lists.buildLists = function(sFormTable, iListNr){
 		var oTable = $("#"+sFormAndList).DataTable( oDataTablesConfig );
 		// save DataTable object in cache
 		hFormAndList2DataTable.put(sFormAndList, oTable);
+		
+		
+		// set nice names for the columns
+		oTable.columns().every(function(index) {			
+			var $thisHeader = $(this.header());
+			var sCurrentColumnName = $thisHeader.text();
+			
+			if (oThisList["table"]["columns"][sCurrentColumnName] != null) {
+				var sNiceName = oThisList["table"]["columns"][sCurrentColumnName]["nice_name"];				
+				if (sNiceName != null){
+					$thisHeader.text(sNiceName);
+				}
+			}			
+	    });
+		
 
 		// build following list
 		if (iListNr+1 < aAllLists.length){
@@ -654,13 +675,20 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 					}
 					
 
+					// set the title of the dialog
 					var sAddRowTitle = (oAdd["title"] != null ? oAdd["title"] : lang.formlist_add_row);
-					fn.prompt(sAddRowTitle, aColumnsForGUI, aPreFilledInValues, function(resp){
-
+					
+					// get nice names for the dialog
+					var aNiceColumnsForGUI = aColumnsForGUI.map( sColName => lists.getNiceColumnName(sThisListLabel, sColName) );
+					
+					// open the dialog
+					fn.prompt(sAddRowTitle, aNiceColumnsForGUI, aPreFilledInValues, function(resp){
+						
 						// First: if we have a list of values to be copied, add those to the record.
 						// (in theory, this might replace some values typed in the dialog)
 						for (var sOneColumn in oToBeCopied){
-							resp[sOneColumn] = oToBeCopied[sOneColumn];
+							var sKeyInResp = lists.getNiceColumnName(sThisListLabel, sOneColumn);
+							resp[sKeyInResp] = oToBeCopied[sOneColumn];
 						}
 
 						// build record to insert
@@ -668,9 +696,11 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 						for (var j=0; j<aAllColumns.length; j++){
 
 							var sColumnName = aAllColumns[j];
-							var valToAssign = resp[sColumnName];
+							var sKeyInResp = lists.getNiceColumnName(sThisListLabel, sColumnName);
+							var valToAssign = resp[sKeyInResp];
 							aRecord.push( valToAssign != null ? valToAssign : "<NULL>"); // this tells form.addNewRows() to assign no value to this cell
 						}
+						
 						
 
 						// add column for 'show' and 'delete' buttons
@@ -1122,6 +1152,62 @@ lists.getColumnsToDisplay = function(oLists, sListLabel){
 };
 
 
+
+// this function is called only once, at the very beginning of the lists rendering
+// BEWARE it must be called after the getColumns() function has been called at least once (to fill hListTable2Cols)
+lists._computeListsNiceNames = function(oFormGrid, sListLabel){
+	
+	var oLists = oFormGrid["lists"];
+	var aTableColumnsConfig = oLists[sListLabel]["table"]["columns"];
+	var sSomeTableName = lists.getFeedingTable(sListLabel);
+	
+	var aColumns = hListTable2Cols.get(sSomeTableName);
+	var aNiceColumns = new Array();
+	
+	for (var i=0; i<aColumns.length; i++){
+		var sColumnName = aColumns[i];
+		var sNiceName = (aTableColumnsConfig[sColumnName] != null ? aTableColumnsConfig[sColumnName]["nice_name"] : sColumnName);
+		aNiceColumns.push( sNiceName ?? sColumnName );
+	}
+	
+	hListTable2NiceCols.put(sSomeTableName, aNiceColumns);	
+};
+
+
+/**
+ * Given a list label and a nice name, get the corresponding true column name
+ * @param {String} the label of the list  
+ * @param {String} the nice name of the column
+ * @returns {String} the true column name
+ */
+lists.getTrueColumnName = function(sFormListLabel, sNiceName){
+	
+	var sSomeTableName = lists.getFeedingTable(sFormListLabel);	
+	var aColumns = hListTable2Cols.get(sSomeTableName);
+	var aNiceColumns = hListTable2NiceCols.get(sSomeTableName);
+	
+	var iIndex = $.inArray(sNiceName, aNiceColumns);
+	return aColumns[iIndex];
+};
+
+/**
+ * Given a list label and a column name, get the corresponding nice name
+ * @param {String} the label of the list
+ * @param {String} the column name
+ * @returns {String} the nice name of the column
+ */
+lists.getNiceColumnName = function(sFormListLabel, sColName){
+	
+	var sSomeTableName = lists.getFeedingTable(sFormListLabel);	
+	var aColumns = hListTable2Cols.get(sSomeTableName);
+	var aNiceColumns = hListTable2NiceCols.get(sSomeTableName);	
+	
+	var iIndex = $.inArray(sColName, aColumns);
+	return aNiceColumns[iIndex];
+};
+
+
+
 /**
  * Get the list of columns that are set to be visible in the list config.
  * Being part of the list depends on visibility setting of the column/cell only.
@@ -1306,7 +1392,7 @@ lists.getDataFromColumn = function(sListLabel, sColumnName){
 	
 	// Get column names
 	var aAllColumns = oTable.columns().header().toArray().map(function(header) {
-	    return $(header).text();
+	    return lists.getTrueColumnName(sListLabel, $(header).text());
 	});
 	
 	var aRows = oTable.rows().data();
@@ -1443,7 +1529,7 @@ lists.getSiblingCell = function(sListLabel, nCell, sColName){
 	var oTable = lists.getDataTableObjectOf(sListLabel);
 	var nRow = oTable.row(nCell).node();
 	var iColIndex = $.inArray(sColName, oTable.columns().header().toArray().map(function(header) {
-		return $(header).text();
+		return lists.getTrueColumnName(sListLabel, $(header).text());
 	}));
 	return oTable.cell(nRow, iColIndex).node();
 }

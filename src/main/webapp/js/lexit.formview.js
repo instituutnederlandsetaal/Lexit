@@ -1893,7 +1893,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 	$("#"+sFormAndListLabel+" thead th").each(function(i){
 
 		var eThisCol = this;
-		var sColName = $(eThisCol).text();
+		var sColName = lists.getTrueColumnName(sListLabel, $(eThisCol).text());
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
 		var bEditable = conf.getEditability(oColumnConfig);
 		var bClickable = false; // in this case, we don't use the table config, since it mostly doesn't meet the form logic
@@ -2427,7 +2427,7 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 					
 					var thisCell = this;
 					var iColIndex = $(thisRow).find("td").index(thisCell);
-					var sColName = $("#"+sListTableId+" thead th").eq(iColIndex).text();				
+					var sColName = lists.getTrueColumnName(sListLabel, $("#"+sListTableId+" thead th").eq(iColIndex).text());				
 					var sColValue = $(thisCell).text();
 
 					aColumnNames.push(sColName);
