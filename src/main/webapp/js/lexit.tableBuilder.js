@@ -779,7 +779,7 @@ tb.addExportButtons = function(sSomeTableName){
 		.css("float", "right");
 
 	// add button groups label
-	if (aFullButtonSettings != null){
+	if (aFullButtonSettings != null && aFullButtonSettings["buttons_groups_labels"] != null){
 
 		// this is a 2-members array as [<label of normal export buttons group>, <label of full export button group>]
 		var aButtonGroupsLabel = aFullButtonSettings["buttons_groups_labels"];
