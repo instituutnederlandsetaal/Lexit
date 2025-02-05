@@ -279,16 +279,25 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("input").attr("cycle_value") != null){
 			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").css("background-color", "#DDDDDD").css("border", "1px solid #FFFFFF");
 		}
+		
+		//console.log("--" +sCellName, $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").get(0));
 
 		// if we have a selectbox, select the selected value
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
 			
+			var searchBoxInUnderlyingTable = $("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
+					.find("#"+sTableName+"_searchbox_"+sCellName);				
+			var sSelectedValueInUnderlyingTable = searchBoxInUnderlyingTable.val();
+			
+			//console.log("-------+");
+			//console.log(sTableName);
+			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").get(0));
+			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").length);
+			//console.log(searchBoxInUnderlyingTable.get(0));
+			//console.log(sSelectedValueInUnderlyingTable);
+			
 			// small pauze needed in some cases, or it will crash 
 			setTimeout(function(){
-				
-				var sSelectedValueInUnderlyingTable = 
-					$("#"+sTableName+"_wrapper div.dataTables_scrollHeadInner table#"+sTableName+"_searchboxes tr:eq(0) td")
-						.find("#"+sTableName+"_searchbox_"+sCellName).val();
 	
 				// https://stackoverflow.com/questions/314636/how-do-you-select-a-particular-option-in-a-select-element-in-jquery
 				$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").find("option").filter(function(i, e) {
@@ -987,6 +996,7 @@ form.buildViewGrid = function(sTableName){
 		var sButtonBgColor = 	oCustomButtons[sButtonName]["bgcolor"];
 		var aButtonPosition = 	oCustomButtons[sButtonName]["position"];
 		var sButtonClass =	 	oCustomButtons[sButtonName]["class"];
+		var sButtonNiceName = 	oCustomButtons[sButtonName]["nice_name"];
 		if (aButtonPosition == null) {
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "buttons:{position}"));
 		}
@@ -998,7 +1008,7 @@ form.buildViewGrid = function(sTableName){
 		var customButton = $("&lt;button>")
 			.addClass("formview_button")
 			.append( 
-				$("&lt;span>&lt;/span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).text(sButtonName) 
+				$("&lt;span>&lt;/span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).html(sButtonNiceName ?? sButtonName) 
 			)
 			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "blue") )
 			.attr("id", "form_button_"+sButtonId)
@@ -1119,6 +1129,7 @@ form.buildViewGrid = function(sTableName){
 			var oFormGrid =         conf.getFormGrid(oTableSettings);
 			var oCells =  			oFormGrid["cells"];
 			var oLists =			oFormGrid["lists"];
+			var fnSaveCallback = 	oFormGrid["save_callback"];
 
 
 			// Register the selected rows in lists
@@ -1304,7 +1315,7 @@ form.buildViewGrid = function(sTableName){
 				// are refreshed, in case those are loaded in the GUI already
 				for (var sListLabel in oLists){
 					
-					lists.refresh(sListLabel);
+					lists.refresh(sListLabel, null, false);
 					
 					var sTableToRefresh = lists.getFeedingTable(sListLabel);
 					if (fn.tableExists(sTableToRefresh)){
@@ -1328,8 +1339,20 @@ form.buildViewGrid = function(sTableName){
 
 			// add this job to the jobs list
 			fnDoAllUpdates.addJob(fnAllWentWell);
+			
+			
+			
+			// if there is a save callback set, 
+			// add that as a job too
+			if (fnSaveCallback != null){
+				
+				var fnCallbackWhenSaving = function(){
+					fnSaveCallback( mt.getDataTableObjectOf(sTableName) );
+				};				
+				fnDoAllUpdates.addJob(fnCallbackWhenSaving);				
+			}
 
-
+			
 
 			// Start! ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1777,26 +1800,6 @@ form.manageViewGrid = function(sTableName){
 	// Start! ----------------------------------------------------------------------------------------------------------------------------------------
 
 	return fnDoListsUpdates;
-
-
-
-	// setTimeout(function(){
-
-	// 	// now update the lists
-	// 	for (var sListLabel in oListLabel2Filters){
-
-	// 		var sTableToFeedTheListWith = 	oLists[sListLabel]["table"]["name"];
-
-	// 		// feed the lists
-	// 		lists.feed(sListLabel,  oListLabel2Filters[sListLabel], function(){
-
-	// 			// make the list editable
-	// 			form.makeListEditable(sListLabel, sTableToFeedTheListWith);
-	// 		});
-	// 	}
-
-	// }, iWait);
-	// iWait = 0; // after first call
 	
 };
 
@@ -1918,13 +1921,15 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 	$("#"+sFormAndListLabel+" thead th").each(function(i){
 
 		var eThisCol = this;
-		var sColName = $(eThisCol).text();
+		var sColName = lists.getTrueColumnName(sListLabel, $(eThisCol).text());
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
 		var bEditable = conf.getEditability(oColumnConfig);
 		var bClickable = false; // in this case, we don't use the table config, since it mostly doesn't meet the form logic
-
+		
+		// we will need the column index
 		var iColIndex = $("#"+sFormAndListLabel+" thead").find("th").index(eThisCol);
-
+		var iColNameIndex = $.inArray(sColName, mt.getListOfColumnsOf(sTableToFeedTheListWith));
+		
 		// formgrid config overrides the table config
 		if (oColumnsConfig[sColName] != null){
 
@@ -1934,14 +1939,32 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			if (oColumnsConfig[sColName]["click"] != null)
 				bClickable = true;
 		}
+		
+		
+		// take care of select boxes
+		// [1] select values from 'choosefrom' in config.js
+		var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+		var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
+		// [2] ELSE  select values from Postgres ENUM type
+		if (aAllowedValues == null)
+			aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];
 			
 
-		// if column must be editable:
-		if (bEditable){
 
-			$("#"+sFormAndListLabel+" tbody tr").each(function(){
-				$(this).find("td").eq(iColIndex).addClass("editable");
-			});
+		// make column editable if required:
+		if (bEditable){
+            // as a text field
+            if (aAllowedValues == null || aAllowedValues.length &lt;= 1){
+				$("#"+sFormAndListLabel+" tbody tr").each(function(){
+					$(this).find("td").eq(iColIndex).addClass("editable");					
+				});
+			}
+			// as a select box
+			if (aAllowedValues != null &amp;&amp; aAllowedValues.length > 1){
+				$("#"+sFormAndListLabel+" tbody tr").each(function(){
+					$(this).find("td").eq(iColIndex).addClass("editable_selectbox");
+				});
+			}
 		}
 
 		// if column must be clickable:
@@ -2092,6 +2115,206 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 				});
 		}
 	});
+	
+	
+	// make selectboxes editable
+
+	$(oTable.rows().nodes()).each(function(){
+		
+		var nRow = this;
+		
+		$(nRow).find("td.editable_selectbox").each(function(){		
+		
+			var nCell = this;
+			
+			// we will need the column index
+			var iColIndex = $(nRow).find("td").index(nCell);
+			
+			var aVisibleColumns =   lists.getColumnsToDisplay(oForm["lists"], sListLabel);
+			var sCellName = 		aVisibleColumns[iColIndex];			
+			var iColNameIndex = 	$.inArray(sCellName, mt.getListOfColumnsOf(sTableToFeedTheListWith));
+			
+			// we need to know which value is currently assigned to the cell, in order to show it as 'selected' in the selectbox
+			var sValueOfThisCell = 	lists.getDataFromCell(sListLabel, nCell);
+			
+			// get the values to select from
+			var oTableConfig = 		conf.getTableConfig(sTableToFeedTheListWith);
+			var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sCellName);
+			
+			// [1] select values from 'choosefrom' in config.js
+			var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+			var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
+			// [2] ELSE  select values from Postgres ENUM type
+			if (aAllowedValues == null)
+				aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];		
+			
+			
+			
+			// we will implement a function timeout, in such a way that the selectbox only appears when the user stays on the cells a little bit
+			// that prevents selectboxes to appear everywhere the mouse goes!
+			let mouseoverTimeout;
+			
+			
+			$(nCell)
+				.data("tablename", sTableToFeedTheListWith)
+				.data("cellname", sCellName)
+				.data("allowed_values", aAllowedValues)
+				.on("mouseover", function(){
+			
+					const cell = $(this); // Store a reference to the current cell
+					mouseoverTimeout = setTimeout(() => {
+						
+						cell.editable( 
+					
+							// this comes into action only once some value was chosen in the select-menu
+							function(value, settings){
+								
+								// current node 
+								var nCurrentNode = this;
+								
+								// instead of submitting an url (default in jEditable)
+								// we submit an own function which makes an Ajaxcall
+								// (so we control everything!)
+								var aPos = lists.getDataTableObjectOf(sListLabel).cell( nCurrentNode ).index();
+								
+								// check if we have a custom editing function from config file
+								// if available, it must overrule the normal (following) function
+								var oTableConfig = 		conf.getTableConfig(sTableToFeedTheListWith);
+								var sColumnName = 		mt.getListOfColumnsOf(sTableToFeedTheListWith)[aPos.column];
+								var sColumnType = 		mt.getListOfColumnTypesOf(sTableToFeedTheListWith)[aPos.column];
+								var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sColumnName);
+								var fnEditCallback = 	conf.getEditCallback(oColumnConfig);
+								var fnEditErrorHandler = conf.getEditErrorHandler(oColumnConfig);
+		
+												
+								
+								// default behaviour is saving the value client-side,
+								// but sending it to the server only happens when the user clicks on the Save button
+								// (default: false)
+										
+								var bSendToServer = false;
+																
+								if (bSendToServer){
+												
+									lists.showProcessingMsg(sListLabel, true);
+									
+									var rowId = this.parentNode.getAttribute('id');
+									var url = WEBSERV_URL+"/api/setvalue";
+									$.ajax( {
+										"type": "GET",
+										"async": false,
+										"url": url,
+										"data": {
+											"row_id": rowId,
+											"db_name": getHttpParams().get("db"),
+											"table_name": sTableToFeedTheListWith,
+											"column_name": sColumnName,
+											"new_value": value,
+											"value_type": sColumnType,
+											"dummy": getUniqueNumber()
+											},
+										"dataType": "xml", // get response as xml
+										"success": function(xml) {
+											lists.removeProcessingMsg(sListLabel, true);
+											if (gui.getDbResponse(xml)) {
+												
+												// put the new value into the Datatable object 							 			
+												lists.getDataTableObjectOf(sListLabel).cell(nCurrentNode).data(value);
+												
+												// callcack function, if it is set in configuration
+												if (fnEditCallback!=null)
+													fnEditCallback(lists.getDataTableObjectOf(sListLabel), nCurrentNode, value);
+											}
+											else {
+												fn.message(lang.error_occurred_in_table+ " '"+sTableToFeedTheListWith+"'", 
+														lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]",
+														function(){
+															lists.refresh(sListLabel);
+														}
+												);
+											}
+										},
+										"error": function(jqXHR, textStatus, errorThrown){
+											
+											if (fnEditErrorHandler != null) {
+												lists.removeProcessingMsg(sListLabel, true);
+												fnEditErrorHandler({
+													"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
+													"listLabel": sListLabel,
+													"tableName": sTableToFeedTheListWith, "columnName": sColumnName, "columnValue": value
+													});
+											}
+											else {
+												fn.message(lang.error_occurred_in_table+ " '"+sTableToFeedTheListWith+"'", 
+														lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+														function(){
+															lists.refresh(sListLabel);															
+														}
+												);
+											}
+											
+										}
+											
+									} );
+											
+								}
+								
+								// default action
+								else {
+									
+									// put the new value into the Datatable object 							 			
+									lists.getDataTableObjectOf(sListLabel).cell(nCurrentNode).data(value);
+									
+									// mark modification
+									$(nCurrentNode).addClass("modified");
+									
+									// attract attention from user to send button, which must be pressed 
+									// since some content was modified,
+									// and show that reset is possible now
+																		
+									form.setSendButtonToSetting(sFormTable, "payattention");
+									form.setResetButtonToSetting(sFormTable, "active");
+									
+									// callcack function, if it is set in configuration
+									if (fnEditCallback!=null)
+										fnEditCallback(lists.getDataTableObjectOf(sListLabel), nCurrentNode, value);
+								}
+								
+							},
+							
+								
+							// parameters
+							// NOTE:
+							// we added a callback as we need to put the chosen value into the jeditable internal settings
+							// in such a way, that jeditable knows that value should be shown as 'selected'
+							{
+							    "data": gui._buildDataArrayForJEditable( sTableToFeedTheListWith, $(this).closest("td").data("allowed_values"), sValueOfThisCell, aValuesToLabels ),
+							    "type": "select",
+							    "event": "dblclick",
+							    "onblur": "cancel", 							
+								"callback": function(value, settings) {
+									value = value.replace("&amp;amp;", "&amp;"); // prevent mismatch of value, as jeditable converts &amp; into &amp;amp;
+									settings.data.selected = value;
+							     },
+								"height": "14px",
+						        "width": "100%",
+						        "tooltip": lang.click_to_edit,
+						        "placeholder" : "" // prevents filling empty cells with default msg 'Click to edit'
+							}
+						); // end of jEditable for select boxes
+						
+						// Trigger the editable manually
+						cell.trigger("dblclick");
+						
+					}, 250);
+					
+				})
+				.on("mouseout blur", function(){
+					clearTimeout(mouseoverTimeout);
+				});
+				
+			});
+	});
 };
 
 
@@ -2232,7 +2455,7 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 					
 					var thisCell = this;
 					var iColIndex = $(thisRow).find("td").index(thisCell);
-					var sColName = $("#"+sListTableId+" thead th").eq(iColIndex).text();				
+					var sColName = lists.getTrueColumnName(sListLabel, $("#"+sListTableId+" thead th").eq(iColIndex).text());				
 					var sColValue = $(thisCell).text();
 
 					aColumnNames.push(sColName);
@@ -2573,6 +2796,10 @@ form.getColumnsNiceNames = function(sSomeTable){
  * @param {Boolean} true: get value out of the underlying table - false: get value currently visible in the form (even if not saved yet)
  */
 form.getDataFromCell = function(sFormTable, sCellName, bUnderlying){
+	
+	// we need the table name
+	if (typeof sFormTable == 'object')
+		sFormTable = fn.getTableName(sFormTable);
 
 	// if we want the current value IN THE UNDERLYING TABLE 
 	// represented by the form (which is not necessarily the value
@@ -2668,7 +2895,7 @@ form.isUnsaved = function(sTableName){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Nov 11 2024 12:08:22 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:41 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

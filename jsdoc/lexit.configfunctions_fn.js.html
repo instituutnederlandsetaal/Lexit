@@ -336,7 +336,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @pparam {Boolean} bAppendHelp - append the help button if true
  */
-fn.setBalk = function(bSetting, bAppendHelp){
+fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo){
 	
 	if (bAppendHelp == null) bAppendHelp = false;
 	
@@ -354,6 +354,12 @@ fn.setBalk = function(bSetting, bAppendHelp){
 			setTimeout(function(){
 				head.showGeneralHelp();	
 			}, 500);
+		}
+		
+		if (sPathToCustomLogo != null) {
+			$("#square_logo").append(
+				$("&lt;img>").attr("src", sPathToCustomLogo)
+			);
 		}
 	}
 	else {
@@ -417,8 +423,9 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	 		setSchemaNameCache = sNewSchema;
 	 		setSchemaTimeOut = setTimeout(
 					function(){
-						// BEWARE: the callback must be fired ONLY at the first call of fn.setSchema().
-						// Calling it at every TimeOut could cause unexpected behavior to the developers:
+						// BEWARE: the CALLBACK must be fired ONLY at the first call of fn.setSchema(),
+						// which is why we set is to be null at the end of this function.
+						// Calling the callback at every TimeOut could cause unexpected behavior to the developers:
 						// the developers most probably expect that a schema is set once and for all, 
 						// and do not know of the necessity to re-call the function regularly, as this is just
 						// a trick to deal with the short life of the ContextObject. As a consequence, the
@@ -458,6 +465,16 @@ fn.getCurrentSchema = function(){
 	return setSchemaNameCache;	
 }
 
+
+
+/**
+ * Rebuild the tables menu in the Lex'it GUI. 
+ * This function is to be called when table visibility was changed (oHiddenTablesList or oShowOnlyTables), etc.
+ */
+fn.rebuildTablesMenu = function(){
+	ts.reinit();
+	ts.getListOfTables(null, "", "");
+}
 
 
 
@@ -962,8 +979,12 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callDatabaseInNewTab
  * @see fn.getTableExtraSettings
  * @see fn.callTable
+ * @see fn.callTableSilently
  */
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+	
+	// default value
+	var iWait = 250; // ms
 	
 	// make sure sSomeTablename contains a string
 	if (typeof sSomeTablename == 'object')
@@ -994,11 +1015,9 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 		ts.reinit();
 		ts.getListOfTables(null, "", "");
 		
-        setTimeout(function(){
-        	
-        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
-        	
-        }, 250);
+        setTimeout(function(){        	
+        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
+        }, iWait);
     }
 	
 };
@@ -1007,6 +1026,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
  * Synonym of fn.callDatabase
  * 
  * @see fn.callDatabase
+ * @see fn.callTableSilently
  */
 fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
@@ -1077,9 +1097,11 @@ fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExt
 		tb.loadTable(sSomeTablename, fnFunction, oExtraSettings);
 	}	
 	// if the table exists already, just call it with the right settings
-	else {		
-		if (fnFunction != null) 
-			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);		
+	else {
+		// add draw callback
+		if (fnFunction != null) {
+			mt.getDataTableObjectOf(sSomeTablename).addDrawCallback("userCallBack", fnFunction);
+		}		
 		fn._callTableWithFilter(sSomeTablename, aContentToMatch);
 	}
 };
@@ -1098,7 +1120,8 @@ fn._callTableWithFilter = function(sSomeTablename, aContentToMatch){
 /**
  * Call a table silently, meaning that it won't be shown, but all its details will be loaded
  * into the multiple table registry, so as to be able to retrieve these details if needed elsewhere!
- * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been loaded yet) 
+ * (It is, for example, sometimes convenient to known which columns a table consists of, even if it hasn't been opened on screen yet)
+ * @param {String} sSomeTablename - Table name 
  */
 fn.callTableSilently = function(sSomeTablename){
 	
@@ -1130,7 +1153,7 @@ fn._callTableSilentlySub = function(sSomeTableName){
 			"db_name": getHttpParams().get("db") 
 		},
 		dataType: "xml",
-		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
 			
@@ -5663,9 +5686,9 @@ fn.setFreeButtonName = function(sTableName, sButtonLabel, sNewName){
  * 
  * @param {Node} node - A free button node}
  */
-fn.getFreeButtonName = function(nNode){
+fn.getFreeButtonName = function(nButtonNode){
 	
-	return $(node).attr("name");
+	return $(nButtonNode).html();
 };
 
 /**
@@ -5679,7 +5702,7 @@ fn.getFreeButtonId = function(mixed, sButtonLabel){
 	
 	// if no button label was given, we assume it's a button node 
 	if (sButtonLabel == null){
-		return $(node).attr("name");
+		return $(mixed).attr("id");
 	}
 	
 	// otherwise we have a table and a button label
@@ -6533,6 +6556,15 @@ fn.startLexitLogin = function(){
 	startLexitLogin();
 };
 
+/**
+ * Log out a user
+ * 
+ * @param {Function} fnCallback - some function to call after logging out
+ */
+fn.startLexitLogout = function(fnCallback){
+	startLexitLogout(fnCallback);
+};
+
 
 
 /**
@@ -6754,7 +6786,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Nov 11 2024 12:08:22 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:40 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

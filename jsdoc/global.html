@@ -161,7 +161,7 @@
 
             
 
-            <td class="description last">Functie die moet worden getriggerd als men in een gegeven kolom klikt e.d.</td>
+            <td class="description last">Function to be triggered when clicking in a specific column, etc.</td>
         </tr>
 
     
@@ -184,7 +184,7 @@
 
             
 
-            <td class="description last">Functie die moet worden getriggerd als men in een gegeven kolom dubbelklikt e.d.</td>
+            <td class="description last">Function to be triggered when double-clicking in a specific column, etc.</td>
         </tr>
 
     
@@ -207,7 +207,7 @@
 
             
 
-            <td class="description last">Achtergrondkleur van de kolom als html kleurcode (zoals "#123ABC"). Als men slechts één kleurcode opgeef, dan berekent Lex'it automatisch een andere nuance van die kleur voor de oneven rijen (het werkt echter niet bij letterlijke kleurnamen (zoals "green"). Het is ook mogelijk om de kleur van zowel de oneven als de even rijen precies op te geven: dan moet men een tweeledige array opgeven, met de twee kleuren achter elkaar: ["#123ABC", "#ABC123"].</td>
+            <td class="description last">Background color of the column as an HTML color code (e.g., "#123ABC"). If only one color code is provided, Lex'it automatically calculates a different shade of that color for the odd rows. However, this does not work with literal color names (e.g., "green"). It is also possible to specify the colors for both odd and even rows explicitly by providing a two-element array with the two colors in sequence: ["#123ABC", "#ABC123"].</td>
         </tr>
 
     
@@ -230,7 +230,7 @@
 
             
 
-            <td class="description last">Plaats een button in een kolom, met de als string opgegeven naam. Het is ook mogelijk om de inhoud van de kolom als Button-naam te gebruiken: daartoe moet in de configuratie als naam een lege string worden gegeven ("button": ""). De functionaliteit van de button moet worden opgegeven met parameter 'click'.</td>
+            <td class="description last">Place a button in a column with the specified name as a string. It is also possible to use the content of the column as the button name: for this, an empty string should be provided for the name ("button": ""). The functionality of the button must be specified using the 'click' parameter.</td>
         </tr>
 
     
@@ -253,7 +253,7 @@
 
             
 
-            <td class="description last">Zet een tooltip bij een button, te zien bij mouseover. Dit is handig om de functie van een knop te verklaren als de naam van de knop dat onvoldoende doet (bijv. vanwege een te korte naam).</td>
+            <td class="description last">Add a tooltip to a button, visible on mouseover. This is useful for explaining the function of a button if the button's name is insufficient (e.g., due to a short name).</td>
         </tr>
 
     
@@ -276,7 +276,7 @@
 
             
 
-            <td class="description last">Zet een tooltip bij een cell, te zien bij mouseover. Dit is handig om zichtbaar te maken dat klikken op een cell een functie heeft.</td>
+            <td class="description last">Add a tooltip to a cell, visible on mouseover. This is useful for indicating that clicking on a cell has a function..</td>
         </tr>
 
     
@@ -299,7 +299,7 @@
 
             
 
-            <td class="description last">Maak van de zoekbox van betreffende kolom een select-box. De waarden om uit te kiezen kunnen op twee manieren worden opgegeven: [1] Als lege array, in welk geval de tool zelf de verschillende unieke waardes ophaalt in de database (voorbeeld: {"choosefrom": []}). [2] Als een array van stringwaarden. Omdat de select-box als eerste waarde de aansporing "Kiezen" zal hebben, moet "Kiezen" ook een onderliggende waarde hebben. Deze 'neutrale' waarde moet als allereerste lid van eerdergenoemde array worden opgegeven; als daar geen waarde aan toegekend hoeft te worden, dan voldoet een lege string (voorbeeld: {"choosefrom": ["", "1", "2", "3"]}, waarin "" de onderliggende waarde van "Kiezen" zal zijn).</td>
+            <td class="description last">Turn the search box of the specified column into a select box. The values to choose from can be specified in two ways: [1] As an empty array, in which case the tool will automatically retrieve the unique values from the database (e.g., {"choosefrom": []}). [2] As an array of string values. Since the select box will have "Choose" as its first value, "Choose" must also have an underlying value. This 'neutral' value should be the first element in the array, and if no value needs to be assigned, an empty string will suffice (e.g., {"choosefrom": ["", "1", "2", "3"]}, where "" will be the underlying value for "Choose").</td>
         </tr>
 
     
@@ -322,7 +322,7 @@
 
             
 
-            <td class="description last">Declareer labels voor de waardes van een select-box. Op die manier kunnen de onbegrijpelijke waardesdie de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.</td>
+            <td class="description last">Declare labels for the values of a select box. This allows the incomprehensible values expected by the database to be made understandable to the user.</td>
         </tr>
 
     
@@ -345,7 +345,7 @@
 
             
 
-            <td class="description last">Een editeerbare cel waarin slechts een gesloten aantal waardes zijn toegestaan, wordt normaal gesprokenbewerkt via een Select-box. Met deze parameter declareert men welke mouse-event het weergeven van de Select-box moet triggeren.Default is dat 'mouseover'.</td>
+            <td class="description last">An editable cell where only a limited number of values are allowed is typically edited via a select box. With this parameter, you can declare which mouse event should trigger the display of the select box. The default is 'mouseover'.</td>
         </tr>
 
     
@@ -368,7 +368,7 @@
 
             
 
-            <td class="description last">Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.Lex'it heeft enige default classes beschikbaar, zoals 'inlfont10pt' (voor weergave van INL font in 10 pt),of 'inlfont' (deze zonder font-size specificatie).</td>
+            <td class="description last">Assign a class to a column, for example, to style the cells of the column. This could include default classes declared in css/lexit_table.css, such as those used for centering content in cells.Lex'it provides some default classes, such as 'inlfont10pt' (for displaying the INL font in 10 pt) or 'inlfont' (this one without a font-size specification).</td>
         </tr>
 
     
@@ -391,7 +391,7 @@
 
             
 
-            <td class="description last">Wanneer een kolom een technische, niet gebruikersvriendelijke naam heeft, kan men deze voor  de gebruiker een mooiere naam geven. Dat doet men met deze parameter.</td>
+            <td class="description last">When a column has a technical, non-user-friendly name, you can give it a more user-friendly name for display using this parameter.</td>
         </tr>
 
     
@@ -414,7 +414,7 @@
 
             
 
-            <td class="description last">Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke waarden zijn 'asc', 'desc' of null (default).Let wel: als er op meerdere kolommen tegelijk gesorteerd moet worden, wordt de prioriteit bepaald aande hand van de volgorde waarin de te sorteren kolommen worden opgegeven. Beter en overzichtelijkeris het om de sorteerkolommen in de table settings op te geven met parameter "columns_sorting" (zie aldaar).</td>
+            <td class="description last">If this is not null, the table will be immediately sorted by this column upon initialization. If multiple columns are specified, the table will be sorted by all these columns. The possible values are 'asc', 'desc', or null (default).Note: If sorting by multiple columns at once, the priority is determined by the order in which the columns to be sorted are specified. It is better and more organized to specify the sorting columns in the table settings using the "columns_sorting" parameter (see there).</td>
         </tr>
 
     
@@ -437,7 +437,7 @@
 
             
 
-            <td class="description last">Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)</td>
+            <td class="description last">Context menu that should appear when clicking on a cell. For more information about the context menu object, see the documentation, see: https://swisnl.github.io/jQuery-contextMenu/docs.html)</td>
         </tr>
 
     
@@ -460,7 +460,7 @@
 
             
 
-            <td class="description last">Als dit true is, dan wordt bij een Zoek&Voegtoe-actie (insert) de inhoud van deze kolom gekopieerd. Kolommen waarbij deze setting op false staat worden juist niet meegenomen in de insert.</td>
+            <td class="description last">If this is true, the content of this column will be copied during a Search&Add action (insert). Columns with this setting set to false will not be included in the insert.</td>
         </tr>
 
     
@@ -483,7 +483,7 @@
 
             
 
-            <td class="description last">Bewerkbaarheid van een kolom.</td>
+            <td class="description last">Editability of a column.</td>
         </tr>
 
     
@@ -506,7 +506,7 @@
 
             
 
-            <td class="description last">Callback functie die aangeroepen moet worden na het editten van een cell door een gebruiker. Let wel: dit is iets anders dan de 'editfunc'. 'editfunc' is bedoeld om de werking van de editfunctie te wijzigen. 'editcallback' wordt als laatste uitgevoerd, na 'editfunc'.</td>
+            <td class="description last">Callback function to be called after a user edits a cell. Note: This is different from 'editfunc'. 'editfunc' is used to modify the behavior of the edit function, while 'editcallback' is executed last, after 'editfunc'.</td>
         </tr>
 
     
@@ -529,7 +529,7 @@
 
             
 
-            <td class="description last">Customfunctie die uitgevoerd moet worden na het editten van een cell. Deze functie is bedoeld om de standaardverwerking van celinvoer te vervangen: normaal zou de software de bewerkte cel in de database direct willen bewerken, maar wanneer de schermtabel een view is, moeten juist andere tabellen worden bewerkt en dat kan in editfunc worden gedeclareerd.</td>
+            <td class="description last">Custom function to be executed after editing a cell. This function is intended to replace the default handling of cell input: normally, the software would update the edited cell directly in the database, but when the screen table is a view, other tables need to be updated instead, and this can be declared in 'editfunc'.</td>
         </tr>
 
     
@@ -552,7 +552,7 @@
 
             
 
-            <td class="description last">Lijst van tabellen die ververst moeten worden na het editten van een cell.</td>
+            <td class="description last">List of tables that should be refreshed after editing a cell.</td>
         </tr>
 
     
@@ -575,7 +575,7 @@
 
             
 
-            <td class="description last">Regex waarmee de bewerkte cellinhoud mee moet matchen om de 'editfunc' te triggeren. Als 'edittrigger' null is, dan wordt 'editfunc' altijd getriggerd.</td>
+            <td class="description last">Regex that the edited cell content must match to trigger the 'editfunc'. If 'edittrigger' is null, 'editfunc' will always be triggered.</td>
         </tr>
 
     
@@ -598,7 +598,7 @@
 
             
 
-            <td class="description last">Function voor het voorbewerken (preprocessen) van een ingevoerde waarde, vóór dat Lex'it deze invoert in de database.</td>
+            <td class="description last">Function for preprocessing an entered value before Lex'it inserts it into the database.</td>
         </tr>
 
     
@@ -621,7 +621,7 @@
 
             
 
-            <td class="description last">Handler dat aangeroepen wordt wanneer het bewerken van een editable veld een fout veroorzaakt.</td>
+            <td class="description last">Handler that is called when editing an editable field causes an error.</td>
         </tr>
 
     
@@ -644,7 +644,7 @@
 
             
 
-            <td class="description last">Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.</td>
+            <td class="description last">Ellipsis. When a cell contains a lot of text, ellipsis can be enabled: only a portion of the text will be displayed. On mouseover, the full content of the cell will be shown.</td>
         </tr>
 
     
@@ -667,7 +667,7 @@
 
             
 
-            <td class="description last">Ellipsis. Wanneer ellipsis is toegepast en de gebruiker met de muis over de tabel heen gaat, klaptde een na de andere cel open en swingen de rijen steeds open en dicht, wat erg onrustig is. Bovendien bemoeilijktdat het selecteren van een rij, omdat rijen eromheen te pas en te onpas open- en dichtklappen. Een oplossing is om een delayin te stellen, waardoor het uitklappen van een rij pas gebeurt als er na een opgegeven tijdsduur nog steeds sprakeis van 'mouseover' op de uit te klappen cel. Zo niet, dan klapt de cel niet open.</td>
+            <td class="description last">Ellipsis. When ellipsis is applied and the user moves the mouse over the table, the cells open one after another, causing rows to swing open and closed, which can be very distracting. This also makes it difficult to select a row, as nearby rows keep opening and closing. One solution is to set a delay, so that the expansion of a row only happens if the mouse is still hovering over the cell after a specified duration. If not, the cell will not expand.</td>
         </tr>
 
     
@@ -690,7 +690,7 @@
 
             
 
-            <td class="description last">'max-width' attribuut bij ellipsis.</td>
+            <td class="description last">'max-width' attribute for ellipsis.</td>
         </tr>
 
     
@@ -713,7 +713,7 @@
 
             
 
-            <td class="description last">'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar.</td>
+            <td class="description last">'max-height' attribute for ellipsis. When this value is exceeded by the cell content, a scrollbar will appear.</td>
         </tr>
 
     
@@ -736,7 +736,7 @@
 
             
 
-            <td class="description last">Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? (default: true)</td>
+            <td class="description last">Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. (default: true)</td>
         </tr>
 
     
@@ -759,7 +759,7 @@
 
             
 
-            <td class="description last">Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? (default: true)</td>
+            <td class="description last">Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? (default: true)</td>
         </tr>
 
     
@@ -782,7 +782,7 @@
 
             
 
-            <td class="description last">Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.</td>
+            <td class="description last">Column filter that should be applied immediately upon initializing the table. To maintain the filter after initialization, set 'keepfilter': true as well.</td>
         </tr>
 
     
@@ -805,7 +805,7 @@
 
             
 
-            <td class="description last">Als dit 'false' is, dan kan een gebruiker de zichtbaarheid van een kolom niet wijzigen (bijv. handig als een verbogen kolom informatie bevat die niet voor de gebruiker bestemd is).</td>
+            <td class="description last">If this is 'false', a user cannot change the visibility of a column (e.g., useful when a hidden column contains information not intended for the user).</td>
         </tr>
 
     
@@ -828,7 +828,7 @@
 
             
 
-            <td class="description last">Als dit 'true' is, dan wordt de filter (uit parameter 'filter':...) opnieuw toegepast als men op 'RESET' klikt. Als men wil voorkomen dat de filter tussentijds wordt gewijzigd, moet met dezelfde kolom op "searchable": false zetten.</td>
+            <td class="description last">If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 'RESET' button is clicked. If you want to prevent the filter from being modified in the meantime, set "searchable": false for the same column.</td>
         </tr>
 
     
@@ -851,7 +851,7 @@
 
             
 
-            <td class="description last">Als dit 'false' is, wordt de query builder by CTRL+klik in het zoekveld uitgeschakeld.</td>
+            <td class="description last">If this is 'false', the query builder will be disabled by CTRL+click in the search field.</td>
         </tr>
 
     
@@ -874,7 +874,7 @@
 
             
 
-            <td class="description last">declareer de in de query builder te tonen zoekwaarden (keys) en hun vertaling in voor de database begrijpelijke waarden om een welgevormde query samen te stellen (values).</td>
+            <td class="description last">Declare the search values (keys) to be shown in the query builder, and their translation into database-understandable values (values) to construct a well-formed query.</td>
         </tr>
 
     
@@ -897,7 +897,7 @@
 
             
 
-            <td class="description last">functie om de door query builder geformuleerde query aan te passen voordat deze wordt afgevuurd op de database.</td>
+            <td class="description last">Function to modify the query formulated by the query builder before it is sent to the database.</td>
         </tr>
 
     
@@ -920,7 +920,7 @@
 
             
 
-            <td class="description last">settings voor de query builder (indien default gedrag aangepast moet worden).Parameter 'grid': true/false bepaalt of de zoekwaarden al dan niet als een grid getoond moeten worden.Parameter 'preselected' bepaalt welke waarde in de query builder alvast geselecteerd moet zijn.Parameter 'autostart': true/false bepaalt of de door de query builder geformuleerde query bij klikken op OK al dan niet direct moet worden afgevuurd op de database.</td>
+            <td class="description last">Settings for the query builder (if the default behavior needs to be adjusted). Parameter 'grid': true/false determines whether the search values should be displayed as a grid.Parameter 'preselected' specifies which value should be preselected in the query builder.Parameter 'autostart': true/false determines whether the query formulated by the query builder should be immediately sent to the database when clicking OK.</td>
         </tr>
 
     
@@ -943,7 +943,7 @@
 
             
 
-            <td class="description last">Doorzoekbaarheid van een kolom.</td>
+            <td class="description last">Searchability of a column.</td>
         </tr>
 
     
@@ -966,7 +966,7 @@
 
             
 
-            <td class="description last">Sorteerbaarheid van een kolom.</td>
+            <td class="description last">Sortability of a column.</td>
         </tr>
 
     
@@ -989,7 +989,7 @@
 
             
 
-            <td class="description last">Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)</td>
+            <td class="description last">Function to be triggered when a search is applied to a given column. Example: automatically convert the search value to lowercase (this becomes the effective search value).</td>
         </tr>
 
     
@@ -1012,7 +1012,7 @@
 
             
 
-            <td class="description last">Pas de tekst van een cell aan voordat die op het scherm wordt getoond. Dit is zuiver bedoeld voor rendering.Dit heeft dus géén invloed op de onderliggende data. Zoekopdrachten worden door deze functie dus niet beïnvloed.</td>
+            <td class="description last">Modify the text of a cell before it is displayed on the screen. This is purely for rendering purposes. It does not affect the underlying data, so search queries are not influenced by this function</td>
         </tr>
 
     
@@ -1035,7 +1035,7 @@
 
             
 
-            <td class="description last">Kleur die de tekst moet hebben in een gegeven kolom.</td>
+            <td class="description last">Color that the text should have in a given column.</td>
         </tr>
 
     
@@ -1058,7 +1058,7 @@
 
             
 
-            <td class="description last">Font-family in een gegeven kolom.</td>
+            <td class="description last">Font-family for a given column.</td>
         </tr>
 
     
@@ -1081,7 +1081,7 @@
 
             
 
-            <td class="description last">Font-size in een gegeven kolom.</td>
+            <td class="description last">Font-size for a given column.</td>
         </tr>
 
     
@@ -1104,7 +1104,7 @@
 
             
 
-            <td class="description last">Font-style in een gegeven kolom.</td>
+            <td class="description last">Font-style for a given column.</td>
         </tr>
 
     
@@ -1127,7 +1127,7 @@
 
             
 
-            <td class="description last">Font-weight in een gegeven kolom. Zie voorbeeld bij 'textstyle'.</td>
+            <td class="description last">Font-weight for a given column. See the example at 'textstyle'.</td>
         </tr>
 
     
@@ -1150,7 +1150,7 @@
 
             
 
-            <td class="description last">Bij het gebruik van selectboxen kan het zijn dat een gebruiker een waarde per ongeluk klikt.Om dat te voorkomen, kan men in de configuratie afdwingen dat de gebruiker bij het maken van zijn keuze tegelijkertijd een opgegeven toets indrukt. Wanneer de gebruiker deze toets bij het maken van een keuze in een selectbox niet indrukt, wordt de keuze afgekeurd. Deze validatie-toets kan worden opgegeven als 'validator'.</td>
+            <td class="description last">When using select boxes, it may happen that a user accidentally clicks a value. To prevent this, you can enforce in the configuration that the user must press a specified key while making their selection. If the user does not press this key when making a selection in the select box, the choice will be rejected. This validation key can be specified as 'validator'.</td>
         </tr>
 
     
@@ -1173,7 +1173,7 @@
 
             
 
-            <td class="description last">Zichtbaarheid van een kolom. De zichtbaarheid van een kolom kan in de gebruikersinterface door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) moet men ook "flexible_visibility": false instellen.</td>
+            <td class="description last">Visibility of a column. The visibility of a column can be changed by the user in the interface. To prevent this (e.g., because a column contains 'secret' information), you should also set "flexible_visibility": false.</td>
         </tr>
 
     
@@ -1196,7 +1196,7 @@
 
             
 
-            <td class="description last">Breedte van een kolom. Dit kan worden gespecificeerd in 'px', maar men kan ook een relatieve waarde (in '%') opgeven.</td>
+            <td class="description last">Width of a column. This can be specified in 'px', but a relative value (in '%') can also be provided.</td>
         </tr>
 
     
@@ -1235,7 +1235,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line367">line 367</a>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line384">line 384</a>
     </li></ul></dd>
     
 
@@ -1316,7 +1316,7 @@
 
             
 
-            <td class="description last">Als men in het tabellen-menu de tabellen wil groeperen in subcategorieën (bijv. eencategorie 'klustabellen', een categorie 'opzoektabellen' enz.) dan voldoet het omde tabellen in kwestie een 'group' toe te kennen. Alle tabellen die dezelfde groepsnaamdelen, worden in het tabellen-selectiemenu bij elkaar gevoegd met deze groepsnaam als kop</td>
+            <td class="description last">If you want to group tables into subcategories in the tables menu (e.g., a category 'task tables', a category 'lookup tables', etc.), it is sufficient to assign a 'group' to the relevant tables. All tables that share the same group name will be grouped together in the table selection menu, with this group name as the header.</td>
         </tr>
 
     
@@ -1339,7 +1339,7 @@
 
             
 
-            <td class="description last">By default heeft de header van een tabel een licht grijze achtergrond. Met 'header_color'kan echter een eigen kleur worden opgegeven. Wanneer er op het scherm allerlei tabellen onder elkaar staan,maakt een eigen kleur een tabel sneller herkenbaar. Als men niet zelf een kleur wil kiezen, kan Lex'itzelf een kleur kiezen: geef 'header_color' dan de waarde 'auto'.</td>
+            <td class="description last">By default, the header of a table has a light gray background. However, with 'header_color', a custom color can be specified. When multiple tables are displayed on the screen, a unique color makes a table easier to recognize. If you don't want to choose a color yourself, Lex'it can select one automatically: set 'header_color' to 'auto'.</td>
         </tr>
 
     
@@ -1362,7 +1362,7 @@
 
             
 
-            <td class="description last">Als een tabel een lelijke 'technische' naam heeft, kan die in de interface tochmet een mooie naam worden weergegeven; geef deze naam op met deze setting.</td>
+            <td class="description last">If a table has an unattractive 'technical' name, * it can still be displayed with a nicer name in the interface. * Specify this name using this setting.</td>
         </tr>
 
     
@@ -1385,7 +1385,7 @@
 
             
 
-            <td class="description last">Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven verticale positie worden geplaatst.</td>
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified vertical position.</td>
         </tr>
 
     
@@ -1408,7 +1408,7 @@
 
             
 
-            <td class="description last">Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven horitale positie worden geplaatst.</td>
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified horizontal position.</td>
         </tr>
 
     
@@ -1431,7 +1431,7 @@
 
             
 
-            <td class="description last">By default toont een tabel 10 rijen tegelijk. Dit aantal kan in de GUI door de gebruikerhandmatig worden gewijzigd. Maar indien men standaard een ander aantal rijen wil zien,zonder dat telkens weer handmatig te hoeven instellen, kan men dit aantal met 'displaylength'declareren.</td>
+            <td class="description last">By default, a table displays 10 rows at a time. The user can manually change this number in the GUI. However, if you want a different default number of rows without having to adjust it manually each time, you can specify it using 'displaylength'.</td>
         </tr>
 
     
@@ -1454,7 +1454,7 @@
 
             
 
-            <td class="description last">Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).Voor 'alles tonen' moet waarde -1 worden opgegeven.</td>
+            <td class="description last">Define the options available in the 'Show ... rows' menu (in the table header). * To display all rows, use the value -1.</td>
         </tr>
 
     
@@ -1477,7 +1477,7 @@
 
             
 
-            <td class="description last">Bepaal de paging type van een tabel (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers).Default is 'full_numbers'</td>
+            <td class="description last">Define the paging type of a table (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers). The default is 'full_numbers'.</td>
         </tr>
 
     
@@ -1500,7 +1500,7 @@
 
             
 
-            <td class="description last">Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).Default is 'table'</td>
+            <td class="description last">Define the default display mode of the table: 'table' (normal) or 'form' (form view). The default is 'table'.</td>
         </tr>
 
     
@@ -1523,7 +1523,7 @@
 
             
 
-            <td class="description last">Declareer een formulier, als custom weergave van een tabel (dit wordt in de handleiding uitgebreid uitgelegd).</td>
+            <td class="description last">Declare a form as a custom view for a table (this is explained in detail in the manual).</td>
         </tr>
 
     
@@ -1546,7 +1546,7 @@
 
             
 
-            <td class="description last">Om in het tabeloverzicht meer info over een tabel te geven, legt men deze info hier vast.Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.</td>
+            <td class="description last">To provide more information about a table in the table overview, define the details here. This information will appear in the menu under 'Choose a table'.</td>
         </tr>
 
     
@@ -1569,7 +1569,7 @@
 
             
 
-            <td class="description last">Volgorde waarin de kolommen moeten worden weergegeven,wanneer het moet afwijken van de volgorde uit de oorspronkelijke database (default: null)</td>
+            <td class="description last">Defines the order in which columns should be displayed, if it needs to differ from the original database order. (default: null)</td>
         </tr>
 
     
@@ -1592,7 +1592,7 @@
 
             
 
-            <td class="description last">kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}</td>
+            <td class="description last">Specifies the columns to be sorted, in order of priority, provided as an associative array: { colname1: sortdir1, colname2: sortdir2, ...}</td>
         </tr>
 
     
@@ -1615,7 +1615,7 @@
 
             
 
-            <td class="description last">Wanneer een tabel een kolom bevat waarnaar rijen gegroepeerd kunnen worden(omdat meerdere rijen dezelfde waarde hebben in bedoelde kolom), is het mogelijk om de groepenzichtbaar te maken: in parameter "grouping_column" geeft men de naam op van de kolomwaarnaar gegroepeerd kan worden. Let wel: gebruik van deze parameter zorgt er alleen voor dat groepen op het scherm zichtbaar worden gemaakt, maar om daadwerkelijk te groeperen moet de tabel vooraf op dezelfde kolom worden gesorteerd.</td>
+            <td class="description last">When a table contains a column by which rows can be grouped (because multiple rows share the same value in that column), it is possible to make these groups visible. Use the "grouping_column" parameter to specify the column name for grouping. Note: This parameter only makes groups visually distinguishable on the screen. To actually group the data, the table must be pre-sorted by the same column.</td>
         </tr>
 
     
@@ -1638,7 +1638,7 @@
 
             
 
-            <td class="description last">Breedte van de tabel. (synoniem: "width")</td>
+            <td class="description last">Width of the table. (synonym: "width")</td>
         </tr>
 
     
@@ -1661,7 +1661,7 @@
 
             
 
-            <td class="description last">Breedte van de tabel. (s)ynoniem: "size")</td>
+            <td class="description last">Width of the table. (synonym: "size")</td>
         </tr>
 
     
@@ -1684,7 +1684,7 @@
 
             
 
-            <td class="description last">hoogte van de header boven de tabel (default is 50px)</td>
+            <td class="description last">Height of the header above the table. (default is 50px)</td>
         </tr>
 
     
@@ -1707,7 +1707,7 @@
 
             
 
-            <td class="description last">hoogte van de footer onder de tabel(default is 50px)</td>
+            <td class="description last">Height of the footer below the table. (default is 50px)</td>
         </tr>
 
     
@@ -1730,7 +1730,7 @@
 
             
 
-            <td class="description last">Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)beschikbaar moet zijn(default is true)</td>
+            <td class="description last">Determine whether the search box for the entire table (searching all fields at once) should be available. (default is true)</td>
         </tr>
 
     
@@ -1753,7 +1753,7 @@
 
             
 
-            <td class="description last">callback na een Table draw Met 'repeat_callback:false', wordt de callback alleen aangeroepen als de tabel open gaat.Met 'repeat_callback:true', wordt de callback bij elke Tabel draw (verversen, bladeren, ...) opnieuw aangeroepen.</td>
+            <td class="description last">Callback after a table draw. With 'repeat_callback: false', the callback is only triggered when the table opens. With 'repeat_callback: true', the callback is triggered on every table draw (refresh, pagination, etc.).</td>
         </tr>
 
     
@@ -1776,7 +1776,7 @@
 
             
 
-            <td class="description last">herhaal de callback elke keer dat de tabel opnieuw wordt getekend (default: false)</td>
+            <td class="description last">Repeat the callback every time the table is redrawn. (default: false)</td>
         </tr>
 
     
@@ -1799,7 +1799,7 @@
 
             
 
-            <td class="description last">callback die uitgevoerd moet worden vóór dat een tabel getoond wordt en met data wordt gevuld(dit maakt het mogelijk om bewerkingen op de tabel-data uit te voeren voordat deze getoond wordt)</td>
+            <td class="description last">Callback to be executed before a table is displayed and populated with data. This allows modifications to the table data before it is shown.</td>
         </tr>
 
     
@@ -1822,7 +1822,7 @@
 
             
 
-            <td class="description last">callback die uitgevoerd moet worden bij het aanklikken van de resetknop, maar dan netvoordat de tabel wordt herladen (zodat bijvoorbeeld filters aangepast kunnen worden enz)</td>
+            <td class="description last">Callback to be executed when clicking the reset button, but just before the table is reloaded. This allows modifications such as adjusting filters, etc.</td>
         </tr>
 
     
@@ -1845,7 +1845,7 @@
 
             
 
-            <td class="description last">callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)</td>
+            <td class="description last">Callback to be executed when clicking the 'close' button (closing the table).</td>
         </tr>
 
     
@@ -1868,7 +1868,7 @@
 
             
 
-            <td class="description last">bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld (default: false)</td>
+            <td class="description last">Determine whether the number of results in the table should always be counted exactly. (default: false)</td>
         </tr>
 
     
@@ -1891,7 +1891,7 @@
 
             
 
-            <td class="description last">de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] (default: true)</td>
+            <td class="description last">The table receives focus when the Tab key is pressed, if it is the table's turn [because tables receive focus in turn].(default: true)</td>
         </tr>
 
     
@@ -1914,7 +1914,7 @@
 
             
 
-            <td class="description last">ververs de table als de window waarin die getoond wordt weer focus krijgt (default: true)</td>
+            <td class="description last">Refresh the table when the window in which it is displayed regains focus. (default: true)</td>
         </tr>
 
     
@@ -1937,7 +1937,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "RESET" (default: true)</td>
+            <td class="description last">Show or hide the "RESET" button. (default: true)</td>
         </tr>
 
     
@@ -1960,7 +1960,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Kolommenselectie", zodat gebruiker de zichtbare kolommen kan kiezen (default: true)</td>
+            <td class="description last">Show or hide the "Column Selection" button, allowing the user to choose which columns are visible. (default: true)</td>
         </tr>
 
     
@@ -1983,7 +1983,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Formulier/Tabel view" (default: true)</td>
+            <td class="description last">Show or hide the "Form/Table View" button (default: true)</td>
         </tr>
 
     
@@ -2006,7 +2006,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ververs" (default: true)</td>
+            <td class="description last">Show or hide the "Refresh" button. (default: true)</td>
         </tr>
 
     
@@ -2029,7 +2029,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Zoek & Bewerk" (default: true)</td>
+            <td class="description last">Show or hide the "Search & Edit" button. (default: true)</td>
         </tr>
 
     
@@ -2052,7 +2052,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Rijselectie" (default: true)</td>
+            <td class="description last">Show or hide the "Row Selection" button. (default: true)</td>
         </tr>
 
     
@@ -2075,7 +2075,7 @@
 
             
 
-            <td class="description last">zet de knop "Rijselectie" alvast aan/uit (default: false, d.w.z. Selectie-modus is UIT)</td>
+            <td class="description last">Enable or disable the "Row Selection" button by default. (default: false, meaning selection mode is OFF)</td>
         </tr>
 
     
@@ -2098,7 +2098,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ongedaan maken" (default: true)</td>
+            <td class="description last">Show or hide the "Undo" button.(default: true)</td>
         </tr>
 
     
@@ -2121,7 +2121,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "Ga naar" (default: true)</td>
+            <td class="description last">Show or hide the "Go To" button.(default: true)</td>
         </tr>
 
     
@@ -2144,7 +2144,7 @@
 
             
 
-            <td class="description last">toon/verberg knop "?" (default: true)</td>
+            <td class="description last">Show or hide the "?" button.(default: true)</td>
         </tr>
 
     
@@ -2167,7 +2167,7 @@
 
             
 
-            <td class="description last">voeg een volledig export button aan de tabel voeter toe (zie handleiding voor meer info)</td>
+            <td class="description last">Add a full export button to the table footer (see the manual for more information).</td>
         </tr>
 
     
@@ -2190,7 +2190,7 @@
 
             
 
-            <td class="description last">zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt</td>
+            <td class="description last">Ensure that a context menu appears when a row in the table is clicked</td>
         </tr>
 
     
@@ -2213,7 +2213,7 @@
 
             
 
-            <td class="description last">zorg ervoor dat een pulldownmenu verschijnt als een button in de tabelheader wordt aangeklikt</td>
+            <td class="description last">Ensure that a dropdown menu appears when a button in the table header is clicked.</td>
         </tr>
 
     
@@ -2236,7 +2236,7 @@
 
             
 
-            <td class="description last">Wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden.Als waarde moet dan de naam van de menu-optie worden gegeven, die vooraf geselecteerd moet zijn.</td>
+            <td class="description last">When a 'menu' is declared, the "selected" option allows preselecting a menu item. The value should be the name of the menu option that should be preselected.</td>
         </tr>
 
     
@@ -2259,7 +2259,7 @@
 
             
 
-            <td class="description last">ken een functie toe aan een toets at keyup</td>
+            <td class="description last">Assign a function to a key on keyup</td>
         </tr>
 
     
@@ -2282,7 +2282,7 @@
 
             
 
-            <td class="description last">ken een functie toe aan een toets at keydown</td>
+            <td class="description last">Assign a function to a key on keydown</td>
         </tr>
 
     
@@ -2305,7 +2305,7 @@
 
             
 
-            <td class="description last">maak de tabel versleepbaar (default: true)</td>
+            <td class="description last">Make the table draggable (default: true)</td>
         </tr>
 
     
@@ -2328,7 +2328,7 @@
 
             
 
-            <td class="description last">callback opgeroepen na het verslepen van een table</td>
+            <td class="description last">Callback triggered after dragging a table</td>
         </tr>
 
     
@@ -2351,7 +2351,7 @@
 
             
 
-            <td class="description last">maak de tabel resizable (default: true)</td>
+            <td class="description last">Make the table resizable (default: true)</td>
         </tr>
 
     
@@ -2374,7 +2374,7 @@
 
             
 
-            <td class="description last">callback opgeroepen na het resizen van een table</td>
+            <td class="description last">Callback triggered after resizing a table</td>
         </tr>
 
     
@@ -2851,7 +2851,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Nov 11 2024 12:08:23 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:41 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

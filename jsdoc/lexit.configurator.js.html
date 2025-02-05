@@ -44,77 +44,86 @@ var oTableSettingsList_example = {
 
 		/**
 		 * @type {string}
-		 * @description Als men in het tabellen-menu de tabellen wil groeperen in subcategorieën (bijv. een
-		 * categorie 'klustabellen', een categorie 'opzoektabellen' enz.) dan voldoet het om
-		 * de tabellen in kwestie een 'group' toe te kennen. Alle tabellen die dezelfde groepsnaam
-		 * delen, worden in het tabellen-selectiemenu bij elkaar gevoegd met deze groepsnaam als kop
+		 * @description If you want to group tables into subcategories in the tables menu 
+		 * (e.g., a category 'task tables', a category 'lookup tables', etc.), 
+		 * it is sufficient to assign a 'group' to the relevant tables. 
+		 * All tables that share the same group name will be grouped together 
+		 * in the table selection menu, with this group name as the header. 
 		 */
 		"group": "...",
 		
 		
 		/**
 		 * @type {string}
-		 * @description By default heeft de header van een tabel een licht grijze achtergrond. Met 'header_color'
-		 * kan echter een eigen kleur worden opgegeven. Wanneer er op het scherm allerlei tabellen onder elkaar staan,
-		 * maakt een eigen kleur een tabel sneller herkenbaar. Als men niet zelf een kleur wil kiezen, kan Lex'it
-		 * zelf een kleur kiezen: geef 'header_color' dan de waarde 'auto'. 
+		 * @description By default, the header of a table has a light gray background. 
+		 * However, with 'header_color', a custom color can be specified. 
+		 * When multiple tables are displayed on the screen, a unique color 
+		 * makes a table easier to recognize. 
+		 * If you don't want to choose a color yourself, Lex'it can select one automatically: 
+		 * set 'header_color' to 'auto'.
 		 */
 		"header_color": "...",
 		
 		/**
 		 * @type {string}
-		 * @description Als een tabel een lelijke 'technische' naam heeft, kan die in de interface toch
-		 * met een mooie naam worden weergegeven; geef deze naam op met deze setting.
+		 * @description If a table has an unattractive 'technical' name, 
+		 * * it can still be displayed with a nicer name in the interface. 
+		 * * Specify this name using this setting.
 		 */
 		"nice_name": "...",     
 		
 		
 		/**
 		 * @type {integer}
-		 * @description Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven verticale positie worden geplaatst.
+		 * @description If declared, the (top-left corner of the) table will be positioned 
+		 * * at the specified vertical position.
 		 */
 		"top": 50,
 
 		/**
 		 * @type {integer}
-		 * @description Indien gedeclareerd, zal de (linkerbovenhoek van de) tabel op de opgegeven horitale positie worden geplaatst.
+		 * @description If declared, the (top-left corner of the) table will be positioned 
+		 * * at the specified horizontal position.
 		 */
 		"left": 50,
 		
 		/**
 		 * @type {integer}
-		 * @description By default toont een tabel 10 rijen tegelijk. Dit aantal kan in de GUI door de gebruiker
-		 * handmatig worden gewijzigd. Maar indien men standaard een ander aantal rijen wil zien,
-		 * zonder dat telkens weer handmatig te hoeven instellen, kan men dit aantal met 'displaylength'
-		 * declareren.
-		 */
+		 * @description By default, a table displays 10 rows at a time. 
+		 * The user can manually change this number in the GUI. 
+		 * However, if you want a different default number of rows 
+		 * without having to adjust it manually each time, 
+		 * you can specify it using 'displaylength'.
+ 		 */
 		"displaylength": 50,
 		
 		
 		/**
 		 * @type {array}
-		 * @description Bepaal de keuzemogelijkheden in het 'Toon ... rijen' menu (in de tabelheader).
-		 * Voor 'alles tonen' moet waarde -1 worden opgegeven.
+		 * @description Define the options available in the 'Show ... rows' menu (in the table header). 
+		 * * To display all rows, use the value -1.
 		 */
 		"displaylength_menu": [1, 5, 10, 50],
 				
 		/**
 		 * @type {string}
-		 * @description Bepaal de paging type van een tabel (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers).
-		 * Default is 'full_numbers'
+		 * @description Define the paging type of a table (numbers, simple, simple_numbers, full, 
+		 * full_numbers, first_last_numbers). 
+		 * The default is 'full_numbers'.
 		 */
 		"pagingtype": "full_numbers",
 		
 		/**
 		 * @type {string}
-		 * @description Bepaal de default weergave van de tabel: 'table' (normaal) of 'form' (formulier).
-		 * Default is 'table'
+		 * @description Define the default display mode of the table: 
+		 * 'table' (normal) or 'form' (form view). 
+		 * The default is 'table'.
 		 */
 		"viewtype": "form",
 		
 		/**
 		 * @type {object}
-		 * @description Declareer een formulier, als custom weergave van een tabel (dit wordt in de handleiding uitgebreid uitgelegd).
+		 * @description Declare a form as a custom view for a table (this is explained in detail in the manual).
 		 * @example: "formgrid": {"size": [], "definition": [], "cells": {}, etc.}
 		 */
 		"formgrid": {},
@@ -122,15 +131,16 @@ var oTableSettingsList_example = {
 		
 		/**
 		 * @type {string}
-		 * @description Om in het tabeloverzicht meer info over een tabel te geven, legt men deze info hier vast.
-		 * Deze informatie verschijnt dus in het menu bij 'Kies een tabel'.
+		 * @description To provide more information about a table in the table overview, 
+		 * define the details here. 
+		 * This information will appear in the menu under 'Choose a table'.
 		 */
 		"info": "Deze tabel is ....",
 		
 		/** 
 		 * @type {array} 
-		 * @description Volgorde waarin de kolommen moeten worden weergegeven,
-		 * wanneer het moet afwijken van de volgorde uit de oorspronkelijke database 
+		 * @description Defines the order in which columns should be displayed, 
+		 * if it needs to differ from the original database order. 
 		 * (default: null)
 		 * */
 		"columns_order": ["colname1", "colname2", "colnameX"],
@@ -138,71 +148,72 @@ var oTableSettingsList_example = {
 		
 		/** 
 		 * @type {object} 
-		 * @description kolommen waarop gesorteerd moet worden, in volgorde van prioriteit,
-		 * opgegeven in de vorm van een associative array: { colname1: sortdir1, colname2: sortdir2, ...}
+		 * @description Specifies the columns to be sorted, in order of priority, 
+		 * provided as an associative array: { colname1: sortdir1, colname2: sortdir2, ...}
 		 * */
 		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
 		
 		
 		/**
 		 * @type {string}
-		 * @description Wanneer een tabel een kolom bevat waarnaar rijen gegroepeerd kunnen worden
-		 * (omdat meerdere rijen dezelfde waarde hebben in bedoelde kolom), is het mogelijk om de groepen
-		 * zichtbaar te maken: in parameter "grouping_column" geeft men de naam op van de kolom
-		 * waarnaar gegroepeerd kan worden. 
-		 * Let wel: gebruik van deze parameter zorgt er alleen voor dat groepen op het scherm zichtbaar 
-		 * worden gemaakt, maar om daadwerkelijk te groeperen moet de tabel vooraf op dezelfde kolom worden 
-		 * gesorteerd.      
+		 * @description When a table contains a column by which rows can be grouped 
+		 * (because multiple rows share the same value in that column), 
+		 * it is possible to make these groups visible. 
+		 * Use the "grouping_column" parameter to specify the column name for grouping. 
+		 * 
+		 * Note: This parameter only makes groups visually distinguishable on the screen. 
+		 * To actually group the data, the table must be pre-sorted by the same column.      
 		 */
 		"grouping_column": "...",
 		
 		/**
 		 * @type {string}
-		 * @description Breedte van de tabel. 
-		 * (synoniem: "width")
+		 * @description Width of the table. 
+		 * (synonym: "width")
 		 */
 		"size": "60%",
 		
 		/**
 		 * @type {string}
-		 * @description Breedte van de tabel. 
-		 * (s)ynoniem: "size")
+		 * @description Width of the table. 
+		 * (synonym: "size")
 		 */
 		"width": "60%",
 		
 		/**
 		 * @type {string}
-		 * @description hoogte van de header boven de tabel 
+		 * @description Height of the header above the table. 
 		 * (default is 50px)
 		 */
 		"header_height": "150px",
 		
 		/**
 		 * @type {string}
-		 * @description hoogte van de footer onder de tabel
+		 * @description Height of the footer below the table. 
 		 * (default is 50px)
 		 */
 		"footer_height": "30px",
 		
 		/**
 		 * @type {boolean}
-		 * @description Bepaal of de zoekbox voor de gehele tabel (zoeken in alle velden tegelijk)
-		 * beschikbaar moet zijn
+		 * @description Determine whether the search box for the entire table 
+		 * (searching all fields at once) should be available. 
 		 * (default is true)
 		 */
 		"main_search": true,		
 
 		/** 
 		 * @type {function} 
-		 * @description callback na een Table draw 
-		 * Met 'repeat_callback:false', wordt de callback alleen aangeroepen als de tabel open gaat.
-		 * Met 'repeat_callback:true', wordt de callback bij elke Tabel draw (verversen, bladeren, ...) opnieuw aangeroepen.
-		 * */
+		 * @description Callback after a table draw. 
+		 * With 'repeat_callback: false', the callback is only triggered when the table opens. 
+		 * With 'repeat_callback: true', the callback is triggered on every table draw 
+		 * (refresh, pagination, etc.).
+		 */
 		"callback": function(t){ doSomething(); },
 		
 		/** 
 		 * @type {boolean} 
-		 * @description herhaal de callback elke keer dat de tabel opnieuw wordt getekend 
+		 * @description Repeat the callback every time the table is redrawn. 
 		 * (default: false)
 		 * */
 		"repeat_callback": true,
@@ -210,128 +221,133 @@ var oTableSettingsList_example = {
 
 		/**
 		 * @type {function} 
-		 * @description callback die uitgevoerd moet worden vóór dat een tabel getoond wordt en met data wordt gevuld
-		 * (dit maakt het mogelijk om bewerkingen op de tabel-data uit te voeren voordat deze getoond wordt)
+		 * @description Callback to be executed before a table is displayed and populated with data. 
+		 * This allows modifications to the table data before it is shown.
 		 */
 		"preinit_callback": function(t){ doSomething(); },
 		
 		/**
 		 * @type {function} 
-		 * @description callback die uitgevoerd moet worden bij het aanklikken van de resetknop, maar dan net
-		 * voordat de tabel wordt herladen (zodat bijvoorbeeld filters aangepast kunnen worden enz)
+		 * @description Callback to be executed when clicking the reset button, 
+		 * but just before the table is reloaded. 
+		 * This allows modifications such as adjusting filters, etc.
 		 */
 		"prereset_callback": function(t){ doSomething(); },
 		
 		
 		/**
 		 * @type {function} 
-		 * @description callback die uitgevoerd moet worden bij het aanklikken van de 'close'-knop (tabel afsluiten)
+		 * @description Callback to be executed when clicking the 'close' button (closing the table).
 		 */
 		"close_callback": function(t){ doSomething(); },
 
 
 		/** 
 		 * @type {boolean} 
-		 * @description bepaal of het aantal resultaten in de tabel altijd exact moet worden geteld 
+		 * @description Determine whether the number of results in the table 
+		 * should always be counted exactly. 
 		 * (default: false)
 		 * */
 		"exact_count": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description de tabel krijgt focus als de tabtoets wordt ingedrukt, wanneer de tabel aan de beurt is [omdat tabellen om de beurt focus krijgen] 
+		 * @description The table receives focus when the Tab key is pressed, 
+		 * if it is the table's turn [because tables receive focus in turn].
 		 * (default: true)
 		 * */
 		"get_focus_on_tab": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description ververs de table als de window waarin die getoond wordt weer focus krijgt 
+		 * @description Refresh the table when the window in which it is displayed regains focus. 
 		 * (default: true)
 		 * */
 		"refresh_upon_focus": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "RESET" 
+		 * @description Show or hide the "RESET" button. 
 		 * (default: true)
 		 * */
 		"reset_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Kolommenselectie", zodat gebruiker de zichtbare kolommen kan kiezen 
+		 * @description Show or hide the "Column Selection" button, 
+		 * allowing the user to choose which columns are visible. 
 		 * (default: true)
 		 * */
 		"columns_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Formulier/Tabel view" 
+		 * @description Show or hide the "Form/Table View" button 
 		 * (default: true)
 		 * */
 		"viewtype_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ververs" 
+		 * @description Show or hide the "Refresh" button. 
 		 * (default: true)
 		 * */
 		"refresh_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Zoek &amp; Bewerk" 
+		 * @description Show or hide the "Search &amp; Edit" button. 
 		 * (default: true)
 		 * */
 		"replace_button": true,  
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Rijselectie" 
+		 * @description Show or hide the "Row Selection" button. 
 		 * (default: true)
 		 * */
 		"selection_button": true,  
 		
 		/** 
 		 * @type {boolean} 
-		 * @description zet de knop "Rijselectie" alvast aan/uit 
-		 * (default: false, d.w.z. Selectie-modus is UIT)
+		 * @description Enable or disable the "Row Selection" button by default. 
+		 * (default: false, meaning selection mode is OFF)
 		 * */
 		"selection_button_active": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ongedaan maken" 
+		 * @description Show or hide the "Undo" button.
 		 * (default: true)
 		 * */
 		"undo_button": true,     
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "Ga naar" 
+		 * @description Show or hide the "Go To" button.
 		 * (default: true)
 		 * */
 		"goto_button": true,
 		
 		/** 
 		 * @type {boolean} 
-		 * @description toon/verberg knop "?" 
+		 * @description Show or hide the "?" button.
 		 * (default: true)
 		 */
 		"help_button": true,
 		
 		/** 
 		 * @type {object} 
-		 * @description voeg een volledig export button aan de tabel voeter toe (zie handleiding voor meer info)
+		 * @description Add a full export button to the table footer 
+		 * (see the manual for more information).
 		 */
 		"full_export_button": {},
 
 
 		/** 
 		 * @type {function} 
-		 * @description zorg ervoor dat een contextmenu verschijnt als een rij in de tabel wordt aangeklikt
-		 * */
+		 * @description Ensure that a context menu appears when a row in the table is clicked
+		 */
 		"contextmenu": {
 			"items": {"some-key": "some-label"}, 
 			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
@@ -339,52 +355,53 @@ var oTableSettingsList_example = {
 		
 		/** 
 		 * @type {object} 
-		 * @description zorg ervoor dat een pulldownmenu verschijnt als een button in de tabelheader wordt aangeklikt
+		 * @description Ensure that a dropdown menu appears when a button in the table header is clicked.
 		 * */
 		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },
 		
 		/** 
 		 * @type {string}
-		 * @description Wanneer een 'menu' is gedeclareerd, kan m.b.v. "selected" een item vooraf geselecteerd worden.
-		 * Als waarde moet dan de naam van de menu-optie worden gegeven, die vooraf geselecteerd moet zijn.
+		 * @description When a 'menu' is declared, the "selected" option allows 
+		 * preselecting a menu item. 
+		 * The value should be the name of the menu option that should be preselected.
 		 * */
 		"selected": "...",
 		
 		/**
 		 *  @type {function} 
-		 *  @description ken een functie toe aan een toets at keyup
+		 *  @description Assign a function to a key on keyup
 		 *  */
 		"keyup" : function(t){ doSomething(); },
 		
 		/** 
 		 * @type {function} 
-		 * @description ken een functie toe aan een toets at keydown
+		 * @description Assign a function to a key on keydown
 		 * */
 		"keydown" : function(t){ doSomething(); },
 
 		/** 
 		 * @type {boolean} 
-		 * @description maak de tabel versleepbaar 
+		 * @description Make the table draggable 
 		 * (default: true)
 		 * */
 		"draggable": true,
 		
 		/** 
 		 * @type {function} 
-		 * @description callback opgeroepen na het verslepen van een table 
+		 * @description Callback triggered after dragging a table 
 		 * */
 		"drag_callback": function(t, ui){ doSomething(); },
 
 		/** 
 		 * @type {boolean} 
-		 * @description maak de tabel resizable 
+		 * @description Make the table resizable 
 		 * (default: true)
 		 * */
 		"resizable": true,
 		
 		/** 
 		 * @type {function} 
-		 * @description callback opgeroepen na het resizen van een table 
+		 * @description Callback triggered after resizing a table 
 		 * */
 		"resize_callback": function(t, ui){ doSomething(); }
 };
@@ -396,116 +413,121 @@ var oTableConfigurationList_example = {
 		
 		/** 
 		 * @type {function} 
-		 * @description Functie die moet worden getriggerd als men in een gegeven kolom klikt e.d.
+		 * @description Function to be triggered when clicking in a specific column, etc.
 
 		 * */
 		"click": function(t, n, event){ doSomething(); },
 		
 		/**
 		 * @type {function}
-		 * @description Functie die moet worden getriggerd als men in een gegeven kolom dubbelklikt e.d.
+		 * @description Function to be triggered when double-clicking in a specific column, etc.
 		 */
 		"dblclick": function(t, n, event){ doSomething(); },
 		
 		/**
 		 * @type {string}
-		 * @description Achtergrondkleur van de kolom als html kleurcode (zoals "#123ABC"). Als men slechts één 
-		 * kleurcode opgeef, dan berekent Lex'it automatisch een andere nuance van die kleur voor de oneven rijen 
-		 * (het werkt echter niet bij letterlijke kleurnamen (zoals "green"). Het is ook mogelijk om de kleur van 
-		 * zowel de oneven als de even rijen precies op te geven: dan moet men een tweeledige array opgeven, met 
-		 * de twee kleuren achter elkaar: ["#123ABC", "#ABC123"].
+		 * @description Background color of the column as an HTML color code (e.g., "#123ABC"). 
+		 * If only one color code is provided, Lex'it automatically calculates a different 
+		 * shade of that color for the odd rows. 
+		 * 
+		 * However, this does not work with literal color names (e.g., "green"). 
+		 * It is also possible to specify the colors for both odd and even rows explicitly 
+		 * by providing a two-element array with the two colors in sequence: 
+		 * ["#123ABC", "#ABC123"].
 		 */
 		"bgcolor": "",
 		
 		/**
 		 * @type {string}
-		 * @description Plaats een button in een kolom, met de als string opgegeven naam. Het is ook mogelijk om 
-		 * de inhoud van de kolom als Button-naam te gebruiken: daartoe moet in de configuratie als naam een lege 
-		 * string worden gegeven ("button": ""). De functionaliteit van de button moet worden opgegeven met 
-		 * parameter 'click'.
+		 * @description Place a button in a column with the specified name as a string. 
+		 * It is also possible to use the content of the column as the button name: 
+		 * for this, an empty string should be provided for the name ("button": ""). 
+		 * The functionality of the button must be specified using the 'click' parameter.
 		 */
 		"button": "",
 		
 		/**
 		 * @type {string}
-		 * @description Zet een tooltip bij een button, te zien bij mouseover. Dit is handig om de 
-		 * functie van een knop te verklaren als de naam van de knop dat onvoldoende doet (bijv. 
-		 * vanwege een te korte naam).
+		 * @description Add a tooltip to a button, visible on mouseover. 
+		 * This is useful for explaining the function of a button if the button's name 
+		 * is insufficient (e.g., due to a short name).
 		 */
 		"button_tooltip": "",
 		
 		/**
 		 * @type {string}
-		 * @description Zet een tooltip bij een cell, te zien bij mouseover. Dit is handig om zichtbaar te 
-		 * maken dat klikken op een cell een functie heeft.
+		 * @description Add a tooltip to a cell, visible on mouseover. 
+		 * This is useful for indicating that clicking on a cell has a function..
 		 */
 		"cell_tooltip": "",
 		
 		/**
 		 * @type {array}
-		 * @description Maak van de zoekbox van betreffende kolom een select-box. De waarden om uit te kiezen 
-		 * kunnen op twee manieren worden opgegeven: 
-		 * [1] Als lege array, in welk geval de tool zelf de verschillende unieke waardes ophaalt in de database 
-		 * (voorbeeld: {"choosefrom": []}). 
-		 * [2] Als een array van stringwaarden. Omdat de select-box als eerste waarde de aansporing "Kiezen" zal 
-		 * hebben, moet "Kiezen" ook een onderliggende waarde hebben. Deze 'neutrale' waarde moet als allereerste 
-		 * lid van eerdergenoemde array worden opgegeven; als daar geen waarde aan toegekend hoeft te worden, dan 
-		 * voldoet een lege string (voorbeeld: {"choosefrom": ["", "1", "2", "3"]}, waarin "" de onderliggende 
-		 * waarde van "Kiezen" zal zijn).
-		 * 	 */
+		 * @description Turn the search box of the specified column into a select box. The values to choose from can 
+		 * be specified in two ways: 
+		 * [1] As an empty array, in which case the tool will automatically retrieve the unique values from the database 
+		 * (e.g., {"choosefrom": []}). 
+		 * [2] As an array of string values. Since the select box will have "Choose" as its first value, 
+		 * "Choose" must also have an underlying value. This 'neutral' value should be the first element in the array, 
+		 * and if no value needs to be assigned, an empty string will suffice (e.g., {"choosefrom": ["", "1", "2", "3"]}, 
+		 * where "" will be the underlying value for "Choose").
+		 */
 		"choosefrom": ["val1", "val2"],
 		
 		/**
 		 * @type {object}
-		 * @description Declareer labels voor de waardes van een select-box. Op die manier kunnen de onbegrijpelijke waardes
-		 * die de database verwacht toch voor de gebruiker begrijpelijk worden gemaakt.
+		 * @description Declare labels for the values of a select box. 
+		 * This allows the incomprehensible values expected by the database 
+		 * to be made understandable to the user.
 		 */
 		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
 
 
 		/**
 		 * @type {string}
-		 * @description Een editeerbare cel waarin slechts een gesloten aantal waardes zijn toegestaan, wordt normaal gesproken
-		 * bewerkt via een Select-box. Met deze parameter declareert men welke mouse-event het weergeven van de Select-box moet triggeren.
-		 * Default is dat 'mouseover'.
+		 * @description An editable cell where only a limited number of values are allowed is typically edited via a select box. 
+		 * With this parameter, you can declare which mouse event should trigger the display of the select box. 
+		 * The default is 'mouseover'.
 		 */
 		"select_trigger_event": "mouseover",
 		
 		
 		/**
 		 * @type {string}
-		 * @description Ken een class toe aan een kolom, bijv. om de cellen van de kolom te kunnen stylen.
-		 * Te denken valt aan default classes zoals gedeclareerd in css/lexit_table.css, om bijv. te kunnen centreren in cellen e.d.
+		 * @description Assign a class to a column, for example, to style the cells of the column. 
+		 * This could include default classes declared in css/lexit_table.css, such as those used for centering content in cells.
 		 * 
-		 * Lex'it heeft enige default classes beschikbaar, zoals 'inlfont10pt' (voor weergave van INL font in 10 pt),
-		 * of 'inlfont' (deze zonder font-size specificatie). 
+		 * Lex'it provides some default classes, such as 'inlfont10pt' (for displaying the INL font in 10 pt) 
+		 * or 'inlfont' (this one without a font-size specification). 
 		 */
 		"class": "",
 		
 		
 		/**
 		 * @type {string}
-		 * @description Wanneer een kolom een technische, niet gebruikersvriendelijke naam heeft, kan men deze voor  
-		 * de gebruiker een mooiere naam geven. Dat doet men met deze parameter.
+		 * @description When a column has a technical, non-user-friendly name, 
+		 * you can give it a more user-friendly name for display using this parameter.
 		 */
 		"nice_name": "",
 		
 		/**
 		 * @type {string}
 		 * @deprecated
-		 * @description Als dit niet null is, dan wordt de tabel meteen bij het initialiseren gesorteerd op deze 
-		 * kolom. Als men meerdere kolommen aangeeft, wordt de tabel op al deze kolommen gesorteerd. De mogelijke 
-		 * waarden zijn 'asc', 'desc' of null (default).
-		 * Let wel: als er op meerdere kolommen tegelijk gesorteerd moet worden, wordt de prioriteit bepaald aan
-		 * de hand van de volgorde waarin de te sorteren kolommen worden opgegeven. Beter en overzichtelijker
-		 * is het om de sorteerkolommen in de table settings op te geven met parameter "columns_sorting" (zie aldaar).  
+		 * @description If this is not null, the table will be immediately sorted by this column upon initialization. 
+		 * If multiple columns are specified, the table will be sorted by all these columns. 
+		 * The possible values are 'asc', 'desc', or null (default).
+		 * 
+		 * Note: If sorting by multiple columns at once, the priority is determined by the order in which the columns 
+		 * to be sorted are specified. It is better and more organized to specify the sorting columns in the table settings 
+		 * using the "columns_sorting" parameter (see there).  
 		 */
 		"colsort": "",
 		
 		/**
 		 * @type {object}
-		 * @description Contextmenu dat moet verschijnen bij het aanklikken van een cel. Voor meer info over het contextmenu-object, 
-		 * zie: https://swisnl.github.io/jQuery-contextMenu/docs.html)
+		 * @description Context menu that should appear when clicking on a cell. 
+		 * For more information about the context menu object, see the documentation, 
+		 * see: https://swisnl.github.io/jQuery-contextMenu/docs.html)
 		 */
 		"contextmenu": {
 			"items": {"some-key": "some-label"}, 
@@ -514,48 +536,49 @@ var oTableConfigurationList_example = {
 		
 		/**
 		 * @type {object}
-		 * @description Als dit true is, dan wordt bij een Zoek&amp;Voegtoe-actie (insert) de inhoud van deze kolom 
-		 * gekopieerd. Kolommen waarbij deze setting op false staat worden juist niet meegenomen in de insert. 
+		 * @description If this is true, the content of this column will be copied during a Search&amp;Add action (insert). 
+		 * Columns with this setting set to false will not be included in the insert. 
 		 */
 		"copy_upon_insert": {},
 		
 		/**
 		 * @type {boolean}
-		 * @description Bewerkbaarheid van een kolom.
+		 * @description Editability of a column.
 		 */
 		"editable": true,
 		
 		/**
 		 * @type {function}
-		 * @description Callback functie die aangeroepen moet worden na het editten van een cell door een gebruiker. 
-		 * Let wel: dit is iets anders dan de 'editfunc'. 'editfunc' is bedoeld om de werking van de editfunctie te 
-		 * wijzigen. 'editcallback' wordt als laatste uitgevoerd, na 'editfunc'.
+		 * @description Callback function to be called after a user edits a cell. 
+		 * Note: This is different from 'editfunc'. 'editfunc' is used to modify the behavior of the edit function, 
+		 * while 'editcallback' is executed last, after 'editfunc'.
 		 */
 		"editcallback": function(t, n, newValue){},
 		
 		/**
 		 * @type {function}
-		 * @description Customfunctie die uitgevoerd moet worden na het editten van een cell. Deze functie is bedoeld om 
-		 * de standaardverwerking van celinvoer te vervangen: normaal zou de software de bewerkte cel in de database direct 
-		 * willen bewerken, maar wanneer de schermtabel een view is, moeten juist andere tabellen worden bewerkt en dat 
-		 * kan in editfunc worden gedeclareerd.
+		 * @description Custom function to be executed after editing a cell. 
+		 * This function is intended to replace the default handling of cell input: 
+		 * normally, the software would update the edited cell directly in the database, 
+		 * but when the screen table is a view, other tables need to be updated instead, 
+		 * and this can be declared in 'editfunc'.
 		 */
 		"editfunc": function(t, n, newValue){},
 		
 		/**
 		 * @type {array}
-		 * @description Lijst van tabellen die ververst moeten worden na het editten van een cell.
+		 * @description List of tables that should be refreshed after editing a cell.
 		 */
 		"editrefresh": ["table1", "table2"],
 		
 		/**
-		 * @description Regex waarmee de bewerkte cellinhoud mee moet matchen om de 'editfunc' te triggeren. Als 'edittrigger' 
-		 * null is, dan wordt 'editfunc' altijd getriggerd.
+		 * @description Regex that the edited cell content must match to trigger the 'editfunc'. 
+		 * If 'edittrigger' is null, 'editfunc' will always be triggered.
 		 */
 		"edittrigger": "",
 
 		/**
-		 * @description Function voor het voorbewerken (preprocessen) van een ingevoerde waarde, vóór dat Lex'it deze invoert in de database.
+		 * @description Function for preprocessing an entered value before Lex'it inserts it into the database.
 		 * @see searchpreprocess 
 		 */
 		"editpreprocess": "",
@@ -563,44 +586,43 @@ var oTableConfigurationList_example = {
 		
 		/**
 		 * @type {function}
-		 * @description Handler dat aangeroepen wordt wanneer het bewerken van een editable veld een fout veroorzaakt. 
+		 * @description Handler that is called when editing an editable field causes an error. 
 		 */
 		"editerrorhandler": function(err){},
 		
 		/**
 		 * @type {boolean}
-		 * @description Ellipsis. Wanneer een cel heel veel tekst bevat, kan ellipsis aan worden gezet: dan wordt slechts 
-		 * een deel van de tekst getoond. Bij mouseover wordt wel de hele celinhoud getoond.
+		 * @description Ellipsis. When a cell contains a lot of text, ellipsis can be enabled: only a portion of the text will be displayed. 
+		 * On mouseover, the full content of the cell will be shown.
 		 */
 		"ellipsis": false,
 
 		/**
 		 * @type {integer}
-		 * @description Ellipsis. Wanneer ellipsis is toegepast en de gebruiker met de muis over de tabel heen gaat, klapt
-		 * de een na de andere cel open en swingen de rijen steeds open en dicht, wat erg onrustig is. Bovendien bemoeilijkt
-		 * dat het selecteren van een rij, omdat rijen eromheen te pas en te onpas open- en dichtklappen. Een oplossing is om een delay
-		 * in te stellen, waardoor het uitklappen van een rij pas gebeurt als er na een opgegeven tijdsduur nog steeds sprake
-		 * is van 'mouseover' op de uit te klappen cel. Zo niet, dan klapt de cel niet open. 
+		 * @description Ellipsis. When ellipsis is applied and the user moves the mouse over the table, the cells open one after another, 
+		 * causing rows to swing open and closed, which can be very distracting. This also makes it difficult to select a row, 
+		 * as nearby rows keep opening and closing. One solution is to set a delay, so that the expansion of a row only happens 
+		 * if the mouse is still hovering over the cell after a specified duration. If not, the cell will not expand.
 		 */
 		"ellipsis_delay": 300,
 		
 		
 		/**
 		 * @type {string}
-		 * @description 'max-width' attribuut bij ellipsis.
+		 * @description 'max-width' attribute for ellipsis.
 		 */
 		"ellipsis_width": "200px",
 
 
 		/**
 		 * @type {string}
-		 * @description 'max-height' attribuut bij ellipsis. Wanneer deze waarde door de cel-inhoud overschreden wordt, verschijnt er een scrollbar. 
+		 * @description 'max-height' attribute for ellipsis. When this value is exceeded by the cell content, a scrollbar will appear. 
 		 */
 		"ellipsis_height": "150px",
 		
 		/**
 		 * @type {boolean}
-		 * @description Ellipsis unwrap. Moet een ellipsis cel worden uitgepakt bij mouseover of niet? 
+		 * @description Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. 
 		 * (default: true)
 		 */
 		"ellipsis_unwrap": true,
@@ -608,78 +630,80 @@ var oTableConfigurationList_example = {
 		
 		/**
 		 * @type {boolean}
-		 * @description Ellipsis: moet een geselecteerde rij unwrapped blijven, i.p.v. automatisch wrappen bij mouseout? 
+		 * @description Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? 
 		 * (default: true)
 		 */
 		"ellipsis_keep_selected_unwrapped": true,
 		
 		/**
 		 * @type {string}
-		 * @description Kolomfilter die gelijk bij het initialiseren van een tabel moet worden toegepast. Om de 
-		 * filter ook na het initialiseren te handhaven, moet men ook 'keepfilter':true instellen.
+		 * @description Column filter that should be applied immediately upon initializing the table. 
+		 * To maintain the filter after initialization, set 'keepfilter': true as well.
 		 */
 		"filter": "",
 		
 		/**
 		 * @type {boolean}
-		 * @description Als dit 'false' is, dan kan een gebruiker de zichtbaarheid van een kolom niet wijzigen (bijv. 
-		 * handig als een verbogen kolom informatie bevat die niet voor de gebruiker bestemd is).
+		 * @description If this is 'false', a user cannot change the visibility of a column 
+		 * (e.g., useful when a hidden column contains information not intended for the user).
 		 */
 		"flexible_visibility": true,
 		
 		/**
 		 * @type {boolean}
-		 * @description Als dit 'true' is, dan wordt de filter (uit parameter 'filter':...) opnieuw toegepast als men 
-		 * op 'RESET' klikt. Als men wil voorkomen dat de filter tussentijds wordt gewijzigd, moet met dezelfde kolom 
-		 * op "searchable": false zetten. 
+		 * @description If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 
+		 * 'RESET' button is clicked. If you want to prevent the filter from being modified in the meantime, 
+		 * set "searchable": false for the same column. 
 		 */
 		"keepfilter": true,
 		
 		
 		/**
 		 * @type {boolean}
-		 * @description Als dit 'false' is, wordt de query builder by CTRL+klik in het zoekveld uitgeschakeld.
+		 * @description If this is 'false', the query builder will be disabled by CTRL+click in the search field.
 		 */
 		"query_builder_allowed": false,
 		
 		/**
 		 * @type {object}
-		 * @description declareer de in de query builder te tonen zoekwaarden (keys) en hun vertaling in voor de database begrijpelijke waarden om een welgevormde query samen te stellen (values).
+		 * @description Declare the search values (keys) to be shown in the query builder, 
+		 * and their translation into database-understandable values (values) to construct a well-formed query.
 		 * @example {"Neuter": "n", "Masculine": "m", "Feminine": "f"}
 		 */
 		"query_builder_values": {"key": "value"},
 		
 		/**
 		 * @type {function}
-		 * @description functie om de door query builder geformuleerde query aan te passen voordat deze wordt afgevuurd op de database.
+		 * @description Function to modify the query formulated by the query builder before it is sent to the database.
 		 */		
 		"query_builder_processor": function(query){}, 
 		
 		/**
 		 * @type {object}
-		 * @description settings voor de query builder (indien default gedrag aangepast moet worden).
-		 * Parameter 'grid': true/false bepaalt of de zoekwaarden al dan niet als een grid getoond moeten worden.
-		 * Parameter 'preselected' bepaalt welke waarde in de query builder alvast geselecteerd moet zijn.
-		 * Parameter 'autostart': true/false bepaalt of de door de query builder geformuleerde query bij klikken op OK al dan niet direct moet worden afgevuurd op de database.
+		 * @description Settings for the query builder (if the default behavior needs to be adjusted). 
+		 * Parameter 'grid': true/false determines whether the search values should be displayed as a grid.
+		 * Parameter 'preselected' specifies which value should be preselected in the query builder.
+		 * Parameter 'autostart': true/false determines whether the query formulated by the query builder 
+		 * should be immediately sent to the database when clicking OK.
 		 */
 		"query_builder_settings": {"grid": false, "preselected": "some_value", "autostart": true},
 		
 		/**
 		 * @type {boolean}
-		 * @description Doorzoekbaarheid van een kolom.
+		 * @description Searchability of a column.
 		 */
 		"searchable": true,
 		
 		/**
 		 * @type {boolean}
-		 * @description Sorteerbaarheid van een kolom.
+		 * @description Sortability of a column.
 		 */
 		"sortable": true,
 		
 		/**
 		 * @type {function}
-		 * @description Functie die moet worden getriggerd als men een zoekopdracht toepast op een gegeven kolom.
-		 * Voorbeeld: zet de zoekwaarde automatisch om naar lowercase (dit wordt dan de effectieve zoekwaarde)
+		 * @description Function to be triggered when a search is applied to a given column. 
+		 * Example: automatically convert the search value to lowercase (this becomes the effective search value).
 		 * @see searchform
 		 * @see editpreprocess
 		 */
@@ -687,62 +711,63 @@ var oTableConfigurationList_example = {
 
 		/**
 		 * @type {function}
-		 * @description Pas de tekst van een cell aan voordat die op het scherm wordt getoond. Dit is zuiver bedoeld voor rendering.
-		 * Dit heeft dus géén invloed op de onderliggende data. Zoekopdrachten worden door deze functie dus niet beïnvloed.
+		 * @description Modify the text of a cell before it is displayed on the screen. 
+		 * This is purely for rendering purposes. 
+		 * It does not affect the underlying data, so search queries are not influenced by this function
 		 */
 		"render": function(text){},
 		
 		/**
 		 * @type {string}
-		 * @description Kleur die de tekst moet hebben in een gegeven kolom.
+		 * @description Color that the text should have in a given column.
 		 */
 		"textcolor": "",
 		
 		/**
 		 * @type {string}
-		 * @description Font-family in een gegeven kolom.
+		 * @description Font-family for a given column.
 		 */
 		"textfont": "",
 		
 		/**
 		 * @type {string}
-		 * @description Font-size in een gegeven kolom.
+		 * @description Font-size for a given column.
 		 */
 		"textsize": "",
 		
 		/**
 		 * @type {string}
-		 * @description Font-style in een gegeven kolom.
+		 * @description Font-style for a given column.
 		 */
 		"textstyle": "",
 		
 		/**
 		 * @type {string}
-		 * @description Font-weight in een gegeven kolom. Zie voorbeeld bij 'textstyle'. 
+		 * @description Font-weight for a given column. See the example at 'textstyle'. 
 		 */
 		"textweight": "",
 		
 		/**
 		 * @type {string}
-		 * @description Bij het gebruik van selectboxen kan het zijn dat een gebruiker een waarde per ongeluk klikt.
-		 * Om dat te voorkomen, kan men in de configuratie afdwingen dat de gebruiker bij het maken van zijn keuze 
-		 * tegelijkertijd een opgegeven toets indrukt. Wanneer de gebruiker deze toets bij het maken van een keuze 
-		 * in een selectbox niet indrukt, wordt de keuze afgekeurd. Deze validatie-toets kan worden opgegeven als 
-		 * 'validator'. 
+		 * @description When using select boxes, it may happen that a user accidentally clicks a value. 
+		 * To prevent this, you can enforce in the configuration that the user must press a specified key 
+		 * while making their selection. If the user does not press this key when making a selection in the select box, 
+		 * the choice will be rejected. This validation key can be specified as 'validator'.
 		 */
 		"validator": "",
 		
 		/**
 		 * @type {boolean}
-		 * @description Zichtbaarheid van een kolom. De zichtbaarheid van een kolom kan in de gebruikersinterface 
-		 * door een gebruiker worden gewijzigd. Om dat te voorkomen (bijv. omdat een kolom 'geheime' informatie bevat) 
-		 * moet men ook "flexible_visibility": false instellen.
+		 * @description Visibility of a column. The visibility of a column can be changed by the user in the interface. 
+		 * To prevent this (e.g., because a column contains 'secret' information), 
+		 * you should also set "flexible_visibility": false.
 		 */
 		"visible": true,
 		
 		/**
 		 * @type {string}
-		 * @description Breedte van een kolom. Dit kan worden gespecificeerd in 'px', maar men kan ook een relatieve waarde (in '%') opgeven.
+		 * @description Width of a column. This can be specified in 'px', 
+		 * but a relative value (in '%') can also be provided.
 		 */
 		"width": "10%"
 
@@ -1075,6 +1100,17 @@ conf.getSelectTriggerEvent = function(aColumnConfig){
 		return "mouseover";
 	return aColumnConfig["select_trigger_event"];
 }
+
+/**
+ * Retrieve delay (in ms) before the mouse event [triggering select box to appear] is effectively triggered
+ * Default: 250 ms
+ */
+conf.getSelectTriggerDelay = function(aColumnConfig){
+	if (typeof aColumnConfig["select_trigger_delay"] == 'undefined')
+		return 250; // ms
+	return aColumnConfig["select_trigger_delay"];
+}
+
 
 
 // retrieve visibility settings
@@ -2557,7 +2593,7 @@ conf.getFormGrid = function(aTableSettings){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Nov 11 2024 12:08:22 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:40 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>
