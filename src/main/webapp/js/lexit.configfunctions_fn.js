@@ -439,6 +439,16 @@ fn.getCurrentSchema = function(){
 
 
 
+/**
+ * Rebuild the tables menu in the Lex'it GUI. 
+ * This function is to be called when table visibility was changed (oHiddenTablesList or oShowOnlyTables), etc.
+ */
+fn.rebuildTablesMenu = function(){
+	ts.reinit();
+	ts.getListOfTables(null, "", "");
+}
+
+
 
 
 // *****************************************************************
