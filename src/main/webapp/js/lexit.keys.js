@@ -426,28 +426,22 @@ kf.addKeyFunctions = function(){
 				"    <form id=\"fileUploadForm\">" +
 				"        <input type=\"file\" id=\"fileChooser\" name=\"file\" />" +
 				"        <BR><BR>" +
-				"        <button type=\"button\" onclick=\"uploadFile()\">"+ lang.import_uploadbutton +"</button>" +
+				"        <button type=\"button\" id=\"start_upload_button\" onclick=\"uploadFile()\">"+ lang.import_uploadbutton +"</button>" +
 				"    </form>";
 
 			fn.message(lang.import_dialog_title, lang.import_dialog_msg+":<BR><BR>"+sUploadForm);
 			setTimeout(function(){
-					$("#dialog_accept_button").text(lang.cancel);
+					$("#dialog_accept_button")
+						.text(lang.cancel)
+						.attr("id", "upload_cancel_button");
+						//.removeClass("ui-button").removeClass("ui-corner-all").removeClass("ui-widget")						
+						
+					$("#upload_cancel_button").appendTo("#fileUploadForm");
+					
+					$("#start_upload_button").addClass("ui-button").addClass("ui-corner-all").addClass("ui-widget")
+					
+					$("input#fileChooser").focus();
 				}, 100); 
-			//	function(){
-			//		uploadFile();
-			//	},
-			//	function(){
-            //        // do nothing
-			//	}
-			//);
-			
-			//setTimeout(function(){
-			//	$("#dialog_accept_button").text(lang.import_uploadbutton);
-			//	$("#dialog_accept_button").prop("value", lang.import_uploadbutton);
-			//	
-			//	$(".ui-dialog-buttonset").find("button").eq(1).text(lang.cancel);
-			//	$(".ui-dialog-buttonset").find("button").eq(1).prop("value", lang.cancel);
-			//	}, 200);			
 			
 		}
 
