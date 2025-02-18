@@ -1914,13 +1914,19 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		
 		
 		// take care of select boxes
-		// [1] select values from 'choosefrom' in config.js
-		var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
-		var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
-		// [2] ELSE  select values from Postgres ENUM type
-		if (aAllowedValues == null)
+		
+		// [1] select values from 'choosefrom' in list config
+		var oCellConfig = 		lists.getCellConfig(sListLabel, sColName);
+		var aAllowedValues = 	oCellConfig != null ? oCellConfig["choosefrom"] : null; 
+		
+		// [2] select values from 'choosefrom' in config.js
+		if (aAllowedValues == null){
+			aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+		}				
+		// [3] ELSE  select values from Postgres ENUM type
+		if (aAllowedValues == null){
 			aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];
-			
+		}
 
 
 		// make column editable if required:
@@ -2109,14 +2115,21 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			// we need to know which value is currently assigned to the cell, in order to show it as 'selected' in the selectbox
 			var sValueOfThisCell = 	lists.getDataFromCell(sListLabel, nCell);
 			
-			// get the values to select from
+			// get the values to select from			
+			
+			// [1] select values from 'choosefrom' in list config
+			var oCellConfig = 		lists.getCellConfig(sListLabel, sCellName);
+			var aAllowedValues = 	oCellConfig != null ? oCellConfig["choosefrom"] : null;
+			var aValuesToLabels =	oCellConfig != null ? oCellConfig["choosefrom_labels"] : null; 	
+			
+			// [2] select values from 'choosefrom' in config.js
 			var oTableConfig = 		conf.getTableConfig(sTableToFeedTheListWith);
 			var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sCellName);
-			
-			// [1] select values from 'choosefrom' in config.js
-			var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
-			var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
-			// [2] ELSE  select values from Postgres ENUM type
+			if (aAllowedValues == null){
+				aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+				aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);	
+			}
+			// [3] ELSE  select values from Postgres ENUM type
 			if (aAllowedValues == null)
 				aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];		
 			
@@ -2678,6 +2691,22 @@ form.getFeedingTable = function(mixed){
 
 
 // --------------------------------------------------------------------
+
+
+
+/**
+ * Retrieve the configuration of a form column/cell
+ * @param {String} name of the table underlying the form
+ * @param {String} name of the cell/column
+ * @returns {Array} associative array
+ */
+form.getColumnConfig = function(sTableName, sCellName){
+	
+	var aTableSettings = conf.getTableSettings(sTableName);
+	var oGrid = conf.getFormGrid(aTableSettings);
+	var oCells = oGrid["cells"];
+	return oCells[sCellName];
+};
 
 
 /**

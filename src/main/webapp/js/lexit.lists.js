@@ -567,7 +567,7 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 				var sThisListLabel = 		lists.getLabelFromNode(this);
 				var sThisListTableName =	lists.getFeedingTable(sThisListLabel);
 				var aAllColumns = 			lists.getAllColumns(sThisListTableName);
-
+				
 
 				// if some values of the record to be added
 				// have to be copied according to config, do that
@@ -653,11 +653,18 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 						
 					for (const sColNameForGUI of aColumnsForGUI) {	
 						
-						var oColumnConfig =	conf.getColumnConfig(oThisListTableConfig, sColNameForGUI);
 						
-						// [1] select values from 'choosefrom' in config.js
-						var aAllowedValues = conf.getSelectionBox(oColumnConfig);
-						// [2] ELSE  select values from Postgres ENUM type
+						
+						// [1] select values from 'choosefrom' in list definition
+						var oCellConfig = lists.getCellConfig(sThisListLabel, sColNameForGUI);
+						var aAllowedValues = oCellConfig != null ? oCellConfig["choosefrom"] : null;
+						
+						// [2] select values from 'choosefrom' in config.js
+						if (aAllowedValues == null){
+							var oColumnConfig =	conf.getColumnConfig(oThisListTableConfig, sColNameForGUI);
+							aAllowedValues = conf.getSelectionBox(oColumnConfig);
+						}
+						// [3] ELSE  select values from Postgres ENUM type
 						if (aAllowedValues == null){
 							var iColNameIndex = 	$.inArray(sColNameForGUI, mt.getListOfColumnsOf(sThisListTableName));
 							aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sThisListTableName)[iColNameIndex];
@@ -1463,6 +1470,29 @@ lists.getDataFromCell = function(sListLabel, mMixed, sColName){
 	// otherwise
 	return null;
 };
+
+
+/**
+ * Get the config of a cell in a list, given its label
+ * @param {String} label of the list
+ * @param {String} [sColName] column name of the cell
+ * @returns {Array} associative array
+ */
+lists.getCellConfig = function(sListLabel, sCellName){
+	
+	var sFormContainerId = lists.getFormContainerId(sListLabel);
+	var sFormTable = form.getFeedingTable(sFormContainerId);
+	var oTableSettings = conf.getTableSettings(sFormTable);
+	var oFormGrid = conf.getFormGrid(oTableSettings);
+	var oLists = oFormGrid["lists"];	
+	var oListConfig = oLists[sListLabel];	
+	var oColumnsConfig = oListConfig["table"]["columns"];	
+	var oCellConfig = oColumnsConfig[sCellName];
+	
+	return oCellConfig;
+};
+
+
 
 
 /**

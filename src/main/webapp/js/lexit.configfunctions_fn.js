@@ -308,9 +308,10 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @pparam {Boolean} bAppendHelp - append the help button if true
  */
-fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo){
+fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo, sCustomLogoSize){
 	
 	if (bAppendHelp == null) bAppendHelp = false;
+	if (sCustomLogoSize == null) sCustomLogoSize = "52px";
 	
 	if (bSetting){
 		$("body").removeClass("default").addClass("huisstijl");
@@ -330,7 +331,7 @@ fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo){
 		
 		if (sPathToCustomLogo != null) {
 			$("#square_logo").append(
-				$("<img>").attr("src", sPathToCustomLogo)
+				$("<img>").attr("src", sPathToCustomLogo).css("height", sCustomLogoSize).css("width", sCustomLogoSize)
 			);
 		}
 	}

@@ -366,7 +366,7 @@ public class TableResources {
 		try {
 			fileToSend = readWelcomeJsFile(context, dbName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			// do nothing: a welcome page is not mandatory, so no need to throw an exception  
 		}
 		
 		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
