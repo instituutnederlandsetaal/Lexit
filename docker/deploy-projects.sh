@@ -1,17 +1,29 @@
 #!/bin/bash
 
+# version
+echo "=== Lexit Configs Deployer v2025.02.17 ==="
+
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+# no color
+NC='\033[0m'
+
 # load .env
 echo "Loading .env"
 set -a && source .env && set +a
 
+# define defaults that can be overridden by .env
+PROJECTS_GIT=${PROJECTS_GIT:-"https://github.com/INL/lexit-configs"}
+
 # pull Lexit-configs
-echo "Pulling lexit-configs"
+echo "Pulling configs from $PROJECTS_GIT"
 if [ -d "lexit-configs" ]; then
     git -C lexit-configs fetch
-    git -C lexit-configs reset --hard $LEXIT_CONFIGS_VERSION
+    git -C lexit-configs reset --hard $CONFIGS_VERSION
 else
-    git clone https://github.com/INL/lexit-configs lexit-configs
-    git -C lexit-configs reset --hard $LEXIT_CONFIGS_VERSION
+    git clone $PROJECTS_GIT lexit-configs
+    git -C lexit-configs reset --hard $CONFIGS_VERSION
 fi
 
 # create tmp dirs
@@ -24,7 +36,7 @@ echo "Copying configs to temp folder"
 # $PROJECTS is a comma separated list of projects
 for project in $(echo $PROJECTS | tr "," "\n")
 do
-    cp lexit-configs/$project/*.database $TMP_LEXIT_DB_CONFIG
+    cp lexit-configs/$project/*.database $TMP_LEXIT_DB_CONFIG 2>/dev/null || echo -e "${YELLOW}WARNING: No database file found for $project. Continuing...${NC}"
     cp -r lexit-configs/$project/* $TMP_LEXIT_CONFIG
 done
 
@@ -42,12 +54,12 @@ echo "user=$LEXIT_SCHEMA_USER" >> $lexit_schema
 echo "pass=$LEXIT_SCHEMA_PASSWORD" >> $lexit_schema
 
 echo "Copying projects-overview.js"
-cp projects_overview.js $TMP_LEXIT_CONFIG
+cp projects_overview.js $TMP_LEXIT_CONFIG 2>/dev/null || echo -e "${YELLOW}WARNING: No projects_overview.js found. Continuing...${NC}"
 
 # rsync from tmp to real
 echo "Copying tmp folder to real folder"
-rsync -a --delete $TMP_LEXIT_CONFIG lexit2_config/
+rsync -a --delete $TMP_LEXIT_CONFIG lexit2_config/ 2>/dev/null || echo -e "${YELLOW}WARNING: Incomplete rsync of lexit2_config ${NC}"
 rsync -a --delete $TMP_LEXIT_DB_CONFIG lexit2_db_config/
 rm -rf tmp
 
-echo "Finished deploying projects to docker mount"
+echo -e "${GREEN}Finished deploying projects to docker mount!${NC}"
