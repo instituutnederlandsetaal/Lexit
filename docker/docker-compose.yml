@@ -1,7 +1,9 @@
+name: lexit
+
 services:
 
     lexit:
-        image: instituutnederlandsetaal/lexit:${LEXIT_VERSION}
+        image: instituutnederlandsetaal/lexit:${DOCKER_VERSION}
         restart: unless-stopped
         build:
             context: ..
