@@ -681,6 +681,14 @@ $.inArrayRegEx = function(value, array, start) {
 };
 
 
+// get the values that are not common (symmetric difference) between two arrays
+function symmetricDifference(arr1, arr2) {
+    return arr1.filter(val => !arr2.includes(val))
+           .concat(arr2.filter(val => !arr1.includes(val)));
+}
+
+
+
 
 //*******************************************************
 // ESCAPE CHARS functions

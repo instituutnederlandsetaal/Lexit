@@ -183,12 +183,16 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		// if the arrays are not identical, we should give an error message
 		else {
 			
+			var sCompare = lang.columns_list_to_compare + ": {" + symmetricDifference(firstArray, secondArray).join(", ") + "}";
+			
 			var sCause = (aColumnOrder.length != aAllColumns.length) ?
 					lang.columns_list_number_mismatch1+": "+aAllColumns.length+".<BR><BR>"+
-					lang.columns_list_number_mismatch2+": "+aColumnOrder.length 
+					lang.columns_list_number_mismatch2+": "+aColumnOrder.length+".<BR><BR>"+
+					sCompare 
 					: 
 					lang.columns_list_name_mismatch1+ ":<BR>{"+ firstArray.join(", ") +"}.<BR><BR>"+
-					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}";
+					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}<BR><BR>"+
+					sCompare
 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ ": " +sCause+".");
 		}
 	}

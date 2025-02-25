@@ -2089,7 +2089,7 @@ conf.getFreeHeaderButtonPosition = function(aButtonSettings){
 
 conf.getFreeHeaderButtonBgColor = function(aButtonSettings){
 	if (typeof aButtonSettings["bgcolor"] == 'undefined')
-		return "blue";
+		return "#3970b3";
 	return aButtonSettings["bgcolor"];
 };
 
@@ -2171,7 +2171,7 @@ conf.getHeaderButtonName = function(aButtonSettings){
 };
 conf.getHeaderButtonBgColor = function(aButtonSettings){
 	if (typeof aButtonSettings["bgcolor"] == 'undefined')
-		return "blue";
+		return "#3970b3";
 	return aButtonSettings["bgcolor"];
 };
 conf.getHeaderButtonTextColor = function(aButtonSettings){
