@@ -18,7 +18,7 @@ import resources.DbResponseObject;
 
 
 
-public class PostgresDatabaseCommunication {
+public class PostgresDatabaseCommunication implements AutoCloseable {
 	
 	// keep in mind just in case 
 	//
@@ -832,6 +832,11 @@ public class PostgresDatabaseCommunication {
 		return 
 			typeName.startsWith("real") ||
 			typeName.startsWith("double precision"); 
+	}
+
+	@Override
+	public void close() throws Exception {
+		closeConnection();		
 	};
 	
 }
