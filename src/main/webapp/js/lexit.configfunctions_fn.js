@@ -446,7 +446,7 @@ fn.getCurrentSchema = function(){
  */
 fn.rebuildTablesMenu = function(){
 	ts.reinit();
-	ts.getListOfTables(null, "", "");
+	ts.getListOfTables(null, {}, {});
 }
 
 

@@ -406,6 +406,7 @@ gui.buildFormViewIfRequiredOLD = function(sSomeTablename){
 		// ------------
 
 		var nReferentialColumn = $("#"+sSomeTablename+"_wrapper thead").find("th").eq(i);
+		var iFontSize = parseInt(nReferentialColumn.css("font-size"));
 		var sColumnTitle = nReferentialColumn.text();
 		var oTableConfig = conf.getTableConfig(sSomeTablename);
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnTitle);
@@ -417,7 +418,9 @@ gui.buildFormViewIfRequiredOLD = function(sSomeTablename){
 			.addClass(sSomeTablename+"_cell_label")
 			.css("width", iMaxColumnTitleWidth)
 			.css("background-color", "#E2E4FF")
-			.append($("<b></b>").text(sColNameToRender));	
+			.append(
+				$("<b></b>").text(sColNameToRender).css("font-size", iFontSize)
+			);	
 		
 		var iNewTop  = iBaseTop + y*(iBaseHeight+2);
 		var iNewLeft = iBaseLeft + x*(2.5*iMaxColumnTitleWidth) + x*40;

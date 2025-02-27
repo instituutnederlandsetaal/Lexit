@@ -43,7 +43,6 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 			
 			removeSpinner('#indicators');
 			fn.message(lang.error, lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
-			//fn.startLexitLogout(false);
 		}
 	});
 	
@@ -198,21 +197,26 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 			iNumberOfVisibleTables++;
 		
 		// set the filters of the table to be called upon startup
-		if (tableItems.eq(0).text() == sTableToCallUponStartUp)
-			{
+		if (tableItems.eq(0).text() == sTableToCallUponStartUp) {
 			haTableFilters.put( sTableName, oContentToMatchUponStartUp );
 			haTableSettings.put( sTableName, oTableSettings );
-			}			
-		else
-			{
+		}			
+		else {
 			haTableFilters.put( sTableName, {} );
 			haTableSettings.put( sTableName, {} );
-			}
+		}
 	});	
 	
 	
+	// make sure that groups are sorted alphabetically, except the empty name "" and the "Default" names, which must come first
+	aTableGroups.sort((a, b) => {
+	    if (a === "") return -1; // Empty string comes first
+	    if (b === "") return 1;
+	    if (a === "Default") return -1; // "Default" comes second     NB: Default is returned by function conf.getTableGroup()
+	    if (b === "Default") return 1;
+	    return a.localeCompare(b); // Alphabetical order for the rest
+	});
 
-	
 	
 	// build a selection list now
 	ts.buildListOfTables(haTableFilters, haTableSettings, aTableGroups, haTableGroups);
@@ -220,20 +224,19 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	// if we have only one table to choose from
 	// load that table automatically (at least if default behaviour,
 	// as stated in bOpenSingleTableAtStartup variable, wasn't turned off in config.js file)
-	if (iNumberOfVisibleTables==1 && bOpenSingleTableAtStartup)
-		{
+	if (iNumberOfVisibleTables==1 && bOpenSingleTableAtStartup) {
+		
 		var iIndexOfFirstVisibleTable = $.inArray(true, abTableVisible, 1);
 		$("#selected_source").val(asTableNames[iIndexOfFirstVisibleTable]).change();
+		
 		// if we have only one table available, let's hide the table selector (which is meaningless now)
 		$("#selected_source").hide();
 		$("#indicator").find("span").eq(0).hide();
-		}
+	}
 	// else if we are required to open a given table at start up, do it
-	else if (sTableToCallUponStartUp != null)
-		{
+	else if (sTableToCallUponStartUp != null) {
 		$("#selected_source").val(sTableToCallUponStartUp).change();
-		}
-	
+	}
 };
 		
 
@@ -269,8 +272,8 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 
 		});
 
-	for (var j=0; j<aTablesGroups.length; j++)
-		{
+	for (var j=0; j<aTablesGroups.length; j++) {
+		
 		// get the name of the group
 		var sOneGroupName = aTablesGroups[j];
 		
@@ -282,8 +285,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 		var aCurrentGroupOfTables = haTableGroups.get(sOneGroupName);
 		
 		// append the table names to the menu to choose from
-		for (var i=0; i<asTableNames.length; i++)
-			{
+		for (var i=0; i<asTableNames.length; i++) {
 			
 			// skip invisible tables (hidden for user)
 			if ( !abTableVisible[i] )
@@ -298,19 +300,18 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 			
 			// append visible table names
 			groupTagToAdd.append(
-					$("<option></option>")
-						.attr("value", asTableNames[i] )
-						.text( asTableDescriptions[i] )	
-						.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
-						.attr("title", bShowTableComments ? asTableComments[i] : "")
-						.attr("disabled", (asTableComments[i] == "separator"))
-				);
-			}
+				$("<option></option>")
+					.attr("value", asTableNames[i] )
+					.text( asTableDescriptions[i] )	
+					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
+					.attr("title", bShowTableComments ? asTableComments[i] : "")
+					.attr("disabled", (asTableComments[i] == "separator"))
+			);
+		}
 		
 		// add the group we just built, to the select tag
-		selectTagToAdd.append(groupTagToAdd);
-		
-		}
+		selectTagToAdd.append(groupTagToAdd);	
+	}
 	
 	
 	// add the select tag to the form tag	
@@ -332,35 +333,31 @@ ts.callTable = function(haTableFilters, haTableSettings){
 	$("#selected_source").val(lang.choose_a_table_default_value);
 	
 	// no choice means do nothing
-	if (sTableName == lang.choose_a_table_default_value) 
-		{
+	if (sTableName == lang.choose_a_table_default_value) {
 		removeSpinner();
 		return true;
-		}
+	}
 	
 	// special case, ctrl pressed means adding a table to the screen
-	if ( kf.isPressed("ctrl") )
-		{
+	if ( kf.isPressed("ctrl") ) {
+		
 		if ($.inArray(sTableName, mt.getListOfLoadedTables())<0 )			
 			fn.callDatabase(sTableName, {} );
-		else
-			{
+		else {
 			removeSpinner();
 			fn.message(lang.beware, lang.already_loaded);
 			return true;
-			}
-			
 		}
+			
+	}
 	// special case, shift pressed means opening a table in a new tab
-	else if ( kf.isPressed("shift") )
-		{
+	else if ( kf.isPressed("shift") ) {
 		removeSpinner();
 		kf.registerReleasedKey();
 		fn.callDatabaseInNewTab(sTableName, {} );
-		}
+	}
 	// normal case, selection of a table causes removal of all others
-	else
-		{
+	else {
 		// we make a clean start:
 		
 		// remove all table properties records
@@ -372,7 +369,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 		
 		// load the chosen table:				
 		fn.callDatabase(sTableName, haTableFilters.get(sTableName), null, haTableSettings.get(sTableName));
-		}
+	}
 };
 
 
