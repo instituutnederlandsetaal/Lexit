@@ -306,11 +306,11 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 /**
  * Add a balk on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
- * @pparam {Boolean} bAppendHelp - append the help button if true
+ * @pparam {Boolean} bSetLinks - set default links to help, about and contribute
  */
-fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo, sCustomLogoSize){
+fn.setBalk = function(bSetting, bSetLinks, sPathToCustomLogo, sCustomLogoSize){
 	
-	if (bAppendHelp == null) bAppendHelp = false;
+	if (bSetLinks == null) bSetLinks = false;
 	if (sCustomLogoSize == null) sCustomLogoSize = "52px";
 	
 	if (bSetting){
@@ -322,10 +322,32 @@ fn.setBalk = function(bSetting, bAppendHelp, sPathToCustomLogo, sCustomLogoSize)
 		$("#indicators").removeClass("default").addClass("huisstijl");
 		$("#headerlinks").removeClass("default").addClass("huisstijl");
 		
-		if (bAppendHelp){
+		if (bSetLinks){
 			// assign functions
 			setTimeout(function(){
+				
+				// append help
 				head.showGeneralHelp();	
+				
+				// append about
+				$("#headerlinks #about_link")
+					.click(function() {
+						fn.message("About Lex'it", 
+							"<table style='width: 400px'><tr>"+
+							"<td><h1>Lex'it</h1><b>Lex</b><i>icon</i> <b>I</b><i>nteractive</i> <b>T</b><i>ool</i><BR><BR><a href='https://www.ivdnt.org' target='_blank''>www.ivdnt.org</a></td>"+
+							"<td><BR><img src='"+(document.URL.indexOf("localhost")<0 ? "../lexit2/images/" : "images/")+"INT-logo-4regel.png' style='height: 120px; position:absolute; right:0;'></td>"+
+							"</tr></table><BR>"
+							);
+						setTimeout(function() {
+							$("#dialog_accept_button").focus();
+						});	
+					});
+					
+				// append contribute
+				$("#headerlinks #contribute_link")
+					.click(function() {
+						window.open("https://github.com/INL/lexit", "_blank");
+					});
 			}, 500);
 		}
 		

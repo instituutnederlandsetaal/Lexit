@@ -143,18 +143,19 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		// if some extra user info is available in the configuration (like job of table description, creation date)
 		// add it to the table description
 		var aFullDescription = new Array();
-		
+				
 		var sCreationDate = oTableComments["created"];
-		if (sCreationDate != null && sCreationDate != '')
-			aFullDescription.push("CREATED "+sCreationDate);
-		
 		var sFinishedDate = oTableComments["finished"];
-		if (sFinishedDate != null && sFinishedDate != '')
-			aFullDescription.push("FINISHED "+sFinishedDate);
-		
 		var sProcessedDate = oTableComments["processed"];
+		
+		// the else if statements are in order of importance
 		if (sProcessedDate != null && sProcessedDate != '')
-			aFullDescription.push("PROCESSED "+sProcessedDate);
+			aFullDescription.push(lang.job_short_processed_on+" "+sProcessedDate);
+		else if (sFinishedDate != null && sFinishedDate != '')
+			aFullDescription.push(lang.job_short_finished_on+" "+sFinishedDate);
+		else if (sCreationDate != null && sCreationDate != '')
+			aFullDescription.push(lang.job_short_started_on+" "+sCreationDate);		
+		
 		
 		
 		var sTableInfo = conf.getTableInfo(aTableSettings);
@@ -298,14 +299,22 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 			// outside home environment, showing table comments is not allowed
 			var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );
 			
+			
 			// append visible table names
-			groupTagToAdd.append(
-				$("<option></option>")
+			var optionTagToAdd = $("<option></option>")
 					.attr("value", asTableNames[i] )
-					.text( asTableDescriptions[i] )	
+					.html( asTableDescriptions[i] )	
 					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
 					.attr("title", bShowTableComments ? asTableComments[i] : "")
-					.attr("disabled", (asTableComments[i] == "separator"))
+					.attr("disabled", (asTableComments[i] == "separator"));
+			
+			// if the table some label, disable it 
+			if (asTableNames[i] == lang.choose_a_table_default_value)
+				optionTagToAdd.attr("disabled", "").attr("selected", "");
+			
+			// ready to append to current group
+			groupTagToAdd.append(
+				optionTagToAdd
 			);
 		}
 		

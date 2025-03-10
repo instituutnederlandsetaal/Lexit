@@ -412,6 +412,13 @@ kf.addKeyFunctions = function(){
     		if (sActiveTable!=null)
     			fn.refreshTable(sActiveTable);
     	}
+    	
+    	// logout
+    	if ( (kf.isPressed("l") && e.ctrlKey && e.shiftKey) ){
+			startLexitLogout(function(){
+				lexitReload();
+			});
+		}
 
 		// upload file
 		if (  (kf.isPressed("u") && e.ctrlKey && e.shiftKey) 

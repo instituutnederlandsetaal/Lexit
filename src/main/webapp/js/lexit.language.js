@@ -133,6 +133,9 @@ lang.table_notes = "Tabelnotities";
 lang.job_started_on = "Klus aangemaakt op";
 lang.job_finished_on = "Klus afgemaakt op";
 lang.job_processed_on = "Klus verwerkt op";
+lang.job_short_started_on = "AANGEMAAKT";
+lang.job_short_finished_on = "AFGEMAAKT";
+lang.job_short_processed_on = "VERWERKT";
 lang.job_notes = "Notities";
 lang.note_was_added = "De notitie is toegevoegd.";
 lang.no_note_was_saved = "Geen notitie opgeslagen.";
@@ -814,6 +817,9 @@ lang.helpText =
 				"<TR>" +
 				"<TD>CTRL + Shift + U</TD><TD>&nbsp;&nbsp;</TD><TD>Upload een bestand.</TD>" +				
 				"</TR>" +
+				"<TR>" +
+				"<TD>CTRL + Shift + L</TD><TD>&nbsp;&nbsp;</TD><TD>Uitloggen.</TD>" +				
+				"</TR>" +
 				"</TABLE>" +
 				"</div>" +
 				
@@ -1406,6 +1412,9 @@ lang.setLanguage = function(sLanguageCode){
 				"<TR>" +
 				"<TD>CTRL + Shift + U</TD><TD>&nbsp;&nbsp;</TD><TD>Upload a file.</TD>" +				
 				"</TR>" +
+				"<TR>" +
+				"<TD>CTRL + Shift + L</TD><TD>&nbsp;&nbsp;</TD><TD>Log out.</TD>" +				
+				"</TR>" +
 				"</TABLE>" +
 				"</div>" +
 				
@@ -1570,9 +1579,12 @@ lang.setLanguage = function(sLanguageCode){
 
 		lang.click_to_add_a_note = "Click to add notes";
 		lang.table_notes = "Table notes";
-		lang.job_started_on = "Job started on";
+		lang.job_started_on = "Job created on";
 		lang.job_finished_on = "Job finished on";
 		lang.job_processed_on = "Job processed on";
+		lang.job_short_started_on = "CREATED";
+		lang.job_short_finished_on = "FINISHED";
+		lang.job_short_processed_on = "PROCESSED";
 		lang.job_notes = "Notes";
 		lang.note_was_added = "The notes were saved.";
 		lang.no_note_was_saved = "No note was saved.";
