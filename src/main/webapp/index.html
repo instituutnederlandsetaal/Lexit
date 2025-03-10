@@ -793,21 +793,42 @@
 			},
 			"error": function(jqxhr, settings, exception){
 				
+				// connection failed
+				if (jqxhr.responseText.indexOf("Connection failed")>=0){
+					
+					// use timeout to allow all error messages to be shown:
+					// we will then close all dialogs
+					// and given one single USEFUL message to the user
+					
+					setTimeout(function(){
+						
+						fn.closeDialog();
+						fn.message(lang.error, "<B>" + jqxhr.responseText + "</B>",
+							function () {
+								lexitReload();
+							}
+						);
+						
+					}, 1000);
+					
+				} 
+				
 				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
 				// so we reload the page, which will trigger the user to log in again
-				if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
+				else if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
 					throw new Error("Execution stopped: "+lang.saving_active_tab_failed); // prevents infinite loop!
 				}
+				
 				// otherwise, an error in this function indicates a problem with the webservice
 				// we we must tell the user firt about the error before reloading the page
-				else {
-					fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +lang.error+ ": ["+exception+"]",
+				else {						
+					fn.closeDialog();
+					fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +jqxhr.responseText+ ": ["+exception+"]",
 						function () {
 							lexitReload();
 						}
-					);
-				}
-				 
+					);					
+				}				 
 			}
 		});
 	}

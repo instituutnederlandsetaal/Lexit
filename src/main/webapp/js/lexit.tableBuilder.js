@@ -585,7 +585,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 	} ); //end of datatable definition
 
-	
+	// prevent ugly DataTables Ajax error
+	// See: https://datatables.net/manual/tech-notes/7 
+	$.fn.dataTable.ext.errMode = 'throw';
 	
 	// apply row grouping, if required
 	gui.applyRowGrouping(sSomeTableName);	

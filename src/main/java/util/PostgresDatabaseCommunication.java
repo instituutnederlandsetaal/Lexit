@@ -112,7 +112,10 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 
         } 
         catch (Exception e) {
-        	throw new RuntimeException("Connection failed! Check output console!", e);
+        	//
+        	// BEWARE: don't change this message, as the client checks of it
+        	// ======
+        	throw new RuntimeException("Connection failed! Check the project database configuration.", e);
         }
 
         if (this.db == null) {
