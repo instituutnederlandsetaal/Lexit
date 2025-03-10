@@ -126,6 +126,10 @@ public class TableResources {
 			nameToDatabaseObject.remove(key);
 			Util.debug("Removed old Database object: "+key);
 		}
+		
+		// log out
+		
+		lexitInfo.logOutUser(username);
  		
  		DbResponseObject dro = new DbResponseObject();
  		dro.setResponse(username + " was logged out from Lex'it"); 		

@@ -45,6 +45,8 @@ public class Database {
 	// servlet context etc
 	ContextObject co;
 	
+	PostgresDatabaseCommunication dc;
+	
 	// columns names and types, etc. hashed for caching
 	public ConcurrentHashMap<String, String> tableAndColumnNameToTypes = new ConcurrentHashMap<String, String>(); 
 	public ConcurrentHashMap<String, String> tableAndColumnNameToCustomTypesValues = new ConcurrentHashMap<String, String>();
@@ -81,6 +83,9 @@ public class Database {
 		try {
 			this.co = co;
 			readPropertiesFile();
+			
+			this.dc = connectDatabase();
+			
 		} catch (IOException e) {
 			throw new RuntimeException("Error while reading the "+co.getDbName()+" properties file", e);
 		}
@@ -126,7 +131,7 @@ public class Database {
 	 * @param tableName
 	 * @param idValue
 	 */
-	public  void deleteRecord(String tableName, String idValue, 
+	public void deleteRecord(String tableName, String idValue, 
 			DbResponseObject dro){
 		
 		String schema = getSchema(tableName);
@@ -143,12 +148,10 @@ public class Database {
 			"WHERE " + getSafeFieldName(idColumn) + " = ? ;";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
-		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			dc.sendPreparedUpdate(deleteRecord, args, ato, dro);
+			getConnection().sendPreparedUpdate(deleteRecord, args, ato, dro);
 			
 		}
 		catch (Exception e) {
@@ -156,9 +159,6 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+deleteRecord, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 	}
 	
 	/**
@@ -193,22 +193,16 @@ public class Database {
 			";";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
-		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			dc.sendPreparedUpdate(deleteRecords, args, ato, dro);
+			getConnection().sendPreparedUpdate(deleteRecords, args, ato, dro);
 			
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+deleteRecords);
 			throw new RuntimeException("Error while executing query "+deleteRecords, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 	}
 	
@@ -355,22 +349,20 @@ public class Database {
 			
 			// we have built the right query, now use it to get the row number
 			
-			PostgresDatabaseCommunication dc = connectDatabase();
+			
 			
 			try {
-				dc.sendUpdate("SET search_path TO "+schema+"; ");	
+				getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 				
 				ResultSet rs;
-				if( alreadyCalled )
-					{
+				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
-					}
-				else
-					{
-					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato);
+				}
+				else {
+					rs = getConnection().sendPreparedQuery(getRowNumberQuery, args, ato);
 					res = getResultsInAList(rs, new String[]{"rownumber"});
 					gotoQueryToResultSet.put(hashKey, res);
-					}
+				}
 						 
 				// get row number for the right occurence
 				
@@ -382,10 +374,6 @@ public class Database {
 			} catch (Exception e) {
 				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
 			} 
-			
-			finally {
-				closeDatabase(dc);
-			}
 		}
 		
 		
@@ -497,37 +485,31 @@ public class Database {
 			
 			// we have built the right query, now use it to get the row number
 			
-			PostgresDatabaseCommunication dc = connectDatabase();
+			
 			
 			try {
-				dc.sendUpdate("SET search_path TO "+schema+"; ");	
+				getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 				
 				ResultSet rs;
-				if( alreadyCalled )
-					{
+				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
-					}
-				else
-					{
-					rs = dc.sendPreparedQuery(getRowNumberQuery, argValues, ato);
+				}
+				else {
+					rs = getConnection().sendPreparedQuery(getRowNumberQuery, argValues, ato);
 					res = getResultsInAList(rs, new String[]{"ids_to_render"});
 					gotoQueryToResultSet.put(hashKey, res);
-					}
+				}
 						 
 				// get row number for the right occurence
 				
-				if (res.size() > 0 && occurrenceNr < res.size() )
-					{				
+				if (res.size() > 0 && occurrenceNr < res.size() ) {				
 					functionOuput = res.get(occurrenceNr)[0];
-					}
+				}
 				
 			} catch (Exception e) {
 				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
 			} 
 			
-			finally {
-				closeDatabase(dc);
-			}
 		}	
 		 
 		return functionOuput;
@@ -582,12 +564,12 @@ public class Database {
 			";";	
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			ResultSet rs = dc.sendPreparedQuery(getIdQuery, args);
+			ResultSet rs = getConnection().sendPreparedQuery(getIdQuery, args);
 			
 			res = getResultsInAList(rs, new String[]{idColumn});
 			if (res.size()>0)
@@ -597,9 +579,6 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+getIdQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return idOfCreatedRecord;	
 	}
@@ -631,18 +610,19 @@ public class Database {
 	    	    "SELECT n FROM t WHERE n IS NOT NULL;";
 	    
 	    
-	    PostgresDatabaseCommunication dc = connectDatabase();
+	    
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
 	    try {
-	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+	    	
+		  getConnection().sendUpdate("SET search_path TO " + schema + "; ");
 	      
 	      // in some rare cases, the query hereabove will be slow
-	      dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
+	      getConnection().sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 
-	      ResultSet rs = dc.sendQuery(query);
+	      ResultSet rs = getConnection().sendQuery(query);
 
 	      res = getResultsInAList(rs, new String[] { "n" });
 	      if (res.size() > 0)
@@ -662,9 +642,6 @@ public class Database {
 	    	
 	    	uvo = getUniqueValues_oldStyle(tableName, columnName, null, null);
 	      
-	    }
-	    finally {
-	      closeDatabase(dc);
 	    }
 
 	    return uvo;
@@ -706,22 +683,21 @@ public class Database {
         			"ORDER BY n;";
     	}
     	    	
-    	PostgresDatabaseCommunication dc = connectDatabase();
+    	
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
     	try {
-  	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+    		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
   	      
   	      ResultSet rs = columnValueFilter.isEmpty() ? 
-  	    		  dc.sendQuery(query)
+  	    		getConnection().sendQuery(query)
   	    		  :
-  	    		  dc.sendPreparedQuery(query, new String[]{columnValueFilter});
+  	    		getConnection().sendPreparedQuery(query, new String[]{columnValueFilter});
 
   	      res = getResultsInAList(rs, new String[] { "n" });
-  	      if (res.size() > 0)
-  	      {
+  	      if (res.size() > 0) {
   	        for (String[] oneRecord : res)
   	        {
   	          String oneValue = oneRecord[0].trim();
@@ -733,9 +709,6 @@ public class Database {
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
     	}
-    	finally {
-	      closeDatabase(dc);
-	    }
     	
     	return uvo;
     	
@@ -840,18 +813,18 @@ public class Database {
     	}
     	
     	    	
-    	PostgresDatabaseCommunication dc = connectDatabase();
+    	
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
     	try {
-  	      dc.sendUpdate("SET search_path TO " + schema + "; ");
+    		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
   	      
   	      ResultSet rs = columnsValues.size() == 0 ? 
-  	    		  dc.sendQuery(query)
+  	    		getConnection().sendQuery(query)
   	    		  :
-  	    		  dc.sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato);
+  	    		getConnection().sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato);
 
   	      res = getResultsInAList(rs, new String[] { "n", "cnt" });
   	      if (res.size() > 0)
@@ -867,9 +840,6 @@ public class Database {
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
     	}
-    	finally {
-	      closeDatabase(dc);
-	    }
     	
     	return uvo;
     	
@@ -903,15 +873,15 @@ public class Database {
 			"WHERE " + getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			ato.setType(0, idColumnType);
 			
-			ResultSet rs = dc.sendPreparedQuery(getRecord, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato);
 			
 			res = getResultsInAList(rs, columnsNames);	
 			
@@ -933,10 +903,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return tro;
 	}
@@ -972,33 +938,30 @@ public class Database {
 			"IN ("+Util.getStringOfQuestionMarks(ids)+");";	
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
-			for (int i=0; i<ids.length; i++)
-			{
+			for (int i=0; i<ids.length; i++) {
 				ato.setType(i, idColumnType);
 			}
 			
-			ResultSet rs = dc.sendPreparedQuery(getRecords, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecords, args, ato);
 			
 						
 			res = getResultsInAList(rs, columnsNames);	
 			
-			if (res.size() == ids.length) // expected number of rows?
-			{
+			if (res.size() == ids.length) { // expected number of rows?
+			
 				// process each row
-				for (int i=0; i<ids.length; i++)
-				{
+				for (int i=0; i<ids.length; i++) {
+					
 					String[] recordCell = res.get(i);
 					
-					if (recordCell != null)
-					{
-						for (int j=0; j<columnsNames.length; j++)
-						{
+					if (recordCell != null) {
+						for (int j=0; j<columnsNames.length; j++) {
 							String idOfthisRow = recordCell[idColumnIndex];
 							tro.addIdColumnAndValue(idOfthisRow, columnsNames[j], recordCell[j]);
 						}
@@ -1012,10 +975,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRecords, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return tro;
 	}
@@ -1071,24 +1030,21 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = dc.sendPreparedQuery(getRecord, args);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args);
 			
 			String[] columnsNames = getColumnNames(tableName);			
 			res = getResultsInAList(rs, columnsNames);	
 			
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
 				String[] recordCell = res.get(0);
 				
-				if (recordCell != null)
-				{
-					for (int i =0; i<columnsNames.length; i++)
-					{
+				if (recordCell != null) {
+					for (int i =0; i<columnsNames.length; i++) {
 						tro.addColumnAndValue(columnsNames[i], recordCell[i]);
 					}
 				}
@@ -1097,10 +1053,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return tro;
 	}
@@ -1173,26 +1125,25 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = dc.sendPreparedQuery(getRecord, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato);
 			
 			res = getResultsInAList(rs, columnsNames);	
 			
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
+				
 				// process each row
-				for (int i=0; i<res.size(); i++)
-				{
+				for (int i=0; i<res.size(); i++) {
 					String[] recordCell = res.get(i);
 					
-					if (recordCell != null)
-					{
-						for (int j=0; j<columnsNames.length; j++)
-						{
+					if (recordCell != null) {
+						
+						for (int j=0; j<columnsNames.length; j++) {
+							
 							String idOfthisRow = (idColumnIndex >-1 ? 
 									recordCell[idColumnIndex]	// natural primary key 
 									:
@@ -1208,10 +1159,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return tro;
 	
@@ -1286,19 +1233,17 @@ public class Database {
 		// DEBUG
 		//System.out.println(getRecord);		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			ResultSet rs = dc.sendQuery(getRecord);
+			ResultSet rs = getConnection().sendQuery(getRecord);
 			
 			String[] columnsNames = getColumnNamesFromResultSet(rs);			
 			res = getResultsInAList(rs, columnsNames);			
 			
-			for (int i=0; i<columnsNames.length; i++)
-			{
+			for (int i=0; i<columnsNames.length; i++) {
 				String[] allCells = new String[res.size()];
-				for (int j=0; j<res.size(); j++)
-				{
+				for (int j=0; j<res.size(); j++) {
 					allCells[j] = res.get(j)[i].trim();
 				}
 				tro.addColumnAndValue(columnsNames[i], Util.join(allCells, Constants.ARG_INTERNAL_SEPARATOR));
@@ -1307,10 +1252,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return tro;
 	}
@@ -1346,22 +1287,18 @@ public class Database {
 		}
 		
 				
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			dc.sendPreparedUpdate(insertRecords, values, ato, dro);
+			getConnection().sendPreparedUpdate(insertRecords, values, ato, dro);
 			
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertRecords);
 			throw new RuntimeException("Error while executing query "+insertRecords, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 	}
 	/**
 	 * Insert some records into a table
@@ -1422,15 +1359,14 @@ public class Database {
 		String valueTypeOfIdColumn = getTypeOfColumn(tableName, primaryKey);
 				
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			for (int i = 0; i<rowIds.length; i++)
-			{
+			for (int i = 0; i<rowIds.length; i++) {
 				ato.setType(0, valueTypeOfIdColumn);
-				dc.sendPreparedUpdate(insertQuery, new String[]{rowIds[i]}, ato, dro);
+				getConnection().sendPreparedUpdate(insertQuery, new String[]{rowIds[i]}, ato, dro);
 			}
 			
 		}
@@ -1438,10 +1374,6 @@ public class Database {
 			dro.setResponse("Error while executing query "+insertQuery);
 			throw new RuntimeException("Error while executing query "+insertQuery, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}	
 		
 	}
 	
@@ -1531,26 +1463,23 @@ public class Database {
 		}
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			ResultSet rs = null;
 			
-			if (type.equals("insert"))
-			{
-				rs = dc.sendPreparedQuery(insertQuery, filterValues);
+			if (type.equals("insert")) {
+				rs = getConnection().sendPreparedQuery(insertQuery, filterValues);
 				
 			}
-			else
-			{
-				dc.sendPreparedUpdate(insertQuery, filterValues, ato, dro);				
+			else {
+				getConnection().sendPreparedUpdate(insertQuery, filterValues, ato, dro);				
 			}
 			
 			ArrayList<String[]> res;
-			if (type.equals("insert"))
-			{
+			if (type.equals("insert")) {
 				res = getResultsInAList(rs, new String[]{idColumn});
 				idOfCreatedRecord = Util.join(res.get(0), ",");	
 				dro.setResponse(idOfCreatedRecord);
@@ -1561,11 +1490,6 @@ public class Database {
 			dro.setResponse("Error while executing query "+insertQuery);
 			throw new RuntimeException("Error while executing query "+insertQuery, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
-		
 		
 	}
 	
@@ -1607,12 +1531,12 @@ public class Database {
 			ato.setType(i, valueTypes[i]);			
 		}
 				
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(insertRecords, values, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(insertRecords, values, ato);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -1622,11 +1546,6 @@ public class Database {
 			dro.setResponse("Error while executing query "+insertRecords);
 			throw new RuntimeException("Error while executing query "+insertRecords, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
-		
 		
 	};
 	
@@ -1693,12 +1612,12 @@ public class Database {
 		String[] valueTypes = getTypesOfColumns(tableName, new String[]{idColumn});
 		ato.setType(0, valueTypes[0]);
 				
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(duplicateRecord, values, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(duplicateRecord, values, ato);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -1708,11 +1627,6 @@ public class Database {
 			dro.setResponse("Error while executing query "+duplicateRecord);
 			throw new RuntimeException("Error while executing query "+duplicateRecord, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
-		
 		
 	};
 	
@@ -1749,20 +1663,16 @@ public class Database {
 			"WHERE "+ getSafeFieldName(idColumn) +" = ? ;";	
 		
 				
-		PostgresDatabaseCommunication dc = connectDatabase();			
+					
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
 			throw new RuntimeException("Error while executing query "+updateRecords, e);
-		}
-		
-		finally {
-			closeDatabase(dc);
 		}
 	}
 	
@@ -1784,7 +1694,7 @@ public class Database {
 		
 		String schema = getSchema(tableName);
 		
-		PostgresDatabaseCommunication dc = connectDatabase();	
+			
 		
 		// single quote escape is quote doubling 
 		newComment = newComment.replace("'", "''");
@@ -1798,17 +1708,13 @@ public class Database {
 		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			dc.sendUpdate(setComment);
+			getConnection().sendUpdate(setComment);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+setComment);
 			throw new RuntimeException("Error while executing query "+setComment, e);
-		}
-		
-		finally {
-			closeDatabase(dc);
 		}
 		
 	}
@@ -1846,12 +1752,12 @@ public class Database {
 			"ORDER BY 1,2;";	
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			ResultSet rs = dc.sendPreparedQuery(getIdQuery, args);
+			ResultSet rs = getConnection().sendPreparedQuery(getIdQuery, args);
 			
 			res = getResultsInAList(rs, new String[]{"comment"});
 			if (res.size()>0)
@@ -1862,10 +1768,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getIdQuery, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return sTableComment;	
 	}
@@ -1937,12 +1839,12 @@ public class Database {
 				
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			ResultSet rs = dc.sendPreparedQuery(checkExistenceQuery, args);
+			ResultSet rs = getConnection().sendPreparedQuery(checkExistenceQuery, args);
 			
 			res = getResultsInAList(rs, new String[]{"result"});
 			
@@ -1957,9 +1859,6 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+checkExistenceQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 	}
 
@@ -1981,24 +1880,21 @@ public class Database {
 
 		String[] args = new String[]{schema, tableName};
 
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 
 
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 
-			ResultSet rs = dc.sendPreparedQuery(query, args);
+			ResultSet rs = getConnection().sendPreparedQuery(query, args);
 
 			result = getResultsInAList(rs, new String[]{"table_name"});
 
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		}
-		finally {
-			closeDatabase(dc);
-		}
-
+		
 		return result.size() > 0;
 	}
 	
@@ -2042,20 +1938,16 @@ public class Database {
 			"WHERE "+ getSafeFieldName(idColumn) +" = ? ;";
 		
 				
-		PostgresDatabaseCommunication dc = connectDatabase();			
+					
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
 			throw new RuntimeException("Error while executing query "+updateRecords, e);
-		}
-		
-		finally {
-			closeDatabase(dc);
 		}
 	}
 	
@@ -2119,21 +2011,18 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
 			throw new RuntimeException("Error while executing query "+updateRecords, e);
 		}
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 	}
 	
@@ -2195,21 +2084,18 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
 			throw new RuntimeException("Error while executing query "+updateRecords, e);
 		}
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 	}
 	
@@ -2263,13 +2149,13 @@ public class Database {
 		String query2 = "SELECT rows FROM t"+tableId+"; ";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();	
+			
 		
 		try {
 			Util.debug(co, "## Get count estimate (fast)");
 			
-			dc.sendUpdate(query1);
-			ResultSet rs = dc.sendQuery(query2);
+			getConnection().sendUpdate(query1);
+			ResultSet rs = getConnection().sendQuery(query2);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"rows"});		
 			count = Integer.parseInt(res.get(0)[0]);
@@ -2277,9 +2163,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
 		} 
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return count;		
 	}
@@ -2329,12 +2212,12 @@ public class Database {
 		String query2 = "SELECT cost FROM t"+tableId+"; ";
 	
 		
-		PostgresDatabaseCommunication dc = connectDatabase();	
+			
 		
 		try {		
 			
-			dc.sendUpdate(query1);
-			ResultSet rs = dc.sendQuery(query2);
+			getConnection().sendUpdate(query1);
+			ResultSet rs = getConnection().sendQuery(query2);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"cost"});		
 			queryCost = Integer.parseInt(res.get(0)[0]);
@@ -2347,9 +2230,6 @@ public class Database {
 			// give some results otherwise the client won't have any count!!!
 			//throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
 		} 
-		finally {
-			closeDatabase(dc);
-		}
 		
 		Util.debug(co, "queryCost = "+queryCost);
 		return queryCost;		
@@ -2376,10 +2256,10 @@ public class Database {
 			"FROM " + getSafeTableName(tableName, schema) + ";";	
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
 			
 			
 			boolean bForceExactCount = this.getForceExactCount();
@@ -2387,7 +2267,7 @@ public class Database {
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
 			ResultSet rs = bForceExactCount ? 
-					dc.sendQuery(getCountQuery) : dc.sendQueryWithTimeout(getCountQuery, maxAllowedDuration);
+					getConnection().sendQuery(getCountQuery) : getConnection().sendQueryWithTimeout(getCountQuery, maxAllowedDuration);
 			
 			res = getResultsInAList(rs, new String[]{"rowcount"});
 			// if the time limit was exceeded, we have a null resultset 
@@ -2398,9 +2278,6 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+getCountQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return count;
 		
@@ -2444,7 +2321,7 @@ public class Database {
 				"ORDER BY 1,2;";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 		
 		// prepare max allowed cost initialization
@@ -2452,9 +2329,9 @@ public class Database {
 		long timeBefore = new Date().getTime();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(query, new String[]{schema});
+			ResultSet rs = getConnection().sendPreparedQuery(query, new String[]{schema});
 			
 			// compute max allowed cost (initialization)
 			long timeAfter = new Date().getTime();
@@ -2466,9 +2343,6 @@ public class Database {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		} 
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return result;
 	}
@@ -2500,27 +2374,24 @@ public class Database {
 				"AND pg_catalog.pg_table_is_visible(c.oid);";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(query, new String[]{schema});
+			ResultSet rs = getConnection().sendPreparedQuery(query, new String[]{schema});
 			
 			result = getResultsInAList(rs, new String[]{"table_name"});		
 			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		} 
-		finally {
-			closeDatabase(dc);
-		}
 		
 		// return one-dimensional array of table names
 		ArrayList<String> trueTablesList = new ArrayList<String>(); 
-		for (String[] oneRecord : result)
-		{
+		for (String[] oneRecord : result){
 			trueTablesList.add(oneRecord[0]);
 		}
 		
@@ -2689,8 +2560,7 @@ public class Database {
 		// -----------------------------------------------
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
-		if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()==0)
-		{
+		if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()==0){
 			// main search means search all columns at once
 			columnsToSearch = getColumnNames(tableName);
 			ArrayList<String> queryParts = new ArrayList<String>();
@@ -2938,7 +2808,7 @@ public class Database {
 		// ******************************************
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		TableAndCountObject tableAndCount = new TableAndCountObject();
 		
 		// remove operators that were put in from (like '<33'  or '!woord') 
@@ -2947,13 +2817,13 @@ public class Database {
 		}
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			// get the table content 
 			String[] args = queryValues.toArray(new String[queryValues.size()]);
 			
 			ResultSet rs1 = queryValues.size()==0 ?
-				dc.sendQuery(query) : dc.sendPreparedQuery(query, args, ato);
+				getConnection().sendQuery(query) : getConnection().sendPreparedQuery(query, args, ato);
 			
 			ArrayList<ConcurrentHashMap<String, String>> cellList = 
 				getListOfIdToCell(tableName, primaryKey, rs1, allColumns );
@@ -3002,21 +2872,20 @@ public class Database {
 					
 					// count the normal way, t.i. count(*)
 					// if it is required by the user just now OR if querycost is low
-					if (bExactCountRequiredByUser || queryCost < maxAllowedCost)
-					{
+					if (bExactCountRequiredByUser || queryCost < maxAllowedCost) {
 						Util.debug(co, "%%% We will count the normal way (exact count required by user: "+bExactCountRequiredByUser+")");
 						
-						dc.sendUpdate("SET search_path TO "+schema+"; ");
+						getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 						
 						// Important here: we set a timeout, to make sure 
 						// that the normal count will never takes too long.
 						// BUT if the user absolutely required an exact count, he/she will have to put up with it...
 						if ( !bExactCountRequiredByUser)
-							dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
+							getConnection().sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 						
 						ResultSet rs2;						
 						try {
-							rs2 = dc.sendPreparedQuery(countQuery, args, ato);	
+							rs2 = getConnection().sendPreparedQuery(countQuery, args, ato);	
 							
 							ArrayList<ArrayList<String>> countResult = 
 								getResultsInArrayList(rs2, new String[]{"count"});
@@ -3027,21 +2896,16 @@ public class Database {
 						}
 						// if the normal count takes too long, do an estimate count
 						catch (Exception e) {
-							if (Constants.debug)
-								{
+							if (Constants.debug) {
 								System.out.println("%%% NORMAL COUNT TIME OUT !!");
 								System.out.println("%%% We will use an estimate count");
 								// if the normal count timed out, we can't recompute the max allowed
 								// cost in a reliable way, because the duration won't relate to the
 								// query cost computed by the database. So, we have to cancel recomputation.
 								recomputeMaxAllowedCost = false;
-								}
+							}
 							count = getEstimateCount(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
-						}
-						finally {
-							// not possible here!
-							//closeDatabase(dc);
 						}
 						
 					}
@@ -3081,8 +2945,8 @@ public class Database {
 			//         records will probably be less than the iDisplayLength too, even if there
 			//         are actually millions of records!
 			if (tableAndCount.getContent().size() < iDisplayLength
-					&& iDisplayStart==0) 
-			{
+					&& iDisplayStart==0) {
+				
 				count = tableAndCount.getContent().size();
 				exactCount = true;
 			}				
@@ -3104,11 +2968,9 @@ public class Database {
 			
 			// show error in console
 			Util.debug(co, "## ERROR: "+"Error while executing query "+query);
-			e.printStackTrace(); 
-		}
-		finally {
-			dc.sendUpdate("RESET statement_timeout;");
-			closeDatabase(dc);
+						
+			// reset the statement_timeout
+			getConnection().sendUpdate("RESET statement_timeout;");
 		}
 		
 		
@@ -3130,9 +2992,6 @@ public class Database {
 				&& !indexAvailableForSortCol)
 			tableAndCount.setNeededIndexForSortingColumns(Util.join(aSortCol, ", "));
 		
-		
-		// just to make sure
-		closeDatabase(dc);
 		
 		return tableAndCount;
 	}
@@ -3453,14 +3312,14 @@ public class Database {
 		
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };			
 			
-			ResultSet rs = dc.sendPreparedQuery(getPK, args);
+			ResultSet rs = getConnection().sendPreparedQuery(getPK, args);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname", "format_type"});
 			
@@ -3514,9 +3373,6 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+getPK, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		// store the primary key in a hash, for caching (for speed improvement)
 		if (primaryKeyColumn != null)
@@ -3559,14 +3415,14 @@ public class Database {
 			"AND table_schema = ? ;";
 		
 			
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{tableNameOnly, columnName, schema};		
 			
-			ResultSet rs = dc.sendPreparedQuery(typeQuery, args);
+			ResultSet rs = getConnection().sendPreparedQuery(typeQuery, args);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"type"});		
 			
@@ -3582,14 +3438,10 @@ public class Database {
 				type = "unknown";
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+typeQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 	
 		return type;
 	}
@@ -3617,10 +3469,10 @@ public class Database {
 		String[] columnTypes = new String[columns.length];
 			
 			
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			for (int i = 0; i<columns.length; i++)
 			{
@@ -3643,7 +3495,7 @@ public class Database {
 				{
 					String[] args = new String[]{tableNameOnly, columns[i], schema};		
 					
-					ResultSet rs = dc.sendPreparedQuery(typeQuery, args);				
+					ResultSet rs = getConnection().sendPreparedQuery(typeQuery, args);				
 					ArrayList<String[]> res = getResultsInAList(rs, new String[]{"type"});						
 					
 					columnTypes[i] = (res.size()>0) ? res.get(0)[0] : "unknown";
@@ -3655,14 +3507,10 @@ public class Database {
 			}
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+typeQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return columnTypes;
 	}
@@ -3692,16 +3540,16 @@ public class Database {
 			"AND    a.attrelid = ?::regclass "+
 			"ORDER  BY a.attnum; ";
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		String[] columnComments = new String[columns.length];
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
 			
-			ResultSet rs = dc.sendPreparedQuery(commentsQuery, args);				
+			ResultSet rs = getConnection().sendPreparedQuery(commentsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"name", "comment"});
 		
 			if (res.size()>0)
@@ -3718,14 +3566,10 @@ public class Database {
 				}
 			}			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+commentsQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return columnComments;
 		
@@ -3779,14 +3623,14 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments };		
 			
-			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
+			ResultSet rs = getConnection().sendPreparedQuery(functionDetailsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"argument_types"});
 			
 			// output has the form:  "type1, type2, type3"
@@ -3802,17 +3646,12 @@ public class Database {
 			}			
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 			
-		if (Constants.debug)
-		{
+		if (Constants.debug){
 			System.out.println("## Function args types: ");
 			System.out.println(Arrays.toString(argumentTypes));
 		}
@@ -3898,37 +3737,30 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, functionSchemaName, projectSchema};		
 			
-			ResultSet rs = dc.sendPreparedQuery(functionQuery, args);				
+			ResultSet rs = getConnection().sendPreparedQuery(functionQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"function_operation"});
 			
-			if (res.size()>0)
-				{
+			if (res.size()>0) {
 				functionOperationType = res.get(0)[0];
 				functionNameToOperationType.put(cachingKey, functionOperationType);
-				}			
+			}			
 			
-			} 
-		catch (Exception e) 
-			{
-				throw new RuntimeException("Error while executing query "+functionQuery, e);
-			} 
+		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+functionQuery, e);
+		} 
 			
-		finally {
-			closeDatabase(dc);
-		}
-			
-		if (Constants.debug)
-			{
+		if (Constants.debug){
 				System.out.println("## Function operation type: ");
 				System.out.println(functionOperationType);
-			}
+		}
 		
 		return functionOperationType;
 	}
@@ -3979,14 +3811,14 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments};		
 			
-			ResultSet rs = dc.sendPreparedQuery(functionDetailsQuery, args);				
+			ResultSet rs = getConnection().sendPreparedQuery(functionDetailsQuery, args);				
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"return_type"});
 			
 			if (res.size()>0)
@@ -3996,17 +3828,12 @@ public class Database {
 			}			
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e)  {
 			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
 		} 
 		
-		finally {
-			closeDatabase(dc);
-		}
 			
-		if (Constants.debug)
-		{
+		if (Constants.debug){
 			System.out.println("## Function return type: ");
 			System.out.println(returnType);
 		}
@@ -4069,14 +3896,14 @@ public class Database {
 			";";
 		
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{tableNameOnly, schema}; 
 			
-			ResultSet rs = dc.sendPreparedQuery(columnQuery, args);
+			ResultSet rs = getConnection().sendPreparedQuery(columnQuery, args);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname"});
 			
@@ -4088,14 +3915,9 @@ public class Database {
 			}			
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+columnQuery, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		// store the column names for caching (speed improvement)
 		tableNameToColumnNames.put(cachingKey, columnNames);
@@ -4121,12 +3943,12 @@ public class Database {
 		
 		String[] args = new String[]{tableName, columnName, schema};
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(query, args);
+			ResultSet rs = getConnection().sendPreparedQuery(query, args);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"custom_type"});
 			
@@ -4135,14 +3957,9 @@ public class Database {
 				nameOfCustomType = res.get(0)[0];
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e)  {
 			throw new RuntimeException("Error while executing query "+query, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return nameOfCustomType;
 	}
@@ -4165,12 +3982,12 @@ public class Database {
 		
 		String[] args = new String[]{typeName, schema};
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = dc.sendPreparedQuery(query, args);
+			ResultSet rs = getConnection().sendPreparedQuery(query, args);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"enum_labels"});
 			
@@ -4179,14 +3996,9 @@ public class Database {
 				values = res.get(0)[0];
 			
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		} 
-		
-		finally {
-			closeDatabase(dc);
-		}
 		
 		return values;
 	}
@@ -4348,13 +4160,11 @@ public class Database {
 				}
 				return lijst;
 			}
-			finally
-			{
+			finally {
 				rs.close();
 			}
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		
@@ -4364,48 +4174,38 @@ public class Database {
 		
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 		
-		if (rs == null) 
-		{
+		if (rs == null)  {
 			Util.debug(co, "Result list is empty");
 			return list;
 		}
 		
-		try
-		{
-			try
-			{
-				while (rs.next())
-				{
+		try {
+			try {
+				while (rs.next()) {
 					ArrayList<String> veldInhoud = new ArrayList<String>();
-					for (int i=0; i<velden.length; i++)
-					{
+					for (int i=0; i<velden.length; i++) {
 						String veld = velden[i];
 												
 						byte[] col = rs.getBytes(veld);
-						if (col != null)
-						{
+						if (col != null) {
 							String str = new String(col, "UTF-8");
 							
 							veldInhoud.add(str);	
 						}
-						else
-						{
+						else {
 							veldInhoud.add( "" );
 						}
 					}
 					list.add(veldInhoud);
 					
-					
 				}
 				return list;
 			}
-			finally
-			{
+			finally {
 				rs.close();
 			}
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		
@@ -4583,15 +4383,14 @@ public class Database {
 	/**
 	 * opens a Postgres database connection
 	 */
-	public PostgresDatabaseCommunication connectDatabase() 
-	{
+	public PostgresDatabaseCommunication connectDatabase()  {
 		// first check if the database access data are known
 		// (that is: location, username, password, etc)
 		if ( databaseAccessHash.size() == 0 )
 			try {
 				readPropertiesFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		
@@ -4628,6 +4427,15 @@ public class Database {
 		
 		return postgresDc;
 		
+	}
+	
+	
+	public PostgresDatabaseCommunication getConnection() {
+		if (this.dc == null || this.dc.isClosed()) {
+			System.out.println("Reconnect to database");
+			this.dc = connectDatabase();
+		}
+		return dc;
 	}
 	
 	/**
@@ -4669,16 +4477,13 @@ public class Database {
 		// set the new active tab id in the ContextObject kept in this DatabaseObject
 		this.co.setActiveTabId(activeTabId);
 		
-		PostgresDatabaseCommunication dc = connectDatabase();
+		
 		try {
-			dc.SendActiveTabIdToDatabaseServer();
+			getConnection().SendActiveTabIdToDatabaseServer();
 		}
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query setting the active tab", e);
-		} 		
-		finally {
-			closeDatabase(dc);
-		}
+		} 	
 		
 	}
 
@@ -4712,13 +4517,12 @@ public class Database {
 	/**
 	 * close the database connection
 	 */
-	public void closeDatabase(PostgresDatabaseCommunication dc)
-	{
-		if (dc != null)
-			dc.closeConnection();
-		if (Constants.debug)
-			System.out.println("Connection with the database closed.\n");
-	}
+//	public void closeDatabase(PostgresDatabaseCommunication dc) {
+//		if (dc != null)
+//			dc.closeConnection();
+//		if (Constants.debug)
+//			System.out.println("Connection with the database closed.\n");
+//	}
 
 	
 	/**
@@ -4774,8 +4578,7 @@ public class Database {
 		// if exact count is required, we must get an true count anyway
 		// OR
 		// if we have a view, get the true count
-		if ( bForceExactCount || !currentTableIsATrueTable )
-		{
+		if ( bForceExactCount || !currentTableIsATrueTable ) {
 			count = getTrueCountOfATable(tableNameOnly);
 		}
 		
@@ -4783,8 +4586,7 @@ public class Database {
 		// if we have a table and exact count is not required, get a fast estimate count
 		// OR
 		// if count in case [1] failed (timeout), try this fast estimate count method as well
-		if ( ( !bForceExactCount && currentTableIsATrueTable) || count<0 )
-		{
+		if ( ( !bForceExactCount && currentTableIsATrueTable) || count<0 ) {
 			exactCount = false;
 			count = getEstimateCount("SELECT * FROM "+getSafeTableName(tableNameOnly, schema));
 		}
@@ -4844,7 +4646,7 @@ public class Database {
 	public DbResponseObject convertCsvIntoTable(String dbName, InputStream fileInputStream, FormDataContentDisposition fileMetaData){
 
 		DbResponseObject ro = new DbResponseObject();
-		PostgresDatabaseCommunication dc;
+		
 
 		// get current schema
 		String currentSchema = getSchemaName();
@@ -4949,15 +4751,13 @@ public class Database {
 
                         String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNames, " text, ")+" text);";
                         String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
-                        dc = connectDatabase();
+                        
                         try {
-                            dc.sendUpdate(createTableQuery);
-                            dc.sendUpdate(AddUploadedCommentQuery);
-                        } catch (Exception e) {
+                            getConnection().sendUpdate(createTableQuery);
+                            getConnection().sendUpdate(AddUploadedCommentQuery);
+                        } 
+                        catch (Exception e) {
                             throw new RuntimeException("Error while executing query "+createTableQuery + "\n" + AddUploadedCommentQuery, e);
-                        }
-                        finally {
-                            closeDatabase(dc);
                         }
 
 
@@ -4970,20 +4770,18 @@ public class Database {
                     else {
 
                         String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
-                        dc = connectDatabase();
+                        
                         try {
 							if (columnNames.size() == oneRow.length && oneRow.length == ato.getSize()){
-								dc.sendPreparedUpdate(insertQuery, oneRow, ato, new DbResponseObject());
+								getConnection().sendPreparedUpdate(insertQuery, oneRow, ato, new DbResponseObject());
 							}
 							else {
 								System.out.println("Row #"+counter+" in uploaded "+fileType.toUpperCase()+"-file has a different number of columns than the header row. Skipping.");
 							}
 
-                        } catch (Exception e) {
-                            throw new RuntimeException("Error while executing query "+insertQuery, e);
                         }
-                        finally {
-                            closeDatabase(dc);
+                        catch (Exception e) {
+                            throw new RuntimeException("Error while executing query "+insertQuery, e);
                         }
                     }
 
@@ -5020,7 +4818,7 @@ public class Database {
 	 */
 	public DbResponseObject convertFileIntoTable(String dbName, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
 
-		PostgresDatabaseCommunication dc;
+		
 		DbResponseObject ro = new DbResponseObject();
 
 		// get current schema
@@ -5175,16 +4973,13 @@ public class Database {
 
 				String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNamesAndTypes, ", ")+");";
 				String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
-				//System.out.println(createTableQuery);
-				dc = connectDatabase();
+				
 				try {
-					dc.sendUpdate(createTableQuery);
-					dc.sendUpdate(AddUploadedCommentQuery);
-				} catch (Exception e) {
+					getConnection().sendUpdate(createTableQuery);
+					getConnection().sendUpdate(AddUploadedCommentQuery);
+				} 
+				catch (Exception e) {
 					throw new RuntimeException("Error while executing query " + createTableQuery + "\n" + AddUploadedCommentQuery, e);
-				}
-				finally {
-					closeDatabase(dc);
 				}
 
 
@@ -5225,15 +5020,14 @@ public class Database {
 
 						// insert those values into the table
 						String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
-						dc = connectDatabase();
+						
 						try {
-							dc.sendPreparedUpdate(insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
-						} catch (Exception e) {
+							getConnection().sendPreparedUpdate(insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
+						} 
+						catch (Exception e) {
 							throw new RuntimeException("Error while executing query "+insertQuery, e);
 						}
-						finally {
-							closeDatabase(dc);
-						}
+						
 
 					}
 				} // end of loop through rows
@@ -5258,7 +5052,7 @@ public class Database {
 		// get current schema
 		String currentSchema = getSchemaName();
 
-		PostgresDatabaseCommunication dc;
+		
 		DbResponseObject ro = new DbResponseObject();
 		String comment = this.getComment(tableName);
 
@@ -5268,17 +5062,14 @@ public class Database {
 		}
 
 		String dropTableIfExists = "DROP TABLE IF EXISTS "+currentSchema+"."+tableName+";";
-		dc = connectDatabase();
+		
 		try {
-			dc.sendUpdate(dropTableIfExists);
+			getConnection().sendUpdate(dropTableIfExists);
 			ro.setResponse("OK");
 		} catch (Exception e) {
 			ro.setResponse("Error! Couln't remove table '"+tableName+"'.");
 			throw new RuntimeException("Error while executing query "+dropTableIfExists, e);
 
-		}
-		finally {
-			closeDatabase(dc);
 		}
 		return ro;
 	}

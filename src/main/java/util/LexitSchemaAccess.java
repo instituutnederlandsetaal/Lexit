@@ -129,9 +129,6 @@ public class LexitSchemaAccess {
 		catch (Exception e) {  	    	
 			throw new RuntimeException("Creating the LEXIT_SCHEMA content caused an error.", e);
 		}
-		finally {
-			closeDatabase();
-		}
 	}
 	
 	
@@ -356,6 +353,18 @@ public class LexitSchemaAccess {
 	}
 	
 	
+	// log out a user
+	public void logOutUser(String username) {
+
+		// remove the session ID - username correspondance
+		for (String key : sessionIds2users.keySet()) {
+			if (sessionIds2users.get(key).equals(username)) {
+				removeSessionId(key);
+			}
+		}
+	}
+	
+	
 	// read the users login info frm the database
 	private void readUsersLogins() {
 		
@@ -384,9 +393,6 @@ public class LexitSchemaAccess {
 	    }
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users login info caused an error.", e);
-	    }
-	    finally {
-	      closeDatabase();
 	    }
 
 		
@@ -432,9 +438,6 @@ public class LexitSchemaAccess {
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users roles caused an error.", e);
 	    }
-	    finally {
-	      closeDatabase();
-	    }
 
 	}
 	
@@ -457,11 +460,10 @@ public class LexitSchemaAccess {
 		try {
 			dc.sendPreparedUpdate(deleteUserQuery1, deleteUserArgs, deleteUserAto, null);
 			dc.sendPreparedUpdate(deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
-		} finally {
-			closeDatabase();
-		}
+		} 
 
 	}
 	
@@ -485,11 +487,10 @@ public class LexitSchemaAccess {
 
 		try {
 			dc.sendPreparedUpdate(deleteUserQuery, deleteUserArgs, deleteUserAto, null);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
-		} finally {
-			closeDatabase();
-		}
+		} 
 
 	}
 	
@@ -522,11 +523,10 @@ public class LexitSchemaAccess {
 			if (res.size() > 0) {
 				role = res.get(0)[0];
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new RuntimeException("Reading the default role of a user caused an error.", e);
-		} finally {
-			closeDatabase();
-		}
+		} 
 		
 		return role;
 	}	
@@ -592,9 +592,6 @@ public class LexitSchemaAccess {
 	  	    catch (Exception e) {  	    	
 	  	    	throw new RuntimeException("Adding a user caused an error.", e);
 	  	    }
-	  	    finally {
-	  	      closeDatabase();
-	  	    }
 			
 		}
 			
@@ -622,9 +619,6 @@ public class LexitSchemaAccess {
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Removing old user role caused an error.", e);
     	    }
-    	    finally {
-    	      closeDatabase();
-    	    }
         	
     		
         	
@@ -646,9 +640,6 @@ public class LexitSchemaAccess {
     	    }
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Adding a user and project role caused an error.", e);
-    	    }
-    	    finally {
-    	      closeDatabase();
     	    }
     		
     	}
@@ -731,13 +722,13 @@ public class LexitSchemaAccess {
 	
 	
 	// close the database connection
-	private void closeDatabase()
-	{
-		if (dc != null)
-			dc.closeConnection();
-		if (Constants.debug)
-			Util.debug("Connection with the Lex'it schema closed.\n");
-	}
+//	private void closeDatabase()
+//	{
+//		if (dc != null)
+//			dc.closeConnection();
+//		if (Constants.debug)
+//			Util.debug("Connection with the Lex'it schema closed.\n");
+//	}
 	
 	
 	

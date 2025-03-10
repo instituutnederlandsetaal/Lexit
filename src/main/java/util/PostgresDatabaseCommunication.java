@@ -24,14 +24,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	//
 	// https://stackoverflow.com/questions/2757549/org-postgresql-util-psqlexception-fatal-sorry-too-many-clients-already
 	
-	
+	private boolean open = false;
 
 	public PostgresDatabaseCommunication(ContextObject co, boolean sendTomcatUserInfoToDb) {	
 		
 		// get the tomcat server context
 		// allowing us to get the active tomcat user name etc
 		this.co = co;
-		this.sendTomcatUserInfoToDb = sendTomcatUserInfoToDb;
+		this.sendUserInfoToDb = sendTomcatUserInfoToDb;
 	}	
 	
 	/**
@@ -40,27 +40,32 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	 */
 	private Connection db;
 	private ContextObject co;
-	private boolean activeTomcatUserTableIsThere = false; 
-	private boolean sendTomcatUserInfoToDb = false;
+	private boolean activeUserTableIsThere = false; 
+	private boolean sendUserInfoToDb = false;
 	
 	
 	/**
 	 * Sluit de connectie met de MySQL database. Dit moet helemaal aan het eind 
 	 * van het programma gebeuren.
 	 */
-	public void closeConnection()
-		{
+	public void closeConnection() {
 		try {
-			db.close();
+			if (this.open) {
+				db.close();
+				this.open = false; // Mark as closed
+			}
+			else {
+	            System.out.println("Resource is already closed.");
+	        }
+			
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			throw new RuntimeException("Error while closing the connection!", e);
 		}
 	}
 	
-	public void connectTo(String host, String port, String db, String user, String password)
-	{
+	public void connectTo(String host, String port, String db, String user, String password) {
+		
 		// if project config doesn't specify any port, choose the Postgres default port 
 		port = (port == null || port.isEmpty()) ? "5432" : port; 
 				
@@ -72,7 +77,6 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         // checks if the class exists (implicitly if the library is there)
         try {
         	Class.forName("org.postgresql.Driver");
-
         } 
         catch (ClassNotFoundException e) {        
         	throw new RuntimeException("PostgreSQL JDBC Driver not found. Include it in your library path!", e);
@@ -86,9 +90,12 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         	props.setProperty("charSet", "UTF8");
         	
         	// needed for special illegal databases (wrong Psql version or so) which cause getConnection to hang indefinitely)
-        	props.setProperty("connectTimeout", "5");  // Connection timeout (in seconds)
-        	props.setProperty("socketTimeout", "5");   // Socket read timeout (in seconds)
-        	props.setProperty("loginTimeout", "5");    // Login timeout (in seconds)
+        	//
+        	// BUT IT TURNED OUT THAT CAUSED PROBLEMS WITH THE DATABASE AUTOCLOSABLE CONNECTION
+        	//                        ---------------------------------------------------------
+        	//props.setProperty("connectTimeout", "5");  // Connection timeout (in seconds)
+        	//props.setProperty("socketTimeout", "5");   // Socket read timeout (in seconds)
+        	//props.setProperty("loginTimeout", "5");    // Login timeout (in seconds)
 
         	//props.setProperty("sslmode", "disable"); // temporary fix: https://stackoverflow.com/questions/59190010/psycopg2-operationalerror-fatal-unsupported-frontend-protocol-1234-5679-serve
         	//props.setProperty("Integrated Security", "false");
@@ -97,15 +104,18 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         	
         	this.db = DriverManager.getConnection(location, props);
         	
+        	// remember the connection is open
+        	this.open = true;
+        	
         	// make sure we never end up with idle connections
         	//this.sendUpdate("alter system set idle_in_transaction_session_timeout= 300000;");
 
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
         	throw new RuntimeException("Connection failed! Check output console!", e);
         }
 
-        if (this.db == null)
-        {
+        if (this.db == null) {
         	if (Constants.debug) System.out.println("Failed to make connection!");
         }
 		
@@ -131,24 +141,22 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// from the temporary table.
 		
 		
-		if ( 	sendTomcatUserInfoToDb &&
-				!activeTomcatUserTableIsThere &&
-				this.co != null)
-		{
+		if ( 	sendUserInfoToDb &&
+				!activeUserTableIsThere &&
+				this.co != null) {
+			
 			Statement stmt = null;
 			String query = "CREATE TEMPORARY TABLE active_user AS "+
 				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
 			
-			try
-			{
+			try {
 				// Create a Statement object
 				stmt = this.db.createStatement();
 				stmt.executeUpdate(query);
 				
-				activeTomcatUserTableIsThere = true;
+				activeUserTableIsThere = true;
 			}
-			catch (SQLException e)
-			{
+			catch (SQLException e) {
 				throw new RuntimeException("Error while executing query "+query, e);
 			}			
 			
@@ -161,9 +169,9 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// This is convenient when some Lex'it project is used in multiple tabs at the same time
 		// and database function must be able to tell which tab is sending information
 		
-		if ( sendTomcatUserInfoToDb )
-		{
-			if (activeTomcatUserTableIsThere) {
+		if ( sendUserInfoToDb ) {
+			
+			if (activeUserTableIsThere) {
 				
 				Statement stmt = null;
 				String query = "UPDATE active_user "+
@@ -171,14 +179,12 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 								"WHERE username = '"+this.co.getUsername()+"'::text "+
 								"AND session_id = '"+this.co.getSessionId()+"'::text; ";
 				
-				try
-				{
+				try {
 					// Create a Statement object
 					stmt = this.db.createStatement();
 					stmt.executeUpdate(query);
 				}
-				catch (SQLException e)
-				{
+				catch (SQLException e) {
 					throw new RuntimeException("Error while executing query "+query, e);
 				}
 			}
@@ -191,8 +197,8 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	}
 	
 	
-	public ResultSet sendQuery(String query) 
-	{
+	public ResultSet sendQuery(String query)  {
+		
 		if (Constants.debug) System.out.println(query);
 		
 		SendUserIdentityToDatabaseServer();
@@ -200,14 +206,12 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// Get the results
 		ResultSet rs = null;
 		Statement stmt = null;
-		try
-		{			
+		try {			
 			// Create a Statement object
 			stmt = this.db.createStatement();
 			rs = stmt.executeQuery(query);			
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		}				
 		return rs;
@@ -219,8 +223,8 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	 * @param timeLimitInMilliseconds
 	 * @return
 	 */
-	public ResultSet sendQueryWithTimeout(String query, int timeLimitInMilliseconds) 
-	{
+	public ResultSet sendQueryWithTimeout(String query, int timeLimitInMilliseconds)  {
+		
 		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
 		
@@ -229,8 +233,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// Get the results
 		ResultSet rs = null;
 		Statement stmt = null;
-		try
-		{			
+		try {			
 			// Create a Statement object
 			stmt = this.db.createStatement();
 			
@@ -243,18 +246,18 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			// the timeout is set, now execute the query
 			rs = stmt.executeQuery(query);			
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
+			
 			if (Constants.debug) System.out.println("Exception "+e.getMessage());
-			if (e.getMessage().toLowerCase().contains("timeout"))
-			{
+			
+			if (e.getMessage().toLowerCase().contains("timeout")) {
+				
 				// show a message but throw no exception
 				// so time out will return null
 				long timeAfterQuery = new Date().getTime();
 				if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
 			}
-			else
-			{
+			else {
 				// error, throw an exception and return no value
 				throw new RuntimeException("Error while executing query "+query, e);
 			}
@@ -278,28 +281,24 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		return rs;
 	}
 
-	public void sendUpdate(String query) 
-	{
+	public void sendUpdate(String query)  {
 		if (Constants.debug) System.out.println(query);
 		
 		SendUserIdentityToDatabaseServer();
 		
 		Statement stmt = null;
-		try
-		{
+		try {
 			// Create a Statement object
 			stmt = this.db.createStatement();
 			stmt.executeUpdate(query);
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		}
 	}
 	
 	
-	public ResultSet sendPreparedQuery(String query, String[] args) 
-	{
+	public ResultSet sendPreparedQuery(String query, String[] args) {
 		// if the query args contains null values,
 		// the query needs to be rebuilt
 		QueryObject qo = rebuildQueryIfArgListContainsNullValues(new QueryObject(query, args, null));
@@ -308,8 +307,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		query = qo.getQuery();
 		args = qo.getArgs();
 		
-		if (Constants.debug)
-		{
+		if (Constants.debug) {
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
@@ -319,14 +317,12 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// Get the results
 		ResultSet rs = null;
 		PreparedStatement prest = null;
-		try
-		{
+		try {
 			// prepare statement
 			prest = this.db.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-			for (int i=0; i<args.length; i++)
-			{
+			for (int i=0; i<args.length; i++) {
 				String oneArg = args[i];				
 				// a string containing 'NULL' must be interpreted as null
 				if (oneArg.equals("NULL")) oneArg = null;
@@ -340,16 +336,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 						
 			rs = prest.executeQuery();
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		}
 		
 		return rs;
 	}
 	
-	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato) 
-	{
+	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -360,8 +354,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		args = qo.getArgs();
 		ato = qo.getAto();
 		
-		if (Constants.debug)
-		{
+		if (Constants.debug) {
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
@@ -371,42 +364,37 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// Get the results
 		ResultSet rs = null;
 		PreparedStatement prest = null;
-		try
-		{
+		try {
 			// prepare statement
 			prest = this.db.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-			for (int i=0; i<args.length; i++)
-			{
+			for (int i=0; i<args.length; i++) {
+				
 				String oneArg = args[i];
 				String oneType = ato.getType(i);
 				// a string containing 'NULL' must be interpreted as null
 				if (oneArg.equals("NULL")) oneArg = null;
 				
-				if (oneType.equals("date"))
-				{
+				if (oneType.equals("date")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
 				}
-				else if (oneType.startsWith("time"))
-				{
+				else if (oneType.startsWith("time")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
 				}
-				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
-				{
+				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
 				}
-				else if (oneType.equals("boolean"))
-				{
+				else if (oneType.equals("boolean")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BOOLEAN);
 					else 
@@ -414,15 +402,13 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				}
 				
 				
-				else if ( isBigWholeNumberType(oneType) )
-				{
+				else if ( isBigWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
 					else 
 						prest.setLong(i+1, Long.parseLong(oneArg));
 				}
-				else if ( isWholeNumberType(oneType) )
-				{
+				else if ( isWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
@@ -431,30 +417,27 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 				
 				
-				else if ( isRealNumberType(oneType) )
-				{
+				else if ( isRealNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.DOUBLE);
 					else 
 						prest.setDouble(i+1, Double.parseDouble(oneArg));
 				}
-				else if (oneType.endsWith("[]")) // array
-				{
+				else if (oneType.endsWith("[]")) { // array
+				
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
 					if (oneType.equals("_int4[]"))
 						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
 				}
-				else if (oneType.equals("jsonb"))
-				{	
+				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);
 					else 
 						prest.setString(i+1, "[{"+oneArg+"}]");
 				}
-				else
-				{
+				else {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);
 					else 
@@ -465,16 +448,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			
 			rs = prest.executeQuery();
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			throw new RuntimeException("Error while executing query "+query, e);
 		}
 		
 		return rs;
 	}
 	
-	public void sendPreparedUpdate(String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) 
-	{
+	public void sendPreparedUpdate(String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -485,8 +466,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		args = qo.getArgs();
 		ato = qo.getAto();
 		
-		if (Constants.debug)
-		{			
+		if (Constants.debug) {			
 			System.out.println(query);
 			System.out.println(Util.join(args, ", "));
 		}
@@ -495,13 +475,11 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		
 		PreparedStatement prest;
 		
-		try
-		{
+		try {
 			// Create a Statement object
 			prest = this.db.prepareStatement(query);
 			
-			for (int i=0; i<args.length; i++)
-			{
+			for (int i=0; i<args.length; i++) {
 				String oneArg = args[i];				
 				String oneType = ato.getType(i);
 				// a string containing 'NULL' must be interpreted as null
@@ -509,74 +487,65 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 				
 				
-				if (oneType.equals("date"))
-				{
+				if (oneType.equals("date")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
 				}
-				else if (oneType.startsWith("time"))
-				{
+				else if (oneType.startsWith("time")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
 				}
-				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") )
-				{
+				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 
 						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
 				}
-				else if (oneType.equals("boolean"))
-				{
+				else if (oneType.equals("boolean")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BOOLEAN);
 					else 
 						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 				}
 				
-				else if ( isBigWholeNumberType(oneType) )
-				{
+				else if ( isBigWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
 					else 
 						prest.setLong(i+1, Long.parseLong(oneArg));
 				}
-				else if ( isWholeNumberType(oneType) )
-				{
+				else if ( isWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
 						prest.setInt(i+1, Integer.parseInt(oneArg));
 				}
 				
-				else if ( isRealNumberType(oneType) )
-				{
+				else if ( isRealNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.DOUBLE);
 					else 
 						prest.setDouble(i+1, Double.parseDouble(oneArg));
 				}
-				else if (oneType.endsWith("[]")) // array
-				{
+				else if (oneType.endsWith("[]")) { // array
+				
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
 					if (oneType.equals("_int4[]"))
 						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
 				}
-				else if (oneType.equals("jsonb"))
-				{	
+				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);
 					else 
 						prest.setString(i+1, "[{"+oneArg+"}]");
 				}
-				else
-				{
+				else {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);
 					else 
@@ -594,8 +563,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			prest.executeUpdate();
 			if (dro != null) dro.setResponse("OK");
 		}
-		catch (SQLException e)
-		{
+		catch (SQLException e) {
 			if (dro != null) dro.setResponse("Error while executing query "+query);
 			throw new RuntimeException("Error while executing query "+query, e);
 		}			
@@ -633,8 +601,8 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// rebuild the query without null values in args list
 		String rebuiltQuery = "";
 		
-		for (int i=0; i<querySplit.length; i++)
-		{
+		for (int i=0; i<querySplit.length; i++) {
+			
 			rebuiltQuery += querySplit[i];
 			
 			// if we have reached the last part of the query
@@ -644,15 +612,13 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		
 			
 			// if we have a null value as an argument for the question mark 
-			if (args[i] == null || args[i].toLowerCase().equals("null"))
-			{
+			if (args[i] == null || args[i].toLowerCase().equals("null")) {
 				// we replace the question mark by its value
 				// an remove the corresponding argument
 				rebuiltQuery += " null ";
 			}
 			// otherwise
-			else
-			{
+			else {
 				// we keep the question mark and the corresponding argument
 				rebuiltQuery += "?";
 				newArgsList.add(args[i]);
@@ -683,8 +649,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		
 		// if current query doesn't contain any 'exact equality' regex, leave right away
 		boolean found = false;
-		for (String oneArg : args)
-		{
+		for (String oneArg : args) {
 			if (oneArg.startsWith("exact:")) 
 				{
 				found = true;
@@ -705,8 +670,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// rebuild the query without 'exact equality' regexes
 		String rebuiltQuery = "";
 		
-		for (int i=0; i<querySplit.length; i++)
-		{
+		for (int i=0; i<querySplit.length; i++) {
 			rebuiltQuery += querySplit[i];
 			
 			// if we have reached the last part of the query
@@ -716,8 +680,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		
 			
 			// if we have an 'exact equality' as an argument for the question mark 
-			if (args[i].startsWith("exact:"))
-			{
+			if (args[i].startsWith("exact:")) {
 				// we remove 'exact:'	
 				// and change the operator into '='		
 						
@@ -727,8 +690,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 				// 1. case sensitive
 				//    (exact equality operator)
-				if (rebuiltQuery.endsWith("~"))
-				{
+				if (rebuiltQuery.endsWith("~")) {
 					// remove 'exact:'
 					newArgsList.add( args[i].substring("exact:".length()) );
 					// set argument type
@@ -740,8 +702,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 				// 2. or case insensitive 
 				//    (put everything to lowercase a both sides of equality operator)
-				else if (rebuiltQuery.endsWith("~*"))
-				{
+				else if (rebuiltQuery.endsWith("~*")) {
 					// remove 'exact:' and lowercase the argument
 					newArgsList.add(args[i].substring("exact:".length()).toLowerCase());
 					// set argument type
@@ -770,8 +731,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				rebuiltQuery += "?";
 			}
 			// otherwise
-			else
-			{
+			else {
 				// we keep the question mark and the corresponding argument
 				rebuiltQuery += "?";
 				newArgsList.add(args[i]);
@@ -833,10 +793,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			typeName.startsWith("real") ||
 			typeName.startsWith("double precision"); 
 	}
+	
+	public boolean isClosed() {
+        return !this.open;
+    }
 
 	@Override
-	public void close() throws Exception {
-		closeConnection();		
+	public void close() throws Exception {		
+		closeConnection();
 	};
 	
 }
