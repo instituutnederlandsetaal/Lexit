@@ -583,11 +583,18 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 
 		
-	} ); //end of datatable definition
+	} )
+	// prevent ugly DataTables Ajax error
+	.on( 'error.dt', function ( e, settings, techNote, message ) {
+		console.log( 'An error has been reported by DataTables: ', message );
+		lexitReload();        
+    } );  	
+	//end of datatable definition
 
 	// prevent ugly DataTables Ajax error
 	// See: https://datatables.net/manual/tech-notes/7 
-	$.fn.dataTable.ext.errMode = 'throw';
+	//      https://web.archive.org/web/20160316092904/http://datatables.net/reference/event/error
+	$.fn.dataTable.ext.errMode = 'none';
 	
 	// apply row grouping, if required
 	gui.applyRowGrouping(sSomeTableName);	
