@@ -71,9 +71,15 @@ var aProjectList = [
 		goody: true
 	},
 	{
+		name: "Gebruikersbeheer",
+		config_filename: "admin",
+		description: "Gebruikersbeheer",
+		goody: true
+	},
+	{
 		name: "Reset user rights",
 		config_filename: "reset_user_rights",
-		description: "Toegangsrechten resetten (klik alleen als het nodig is, geen speelgoed!)",
+		description: "Handmatig toegangsrechten resetten",
 		goody: true
 	}	 
 ];
