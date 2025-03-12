@@ -49,10 +49,29 @@ div#page table.lexit_menu_section {				/* section table rows */
 }
 
 
+div#page table.lexit_menu_section b, div#page table.lexit_menu_section i {
+	color: #000000;
+} 
 
-div#page table.lexit_menu_section b:hover,i:hover {
-	background-color: #80aaff;
+div#page table.lexit_menu_section b:hover, div#page table.lexit_menu_section i:hover {
+	background-color: #000000;
 	color: white;
+}
+
+div#page table.lexit_menu_section#lexit_menu_production_section {
+	background-color: #D0F5A9;
+}
+div#page table.lexit_menu_section#lexit_menu_goodies_section {
+	background-color: #A9E2F3;
+}
+div#page table.lexit_menu_section#lexit_menu_development_section {
+	background-color: #EFEFFB;
+}
+div#page table.lexit_menu_section#lexit_menu_closed_section {
+	background-color: #F8E0E0;
+}
+div#page table.lexit_menu_section#lexit_menu_unknown_section {
+	background-color: #F2F2F2;
 }
 
 

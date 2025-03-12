@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.03.11
+	v2025.03.12
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -1105,35 +1105,35 @@
 				.html("<b>" +lang.production+ "</b>");
 			var docOpen = $("<table></table>")
 				.addClass("lexit_menu_section")
-				.css("background", "#D0F5A9");
+				.attr("id", "lexit_menu_production_section");
 			
 			var goodiesTitle = $("<span></span>")
 				.addClass("lexit_menu_section")
 				.html("<b>" +lang.goodies+ "</b>");
 			var goodies = $("<table></table>")
 				.addClass("lexit_menu_section")
-				.css("background", "#A9E2F3");
+				.attr("id", "lexit_menu_goodies_section");
 			
 			var docDevelopmentTitle = $("<span></span>")
 				.addClass("lexit_menu_section")
 				.html("<b>" +lang.in_development+ "</b>");
 			var docDevelopment = $("<table></table>")
-				.addClass("lexit_menu_section")
-				.css("background", "#EFEFFB");
+				.addClass("lexit_menu_section")				
+				.attr("id", "lexit_menu_development_section");
 			
 			var docClosedTitle = $("<span></span>")
 				.addClass("lexit_menu_section")
 				.html("<b>" +lang.project_closed+ "</b>");
 			var docClosed = $("<table></table>")
 				.addClass("lexit_menu_section")
-				.css("background", "#F8E0E0");
+				.attr("id", "lexit_menu_closed_section");
 			
 			var docUnknownTitle = $("<span></span>")
 				.addClass("lexit_menu_section")
 				.html("<b>" +lang.project_unknown+ "</b>");
 			var docUnknown = $("<table></table>")
 				.addClass("lexit_menu_section")
-				.css("background", "#F2F2F2");
+				.attr("id", "lexit_menu_unknown_section");
 			
 			
 			// process list of all config files

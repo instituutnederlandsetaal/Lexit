@@ -306,7 +306,9 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 /**
  * Add a balk on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
- * @pparam {Boolean} bSetLinks - set default links to help, about and contribute
+ * @pparam {Boolean} [bSetLinks=false] - set default links to help, about and contribute
+ * @param {String} [sPathToCustomLogo=null] - path to a custom
+ * @param {String} [sCustomLogoSize="52px"] - size of the custom logo
  */
 fn.setBalk = function(bSetting, bSetLinks, sPathToCustomLogo, sCustomLogoSize){
 	
@@ -1752,6 +1754,7 @@ fn.closeTable = function(sSomeTablename, fnCallback){
  * Close all tables but the named one
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @param {Function} fnCallback - Some function to call after the tables are closed 
+ * @see fn.closeAllTables
  */
 fn.closeOtherTables = function(sSomeTablename, fnCallback){
 	if (typeof sSomeTablename == 'object')
@@ -1780,6 +1783,7 @@ fn.closeOtherTables = function(sSomeTablename, fnCallback){
 /**
  * Close all tables
  * @param {Function} fnCallback - Some function to call after the tables are closed 
+ * @see fn.closeOtherTables
  */
 fn.closeAllTables = function(fnCallback){
 	
@@ -3510,6 +3514,7 @@ fn.getIdOfRecord = function(sSomeTablename, aFieldsAndValues, fnCallback, fnErro
  * @param {Node} nRow - A row node
  * @param {Function} fnCallback - Function called after the operation
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * @see fn.removeFromTableGivenANode
  */
 fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	
@@ -3583,6 +3588,7 @@ fn.removeFromTableGivenANode = function(nRow, fnCallback, fnErrorHandler){
  * @param {Array} aFieldsAndValuesToMatch - An associative array of fields and values to match
  * @param {Function} [fnCallback=null] - Function called after the operation
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * @see fn.removeFromTableGivenFieldValues
  */
 fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch, fnCallback, fnErrorHandler){
 	
@@ -6004,7 +6010,7 @@ fn.getFilters = function(sSomeTable){
 
 
 /**
- * Get the filters values for a given table upon call (t.i.: as part of the fn.callTable() call).
+ * Get the filters values for a given table upon call, t.i.: as part of the fn.callTable() call.
  * @param {(String|API-object-instance)} sSomeTable - A table name or object
  */
 fn.getFiltersUponCall = function(sSomeTable){
