@@ -1401,6 +1401,10 @@ function uploadFile(sFileName) {
 
 	formData.append('file', file);
 	formData.append('db', dbName);
+	
+	// show the file is now being loaded
+	fn.closeDialog();
+	fn.message(lang.import_dialog_title, lang.loading_file + " ...");
 
 	// this might take a while, so put spinner
 	showSpinner("#dynamic", true);
@@ -1445,7 +1449,11 @@ function uploadFile(sFileName) {
 
 			},
 			error: function(xhr, status, error) {
-				console.error('Upload failed: ' + error);
+				
+				removeSpinner("#dynamic");
+				fn.closeDialog();
+				
+				fn.message(lang.error, lang.loading_file_failed);
 			}
 		});
 	}, 100);

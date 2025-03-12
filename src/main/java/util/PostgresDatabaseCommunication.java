@@ -331,7 +331,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				if (oneArg.equals("NULL")) oneArg = null;
 				
 				if ( Util.isInteger(oneArg))
-					prest.setInt(i+1, Integer.parseInt(oneArg));
+					prest.setInt(i+1, Integer.parseInt( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				else
 					prest.setString(i+1,oneArg);				
 			}
@@ -409,13 +409,13 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
 					else 
-						prest.setLong(i+1, Long.parseLong(oneArg));
+						prest.setLong(i+1, Long.parseLong( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
 				else if ( isWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
-						prest.setInt(i+1, Integer.parseInt(oneArg));
+						prest.setInt(i+1, Integer.parseInt( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
 				
 				
@@ -424,7 +424,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.DOUBLE);
 					else 
-						prest.setDouble(i+1, Double.parseDouble(oneArg));
+						prest.setDouble(i+1, Double.parseDouble(oneArg)); 
 				}
 				else if (oneType.endsWith("[]")) { // array
 				
@@ -519,13 +519,13 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
 					else 
-						prest.setLong(i+1, Long.parseLong(oneArg));
+						prest.setLong(i+1, Long.parseLong( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
 				else if ( isWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
-						prest.setInt(i+1, Integer.parseInt(oneArg));
+						prest.setInt(i+1, Integer.parseInt( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
 				
 				else if ( isRealNumberType(oneType) ) {
@@ -796,6 +796,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			typeName.startsWith("real") ||
 			typeName.startsWith("double precision"); 
 	}
+	
+	public String getRidOfDecimal(String number){
+		if (number.indexOf(".")<0) return number;
+        return number.replaceAll("\\.[0-9]+$", "");
+    }
+
+	
+	
 	
 	public boolean isClosed() {
         return !this.open;

@@ -16,6 +16,8 @@ lang.isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 lang.ok = "Ok";
 lang.send = "Verzend";
 lang.save = "Opslaan";
+lang.loading_file = "Het bestand wordt geladen";
+lang.loading_file_failed = "Het laden is mislukt";
 lang.undo = "Herstel";
 lang.compare = "Vergelijk";
 lang.yes = "Ja";
@@ -1463,6 +1465,8 @@ lang.setLanguage = function(sLanguageCode){
 		lang.ok = "Ok";
 		lang.send = "Send";
 		lang.save = "Save";
+		lang.loading_file = "The file is being loaded";
+		lang.loading_file_failed = "Loading has failed";
 		lang.undo = "Undo";
 		lang.compare = "Vergelijk";
 		lang.yes = "Yes";

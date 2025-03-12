@@ -430,9 +430,10 @@ kf.addKeyFunctions = function(){
 				
 			e.preventDefault();
 			var sUploadForm =
+				"	 <BR>" +
 				"    <form id=\"fileUploadForm\">" +
 				"        <input type=\"file\" id=\"fileChooser\" name=\"file\" />" +
-				"        <BR><BR>" +
+				"        <BR><BR><BR>" +
 				"        <button type=\"button\" id=\"start_upload_button\" onclick=\"uploadFile()\">"+ lang.import_uploadbutton +"</button>" +
 				"    </form>";
 

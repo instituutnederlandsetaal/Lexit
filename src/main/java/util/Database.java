@@ -4941,6 +4941,9 @@ public class Database {
 									case NUMERIC:
 										cellType = "bigint";
 										break;
+									case BLANK:
+										cellType = "text";
+										break;
 									default:
 										cellType = "text";
 										break;
@@ -5008,12 +5011,8 @@ public class Database {
 
 							cell = row.getCell((short)colNr);
 							String cellValue = null;
-							if (cell != null) {
-								if (dataType.equals("boolean"))
-									cellValue = cell.getBooleanCellValue() ? "true" : "false";
-								else if (dataType.equals("bigint"))
-									cellValue = String.valueOf( (long)cell.getNumericCellValue() );
-								else cellValue = cell.getStringCellValue().toString();
+							if (cell != null) {								
+								cellValue = getCellValue(cell);								
 							}
 							values.add(cellValue);
 						}
@@ -5044,6 +5043,36 @@ public class Database {
 
 		return ro;
 	}
+	
+	
+	// Helper method to handle cell content dynamically
+    public static String getCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    // If it's a date, format it
+                    return cell.getDateCellValue().toString();
+                } else {
+                    // Otherwise, treat it as a number
+                    return Double.toString(cell.getNumericCellValue());
+                }
+            case BOOLEAN:
+                return Boolean.toString(cell.getBooleanCellValue());
+            case FORMULA:
+                // Evaluate the formula if needed
+                return cell.getCellFormula();
+            case BLANK:
+                return "";
+            default:
+                return "Unsupported Cell Type";
+        }
+    }
 
 
 
