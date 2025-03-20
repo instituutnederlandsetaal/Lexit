@@ -381,7 +381,7 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	      ResultSet rs = dc.sendQuery(query);
+	      ResultSet rs = dc.sendQuery(query, 0);
 
 	      res = getResultsInAList(rs, new String[] { "username", "password" });
 	      if (res.size() > 0) {
@@ -425,7 +425,7 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	      ResultSet rs = dc.sendQuery(query);
+	      ResultSet rs = dc.sendQuery(query, 0);
 
 	      res = getResultsInAList(rs, new String[] { "username", "roles" });
 	      if (res.size() > 0) {
@@ -517,7 +517,7 @@ public class LexitSchemaAccess {
 		ArrayList<String[]> res;
 		
 		try {
-			ResultSet rs = dc.sendPreparedQuery(query, queryArgs, queryAto);
+			ResultSet rs = dc.sendPreparedQuery(query, queryArgs, queryAto, 0);
 
 			res = getResultsInAList(rs, new String[] { "default_access_role" });
 			if (res.size() > 0) {

@@ -200,7 +200,7 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
 					});
 			else
 				fn.message(lang.error, lang.error_when_calling+" fn.getLibrary(): " +				
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		});
 	
 };
@@ -232,7 +232,7 @@ fn.getCssFile = function(sPath, fnCallback, fnErrorHandler){
 					});
 			else
 				fn.message(lang.error, lang.error_when_calling+" fn.getCssFile(): " +				
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		});
 };
 
@@ -310,10 +310,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
  * @param {String} [sPathToCustomLogo=null] - path to a custom
  * @param {String} [sCustomLogoSize="52px"] - size of the custom logo
  */
-fn.setBalk = function(bSetting, bSetLinks, sPathToCustomLogo, sCustomLogoSize){
-	
-	if (bSetLinks == null) bSetLinks = false;
-	if (sCustomLogoSize == null) sCustomLogoSize = "52px";
+fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoSize="52px"){
 	
 	if (bSetting){
 		$("body").removeClass("default").addClass("huisstijl");
@@ -393,9 +390,9 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"schema_name": sNewSchema,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -448,7 +445,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 					});
 			else
 				fn.message(lang.error, lang.error_when_calling+ " fn.setSchema("+sNewSchema+"): " +				
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		}
 	} );
 };
@@ -1147,7 +1144,7 @@ fn._callTableSilentlySub = function(sSomeTableName){
 		url: url,
 		data: {
 			"table": sSomeTableName, 
-			"db_name": getHttpParams().get("db") 
+			"db_name": lexutil.getHttpParams().get("db") 
 		},
 		dataType: "xml",
 		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -1199,7 +1196,7 @@ fn.callDatabaseInNewTab = function(sSomeTablename, aContentToMatch, oExtraSettin
 		aContentToMatch = {};
 	
 	var sBaseUrl = fn._getBaseUrl();
-	var hParams = getHttpParams();
+	var hParams = lexutil.getHttpParams();
 	var sDb = sProjectName == null ? hParams.get("db") : sProjectName;
 	var sUrl = sBaseUrl+"?db="+sDb+"&table="+sSomeTablename;
 	
@@ -1461,9 +1458,9 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -1482,7 +1479,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 					});
 			else
 				fn.message(lang.error, lang.error_when_calling+ " fn.cleanTableCache("+sSomeTablename+"): " +				
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		}
 	} );
 };
@@ -1518,7 +1515,7 @@ fn.scrollToTable = function(sSomeTablename, bVerticalOnly){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	smoothScroll("html,body", "#"+sSomeTablename+"_dynamic", bVerticalOnly);
+	lexutil.smoothScroll("html,body", "#"+sSomeTablename+"_dynamic", bVerticalOnly);
 };
 
 
@@ -2845,7 +2842,7 @@ fn.getSelectedTextInNode = function(nMixed, sColumnName) {
     // This is needed because detection of positions doesn't take into account the tags and 
     //  html entitie names within the original string. We will need to remove highlighting
     //  in advance, because highlighting tags are no part of the original string
-    var oTrueIndexes = getTrueIndexes(
+    var oTrueIndexes = lexutil.getTrueIndexes(
     		fulltext,
     		fn.removeHighlight( fn.getDataFromCellNode(nCell) ), 
     		$.trim(text), start);
@@ -2928,11 +2925,11 @@ fn.getWordClickedUponInNode = function(nMixed, sColumnName){
     // This is needed because detection of positions doesn't take into account the tags and 
     //  html entities names within the original string. We will need to remove highlighting
     //  in advance, because highlighting tags are no part of the original string
-    var oTrueIndexes = getTrueIndexes(
+    var oTrueIndexes = lexutil.getTrueIndexes(
     		fulltext,
     		fn.removeHighlight( fn.getDataFromCellNode(nCell) ), 
     		$.trim(text), start, 
-    		true); // extra parameter: push word boundaries (see explanation at util.getTrueIndexes)
+    		true); // extra parameter: push word boundaries (see explanation at lexutil.getTrueIndexes)
     
     // return an object with 4 parts: selection start/end indexes, selection text, and reliability
     return {
@@ -3127,18 +3124,18 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 	var url = WEBSERV_URL+"/api/setvalue"; 
 	
 	// make sure we send no null values, as join can't deal with it
-	aColumnValues = convertNullToString(aColumnValues);
+	aColumnValues = lexutil.convertNullToString(aColumnValues);
 	
 	$.ajax( {
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"row_id": fn.getRowNodeId(nMixed),
 			"table_name": sTable,
 			"column_name": aColumnNames.join(ARG_INTERNAL_SEPARATOR),
 			"new_value": aColumnValues.join(ARG_INTERNAL_SEPARATOR), 
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3157,7 +3154,7 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 			else
 				fn.message(lang.error, 
 				lang.error_when_calling+ " fn.updateDatabaseGivenANode("+sTable+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );		
 
@@ -3214,20 +3211,20 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 	var url = WEBSERV_URL+"/api/setvalue_without_id"; 
 	
 	// make sure we send no null values, as join can't deal with it
-	aValuesToMatch = convertNullToString(aValuesToMatch);
-	aValuesToUpdate = convertNullToString(aValuesToUpdate);
+	aValuesToMatch = lexutil.convertNullToString(aValuesToMatch);
+	aValuesToUpdate = lexutil.convertNullToString(aValuesToUpdate);
 	
 	$.ajax( {
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name_to_match": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
 			"value_to_match": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR), 
 			"column_name_to_update": aColNamesToUpdate.join(ARG_INTERNAL_SEPARATOR),
 			"value_to_update": aValuesToUpdate.join(ARG_INTERNAL_SEPARATOR), 
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3248,7 +3245,7 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.updateDatabaseGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -3299,19 +3296,19 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	var url = WEBSERV_URL+"/api/insertvalue"; 
 	
 	// make sure we send no null values, as join can't deal with it
-	aValuesToAdd = convertNullToString(aValuesToAdd);
+	aValuesToAdd = lexutil.convertNullToString(aValuesToAdd);
 	
 	$.ajax( {
 		"type": "GET",
 		"async": false,
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name": aColNamesToAdd.join(ARG_INTERNAL_SEPARATOR),
 			"value": aValuesToAdd.join(ARG_INTERNAL_SEPARATOR),
 			"returning": returnField,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3334,7 +3331,7 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.insertIntoDatabase("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -3376,12 +3373,12 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 		"async": false,
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"columns_to_skip": ( aListOfColumnsToSkip == null ? aListOfColumnsToSkip : aListOfColumnsToSkip.join(ARG_INTERNAL_SEPARATOR) ),
 			"pk_substitute": ( pkSubstitute != null ? pkSubstitute : 'null' ),
 			"pk_value": pkValue,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3404,7 +3401,7 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.duplicateRecord("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -3443,18 +3440,18 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 	var url = WEBSERV_URL+"/api/get_id_of_record"; 
 	
 	// make sure we send no null values, as join can't deal with it
-	aValuesToMatch = convertNullToString(aValuesToMatch);
+	aValuesToMatch = lexutil.convertNullToString(aValuesToMatch);
 	
 	$.ajax( {
 		"type": "GET",
 		"async": false, // needed to block code execution while awaiting the server response
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
 			"value": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR),
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3475,7 +3472,7 @@ fn.getIdFromDatabase = function(sSomeTablename, aFieldsAndValues, fnCallback, fn
 			else
 				fn.message(lang.error, 
 	 				lang.error_when_calling+" fn.getIdFromDatabase("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -3540,9 +3537,9 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 		"url": url,
 		"data": {
 			"row_id": sNodeId,
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sTable,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3563,7 +3560,7 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+" fn.removeFromDatabaseGivenANode("+sTable+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -3607,17 +3604,17 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 	var url = WEBSERV_URL+"/api/delete_row_without_id";
 	
 	// make sure we send no null values, as join can't deal with it
-	aValuesToMatch = convertNullToString(aValuesToMatch);
+	aValuesToMatch = lexutil.convertNullToString(aValuesToMatch);
  
 	$.ajax( {
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
 			"value": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR), 
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3638,7 +3635,7 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 			else
 				fn.message(lang.error,
 	 			lang.error_when_calling+ " fn.removeFromDatabaseGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };
@@ -3710,10 +3707,10 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 		"type": "GET",
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sTable,
 			"id": sRecordId,
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -3735,7 +3732,7 @@ fn.callRecord = function(nRow, aColumnsToUpdate, fnCallback, fnErrorHandler){
 			else
 				fn.message(lang.error,
 	 			lang.error_when_calling+" fn.callRecord("+sTable+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -3812,10 +3809,10 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"id": sRecordId,
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {	 		
@@ -3834,7 +3831,7 @@ fn.getRecord = function(sSomeTablename, sRecordId, fnCallback, fnErrorHandler){
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+" fn.getRecord("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		}
 	} );
 	
@@ -3869,10 +3866,10 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"ids": sRecordIds,
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {	 		
@@ -3891,7 +3888,7 @@ fn.getRecords = function(sSomeTablename, aRecordIds, fnCallback, fnErrorHandler)
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.getRecords("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -3930,18 +3927,18 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 	var url = WEBSERV_URL+"/api/get_record_without_id";
 	
 	// make sure we send no null values, as join can't deal with it
-	aValuesToMatch = convertNullToString(aValuesToMatch);
+	aValuesToMatch = lexutil.convertNullToString(aValuesToMatch);
 	
 	$.ajax( {
 		"type": "GET",
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name_to_match": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
 			"value_to_match": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR),
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {	 		
@@ -3960,7 +3957,7 @@ fn.getRecordGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch,
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.getRecordGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -3988,11 +3985,11 @@ fn.getRecordsGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch
 		"url": url,
 		"async": false, // needed to block code execution while awaiting the server response
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename,
 			"column_name_to_match": aColNamesToMatch.join(ARG_INTERNAL_SEPARATOR),
 			"value_to_match": aValuesToMatch.join(ARG_INTERNAL_SEPARATOR),
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {	 		
@@ -4011,7 +4008,7 @@ fn.getRecordsGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToMatch
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+ " fn.getRecordsGivenFieldValues("+sSomeTablename+"): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 	
@@ -4099,13 +4096,13 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 		aFunctionArguments = [];
 	
 	// make sure the function arguments contain no null value, as join can't deal with it		
-	aFunctionArguments = convertNullToString(aFunctionArguments);		
+	aFunctionArguments = lexutil.convertNullToString(aFunctionArguments);		
 	
 	// data to be send
 	var aData = {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"function_name": sFunctionName,
-			"dummy": getUniqueNumber() 
+			"dummy": lexutil.getUniqueNumber() 
 			};
 	// add the args only if those are non-empty (otherwise the webservice can't tell the difference between
 	// no argument at all vs. one single empty string argument, which are two quite different things!)
@@ -4143,8 +4140,8 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 	 		
 	 		// [2] more return values
 	 		// (in that case, the keys are the returned columns names)
-	 		else if (countProperties(oFieldsAndValues)>1) {
-	 			functionCallOuput = new cloneObject(oFieldsAndValues);
+	 		else if (lexutil.countProperties(oFieldsAndValues)>1) {
+	 			functionCallOuput = new lexutil.cloneObject(oFieldsAndValues);
 	 		}
 	 			 		
 	 		// if some callback function is given, call it now		 		
@@ -4163,7 +4160,7 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 			else
 				fn.message(lang.error, 
 	 			lang.error_when_calling+" fn.callFunction(" + sFunctionName + "): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));			
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));			
 			}
 		} );
 		
@@ -4259,7 +4256,7 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
 
 						// make sure that the autocomplete won't disappear behind the table (it did happen in the past...)
 						setTimeout(function(){
-							$(".ui-front").css("z-index", getHighestZindex()+1);
+							$(".ui-front").css("z-index", lexutil.getHighestZindex()+1);
 						}, 100);
 					}
 		        });
@@ -4331,7 +4328,7 @@ fn._activeEnterForThisDialog = function(dialogDivId){
 fn.message = function(sTitle, sMessage, fnFunction){
 	
 	var sP = $("<p></p>").html(sMessage);
-	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var dialogDivId = "dialog-message"+lexutil.getUniqueNumber();
 	var sDiv = $("<div></div>").attr("id", dialogDivId).attr("title", sTitle).append(sP);
 	
 	$(document.body).append(sDiv);
@@ -4383,7 +4380,7 @@ fn.message = function(sTitle, sMessage, fnFunction){
 fn.askToChoose = function(sTitle, sMessage, oOptions){
 	
 	var sP = $("<p></p>").html(sMessage);
-	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var dialogDivId = "dialog-message"+lexutil.getUniqueNumber();
 	var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
 	
 	$(document.body).append(sDiv);
@@ -4457,7 +4454,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
 	}
 	else {
 		var sP = $("<p></p>").html(sMessage);
-		var dialogDivId = "dialog-message"+getUniqueNumber();
+		var dialogDivId = "dialog-message"+lexutil.getUniqueNumber();
 		var sDiv = $("<div></div>").attr("id",dialogDivId).attr("title", sTitle).append(sP);
 		
 		$(document.body).append(sDiv);
@@ -4512,7 +4509,7 @@ fn.confirm = function(sTitle, sMessage, fnFunction, fnCancelFunction){
  */
 fn.showTabs = function(sTitle, sMessage, oTitles2HtmlContent, fnFunction, oExtraSettings){
 	
-	var dialogDivId = "dialog-message"+getUniqueNumber();
+	var dialogDivId = "dialog-message"+lexutil.getUniqueNumber();
 	var nDiv = $("<div></div>").attr("id", dialogDivId).attr("title", sTitle);
 	
 	$(document.body).append(nDiv);
@@ -4694,7 +4691,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	if (bTextarea == null) 
 		bTextarea = false;
 	
-	var promptDivId = "dialog-message"+getUniqueNumber();
+	var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
 	
 	var promptDiv = $("<div></div>") 
 		.attr("id", promptDivId)
@@ -4727,7 +4724,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		// or a checkbox?
 		var bCheckBox = (aValues != null && typeof aValues[i] === 'boolean');
 		
-		var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+		var fieldLC = $.trim( lexutil.keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		var label = $("<label></label>")
 			.attr("for", fieldLC)
 			.text($.trim(aFieldNames[i]));
@@ -4869,7 +4866,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
      			var thisFieldName = $.trim(aFieldNames[i]);
      			
      			// value for this field, entered by the user
-    			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+    			var fieldLC = $.trim( lexutil.keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
     			// read value for this field
     			// first try special case (select box), and then the normal case (text)
     			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
@@ -4978,7 +4975,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  */
 fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, mSelectionMode){
 	
-	var promptDivId = "dialog-message"+getUniqueNumber();
+	var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!
 	
 	mSelectionMode = (typeof mSelectionMode == 'undefined' ? false : mSelectionMode);		
@@ -5229,8 +5226,8 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	fn._clearUserInput();
 	
-	var promptDivId = "dialog-message"+getUniqueNumber();
-	var sortableId = "sortable"+getUniqueNumber();
+	var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
+	var sortableId = "sortable"+lexutil.getUniqueNumber();
 	
 	// deal with title/message input
 	var sMessage = "";
@@ -5257,7 +5254,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	for (var i=0; i<aFieldNames.length; i++)
 		{
-		var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+		var fieldLC = $.trim( lexutil.keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		aOriginalOrder.push(fieldLC);
 		
 		var liElement = $("<li></li>")
@@ -5294,7 +5291,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
     	  click: function(){
     		  
     		for (var i=0; i<aFieldNames.length; i++) {
-    			var fieldLC = $.trim( keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
+    			var fieldLC = $.trim( lexutil.keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
     			
     			// compute output for fn.getPromptBoxInput
     			// (we keep this mainly for backwards compatibility, since we had no response in callback in the past)
@@ -6281,7 +6278,7 @@ fn.getHighlight = function(sString, aaIndexes, sColor){
 	}
 	
 	// make sure the indexes are sorted correctly
-	aaIndexes = sortArrayOfArray(aaIndexes);
+	aaIndexes = lexutil.sortArrayOfArray(aaIndexes);
 	
 	var sPreTag = "<span style='background: "+sColor+"'>";
 	var sPostTag = "</span>";
@@ -6412,7 +6409,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 
 	if ( bUseTheLexitServiceAsProxy ){
 
-		var sData = getAssociativeArrayAsString(aParameters);
+		var sData = lexutil.getAssociativeArrayAsString(aParameters);
 		
 		var ajaxParams = {
 			url: WEBSERV_URL+"/api/call_external_service",
@@ -6453,7 +6450,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 				else
 					fn.message(lang.error,
 						lang.error_when_calling+" fn.callService(): " +	
-						textStatus+"; "+getJqXHRInfo(jqXHR));
+						textStatus+"; "+lexutil.getJqXHRInfo(jqXHR));
 			});		
 
 	}
@@ -6494,7 +6491,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 				else
 					fn.message(lang.error,
 					lang.error_when_calling+" fn.callService(): " +				
-					textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+					textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		}
 		
@@ -6587,7 +6584,7 @@ fn.getCurrentTabId = function(){
  * @returns {String} A project name
  */
 fn.getCurrentProject = function(){
-	return getHttpParams().get("db");
+	return lexutil.getHttpParams().get("db");
 };
 
 
@@ -6634,7 +6631,7 @@ fn.setCurrentUser = function(sName, fnCallback, fnErrorHandler){
 		"async": false, // needed to block code execution while awaiting the server response
 		"url": url,
 		"data": {
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -6655,7 +6652,7 @@ fn.setCurrentUser = function(sName, fnCallback, fnErrorHandler){
 					});
 			else
 				fn.message(lang.error, lang.error_when_calling+ " fn.setCurrentUser('"+sName+"'): "+
-				textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 			}
 		} );
 };

@@ -359,7 +359,7 @@ public class Database {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = getConnection().sendPreparedQuery(getRowNumberQuery, args, ato);
+					rs = getConnection().sendPreparedQuery(getRowNumberQuery, args, ato, 0);
 					res = getResultsInAList(rs, new String[]{"rownumber"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
@@ -495,7 +495,7 @@ public class Database {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = getConnection().sendPreparedQuery(getRowNumberQuery, argValues, ato);
+					rs = getConnection().sendPreparedQuery(getRowNumberQuery, argValues, ato, 0);
 					res = getResultsInAList(rs, new String[]{"ids_to_render"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
@@ -622,7 +622,7 @@ public class Database {
 	      // in some rare cases, the query hereabove will be slow
 	      getConnection().sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 
-	      ResultSet rs = getConnection().sendQuery(query);
+	      ResultSet rs = getConnection().sendQuery(query, 0);
 
 	      res = getResultsInAList(rs, new String[] { "n" });
 	      if (res.size() > 0)
@@ -692,7 +692,7 @@ public class Database {
     		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
   	      
   	      ResultSet rs = columnValueFilter.isEmpty() ? 
-  	    		getConnection().sendQuery(query)
+  	    		getConnection().sendQuery(query, 0)
   	    		  :
   	    		getConnection().sendPreparedQuery(query, new String[]{columnValueFilter});
 
@@ -822,9 +822,9 @@ public class Database {
     		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
   	      
   	      ResultSet rs = columnsValues.size() == 0 ? 
-  	    		getConnection().sendQuery(query)
+  	    		getConnection().sendQuery(query, 0)
   	    		  :
-  	    		getConnection().sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato);
+  	    		getConnection().sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato, 0);
 
   	      res = getResultsInAList(rs, new String[] { "n", "cnt" });
   	      if (res.size() > 0)
@@ -881,7 +881,7 @@ public class Database {
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			ato.setType(0, idColumnType);
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato, 0);
 			
 			res = getResultsInAList(rs, columnsNames);	
 			
@@ -948,7 +948,7 @@ public class Database {
 				ato.setType(i, idColumnType);
 			}
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecords, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecords, args, ato, 0);
 			
 						
 			res = getResultsInAList(rs, columnsNames);	
@@ -1130,7 +1130,7 @@ public class Database {
 		try {
 			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato, 0);
 			
 			res = getResultsInAList(rs, columnsNames);	
 			
@@ -1236,7 +1236,7 @@ public class Database {
 		
 		
 		try {
-			ResultSet rs = getConnection().sendQuery(getRecord);
+			ResultSet rs = getConnection().sendQuery(getRecord, 0);
 			
 			String[] columnsNames = getColumnNamesFromResultSet(rs);			
 			res = getResultsInAList(rs, columnsNames);			
@@ -1536,7 +1536,7 @@ public class Database {
 		try {
 			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(insertRecords, values, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(insertRecords, values, ato, 0);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -1617,7 +1617,7 @@ public class Database {
 		try {
 			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(duplicateRecord, values, ato);
+			ResultSet rs = getConnection().sendPreparedQuery(duplicateRecord, values, ato, 0);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -2155,7 +2155,7 @@ public class Database {
 			Util.debug(co, "## Get count estimate (fast)");
 			
 			getConnection().sendUpdate(query1);
-			ResultSet rs = getConnection().sendQuery(query2);
+			ResultSet rs = getConnection().sendQuery(query2, 0);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"rows"});		
 			count = Integer.parseInt(res.get(0)[0]);
@@ -2217,7 +2217,7 @@ public class Database {
 		try {		
 			
 			getConnection().sendUpdate(query1);
-			ResultSet rs = getConnection().sendQuery(query2);
+			ResultSet rs = getConnection().sendQuery(query2, 0);
 			
 			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"cost"});		
 			queryCost = Integer.parseInt(res.get(0)[0]);
@@ -2256,18 +2256,14 @@ public class Database {
 			"FROM " + getSafeTableName(tableName, schema) + ";";	
 		
 		
-		
-		
 		try {
 			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
-			
 			
 			boolean bForceExactCount = this.getForceExactCount();
 			
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
-			ResultSet rs = bForceExactCount ? 
-					getConnection().sendQuery(getCountQuery) : getConnection().sendQueryWithTimeout(getCountQuery, maxAllowedDuration);
+			ResultSet rs = getConnection().sendQuery(getCountQuery, (bForceExactCount ? 0 : maxAllowedDuration));
 			
 			res = getResultsInAList(rs, new String[]{"rowcount"});
 			// if the time limit was exceeded, we have a null resultset 
@@ -2823,7 +2819,7 @@ public class Database {
 			String[] args = queryValues.toArray(new String[queryValues.size()]);
 			
 			ResultSet rs1 = queryValues.size()==0 ?
-				getConnection().sendQuery(query) : getConnection().sendPreparedQuery(query, args, ato);
+				getConnection().sendQuery(query, 0) : getConnection().sendPreparedQuery(query, args, ato, 0);
 			
 			ArrayList<ConcurrentHashMap<String, String>> cellList = 
 				getListOfIdToCell(tableName, primaryKey, rs1, allColumns );
@@ -2877,15 +2873,16 @@ public class Database {
 						
 						getConnection().sendUpdate("SET search_path TO "+schema+"; ");
 						
-						// Important here: we set a timeout, to make sure 
-						// that the normal count will never takes too long.
-						// BUT if the user absolutely required an exact count, he/she will have to put up with it...
-						if ( !bExactCountRequiredByUser)
-							getConnection().sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 						
 						ResultSet rs2;						
 						try {
-							rs2 = getConnection().sendPreparedQuery(countQuery, args, ato);	
+							
+							// Important here: we might have to set a timeout, to make sure 
+							// that the normal count will never takes too long.
+							// BUT if the user absolutely required an exact count, he/she will have to put up with it...
+							
+							rs2 = getConnection().sendPreparedQuery(countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) );	
+							
 							
 							ArrayList<ArrayList<String>> countResult = 
 								getResultsInArrayList(rs2, new String[]{"count"});
@@ -2896,6 +2893,7 @@ public class Database {
 						}
 						// if the normal count takes too long, do an estimate count
 						catch (Exception e) {
+							
 							if (Constants.debug) {
 								System.out.println("%%% NORMAL COUNT TIME OUT !!");
 								System.out.println("%%% We will use an estimate count");
@@ -2968,9 +2966,6 @@ public class Database {
 			
 			// show error in console
 			Util.debug(co, "## ERROR: "+"Error while executing query "+query);
-						
-			// reset the statement_timeout
-			getConnection().sendUpdate("RESET statement_timeout;");
 		}
 		
 		
@@ -4429,7 +4424,10 @@ public class Database {
 		
 	}
 	
-	
+	/**
+	 * Get a connection
+	 * @return
+	 */
 	public PostgresDatabaseCommunication getConnection() {
 		if (this.dc == null || this.dc.isClosed()) {
 			System.out.println("Reconnect to database");

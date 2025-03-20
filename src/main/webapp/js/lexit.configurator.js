@@ -817,10 +817,9 @@ conf.isHiddenTable = function(sTablename){
 		return false;
 	
 	// if the oShowOnlyTables list was set in the configuration, check that list first
-	if (typeof oShowOnlyTables != 'undefined' && countProperties(oShowOnlyTables)>0)
-		{
+	if (typeof oShowOnlyTables != 'undefined' && lexutil.countProperties(oShowOnlyTables)>0){
 		return $.inArrayRegEx(sTablename, oShowOnlyTables)<0;
-		}
+	}
 		
 	// otherwise check the oHiddenTablesList
 	return $.inArrayRegEx(sTablename, oHiddenTablesList)>-1;
@@ -902,14 +901,12 @@ conf.getColumnConfig = function( oTableConfig, sColumnName){
 	
 	var oColumnConfig = new Object();
 	
-	for (oneColumn in oTableConfig)
-		{
-		if (oneColumn == sColumnName)
-			{			
-			oColumnConfig = new cloneObject( oTableConfig[sColumnName] );
+	for (oneColumn in oTableConfig) {
+		if (oneColumn == sColumnName) {			
+			oColumnConfig = new lexutil.cloneObject( oTableConfig[sColumnName] );
 			break;
-			}
 		}
+	}
 	
 	// add the column name as a key, 
 	// so we can retrieve the name of a column from its config object! 
@@ -975,15 +972,13 @@ conf.getBackgroundColor = function(aColumnConfig){
 	// (this is only possible when the color is an hex color code)
 	
 	// input is string
-	if (typeof aColumnColorConfig=='string' && $.startsWith(aColumnColorConfig, "#"))
-		{
-		return [shadeColor(aColumnColorConfig, -10), aColumnColorConfig];
-		}
-	// unput is array of string
-	if (aColumnColorConfig.length==1 && $.startsWith(aColumnColorConfig[0], "#"))
-		{
-		return [shadeColor(aColumnColorConfig[0], -10), aColumnColorConfig[0]];
-		}
+	if (typeof aColumnColorConfig=='string' && $.startsWith(aColumnColorConfig, "#")) {
+		return [lexutil.shadeColor(aColumnColorConfig, -10), aColumnColorConfig];
+	}
+	// input is array of string
+	if (aColumnColorConfig.length==1 && $.startsWith(aColumnColorConfig[0], "#")) {
+		return [lexutil.shadeColor(aColumnColorConfig[0], -10), aColumnColorConfig[0]];
+	}
 	return aColumnColorConfig;
 };
 
@@ -1852,9 +1847,9 @@ conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
 	
 	// of course, give priority to the column order explicitly set in the configuration 
 	if (aColumnOrder == null)
-		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aAllColumns);
+		aRestoreObjects[sTablename]["list_of_columns"] = lexutil.cloneArray(aAllColumns);
 	else
-		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aColumnOrder);
+		aRestoreObjects[sTablename]["list_of_columns"] = lexutil.cloneArray(aColumnOrder);
 };
 
 conf.getOriginalColumnList = function(sTablename){
@@ -1984,21 +1979,19 @@ conf.getHeaderColor = function(aTableSettings){
 	var sTableName = conf.getTableName(aTableSettings);
 	
 	// special case: value is 'auto'
-	if (aTableSettings["header_color"] == 'auto' && sTableName != null)
-		{
+	if (aTableSettings["header_color"] == 'auto' && sTableName != null) {
 		// generate color out of table name string
-		var sHeaderColor = stringToColour( sTableName );
+		var sHeaderColor = lexutil.stringToColor( sTableName );
 		
 		// if color is dark, make it lighter
-		var ligherOn = (lightOrDark(sHeaderColor) == 'dark');
-		while (ligherOn)
-			{
-			sHeaderColor = ColorLuminance(sHeaderColor, 0.5);
-			ligherOn = (lightOrDark(sHeaderColor) == 'dark');
-			} 
+		var ligherOn = (lexutil.lightOrDark(sHeaderColor) == 'dark');
+		while (ligherOn) {
+			sHeaderColor = lexutil.colorLuminance(sHeaderColor, 0.5);
+			ligherOn = (lexutil.lightOrDark(sHeaderColor) == 'dark');
+		} 
 		
 		return sHeaderColor;
-		}
+	}
 	
 	// default
 	return aTableSettings["header_color"];

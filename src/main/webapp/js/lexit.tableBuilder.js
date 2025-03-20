@@ -321,7 +321,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				var bExactCountByConfig = conf.getExactCount(oTableSettings);
 				
 				return $.extend( {}, d, {
-			        "sDbName": 			getHttpParams().get("db"),
+			        "sDbName": 			lexutil.getHttpParams().get("db"),
 			        "sTableName": 		sSomeTableName,
 			        "bForceExactCount":	(bForceExactCount || bExactCountByConfig), // if one is true, it's enough
 			        "sGoToRowIds":		sGoToRowIds      // needed for GoTo function, when working with row ids (all info at Database.getRowNumberOfRecord)
@@ -442,7 +442,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 						if (textRendering != null){
 							var sTextVal = $("td:eq("+iColNumber+")", oCurrentRow.node()).text();
 							sTextVal = textRendering(sTextVal);
-							if (hasTags(sTextVal)) {
+							if (lexutil.hasTags(sTextVal)) {
 								$("td:eq("+iColNumber+")", oCurrentRow.node()).html(sTextVal);
 							}
 							else {

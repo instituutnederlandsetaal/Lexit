@@ -428,13 +428,13 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 				"data": {
 					"async": false,
 					"row_id": rowIds.join(ARG_INTERNAL_SEPARATOR),
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sSomeTablename,
 					"filter_column_name": sSelectedColumn,
 					"filter_value": sOldString,
 					"replacement_value": sNewString,
 					"column_to_copy": columnsToCopy.join(ARG_INTERNAL_SEPARATOR),					
-					"dummy": getUniqueNumber() 
+					"dummy": lexutil.getUniqueNumber() 
 					},
 			 	"dataType": "xml", // get response as xml
 			 	"success": function(xml) {
@@ -474,11 +474,11 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 				"data": {
 					"async": false,
 					"row_id": rowIds.join(ARG_INTERNAL_SEPARATOR),
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sSomeTablename,
 					"column_name": sSelectedColumn,
 					"new_value": newValues.join(ARG_INTERNAL_SEPARATOR), 
-					"dummy": getUniqueNumber() 
+					"dummy": lexutil.getUniqueNumber() 
 					},
 			 	"dataType": "xml", // get response as xml
 			 	"success": function(xml) {

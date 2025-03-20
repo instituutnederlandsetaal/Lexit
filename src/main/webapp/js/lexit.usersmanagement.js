@@ -31,7 +31,7 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 				"data": {
 					"username": username,
 					"db_name": project,
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 				},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
@@ -69,7 +69,7 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 		"type": "GET",
 		"url": WEBSERV_URL+"/api/get_list_of_users_and_roles",
 		"data": {
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 		},
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
@@ -130,7 +130,7 @@ lexitusers.refreshUserRight = function(fnCallback){
 		"type": "GET",
 		"url": WEBSERV_URL+"/api/reset_user_rights",
 		"data": {
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 		},
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
@@ -150,7 +150,7 @@ lexitusers.getDefaultRole = function(someUser, fnCallback){
 		"url": WEBSERV_URL+"/api/get_user_default_role",
 		"data": {
 			"username": someUser,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 		},
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
@@ -171,7 +171,7 @@ lexitusers.deleteUser = function(){
 		"type": "GET",
 		"url": WEBSERV_URL+"/api/get_list_of_users",
 		"data": {
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 		},
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
@@ -192,7 +192,7 @@ lexitusers.deleteUser = function(){
 									"url": WEBSERV_URL+"/api/delete_user",
 									"data": {
 										"username": resp["username"],
-										"dummy": getUniqueNumber()
+										"dummy": lexutil.getUniqueNumber()
 									},
 									"dataType": "xml", // get response as xml
 									"success": function(xml) {
@@ -261,7 +261,7 @@ lexitusers.createNewUser = function(){
 						"username": resp["username"],
 						"password": resp["password"],
 						"default_role": resp["default access role"],
-						"dummy": getUniqueNumber()
+						"dummy": lexutil.getUniqueNumber()
 					},
 					"dataType": "xml", // get response as xml
 					"success": function(xml) {
@@ -294,7 +294,7 @@ lexitusers.addRoleInProject = function(){
 		"type": "GET",
 		"url": WEBSERV_URL+"/api/get_list_of_users",
 		"data": {
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 		},
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
@@ -316,7 +316,7 @@ lexitusers.addRoleInProject = function(){
 								"default_role": ( resp["default access role"] == 'NO CHANGE' ? null : resp["default access role"]),
 								"db_name": resp["project (db)"],
 								"role": resp["role in project (db)"],
-								"dummy": getUniqueNumber()
+								"dummy": lexutil.getUniqueNumber()
 							},
 							"dataType": "xml", // get response as xml
 							"success": function(xml) {

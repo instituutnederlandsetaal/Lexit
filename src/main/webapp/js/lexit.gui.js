@@ -715,12 +715,12 @@ gui.makeTableEditable = function(sSomeTablename){
 					"url": url,
 					"data": {
 						"row_id": rowId,
-						"db_name": getHttpParams().get("db"),
+						"db_name": lexutil.getHttpParams().get("db"),
 						"table_name": sSomeTablename,
 						"column_name": sColumnName,
 						"new_value": sPreprocessedValue,
 						"value_type": sColumnType,
-						"dummy": getUniqueNumber()
+						"dummy": lexutil.getUniqueNumber()
 						},
 				 	"dataType": "xml", // get response as xml
 				 	"success": function(xml) {
@@ -755,7 +755,7 @@ gui.makeTableEditable = function(sSomeTablename){
 						}
 						else {
 							fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
 									function(){
 										gui.refreshTable(sSomeTablename);
 										//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
@@ -885,7 +885,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		// (must be contrary of current value, which is actually the value before the click)
 		var newValue = gui.getTrueCheckboxValue(sSomeTablename, nCurrentNode);
 		// put the new value into the Datatable object too
-		mt.getDataTableObjectOf(sSomeTablename).cell(nCurrentNode).data(  translateBoolean(newValue) );
+		mt.getDataTableObjectOf(sSomeTablename).cell(nCurrentNode).data(  lexutil.translateBoolean(newValue) );
 		
 		// send the checked/unchecked value to the database		
 		
@@ -930,12 +930,12 @@ gui.makeTableEditable = function(sSomeTablename){
 				"url": url,
 				"data": {
 					"row_id": this.parentNode.getAttribute('id'),
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sSomeTablename,
 					"column_name": sColumnName,
 					"new_value": newValue,
 					"value_type": sColumnType, 
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 			 	"dataType": "xml", // get response as xml
 			 	"success": function(xml) {
@@ -961,7 +961,7 @@ gui.makeTableEditable = function(sSomeTablename){
 					}
 					else {
 						fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
 							function(){
 								gui.refreshTable(sSomeTablename);
 							}
@@ -1113,12 +1113,12 @@ gui.makeTableEditable = function(sSomeTablename){
 											"url": url,
 											"data": {
 												"row_id": rowId,
-												"db_name": getHttpParams().get("db"),
+												"db_name": lexutil.getHttpParams().get("db"),
 												"table_name": sSomeTablename,
 												"column_name": sColumnName,
 												"new_value": value,
 												"value_type": sColumnType,
-												"dummy": getUniqueNumber()
+												"dummy": lexutil.getUniqueNumber()
 												},
 										 	"dataType": "xml", // get response as xml
 										 	"success": function(xml) {
@@ -1155,7 +1155,7 @@ gui.makeTableEditable = function(sSomeTablename){
 												}
 												else {
 													fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-															lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+															lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
 															function(){
 																gui.refreshTable(sSomeTablename);
 															}
@@ -1290,14 +1290,14 @@ gui.showProcessingMsg = function(sSomeTablename, bRefreshing){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	showSpinner("#"+sSomeTablename+"_wrapper", bRefreshing);	
+	lexutil.showSpinner("#"+sSomeTablename+"_wrapper", bRefreshing);	
 	$("body").css("cursor", "progress");
 };
 gui.removeProcessingMsg = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	removeSpinner("#"+sSomeTablename+"_wrapper");
+	lexutil.removeSpinner("#"+sSomeTablename+"_wrapper");
 	$("body").css("cursor", "auto");
 };
 
@@ -1463,7 +1463,7 @@ gui.buildMapOfCellBackgroundColors = function(sSomeTableName){
 					(iColNumber==iSortColumn  ? (iRowNumber%2==0 ? "#D3D6FF":"#EAEBFF") : 
 						(iRowNumber%2==0 ? "#E2E4FF":"#FFFFFF")); 
 		aNodeColorsMap[i] = sNeutralBgColor;
-		aNodeHighlightColorsMap[i] = shadeColor(sNeutralBgColor, -10);
+		aNodeHighlightColorsMap[i] = lexutil.shadeColor(sNeutralBgColor, -10);
 
 		if (i==2*iNumberOfVisibleColumns-1) // = t.i. total number of cells in two rows (0-based)
 			return false; // break, because we know enough after two rows (odd en even rows)
@@ -1556,8 +1556,8 @@ gui.refreshTable = function(oTable){
 	
 	var sTable = "";
 	
-	// prevents IE from selecting the whole page upon clicking on a button
-	clearSelection();
+	// prevent browser from selecting the whole page upon clicking on a button
+	lexutil.clearSelection();
 	
 	if (typeof oTable == 'string') {
 		sTable = oTable; // (primitives are not passed by reference, so this is ok)

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.03.12
+	v2025.03.20
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -54,7 +54,7 @@
 	                    (http://fgnass.github.com/spin.js/)
 	tipTip		      : better tooltip function than standard html tooltips
 	                    (http://code.drewwilson.com/entry/tiptip-jquery-plugin)
-	util              : all kinds of INL-made utilities
+	util              : all kinds of utilities
 	-->
 		
 	<!-- 
@@ -78,6 +78,8 @@
 	td  : Functions about table details
 	ts  : Functions about table selection
 	un	: Undo function
+	lexitusers : users management
+	lexutil : utilities
 	-->
 	
 	
@@ -143,6 +145,7 @@
 	<script type="text/javascript" language="javascript" src="js/lexit.lists.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.usersmanagement.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.queues.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.util.js"></script>
 	
 	<!-- extra custom dataTables functions as an extension to the standard installation -->
 	
@@ -265,7 +268,7 @@
 		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
 		
 		// get http parameters
-		paramsHash = getHttpParams();
+		paramsHash = lexutil.getHttpParams();
 
 		// set language to be used
 		sLexitLanguage = (paramsHash!=null && paramsHash.get("lang")!=null ?
@@ -848,7 +851,7 @@
 		else {
 
 			// this might take a while, so put spinner
-			showSpinner("#dynamic", true);
+			lexutil.showSpinner("#dynamic", true);
 			
 			var url = WEBSERV_URL+"/api/get_configfiles_list";
 			
@@ -865,7 +868,7 @@
 					aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
 
 					// remove spinner
-					removeSpinner("#dynamic");
+					lexutil.removeSpinner("#dynamic");
 					
 					// go!
 					initialize();
@@ -1283,7 +1286,7 @@
 				continue;
 			}
 			else {
-				oObjectToReturn = new cloneObject(aProjectList[i]);
+				oObjectToReturn = new lexutil.cloneObject(aProjectList[i]);
 				break;
 			}
 		}

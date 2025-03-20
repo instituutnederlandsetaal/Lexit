@@ -74,7 +74,7 @@ sf.goTo = function(sSomeTablename){
 		
 		// selectboxes need 'exact:' in front, otherwise preset-values containing regex chars will be
 		// interpreted as regexes, which we don't want
-		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !isRegex(sCurrentColumnValue))
+		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !lexutil.isRegex(sCurrentColumnValue))
 			{
 			sCurrentColumnValue = "exact:"+sCurrentColumnValue;
 			}
@@ -168,7 +168,7 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 	//  has changed (for example because of a new sorting order set by the user), we have
 	//  to query the database again for the locations of the terms we want to go to!;
 	//  the unique key, which is compared to the one of the previous round, is used for this aim)
-	var sCurrentCallOfGoTo =	getHttpParams().get("db") + 
+	var sCurrentCallOfGoTo =	lexutil.getHttpParams().get("db") + 
 								sSomeTablename + 
 								sColumnName + sColumnValue +	
 								(fn.getSortingColumns(sSomeTablename)).join() + 
@@ -195,7 +195,7 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 		type: "GET",
 		url: url,
 		data: {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTablename, 
 			"column_name": sColumnName,
 			"column_value": sColumnValue,
@@ -414,7 +414,7 @@ sf.enableSearchFields = function(someTablename){
 			var aListOfOptions = aColumnSelectionBox;
 			// or [2] set in Postgres database (Postgres ENUM type)
 			if (aColumnSelectionBox == null) {
-				aListOfOptions = cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(someTablename)[i]);
+				aListOfOptions = lexutil.cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(someTablename)[i]);
 				
 				// empty value as neutral choice
 				aListOfOptions.unshift("");
@@ -427,7 +427,7 @@ sf.enableSearchFields = function(someTablename){
 				if (aListOfOptions[j] != '' && aListOfOptions[j] != '-') {
 					// don't forget to escape the regex chars, otherwise choosing the ALLES option
 					// will sometimes not give the expected results
-					aAllAllowedValues.push( escapeRegexChars(aListOfOptions[j]) );						
+					aAllAllowedValues.push( lexutil.escapeRegexChars(aListOfOptions[j]) );						
 				}
 			}
 			sAllOptions = "^("+aAllAllowedValues.join("|")+")$";
@@ -964,9 +964,9 @@ sf.giveRightShapeToSearchValue = function(sTableName, sColumnName, sValue){
 	
 	if (	isASelectBox && 
 			fnColumnSearchQueryTransformFunction == null && // custom query transformation has priority on general transformation
-			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !isRegex(sValue) && (mt.getListOfColumnTypesOf(sTableName))[iColumnIndex] != "integer") 
+			( sValue != '' && !$.startsWith(sValue, "exact:") && !$.startsWith(sValue, "^") && !lexutil.isRegex(sValue) && (mt.getListOfColumnTypesOf(sTableName))[iColumnIndex] != "integer") 
 		)
-		sValue = "exact:"+sValue; //+escapeRegexChars( sValue );
+		sValue = "exact:"+sValue;
 	
 	
 	
@@ -1029,7 +1029,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	
 	// build dialog 
 	
-	var promptDivId = "dialog-message"+getUniqueNumber();
+	var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
 	var selectableId = "selectable"; // don't change that one: the css expects this id!	
 	
 	var sMessageP = $("<p></p>").html(lang.search_help_msg);
@@ -1103,7 +1103,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
-							oKeysAndValues = new cloneObject(oValues);							
+							oKeysAndValues = new lexutil.cloneObject(oValues);							
 							$("#"+selectableId).empty();							
 							buildSelectOptions(oKeysAndValues);
 							
@@ -1138,7 +1138,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
-							oKeysAndValues = new cloneObject(oValues);							
+							oKeysAndValues = new lexutil.cloneObject(oValues);							
 							$("#"+selectableId).empty();							
 							buildSelectOptions(oKeysAndValues);
 							
@@ -1176,7 +1176,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
 						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
 							
-							oKeysAndValues = new cloneObject(oValues);							
+							oKeysAndValues = new lexutil.cloneObject(oValues);							
 							$("#"+selectableId).empty();							
 							buildSelectOptions(oKeysAndValues);
 							
@@ -1261,7 +1261,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	
 	
 	// adapt height of the prompt to the number of values 
-	var promptHeight = (250 + 30 * countProperties(oKeysAndValues));
+	var promptHeight = (250 + 30 * lexutil.countProperties(oKeysAndValues));
 	
 	
 	// Open dialog	
@@ -1308,7 +1308,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 						for (var i=0; i<aNewChosenOptions.length; i++){
 							var oneNewChoice = aNewChosenOptions[i];
 
-							aOutput.push( escapeRegexChars( oKeysAndValues[oneNewChoice] ) );
+							aOutput.push( lexutil.escapeRegexChars( oKeysAndValues[oneNewChoice] ) );
 						}
 
 
@@ -1421,14 +1421,14 @@ sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName
 		"async": false, // needed to block code execution while awaiting the server response
 		"url": url,
 		"data": {
-			"db_name": getHttpParams().get("db"),
+			"db_name": lexutil.getHttpParams().get("db"),
 			"table_name": sSomeTableName,
 			"column_name": sCurrentColumnName,
 			"column_value_filter": sValueFilter,
 			"other_columns_filters_and_values": sOtherColumnsFiltersAndValues,
 			"limit": ((sLimit == null || sLimit == '') ? 20 : sLimit),
 			"sort_by_freq": bSortbyfreq,
-			"dummy": getUniqueNumber()
+			"dummy": lexutil.getUniqueNumber()
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {

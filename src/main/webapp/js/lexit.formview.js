@@ -88,9 +88,7 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
 
 			// add blink function for send_button
-			var blink = function(elem, iCount) {
-				
-				if (iCount == null) iCount = 0;
+			var blink = function(elem, iCount = 0) {				
 
 				$(elem).animate({
 						opacity: '0'
@@ -2191,12 +2189,12 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 										"url": url,
 										"data": {
 											"row_id": rowId,
-											"db_name": getHttpParams().get("db"),
+											"db_name": lexutil.getHttpParams().get("db"),
 											"table_name": sTableToFeedTheListWith,
 											"column_name": sColumnName,
 											"new_value": value,
 											"value_type": sColumnType,
-											"dummy": getUniqueNumber()
+											"dummy": lexutil.getUniqueNumber()
 											},
 										"dataType": "xml", // get response as xml
 										"success": function(xml) {
@@ -2231,7 +2229,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 											}
 											else {
 												fn.message(lang.error_occurred_in_table+ " '"+sTableToFeedTheListWith+"'", 
-														lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+														lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
 														function(){
 															lists.refresh(sListLabel);															
 														}
@@ -2352,18 +2350,18 @@ form.addNewRows = function(eListContainer, fnCallback){
 			var url = WEBSERV_URL+"/api/insertvalue"; 
 			
 			// make sure we send no null values, as join can't deal with it
-			aValuesToAdd = convertNullToString(aValuesToAdd);
+			aValuesToAdd = lexutil.convertNullToString(aValuesToAdd);
 			
 			$.ajax( {
 				"type": "GET",
 				"async": false,
 				"url": url,
 				"data": {
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sTableToUpdate,
 					"column_name": aColNamesToAdd.join(ARG_INTERNAL_SEPARATOR),
 					"value": aValuesToAdd.join(ARG_INTERNAL_SEPARATOR),
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
@@ -2383,7 +2381,7 @@ form.addNewRows = function(eListContainer, fnCallback){
 					
 					fn.message(lang.error, 
 						lang.error_when_calling+ " form.addNewRows("+sTableToUpdate+"): "+
-						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+						textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 					
 				}
 			});
@@ -2452,18 +2450,18 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 				var url = WEBSERV_URL+"/api/setvalue"; 
 
 				// make sure we send no null values, as join can't deal with it
-				aColumnValues = convertNullToString(aColumnValues);
+				aColumnValues = lexutil.convertNullToString(aColumnValues);
 
 				$.ajax( {
 					"type": "GET",
 					"url": url,
 					"data": {
-						"db_name": getHttpParams().get("db"),
+						"db_name": lexutil.getHttpParams().get("db"),
 						"row_id": rowId,
 						"table_name": sTableToUpdate,
 						"column_name": aColumnNames.join(ARG_INTERNAL_SEPARATOR),
 						"new_value": aColumnValues.join(ARG_INTERNAL_SEPARATOR), 
-						"dummy": getUniqueNumber()
+						"dummy": lexutil.getUniqueNumber()
 						},
 					"dataType": "xml", // get response as xml
 					"success": function(xml) {
@@ -2483,7 +2481,7 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 					"error": function(jqXHR, textStatus, errorThrown){
 						fn.message(lang.error, 
 							lang.error_when_calling+ " form.updateRow("+sTableToUpdate+"): "+
-							textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+							textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 					}
 				});
 
@@ -2538,9 +2536,9 @@ form.removeRows = function(eListContainer, fnCallback){
 				"url": url,
 				"data": {
 					"row_id": sNodeId,
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sTableToUpdate,
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
@@ -2557,7 +2555,7 @@ form.removeRows = function(eListContainer, fnCallback){
 
 					fn.message(lang.error, 
 						lang.error_when_calling+" form.removeRows("+sTableToUpdate+"): "+
-						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+						textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 				}
 			});
 		}
@@ -2718,7 +2716,7 @@ form.getColumnConfig = function(sTableName, sCellName){
 form.getVisibleColumnsOf = function(sTableName){
 
 	// get visibility according to table config
-	var aVisibleColumns = cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
+	var aVisibleColumns = lexutil.cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
 
 	// then get the form config:
 	// the form visibility settings there will overwrite the table config

@@ -50,7 +50,7 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 	// in IE because it doesn't recognize 'change' like other browsers!!)
 	
 	if (thisStack.length>0) {
-		var copyOfStack = cloneArray(thisStack);
+		var copyOfStack = lexutil.cloneArray(thisStack);
 		var oDataOnTop = copyOfStack.pop();	
 		
 		var sRowIdOnTop = 			oDataOnTop.rowId;	
@@ -180,11 +180,11 @@ un.undoEvent = function(sSomeTableName){
 			"url": url,
 			"data": {
 				"row_id": sRowId,
-				"db_name": getHttpParams().get("db"),
+				"db_name": lexutil.getHttpParams().get("db"),
 				"table_name": sSomeTableName,
 				"column_name": sColumnName,
 				"new_value": sOldValue,				
-				"dummy": getUniqueNumber()
+				"dummy": lexutil.getUniqueNumber()
 				},
 		 	"dataType": "xml", // get response as xml
 		 	"success": function(xml) {

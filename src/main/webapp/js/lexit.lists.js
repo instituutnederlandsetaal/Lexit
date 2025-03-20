@@ -405,7 +405,7 @@ lists.showProcessingMsg = function(sListLabel, bAccordion){
 	var fnShowSpinner = function(selector, iCounter){
 		
 		if ($(selector).width() > 0) {
-			showSpinner(selector);
+			lexutil.showSpinner(selector);
 		}
 		else {
 			setTimeout(function(){
@@ -428,7 +428,7 @@ lists.removeProcessingMsg = function(sListLabel, bAccordion){
 	// remove the spinner, but it this function was called too fast if won't work so: check if it hasn't work and if so, recall the function
 	var fnRemoveSpinner = function(selector, iCounter){
 		
-		removeSpinner(selector);
+		lexutil.removeSpinner(selector);
 		
 		setTimeout(function(){
 			if (iCounter<10 && $(selector).length > 0) {
@@ -1322,7 +1322,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 			url: url,
 			data: {
 				"table": sSomeTableName, 
-				"db_name": getHttpParams().get("db") 
+				"db_name": lexutil.getHttpParams().get("db") 
 				},
 			dataType: "xml",
 			//contentType: "application/x-www-form-urlencoded;charset=UTF-8",

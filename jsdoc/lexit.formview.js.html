@@ -116,9 +116,7 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
 
 			// add blink function for send_button
-			var blink = function(elem, iCount) {
-				
-				if (iCount == null) iCount = 0;
+			var blink = function(elem, iCount = 0) {				
 
 				$(elem).animate({
 						opacity: '0'
@@ -1942,13 +1940,19 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		
 		
 		// take care of select boxes
-		// [1] select values from 'choosefrom' in config.js
-		var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
-		var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
-		// [2] ELSE  select values from Postgres ENUM type
-		if (aAllowedValues == null)
+		
+		// [1] select values from 'choosefrom' in list config
+		var oCellConfig = 		lists.getCellConfig(sListLabel, sColName);
+		var aAllowedValues = 	oCellConfig != null ? oCellConfig["choosefrom"] : null; 
+		
+		// [2] select values from 'choosefrom' in config.js
+		if (aAllowedValues == null){
+			aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+		}				
+		// [3] ELSE  select values from Postgres ENUM type
+		if (aAllowedValues == null){
 			aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];
-			
+		}
 
 
 		// make column editable if required:
@@ -2137,14 +2141,21 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			// we need to know which value is currently assigned to the cell, in order to show it as 'selected' in the selectbox
 			var sValueOfThisCell = 	lists.getDataFromCell(sListLabel, nCell);
 			
-			// get the values to select from
+			// get the values to select from			
+			
+			// [1] select values from 'choosefrom' in list config
+			var oCellConfig = 		lists.getCellConfig(sListLabel, sCellName);
+			var aAllowedValues = 	oCellConfig != null ? oCellConfig["choosefrom"] : null;
+			var aValuesToLabels =	oCellConfig != null ? oCellConfig["choosefrom_labels"] : null; 	
+			
+			// [2] select values from 'choosefrom' in config.js
 			var oTableConfig = 		conf.getTableConfig(sTableToFeedTheListWith);
 			var oColumnConfig = 	conf.getColumnConfig(oTableConfig, sCellName);
-			
-			// [1] select values from 'choosefrom' in config.js
-			var aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
-			var aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);		
-			// [2] ELSE  select values from Postgres ENUM type
+			if (aAllowedValues == null){
+				aAllowedValues = 	conf.getSelectionBox(oColumnConfig);
+				aValuesToLabels = 	conf.getSelectionBoxLabels(oColumnConfig);	
+			}
+			// [3] ELSE  select values from Postgres ENUM type
 			if (aAllowedValues == null)
 				aAllowedValues = mt.getListOfAllowedValuesInVisibleColumnsOf(sTableToFeedTheListWith)[iColNameIndex];		
 			
@@ -2206,12 +2217,12 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 										"url": url,
 										"data": {
 											"row_id": rowId,
-											"db_name": getHttpParams().get("db"),
+											"db_name": lexutil.getHttpParams().get("db"),
 											"table_name": sTableToFeedTheListWith,
 											"column_name": sColumnName,
 											"new_value": value,
 											"value_type": sColumnType,
-											"dummy": getUniqueNumber()
+											"dummy": lexutil.getUniqueNumber()
 											},
 										"dataType": "xml", // get response as xml
 										"success": function(xml) {
@@ -2246,7 +2257,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 											}
 											else {
 												fn.message(lang.error_occurred_in_table+ " '"+sTableToFeedTheListWith+"'", 
-														lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR),
+														lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
 														function(){
 															lists.refresh(sListLabel);															
 														}
@@ -2367,18 +2378,18 @@ form.addNewRows = function(eListContainer, fnCallback){
 			var url = WEBSERV_URL+"/api/insertvalue"; 
 			
 			// make sure we send no null values, as join can't deal with it
-			aValuesToAdd = convertNullToString(aValuesToAdd);
+			aValuesToAdd = lexutil.convertNullToString(aValuesToAdd);
 			
 			$.ajax( {
 				"type": "GET",
 				"async": false,
 				"url": url,
 				"data": {
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sTableToUpdate,
 					"column_name": aColNamesToAdd.join(ARG_INTERNAL_SEPARATOR),
 					"value": aValuesToAdd.join(ARG_INTERNAL_SEPARATOR),
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
@@ -2398,7 +2409,7 @@ form.addNewRows = function(eListContainer, fnCallback){
 					
 					fn.message(lang.error, 
 						lang.error_when_calling+ " form.addNewRows("+sTableToUpdate+"): "+
-						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+						textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 					
 				}
 			});
@@ -2467,18 +2478,18 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 				var url = WEBSERV_URL+"/api/setvalue"; 
 
 				// make sure we send no null values, as join can't deal with it
-				aColumnValues = convertNullToString(aColumnValues);
+				aColumnValues = lexutil.convertNullToString(aColumnValues);
 
 				$.ajax( {
 					"type": "GET",
 					"url": url,
 					"data": {
-						"db_name": getHttpParams().get("db"),
+						"db_name": lexutil.getHttpParams().get("db"),
 						"row_id": rowId,
 						"table_name": sTableToUpdate,
 						"column_name": aColumnNames.join(ARG_INTERNAL_SEPARATOR),
 						"new_value": aColumnValues.join(ARG_INTERNAL_SEPARATOR), 
-						"dummy": getUniqueNumber()
+						"dummy": lexutil.getUniqueNumber()
 						},
 					"dataType": "xml", // get response as xml
 					"success": function(xml) {
@@ -2498,7 +2509,7 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 					"error": function(jqXHR, textStatus, errorThrown){
 						fn.message(lang.error, 
 							lang.error_when_calling+ " form.updateRow("+sTableToUpdate+"): "+
-							textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+							textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 					}
 				});
 
@@ -2553,9 +2564,9 @@ form.removeRows = function(eListContainer, fnCallback){
 				"url": url,
 				"data": {
 					"row_id": sNodeId,
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sTableToUpdate,
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 				"dataType": "xml", // get response as xml
 				"success": function(xml) {
@@ -2572,7 +2583,7 @@ form.removeRows = function(eListContainer, fnCallback){
 
 					fn.message(lang.error, 
 						lang.error_when_calling+" form.removeRows("+sTableToUpdate+"): "+
-						textStatus+" "+errorThrown+"; "+getJqXHRInfo(jqXHR));
+						textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 				}
 			});
 		}
@@ -2708,6 +2719,22 @@ form.getFeedingTable = function(mixed){
 // --------------------------------------------------------------------
 
 
+
+/**
+ * Retrieve the configuration of a form column/cell
+ * @param {String} name of the table underlying the form
+ * @param {String} name of the cell/column
+ * @returns {Array} associative array
+ */
+form.getColumnConfig = function(sTableName, sCellName){
+	
+	var aTableSettings = conf.getTableSettings(sTableName);
+	var oGrid = conf.getFormGrid(aTableSettings);
+	var oCells = oGrid["cells"];
+	return oCells[sCellName];
+};
+
+
 /**
  * Compute list of visible form columns, given the underlying table config AND the form config combined
  * (if the visibility parameter is set in both, the form config parameter setting wins)
@@ -2717,7 +2744,7 @@ form.getFeedingTable = function(mixed){
 form.getVisibleColumnsOf = function(sTableName){
 
 	// get visibility according to table config
-	var aVisibleColumns = cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
+	var aVisibleColumns = lexutil.cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
 
 	// then get the form config:
 	// the form visibility settings there will overwrite the table config
@@ -2889,13 +2916,13 @@ form.isUnsaved = function(sTableName){
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lexutil.html">lexutil</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:41 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Mar 17 2025 13:17:20 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

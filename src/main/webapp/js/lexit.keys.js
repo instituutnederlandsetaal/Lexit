@@ -434,7 +434,7 @@ kf.addKeyFunctions = function(){
 				"    <form id=\"fileUploadForm\">" +
 				"        <input type=\"file\" id=\"fileChooser\" name=\"file\" />" +
 				"        <BR><BR><BR>" +
-				"        <button type=\"button\" id=\"start_upload_button\" onclick=\"uploadFile()\">"+ lang.import_uploadbutton +"</button>" +
+				"        <button type=\"button\" id=\"start_upload_button\" onclick=\"lexutil.uploadFile()\">"+ lang.import_uploadbutton +"</button>" +
 				"    </form>";
 
 			fn.message(lang.import_dialog_title, lang.import_dialog_msg+":<BR><BR>"+sUploadForm);

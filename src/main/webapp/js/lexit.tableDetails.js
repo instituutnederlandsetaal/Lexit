@@ -18,7 +18,7 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 		url: url,
 		data: {
 			"table": sSomeTableName, 
-			"db_name": getHttpParams().get("db") 
+			"db_name": lexutil.getHttpParams().get("db") 
 			},
 		dataType: "xml",
 		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -81,10 +81,10 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 				"async": false, // needed to block code execution while awaiting the server response
 				"url": url,
 				"data": {
-					"db_name": getHttpParams().get("db"),
+					"db_name": lexutil.getHttpParams().get("db"),
 					"table_name": sSomeTableName,
 					"column_name": sCurrentColumnName,
-					"dummy": getUniqueNumber()
+					"dummy": lexutil.getUniqueNumber()
 					},
 			 	"dataType": "xml", // get response as xml
 			 	"success": function(xml) {				 		
@@ -160,13 +160,13 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	if (aColumnOrder != null) {
 		// first check if the list of columns returned by database is
 		// the same as the list of columns from the table configuration settings
-		var firstArray = cloneArray(aAllColumns);
-		var secondArray = cloneArray(aColumnOrder);
+		var firstArray = lexutil.cloneArray(aAllColumns);
+		var secondArray = lexutil.cloneArray(aColumnOrder);
 		firstArray.sort();
 		secondArray.sort();
 		
 		// the arrays are identical, we can proceed with the reordering of column types		
-		if (arrays_equal(firstArray, secondArray)) {
+		if (lexutil.arraysAreEqual(firstArray, secondArray)) {
 			
 			var aNewColumnTypes = new Array();
 			var oaNewAllowedValues = new Array();
@@ -186,7 +186,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		// if the arrays are not identical, we should give an error message
 		else {
 			
-			var sCompare = lang.columns_list_to_compare + ": {" + symmetricDifference(firstArray, secondArray).join(", ") + "}";
+			var sCompare = lang.columns_list_to_compare + ": {" + lexutil.symmetricDifference(firstArray, secondArray).join(", ") + "}";
 			
 			var sCause = (aColumnOrder.length != aAllColumns.length) ?
 					lang.columns_list_number_mismatch1+": "+aAllColumns.length+".<BR><BR>"+
@@ -207,7 +207,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	// Postgres ENUM type
 	mt.setListOfAllowedValuesInColumnsOf(sSomeTableName, oaAllowedValuesForColumns);
 	
-	removeSpinner('#indicators');
+	lexutil.removeSpinner('#indicators');
 	
 	// usual route is table building, but if a callback function is given, we call this function instead
 	if (fnSecretCallback == null)
@@ -299,8 +299,8 @@ td.selectColumns = function(sSomeTablename){
 	// retrieve table client configuration
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
 	
-	var promptDivId = "dialog-message"+getUniqueNumber();
-	var sortableId = "sortable"+getUniqueNumber();
+	var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
+	var sortableId = "sortable"+lexutil.getUniqueNumber();
 	
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)

@@ -60,7 +60,7 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				    			.css("height", $(this).height()) 
 				    			.css("width", $(this).width()) 
 				    			.addClass('draggableHelper')
-				    			.css("z-index", getHighestZindex()+1 ) // always in front
+				    			.css("z-index", lexutil.getHighestZindex()+1 ) // always in front
 				    			); 
 				    }, 
 				    
@@ -186,10 +186,10 @@ head.showNameOfTheTable = function(sSomeTablename){
 					"type": "GET",
 					"url": WEBSERV_URL+"/api/get_comment",
 					"data": {
-						"db_name": getHttpParams().get("db"),						
+						"db_name": lexutil.getHttpParams().get("db"),						
 						"table_name": sSomeTablename,
 						"table_type": mt.getAvailableTableDetails(sSomeTablename)[1],
-						"dummy": getUniqueNumber()
+						"dummy": lexutil.getUniqueNumber()
 						},
 				 	"dataType": "xml", // get response as xml
 				 	"success": function(xml) {
@@ -219,11 +219,11 @@ head.showNameOfTheTable = function(sSomeTablename){
 									"type": "GET",
 									"url": WEBSERV_URL+"/api/setcomment",
 									"data": {
-										"db_name": getHttpParams().get("db"),
+										"db_name": lexutil.getHttpParams().get("db"),
 										"table_name": sSomeTablename,
 										"table_type": (mt.getAvailableTableDetails(sSomeTablename)[1] == "view" ? "VIEW" : "TABLE"),
 										"new_comment": sNewTableComment,
-										"dummy": getUniqueNumber()
+										"dummy": lexutil.getUniqueNumber()
 										},
 								 	"dataType": "xml", // get response as xml
 								 	"success": function(xml) {
@@ -1076,7 +1076,7 @@ head.putHelpButton = function(sSomeTablename){
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
 			
-			var helpDivId = "dialog"+getUniqueNumber();
+			var helpDivId = "dialog"+lexutil.getUniqueNumber();
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)
@@ -1197,9 +1197,9 @@ head.putTableEraseButton = function(sSomeTablename){
 						"type": "GET",
 						"url": WEBSERV_URL+"/api/remove_uploaded_table",
 						"data": {
-							"db_name": getHttpParams().get("db"),
+							"db_name": lexutil.getHttpParams().get("db"),
 							"table_name": sSomeTablename,
-							"dummy": getUniqueNumber()
+							"dummy": lexutil.getUniqueNumber()
 						},
 						"dataType": "xml", // get response as xml
 						"success": function(xml) {
@@ -1256,7 +1256,7 @@ head.showGeneralHelp = function(){
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
 			
-			var helpDivId = "dialog"+getUniqueNumber();
+			var helpDivId = "dialog"+lexutil.getUniqueNumber();
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)

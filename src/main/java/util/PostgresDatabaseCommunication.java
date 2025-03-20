@@ -24,7 +24,6 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	//
 	// https://stackoverflow.com/questions/2757549/org-postgresql-util-psqlexception-fatal-sorry-too-many-clients-already
 	
-	private boolean open = false;
 
 	public PostgresDatabaseCommunication(ContextObject co, boolean sendTomcatUserInfoToDb) {	
 		
@@ -50,17 +49,18 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	 */
 	public void closeConnection() {
 		try {
-			if (this.open) {
-				db.close();
-				this.open = false; // Mark as closed
-			}
-			else {
-	            System.out.println("Resource is already closed.");
-	        }
-			
+			db.close();
 		}
 		catch (SQLException e) {
 			throw new RuntimeException("Error while closing the connection!", e);
+		}
+	}
+	
+	public boolean isClosed() {
+		try {
+			return this.db.isClosed();
+		} catch (SQLException e) {
+			throw new RuntimeException("Error while checking if the connection is closed!", e);
 		}
 	}
 	
@@ -103,9 +103,6 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         	//props.setProperty("prepareThreshold", "1");
         	
         	this.db = DriverManager.getConnection(location, props);
-        	
-        	// remember the connection is open
-        	this.open = true;
         	
         	// make sure we never end up with idle connections
         	//this.sendUpdate("alter system set idle_in_transaction_session_timeout= 300000;");
@@ -199,26 +196,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 
 	}
 	
-	
-	public ResultSet sendQuery(String query)  {
-		
-		if (Constants.debug) System.out.println(query);
-		
-		SendUserIdentityToDatabaseServer();
-		
-		// Get the results
-		ResultSet rs = null;
-		Statement stmt = null;
-		try {			
-			// Create a Statement object
-			stmt = this.db.createStatement();
-			rs = stmt.executeQuery(query);			
-		}
-		catch (SQLException e) {
-			throw new RuntimeException("Error while executing query "+query, e);
-		}				
-		return rs;
-	}
+
 	
 	/**
 	 * Send a query with a time limit
@@ -226,7 +204,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	 * @param timeLimitInMilliseconds
 	 * @return
 	 */
-	public ResultSet sendQueryWithTimeout(String query, int timeLimitInMilliseconds)  {
+	public ResultSet sendQuery(String query, int timeLimitInMilliseconds) {
 		
 		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
@@ -240,11 +218,17 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			// Create a Statement object
 			stmt = this.db.createStatement();
 			
-			// set a timeout in milliseconds
-			// (beware: setting this must happen in a separate query: we can't bundle this
-			//  with the main query, or it won't have any effect!)
-			String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
-			stmt.executeUpdate(SetTimeOutQuery);
+			// if required, set a timeout 
+			
+			if (timeLimitInMilliseconds > 0) {
+				
+				// set a timeout in milliseconds if required
+				// (beware: setting this must happen in a separate query: we can't bundle this
+				//  with the main query, or it won't have any effect!)
+				
+				String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+				stmt.executeUpdate(SetTimeOutQuery);
+			}
 			
 			// the timeout is set, now execute the query
 			rs = stmt.executeQuery(query);			
@@ -268,17 +252,21 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		finally {
 			
 			// finally, reset the original timeout settings
-			String ResetTimeOutQuery = "RESET statement_timeout;";
 			
-			try {
-				// Create a new Statement object
-				stmt = this.db.createStatement();
-				// reset timeout
-				stmt.executeUpdate(ResetTimeOutQuery);
+			if (timeLimitInMilliseconds > 0) {
 				
-			} catch (SQLException e) {
-				throw new RuntimeException("Error while executing query "+query, e);
+				String ResetTimeOutQuery = "RESET statement_timeout;";			
+				try {
+					// Create a new Statement object
+					stmt = this.db.createStatement();
+					// reset timeout
+					stmt.executeUpdate(ResetTimeOutQuery);
+					
+				} catch (SQLException e) {
+					throw new RuntimeException("Error while executing query "+query, e);
+				}				
 			}
+			
 		}
 		
 		return rs;
@@ -346,7 +334,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		return rs;
 	}
 	
-	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato) {
+	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -366,8 +354,24 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		
 		// Get the results
 		ResultSet rs = null;
+		Statement stmt = null;
 		PreparedStatement prest = null;
 		try {
+			
+			// if required, set a timeout 
+			
+			if (timeLimitInMilliseconds > 0) {
+				// Create a Statement object
+				stmt = this.db.createStatement();
+				
+				// set a timeout in milliseconds
+				// (beware: setting this must happen in a separate query: we can't bundle this
+				//  with the main query, or it won't have any effect!)
+				String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+				stmt.executeUpdate(SetTimeOutQuery);				
+			}
+			
+			
 			// prepare statement
 			prest = this.db.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -453,6 +457,24 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		}
 		catch (SQLException e) {
 			throw new RuntimeException("Error while executing query "+query, e);
+		}
+		finally {
+			
+			// finally, reset the original timeout settings
+			
+			if (timeLimitInMilliseconds > 0) {
+				
+				String ResetTimeOutQuery = "RESET statement_timeout;";				
+				try {
+					// Create a new Statement object
+					stmt = this.db.createStatement();
+					// reset timeout
+					stmt.executeUpdate(ResetTimeOutQuery);
+					
+				} catch (SQLException e) {
+					throw new RuntimeException("Error while executing query "+query, e);
+				}
+			}
 		}
 		
 		return rs;
@@ -804,14 +826,11 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 
 	
 	
-	
-	public boolean isClosed() {
-        return !this.open;
-    }
 
 	@Override
 	public void close() throws Exception {		
-		closeConnection();
+		if (this.db != null && !this.db.isClosed())
+			closeConnection();
 	};
 	
 }

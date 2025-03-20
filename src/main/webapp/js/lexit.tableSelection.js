@@ -21,7 +21,7 @@ ts.reinit = function(){
 // But those variables can be set so as to be able to open a table upon startup and apply some filters to it 
 ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings){
 	
-	showSpinner('#indicators');
+	lexutil.showSpinner('#indicators');
 				
 	var url = WEBSERV_URL+"/api/gettables";
 	
@@ -29,19 +29,19 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 		type: "GET",
 		url: url,
 		data: {
-			"db_name": getHttpParams().get("db"),
-			"dummy": getUniqueNumber()
+			"db_name": lexutil.getHttpParams().get("db"),
+			"dummy": lexutil.getUniqueNumber()
 		},
 		dataType: "xml",
 		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			
-			removeSpinner('#indicators');					
+			lexutil.removeSpinner('#indicators');					
 			ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
 		},
 		error: function(jqXHR, textStatus, errorThrown){
 			
-			removeSpinner('#indicators');
+			lexutil.removeSpinner('#indicators');
 			fn.message(lang.error, lang.loading_xml_failed+ ": "+textStatus+" "+errorThrown);
 		}
 	});
@@ -84,7 +84,7 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	// show error message if configuration tries to call a table that is set to be hidden
 	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) ) {
 		fn.message(lang.error, 
-			"'"+sTableToCallUponStartUp+"': " +lang.error_opening_hidden_table+	" "+getHttpParams().get("db")+".config.js");
+			"'"+sTableToCallUponStartUp+"': " +lang.error_opening_hidden_table+	" "+lexutil.getHttpParams().get("db")+".config.js");
 	}
 	
 	
@@ -262,7 +262,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 			
 			// wrapping needed otherwise IE won't show the spinner
 			$(this).queue( function(){
-				showSpinner('#indicators');
+				lexutil.showSpinner('#indicators');
 				$(this).dequeue();
 			} ).delay(10).queue(function(){
 				ts.callTable(haTableFilters, haTableSettings);
@@ -343,7 +343,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 	
 	// no choice means do nothing
 	if (sTableName == lang.choose_a_table_default_value) {
-		removeSpinner();
+		lexutil.removeSpinner();
 		return true;
 	}
 	
@@ -353,7 +353,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 		if ($.inArray(sTableName, mt.getListOfLoadedTables())<0 )			
 			fn.callDatabase(sTableName, {} );
 		else {
-			removeSpinner();
+			lexutil.removeSpinner();
 			fn.message(lang.beware, lang.already_loaded);
 			return true;
 		}
@@ -361,7 +361,7 @@ ts.callTable = function(haTableFilters, haTableSettings){
 	}
 	// special case, shift pressed means opening a table in a new tab
 	else if ( kf.isPressed("shift") ) {
-		removeSpinner();
+		lexutil.removeSpinner();
 		kf.registerReleasedKey();
 		fn.callDatabaseInNewTab(sTableName, {} );
 	}

@@ -845,10 +845,9 @@ conf.isHiddenTable = function(sTablename){
 		return false;
 	
 	// if the oShowOnlyTables list was set in the configuration, check that list first
-	if (typeof oShowOnlyTables != 'undefined' &amp;&amp; countProperties(oShowOnlyTables)>0)
-		{
+	if (typeof oShowOnlyTables != 'undefined' &amp;&amp; lexutil.countProperties(oShowOnlyTables)>0){
 		return $.inArrayRegEx(sTablename, oShowOnlyTables)&lt;0;
-		}
+	}
 		
 	// otherwise check the oHiddenTablesList
 	return $.inArrayRegEx(sTablename, oHiddenTablesList)>-1;
@@ -930,14 +929,12 @@ conf.getColumnConfig = function( oTableConfig, sColumnName){
 	
 	var oColumnConfig = new Object();
 	
-	for (oneColumn in oTableConfig)
-		{
-		if (oneColumn == sColumnName)
-			{			
-			oColumnConfig = new cloneObject( oTableConfig[sColumnName] );
+	for (oneColumn in oTableConfig) {
+		if (oneColumn == sColumnName) {			
+			oColumnConfig = new lexutil.cloneObject( oTableConfig[sColumnName] );
 			break;
-			}
 		}
+	}
 	
 	// add the column name as a key, 
 	// so we can retrieve the name of a column from its config object! 
@@ -1003,15 +1000,13 @@ conf.getBackgroundColor = function(aColumnConfig){
 	// (this is only possible when the color is an hex color code)
 	
 	// input is string
-	if (typeof aColumnColorConfig=='string' &amp;&amp; $.startsWith(aColumnColorConfig, "#"))
-		{
-		return [shadeColor(aColumnColorConfig, -10), aColumnColorConfig];
-		}
-	// unput is array of string
-	if (aColumnColorConfig.length==1 &amp;&amp; $.startsWith(aColumnColorConfig[0], "#"))
-		{
-		return [shadeColor(aColumnColorConfig[0], -10), aColumnColorConfig[0]];
-		}
+	if (typeof aColumnColorConfig=='string' &amp;&amp; $.startsWith(aColumnColorConfig, "#")) {
+		return [lexutil.shadeColor(aColumnColorConfig, -10), aColumnColorConfig];
+	}
+	// input is array of string
+	if (aColumnColorConfig.length==1 &amp;&amp; $.startsWith(aColumnColorConfig[0], "#")) {
+		return [lexutil.shadeColor(aColumnColorConfig[0], -10), aColumnColorConfig[0]];
+	}
 	return aColumnColorConfig;
 };
 
@@ -1880,9 +1875,9 @@ conf.makeRestoreCopyOfTableConfig = function(sTablename, aAllColumns){
 	
 	// of course, give priority to the column order explicitly set in the configuration 
 	if (aColumnOrder == null)
-		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aAllColumns);
+		aRestoreObjects[sTablename]["list_of_columns"] = lexutil.cloneArray(aAllColumns);
 	else
-		aRestoreObjects[sTablename]["list_of_columns"] = cloneArray(aColumnOrder);
+		aRestoreObjects[sTablename]["list_of_columns"] = lexutil.cloneArray(aColumnOrder);
 };
 
 conf.getOriginalColumnList = function(sTablename){
@@ -2012,21 +2007,19 @@ conf.getHeaderColor = function(aTableSettings){
 	var sTableName = conf.getTableName(aTableSettings);
 	
 	// special case: value is 'auto'
-	if (aTableSettings["header_color"] == 'auto' &amp;&amp; sTableName != null)
-		{
+	if (aTableSettings["header_color"] == 'auto' &amp;&amp; sTableName != null) {
 		// generate color out of table name string
-		var sHeaderColor = stringToColour( sTableName );
+		var sHeaderColor = lexutil.stringToColor( sTableName );
 		
 		// if color is dark, make it lighter
-		var ligherOn = (lightOrDark(sHeaderColor) == 'dark');
-		while (ligherOn)
-			{
-			sHeaderColor = ColorLuminance(sHeaderColor, 0.5);
-			ligherOn = (lightOrDark(sHeaderColor) == 'dark');
-			} 
+		var ligherOn = (lexutil.lightOrDark(sHeaderColor) == 'dark');
+		while (ligherOn) {
+			sHeaderColor = lexutil.colorLuminance(sHeaderColor, 0.5);
+			ligherOn = (lexutil.lightOrDark(sHeaderColor) == 'dark');
+		} 
 		
 		return sHeaderColor;
-		}
+	}
 	
 	// default
 	return aTableSettings["header_color"];
@@ -2117,7 +2110,7 @@ conf.getFreeHeaderButtonPosition = function(aButtonSettings){
 
 conf.getFreeHeaderButtonBgColor = function(aButtonSettings){
 	if (typeof aButtonSettings["bgcolor"] == 'undefined')
-		return "blue";
+		return "#3970b3";
 	return aButtonSettings["bgcolor"];
 };
 
@@ -2199,7 +2192,7 @@ conf.getHeaderButtonName = function(aButtonSettings){
 };
 conf.getHeaderButtonBgColor = function(aButtonSettings){
 	if (typeof aButtonSettings["bgcolor"] == 'undefined')
-		return "blue";
+		return "#3970b3";
 	return aButtonSettings["bgcolor"];
 };
 conf.getHeaderButtonTextColor = function(aButtonSettings){
@@ -2587,13 +2580,13 @@ conf.getFormGrid = function(aTableSettings){
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="conf.html">conf</a></li><li><a href="fn.html">fn</a></li><li><a href="form.html">form</a></li><li><a href="fx.html">fx</a></li><li><a href="kf.html">kf</a></li><li><a href="lexutil.html">lexutil</a></li><li><a href="lists.html">lists</a></li><li><a href="mt.html">mt</a></li></ul><h3>Global</h3><ul><li><a href="global.html#oTableConfigurationList_example">oTableConfigurationList_example</a></li><li><a href="global.html#oTableSettingsList_example">oTableSettingsList_example</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 05 2025 15:06:40 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Mar 17 2025 13:17:20 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>
