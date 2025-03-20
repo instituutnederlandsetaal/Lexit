@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # version
-echo "=== Lexit Configs Deployer v2025.02.17 ==="
+echo "=== Lexit Configs Deployer v2025.03.14 ==="
 
 RED='\033[31m'
 GREEN='\033[32m'
@@ -34,7 +34,8 @@ mkdir -p $TMP_LEXIT_CONFIG $TMP_LEXIT_DB_CONFIG
 # copy configs
 echo "Copying configs to temp folder"
 # $PROJECTS is a comma separated list of projects
-for project in $(echo $PROJECTS | tr "," "\n")
+IFS=$',\n'
+for project in $PROJECTS
 do
     cp lexit-configs/$project/*.database $TMP_LEXIT_DB_CONFIG 2>/dev/null || echo -e "${YELLOW}WARNING: No database file found for $project. Continuing...${NC}"
     cp -r lexit-configs/$project/* $TMP_LEXIT_CONFIG
