@@ -69,17 +69,19 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 	var haTableGroups =		new Hashtable();
 	
 	// create a neutral nameless group, with the neutral value as its first option
-	aTableGroups.push( "" );
-	haTableGroups.put( "", [lang.choose_a_table_default_value] );
+	if (aTableGroups[""] == null){ // prevent adding the neutral value multiple times (which can happen if fn.rebuildTablesMenu() was called)
+		aTableGroups.push( "" );
+		haTableGroups.put( "", [lang.choose_a_table_default_value] );
 	
-	// list of table names and description for the list to choose from
-	asTableNames.push( lang.choose_a_table_default_value );
-	asTableDescriptions.push( lang.choose_a_table_default_value );
-	asTableComments.push( "" );	// comments (in the GUI called 'notities'), that can be typed in by clicking onto the table name (in the table header),
-								// and which are also visible through html 'title' attribute
-	asTableTypes.push( "none" );
-	abTableVisible.push( true );
+		// list of table names and description for the list to choose from
+		asTableNames.push( lang.choose_a_table_default_value );
+		asTableDescriptions.push( lang.choose_a_table_default_value );
+		asTableComments.push( "" );	// comments (in the GUI called 'notities'), that can be typed in by clicking onto the table name (in the table header),
+									// and which are also visible through html 'title' attribute
+		asTableTypes.push( "none" );
+		abTableVisible.push( true );
 	
+	}
 	
 	// show error message if configuration tries to call a table that is set to be hidden
 	if ( sTableToCallUponStartUp != null && conf.isHiddenTable(sTableToCallUponStartUp) ) {

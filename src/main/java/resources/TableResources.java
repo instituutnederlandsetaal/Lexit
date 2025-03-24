@@ -92,6 +92,28 @@ public class TableResources {
  	}
  	
  	
+ 	
+ 	
+ 	@Path("reader_login")
+ 	@POST
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject loginReader(
+ 			@Context ServletContext context,
+ 			@Context SecurityContext sc,
+ 			@Context HttpServletRequest httpServletRequest			
+ 			) {
+ 		
+ 		DbResponseObject dro = new DbResponseObject();
+ 		
+ 		String sessionId = lexitInfo.getSessionId(httpServletRequest);
+			
+		// remember that this session ID represents the reader
+		lexitInfo.setSessionIdIsUsername(sessionId, Constants.PUBLIC_READER_USER);
+ 		
+ 		return dro;
+ 	}
+ 	
+ 	
  	@Path("logout")
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -149,7 +171,7 @@ public class TableResources {
  		
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);		
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName); 		
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName); 		
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -182,7 +204,7 @@ public class TableResources {
  			) throws IOException {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -208,7 +230,7 @@ public class TableResources {
 			) throws IOException {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -232,7 +254,7 @@ public class TableResources {
  			@Context HttpServletRequest httpServletRequest) {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -262,7 +284,7 @@ public class TableResources {
  			) throws IOException {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -286,7 +308,7 @@ public class TableResources {
  			) {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -310,7 +332,7 @@ public class TableResources {
  			) {
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
- 		ContextObject co = new ContextObject(context, sc, httpServletRequest, "admin", loginName);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
  		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
  			throw new RuntimeException("Permission denied to "+loginName);
  		}
@@ -443,7 +465,7 @@ public class TableResources {
 		
 		DbResponseObject response = new DbResponseObject();
 		
-		if (dbName.equals("spy") || dbName.equals("admin")) {
+		if (dbName.equals("spy") || dbName.equals(Constants.ADMIN_DB)) {
 			response.setResponse("active_tab_id needn't to be set in "+dbName+" mode ");
 		}
 		else {
@@ -1841,6 +1863,10 @@ public class TableResources {
 		// remove the 'old' ContextObjects
 		
 		for (String key : keysToDelete) {
+			
+			// close the connection to the database
+			nameToDatabaseObject.get(key).closeDatabase(); 
+			
 			// remove ContextObject since it's left unused
 			nameToDatabaseObject.remove(key);
 			Util.debug("Removed old Database object: "+key);
@@ -1907,11 +1933,10 @@ public class TableResources {
 		
 		// get the dbname (we need it to match the tomcat user role)		
 		String dbName = co.getDbName();
-		String userName = co.getUsername();
 		
 		
 		// admin project is allowed for admin, that's all
-		if (dbName.equals("admin") && action.equals(Constants.USER_IS_ADMIN)) {
+		if (dbName.equals(Constants.ADMIN_DB) && action.equals(Constants.USER_IS_ADMIN)) {
 			return true;
 		}
 		
@@ -2020,8 +2045,8 @@ public class TableResources {
 			br.close();
 			in.close();
 		}
-		catch (Exception e){//Catch exception if any
-			throw new RuntimeException("Error while reading the "+filepath+" configuration file", e);
+		catch (Exception e){ 
+			// don't throw any error, since it's not a problem if the welcome file is missing (as it is an optional file by design)
 		}
 		
 		return sb.toString();

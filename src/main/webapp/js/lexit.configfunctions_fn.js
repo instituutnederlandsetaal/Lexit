@@ -6365,11 +6365,11 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 	if (oExtraParams == undefined)
 		oExtraParams = {};
 
-	var bAimedServiceIsOnSameHost = sUrl.indexOf(document.domain)>-1;
+	var bAimedServiceIsOnSameHost = (location.hostname != '' && sUrl.indexOf(location.hostname)>-1);
 	
 	// crossDomain parameter (part of the jquery ajax API)
 	//
-	// Beware: in Lex'it the default value is true, be in jQuery that is false instead. We keep it that way for backwards compatibility.  
+	// Beware: in Lex'it the default value is true, but in jQuery that is false instead. We keep it that way for backwards compatibility.  
 	var bCrossDomainValueIsSet = ( typeof oExtraParams["crossDomain"] !== 'undefined' );
 	
 	// if the called url is NOT on the same server as Lex'it,
@@ -6561,6 +6561,41 @@ fn.startLexitLogin = function(){
  */
 fn.startLexitLogout = function(fnCallback){
 	startLexitLogout(fnCallback);
+};
+
+
+
+/**
+ * Login as a public reader
+ */
+fn.startPublicReader = function(){
+	
+	$.ajax({
+		"type": "POST",
+		headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+
+		"url": WEBSERV_URL+"/api/reader_login",
+		"data": {
+			"dummy": getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			var sResp = fn.getDbResponse(xml);
+	 		if (sResp == 'Access denied'){
+	 			fn.closeDialog();
+	 			fn.message(sResp, sResp, function(){
+	 				lexitReload();
+	 			});
+	 		}
+	 		else {
+	 			lexitReload();
+	 		}
+	 	},
+		"error": function(jqXHR, textStatus, errorThrown){			
+			fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+		}
+	});
 };
 
 

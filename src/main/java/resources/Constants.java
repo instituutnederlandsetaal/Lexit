@@ -8,6 +8,10 @@ package resources;
  */
 public class Constants {
 	
+	// ------------------------------------------------------------------------
+	// FOLDERS AND PATHS
+	// ------------------------------------------------------------------------
+	
 	// Base URL  ( www.host.nl / BASE_URL / ... )
 	public final static String BASE_URL = "lexit2";
 	
@@ -18,21 +22,54 @@ public class Constants {
 	public final static String DB_CONFIG_ROOT = "etc";
 	public final static String DB_CONFIG_DIR = "lexit2_db_config";
 	
+	
+	// ------------------------------------------------------------------------
+	// SEPARATOR IN USE IN THE APPLICATION
+	// ------------------------------------------------------------------------
+	
 	// separator for arguments within a single string
 	// this must be the same as in the Javascript part (same variable name)
-	public final static String ARG_INTERNAL_SEPARATOR = "ArGsEpArAtOr"; 
-
+	public final static String ARG_INTERNAL_SEPARATOR = "ArGsEpArAtOr";
+	
+	
+	// ------------------------------------------------------------------------
+	// ADMIN AND ACCESS RIGHTS
+	// ------------------------------------------------------------------------
+	
+	// default config file names
+	public final static String ADMIN_CONFIG_FILENAME = "LEXIT_SCHEMA";  // admin database
+	
+	// default project/database names (this corresponds to the 'db' parameter value in the Lex'it URL)
+	public final static String ADMIN_DB = "admin";
+	
+	// default users
+	// the admin user, which declares users and their access rights in the admin GUI
+	public final static String ADMIN_USER = "admin";	
+	public final static String ADMIN_USER_DEFAULT_ROLE = "admin";
+	// the public reader, which is allowed to access some projects without logging in, but only in read mode
+	// Its specific access rights must be declared the usual way in the admin GUI
+	// (this user don't have any default_access_role, as we expect it to access specific projects only)
+	public final static String PUBLIC_READER_USER = "publicreader";  
+	public final static String PUBLIC_READER_DEFAULT_ROLE = "-";
+	
 	// users rights
 	public final static String USER_IS_ADMIN = "admin";     // admin
 	public final static String USER_ALL_ACCESS = "all";     // read, write, delete
 	public final static String USER_WRITE_ACCESS = "write"; // read, write
 	public final static String USER_READ_ACCESS = "read";   // read
 	
+	// ------------------------------------------------------------------------
+	
 	// Lex'it requires some field to act as a primary key
 	// so if it is missing (like in view), the application expects
 	// the field acting as a primary key to be recognisable as such:
 	// it must be called the way it's stated here:
 	public final static String PRIMARYKEY_FIELDNAME = "pkid";
+	
+	
+	// ------------------------------------------------------------------------
+	// DEFAULT TIMEOUTS BEFORE DISPOSING OF A USERS ETC.
+	// ------------------------------------------------------------------------
 	
 	// maximal allowed time a database object is allowed to keep alive
 	// when left unused. After this max duration, this object will be automatically
@@ -53,9 +90,17 @@ public class Constants {
 			5 *     // minutes
 			60 *     // seconds
 			1000;    // milliseconds
+	
+	
+	// ------------------------------------------------------------------------
+	// DEBUGGING
+	// ------------------------------------------------------------------------
 
 	// are we debugging?
 	// t.i. show some output in the console to see what happens
 	// (N.B.: this is not 'final' as we can modify the setting during a session)
 	public static boolean debug = false;
+	
+	
+	// ------------------------------------------------------------------------
 }

@@ -4515,12 +4515,12 @@ public class Database {
 	/**
 	 * close the database connection
 	 */
-//	public void closeDatabase(PostgresDatabaseCommunication dc) {
-//		if (dc != null)
-//			dc.closeConnection();
-//		if (Constants.debug)
-//			System.out.println("Connection with the database closed.\n");
-//	}
+	public void closeDatabase() {
+		if (this.dc != null)
+			this.dc.closeConnection();
+		if (Constants.debug)
+			System.out.println("Connection with the database closed.\n");
+	}
 
 	
 	/**

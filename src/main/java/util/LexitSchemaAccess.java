@@ -28,7 +28,7 @@ import resources.ContextObject;
 public class LexitSchemaAccess {
 	
 	// default name of the Lex'it schema database
-	private String lexitSchemaFileName = "LEXIT_SCHEMA.database";
+	private String lexitSchemaFileName = Constants.ADMIN_CONFIG_FILENAME+".database";
 	
 	// database communication object (to be initialized)
 	private PostgresDatabaseCommunication dc;
@@ -98,7 +98,7 @@ public class LexitSchemaAccess {
 				"DO $$ "
 				+ "BEGIN "
 				+ "		"
-				+ "		CREATE TABLE IF NOT EXISTS \""+lexitSchemaAccessHash.get("schema")+"\".users ( "
+				+ "		CREATE TABLE IF NOT EXISTS \""+ lexitSchemaAccessHash.get("schema") +"\".users ( "
 				+ "		    id serial, "
 				+ "		    username text, "
 				+ "		    password text, "
@@ -106,15 +106,19 @@ public class LexitSchemaAccess {
 				+ "		    CONSTRAINT users_unique UNIQUE (username) "
 				+ "		); "
 				+ "		"
-				+ "		CREATE TABLE IF NOT EXISTS \""+lexitSchemaAccessHash.get("schema")+"\".users_roles ( "
+				+ "		CREATE TABLE IF NOT EXISTS \""+ lexitSchemaAccessHash.get("schema") +"\".users_roles ( "
 				+ "		    user_id integer, "
 				+ "		    projectname text, "
 				+ "		    access_role text, "
 				+ "		    CONSTRAINT users_roles_unique UNIQUE (user_id, projectname, access_role) "
 				+ "		); "
 				+ "		"
-				+ "		INSERT INTO \""+lexitSchemaAccessHash.get("schema")+"\".users(username, password, default_access_role) "  // password is KrommeBananen
-				+ "		SELECT 'admin', 'dfaef8346ba91dc59fa762dfc7fe6eac', 'admin' "
+				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".users(username, password, default_access_role) "
+						// admin user
+				+ "		VALUES ('"+ Constants.ADMIN_USER +"', 'dfaef8346ba91dc59fa762dfc7fe6eac', '"+ Constants.ADMIN_USER_DEFAULT_ROLE +"'), "
+				        // public reader user
+						// (password null on purpose, since this user must be able to login without a password) 
+				+ "			   ('"+ Constants.PUBLIC_READER_USER +"', null, '"+ Constants.PUBLIC_READER_DEFAULT_ROLE +"') "
 				+ "		ON CONFLICT DO NOTHING; "
 				+ "		"
 				+ "END "
@@ -127,7 +131,10 @@ public class LexitSchemaAccess {
 			dc.sendUpdate(query);
 		}
 		catch (Exception e) {  	    	
-			throw new RuntimeException("Creating the LEXIT_SCHEMA content caused an error.", e);
+			throw new RuntimeException("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error.", e);
+		}
+		finally {
+			dc.closeConnection();
 		}
 	}
 	
@@ -394,7 +401,9 @@ public class LexitSchemaAccess {
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users login info caused an error.", e);
 	    }
-
+	    finally {
+			dc.closeConnection();
+		}
 		
 	}
 	
@@ -425,25 +434,33 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	      ResultSet rs = dc.sendQuery(query, 0);
-
-	      res = getResultsInAList(rs, new String[] { "username", "roles" });
-	      if (res.size() > 0) {
-	        for (String[] oneRecord : res){
-	        	users2roles.put(oneRecord[0].trim(), oneRecord[1].trim().split(","));
-	        }
-	        
-	      }
+			ResultSet rs = dc.sendQuery(query, 0);
+			
+			res = getResultsInAList(rs, new String[] { "username", "roles" });
+			if (res.size() > 0) {
+			    for (String[] oneRecord : res){
+			    	users2roles.put(oneRecord[0].trim(), oneRecord[1].trim().split(","));
+			    }
+			    
+			}
 	    }
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users roles caused an error.", e);
 	    }
+	    finally {
+			dc.closeConnection();
+		}
 
 	}
 	
 	
 	
 	public void deleteUser(String username) {
+		
+		// the publicreader can't be deleted (delete its roles instead, so it's powerless!)
+		if (username.equals(Constants.PUBLIC_READER_USER))
+			return;
+		
 
 		// connect to the lex'it schema database
 		dc = connectDatabase();
@@ -464,7 +481,9 @@ public class LexitSchemaAccess {
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
 		} 
-
+		finally {
+			dc.closeConnection();
+		}
 	}
 	
 	
@@ -491,7 +510,9 @@ public class LexitSchemaAccess {
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
 		} 
-
+		finally {
+			dc.closeConnection();
+		}
 	}
 	
 	
@@ -527,6 +548,9 @@ public class LexitSchemaAccess {
 		catch (Exception e) {
 			throw new RuntimeException("Reading the default role of a user caused an error.", e);
 		} 
+		finally {
+			dc.closeConnection();
+		}
 		
 		return role;
 	}	
@@ -536,6 +560,25 @@ public class LexitSchemaAccess {
 	public void setUserWithRole(String username, String password, String defaultRole, String dbName, String role) {
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
+		
+		
+		
+		// first of all: make sure that the publicreader is not messed up with!
+		
+		if (username.equals(Constants.PUBLIC_READER_USER)) {
+			
+			// changing the default role of the public reader is not allowed (we want to prevent it from getting to much rights)
+			defaultRole = Constants.PUBLIC_READER_DEFAULT_ROLE;
+			
+			// the public reader is not allowed to have a writing role in the database
+        	// so, any attempt to give it a writing role will be ignored (this is: converted back into reading role)
+			role = Constants.USER_READ_ACCESS;		
+			
+			// the public reader is not supposed to have a password (it won't be checked anyway)
+			password = null;
+		}
+				
+		
 		
 		// convert the password to MD5
 		
@@ -565,11 +608,6 @@ public class LexitSchemaAccess {
 			// connect to the lex'it schema database 
 			dc = connectDatabase();
 			
-			
-//			System.out.println("Adding user "+username+" with password "+password+" and default role "+defaultRole);
-//			System.out.println("password is null = "+(password == null));
-//			System.out.println("password is empty = "+(password != null && password.isEmpty()));
-			
 			String addUserQuery = 
 					"INSERT INTO "+schemaName+".users(username, password, default_access_role) "+
 					"VALUES (?, ?, ?) "+				
@@ -592,14 +630,21 @@ public class LexitSchemaAccess {
 	  	    catch (Exception e) {  	    	
 	  	    	throw new RuntimeException("Adding a user caused an error.", e);
 	  	    }
-			
+	    	finally {
+				dc.closeConnection();
+			}
 		}
 			
     	
     	
     	// now add the specific project role
     	
-    	if ((dbName != null && !dbName.isEmpty() && !dbName.equals("null")) && (role != null && !role.isEmpty()  && !role.equals("null") )) {
+    	if ((dbName != null && !dbName.isEmpty() && !dbName.equals("null")) 
+    			&& 
+    		(role != null && !role.isEmpty() && !role.equals("null") )) {
+    		
+    		
+    		// first delete the previous role of the user for this project
     		
     		dc = connectDatabase();
     		
@@ -608,7 +653,7 @@ public class LexitSchemaAccess {
     				"WHERE user_id = (SELECT id FROM "+schemaName+".users WHERE username = ?) "+
     				"AND projectname = ?;"; 
     		
-    		String[] deletePreviousRoleArgs = new String[] {username, dbName}; 
+    		String[] deletePreviousRoleArgs = new String[] {username, dbName.trim()}; 
         	ArgumentTypesObject deletePreviousRoleAto = new ArgumentTypesObject();
         	deletePreviousRoleAto.addType("text");
         	deletePreviousRoleAto.addType("text");
@@ -619,8 +664,12 @@ public class LexitSchemaAccess {
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Removing old user role caused an error.", e);
     	    }
+        	finally {
+    			dc.closeConnection();
+    		}
         	
-    		
+        	
+        	// now, write the new role of the user for this project        	   		
         	
         	dc = connectDatabase();
         	
@@ -641,7 +690,9 @@ public class LexitSchemaAccess {
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Adding a user and project role caused an error.", e);
     	    }
-    		
+        	finally {
+    			dc.closeConnection();
+    		}
     	}
     	
 	}
@@ -664,10 +715,8 @@ public class LexitSchemaAccess {
 		ArrayList<String> aOutput = new ArrayList<>();
 		Set<String> keys = users2roles.keySet();
 		
-        for (String key : keys) {
-        	
-        	aOutput.add( key );
-        	
+        for (String key : keys) {        	
+        	aOutput.add( key );        	
         }
 		return aOutput;
 
