@@ -62,24 +62,25 @@ var aProjectList = [
 		closed: true
 	},	
 	 
-	{		 
-		comment: "========== DON'T MODIFY ANYTHING BELOW THIS LINE ================================================",
-		
-		name: "Login overzicht",
-		config_filename: "spy",
-		description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
-		goody: true
+	// ========== DON'T MODIFY ANYTHING BELOW THIS LINE ================================================
+	
+	 {
+			name: "Login overzicht",
+			config_filename: "spy",
+			description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
+			goody: true
+	 },
+	 {
+			name: "Gebruikersbeheer",
+			config_filename: "admin",
+			description: "Gebruikersbeheer",
+			goody: true
 	},
-	{
-		name: "Gebruikersbeheer",
-		config_filename: "admin",
-		description: "Gebruikersbeheer",
-		goody: true
-	},
-	{
-		name: "Reset user rights",
-		config_filename: "reset_user_rights",
-		description: "Handmatig toegangsrechten resetten",
-		goody: true
-	}	 
-];
+	 {
+			name: "Reset user rights",
+			config_filename: "reset_user_rights",
+			description: "Handmatig toegangsrechten resetten",
+			goody: true
+	 }
+	 
+	];
