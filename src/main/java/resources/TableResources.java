@@ -392,7 +392,8 @@ public class TableResources {
 		try {
 			fileToSend = readWelcomeJsFile(context, dbName);
 		} catch (IOException e) {
-			// do nothing: a welcome page is not mandatory, so no need to throw an exception  
+			// a welcome page is not mandatory, so no need to throw an exception
+			fileToSend = "NOT_AVAILABLE";
 		}
 		
 		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
@@ -2046,7 +2047,8 @@ public class TableResources {
 			in.close();
 		}
 		catch (Exception e){ 
-			// don't throw any error, since it's not a problem if the welcome file is missing (as it is an optional file by design)
+			sb = new StringBuilder();
+			sb.append("NOT_AVAILABLE");
 		}
 		
 		return sb.toString();

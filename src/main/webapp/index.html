@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.03.24
+	v2025.03.26
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -422,10 +422,10 @@
 			if (bTest) {
 				$.getScript(paramsHash.get("db")+".welcome.js")
 				.done(function(){					
-					// no nothing, as the login page is supposed to start the lexit login programmatically
+					// no nothing, as the welcome page is supposed to start the lexit login programmatically
 				})
 				.fail(function(jqxhr, settings, exception){
-					// if no login page is available, do normal login
+					// if no welcome page is available, do normal login
 					startLexitLogin();
 				});
 			}
@@ -442,11 +442,15 @@
 						"db_name": paramsHash.get("db"),
 						"dummy": getUniqueNumber()
 					},
-					"success": function(){						
-						// no nothing, as the login page is supposed to start the lexit login programmatically
+					"success": function(response){						
+						// if no welcome page available, do normal login
+						if (response == 'NOT_AVAILABLE'){
+							startLexitLogin();
+						}
+						// otherwise no nothing, as the welcome page is supposed to start the lexit login programmatically
 					},
 					"error": function(jqxhr, settings, exception){
-						// if no login page is available, do normal login
+						// if no welcome page is available, do normal login
 						startLexitLogin();
 					}
 				});
