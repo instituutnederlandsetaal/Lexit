@@ -1532,10 +1532,11 @@ lexutil.getZindexOfTableInFront = function(){
 // ******************************************************
 
 /**
- * Get the current http params into a hashtable object
- * @returns {Hashtable} the http parameters
+ * Get the current http params into a hashtable object (or the value of a given key, if given)
+ * @param {String} sKey - The key to search for (optional)
+ * @returns {Hashtable|String} the http parameters as a Hashtable of parameters and values, or the value of the given parameter
  */
-lexutil.getHttpParams = function(){
+lexutil.getHttpParams = function(sParameter){
 	
 	var paramsHash = new Hashtable();
 	
@@ -1553,15 +1554,43 @@ lexutil.getHttpParams = function(){
 	if (paramsPairs == null || paramsPairs.length==0)
 		return null;
 	
-	// put the parameters pairs in a hashmap
-	for (var i=0; i<paramsPairs.length; i++) {
-		var paramName  = paramsPairs[i].split("=")[0];
-		var paramValue = paramsPairs[i].split("=")[1];
-
-		paramsHash.put(paramName, paramValue);
+	
+	// if no paramter name is given, return all parameters in a Hashtable
+	if (sParameter == null){
+		// put the parameters pairs in a hashmap
+		for (var i=0; i<paramsPairs.length; i++) {
+			var paramName  = paramsPairs[i].split("=")[0];
+			var paramValue = paramsPairs[i].split("=")[1];
+	
+			paramsHash.put(paramName, paramValue);
+		}
+		
+		return paramsHash;
+	}
+	// otherwise, return the value of the given sarameter
+	else {
+		for (var i=0; i<paramsPairs.length; i++) {
+			var paramName  = paramsPairs[i].split("=")[0];
+			if (paramName != sParameter)
+				continue;			
+			return paramsPairs[i].split("=")[1];
+		}
 	}
 	
-	return paramsHash;
+	// if we reach this point, the key was not found
+	return null;	
+};
+
+
+//*******************************************************
+
+/**
+ * Set the statistics for the current page
+ * @param {String} sDomain - The domain to set (optional, default is "lex-it.ivdnt.org")
+ */
+lexutil.setStatistics = function(sDomain = "lex-it.ivdnt.org"){
+	// append plausible.js to the header	
+	$("head").append('<script defer data-domain="'+sDomain+'" src="https://statistiek.ivdnt.org/js/script.js"></script>');
 };
 
 

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.03.27
+	v2025.04.10
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -273,9 +273,7 @@
 		// set language to be used
 		sLexitLanguage = (paramsHash!=null && paramsHash.get("lang")!=null ?
 				paramsHash.get("lang").toLowerCase() : "nl" );
-
 		lang.setLanguage(sLexitLanguage);
-
 		
 		// set neutral internal separator
 		setInternalSeparator(function(){
@@ -545,8 +543,10 @@
 		
 
 		// last case: 
+		// if 'db' parameter is NOT set, show the list of project
+		// but if 'db' parameter is set, open that project
 		
-		// show the list of projects in test mode (development)
+		// in test mode (development)
 		else if (bTest) {
 			$.getScript("projects_overview.js")
 				.done(function(){
@@ -562,7 +562,7 @@
 				});
 		}
 
-		// show the list of projects in normal mode (production)
+		// in normal mode (production)
 		else {
 			var url = WEBSERV_URL+"/api/get_projects_overview";
 
@@ -1025,6 +1025,9 @@
 
 			// show the project name at the top of the screen
 			fn.setProjectTitle(sProjectName);
+			
+			// statistics
+			lexutil.setStatistics();
 		}
 		
 	};

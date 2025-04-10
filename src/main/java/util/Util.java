@@ -412,14 +412,17 @@ public class Util {
 		return str.replaceAll("(\\(|\\)|\\-|\\*|\\+|\\?)", "\\\\$1");
 	}
 	
+	// check if a string contains some letters, including russian
+	//
+	// but this might be better: value.matches(".*(\\p{L}+).*")
 	public static boolean containsSomeLetters(String value){
 		if (value == null) return false;
-		return value.matches(".*([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ]+).*");
+		return value.matches(".*([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ\u0400-\u04FF]+).*");
 	}
 	
 	public static boolean isGenuineWord(String value){
 		if (value == null) return false;
-		return value.matches("^([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ]+)$");
+		return value.matches("^([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ\u0400-\u04FF]+)$");
 	}
 	
 	
