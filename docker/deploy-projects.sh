@@ -14,7 +14,7 @@ echo "Loading .env"
 set -a && source .env && set +a
 
 # define defaults that can be overridden by .env
-PROJECTS_GIT=${PROJECTS_GIT:-"https://github.com/INL/lexit-configs"}
+PROJECTS_GIT=${PROJECTS_GIT:-"https://github.com/instituutnederlandsetaal/lexit-configs"}
 
 # pull Lexit-configs
 echo "Pulling configs from $PROJECTS_GIT"
