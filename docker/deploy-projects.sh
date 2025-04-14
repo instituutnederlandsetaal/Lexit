@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # version
-echo "=== Lexit Configs Deployer v2025.03.14 ==="
+echo "=== Lexit Configs Deployer v2025.04.14 ==="
 
 RED='\033[31m'
 GREEN='\033[32m'
@@ -59,8 +59,8 @@ cp projects_overview.js $TMP_LEXIT_CONFIG 2>/dev/null || echo -e "${YELLOW}WARNI
 
 # rsync from tmp to real
 echo "Copying tmp folder to real folder"
-rsync -a --delete $TMP_LEXIT_CONFIG lexit2_config/ 2>/dev/null || echo -e "${YELLOW}WARNING: Incomplete rsync of lexit2_config ${NC}"
-rsync -a --delete $TMP_LEXIT_DB_CONFIG lexit2_db_config/
+rsync -r --delete $TMP_LEXIT_CONFIG lexit2_config/ 2>/dev/null || echo -e "${YELLOW}WARNING: Incomplete rsync of lexit2_config ${NC}"
+rsync -r --delete $TMP_LEXIT_DB_CONFIG lexit2_db_config/
 rm -rf tmp
 
 echo -e "${GREEN}Finished deploying projects to docker mount!${NC}"
