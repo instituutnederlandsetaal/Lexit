@@ -520,18 +520,16 @@ sf.enableSearchFields = function(someTablename){
 		// for checkboxes, we also need to (un)check the checkbox
 		if (isACheckBox) {
 
-			var iCycleValue;
-			if (sStartValueOfThisColumn == '') {
-				iCycleValue = 0;
-			}
-			else if (sf.isCheckboxTrueValue(sStartValueOfThisColumn)) {
+			var iCycleValue = 0;
+			if (sf.isCheckboxTrueValue(sStartValueOfThisColumn)) {
 				iCycleValue = 1;
 				inputTag.prop("checked", "checked");
 			}
 			else if (sf.isCheckboxFalseValue(sStartValueOfThisColumn)) {
 				iCycleValue = 2;
-			}
+			}			
 
+			// give the checkbox filter the right color etc
 			sf.setCheckboxRight(sCurrentSearchBoxDiv, iCycleValue);	
 		}
 			
@@ -589,6 +587,7 @@ sf.enableSearchFields = function(someTablename){
 				iCycleValue++;
 				if (iCycleValue>2) iCycleValue = 0;
 				
+				// give the checkbox filter the right color etc
 				sf.setCheckboxRight($(this), iCycleValue);
 				
 				// fire filter straight away
@@ -854,7 +853,10 @@ sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 			else {
 				iCycleValue = inputTag.attr("cycle_value");
 			}			
-			sf.setCheckboxRight($(this), iCycleValue);			
+			
+			// give the checkbox filter the right color etc
+			sf.setCheckboxRight($(this), iCycleValue);		
+				
 			if (sf.isCheckboxTrueValue(sCurrentValueOfThisColumn))
 				inputTag.prop("checked", "checked");
 		}

@@ -4284,6 +4284,25 @@ fn.closeDialog = function(){
 
 
 /**
+ * Move the current dialog to a new position
+ * @param {Integer} [iX=0] - X offset (in pixels)
+ * @param {Integer} [iY=0] - Y offset (in pixels)
+ */
+fn.moveDialog = function(iX = 0, iY = 0) {
+
+	var $dlg = $("div[id^='dialog-message']").dialog();
+	var $widget = $dlg.dialog("widget");
+	var currentOffset = $widget.offset();
+	
+	$widget.css({
+		top: (currentOffset.top + iY) + "px",
+  		left: (currentOffset.left + iX) + "px"
+	});
+
+}
+
+
+/**
  * Make sure the buttons of a dialog 
  * can be triggered by the Enter key as well
  * @param dialog div ID

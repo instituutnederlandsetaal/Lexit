@@ -1250,7 +1250,9 @@ public class Database {
 			}			
 			
 		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
+			throw new RuntimeException("Error while executing query "+getRecord+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		} 
 		
 		return tro;
