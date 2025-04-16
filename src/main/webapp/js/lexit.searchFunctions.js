@@ -527,7 +527,7 @@ sf.enableSearchFields = function(someTablename){
 			}
 			else if (sf.isCheckboxFalseValue(sStartValueOfThisColumn)) {
 				iCycleValue = 2;
-			}			
+			}
 
 			// give the checkbox filter the right color etc
 			sf.setCheckboxRight(sCurrentSearchBoxDiv, iCycleValue);	
@@ -939,11 +939,11 @@ sf.buildCorrectCheckboxFilterValue = function(sTablename, sVisibleColumnNumber, 
 // check if a given value means 'true' or 'false', if it belongs to a checkbox
 sf.isCheckboxTrueValue = function(sValue){
 	
-	return (sValue==1||sValue=='1'||sValue==true||sValue==='true'||sValue=='t');
+	return (sValue===1||sValue==='1'||sValue===true||sValue==='true'||sValue==='t');
 };
 sf.isCheckboxFalseValue = function(sValue){
 	
-	return (sValue==0||sValue=='0'||sValue==false||sValue==='false'||sValue=='f');
+	return (sValue===0||sValue==='0'||sValue===false||sValue==='false'||sValue==='f');
 };
 
 
