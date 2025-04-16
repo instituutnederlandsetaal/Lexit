@@ -306,7 +306,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 /**
  * Add a balk on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
- * @pparam {Boolean} [bSetLinks=false] - set default links to help, about and contribute
+ * @param {Boolean} [bSetLinks=false] - set default links to help, about and contribute
  * @param {String} [sPathToCustomLogo=null] - path to a custom
  * @param {String} [sCustomLogoSize="52px"] - size of the custom logo
  */
