@@ -38,6 +38,8 @@ var hbTableMustBeOptimal = new Hashtable();
 
 // hash mapping table name to an array of filter values etc
 var hTableState = new Hashtable(); 
+// hash mapping table name to an array of settings (not only filters but also sorting, paging, etc.)
+var hFullTableState  = new Hashtable(); 
 
 // tables part
 
@@ -172,6 +174,8 @@ mt.getTableMustBeOptimal = function(sTableName){
 
 // table state
 
+// state of search filters
+
 mt.setTableState = function(sTableName, oState){
 	
 	hTableState.put(sTableName, oState);
@@ -179,6 +183,17 @@ mt.setTableState = function(sTableName, oState){
 mt.getTableState = function(sTableName){
 	
 	return hTableState.get(sTableName);
+}
+
+// full state (including sorting, paging, etc.)
+
+mt.setFullTableState = function(sTableName, oState){
+	
+	hFullTableState.put(sTableName, oState);
+};
+mt.getFullTableState = function(sTableName){
+	
+	return hFullTableState.get(sTableName);
 }
 
 

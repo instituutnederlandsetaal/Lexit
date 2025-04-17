@@ -1189,7 +1189,7 @@ head.putTableEraseButton = function(sSomeTablename){
 		.css("-moz-border-radius", "15px")
 		.append($("<span></span>").addClass("ui-icon ui-icon-trash"))
 		.bind("click", function(){
-
+			
 			fn.confirm(lang.beware, lang.import_erase_confirm,
 				function(){
 

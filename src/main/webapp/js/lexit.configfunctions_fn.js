@@ -1402,6 +1402,7 @@ fn.tableIsUploaded = function(sSomeTablename){
  * Refresh a table (keep current filters etc)
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @see fn.refreshRow
  */
 fn.refreshTable = function(sSomeTablename, fnCallback){
 	
@@ -1888,6 +1889,101 @@ fn.setTableNameInHeader = function(sSomeTablename, sNameToBeShown){
 }
 
 
+/**
+ * Get the state of a table (position, searchbox values, current order, displayed page number)
+ * and return it as an associative array.  
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Object} An associative array containing the table state
+ * @see fn.respawnTable
+ */
+fn.getTableState = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	var oState = {};
+	oState["top"] = $("#"+sSomeTablename+"_dynamic").offset().top;
+	oState["left"] = $("#"+sSomeTablename+"_dynamic").offset().left;
+	oState["displayRow"] = parseInt(fn.getCurrentDisplayStart(sSomeTablename));
+	oState["displayLength"] = fn.getCurrentDisplayLength(sSomeTablename);
+	oState["searchFilters"] = mt.getDataTableObjectOf(sSomeTablename).getSearchFilters();
+	oState["order"] = mt.getDataTableObjectOf(sSomeTablename).order();
+	oState["viewtype"] = fn.getViewType(sSomeTablename);
+	oState["width"] = $("#"+sSomeTablename+"_dynamic").css("width");
+		
+	var oSearchBoxValues = {};
+	$('#'+sSomeTablename+'_searchboxes td').each( function(i){
+		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sSomeTablename)[i];
+		oSearchBoxValues[sCurrentColumnName] = fn.getValueOfFilterBox(sSomeTablename, sCurrentColumnName);        			
+	});	
+	oState["searchBoxValues"] = oSearchBoxValues;	
+	return oState;
+}
+
+/**
+ * Reopen a table in its last known state (position, searchbox values, current order, displayed row number).
+ * N.B.: the state to be restored has the same format as the one returned by fn.getTableState().
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Array} aExclude - List of settings parameters to exclude from the restoration (possible values: "top", "left", "displayRow", "displaylength", "order", viewtype", "searchFilters", "width")
+ * @param {Function} fnCallBack - Some function to call after the table has been restored}
+ * @see fn.getTableState
+ */
+fn.respawnTable = function(sSomeTablename, aExclude=[], fnCallBack){
+
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	// get the original table state
+	var oState = mt.getFullTableState(sSomeTablename);
+		
+	// set the settings to be restored at respawning
+	var oExtraSettings = {"ignore_initialisation_filters": true};
+	var aKeysToAllowIntoExtraSettings = ["top", "left", "displaylength", "viewtype", "width", "searchFilters"];
+	for (var i=0; i<aKeysToAllowIntoExtraSettings.length; i++){
+		var sKey = aKeysToAllowIntoExtraSettings[i];
+		if ($.inArray(sKey, aExclude)<0 && oState[sKey] != null)
+			oExtraSettings[sKey] = oState[sKey];
+	}
+	
+	// respawn	
+	fn.callDatabase(sSomeTablename, oState.searchBoxValues, function(){
+		
+		// small delay needed otherwise this will be fired too early and won't work
+		$("#"+sSomeTablename).delay(500).queue(function(){
+			
+			// set the sorting
+			if (oState.order != null)
+				mt.getDataTableObjectOf(sSomeTablename).order(oState.order);
+			else
+				mt.getDataTableObjectOf(sSomeTablename).order.neutral();
+		
+		
+			// now we have the right sorting settings set, 
+			// we can set the page number and refresh
+			if (oState.displayRow != null)
+				mt.getDataTableObjectOf(sSomeTablename)
+					.displayRow(oState.displayRow)
+					.draw(false);
+					
+			// put back the search boxes settings
+			for (let sColumnName in oState.searchBoxValues){
+				fn.putDataIntoFilterBox(sSomeTablename, sColumnName, oState.searchBoxValues[sColumnName]);		
+			}
+			
+			// finally, callback if available
+			if (fnCallBack!=null) {
+				fnCallBack();
+			}
+			
+			$(this).dequeue();
+		});
+		
+	},
+	oExtraSettings);
+	
+};
+
+
 
 // *****************************************************************
 // *     GENERAL ROW FUNCTIONS                                     *
@@ -2019,6 +2115,23 @@ fn.getAllRowNodesWhere = function(sSomeTable, aFieldsAndValues, bOnlyFirstRow){
 fn.getRowNodeWhereIdIs = function(sSomeTable, sId){
 	
 	return (fx.getRowWhereIdIs(sSomeTable, sId)).node();
+};
+
+
+/**
+ * Refresh a row, t.i. reload the data of that row.
+ * This function refreshes the row data just like fn.refreshTable does for the whole table.
+ * @param {Node} nMixed - A cell node or a row node
+ * @param {Function} fnCallback - Some function to call after the row has been refreshed
+ * @param {Function} fnErrorHandler - Some function to call when an error occurs
+ * @see fn.refreshTable
+ */
+fn.refreshRow = function(nMixed, fnCallback, fnErrorHandler){
+	
+	if (fn.isCellNode(nMixed))
+		nMixed = fn.getRowNode(nMixed);
+		
+	fn.callRecord(nMixed, null, fnCallback, fnErrorHandler);
 };
 
 
@@ -2599,14 +2712,13 @@ fn.getRowNode = function(nMixed){
 	fn._checkApiInstance("fn.getRowNode", nMixed);
 	fn._checkjQueryObject("fn.getRowNode", nMixed);
 	
-	if ( fn.isCellNode(nMixed) )
-		{
+	if ( fn.isCellNode(nMixed) ) {
 		var sTable = 	fn.getTableName(nMixed);		
 		var oTable = 	mt.getDataTableObjectOf(sTable);
 		var iRowIndex =	oTable.cell(nMixed).index().row;
 		
 		return oTable.row(iRowIndex).node();
-		}		
+	}
 	
 	return nMixed;
 };

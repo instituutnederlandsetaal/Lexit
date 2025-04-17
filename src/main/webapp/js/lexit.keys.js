@@ -480,7 +480,7 @@ kf.addKeyFunctions = function(){
     	
     	
     	// pageup/down
-    	if (kf.isPressed("pageup") || kf.isPressed("pagedown")){			
+    	if ( kf.isPressed("pageup") || kf.isPressed("pagedown") ){			
 			var sActiveTable = kf.getActiveTable();
 			
 			// 1. there must be some table active 
@@ -532,9 +532,38 @@ kf.addKeyFunctions = function(){
 			// (needed as last command)
 			return false;
 		}
+		
+		
+		
+		// home/end keys
+    	if ( kf.isPressed("home") || kf.isPressed("end")){		
+			
+			var sActiveTable = kf.getActiveTable();	
+			
+			// 1. there must be some table active 
+			// 2. don't interfere with context menu
+			// 3. don't interfere with textarea of jeditable
+			// 4. don't interfere with dialog box
+			if (sActiveTable != null 
+					&& !$("div#context-menu-layer").elementExists()
+					&& !$("td form textarea").elementExists()
+					&& !($(e.target).is('textarea')) // not in a form
+					&& !bSomeDialogBoxIsOpen					
+					)
+				{
+					e.preventDefault();
+					
+					if (kf.isPressed("home")){
+						mt.getDataTableObjectOf(sActiveTable).page("first").draw("page");
+					}
+					else if (kf.isPressed("end")){
+						mt.getDataTableObjectOf(sActiveTable).page("last").draw("page");
+					}
+				}
+				
+		}
     	
-    	
-		// arrow keys
+		// arrow keys		
 		if (kf.isPressed("uparrow") || kf.isPressed("downarrow")){	
 			var sActiveTable = kf.getActiveTable();	
 			var iNumberOfRows = fn.getNumberOfVisibleRows(sActiveTable);

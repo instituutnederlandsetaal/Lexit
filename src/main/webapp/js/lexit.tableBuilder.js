@@ -540,7 +540,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				$(nActiveRowNode).toggleClass('selected');				
 			}
 			
-			
+			// save the table state for possible respawn later on
+			mt.setFullTableState(sSomeTableName, fn.getTableState(sSomeTableName));
 		},
 		
 		// ** Functions upon row update **
@@ -1431,10 +1432,9 @@ tb.destroyTable = function(sSomeTablename, fnFunction, bRemoveContainerDiv){
 	mt.removeTableRecord(sSomeTablename);		
 	
 	// finally, callback function if required
-	if (fnFunction!=null)
-		{
+	if (fnFunction!=null) {
 		fnFunction();		
-		}
+	}
 };
 
 
