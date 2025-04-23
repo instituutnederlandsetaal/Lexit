@@ -548,6 +548,7 @@ kf.addKeyFunctions = function(){
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
 					&& !($(e.target).is('textarea')) // not in a form
+					&& !($(e.target).is('input'))
 					&& !bSomeDialogBoxIsOpen					
 					)
 				{
