@@ -311,6 +311,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		"ajax": {
 			"url": WEBSERV_URL+"/api/gettable",
 			"type": "POST",
+			"error": function(xhr, error, thrown) {
+				// added this to prevent the ugly ajax error message from datatables
+				console.log( 'An error has been reported by DataTables: ', error );
+				lexitReload();
+			},
 			"data": function ( d ) {
 
 				// needed for GoTo function (see comment in java code Database.getRowNumberOfRecord)
