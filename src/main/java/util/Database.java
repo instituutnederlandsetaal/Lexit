@@ -2543,15 +2543,17 @@ public class Database {
 			System.out.println(Util.join(aSortDir, ", "));
 		}
 		
+		// Instantiate the queries  (those will be enriched with filters etc. further on)
 		
 		// normal query
 		String query = "SELECT "+getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+getSafeTableName(tableName, schema) + " ";
 		// results count query		
 		String countQuery = "SELECT COUNT(*) AS count FROM "+getSafeTableName(tableName, schema) + " ";
 				
-		String[] columnsToSearch;
+		// arrays for storing values and types
 		ArrayList<String> queryValues = new ArrayList<String>();
 		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
 		
 		// -----------------------------------------------
 		// main search, without column filters
@@ -2559,21 +2561,25 @@ public class Database {
 		
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()==0){
+			
 			// main search means search all columns at once
-			columnsToSearch = getColumnNames(tableName);
+			String[] allTableColumns = this.getColumnNames(tableName);
 			ArrayList<String> queryParts = new ArrayList<String>();
 			ato = new ArgumentTypesObject();
 			
 			// build the query condition for each column (!!! the MAIN search will search EACH column of course !!!)
-			for (int i=0; i<columnsToSearch.length; i++) {
+			for (int i=0; i<allTableColumns.length; i++) {
+				
+				String currentColumnName = allTableColumns[i];
+				
 				// build current part
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) )
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) )
 				{
 					queryParts.add(
-							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) " + getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
@@ -2581,10 +2587,10 @@ public class Database {
 				else
 				{
 					queryParts.add(
-							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], sSearch, false)
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" " + getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false)
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
 				}
 				
 				
@@ -2606,37 +2612,39 @@ public class Database {
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		else if ( (sSearch == null || !sSearch.isEmpty()) && aSearchColumnValues.size()>0) {
 			
-			// main search means search all columns at once
-			columnsToSearch = getColumnNames(tableName);
+			// main search means search all table columns at once
+			String[] allTableColumns = this.getColumnNames(tableName);
 			ArrayList<String> queryParts = new ArrayList<String>();		
 			ato = new ArgumentTypesObject();
 			
 			// I. main search part: search all columns EXCEPT the filtered columns			
 			
-			for (int i=0; i<columnsToSearch.length; i++) {
+			for (int i=0; i<allTableColumns.length; i++) {
+				
+				String currentColumnName = allTableColumns[i];
 				
 				// we skip the specific filtered columns as our main search address the other columns
-				if (aSearchColumnNames.contains(columnsToSearch[i]))
+				if (aSearchColumnNames.contains(currentColumnName))
 					continue;
 				
 				// build the query condition for each column
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, columnsToSearch[i])) ) {
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) ) {
 					
 					queryParts.add(
-							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
+							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) "+ getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], sSearch, false) 
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" " + getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false) 
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
 				}		
 								
 			}			
@@ -2654,25 +2662,36 @@ public class Database {
 			// build the query condition for each column
 			queryParts = new ArrayList<String>();		
 			for (int i=0; i<aSearchColumnNames.size(); i++) {
-				// build current part
-				queryValues.add(aSearchColumnValues.get(i));
+				
+				String currentColumnName = aSearchColumnNames.get(i);
+				String currentSearchValue = aSearchColumnValues.get(i);
+				
+				// special case: 0/1 in a boolean must be translated to true/false
+				if (getTypeOfColumn(tableName, currentColumnName).equals("boolean") && 
+						(currentSearchValue.equals("0") || currentSearchValue.equals("1")) ){
+					currentSearchValue = currentSearchValue.replace("0", "false").replace("1", "true");
+					aSearchColumnValues.set(i, currentSearchValue);
+				}
 				
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
+				// build current part
+				queryValues.add(currentSearchValue);
+				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, aSearchColumnNames.get(i))) ) {
+				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName)) ) {
 					queryParts.add(
-							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
-							" AS text) "+ getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" AS text) "+ getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(aSearchColumnNames.get(i)) + 
-							" " + getSuitableOperatorAndArg(tableName, aSearchColumnNames.get(i), aSearchColumnValues.get(i), caseSensitiveColumn)  
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" " + getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn)  
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, aSearchColumnNames.get(i)));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
 				}
 								
 			}
@@ -2693,32 +2712,41 @@ public class Database {
 		// [ beware: null is also a genuine search value, so it's considered non-empty ]
 		else if ( (sSearch!=null && sSearch.isEmpty()) && aSearchColumnValues.size()>0) {
 			
-			columnsToSearch = aSearchColumnNames.toArray(new String[aSearchColumnNames.size()]);
 			ArrayList<String> queryParts = new ArrayList<String>();
 			ato = new ArgumentTypesObject();
 			
 			// build the query condition for each column
-			for (int i=0; i<columnsToSearch.length; i++)
-			{
+			for (int i=0; i<aSearchColumnNames.size(); i++) {
+				
+				String currentColumnName = aSearchColumnNames.get(i);
+				String currentSearchValue = aSearchColumnValues.get(i);
+				
+				// special case: 0/1 in a boolean must be translated to true/false
+				if (getTypeOfColumn(tableName, currentColumnName).equals("boolean") && 
+						(currentSearchValue.equals("0") || currentSearchValue.equals("1")) ){
+					currentSearchValue = currentSearchValue.replace("0", "false").replace("1", "true");
+					aSearchColumnValues.set(i, currentSearchValue);
+				}
+				
 				// build current part
-				queryValues.add(aSearchColumnValues.get(i));
+				queryValues.add(currentSearchValue);
 				
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(aSearchColumnValues.get(i), getTypeOfColumn(tableName, columnsToSearch[i])) ) {
+				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName)) ) {
 					queryParts.add(
-							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" AS text) " + getSuitableOperatorAndArg(tableName, null, aSearchColumnValues.get(i), caseSensitiveColumn)
+							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" AS text) " + getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(columnsToSearch[i]) + 
-							" " + getSuitableOperatorAndArg(tableName, columnsToSearch[i], aSearchColumnValues.get(i), caseSensitiveColumn) 
+							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
+							" " + getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn) 
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, columnsToSearch[i]));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
 				}
 				
 			}
