@@ -1076,7 +1076,7 @@ head.putHelpButton = function(sSomeTablename){
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
 			
-			var helpDivId = "dialog"+lexutil.getUniqueNumber();
+			var helpDivId = "dialog-message"+lexutil.getUniqueNumber();
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)
@@ -1256,7 +1256,7 @@ head.showGeneralHelp = function(){
 			// we'll be combining jquerui tabs and dialog
 			// see: http://stackoverflow.com/questions/15472048/jquery-ui-tabs-and-dialog
 			
-			var helpDivId = "dialog"+lexutil.getUniqueNumber();
+			var helpDivId = "dialog-message"+lexutil.getUniqueNumber();
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)

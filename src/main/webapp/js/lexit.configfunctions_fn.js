@@ -331,6 +331,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 				// append about
 				$("#headerlinks #about_link")
 					.click(function() {
+						fn.closeDialog();
 						fn.message("About Lex'it", 
 							"<table style='width: 400px'><tr>"+
 							"<td><h1>Lex'it</h1><b>Lex</b><i>icon</i> <b>I</b><i>nteractive</i> <b>T</b><i>ool</i><BR><BR><a href='https://www.ivdnt.org' target='_blank''>www.ivdnt.org</a></td>"+
@@ -345,6 +346,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 				// append contribute
 				$("#headerlinks #contribute_link")
 					.click(function() {
+						fn.closeDialog();
 						window.open("https://github.com/instituutnederlandsetaal/lexit", "_blank");
 					});
 			}, 500);
