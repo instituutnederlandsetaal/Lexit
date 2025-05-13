@@ -144,7 +144,7 @@ lang.no_note_was_saved = "Geen notitie opgeslagen.";
 lang.error_at_saving_note = "Fout bij het opslaan van de notitie";
 lang.error_at_reading_note = "Fout bij het opvragen van de notitie.";
 
-lang.reset_button = "Reset";
+lang.reset_button = "Reset naar beginstand<BR>[+Shift: zoekvelden legen]";
 lang.columns_selection = "Kolommenselectie";
 lang.columns_selection_and_order = "Kolommenselectie en -ordening";
 lang.columns_selection_optimal_mode = "Kolommenselectie  (Optimale modus staat AAN: kolommen zonder inhoud worden automatisch verborgen)";
@@ -1595,7 +1595,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.error_at_saving_note = "An error occured when saving the table notes.";
 		lang.error_at_reading_note = "An error occured when reading the table notes.";
 
-		lang.reset_button = "Reset";
+		lang.reset_button = "Reset to default<BR>[+Shift: clear search boxes]";
 		lang.columns_selection = "Columns selection";
 		lang.columns_selection_and_order = "Columns selection and order";
 		lang.columns_selection_optimal_mode = "Columns selection  (Optimal mode is ON: empty columns are automatically hidden)";

@@ -530,66 +530,77 @@ head.putResetButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 			
-			// abort the running database draw
-			mt.getDataTableObjectOf(sSomeTablename).abortCall();
-			
-			// clean the go-to stack
-			mt.rememberOccurenceNr( sSomeTablename, 0 );
-			mt.rememberLastGoToCommand( sSomeTablename, "" );
-			
-			// clean the undo stack
-			un.cleanUndoStack(sSomeTablename);
-			
-			// clear highlighted rows
-			row.clearRowSelection(sSomeTablename);
-			
-			// clear search fields
-			sf.clearPerColumnSearchFields(sSomeTablename);					
-			sf.clearSearchField(sSomeTablename);
-			
-			// cancel optimal mode in any case
-			mt.setTableMustBeOptimal(sSomeTablename, false);
-			
-			// force webservice to clean its counter cache etc
-			fn.cleanTableCache(sSomeTablename, 
-				function(){
+			if (kf._getPressedKey() == 'shift'){
 				
-					// send empty search request			
-					mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters();
-					
-					// call the pre-reset callback before the table is actually reset
-					if (conf.getPreResetCallback( conf.getTableSettings(sSomeTablename)) != null)
-						conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
-					
-					// this one does the table refresh!
-					var aSorting = conf.getDefaultSortingSettings(sSomeTablename);
-					
-					// see https://www.datatables.net/plug-ins/api/order.neutral%28%29
-					if (aSorting.length==0) 
-						mt.getDataTableObjectOf(sSomeTablename).order.neutral();
-					else
-						mt.getDataTableObjectOf(sSomeTablename).order(aSorting);
-
-					// make sure that the form sorting labels are updated too
-					// (can only be done after re-ordering the table)
-					fn.addDrawCallback(sSomeTablename, function(){
-						setTimeout(function(){
-							form.synchronizeSorting(sSomeTablename);
-						}, 1000);						
-					});
-					
-					// update the table now!
-					mt.getDataTableObjectOf(sSomeTablename).draw();
+				// rest the filters
+				fn.resetAllFilters(sSomeTablename);
 				
-					// put the current search filters values into the search boxes
-					sf.putCurrentValueInAllSearchBoxes(sSomeTablename);
+				// clear search fields
+				sf.clearPerColumnSearchFields(sSomeTablename);					
+				sf.clearSearchField(sSomeTablename);
+			}
+			else {
+				
+				// abort the running database draw
+				mt.getDataTableObjectOf(sSomeTablename).abortCall();
+				
+				// clean the go-to stack
+				mt.rememberOccurenceNr( sSomeTablename, 0 );
+				mt.rememberLastGoToCommand( sSomeTablename, "" );
+				
+				// clean the undo stack
+				un.cleanUndoStack(sSomeTablename);
+				
+				// clear highlighted rows
+				row.clearRowSelection(sSomeTablename);
+				
+				// clear search fields
+				sf.clearPerColumnSearchFields(sSomeTablename);					
+				sf.clearSearchField(sSomeTablename);
+				
+				// cancel optimal mode in any case
+				mt.setTableMustBeOptimal(sSomeTablename, false);
+				
+				// force webservice to clean its counter cache etc
+				fn.cleanTableCache(sSomeTablename, 
+					function(){
 					
-					// finally set the form searchbox too (if needed)
-					form.resetSearchFields(sSomeTablename);
+						// send empty search request			
+						mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters();
+						
+						// call the pre-reset callback before the table is actually reset
+						if (conf.getPreResetCallback( conf.getTableSettings(sSomeTablename)) != null)
+							conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
+						
+						// this one does the table refresh!
+						var aSorting = conf.getDefaultSortingSettings(sSomeTablename);
+						
+						// see https://www.datatables.net/plug-ins/api/order.neutral%28%29
+						if (aSorting.length==0) 
+							mt.getDataTableObjectOf(sSomeTablename).order.neutral();
+						else
+							mt.getDataTableObjectOf(sSomeTablename).order(aSorting);
+	
+						// make sure that the form sorting labels are updated too
+						// (can only be done after re-ordering the table)
+						fn.addDrawCallback(sSomeTablename, function(){
+							setTimeout(function(){
+								form.synchronizeSorting(sSomeTablename);
+							}, 1000);						
+						});
+						
+						// update the table now!
+						mt.getDataTableObjectOf(sSomeTablename).draw();
 					
-					
-			});
-			
+						// put the current search filters values into the search boxes
+						sf.putCurrentValueInAllSearchBoxes(sSomeTablename);
+						
+						// finally set the form searchbox too (if needed)
+						form.resetSearchFields(sSomeTablename);
+						
+				});
+				
+			}
 			
 		});
 	
@@ -805,12 +816,10 @@ head.putUndoButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 			
-			if (kf._getPressedKey() == 'shift')
-				{
+			if (kf._getPressedKey() == 'shift') {
 				fn.restoreTableState(sSomeTablename);
-				}
-			else
-				{
+			}
+			else {
 				fn.confirm(lang.beware, lang.undo_are_you_sure+"?", function(){
 					
 					// clear highlighted rows
@@ -818,7 +827,7 @@ head.putUndoButton = function(sSomeTablename){
 					// undo last change
 					un.undoEvent(sSomeTablename);
 				});
-				}			
+			}			
 			
 		})
 		// button text and counter
