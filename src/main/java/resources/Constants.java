@@ -87,7 +87,7 @@ public class Constants {
 	
 	// amount of time beyond which a user is considered to be 'gone'
 	public static long TIME_GONE = 	
-			5 *     // minutes
+			15 *     // minutes
 			60 *     // seconds
 			1000;    // milliseconds
 	
