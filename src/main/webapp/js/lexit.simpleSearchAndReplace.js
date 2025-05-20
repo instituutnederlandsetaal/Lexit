@@ -83,27 +83,35 @@ ssr.buildSearchAndReplaceDiv = function(sSomeTablename){
 	var column_to_alter = $("<div></div>").attr("id", sSomeTablename+"_column_to_alter").css("display", "inline");	
 	var selectColumnTag = $("<select></select>").attr("id", sSomeTablename+"_selected_column");
 	
-	
+	// get the list of columns to select from
+	// (of course only editable text columns are selectable)
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
-	for (var i=0; i<mt.getListOfVisibleColumnsOf(sSomeTablename).length; i++)
-		{
+	var aColumnsListToSelectFrom = new Array();
+	for (var i=0; i<mt.getListOfVisibleColumnsOf(sSomeTablename).length; i++) {
 		var column_name = mt.getListOfVisibleColumnsOf(sSomeTablename)[i];
 		var colume_type = mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename)[i];
 		
 		// if the column is editable and it is a text column, 
 		// than add its name in list of column to edit		
-		var colconfig = conf.getColumnConfig( oTableConfig, column_name);
-		if ( conf.getEditability(colconfig) && $.inArray(colume_type, ['bit varying(1)', 'boolean'])<0 )
-			{
-			selectColumnTag.append(
-					$("<option></option>")
-					.attr("value", column_name)
-					.text(column_name)
-					);
+		var oColConfig = conf.getColumnConfig( oTableConfig, column_name);
+		if ( conf.getEditability(oColConfig) && $.inArray(colume_type, ['bit varying(1)', 'boolean'])<0 ) {
+			// add the column name to the list
+			aColumnsListToSelectFrom.push(column_name); 			
 			someColumnsAreEditable = true;
-			}
 		}
+	}
 	
+	// now make sure that list if sorted alphabetically
+	aColumnsListToSelectFrom.sort();
+	
+	// add the columns to the select tag	
+	for (var i=0; i<aColumnsListToSelectFrom.length; i++) {
+		selectColumnTag.append(
+			$("<option></option>")
+			.attr("value", aColumnsListToSelectFrom[i])
+			.text(aColumnsListToSelectFrom[i])
+			);	
+	}
 	column_to_alter.append(selectColumnTag);
 	
 

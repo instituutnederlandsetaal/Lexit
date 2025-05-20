@@ -88,6 +88,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		.addClass("table_div") // table div recognizable as such
 		.addClass("ui-widget-content") // needed for resizable, draggable etc
 		.css("width", sTableWidth)
+		.css("min-width", "50vw") // minimum width of the table, to prevent it from being too small (since the pagination div is 45vw wide!)
 		.css("margin-right", "10px");
 	
 	// if the table is set to be kept small, add the needed class

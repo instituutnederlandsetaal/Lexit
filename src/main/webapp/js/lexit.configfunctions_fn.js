@@ -304,7 +304,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 
 
 /**
- * Add a balk on top of the screen, just like in any IvdNT website
+ * Add a border on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @param {Boolean} [bSetLinks=false] - set default links to help, about and contribute
  * @param {String} [sPathToCustomLogo=null] - path to a custom
@@ -3397,11 +3397,19 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	// a classic error is setting a callback function as the returnField, so we must check for it
+	if (typeof returnField == 'function') {
+		fn.message(lang.error,
+			lang.error_when_calling+ " fn.insertIntoDatabase("+sSomeTablename+"):<BR>"+ 
+			lang.error_function_called_with_illegal_value+" (returnField parameter).");
+		return;
+	}
 	
 	var aColNamesToAdd = new Array();
-	var aValuesToAdd = new Array();	
-	
+	var aValuesToAdd = new Array();		
 	for (var sFieldName in aFieldsAndValuesToAdd) {
+		
 		aColNamesToAdd.push(sFieldName);
 		aValuesToAdd.push(aFieldsAndValuesToAdd[sFieldName]);
 	}

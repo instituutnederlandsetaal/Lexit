@@ -1087,6 +1087,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 		)
 		.append(
 			$("<input></input>")
+				.css("width", "150px")
 				.attr("id", "querybuilder_valuefilter")
 				.bind("input propertychange", function (evt) {
 					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
@@ -1094,6 +1095,8 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				    // If it's the propertychange event, make sure it's the value that changed.
 				    if (window.event && event.type == "propertychange" && event.propertyName != "value")
 				        return;
+				        
+				    lexutil.showSpinner("#"+promptDivId, true);
 				
 				    // Clear any previously set timer before setting a fresh one
 				    window.clearTimeout($(this).data("timeout"));
@@ -1103,13 +1106,21 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				    	var sFilter = 	$("#querybuilder_valuefilter").val();
 						var sLimit = 	$("#querybuilder_limit").val();
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
-							
-							oKeysAndValues = new lexutil.cloneObject(oValues);							
-							$("#"+selectableId).empty();							
-							buildSelectOptions(oKeysAndValues);
-							
-						});
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, 
+						
+							function(oValues){
+								
+								lexutil.removeSpinner("#"+promptDivId);
+								oKeysAndValues = new lexutil.cloneObject(oValues);							
+								$("#"+selectableId).empty();							
+								buildSelectOptions(oKeysAndValues);
+								
+							},
+							function(){
+								// if it fails, make sure the spinner is removed
+								lexutil.removeSpinner("#"+promptDivId);
+							}
+						);
 						
 				    }, 1000));
 				})
@@ -1120,7 +1131,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 		)
 		.append(
 			$("<input></input>")
-			.css("width", "40px")
+			.css("width", "30px")
 			.val(20)
 			.attr("id", "querybuilder_limit")
 			.bind("input propertychange", function (evt) {
@@ -1129,6 +1140,8 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				    // If it's the propertychange event, make sure it's the value that changed.
 				    if (window.event && event.type == "propertychange" && event.propertyName != "value")
 				        return;
+				        
+				    lexutil.showSpinner("#"+promptDivId, true);
 				
 				    // Clear any previously set timer before setting a fresh one
 				    window.clearTimeout($(this).data("timeout"));
@@ -1138,13 +1151,20 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				    	var sFilter = 	$("#querybuilder_valuefilter").val();
 						var sLimit = 	$("#querybuilder_limit").val();
 						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
+						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, 
+							function(oValues){
 							
-							oKeysAndValues = new lexutil.cloneObject(oValues);							
-							$("#"+selectableId).empty();							
-							buildSelectOptions(oKeysAndValues);
-							
-						});
+								lexutil.removeSpinner("#"+promptDivId);
+								oKeysAndValues = new lexutil.cloneObject(oValues);							
+								$("#"+selectableId).empty();							
+								buildSelectOptions(oKeysAndValues);
+								
+							},
+							function(){
+								// if it fails, make sure the spinner is removed
+								lexutil.removeSpinner("#"+promptDivId);
+							}
+						);
 						
 				    }, 1000));
 				})
@@ -1167,24 +1187,34 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				// If it's the propertychange event, make sure it's the value that changed.
 				if (window.event && event.type == "propertychange" && event.propertyName != "value")
 					return;
+					
+				lexutil.showSpinner("#"+promptDivId, true);
 
 				// Clear any previously set timer before setting a fresh one
-				    window.clearTimeout($(this).data("timeout"));
-				    $(this).data("timeout", setTimeout(function () {
+			    window.clearTimeout($(this).data("timeout"));
+			    $(this).data("timeout", setTimeout(function () {
 
-				    	// read new unique values given filter
-				    	var sFilter = 	$("#querybuilder_valuefilter").val();
-						var sLimit = 	$("#querybuilder_limit").val();
-						var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
-						sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, function(oValues){
+			    	// read new unique values given filter
+			    	var sFilter = 	$("#querybuilder_valuefilter").val();
+					var sLimit = 	$("#querybuilder_limit").val();
+					var bSortbyfreq=$("#querybuilder_sortbyfreq").find(":selected").val();
+					sf._getUniqueValuesForQueryBuilder(sTableName, sColumnName, sFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq,
+					 
+						function(oValues){
 							
+							lexutil.removeSpinner("#"+promptDivId);
 							oKeysAndValues = new lexutil.cloneObject(oValues);							
 							$("#"+selectableId).empty();							
 							buildSelectOptions(oKeysAndValues);
 							
-						});
-						
-				    }, 1000));
+						},
+						function(){
+							// if it fails, make sure the spinner is removed
+							lexutil.removeSpinner("#"+promptDivId);
+						}
+					);
+					
+			    }, 1000));
 
 			})
 		);
@@ -1413,7 +1443,7 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName)
 	})
 }
 
-sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, fnFunction){
+sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName, sValueFilter, sOtherColumnsFiltersAndValues, sLimit, bSortbyfreq, fnFunction, fnErrorHandler){
 	
 	gui.showProcessingMsg(sSomeTableName);
 	
@@ -1444,15 +1474,19 @@ sf._getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName
 	 		
 	 		gui.removeProcessingMsg(sSomeTableName);
 	 		
-	 		if (typeof fnFunction != 'undefined')
-	 			{
+	 		if (typeof fnFunction != 'undefined') {
 	 			fnFunction(oValues);
-	 			}
-	 		},
+	 		}
+	 	},
 		"error": function(jqXHR, textStatus, errorThrown){
+			
+			if (fnErrorHandler != null) {
+				fnErrorHandler();
+			}
+			
 			gui.removeProcessingMsg(sSomeTableName);
 			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_when_calling+" sf._getUniqueValuesForQueryBuilder. "+
 				textStatus+" "+errorThrown);
-			}
-		} );
+		}
+	} );
 }
