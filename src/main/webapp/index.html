@@ -561,7 +561,10 @@
 
 				})
 				.fail(function(jqxhr, settings, exception){
-					fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+					// OLD behaviour: fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+				
+					// missing the 'projects_overview.js' file is now allowed, just initialize
+					initialize();
 				});
 		}
 
@@ -585,7 +588,11 @@
 
 				},
 				"error": function(jqxhr, settings, exception){
-					fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+					
+					// OLD behaviour: fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
+					
+					// missing the 'projects_overview.js' file is now allowed, just initialize
+					initialize();
 				}
 
 			});
