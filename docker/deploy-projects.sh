@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # version
-echo "=== Lexit Configs Deployer v2025.04.14 ==="
+echo "=== Lexit Configs Deployer v2025.05.21 ==="
 
 RED='\033[31m'
 GREEN='\033[32m'
@@ -53,9 +53,6 @@ echo "schema=public" >> $lexit_schema
 echo "host=$LEXIT_SCHEMA_HOST" >> $lexit_schema
 echo "user=$LEXIT_SCHEMA_USER" >> $lexit_schema
 echo "pass=$LEXIT_SCHEMA_PASSWORD" >> $lexit_schema
-
-echo "Copying projects-overview.js"
-cp projects_overview.js $TMP_LEXIT_CONFIG 2>/dev/null || echo -e "${YELLOW}WARNING: No projects_overview.js found. Continuing...${NC}"
 
 # rsync from tmp to real
 echo "Copying tmp folder to real folder"
