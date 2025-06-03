@@ -1008,8 +1008,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
     }
     else {
 		// reload the list of tables (might be needed when fn.setSchema was called)
-		ts.reinit();
-		ts.getListOfTables(null, "", "");
+		fn.rebuildTablesMenu();
 		
         setTimeout(function(){        	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
