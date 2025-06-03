@@ -1002,7 +1002,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	
 	var iTableIndex = $.inArray(sSomeTablename, asTableNames);
 	
-	if( (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+	if( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }

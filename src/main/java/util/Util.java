@@ -5,6 +5,8 @@ import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -332,8 +334,9 @@ public class Util {
 			if (listOfFiles[i].isFile())
 			{
 				String fileName = listOfFiles[i].getName();
+				boolean isDatabaseConfig = fileName.endsWith(".database");
 				
-				if (fileName.endsWith(".config.js") || fileName.endsWith(".database") ) {
+				if (fileName.endsWith(".config.js") || isDatabaseConfig ) {
 					
 					fileName = fileName.substring(0, fileName.indexOf("."));
 					boolean dbExists = true;
@@ -354,8 +357,8 @@ public class Util {
 					// check if the database is available
 					// ----------------------------------
 					
-					if (fileExists && fileName.endsWith(".database")) {						
-						dbExists = dbExists(path);
+					if (fileExists && isDatabaseConfig) {						
+						dbExists = checkIfDbExists(path);
 					}
 					
 					// add gathered info to filename
@@ -381,22 +384,25 @@ public class Util {
 		return Util.join(sortedList, Constants.ARG_INTERNAL_SEPARATOR);		
 	}
 	
-	
-	private static boolean dbExists(String path) {
+	// check if a database is available
+	private static boolean checkIfDbExists(String path) {
+		
+		String projectName = path.substring(path.lastIndexOf(File.separatorChar)+1);
+		projectName = projectName.substring(0, projectName.indexOf("."));
 		
 		ConcurrentHashMap<String, String> logInfo = readPropertiesFile(path);
 		
-		PostgresDatabaseCommunication postgresDc = new PostgresDatabaseCommunication(null, false);			
 		try {
 			// try to connect
-			postgresDc.connectTo(logInfo.get("host"), logInfo.get("port"), logInfo.get("db"), logInfo.get("user"), logInfo.get("pass"));
-			postgresDc.closeConnection();
+			ContextObject co = new ContextObject(projectName, logInfo.get("user"));
+			PostgresConnectionManager dc = new PostgresConnectionManager(null, false, Constants.maxPoolSize);
+			dc.testConnectionTo(logInfo.get("host"), logInfo.get("port"), logInfo.get("db"), logInfo.get("user"), logInfo.get("pass"));
 		}
 		catch (Exception e) {
 			// if connection fails, the database might be missing
 			return false;
 		}
-		
+		// otherwise we can safely return that the database IS available
 		return true;
 	}
 	
@@ -709,5 +715,166 @@ public class Util {
 	
 	
 	// ******************************************************************
+	
+	
+
+	// ******************************************************************
+	// RESULT SETS
+	// ******************************************************************
+	
+	/**
+	 * get the results of a query in a List
+	 * each record is an array in that list
+	 * @param rs
+	 * @param velden
+	 * @return
+	 * @throws SQLException 
+	 * @throws UnsupportedEncodingException 
+	 */
+	public ArrayList<String[]> getResultsInAList(ResultSet rs, String[] velden) throws UnsupportedEncodingException, SQLException{
+		
+		ArrayList<String[]> lijst = new ArrayList<String[]>();
+		
+		if (rs == null) {
+			return lijst;
+		}
+		
+		try 
+		{
+			try
+			{
+				while (rs.next())
+				{
+					String[] veldInhoud = new String[velden.length];
+					for (int i=0; i<velden.length; i++)
+					{
+						String veld = velden[i];						
+						
+						byte[] col = rs.getBytes(veld);
+						if (col != null)
+						{
+							String str = new String(col, "UTF-8");
+							veldInhoud[i] = str; 
+						}
+						else
+						{
+							veldInhoud[i] = "";
+						}
+						
+					}
+					lijst.add(veldInhoud);
+					
+				}
+				return lijst;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	public ArrayList<ArrayList<String>> getResultsInArrayList(ResultSet rs, String[] velden){
+		
+		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		
+		if (rs == null)  {
+			return list;
+		}
+		
+		try {
+			try {
+				while (rs.next()) {
+					ArrayList<String> veldInhoud = new ArrayList<String>();
+					for (int i=0; i<velden.length; i++) {
+						String veld = velden[i];
+												
+						byte[] col = rs.getBytes(veld);
+						if (col != null) {
+							String str = new String(col, "UTF-8");
+							
+							veldInhoud.add(str);	
+						}
+						else {
+							veldInhoud.add( "" );
+						}
+					}
+					list.add(veldInhoud);
+					
+				}
+				return list;
+			}
+			finally {
+				rs.close();
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	
+	/**
+	 * Convert the rows of a ResultSnapshot into a List of String arrays.
+	 * @param data
+	 * @param fieldnames
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws SQLException
+	 */
+	public static ArrayList<String[]> getResultSetCopyInAList(List<Map<String, Object>> data, String[] fieldnames) throws UnsupportedEncodingException, SQLException{
+		
+		ArrayList<String[]> output = new ArrayList<String[]>();
+		
+		if (data == null) {
+			return output;
+		}
+		
+		for (Map<String, Object> row : data) {
+			
+			String[] fieldvalues = new String[fieldnames.length];
+			for (int i=0; i<fieldnames.length; i++) {
+				String fieldname = fieldnames[i];
+				Object fieldvalue = row.get(fieldname);
+				fieldvalues[i] = (fieldvalue != null ? fieldvalue.toString() : "");				
+			}
+			output.add(fieldvalues);
+
+		}
+		return output;
+	}
+	
+	/**
+	 * Convert the rows of a ResultSnapshot into a List of ArrayLists.
+	 * @param data
+	 * @param fieldnames
+	 * @return
+	 */
+	public static ArrayList<ArrayList<String>> getResultSetCopyInArrayList(List<Map<String, Object>> data, String[] fieldnames){
+		
+		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+		
+		if (data == null)  {
+			return output;
+		}
+		
+		for (Map<String, Object> row : data) {
+			
+			ArrayList<String> fieldvalues = new ArrayList<String>();
+			for (int i=0; i<fieldnames.length; i++) {
+				String fieldname = fieldnames[i];
+				Object fieldvalue = row.get(fieldname);
+				fieldvalues.add( fieldvalue != null ? fieldvalue.toString() : "" );
+			}
+			output.add(fieldvalues);
+
+		}
+		return output;
+		
+	}
 	
 }

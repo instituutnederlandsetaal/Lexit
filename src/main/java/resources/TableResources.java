@@ -7,6 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.zaxxer.hikari.HikariDataSource;
+
 import table.*;
 import util.Database;
 import util.LexitSchemaAccess;
@@ -44,10 +47,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TableResources {
 
 	// database access objects, needed for caching (for speed)
-	ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();
+	public ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();
+	
+	// projectname to DataSource (connection pool)
+	public static ConcurrentHashMap<String, HikariDataSource> project2DataSource = new ConcurrentHashMap<String, HikariDataSource>();
 
 	// users access rights
-    static ConcurrentHashMap<String, String[]> users2roles = new ConcurrentHashMap<String, String[]>();
+	public static ConcurrentHashMap<String, String[]> users2roles = new ConcurrentHashMap<String, String[]>();
 
     // container for user login and roles info
  	LexitSchemaAccess lexitInfo;
@@ -1866,7 +1872,7 @@ public class TableResources {
 		for (String key : keysToDelete) {
 			
 			// close the connection to the database
-			nameToDatabaseObject.get(key).closeDatabase(); 
+//			nameToDatabaseObject.get(key).closeDatabase(); 
 			
 			// remove ContextObject since it's left unused
 			nameToDatabaseObject.remove(key);

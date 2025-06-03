@@ -45,7 +45,7 @@ public class Database {
 	// servlet context etc
 	ContextObject co;
 	
-	PostgresDatabaseCommunication dc;
+	PostgresConnectionManager pc;
 	
 	// columns names and types, etc. hashed for caching
 	public ConcurrentHashMap<String, String> tableAndColumnNameToTypes = new ConcurrentHashMap<String, String>(); 
@@ -73,7 +73,7 @@ public class Database {
 	public boolean bForceExactCount = false; 
 	
 	// Standard value for the maximal allowed cost of a count query
-	int maxAllowedDuration = 2000; // milliseconds
+	int maxAllowedDuration = Constants.maxAllowedDuration; // milliseconds
 	int maxAllowedCost = -1; // value will be computed at first call of recomputeMaxAllowedCost()
 	
 	
@@ -82,9 +82,9 @@ public class Database {
 		
 		try {
 			this.co = co;
-			readPropertiesFile();
+			readDatabasePropertiesFile();
 			
-			this.dc = connectDatabase();
+			this.pc = createPostgresConnectionManager();
 			
 		} catch (IOException e) {
 			throw new RuntimeException("Error while reading the "+co.getDbName()+" properties file", e);
@@ -147,17 +147,17 @@ public class Database {
 			"DELETE FROM " + getSafeTableName(tableName, schema) + " " +
 			"WHERE " + getSafeFieldName(idColumn) + " = ? ;";
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
-			
-			getConnection().sendPreparedUpdate(deleteRecord, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendPreparedUpdate(deleteRecord, args, ato, dro);
 			
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+deleteRecord);
 			throw new RuntimeException("Error while executing query "+deleteRecord, e);
-		} 
+		}
 		
 	}
 	
@@ -192,17 +192,17 @@ public class Database {
 			"WHERE " + (Util.join(columnNames, " = ? AND ") +" = ? ") + 
 			";";
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
-			
-			getConnection().sendPreparedUpdate(deleteRecords, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendPreparedUpdate(deleteRecords, args, ato, dro);
 			
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+deleteRecords);
 			throw new RuntimeException("Error while executing query "+deleteRecords, e);
-		} 
+		}
 		
 	}
 	
@@ -349,31 +349,31 @@ public class Database {
 			
 			// we have built the right query, now use it to get the row number
 			
-			
+			PostgresConnectionManager dc = getPostgresConnectionManager();
 			
 			try {
-				getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+				dc.sendUpdate("SET search_path TO "+schema+"; ");	
 				
-				ResultSet rs;
+				List<Map<String, Object>> rs;
 				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = getConnection().sendPreparedQuery(getRowNumberQuery, args, ato, 0);
-					res = getResultsInAList(rs, new String[]{"rownumber"});
+					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato, 0).getRows();
+					res = Util.getResultSetCopyInAList(rs, new String[]{"rownumber"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
 						 
 				// get row number for the right occurence
 				
-				if (res.size() > 0 && occurrenceNr < res.size() )
-					{				
+				if (res.size() > 0 && occurrenceNr < res.size() ) {				
 					functionOuput = res.get(occurrenceNr)[0];
-					}
+				}
 				
-			} catch (Exception e) {
-				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
 			} 
+			catch (Exception e) {
+				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
+			}
 		}
 		
 		
@@ -485,18 +485,18 @@ public class Database {
 			
 			// we have built the right query, now use it to get the row number
 			
-			
+			PostgresConnectionManager dc = getPostgresConnectionManager();
 			
 			try {
-				getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+				dc.sendUpdate("SET search_path TO "+schema+"; ");	
 				
-				ResultSet rs;
+				List<Map<String, Object>> rs;
 				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = getConnection().sendPreparedQuery(getRowNumberQuery, argValues, ato, 0);
-					res = getResultsInAList(rs, new String[]{"ids_to_render"});
+					rs = dc.sendPreparedQuery(getRowNumberQuery, argValues, ato, 0).getRows();
+					res = Util.getResultSetCopyInAList(rs, new String[]{"ids_to_render"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
 						 
@@ -564,20 +564,20 @@ public class Database {
 			";";	
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getIdQuery, args).getRows();
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getIdQuery, args);
-			
-			res = getResultsInAList(rs, new String[]{idColumn});
+			res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			if (res.size()>0)
 				idOfCreatedRecord = res.get(0)[0];
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getIdQuery, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getIdQuery, e);
+		}
 		
 		
 		return idOfCreatedRecord;	
@@ -615,25 +615,26 @@ public class Database {
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
+	    
+	    PostgresConnectionManager dc = getPostgresConnectionManager();
+	    
 	    try {
 	    	
-		  getConnection().sendUpdate("SET search_path TO " + schema + "; ");
+	    	dc.sendUpdate("SET search_path TO " + schema + "; ");
 	      
-	      // in some rare cases, the query hereabove will be slow
-	      getConnection().sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
+	        // in some rare cases, the query hereabove will be slow
+	    	dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
 
-	      ResultSet rs = getConnection().sendQuery(query, 0);
+	    	List<Map<String, Object>> rs = dc.sendQuery(query, 0).getRows();
 
-	      res = getResultsInAList(rs, new String[] { "n" });
-	      if (res.size() > 0)
-	      {
-	        for (String[] oneRecord : res)
-	        {
-	          String oneValue = oneRecord[0].trim();
-	          if (oneValue != null)
-	            uvo.addValue(oneValue);
-	        }
-	      }
+	    	res = Util.getResultSetCopyInAList(rs, new String[] { "n" });
+	    	if (res.size() > 0) {
+		        for (String[] oneRecord : res) {
+		          String oneValue = oneRecord[0].trim();
+		          if (oneValue != null)
+		            uvo.addValue(oneValue);
+		        }
+	    	}
 	    }
 	    catch (Exception e) {   
 	    	
@@ -688,23 +689,23 @@ public class Database {
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
+	    PostgresConnectionManager dc = getPostgresConnectionManager();
+	    
     	try {
-    		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
-  	      
-  	      ResultSet rs = columnValueFilter.isEmpty() ? 
-  	    		getConnection().sendQuery(query, 0)
-  	    		  :
-  	    		getConnection().sendPreparedQuery(query, new String[]{columnValueFilter});
-
-  	      res = getResultsInAList(rs, new String[] { "n" });
-  	      if (res.size() > 0) {
-  	        for (String[] oneRecord : res)
-  	        {
-  	          String oneValue = oneRecord[0].trim();
-  	          if (oneValue != null)
-  	            uvo.addValue(oneValue);
-  	        }
-  	      }
+    		dc.sendUpdate("SET search_path TO " + schema + "; ");
+    		List<Map<String, Object>> rs = columnValueFilter.isEmpty() ?
+    				dc.sendQuery(query, 0).getRows()
+	  	    		  :
+	  	    		dc.sendPreparedQuery(query, new String[]{columnValueFilter}).getRows();
+	
+    		res = Util.getResultSetCopyInAList(rs, new String[] { "n" });
+    		if (res.size() > 0) {
+        		for (String[] oneRecord : res) {
+            		String oneValue = oneRecord[0].trim();
+            		if (oneValue != null)
+                		uvo.addValue(oneValue);
+            	}
+        	}
   	    }
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
@@ -818,24 +819,25 @@ public class Database {
 	    UniqueValuesObject uvo = new UniqueValuesObject();
 	    ArrayList<String[]> res;
 	    
+	    
+	    PostgresConnectionManager dc = getPostgresConnectionManager();
+	    
     	try {
-    		getConnection().sendUpdate("SET search_path TO " + schema + "; ");
+    		dc.sendUpdate("SET search_path TO " + schema + "; ");
   	      
-  	      ResultSet rs = columnsValues.size() == 0 ? 
-  	    		getConnection().sendQuery(query, 0)
+    		List<Map<String, Object>> rs = columnsValues.size() == 0 ? 
+  	    		dc.sendQuery(query, 0).getRows()
   	    		  :
-  	    		getConnection().sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato, 0);
+  	    		dc.sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato, 0).getRows();
 
-  	      res = getResultsInAList(rs, new String[] { "n", "cnt" });
-  	      if (res.size() > 0)
-  	      {
-  	        for (String[] oneRecord : res)
-  	        {
-  	          String oneValue = oneRecord[0].trim() +" ("+ oneRecord[1].trim() +")";
-  	          if (oneValue != null)
-  	            uvo.addValue(oneValue);
-  	        }
-  	      }
+  	      	res = Util.getResultSetCopyInAList(rs, new String[] { "n", "cnt" });
+  	      	if (res.size() > 0) {
+  	      		for (String[] oneRecord : res) {
+  	      			String oneValue = oneRecord[0].trim() +" ("+ oneRecord[1].trim() +")";
+  	      			if (oneValue != null)
+  	      				uvo.addValue(oneValue);
+  	      		}
+  	      	}
   	    }
     	catch (Exception e) {
     		throw new RuntimeException("Error while executing query " + query, e);
@@ -873,36 +875,31 @@ public class Database {
 			"WHERE " + getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
 			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			ato.setType(0, idColumnType);
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato, 0);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecord, args, ato, 0).getRows();
 			
-			res = getResultsInAList(rs, columnsNames);	
+			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
-			if (res.size()>0)
-			{
-				String[] recordCell = res.get(0);
-				
-				if (recordCell != null)
-				{
-					for (int i =0; i<columnsNames.length; i++)
-					{
+			if (res.size()>0) {
+				String[] recordCell = res.get(0);				
+				if (recordCell != null) {
+					for (int i =0; i<columnsNames.length; i++){
 						tro.addColumnAndValue(columnsNames[i], recordCell[i]);
 					}
 				}
 			}
 			
-			
-			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecord, e);
+		}
 		
 		return tro;
 	}
@@ -938,20 +935,19 @@ public class Database {
 			"IN ("+Util.getStringOfQuestionMarks(ids)+");";	
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
 			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			for (int i=0; i<ids.length; i++) {
 				ato.setType(i, idColumnType);
 			}
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecords, args, ato, 0);
-			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecords, args, ato, 0).getRows();			
 						
-			res = getResultsInAList(rs, columnsNames);	
+			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
 			if (res.size() == ids.length) { // expected number of rows?
 			
@@ -971,10 +967,10 @@ public class Database {
 			}
 			
 			
-			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecords, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecords, e);
+		}
 		
 		return tro;
 	}
@@ -1030,15 +1026,15 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecord, args).getRows();
 			
 			String[] columnsNames = getColumnNames(tableName);			
-			res = getResultsInAList(rs, columnsNames);	
+			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
 			if (res.size()>0) {
 				String[] recordCell = res.get(0);
@@ -1050,9 +1046,10 @@ public class Database {
 				}
 			}				
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecord, e);
+		}
 		
 		return tro;
 	}
@@ -1125,14 +1122,14 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
+			dc.sendUpdate("SET search_path TO "+schema+"; ");				
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getRecord, args, ato, 0);
+			List<Map<String, Object>>  rs = dc.sendPreparedQuery(getRecord, args, ato, 0).getRows();
 			
-			res = getResultsInAList(rs, columnsNames);	
+			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
 			if (res.size()>0) {
 				
@@ -1154,11 +1151,10 @@ public class Database {
 				}
 			}	
 			
-
-			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getRecord, e);
+		}
 		
 		return tro;
 	
@@ -1233,13 +1229,13 @@ public class Database {
 		// DEBUG
 		//System.out.println(getRecord);		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			ResultSet rs = getConnection().sendQuery(getRecord, 0);
+			ResultSetSnapshot snapshot = dc.sendQuery(getRecord, 0);
 			
-			String[] columnsNames = getColumnNamesFromResultSet(rs);			
-			res = getResultsInAList(rs, columnsNames);			
+			String[] columnsNames = snapshot.getColumnNames().toArray(new String[0]);			
+			res = Util.getResultSetCopyInAList(snapshot.getRows(), columnsNames);			
 			
 			for (int i=0; i<columnsNames.length; i++) {
 				String[] allCells = new String[res.size()];
@@ -1253,7 +1249,7 @@ public class Database {
 			throw new RuntimeException("Error while executing query "+getRecord+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
 					Util.getFullStackTrace(e), e);
-		} 
+		}
 		
 		return tro;
 	}
@@ -1289,12 +1285,12 @@ public class Database {
 		}
 		
 				
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			getConnection().sendPreparedUpdate(insertRecords, values, ato, dro);
+			dc.sendPreparedUpdate(insertRecords, values, ato, dro);
 			
 		}
 		catch (Exception e) {
@@ -1361,21 +1357,21 @@ public class Database {
 		String valueTypeOfIdColumn = getTypeOfColumn(tableName, primaryKey);
 				
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			for (int i = 0; i<rowIds.length; i++) {
 				ato.setType(0, valueTypeOfIdColumn);
-				getConnection().sendPreparedUpdate(insertQuery, new String[]{rowIds[i]}, ato, dro);
+				dc.sendPreparedUpdate(insertQuery, new String[]{rowIds[i]}, ato, dro);
 			}
 			
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertQuery);
 			throw new RuntimeException("Error while executing query "+insertQuery, e);
-		} 
+		}
 		
 	}
 	
@@ -1465,24 +1461,23 @@ public class Database {
 		}
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = null;
+			List<Map<String, Object>> rs = null;
 			
 			if (type.equals("insert")) {
-				rs = getConnection().sendPreparedQuery(insertQuery, filterValues);
-				
+				rs = dc.sendPreparedQuery(insertQuery, filterValues).getRows();				
 			}
 			else {
-				getConnection().sendPreparedUpdate(insertQuery, filterValues, ato, dro);				
+				dc.sendPreparedUpdate(insertQuery, filterValues, ato, dro);				
 			}
 			
 			ArrayList<String[]> res;
 			if (type.equals("insert")) {
-				res = getResultsInAList(rs, new String[]{idColumn});
+				res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 				idOfCreatedRecord = Util.join(res.get(0), ",");	
 				dro.setResponse(idOfCreatedRecord);
 			} 	
@@ -1534,13 +1529,13 @@ public class Database {
 		}
 				
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(insertRecords, values, ato, 0).getRows();
 			
-			ResultSet rs = getConnection().sendPreparedQuery(insertRecords, values, ato, 0);
-			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
 			dro.setResponse(idOfCreatedRecord);
 		}
@@ -1615,20 +1610,20 @@ public class Database {
 		ato.setType(0, valueTypes[0]);
 				
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(duplicateRecord, values, ato, 0).getRows();
 			
-			ResultSet rs = getConnection().sendPreparedQuery(duplicateRecord, values, ato, 0);
-			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{idColumn});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
 			dro.setResponse(idOfCreatedRecord);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+duplicateRecord);
 			throw new RuntimeException("Error while executing query "+duplicateRecord, e);
-		} 
+		}
 		
 	};
 	
@@ -1665,12 +1660,11 @@ public class Database {
 			"WHERE "+ getSafeFieldName(idColumn) +" = ? ;";	
 		
 				
-					
+		PostgresConnectionManager dc = getPostgresConnectionManager();			
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
-			
-			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -1709,10 +1703,11 @@ public class Database {
 			" IS E'" + newComment + "';";
 		
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");				
-			
-			getConnection().sendUpdate(setComment);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendUpdate(setComment);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+setComment);
@@ -1754,14 +1749,14 @@ public class Database {
 			"ORDER BY 1,2;";	
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+			dc.sendUpdate("SET search_path TO "+schema+"; ");	
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getIdQuery, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getIdQuery, args).getRows();
 			
-			res = getResultsInAList(rs, new String[]{"comment"});
+			res = Util.getResultSetCopyInAList(rs, new String[]{"comment"});
 			if (res.size()>0)
 				{
 				sTableComment = res.get(0)[0];				
@@ -1769,7 +1764,7 @@ public class Database {
 			
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getIdQuery, e);
-		} 
+		}
 		
 		return sTableComment;	
 	}
@@ -1841,14 +1836,13 @@ public class Database {
 				
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(checkExistenceQuery, args).getRows();
 			
-			ResultSet rs = getConnection().sendPreparedQuery(checkExistenceQuery, args);
-			
-			res = getResultsInAList(rs, new String[]{"result"});
+			res = Util.getResultSetCopyInAList(rs, new String[]{"result"});
 			
 			indexExists = (res.size()>0);
 			
@@ -1857,9 +1851,10 @@ public class Database {
 			
 			return indexExists;
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+checkExistenceQuery, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+checkExistenceQuery, e);
+		}
 		
 		
 	}
@@ -1885,13 +1880,14 @@ public class Database {
 		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 
-			ResultSet rs = getConnection().sendPreparedQuery(query, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
 
-			result = getResultsInAList(rs, new String[]{"table_name"});
+			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});
 
 		} catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
@@ -1940,12 +1936,11 @@ public class Database {
 			"WHERE "+ getSafeFieldName(idColumn) +" = ? ;";
 		
 				
-					
+		PostgresConnectionManager dc = getPostgresConnectionManager();		
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
-			
-			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");	
+			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -2013,18 +2008,17 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
-			
-			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
 			throw new RuntimeException("Error while executing query "+updateRecords, e);
 		}
-		
+				
 		
 	}
 	
@@ -2086,12 +2080,11 @@ public class Database {
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
-			
-			getConnection().sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -2151,20 +2144,21 @@ public class Database {
 		String query2 = "SELECT rows FROM t"+tableId+"; ";
 		
 		
-			
+		PostgresConnectionManager dc = getPostgresConnectionManager();	
 		
 		try {
 			Util.debug(co, "## Get count estimate (fast)");
 			
-			getConnection().sendUpdate(query1);
-			ResultSet rs = getConnection().sendQuery(query2, 0);
+			dc.sendUpdate(query1);
+			List<Map<String, Object>> rs = dc.sendQuery(query2, 0).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"rows"});		
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"rows"});		
 			count = Integer.parseInt(res.get(0)[0]);
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
+		}
 		
 		return count;		
 	}
@@ -2214,24 +2208,25 @@ public class Database {
 		String query2 = "SELECT cost FROM t"+tableId+"; ";
 	
 		
-			
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {		
 			
-			getConnection().sendUpdate(query1);
-			ResultSet rs = getConnection().sendQuery(query2, 0);
+			dc.sendUpdate(query1);
+			List<Map<String, Object>> rs = dc.sendQuery(query2, 0).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"cost"});		
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"cost"});		
 			queryCost = Integer.parseInt(res.get(0)[0]);
 			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			if (Constants.debug)
 				System.out.println("Error while executing query "+query1+" or "+query2);
 			
 			// for the moment, we mustn't throw exception, to make sure this function always
 			// give some results otherwise the client won't have any count!!!
 			//throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
-		} 
+		}
 		
 		Util.debug(co, "queryCost = "+queryCost);
 		return queryCost;		
@@ -2257,24 +2252,35 @@ public class Database {
 			"SELECT COUNT(*) AS rowcount " +
 			"FROM " + getSafeTableName(tableName, schema) + ";";	
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");	
+			dc.sendUpdate("SET search_path TO "+schema+"; ");	
 			
 			boolean bForceExactCount = this.getForceExactCount();
 			
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
-			ResultSet rs = getConnection().sendQuery(getCountQuery, (bForceExactCount ? 0 : maxAllowedDuration));
+			ResultSetSnapshot rss = dc.sendQuery(getCountQuery, (bForceExactCount ? 0 : maxAllowedDuration));
 			
-			res = getResultsInAList(rs, new String[]{"rowcount"});
-			// if the time limit was exceeded, we have a null resultset 
-			if (res.size()>0 && res.get(0).length>0)
-				count = Integer.parseInt(res.get(0)[0]);
+			// if the query took too long, rss will be null
+			// so the function must return -1, telling the caller function
+			// that this function has failed to get an exact count,
+			// so it will try to get an estimate instead
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getCountQuery, e);
+			if (rss != null) {
+				List<Map<String, Object>> rs = rss.getRows();
+				
+				res = Util.getResultSetCopyInAList(rs, new String[]{"rowcount"});
+				// if the time limit was exceeded, we have a null resultset 
+				if (res.size()>0 && res.get(0).length>0)
+					count = Integer.parseInt(res.get(0)[0]);
+			}
+			
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+getCountQuery, e);
+		}
 		
 		
 		return count;
@@ -2326,21 +2332,24 @@ public class Database {
 		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, new String[]{schema}));
 		long timeBefore = new Date().getTime();
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(query, new String[]{schema});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, new String[]{schema}).getRows();
 			
 			// compute max allowed cost (initialization)
 			long timeAfter = new Date().getTime();
 			recomputeMaxAllowedCost(queryCost, timeBefore, timeAfter);
 			
 			// get list of tables
-			result = getResultsInAList(rs, new String[]{"table_name", "description", "comment", "type"});		
+			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name", "description", "comment", "type"});		
 			
-		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query, e);
 		} 
+		catch (Exception e) {
+			throw new RuntimeException("Error while executing query "+query, e);
+		}
 		
 		return result;
 	}
@@ -2375,17 +2384,20 @@ public class Database {
 		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 		
+		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(query, new String[]{schema});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, new String[]{schema}).getRows();
 			
-			result = getResultsInAList(rs, new String[]{"table_name"});		
+			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});		
 			
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
-		} 
+		}
 		
 		// return one-dimensional array of table names
 		ArrayList<String> trueTablesList = new ArrayList<String>(); 
@@ -2434,17 +2446,17 @@ public class Database {
 		
 		// textual
 		// (a string containing letters is not suitable to a non-textual field)
-		if ( Util.containsSomeLetters(value) && !PostgresDatabaseCommunication.isTextualType(columnType) )
+		if ( Util.containsSomeLetters(value) && !PostgresConnectionManager.isTextualType(columnType) )
 			return false;
 		
 		// numeric
 		
 		// (a string containing other things than digits is not suitable to whole number field)
-		if (value.matches(".*([^\\d]).*") && (PostgresDatabaseCommunication.isWholeNumberType(columnType) || PostgresDatabaseCommunication.isBigWholeNumberType(columnType)) )
+		if (value.matches(".*([^\\d]).*") && (PostgresConnectionManager.isWholeNumberType(columnType) || PostgresConnectionManager.isBigWholeNumberType(columnType)) )
 			return false;
 		
 		// (a string containing other things than digits and a dot is not suitable to real number field)
-		if (value.matches(".*([^\\d\\.]).*") && PostgresDatabaseCommunication.isRealNumberType(columnType))
+		if (value.matches(".*([^\\d\\.]).*") && PostgresConnectionManager.isRealNumberType(columnType))
 			return false;
 		
 		return true;
@@ -2545,8 +2557,8 @@ public class Database {
 		
 		// Instantiate the queries  (those will be enriched with filters etc. further on)
 		
-		// normal query
-		String query = "SELECT "+getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+getSafeTableName(tableName, schema) + " ";
+		// data query
+		String dataQuery = "SELECT "+getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+getSafeTableName(tableName, schema) + " ";
 		// results count query		
 		String countQuery = "SELECT COUNT(*) AS count FROM "+getSafeTableName(tableName, schema) + " ";
 				
@@ -2598,7 +2610,7 @@ public class Database {
 			// in a main search, finding in only one column is good enough, so we use 'OR' between columns
 			if (queryParts.size()>0) {
 				
-				query += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
+				dataQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";				
 			}
 						
@@ -2652,7 +2664,7 @@ public class Database {
 			// in a main search, finding in only one column is good enough, so we use 'OR' between columns
 			if (queryParts.size()>0) {
 				
-				query += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
+				dataQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " OR ") + ") ";				
 			}
 						
@@ -2699,7 +2711,7 @@ public class Database {
 			// the column filters are compulsory so we use 'AND'
 			if (queryParts.size()>0) {
 				
-				query += "AND ("+ Util.join(queryParts, " AND ") + ") ";
+				dataQuery += "AND ("+ Util.join(queryParts, " AND ") + ") ";
 				countQuery += "AND ("+ Util.join(queryParts, " AND ") + ") ";				
 			}			
 			
@@ -2753,7 +2765,7 @@ public class Database {
 			// the column filters are compulsory so we use 'AND'
 			if (queryParts.size()>0) {
 				
-				query += "WHERE ("+ Util.join(queryParts, " AND ") + ") ";
+				dataQuery += "WHERE ("+ Util.join(queryParts, " AND ") + ") ";
 				countQuery += "WHERE ("+ Util.join(queryParts, " AND ") + ") ";				
 			}
 			
@@ -2762,7 +2774,7 @@ public class Database {
 		
 		// query without order nor limit
 		// this query version might be needed if we want to try a tweak count
-		String queryWithoutOrderNorLimit = query;
+		String queryWithoutOrderNorLimit = dataQuery;
 		
 		
 		// sorting
@@ -2815,13 +2827,13 @@ public class Database {
 				}
 				sortSeparator = ", ";
 			}
-			query += sortPart;
+			dataQuery += sortPart;
 		}
 				
 		
 		// range
 		if (iDisplayLength>-1)
-			query += " LIMIT " + iDisplayLength +" OFFSET " + iDisplayStart;
+			dataQuery += " LIMIT " + iDisplayLength +" OFFSET " + iDisplayStart;
 		
 		
 		
@@ -2842,17 +2854,18 @@ public class Database {
 			queryValues.set(i, removeFrontOperator(queryValues.get(i)) );
 		}
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			// get the table content 
 			String[] args = queryValues.toArray(new String[queryValues.size()]);
 			
-			ResultSet rs1 = queryValues.size()==0 ?
-				getConnection().sendQuery(query, 0) : getConnection().sendPreparedQuery(query, args, ato, 0);
+			ResultSetSnapshot rs1 = queryValues.size()==0 ?
+					dc.sendQuery(dataQuery, 0) : dc.sendPreparedQuery(dataQuery, args, ato, 0);
 			
-			ArrayList<ConcurrentHashMap<String, String>> cellList = 
-				getListOfIdToCell(tableName, primaryKey, rs1, allColumns );
+			ArrayList<ConcurrentHashMap<String, String>> cellList = getListOfIdToCell(tableName, primaryKey, rs1, allColumns );
 			
 			tableAndCount.setContent(cellList);
 			
@@ -2901,21 +2914,19 @@ public class Database {
 					if (bExactCountRequiredByUser || queryCost < maxAllowedCost) {
 						Util.debug(co, "%%% We will count the normal way (exact count required by user: "+bExactCountRequiredByUser+")");
 						
-						getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+						dc.sendUpdate("SET search_path TO "+schema+"; ");
 						
 						
-						ResultSet rs2;						
+						List<Map<String, Object>> rs2;						
 						try {
 							
 							// Important here: we might have to set a timeout, to make sure 
 							// that the normal count will never takes too long.
 							// BUT if the user absolutely required an exact count, he/she will have to put up with it...
 							
-							rs2 = getConnection().sendPreparedQuery(countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) );	
+							rs2 = dc.sendPreparedQuery(countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) ).getRows();							
 							
-							
-							ArrayList<ArrayList<String>> countResult = 
-								getResultsInArrayList(rs2, new String[]{"count"});
+							ArrayList<ArrayList<String>> countResult = Util.getResultSetCopyInArrayList(rs2, new String[]{"count"});
 							
 							count = Integer.parseInt(countResult.get(0).get(0));
 							exactCount = true;
@@ -2995,7 +3006,8 @@ public class Database {
 			// otherwise the client will get stuck, so we won't throw an exception here!
 			
 			// show error in console
-			Util.debug(co, "## ERROR: "+"Error while executing query "+query);
+			if (Constants.debug) e.printStackTrace();			
+			Util.debug(co, "## ERROR: "+"Error while executing query "+dataQuery);
 		}
 		
 		
@@ -3337,16 +3349,16 @@ public class Database {
 		
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };			
 			
-			ResultSet rs = getConnection().sendPreparedQuery(getPK, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(getPK, args).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname", "format_type"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname", "format_type"});
 			
 			
 			// Do we have an empty result?
@@ -3388,8 +3400,7 @@ public class Database {
 			}
 			
 			// if we do have a result, we have a primary key 
-			else 
-			{
+			else {
 				primaryKeyColumn = res.get(0)[0].trim();
 			}
 			
@@ -3397,7 +3408,7 @@ public class Database {
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+getPK, e);
 		} 
-		
+				
 		
 		// store the primary key in a hash, for caching (for speed improvement)
 		if (primaryKeyColumn != null)
@@ -3425,11 +3436,10 @@ public class Database {
 		// (if we have looked up the column type already, it is stored in a hash)
 		String cachingKey = schema+tableNameOnly+columnName;
 		
-		if ( tableAndColumnNameToTypes.containsKey(cachingKey) )
-			{
+		if ( tableAndColumnNameToTypes.containsKey(cachingKey) ) {
 			Util.debug(co, "## Column type from cache: "+columnName+" = "+tableAndColumnNameToTypes.get(cachingKey));
 			return tableAndColumnNameToTypes.get(cachingKey);
-			}
+		}
 		
 		// use COALESCE to prevent datatype from being NULL
 		String typeQuery = 
@@ -3440,27 +3450,27 @@ public class Database {
 			"AND table_schema = ? ;";
 		
 			
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{tableNameOnly, columnName, schema};		
 			
-			ResultSet rs = getConnection().sendPreparedQuery(typeQuery, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(typeQuery, args).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"type"});		
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"type"});		
 			
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
 				type = res.get(0)[0];
 				
 				// put list in cache 
 				// (so we won't need to ask the database again)
 				tableAndColumnNameToTypes.put(cachingKey, type);
 			}
-			else
+			else {
 				type = "unknown";
+			}
 			
 		} 
 		catch (Exception e) {
@@ -3494,12 +3504,12 @@ public class Database {
 		String[] columnTypes = new String[columns.length];
 			
 			
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			for (int i = 0; i<columns.length; i++)
+			for (int i = 0; i<columns.length; i++) 
 			{
 				// remove quote from names, in case the "safe" quote name was saved
 				columns[i] = removeQuotesFromSqlReservedWord(columns[i]);
@@ -3509,19 +3519,17 @@ public class Database {
 				// (if we have looked up the column type already, it is stored in a hash)
 				String cachingKey = schema+tableNameOnly+columns[i];
 				
-				if ( tableAndColumnNameToTypes.containsKey(cachingKey) )
-				{
+				if ( tableAndColumnNameToTypes.containsKey(cachingKey) ) {
 					Util.debug(co, "## Column type from cache: "+columns[i]+" = "+tableAndColumnNameToTypes.get(cachingKey));
 					columnTypes[i] = tableAndColumnNameToTypes.get(cachingKey);
 				}
 				// if cache is empty, ask the database 
 				// (and put result in cache for later call)
-				else
-				{
+				else {
 					String[] args = new String[]{tableNameOnly, columns[i], schema};		
 					
-					ResultSet rs = getConnection().sendPreparedQuery(typeQuery, args);				
-					ArrayList<String[]> res = getResultsInAList(rs, new String[]{"type"});						
+					List<Map<String, Object>> rs = dc.sendPreparedQuery(typeQuery, args).getRows();				
+					ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"type"});						
 					
 					columnTypes[i] = (res.size()>0) ? res.get(0)[0] : "unknown";
 														
@@ -3535,6 +3543,7 @@ public class Database {
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+typeQuery, e);
 		} 
+		
 		
 		
 		return columnTypes;
@@ -3569,13 +3578,15 @@ public class Database {
 		
 		String[] columnComments = new String[columns.length];
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
 			
-			ResultSet rs = getConnection().sendPreparedQuery(commentsQuery, args);				
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"name", "comment"});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(commentsQuery, args).getRows();				
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"name", "comment"});
 		
 			if (res.size()>0)
 			{
@@ -3648,23 +3659,21 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments };		
 			
-			ResultSet rs = getConnection().sendPreparedQuery(functionDetailsQuery, args);				
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"argument_types"});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionDetailsQuery, args).getRows();				
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"argument_types"});
 			
 			// output has the form:  "type1, type2, type3"
 			// so we need to split and to trim
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
 				argumentTypes = res.get(0)[0].split(",");
-				for (int i=0; i<argumentTypes.length; i++)
-				{
+				for (int i=0; i<argumentTypes.length; i++) {
 					argumentTypes[i] = argumentTypes[i].trim();
 				}
 				functionNameToTypes.put(cachingKey, argumentTypes);
@@ -3673,14 +3682,13 @@ public class Database {
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
-		} 
+		}
 		
 			
 		if (Constants.debug){
 			System.out.println("## Function args types: ");
 			System.out.println(Arrays.toString(argumentTypes));
 		}
-		
 
 		
 		return argumentTypes;
@@ -3762,15 +3770,15 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, functionSchemaName, projectSchema};		
 			
-			ResultSet rs = getConnection().sendPreparedQuery(functionQuery, args);				
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"function_operation"});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionQuery, args).getRows();				
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"function_operation"});
 			
 			if (res.size()>0) {
 				functionOperationType = res.get(0)[0];
@@ -3780,7 +3788,7 @@ public class Database {
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+functionQuery, e);
-		} 
+		}
 			
 		if (Constants.debug){
 				System.out.println("## Function operation type: ");
@@ -3836,18 +3844,17 @@ public class Database {
 		
 		String schema = getSchemaName();
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");			
+			dc.sendUpdate("SET search_path TO "+schema+"; ");			
 			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments};		
 			
-			ResultSet rs = getConnection().sendPreparedQuery(functionDetailsQuery, args);				
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"return_type"});
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionDetailsQuery, args).getRows();				
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"return_type"});
 			
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
 				returnType = res.get(0)[0];
 				functionNameToReturnType.put(cachingKey, returnType);
 			}			
@@ -3855,7 +3862,7 @@ public class Database {
 		} 
 		catch (Exception e)  {
 			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
-		} 
+		}
 		
 			
 		if (Constants.debug){
@@ -3921,16 +3928,16 @@ public class Database {
 			";";
 		
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
 			String[] args = new String[]{tableNameOnly, schema}; 
 			
-			ResultSet rs = getConnection().sendPreparedQuery(columnQuery, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(columnQuery, args).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"attname"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname"});
 			
 			// read names
 			columnNames = new String[res.size()];
@@ -3942,7 +3949,7 @@ public class Database {
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+columnQuery, e);
-		} 
+		}
 		
 		// store the column names for caching (speed improvement)
 		tableNameToColumnNames.put(cachingKey, columnNames);
@@ -3968,14 +3975,14 @@ public class Database {
 		
 		String[] args = new String[]{tableName, columnName, schema};
 		
-		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(query, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"custom_type"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"custom_type"});
 			
 			// read values
 			if (res.size()>0)
@@ -3984,7 +3991,7 @@ public class Database {
 		} 
 		catch (Exception e)  {
 			throw new RuntimeException("Error while executing query "+query, e);
-		} 
+		}
 		
 		return nameOfCustomType;
 	}
@@ -4008,13 +4015,14 @@ public class Database {
 		String[] args = new String[]{typeName, schema};
 		
 		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			getConnection().sendUpdate("SET search_path TO "+schema+"; ");
+			dc.sendUpdate("SET search_path TO "+schema+"; ");
 			
-			ResultSet rs = getConnection().sendPreparedQuery(query, args);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
 			
-			ArrayList<String[]> res = getResultsInAList(rs, new String[]{"enum_labels"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"enum_labels"});
 			
 			// read values
 			if (res.size()>0)
@@ -4023,7 +4031,7 @@ public class Database {
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+query, e);
-		} 
+		}
 		
 		return values;
 	}
@@ -4138,103 +4146,11 @@ public class Database {
 	}
 	
 	
-	/**
-	 * get the results of a query in a List
-	 * each record is an array in that list
-	 * @param rs
-	 * @param velden
-	 * @return
-	 * @throws SQLException 
-	 * @throws UnsupportedEncodingException 
-	 */
-	public ArrayList<String[]> getResultsInAList(ResultSet rs, String[] velden) throws UnsupportedEncodingException, SQLException{
-		
-		ArrayList<String[]> lijst = new ArrayList<String[]>();
-		
-		if (rs == null) 
-		{
-			Util.debug(co, "Result list empty");
-			return lijst;
-		}
-		
-		try 
-		{
-			try
-			{
-				while (rs.next())
-				{
-					String[] veldInhoud = new String[velden.length];
-					for (int i=0; i<velden.length; i++)
-					{
-						String veld = velden[i];						
-						
-						byte[] col = rs.getBytes(veld);
-						if (col != null)
-						{
-							String str = new String(col, "UTF-8");
-							veldInhoud[i] = str; 
-						}
-						else
-						{
-							veldInhoud[i] = "";
-						}
-						
-					}
-					lijst.add(veldInhoud);
-					
-				}
-				return lijst;
-			}
-			finally {
-				rs.close();
-			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-	}
 	
-	public ArrayList<ArrayList<String>> getResultsInArrayList(ResultSet rs, String[] velden){
-		
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-		
-		if (rs == null)  {
-			Util.debug(co, "Result list is empty");
-			return list;
-		}
-		
-		try {
-			try {
-				while (rs.next()) {
-					ArrayList<String> veldInhoud = new ArrayList<String>();
-					for (int i=0; i<velden.length; i++) {
-						String veld = velden[i];
-												
-						byte[] col = rs.getBytes(veld);
-						if (col != null) {
-							String str = new String(col, "UTF-8");
-							
-							veldInhoud.add(str);	
-						}
-						else {
-							veldInhoud.add( "" );
-						}
-					}
-					list.add(veldInhoud);
-					
-				}
-				return list;
-			}
-			finally {
-				rs.close();
-			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-	}
+
+	
+	
+	
 	
 	// remove quotes from a field name that got quotes because it is a reserved sql word
 	public String removeQuotesFromSqlReservedWord(String word){
@@ -4246,13 +4162,12 @@ public class Database {
 	// This is called 'getListOfIdToCell' because we add a row id required bij Datatables
 	// to each row (t.i. DT_RowId).
 	public ArrayList<ConcurrentHashMap<String, String>> getListOfIdToCell( 
-			String tableName, String primaryKey, ResultSet rs, String[] requiredColumns ){
+			String tableName, String primaryKey, ResultSetSnapshot snapshot, String[] requiredColumns ){
 
 		
-		ArrayList<ConcurrentHashMap<String, String>> lijst = new ArrayList<ConcurrentHashMap<String, String>>();
+		ArrayList<ConcurrentHashMap<String, String>> output = new ArrayList<ConcurrentHashMap<String, String>>();
 		
-		if (rs == null) 
-		{
+		if (snapshot.getRows() == null) {
 			Util.debug(co, "Result list is empty!");
 			return new ArrayList<ConcurrentHashMap<String, String>>();
 		}
@@ -4260,54 +4175,27 @@ public class Database {
 		
 		// get the number of columns in the result set
 		
-		ResultSetMetaData rsMetaData = null;
-	    int numberOfColumns = 0;
-		try {
-			rsMetaData = rs.getMetaData();
-			numberOfColumns = rsMetaData.getColumnCount();			
-		} 
-		catch (SQLException e1) 
-		{
-			throw new RuntimeException(e1);
-		}
-		
+		int numberOfColumns = snapshot.getColumnNames().size();
+				
 		
 		// if a list of required columns was given, we will stick to it
 		// otherwise, we take the column names from the resultset
 		
 		
 		Util.debug(co, "We've got "+numberOfColumns+" columns in table "+tableName);
-	    String[] columnNames = new String[numberOfColumns];
-	    String[] columnTypes = new String[numberOfColumns];
-	    
-	    if (requiredColumns.length==0)
-	    {
-	    	try {
-
-		    	// get the column names; column indexes start from 1
-			    for (int i = 1; i < numberOfColumns + 1; i++) {
-			    	
-			    	String columnName = rsMetaData.getColumnName(i);
-			    	columnNames[i-1] = columnName;
-			    	
-			    	
-			    }
-			} 
-		    catch (SQLException e) 
-		    {
-				throw new RuntimeException(e);
-		    }
+	    String[] columnNames;
+	    if (requiredColumns.length==0) {
+	    	columnNames = snapshot.getColumnNames().toArray(new String[0]);
 	    }
-	    else
-	    {
+	    else {
 	    	columnNames = requiredColumns;
 	    }
 	    
 	    
 	    
 	    // get list of column types
-	    if (Constants.debug)
-	    {
+	    String[] columnTypes = new String[numberOfColumns];
+	    if (Constants.debug) {
 	    	System.out.println("Requesting list of column types for:");
 	    	System.out.println(columnNames.length+" => "+Util.join(columnNames, ", "));
 	    }
@@ -4315,8 +4203,7 @@ public class Database {
 	    	columnTypes[i] = getTypeOfColumn(tableName, removeQuotesFromSqlReservedWord(columnNames[i]));
 	    }	    
 	 
-	    if (Constants.debug)
-	    {	    	
+	    if (Constants.debug) {	    	
 		    for (int i = 0; i < columnNames.length; i++) {
 		    	System.out.println(columnNames[i]+" -> '"+columnTypes[i]+"'");
 		    }
@@ -4324,58 +4211,39 @@ public class Database {
 	    
 
 	    // process table content into return variable 
-		try
-		{
+	    
+		for (Map<String, Object> row : snapshot.getRows()) {
 			
-			try
-			{
-				while (rs.next())
-				{
-					ConcurrentHashMap<String, String> record = new ConcurrentHashMap<String, String>();
-					
-					// process each column of a record					
-					
-					for (int i=0; i<columnNames.length; i++)
-					{
-						String columnName = removeQuotesFromSqlReservedWord(columnNames[i]);	
-						
-						byte[] col = rs.getBytes(columnName);
-						String value = rs.getBytes(columnName)!= null ? new String(col, "UTF-8") : null;
-						value = col != null ? value : "";
-						
-						// Datatable need a special ID column
-						if (columnName.equals(primaryKey))
-							record.put("DT_RowId", value);
-						
-						// normal case
-						record.put(columnName, value);						
-						
-					}					
-					
-					// When we return a DT_RowClass, the client adds this as an extra class
-					// name to each table row node. This is convenient as this way
-					// the table row nodes (TR) get absolutely unique: no only
-					// because of their id, but also because of this class name.
-					// This allows us to point at row nodes reliably, without the need
-					// to state explicitly which table we are talking about, as it's already
-					// encapsulated in the node
-					record.put("DT_RowClass", tableName+"_row"); 
-					lijst.add(record);					
-					
-				}
-				return lijst;
-			}
-			finally
-			{
-				rs.close();
-			}			
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
+			ConcurrentHashMap<String, String> record = new ConcurrentHashMap<String, String>();
+			
+			// process each column of a record					
+			
+			for (int i=0; i<columnNames.length; i++) {
+				String columnName = removeQuotesFromSqlReservedWord(columnNames[i]);				
+				Object fieldvalue = row.get(columnName);				
+				String value = ( fieldvalue != null ? fieldvalue.toString() : "" );
+				
+				// Datatable need a special ID column
+				if (columnName.equals(primaryKey))
+					record.put("DT_RowId", value);
+				
+				// normal case
+				record.put(columnName, value);						
+				
+			}					
+			
+			// When we return a DT_RowClass, the client adds this as an extra class
+			// name to each table row node. This is convenient as this way
+			// the table row nodes (TR) get absolutely unique: no only
+			// because of their id, but also because of this class name.
+			// This allows us to point at row nodes reliably, without the need
+			// to state explicitly which table we are talking about, as it's already
+			// encapsulated in the node
+			record.put("DT_RowClass", tableName+"_row"); 
+			output.add(record);	
 		}
 		
-		
+		return output;
 	}
 	
 	
@@ -4390,7 +4258,7 @@ public class Database {
 		// (that is: location, username, password, etc)
 		if ( databaseAccessHash.size() == 0 )
 			try {
-				readPropertiesFile();
+				readDatabasePropertiesFile();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				throw new RuntimeException(e);
@@ -4406,14 +4274,15 @@ public class Database {
 	
 	
 	/**
-	 * opens a Postgres database connection
+	 * Create a PostgresConnectionManager instance.
+	 * This will automatically create a connection pool for the database
 	 */
-	public PostgresDatabaseCommunication connectDatabase()  {
+	public PostgresConnectionManager createPostgresConnectionManager()  {
 		// first check if the database access data are known
 		// (that is: location, username, password, etc)
 		if ( databaseAccessHash.size() == 0 )
 			try {
-				readPropertiesFile();
+				readDatabasePropertiesFile();
 			} 
 			catch (IOException e) {
 				throw new RuntimeException(e);
@@ -4430,7 +4299,8 @@ public class Database {
 		// must behave differently for one user or another).
 		//
 		// NB: the previous Lex'it version worked with Tomcat login, 
-		//     but since june 2024, Lex'it works with Clarin login OR Lex'it login
+		//     but since june 2024, Lex'it works with Clarin login OR Lex'it login (default)
+		
 		String sendTomcatUserInfoToDb = databaseAccessHash.get("send_tomcat_username_to_db");
 		// if the setting is not found, look for the old setting
 		if (sendTomcatUserInfoToDb == null)
@@ -4442,28 +4312,33 @@ public class Database {
 				(sendTomcatUserInfoToDb.toLowerCase().trim().equals("true") ?
 						true : false);		
 		
+		// the config file might contain a 'max_pool_size' value for a particular database
+		// (default in Lex'it is 10, which might be too low for some projects)
+		
+		String sMaxPoolSize = databaseAccessHash.get("max_pool_size");
+		int iMaxPoolSize = (sMaxPoolSize == null ? Constants.maxPoolSize : Integer.parseInt(sMaxPoolSize));
 		
 		// connect to db (we give the tomcat info as arguments, so it might be
 		// used if needed)
-		PostgresDatabaseCommunication postgresDc = 
-			new PostgresDatabaseCommunication(this.co, bSendTomcatUserInfoToDb);
+		PostgresConnectionManager postgresDc = 
+			new PostgresConnectionManager(this.co, bSendTomcatUserInfoToDb, iMaxPoolSize);
 		
-		postgresDc.connectTo(host, port, db, user, pass);
+		postgresDc.createDataSourceInPool(host, port, db, user, pass);
 		
 		return postgresDc;
 		
 	}
 	
 	/**
-	 * Get a connection
+	 * Retrieve a PostgresConnectionManager instance
 	 * @return
 	 */
-	public PostgresDatabaseCommunication getConnection() {
-		if (this.dc == null || this.dc.isClosed()) {
-			System.out.println("Reconnect to database");
-			this.dc = connectDatabase();
+	public PostgresConnectionManager getPostgresConnectionManager() {
+		if (this.pc == null) {
+			Util.debug("Reconnect to database");
+			this.pc = createPostgresConnectionManager();
 		}
-		return dc;
+		return this.pc;
 	}
 	
 	/**
@@ -4476,7 +4351,7 @@ public class Database {
 		// (that is: location, username, password, etc)
 		if ( databaseAccessHash.size() == 0 ) {
 			try {
-				readPropertiesFile();
+				readDatabasePropertiesFile();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				throw new RuntimeException(e);
@@ -4499,25 +4374,25 @@ public class Database {
 	}
 	
 	
-	
+	/**
+	 * Set the active tab ID in the ContextObject.
+	 * Each time a connection is made with the database, this tab ID is send to the database (just like the username)
+	 * so as to allow database operation to take it into account. 
+	 * @param activeTabId
+	 */
 	public void setActiveTabId(String activeTabId) {
 		
 		// set the new active tab id in the ContextObject kept in this DatabaseObject
 		this.co.setActiveTabId(activeTabId);
 		
-		
-		try {
-			getConnection().SendActiveTabIdToDatabaseServer();
-		}
-		catch (Exception e) {
-			throw new RuntimeException("Error while executing query setting the active tab", e);
-		} 	
-		
 	}
 
 	
-	
-	public void readPropertiesFile() throws IOException{
+	/**
+	 * Read the database properties file.
+	 * @throws IOException
+	 */
+	public void readDatabasePropertiesFile() throws IOException{
 		
 		Util.debug(co, "Read database access data from properties file '"+co.getDbName()+".database"+"'...");
 		
@@ -4541,16 +4416,6 @@ public class Database {
 	}
 
 	
-	
-	/**
-	 * close the database connection
-	 */
-	public void closeDatabase() {
-		if (this.dc != null)
-			this.dc.closeConnection();
-		if (Constants.debug)
-			System.out.println("Connection with the database closed.\n");
-	}
 
 	
 	/**
@@ -4780,9 +4645,11 @@ public class Database {
                         String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNames, " text, ")+" text);";
                         String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
                         
+                        PostgresConnectionManager dc = getPostgresConnectionManager();
+                        
                         try {
-                            getConnection().sendUpdate(createTableQuery);
-                            getConnection().sendUpdate(AddUploadedCommentQuery);
+                        	dc.sendUpdate(createTableQuery);
+                        	dc.sendUpdate(AddUploadedCommentQuery);
                         } 
                         catch (Exception e) {
                             throw new RuntimeException("Error while executing query "+createTableQuery + "\n" + AddUploadedCommentQuery, e);
@@ -4799,9 +4666,11 @@ public class Database {
 
                         String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
                         
+                        PostgresConnectionManager dc = getPostgresConnectionManager();
+                        
                         try {
 							if (columnNames.size() == oneRow.length && oneRow.length == ato.getSize()){
-								getConnection().sendPreparedUpdate(insertQuery, oneRow, ato, new DbResponseObject());
+								dc.sendPreparedUpdate(insertQuery, oneRow, ato, new DbResponseObject());
 							}
 							else {
 								System.out.println("Row #"+counter+" in uploaded "+fileType.toUpperCase()+"-file has a different number of columns than the header row. Skipping.");
@@ -5005,9 +4874,11 @@ public class Database {
 				String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNamesAndTypes, ", ")+");";
 				String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
 				
+				PostgresConnectionManager dc = getPostgresConnectionManager();
+				
 				try {
-					getConnection().sendUpdate(createTableQuery);
-					getConnection().sendUpdate(AddUploadedCommentQuery);
+					dc.sendUpdate(createTableQuery);
+					dc.sendUpdate(AddUploadedCommentQuery);
 				} 
 				catch (Exception e) {
 					throw new RuntimeException("Error while executing query " + createTableQuery + "\n" + AddUploadedCommentQuery, e);
@@ -5048,8 +4919,9 @@ public class Database {
 						// insert those values into the table
 						String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
 						
+						
 						try {
-							getConnection().sendPreparedUpdate(insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
+							dc.sendPreparedUpdate(insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
 						} 
 						catch (Exception e) {
 							throw new RuntimeException("Error while executing query "+insertQuery, e);
@@ -5120,14 +4992,18 @@ public class Database {
 
 		String dropTableIfExists = "DROP TABLE IF EXISTS "+currentSchema+"."+tableName+";";
 		
+		
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+		
 		try {
-			getConnection().sendUpdate(dropTableIfExists);
+			dc.sendUpdate(dropTableIfExists);
 			ro.setResponse("OK");
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			ro.setResponse("Error! Couln't remove table '"+tableName+"'.");
 			throw new RuntimeException("Error while executing query "+dropTableIfExists, e);
-
 		}
+		
 		return ro;
 	}
 

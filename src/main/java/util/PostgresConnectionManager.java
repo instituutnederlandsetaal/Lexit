@@ -6,71 +6,77 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.sql.rowset.CachedRowSet;
+
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
+
+import resources.AppLifecycleListener;
 import resources.Constants;
 import resources.ContextObject;
 import resources.DbResponseObject;
+import resources.TableResources;
 
 
 
-public class PostgresDatabaseCommunication implements AutoCloseable {
+public class PostgresConnectionManager {
+	
+	
+	
 	
 	// keep in mind just in case 
 	//
 	// https://stackoverflow.com/questions/2757549/org-postgresql-util-psqlexception-fatal-sorry-too-many-clients-already
 	
 
-	public PostgresDatabaseCommunication(ContextObject co, boolean sendTomcatUserInfoToDb) {	
+	public PostgresConnectionManager(ContextObject co, boolean sendTomcatUserInfoToDb, int maxPoolSize) {	
 		
 		// get the tomcat server context
 		// allowing us to get the active tomcat user name etc
 		this.co = co;
 		this.sendUserInfoToDb = sendTomcatUserInfoToDb;
+		this.maxPoolSize = maxPoolSize;
 	}	
 	
 	/**
-	 * Database connection
-	 *  and tomcat server SecurityContext as well
+	 * Defaults
 	 */
-	private Connection db;
-	private ContextObject co;
-	private boolean activeUserTableIsThere = false; 
-	private boolean sendUserInfoToDb = false;
+	private ContextObject co;							// the context object, allowing us to get the active user name etc
+	private boolean sendUserInfoToDb = false;			// if true, the tomcat username will be sent to the database server
+	private int maxPoolSize = Constants.maxPoolSize;	// the maximum number of connections in the pool for this project
 	
 	
+
 	/**
-	 * Sluit de connectie met de MySQL database. Dit moet helemaal aan het eind 
-	 * van het programma gebeuren.
+	 * Create a datasource (holding a connection to a database) in the connection pool
+	 * 
+	 * @param host
+	 * @param port
+	 * @param db
+	 * @param user
+	 * @param password
 	 */
-	public void closeConnection() {
-		try {
-			db.close();
-		}
-		catch (SQLException e) {
-			throw new RuntimeException("Error while closing the connection!", e);
-		}
-	}
-	
-	public boolean isClosed() {
-		try {
-			return this.db.isClosed();
-		} catch (SQLException e) {
-			throw new RuntimeException("Error while checking if the connection is closed!", e);
-		}
-	}
-	
-	public void connectTo(String host, String port, String db, String user, String password) {
+	public void createDataSourceInPool(String host, String port, String db, String user, String password) {
+		
+		Connection conn = null;		
 		
 		// if project config doesn't specify any port, choose the Postgres default port 
 		port = (port == null || port.isEmpty()) ? "5432" : port; 
 				
 		// location		
-		String location = "jdbc:postgresql://"+host+":"+port+"/"+db;
+		String location = "jdbc:postgresql://"+host+":"+port+"/"+db+"?charSet=UTF8";
 		
 		if (Constants.debug) System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
 		
@@ -78,34 +84,42 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         try {
         	Class.forName("org.postgresql.Driver");
         } 
-        catch (ClassNotFoundException e) {        
+        catch (ClassNotFoundException e) {       
+        	if (Constants.debug) e.printStackTrace();
         	throw new RuntimeException("PostgreSQL JDBC Driver not found. Include it in your library path!", e);
         }
 
-        try {        	
+        try {        
         	
-        	Properties props = new Properties();
-        	props.setProperty("user", user);
-        	props.setProperty("password", password);
-        	props.setProperty("charSet", "UTF8");
-        	
-        	// needed for special illegal databases (wrong Psql version or so) which cause getConnection to hang indefinitely)
-        	//
-        	// BUT IT TURNED OUT THAT CAUSED PROBLEMS WITH THE DATABASE AUTOCLOSABLE CONNECTION
-        	//                        ---------------------------------------------------------
-        	//props.setProperty("connectTimeout", "5");  // Connection timeout (in seconds)
-        	//props.setProperty("socketTimeout", "5");   // Socket read timeout (in seconds)
-        	//props.setProperty("loginTimeout", "5");    // Login timeout (in seconds)
-
-        	//props.setProperty("sslmode", "disable"); // temporary fix: https://stackoverflow.com/questions/59190010/psycopg2-operationalerror-fatal-unsupported-frontend-protocol-1234-5679-serve
-        	//props.setProperty("Integrated Security", "false");
-        	//props.setProperty("tcpKeepAlive", "true");
-        	//props.setProperty("prepareThreshold", "1");
-        	
-        	this.db = DriverManager.getConnection(location, props);
-        	
-        	// make sure we never end up with idle connections
-        	//this.sendUpdate("alter system set idle_in_transaction_session_timeout= 300000;");
+        	HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(location);
+            config.setUsername(user);
+            config.setPassword(password);
+            
+            // the maximum number of connections in the pool has a default value declared in the Constants class
+            // but it can be overridden by the project database config            
+            config.setMaximumPoolSize(this.maxPoolSize);
+            
+            Util.debug("Creating datasource for "+co.getDbName()+" with max pool size "+this.maxPoolSize);
+            
+            config.setIdleTimeout(Constants.idleTimeoutMs); 
+            config.setMaxLifetime(Constants.maxLifetimeMs); 
+            config.setConnectionTimeout(Constants.connectionTimeoutMs);
+            
+            // create the datasource with this config
+            
+            HikariDataSource ds = new HikariDataSource(config);
+            
+            // register the datasource, so as to make sure it is shut down 
+            // when the service is (so as to prevent memory leaks)
+            
+            AppLifecycleListener.registerDataSource(ds);
+            
+            // add the connection to a Hash
+            // to be able to retrieve it given the project name
+            
+            String projectName = co.getDbName();
+            TableResources.project2DataSource.put(projectName, ds);
 
         } 
         catch (Exception e) {
@@ -114,15 +128,97 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         	// ======
         	throw new RuntimeException("Connection failed! Check the project database configuration.", e);
         }
-
-        if (this.db == null) {
-        	if (Constants.debug) System.out.println("Failed to make connection!");
-        }
 		
 	}
 	
+	/**
+	 * Test if a connection to some database CAN be established: 
+	 * otherwise that probably means that the database does not exist, or the credentials are wrong, or so.
+	 * 
+	 * @param host
+	 * @param port
+	 * @param db
+	 * @param user
+	 * @param password
+	 */
+	public void testConnectionTo(String host, String port, String db, String user, String password) {
 	
-	private void SendUserIdentityToDatabaseServer(){
+		// if project config doesn't specify any port, choose the Postgres default port 
+		port = (port == null || port.isEmpty()) ? "5432" : port; 
+				
+		// location		
+		String location = "jdbc:postgresql://"+host+":"+port+"/"+db;
+		
+        // checks if the class exists (implicitly if the library is there)
+        try {
+        	Class.forName("org.postgresql.Driver");
+        } 
+        catch (ClassNotFoundException e) {        
+        	throw new RuntimeException("PostgreSQL JDBC Driver not found. Include it in your library path!", e);
+        }
+        
+        Properties props = new Properties();
+    	props.setProperty("user", user);
+    	props.setProperty("password", password);
+    	props.setProperty("charSet", "UTF8");
+
+
+        try (Connection conn = DriverManager.getConnection(location, props)) {
+        	// Do nothing, the connection is just tested here, no more...
+        	// If the connection can't be established, an exception will be thrown!
+        } 
+        catch (Exception e) {
+        	//
+        	// BEWARE: don't change this message, as the client checks for it
+        	// ======
+        	throw new RuntimeException("Connection failed! Check the project database configuration.", e);
+        }	
+	}
+	
+	
+	/**
+	 * Get a connection from the pool
+	 * 
+	 * @return
+	 */
+	public Connection getConnectionFromPool() {
+		
+		Connection conn = null;
+		
+		try {
+        	
+        	// get the datasource for the project
+        	HikariDataSource ds = TableResources.project2DataSource.get(co.getDbName());
+        	
+        	if (Constants.debug) {
+	        	HikariPoolMXBean poolMXBean = ds.getHikariPoolMXBean();
+	        	System.out.println("Active connections: " + poolMXBean.getActiveConnections());
+	        	System.out.println("Idle connections: " + poolMXBean.getIdleConnections());
+	        	System.out.println("Total connections: " + poolMXBean.getTotalConnections());
+	        	System.out.println("Threads awaiting connection: " + poolMXBean.getThreadsAwaitingConnection());
+	        	System.out.println("-----------------------");
+        	}
+        	
+        	// get the connection from the pool
+        	conn = ds.getConnection();
+		} 
+        catch (SQLException e) {
+        	if (Constants.debug) e.printStackTrace();
+		}
+        
+		// return a connection to the specified project
+        return conn;
+    }
+
+	
+	
+	/**
+	 * Send the username and session id to the database server
+	 * (to be stored in a temporary table in the session) 
+	 * 
+	 * @param conn
+	 */
+	private void SendUserIdentityToDatabaseServer(Connection conn){
 		
 		// if the configuration tells us to send the tomcat username
 		// to the database server
@@ -141,60 +237,42 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 		// from the temporary table.
 		
 		
-		if ( 	sendUserInfoToDb &&
-				!activeUserTableIsThere &&
-				this.co != null) {
-			
-			Statement stmt = null;
-			String query = "CREATE TEMPORARY TABLE active_user AS "+
-				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
-			
-			try {
-				// Create a Statement object
-				stmt = this.db.createStatement();
-				stmt.executeUpdate(query);
-				
-				activeUserTableIsThere = true;
-			}
-			catch (SQLException e) {
-				throw new RuntimeException("Error while executing query "+query, e);
-			}			
-			
-		}
-	}
-	
-	public void SendActiveTabIdToDatabaseServer(){
-	
-		// Keep track of active database and tab id 
-		// This is convenient when some Lex'it project is used in multiple tabs at the same time
-		// and database function must be able to tell which tab is sending information
-		
-		if ( sendUserInfoToDb ) {
-			
-			if (activeUserTableIsThere) {
+		if ( this.sendUserInfoToDb && this.co != null ) {	
 				
 				Statement stmt = null;
-				String query = "UPDATE active_user "+
-								"SET active_tab_id = '"+this.co.getActiveTabId()+"'::text "+
-								"WHERE username = '"+this.co.getUsername()+"'::text "+
-								"AND session_id = '"+this.co.getSessionId()+"'::text; ";
+				String query = "CREATE TEMPORARY TABLE active_user AS "+
+					"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
 				
 				try {
+					
 					// Create a Statement object
-					stmt = this.db.createStatement();
+					stmt = conn.createStatement();
 					stmt.executeUpdate(query);
 				}
-				catch (SQLException e) {
-					throw new RuntimeException("Error while executing query "+query, e);
-				}
-			}
-			// if the active tomcat table is not there yet, create it
-			else {
-				SendUserIdentityToDatabaseServer();
-			}
-		}
-
+				
+				// if the temporary table exists already in the session, just update it!
+				catch (Exception e) {
+					
+					stmt = null;
+					query = "UPDATE active_user "+
+							"SET active_tab_id = '"+this.co.getActiveTabId()+"'::text "+
+							"WHERE username = '"+this.co.getUsername()+"'::text "+
+							"AND session_id = '"+this.co.getSessionId()+"'::text; ";				
+		
+					try {
+						// Create a Statement object
+						stmt = conn.createStatement();
+						stmt.executeUpdate(query);
+					}
+					catch (Exception e2) {
+						if (Constants.debug) e2.printStackTrace();
+						throw new RuntimeException("Error while executing query "+query, e2);
+					}
+				}	
+			}	
+		
 	}
+
 	
 
 	
@@ -204,19 +282,25 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 	 * @param timeLimitInMilliseconds
 	 * @return
 	 */
-	public ResultSet sendQuery(String query, int timeLimitInMilliseconds) {
+	public ResultSetSnapshot sendQuery(String query, int timeLimitInMilliseconds) {
 		
 		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
 		
-		SendUserIdentityToDatabaseServer();
+		
 		
 		// Get the results
 		ResultSet rs = null;
+		ResultSetSnapshot rsCopy = null;
 		Statement stmt = null;
-		try {			
+		
+		try (Connection conn = getConnectionFromPool()) {
+			
+			// register the user identity etc. in this session
+			SendUserIdentityToDatabaseServer(conn);
+			
 			// Create a Statement object
-			stmt = this.db.createStatement();
+			stmt = conn.createStatement();
 			
 			// if required, set a timeout 
 			
@@ -231,65 +315,92 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			}
 			
 			// the timeout is set, now execute the query
-			rs = stmt.executeQuery(query);			
+			rs = stmt.executeQuery(query);		
+			rsCopy = ResultSetSnapshot.copy(rs);
+			
 		}
 		catch (SQLException e) {
 			
-			if (Constants.debug) System.out.println("Exception "+e.getMessage());
-			
+			// if the error is a timeout error
 			if (e.getMessage().toLowerCase().contains("timeout")) {
 				
 				// show a message but throw no exception
-				// so time out will return null
+				// so this function will return null
 				long timeAfterQuery = new Date().getTime();
 				if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
 			}
 			else {
 				// error, throw an exception and return no value
-				throw new RuntimeException("Error while executing query "+query, e);
+				if (Constants.debug) e.printStackTrace();
+				throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
 			}
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
 		}
-		finally {
+		finally {			
 			
 			// finally, reset the original timeout settings
 			
 			if (timeLimitInMilliseconds > 0) {
 				
 				String ResetTimeOutQuery = "RESET statement_timeout;";			
-				try {
+				try (Connection conn = getConnectionFromPool()) {
+					
+					// register the user identity etc. in this session
+					SendUserIdentityToDatabaseServer(conn);
+					
 					// Create a new Statement object
-					stmt = this.db.createStatement();
+					stmt = conn.createStatement();
 					// reset timeout
 					stmt.executeUpdate(ResetTimeOutQuery);
 					
-				} catch (SQLException e) {
-					throw new RuntimeException("Error while executing query "+query, e);
-				}				
+				} 
+				catch (SQLException e) {
+					if (Constants.debug) e.printStackTrace();
+					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
+				} 
+				catch (Exception e) {
+					if (Constants.debug) e.printStackTrace();
+					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
+				}
 			}
 			
 		}
 		
-		return rs;
+		return rsCopy;
 	}
 
-	public void sendUpdate(String query)  {
+	public void sendUpdate(String query) {
 		if (Constants.debug) System.out.println(query);
 		
-		SendUserIdentityToDatabaseServer();
+		
 		
 		Statement stmt = null;
-		try {
+		
+		try (Connection conn = getConnectionFromPool()) {
+			
+			// register the user identity etc. in this session
+			SendUserIdentityToDatabaseServer(conn);
+			
 			// Create a Statement object
-			stmt = this.db.createStatement();
+			stmt = conn.createStatement();
 			stmt.executeUpdate(query);
 		}
 		catch (SQLException e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing plain update "+query, e);
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing plain update "+query, e);
 		}
 	}
 	
 	
-	public ResultSet sendPreparedQuery(String query, String[] args) {
+	public ResultSetSnapshot sendPreparedQuery(String query, String[] args) {
+		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
 		QueryObject qo = rebuildQueryIfArgListContainsNullValues(new QueryObject(query, args, null));
@@ -303,14 +414,20 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			System.out.println(Util.join(args, ", "));
 		}
 		
-		SendUserIdentityToDatabaseServer();
+		
 		
 		// Get the results
 		ResultSet rs = null;
+		ResultSetSnapshot rsCopy = null;
 		PreparedStatement prest = null;
-		try {
+		
+		try (Connection conn = getConnectionFromPool()) {
+			
+			// register the user identity etc. in this session
+			SendUserIdentityToDatabaseServer(conn);
+			
 			// prepare statement
-			prest = this.db.prepareStatement(query,
+			prest = conn.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
 			for (int i=0; i<args.length; i++) {
@@ -326,15 +443,21 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			
 						
 			rs = prest.executeQuery();
+			rsCopy = ResultSetSnapshot.copy(rs);
 		}
 		catch (SQLException e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared query "+query, e);
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared query "+query, e);
 		}
 		
-		return rs;
+		return rsCopy;
 	}
 	
-	public ResultSet sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
+	public ResultSetSnapshot sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -350,19 +473,23 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			System.out.println(Util.join(args, ", "));
 		}
 		
-		SendUserIdentityToDatabaseServer();
 		
 		// Get the results
 		ResultSet rs = null;
+		ResultSetSnapshot rsCopy = null;
 		Statement stmt = null;
 		PreparedStatement prest = null;
-		try {
+		
+		try (Connection conn = getConnectionFromPool()) {
+			
+			// register the user identity etc. in this session
+			SendUserIdentityToDatabaseServer(conn);
 			
 			// if required, set a timeout 
 			
 			if (timeLimitInMilliseconds > 0) {
 				// Create a Statement object
-				stmt = this.db.createStatement();
+				stmt = conn.createStatement();
 				
 				// set a timeout in milliseconds
 				// (beware: setting this must happen in a separate query: we can't bundle this
@@ -373,7 +500,7 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			
 			
 			// prepare statement
-			prest = this.db.prepareStatement(query,
+			prest = conn.prepareStatement(query,
 					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
 			for (int i=0; i<args.length; i++) {
@@ -434,9 +561,9 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
 					if (oneType.equals("_int4[]"))
-						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
 					else
-						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
 				}
 				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
@@ -454,30 +581,47 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			
 			
 			rs = prest.executeQuery();
+			rsCopy = ResultSetSnapshot.copy(rs);
 		}
 		catch (SQLException e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared query (with time limit) "+query, e);
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared query (with time limit) "+query, e);
 		}
-		finally {
+		finally {			
 			
 			// finally, reset the original timeout settings
 			
 			if (timeLimitInMilliseconds > 0) {
 				
-				String ResetTimeOutQuery = "RESET statement_timeout;";				
-				try {
+				String ResetTimeOutQuery = "RESET statement_timeout;";	
+				
+				try (Connection conn1 = getConnectionFromPool()) {
+				
+					// register the user identity etc. in this session
+					SendUserIdentityToDatabaseServer(conn1);
+					
 					// Create a new Statement object
-					stmt = this.db.createStatement();
+					stmt = conn1.createStatement();
 					// reset timeout
 					stmt.executeUpdate(ResetTimeOutQuery);
 					
-				} catch (SQLException e) {
-					throw new RuntimeException("Error while executing query "+query, e);
+				} 
+				catch (SQLException e) {
+					if (Constants.debug) e.printStackTrace();
+					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
+				} 
+				catch (Exception e) {
+					if (Constants.debug) e.printStackTrace();
+					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
 				}
 			}
 		}
 		
-		return rs;
+		return rsCopy;
 	}
 	
 	public void sendPreparedUpdate(String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) {
@@ -496,13 +640,15 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			System.out.println(Util.join(args, ", "));
 		}
 		
-		SendUserIdentityToDatabaseServer();
-		
-		PreparedStatement prest;
-		
-		try {
+		PreparedStatement prest;		
+
+		try (Connection conn = getConnectionFromPool()) {
+			
+			// register the user identity etc. in this session
+			SendUserIdentityToDatabaseServer(conn);
+			
 			// Create a Statement object
-			prest = this.db.prepareStatement(query);
+			prest = conn.prepareStatement(query);
 			
 			for (int i=0; i<args.length; i++) {
 				String oneArg = args[i];				
@@ -560,9 +706,9 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 				
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
 					if (oneType.equals("_int4[]"))
-						prest.setArray(i+1, this.db.createArrayOf("integer", new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
 					else
-						prest.setArray(i+1, this.db.createArrayOf("text", new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
 				}
 				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
@@ -589,9 +735,14 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
 			if (dro != null) dro.setResponse("OK");
 		}
 		catch (SQLException e) {
-			if (dro != null) dro.setResponse("Error while executing query "+query);
-			throw new RuntimeException("Error while executing query "+query, e);
-		}			
+			if (dro != null) dro.setResponse("Error while executing update "+query);
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared update "+query, e);
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing prepared update "+query, e);
+		}
 
 	}
 	
@@ -824,13 +975,5 @@ public class PostgresDatabaseCommunication implements AutoCloseable {
         return number.replaceAll("\\.[0-9]+$", "");
     }
 
-	
-	
-
-	@Override
-	public void close() throws Exception {		
-		if (this.db != null && !this.db.isClosed())
-			closeConnection();
-	};
 	
 }

@@ -92,6 +92,22 @@ public class Constants {
 			1000;    // milliseconds
 	
 	
+	// maximal allowed cost of a count query (in terms of query duration)
+	public static int maxAllowedDuration = 2000; // 2 seconds
+	
+	
+	// ------------------------------------------------------------------------
+	// CONNECTION POOL DEFAULTS
+	// ------------------------------------------------------------------------
+	
+	// the max number of connections per database 
+	// (can be overridden in the database config file with the 'max_pool_size' parameter)
+	public static int maxPoolSize = 10; 
+	
+	public static long connectionTimeoutMs = 30000; // 30 sec
+	public static long idleTimeoutMs = 600000; // 10 min
+	public static long maxLifetimeMs = TIME_GONE; 
+	
 	// ------------------------------------------------------------------------
 	// DEBUGGING
 	// ------------------------------------------------------------------------
