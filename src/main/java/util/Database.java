@@ -1232,6 +1232,16 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
+			
+			// try to call the function from the public schema (kind of default schema)
+			try {
+				dc.sendUpdate("SET search_path TO public; ");
+			}
+			catch (Exception e) {
+				// if it fails, do nothing: the schema might have been removed on purpose
+			}
+			
+			// call the function
 			ResultSetSnapshot snapshot = dc.sendQuery(getRecord, 0);
 			
 			String[] columnsNames = snapshot.getColumnNames().toArray(new String[0]);			
@@ -4301,10 +4311,10 @@ public class Database {
 		// NB: the previous Lex'it version worked with Tomcat login, 
 		//     but since june 2024, Lex'it works with Clarin login OR Lex'it login (default)
 		
-		String sendTomcatUserInfoToDb = databaseAccessHash.get("send_tomcat_username_to_db");
+		String sendTomcatUserInfoToDb = databaseAccessHash.get("send_username_to_db");
 		// if the setting is not found, look for the old setting
 		if (sendTomcatUserInfoToDb == null)
-			sendTomcatUserInfoToDb = databaseAccessHash.get("send_username_to_db");
+			sendTomcatUserInfoToDb = databaseAccessHash.get("send_tomcat_username_to_db");
 				
 		// compute the right value: default is 'false'.
 		boolean bSendTomcatUserInfoToDb = 
@@ -4356,7 +4366,7 @@ public class Database {
 				// TODO Auto-generated catch block
 				throw new RuntimeException(e);
 			}
-		}
+		}		
 		
 		return databaseAccessHash.get("schema");
 	}

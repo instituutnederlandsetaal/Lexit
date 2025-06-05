@@ -1898,7 +1898,8 @@ public class TableResources {
 	};
 	
 	
-	// this is to be used by the spy tool
+	// This is to be used by the spy tool
+	// this function gets users' info out of the map of ContextObjects
 	//
 	// .../api/get_users
 	@Path("get_users")

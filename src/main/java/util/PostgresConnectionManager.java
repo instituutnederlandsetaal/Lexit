@@ -33,7 +33,12 @@ import resources.TableResources;
 
 public class PostgresConnectionManager {
 	
-	
+	/**
+	 * Defaults
+	 */
+	private ContextObject co;							// the context object, allowing us to get the active user name etc
+	private boolean sendUserInfoToDb = false;			// if true, the tomcat username will be sent to the database server
+	private int maxPoolSize = Constants.maxPoolSize;	// the maximum number of connections in the pool for this project
 	
 	
 	// keep in mind just in case 
@@ -50,12 +55,6 @@ public class PostgresConnectionManager {
 		this.maxPoolSize = maxPoolSize;
 	}	
 	
-	/**
-	 * Defaults
-	 */
-	private ContextObject co;							// the context object, allowing us to get the active user name etc
-	private boolean sendUserInfoToDb = false;			// if true, the tomcat username will be sent to the database server
-	private int maxPoolSize = Constants.maxPoolSize;	// the maximum number of connections in the pool for this project
 	
 	
 
@@ -70,15 +69,13 @@ public class PostgresConnectionManager {
 	 */
 	public void createDataSourceInPool(String host, String port, String db, String user, String password) {
 		
-		Connection conn = null;		
-		
 		// if project config doesn't specify any port, choose the Postgres default port 
 		port = (port == null || port.isEmpty()) ? "5432" : port; 
 				
 		// location		
-		String location = "jdbc:postgresql://"+host+":"+port+"/"+db+"?charSet=UTF8";
+		String location = "jdbc:postgresql://" + host + ":" + port + "/" + db + "?charSet=UTF8";
 		
-		if (Constants.debug) System.out.println("PostgreSQL: Try to connect as "+user+"/"+password);
+		if (Constants.debug) System.out.println("PostgreSQL: Try to connect to "+location+" as "+user+"/"+password);
 		
         // checks if the class exists (implicitly if the library is there)
         try {

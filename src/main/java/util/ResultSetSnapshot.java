@@ -8,6 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A utility class to create a snapshot of a ResultSet.
+ * This is needed because ResultSet objects get removed as soon as the connection is closed,
+ * whereas we want to keep the data for later use, so that is copied into a ResultSetSnapshot.
+ */
 public class ResultSetSnapshot {
 	
 	// data containers
@@ -45,7 +50,7 @@ public class ResultSetSnapshot {
 
     
     /**
-     * Make a copy of a ResultSet
+     * Make a copy of a ResultSet in a ResultSetSnapshot.
      * 
      * @param rs
      * @return ResultSetSnapshot
