@@ -1785,8 +1785,9 @@ public class Database {
 	/**
 	 * checkIfIndexExists
 	 * Check whether some index (even multi-column one) exists or not
+	 * 
 	 * @param tableName
-	 * @param indexedFields
+	 * @param indexedFields (an array of column names, which are used as sorting column in the very same query)
 	 * @return
 	 */
 	public Boolean checkIfIndexExists(String tableName, String[] indexedFields){
@@ -1842,7 +1843,7 @@ public class Database {
 			"	and t.relname = ? " + 			// table
 			"	group by t.relname, i.relname " +
 			"	order by t.relname, i.relname) x " +
-			"WHERE column_names = ?; "; 		// column names, sorted 
+			"WHERE column_names = ?; "; 		// sorted, comma separated column names, concatenated hereabove
 				
 		
 		

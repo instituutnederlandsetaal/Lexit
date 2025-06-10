@@ -6,18 +6,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.rowset.CachedRowSet;
-
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -27,7 +20,6 @@ import resources.AppLifecycleListener;
 import resources.Constants;
 import resources.ContextObject;
 import resources.DbResponseObject;
-import resources.TableResources;
 
 
 
@@ -68,6 +60,13 @@ public class PostgresConnectionManager {
 	 * @param password
 	 */
 	public void createDataSourceInPool(String host, String port, String db, String user, String password) {
+		
+		// if the datasource already exists, we don't need to create it again
+		if (AppLifecycleListener.getDataSource(co.getDbName()) != null) {
+			if (Constants.debug)
+				System.out.println("Datasource for project " + co.getDbName() + " already exists, so not creating it again.");
+			return;
+		}
 		
 		// if project config doesn't specify any port, choose the Postgres default port 
 		port = (port == null || port.isEmpty()) ? "5432" : port; 
@@ -110,13 +109,8 @@ public class PostgresConnectionManager {
             // register the datasource, so as to make sure it is shut down 
             // when the service is (so as to prevent memory leaks)
             
-            AppLifecycleListener.registerDataSource(ds);
-            
-            // add the connection to a Hash
-            // to be able to retrieve it given the project name
-            
             String projectName = co.getDbName();
-            TableResources.project2DataSource.put(projectName, ds);
+            AppLifecycleListener.registerDataSource(projectName, ds);
 
         } 
         catch (Exception e) {
@@ -185,7 +179,7 @@ public class PostgresConnectionManager {
 		try {
         	
         	// get the datasource for the project
-        	HikariDataSource ds = TableResources.project2DataSource.get(co.getDbName());
+        	HikariDataSource ds = AppLifecycleListener.getDataSource( co.getDbName() );
         	
         	if (Constants.debug) {
 	        	HikariPoolMXBean poolMXBean = ds.getHikariPoolMXBean();

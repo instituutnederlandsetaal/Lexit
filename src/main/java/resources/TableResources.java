@@ -47,10 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TableResources {
 
 	// database access objects, needed for caching (for speed)
-	public ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();
-	
-	// projectname to DataSource (connection pool)
-	public static ConcurrentHashMap<String, HikariDataSource> project2DataSource = new ConcurrentHashMap<String, HikariDataSource>();
+	public ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();	
 
 	// users access rights
 	public static ConcurrentHashMap<String, String[]> users2roles = new ConcurrentHashMap<String, String[]>();

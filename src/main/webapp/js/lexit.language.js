@@ -211,7 +211,7 @@ lang.opening_config_file_failed = "Het configuratiebestand bestaat niet of het b
 lang.file_is_missing = "heeft mogelijk geen configuratie-bestand meer op deze server";
 lang.missing_database_indexes = "Voor de huidige sorteerkolommen zijn geen indexen beschikbaar.<BR>" +
 						"Dit vertraagt het werken met de database.<BR><BR>" +
-						"Betroffen kolommen:";
+						"Maak een samengestelde index aan voor deze kolommen:";
 lang.inform_admin = "Informeer de administrator.";
 lang.error_opening_hidden_table = "U probeert deze tabel te openen, " +
 				"maar volgens de configuratie moet deze tabel verborgen blijven. " +
@@ -1662,7 +1662,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.file_is_missing = "might not have any configuration file left on the server";
 		lang.missing_database_indexes = "No indexes available for the current sorting columns.<BR>" +
 						"This may cause database operations to be too slow.<BR><BR>" +
-						"Columns at stake:";
+						"Create a composite index for these columns:";
 		lang.inform_admin = "Please inform the administrator.";
 		lang.error_opening_hidden_table = "You're trying to open this table, " +
 				"but according to the configuration it should remain hidden. " +
