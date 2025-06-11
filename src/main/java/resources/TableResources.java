@@ -1939,7 +1939,7 @@ public class TableResources {
 		for (String project : AppLifecycleListener.project2DataSource.keySet()) {
     		
     		// get the source for the project
-    		HikariDataSource dataSource = AppLifecycleListener.getDataSource(project);
+    		HikariDataSource dataSource = AppLifecycleListener.getDataSourceForSpy(project);
     		
     		// If the data source is not null, close it
     		if (dataSource != null) {	

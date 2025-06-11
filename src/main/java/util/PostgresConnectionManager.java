@@ -111,6 +111,9 @@ public class PostgresConnectionManager {
             
             String projectName = co.getDbName();
             AppLifecycleListener.registerDataSource(projectName, ds);
+            
+            // remember the credentials for this project, for respawn!
+            AppLifecycleListener.project2Credentials.put(projectName, new String[] {host, port, db, user, password});
 
         } 
         catch (Exception e) {
@@ -180,6 +183,14 @@ public class PostgresConnectionManager {
         	
         	// get the datasource for the project
         	HikariDataSource ds = AppLifecycleListener.getDataSource( co.getDbName() );
+        	
+        	// if the datasource does not exist anymore because it was closed (e.g. due to inactivity)
+        	// respawn!
+        	if (ds == null) {
+        		String[] credential = AppLifecycleListener.project2Credentials.get(co.getDbName());
+        		createDataSourceInPool(credential[0], credential[1], credential[2], credential[3], credential[4]);
+        		ds = AppLifecycleListener.getDataSource( co.getDbName() );
+        	}
         	
         	if (Constants.debug) {
 	        	HikariPoolMXBean poolMXBean = ds.getHikariPoolMXBean();

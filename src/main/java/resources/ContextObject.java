@@ -83,7 +83,7 @@ public class ContextObject {
 		return this.username;
 	}
 	
-	// if the object left unused? 
+	// is the object left unused? 
 	// (t.i. last time is was used was longer ago than a given maximal duration)
 	public boolean isLeftUnused(){			
 		
