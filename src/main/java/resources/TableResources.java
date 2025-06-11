@@ -9,6 +9,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
 
 import table.*;
 import util.Database;
@@ -1924,6 +1925,42 @@ public class TableResources {
 			ulo.addUserData(new String[]{dbName, (userName != null ? userName : "SYSTEM"), sessionId, (activeTabId != null ? activeTabId : "N/A"), lastActive, activeRecently});
 		}
 		return ulo;
+	}
+	
+	
+	
+	@Path("get_connections_state")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public ConnectionsListObject getConnectionsState() {
+		
+		ConnectionsListObject clo = new ConnectionsListObject();
+		
+		for (String project : AppLifecycleListener.project2DataSource.keySet()) {
+    		
+    		// get the source for the project
+    		HikariDataSource dataSource = AppLifecycleListener.getDataSource(project);
+    		
+    		// If the data source is not null, close it
+    		if (dataSource != null) {	
+    			HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
+    			
+    			int activeConnections = poolMXBean.getActiveConnections();
+    			int idleConnections = poolMXBean.getIdleConnections();
+    			int totalConnections = poolMXBean.getTotalConnections();
+				int threadsAwaitingConnection = poolMXBean.getThreadsAwaitingConnection();				
+
+				// add the data to the ConnectionsListObject
+				clo.addConnectionData(
+						new String[] { project, String.valueOf(activeConnections), String.valueOf(idleConnections),
+								String.valueOf(totalConnections), String.valueOf(threadsAwaitingConnection) });
+    		}
+    		 
+    	}
+		
+		
+		return clo;
+		
 	}
 	
 	/**

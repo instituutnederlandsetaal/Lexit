@@ -16,11 +16,11 @@ public class UsersListObject {
 	@XmlTransient
 	public ArrayList<UserObject> getUsersData(){
 		return this.users_data;
-		}
+	}
 	public void addUserData(String[] user_data){
 		UserObject uo = new UserObject(user_data);
 		
 		this.users_data.add(uo);
-		}
+	}
 
 }
