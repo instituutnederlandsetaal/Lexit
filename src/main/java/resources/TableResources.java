@@ -1869,9 +1869,6 @@ public class TableResources {
 		
 		for (String key : keysToDelete) {
 			
-			// close the connection to the database
-//			nameToDatabaseObject.get(key).closeDatabase(); 
-			
 			// remove ContextObject since it's left unused
 			nameToDatabaseObject.remove(key);
 			Util.debug("Removed old Database object: "+key);

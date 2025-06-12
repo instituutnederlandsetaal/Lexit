@@ -48,6 +48,10 @@ public class PostgresConnectionManager {
 	}	
 	
 	
+	public ContextObject getContextObject() {
+		return this.co;
+	}
+	
 	
 
 	/**
@@ -175,9 +179,12 @@ public class PostgresConnectionManager {
 	 * 
 	 * @return
 	 */
-	public Connection getConnectionFromPool() {
+	private Connection getConnectionFromPool() {
 		
 		Connection conn = null;
+		
+		if (Constants.debug)
+			System.out.println("get Lex'it connection for "+this.co.getDbName());
 		
 		try {
         	
@@ -259,8 +266,8 @@ public class PostgresConnectionManager {
 					query = "UPDATE active_user "+
 							"SET active_tab_id = '"+this.co.getActiveTabId()+"'::text "+
 							"WHERE username = '"+this.co.getUsername()+"'::text "+
-							"AND session_id = '"+this.co.getSessionId()+"'::text; ";				
-		
+							"AND session_id = '"+this.co.getSessionId()+"'::text; ";
+					
 					try {
 						// Create a Statement object
 						stmt = conn.createStatement();
@@ -286,6 +293,9 @@ public class PostgresConnectionManager {
 		
 		String query = "SET search_path TO "+schemaName+";";
 		Statement stmt = null;
+		
+		if (Constants.debug)
+			System.out.println(query);
 		
 		try {
 			// Create a Statement object

@@ -91,22 +91,26 @@ public class Database {
 		}
 	};
 	
-	// the ContextObject wasn't really supposed to keep information: it's mostly a convenient way to send servert context info in one single object
+	// the ContextObject wasn't really supposed to keep information: it's mostly a convenient way to send server context info in one single object
 	// BUT we do use it to keep some more info: 
 	//  [1] the last usage time of the database object (so it can be removed when it hasn't been used for some time)
-	//  [2] the tab the user is currently viewing (so we can simulate a session ID per tab for example)
+	//  [2] the tab the user is currently viewing (so we can simulate a session ID per TAB for example)
 	// Both behave differently:
-	//  [1] has is usage time set each time it's called... and at each call, we loop throught to other cached ContextObjects of some usage time is too long ago
+	//  [1] has is usage time set each time it's called... and at each call, we loop through to other cached ContextObjects and check if some usage time is too long ago
 	//  [2] has its tab-id only set at tab creation or tab change, so the tab-id is lost at the very next round since the ContextObject by default only contains
-	//      server context info. So, to prevent loss, we check if the previous version had some tab-id, and copy it to the new ContextObject
+	//      server context info. So, to prevent loss, we check if the previous version (held in this class) had some tab-id, and copy it to the new ContextObject
 	public void updateContextObject(ContextObject co){
 		
 		// see explanation hereabove
-		if ( (co.getActiveTabId() == null || co.getActiveTabId().isEmpty())
+		
+		if ( (co.getActiveTabId() == null || co.getActiveTabId().isEmpty())			// THIS THE INPUT OBJECT TO BE UPDATED
 				&&
-			 (this.co.getActiveTabId() != null && !this.co.getActiveTabId().isEmpty())) {
+				(this.co.getActiveTabId() != null && !this.co.getActiveTabId().isEmpty())) 	// THIS IS OBJECT CACHED IN
+																							// THIS DATABASE OBJECT, WHICH WE WANT TO KEEP
+																							// THE ACTIVE TAB ID FROM
+		{			
 			co.setActiveTabId(this.co.getActiveTabId());
-			}
+		}
 		
 		this.co = co;
 	}
@@ -4312,8 +4316,9 @@ public class Database {
 	 */
 	public void setActiveTabId(String activeTabId) {
 		
-		// set the new active tab id in the ContextObject kept in this DatabaseObject
+		// set the new active tab id in the ContextObject kept in this DatabaseObject and in the cached PostgresConnectionManager 
 		this.co.setActiveTabId(activeTabId);
+		this.pc.getContextObject().setActiveTabId(activeTabId);
 		
 	}
 
