@@ -220,7 +220,7 @@ public class PostgresConnectionManager {
 	 * 
 	 * @param conn
 	 */
-	private void SendUserIdentityToDatabaseServer(Connection conn){
+	private void sendUserIdentityToDatabaseServer(Connection conn){
 		
 		// if the configuration tells us to send the tomcat username
 		// to the database server
@@ -274,7 +274,29 @@ public class PostgresConnectionManager {
 			}	
 		
 	}
-
+	
+	
+	/**
+	 * Set the search_path to the specified schema name in the current connection.
+	 * 
+	 * @param conn
+	 * @param schemaName
+	 */
+	private void setSchema(Connection conn, String schemaName){
+		
+		String query = "SET search_path TO "+schemaName+";";
+		Statement stmt = null;
+		
+		try {
+			// Create a Statement object
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		}
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing query "+query, e);
+		}
+	}
 	
 
 	
@@ -284,7 +306,7 @@ public class PostgresConnectionManager {
 	 * @param timeLimitInMilliseconds
 	 * @return
 	 */
-	public ResultSetSnapshot sendQuery(String query, int timeLimitInMilliseconds) {
+	public ResultSetSnapshot sendQuery(String schema, String query, int timeLimitInMilliseconds) {
 		
 		if (Constants.debug) System.out.println(query);
 		long timeBeforeQuery = new Date().getTime();
@@ -298,93 +320,115 @@ public class PostgresConnectionManager {
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
+			// set the schema for this connection, so that the query can be executed in the right context)
+			setSchema(conn, schema); 
+			
 			// register the user identity etc. in this session
-			SendUserIdentityToDatabaseServer(conn);
+			sendUserIdentityToDatabaseServer(conn);
 			
-			// Create a Statement object
-			stmt = conn.createStatement();
 			
-			// if required, set a timeout 
 			
-			if (timeLimitInMilliseconds > 0) {
+			// we organize the job in TWO try-catch blocks:
+			// - #1 to set the timeout, if required
+			// - #2 to reset the timeout to default, to prevent the timeout from applying to following queries
+			
+			// block #1
+			
+			try {
 				
-				// set a timeout in milliseconds if required
-				// (beware: setting this must happen in a separate query: we can't bundle this
-				//  with the main query, or it won't have any effect!)
+				// Create a Statement object
+				stmt = conn.createStatement();
+			
+				// if required, set a timeout 
 				
-				String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
-				stmt.executeUpdate(SetTimeOutQuery);
-			}
-			
-			// the timeout is set, now execute the query
-			rs = stmt.executeQuery(query);		
-			rsCopy = ResultSetSnapshot.copy(rs);
-			
-		}
-		catch (SQLException e) {
-			
-			// if the error is a timeout error
-			if (e.getMessage().toLowerCase().contains("timeout")) {
-				
-				// show a message but throw no exception
-				// so this function will return null
-				long timeAfterQuery = new Date().getTime();
-				if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
-			}
-			else {
-				// error, throw an exception and return no value
-				if (Constants.debug) e.printStackTrace();
-				throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
-			}
-		} 
-		catch (Exception e) {
-			if (Constants.debug) e.printStackTrace();
-			throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
-		}
-		finally {			
-			
-			// finally, reset the original timeout settings
-			
-			if (timeLimitInMilliseconds > 0) {
-				
-				String ResetTimeOutQuery = "RESET statement_timeout;";			
-				try (Connection conn = getConnectionFromPool()) {
+				if (timeLimitInMilliseconds > 0) {
 					
-					// register the user identity etc. in this session
-					SendUserIdentityToDatabaseServer(conn);
+					// set a timeout in milliseconds if required
+					// (beware: setting this must happen in a separate query: we can't bundle this
+					//  with the main query, or it won't have any effect!)
+					
+					String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+					stmt.executeUpdate(SetTimeOutQuery);
+				}
+				
+				// the timeout is set, now execute the query
+				rs = stmt.executeQuery(query);		
+				rsCopy = ResultSetSnapshot.copy(rs);
+			
+			}
+			catch (SQLException e) {
+				
+				// if the error is a timeout error
+				if (e.getMessage().toLowerCase().contains("timeout")) {
+					
+					// show a message but throw no exception
+					// so this function will return null
+					long timeAfterQuery = new Date().getTime();
+					if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
+				}				
+				else if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			} catch (Exception e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			}
+			
+			
+			// block #2
+			
+			try {
+				// finally, reset the original timeout settings
+				
+				if (timeLimitInMilliseconds > 0) {
+					
+					String ResetTimeOutQuery = "RESET statement_timeout;";		
 					
 					// Create a new Statement object
 					stmt = conn.createStatement();
 					// reset timeout
 					stmt.executeUpdate(ResetTimeOutQuery);
-					
-				} 
-				catch (SQLException e) {
-					if (Constants.debug) e.printStackTrace();
-					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
-				} 
-				catch (Exception e) {
-					if (Constants.debug) e.printStackTrace();
-					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
 				}
 			}
+			catch (SQLException e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			} catch (Exception e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			}
 			
+			
+		}
+		catch (SQLException e) {		
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
+		
+		} 
+		catch (Exception e) {
+			if (Constants.debug) e.printStackTrace();
+			throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
 		}
 		
 		return rsCopy;
 	}
 
-	public void sendUpdate(String query) {
+	public void sendUpdate(String schema, String query) {
+		
 		if (Constants.debug) System.out.println(query);
-		
-		
 		
 		Statement stmt = null;
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
+			// set the schema for this connection, so that the query can be executed in the right context)
+			setSchema(conn, schema); 
+			
 			// register the user identity etc. in this session
-			SendUserIdentityToDatabaseServer(conn);
+			sendUserIdentityToDatabaseServer(conn);
 			
 			// Create a Statement object
 			stmt = conn.createStatement();
@@ -401,7 +445,7 @@ public class PostgresConnectionManager {
 	}
 	
 	
-	public ResultSetSnapshot sendPreparedQuery(String query, String[] args) {
+	public ResultSetSnapshot sendPreparedQuery(String schema, String query, String[] args) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -425,8 +469,11 @@ public class PostgresConnectionManager {
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
+			// set the schema for this connection, so that the query can be executed in the right context)
+			setSchema(conn, schema); 
+			
 			// register the user identity etc. in this session
-			SendUserIdentityToDatabaseServer(conn);
+			sendUserIdentityToDatabaseServer(conn);
 			
 			// prepare statement
 			prest = conn.prepareStatement(query,
@@ -459,7 +506,7 @@ public class PostgresConnectionManager {
 		return rsCopy;
 	}
 	
-	public ResultSetSnapshot sendPreparedQuery(String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
+	public ResultSetSnapshot sendPreparedQuery(String schema, String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -484,106 +531,157 @@ public class PostgresConnectionManager {
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
+			// set the schema for this connection, so that the query can be executed in the right context)
+			setSchema(conn, schema); 
+			
 			// register the user identity etc. in this session
-			SendUserIdentityToDatabaseServer(conn);
+			sendUserIdentityToDatabaseServer(conn);
 			
-			// if required, set a timeout 
 			
-			if (timeLimitInMilliseconds > 0) {
-				// Create a Statement object
-				stmt = conn.createStatement();
+			
+			// we organize the job in TWO try-catch blocks:
+			// - #1 to set the timeout, if required
+			// - #2 to reset the timeout to default, to prevent the timeout from applying to following queries
+			
+			// block #1
+			
+			try {
+				// if required, set a timeout 
 				
-				// set a timeout in milliseconds
-				// (beware: setting this must happen in a separate query: we can't bundle this
-				//  with the main query, or it won't have any effect!)
-				String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
-				stmt.executeUpdate(SetTimeOutQuery);				
+				if (timeLimitInMilliseconds > 0) {
+					// Create a Statement object
+					stmt = conn.createStatement();
+					
+					// set a timeout in milliseconds
+					// (beware: setting this must happen in a separate query: we can't bundle this
+					//  with the main query, or it won't have any effect!)
+					String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+					stmt.executeUpdate(SetTimeOutQuery);				
+				}
+				
+				
+				// prepare statement
+				prest = conn.prepareStatement(query,
+						ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+	
+				for (int i=0; i<args.length; i++) {
+					
+					String oneArg = args[i];
+					String oneType = ato.getType(i);
+					// a string containing 'NULL' must be interpreted as null
+					if (oneArg.equals("NULL")) oneArg = null;
+					
+					if (oneType.equals("date")) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.OTHER);
+						else 
+							prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
+					}
+					else if (oneType.startsWith("time")) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.OTHER);
+						else 
+							prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
+					}
+					else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") ) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.OTHER);
+						else 
+							prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
+					}
+					else if (oneType.equals("boolean")) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.BOOLEAN);
+						else 
+							prest.setBoolean(i+1, oneArg.equals("true")?true:false);
+					}
+					
+					
+					else if ( isBigWholeNumberType(oneType) ) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.BIGINT);
+						else 
+							prest.setLong(i+1, Long.parseLong( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+					}
+					else if ( isWholeNumberType(oneType) ) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.INTEGER);
+						else 
+							prest.setInt(i+1, Integer.parseInt( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+					}
+					
+					
+					
+					else if ( isRealNumberType(oneType) ) {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.DOUBLE);
+						else 
+							prest.setDouble(i+1, Double.parseDouble(oneArg)); 
+					}
+					else if (oneType.endsWith("[]")) { // array
+					
+						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
+						if (oneType.equals("_int4[]"))
+							prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
+						else
+							prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
+					}
+					else if (oneType.equals("jsonb")) {	
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.VARCHAR);
+						else 
+							prest.setString(i+1, "[{"+oneArg+"}]");
+					}
+					else {
+						if (oneArg == null) 
+							prest.setNull(i+1, java.sql.Types.VARCHAR);
+						else 
+							prest.setString(i+1, oneArg);
+					}				
+				}
+				
+				
+				rs = prest.executeQuery();
+				rsCopy = ResultSetSnapshot.copy(rs);
+				
+			
+			}
+			catch (SQLException e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			} catch (Exception e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
 			}
 			
 			
-			// prepare statement
-			prest = conn.prepareStatement(query,
-					ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-			for (int i=0; i<args.length; i++) {
+			// block #2
+			
+			try {
+				// reset the original timeout settings
 				
-				String oneArg = args[i];
-				String oneType = ato.getType(i);
-				// a string containing 'NULL' must be interpreted as null
-				if (oneArg.equals("NULL")) oneArg = null;
-				
-				if (oneType.equals("date")) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.OTHER);
-					else 
-						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
-				}
-				else if (oneType.startsWith("time")) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.OTHER);
-					else 
-						prest.setTime(i+1, java.sql.Time.valueOf(oneArg));
-				}
-				else if (oneType.equals("bit varying(1)") || oneType.equalsIgnoreCase("USER-DEFINED") ) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.OTHER);
-					else 
-						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
-				}
-				else if (oneType.equals("boolean")) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.BOOLEAN);
-					else 
-						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
+				if (timeLimitInMilliseconds > 0) {
+					
+					String ResetTimeOutQuery = "RESET statement_timeout;";	
+					
+					// Create a new Statement object
+					stmt = conn.createStatement();
+					// reset timeout
+					stmt.executeUpdate(ResetTimeOutQuery);
 				}
 				
-				
-				else if ( isBigWholeNumberType(oneType) ) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.BIGINT);
-					else 
-						prest.setLong(i+1, Long.parseLong( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
-				}
-				else if ( isWholeNumberType(oneType) ) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.INTEGER);
-					else 
-						prest.setInt(i+1, Integer.parseInt( getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
-				}
-				
-				
-				
-				else if ( isRealNumberType(oneType) ) {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.DOUBLE);
-					else 
-						prest.setDouble(i+1, Double.parseDouble(oneArg)); 
-				}
-				else if (oneType.endsWith("[]")) { // array
-				
-					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
-					if (oneType.equals("_int4[]"))
-						prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
-					else
-						prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
-				}
-				else if (oneType.equals("jsonb")) {	
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.VARCHAR);
-					else 
-						prest.setString(i+1, "[{"+oneArg+"}]");
-				}
-				else {
-					if (oneArg == null) 
-						prest.setNull(i+1, java.sql.Types.VARCHAR);
-					else 
-						prest.setString(i+1, oneArg);
-				}				
 			}
-			
-			
-			rs = prest.executeQuery();
-			rsCopy = ResultSetSnapshot.copy(rs);
+			catch (SQLException e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			} catch (Exception e) {
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			}
 		}
 		catch (SQLException e) {
 			if (Constants.debug) e.printStackTrace();
@@ -593,40 +691,11 @@ public class PostgresConnectionManager {
 			if (Constants.debug) e.printStackTrace();
 			throw new RuntimeException("Error while executing prepared query (with time limit) "+query, e);
 		}
-		finally {			
-			
-			// finally, reset the original timeout settings
-			
-			if (timeLimitInMilliseconds > 0) {
-				
-				String ResetTimeOutQuery = "RESET statement_timeout;";	
-				
-				try (Connection conn1 = getConnectionFromPool()) {
-				
-					// register the user identity etc. in this session
-					SendUserIdentityToDatabaseServer(conn1);
-					
-					// Create a new Statement object
-					stmt = conn1.createStatement();
-					// reset timeout
-					stmt.executeUpdate(ResetTimeOutQuery);
-					
-				} 
-				catch (SQLException e) {
-					if (Constants.debug) e.printStackTrace();
-					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
-				} 
-				catch (Exception e) {
-					if (Constants.debug) e.printStackTrace();
-					throw new RuntimeException("Error while executing query "+ResetTimeOutQuery, e);
-				}
-			}
-		}
 		
 		return rsCopy;
 	}
 	
-	public void sendPreparedUpdate(String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) {
+	public void sendPreparedUpdate(String schema, String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) {
 		
 		// if the query args contains null values,
 		// the query needs to be rebuilt
@@ -646,8 +715,11 @@ public class PostgresConnectionManager {
 
 		try (Connection conn = getConnectionFromPool()) {
 			
+			// set the schema for this connection, so that the query can be executed in the right context)
+			setSchema(conn, schema); 
+			
 			// register the user identity etc. in this session
-			SendUserIdentityToDatabaseServer(conn);
+			sendUserIdentityToDatabaseServer(conn);
 			
 			// Create a Statement object
 			prest = conn.prepareStatement(query);

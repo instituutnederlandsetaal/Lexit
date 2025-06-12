@@ -150,8 +150,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			dc.sendPreparedUpdate(deleteRecord, args, ato, dro);
+			dc.sendPreparedUpdate(schema, deleteRecord, args, ato, dro);
 			
 		}
 		catch (Exception e) {
@@ -195,8 +194,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			dc.sendPreparedUpdate(deleteRecords, args, ato, dro);
+			dc.sendPreparedUpdate(schema, deleteRecords, args, ato, dro);
 			
 		}
 		catch (Exception e) {
@@ -352,14 +350,12 @@ public class Database {
 			PostgresConnectionManager dc = getPostgresConnectionManager();
 			
 			try {
-				dc.sendUpdate("SET search_path TO "+schema+"; ");	
-				
 				List<Map<String, Object>> rs;
 				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = dc.sendPreparedQuery(getRowNumberQuery, args, ato, 0).getRows();
+					rs = dc.sendPreparedQuery(schema, getRowNumberQuery, args, ato, 0).getRows();
 					res = Util.getResultSetCopyInAList(rs, new String[]{"rownumber"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
@@ -488,14 +484,12 @@ public class Database {
 			PostgresConnectionManager dc = getPostgresConnectionManager();
 			
 			try {
-				dc.sendUpdate("SET search_path TO "+schema+"; ");	
-				
 				List<Map<String, Object>> rs;
 				if( alreadyCalled ) {
 					res = gotoQueryToResultSet.get(hashKey);
 				}
 				else {
-					rs = dc.sendPreparedQuery(getRowNumberQuery, argValues, ato, 0).getRows();
+					rs = dc.sendPreparedQuery(schema, getRowNumberQuery, argValues, ato, 0).getRows();
 					res = Util.getResultSetCopyInAList(rs, new String[]{"ids_to_render"});
 					gotoQueryToResultSet.put(hashKey, res);
 				}
@@ -567,8 +561,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getIdQuery, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getIdQuery, args).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			if (res.size()>0)
@@ -620,12 +613,8 @@ public class Database {
 	    
 	    try {
 	    	
-	    	dc.sendUpdate("SET search_path TO " + schema + "; ");
-	      
-	        // in some rare cases, the query hereabove will be slow
-	    	dc.sendUpdate("SET statement_timeout TO "+maxAllowedDuration+";");
-
-	    	List<Map<String, Object>> rs = dc.sendQuery(query, 0).getRows();
+	    	// in some rare cases, the query hereabove will be slow
+	    	List<Map<String, Object>> rs = dc.sendQuery(schema, query, maxAllowedDuration).getRows();
 
 	    	res = Util.getResultSetCopyInAList(rs, new String[] { "n" });
 	    	if (res.size() > 0) {
@@ -692,11 +681,10 @@ public class Database {
 	    PostgresConnectionManager dc = getPostgresConnectionManager();
 	    
     	try {
-    		dc.sendUpdate("SET search_path TO " + schema + "; ");
     		List<Map<String, Object>> rs = columnValueFilter.isEmpty() ?
-    				dc.sendQuery(query, 0).getRows()
+    				dc.sendQuery(schema, query, 0).getRows()
 	  	    		  :
-	  	    		dc.sendPreparedQuery(query, new String[]{columnValueFilter}).getRows();
+	  	    		dc.sendPreparedQuery(schema, query, new String[]{columnValueFilter}).getRows();
 	
     		res = Util.getResultSetCopyInAList(rs, new String[] { "n" });
     		if (res.size() > 0) {
@@ -823,12 +811,10 @@ public class Database {
 	    PostgresConnectionManager dc = getPostgresConnectionManager();
 	    
     	try {
-    		dc.sendUpdate("SET search_path TO " + schema + "; ");
-  	      
     		List<Map<String, Object>> rs = columnsValues.size() == 0 ? 
-  	    		dc.sendQuery(query, 0).getRows()
+  	    		dc.sendQuery(schema, query, 0).getRows()
   	    		  :
-  	    		dc.sendPreparedQuery(query, columnsValues.toArray(new String[columnsValues.size()]), ato, 0).getRows();
+  	    		dc.sendPreparedQuery(schema, query, columnsValues.toArray(new String[columnsValues.size()]), ato, 0).getRows();
 
   	      	res = Util.getResultSetCopyInAList(rs, new String[] { "n", "cnt" });
   	      	if (res.size() > 0) {
@@ -878,12 +864,10 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
-			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			ato.setType(0, idColumnType);
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecord, args, ato, 0).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getRecord, args, ato, 0).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
@@ -938,14 +922,12 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
-			
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			for (int i=0; i<ids.length; i++) {
 				ato.setType(i, idColumnType);
 			}
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecords, args, ato, 0).getRows();			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getRecords, args, ato, 0).getRows();			
 						
 			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
@@ -1029,9 +1011,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getRecord, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getRecord, args).getRows();
 			
 			String[] columnsNames = getColumnNames(tableName);			
 			res = Util.getResultSetCopyInAList(rs, columnsNames);	
@@ -1125,9 +1105,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");				
-			
-			List<Map<String, Object>>  rs = dc.sendPreparedQuery(getRecord, args, ato, 0).getRows();
+			List<Map<String, Object>>  rs = dc.sendPreparedQuery(schema, getRecord, args, ato, 0).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, columnsNames);	
 			
@@ -1225,24 +1203,14 @@ public class Database {
 			"SELECT (" + functionName + "("+Util.join(args, ",")+")).*;" 
 			:
 			"SELECT " + functionName + "("+Util.join(args, ",")+");";	
-		
-		// DEBUG
-		//System.out.println(getRecord);		
+				
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
 			
-			// try to call the function from the public schema (kind of default schema)
-			try {
-				dc.sendUpdate("SET search_path TO public; ");
-			}
-			catch (Exception e) {
-				// if it fails, do nothing: the schema might have been removed on purpose
-			}
-			
 			// call the function
-			ResultSetSnapshot snapshot = dc.sendQuery(getRecord, 0);
+			ResultSetSnapshot snapshot = dc.sendQuery("public", getRecord, 0);
 			
 			String[] columnsNames = snapshot.getColumnNames().toArray(new String[0]);			
 			res = Util.getResultSetCopyInAList(snapshot.getRows(), columnsNames);			
@@ -1298,9 +1266,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			dc.sendPreparedUpdate(insertRecords, values, ato, dro);
+			dc.sendPreparedUpdate(schema, insertRecords, values, ato, dro);
 			
 		}
 		catch (Exception e) {
@@ -1370,11 +1336,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			for (int i = 0; i<rowIds.length; i++) {
 				ato.setType(0, valueTypeOfIdColumn);
-				dc.sendPreparedUpdate(insertQuery, new String[]{rowIds[i]}, ato, dro);
+				dc.sendPreparedUpdate(schema, insertQuery, new String[]{rowIds[i]}, ato, dro);
 			}
 			
 		}
@@ -1474,15 +1438,13 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			List<Map<String, Object>> rs = null;
 			
 			if (type.equals("insert")) {
-				rs = dc.sendPreparedQuery(insertQuery, filterValues).getRows();				
+				rs = dc.sendPreparedQuery(schema, insertQuery, filterValues).getRows();				
 			}
 			else {
-				dc.sendPreparedUpdate(insertQuery, filterValues, ato, dro);				
+				dc.sendPreparedUpdate(schema, insertQuery, filterValues, ato, dro);				
 			}
 			
 			ArrayList<String[]> res;
@@ -1542,8 +1504,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(insertRecords, values, ato, 0).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, insertRecords, values, ato, 0).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -1623,8 +1584,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(duplicateRecord, values, ato, 0).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, duplicateRecord, values, ato, 0).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{idColumn});
 			idOfCreatedRecord = res.get(0)[0];	
@@ -1673,8 +1633,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();			
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -1716,8 +1675,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			dc.sendUpdate(setComment);
+			dc.sendUpdate(schema, setComment);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+setComment);
@@ -1762,9 +1720,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getIdQuery, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getIdQuery, args).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, new String[]{"comment"});
 			if (res.size()>0)
@@ -1850,8 +1806,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(checkExistenceQuery, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, checkExistenceQuery, args).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, new String[]{"result"});
 			
@@ -1894,9 +1849,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args).getRows();
 
 			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});
 
@@ -1950,8 +1903,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();		
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -2022,8 +1974,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -2094,8 +2045,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			dc.sendPreparedUpdate(updateRecords, args, ato, dro);
+			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
@@ -2160,8 +2110,8 @@ public class Database {
 		try {
 			Util.debug(co, "## Get count estimate (fast)");
 			
-			dc.sendUpdate(query1);
-			List<Map<String, Object>> rs = dc.sendQuery(query2, 0).getRows();
+			dc.sendUpdate("public", query1);
+			List<Map<String, Object>> rs = dc.sendQuery("public", query2, 0).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"rows"});		
 			count = Integer.parseInt(res.get(0)[0]);
@@ -2223,8 +2173,8 @@ public class Database {
 		
 		try {		
 			
-			dc.sendUpdate(query1);
-			List<Map<String, Object>> rs = dc.sendQuery(query2, 0).getRows();
+			dc.sendUpdate("public", query1);
+			List<Map<String, Object>> rs = dc.sendQuery("public", query2, 0).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"cost"});		
 			queryCost = Integer.parseInt(res.get(0)[0]);
@@ -2266,13 +2216,11 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");	
-			
 			boolean bForceExactCount = this.getForceExactCount();
 			
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
-			ResultSetSnapshot rss = dc.sendQuery(getCountQuery, (bForceExactCount ? 0 : maxAllowedDuration));
+			ResultSetSnapshot rss = dc.sendQuery(schema, getCountQuery, (bForceExactCount ? 0 : maxAllowedDuration));
 			
 			// if the query took too long, rss will be null
 			// so the function must return -1, telling the caller function
@@ -2346,9 +2294,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, new String[]{schema}).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, new String[]{schema}).getRows();
 			
 			// compute max allowed cost (initialization)
 			long timeAfter = new Date().getTime();
@@ -2399,9 +2345,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, new String[]{schema}).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, new String[]{schema}).getRows();
 			
 			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});		
 			
@@ -2868,13 +2812,11 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			// get the table content 
 			String[] args = queryValues.toArray(new String[queryValues.size()]);
 			
 			ResultSetSnapshot rs1 = queryValues.size()==0 ?
-					dc.sendQuery(dataQuery, 0) : dc.sendPreparedQuery(dataQuery, args, ato, 0);
+					dc.sendQuery(schema, dataQuery, 0) : dc.sendPreparedQuery(schema, dataQuery, args, ato, 0);
 			
 			ArrayList<ConcurrentHashMap<String, String>> cellList = getListOfIdToCell(tableName, primaryKey, rs1, allColumns );
 			
@@ -2925,8 +2867,6 @@ public class Database {
 					if (bExactCountRequiredByUser || queryCost < maxAllowedCost) {
 						Util.debug(co, "%%% We will count the normal way (exact count required by user: "+bExactCountRequiredByUser+")");
 						
-						dc.sendUpdate("SET search_path TO "+schema+"; ");
-						
 						
 						List<Map<String, Object>> rs2;						
 						try {
@@ -2935,7 +2875,7 @@ public class Database {
 							// that the normal count will never takes too long.
 							// BUT if the user absolutely required an exact count, he/she will have to put up with it...
 							
-							rs2 = dc.sendPreparedQuery(countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) ).getRows();							
+							rs2 = dc.sendPreparedQuery(schema, countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) ).getRows();							
 							
 							ArrayList<ArrayList<String>> countResult = Util.getResultSetCopyInArrayList(rs2, new String[]{"count"});
 							
@@ -3363,11 +3303,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };			
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(getPK, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getPK, args).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname", "format_type"});
 			
@@ -3464,11 +3402,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			String[] args = new String[]{tableNameOnly, columnName, schema};		
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(typeQuery, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, typeQuery, args).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"type"});		
 			
@@ -3518,13 +3454,10 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			for (int i = 0; i<columns.length; i++) 
-			{
-				// remove quote from names, in case the "safe" quote name was saved
-				columns[i] = removeQuotesFromSqlReservedWord(columns[i]);
+			for (int i = 0; i<columns.length; i++) {
 				
+				// remove quote from names, in case the "safe" quote name was saved
+				columns[i] = removeQuotesFromSqlReservedWord(columns[i]);				
 								
 				// use caching				
 				// (if we have looked up the column type already, it is stored in a hash)
@@ -3539,7 +3472,7 @@ public class Database {
 				else {
 					String[] args = new String[]{tableNameOnly, columns[i], schema};		
 					
-					List<Map<String, Object>> rs = dc.sendPreparedQuery(typeQuery, args).getRows();				
+					List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, typeQuery, args).getRows();				
 					ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"type"});						
 					
 					columnTypes[i] = (res.size()>0) ? res.get(0)[0] : "unknown";
@@ -3592,11 +3525,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(commentsQuery, args).getRows();				
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, commentsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"name", "comment"});
 		
 			if (res.size()>0)
@@ -3673,11 +3604,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments };		
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionDetailsQuery, args).getRows();				
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionDetailsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"argument_types"});
 			
 			// output has the form:  "type1, type2, type3"
@@ -3784,11 +3713,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			
 			String[] args = new String[]{functionName, functionSchemaName, projectSchema};		
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionQuery, args).getRows();				
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"function_operation"});
 			
 			if (res.size()>0) {
@@ -3858,11 +3785,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");			
-			
 			String[] args = new String[]{functionName, schemaName, numberOfArguments};		
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(functionDetailsQuery, args).getRows();				
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionDetailsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"return_type"});
 			
 			if (res.size()>0) {
@@ -3942,11 +3867,9 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
 			String[] args = new String[]{tableNameOnly, schema}; 
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(columnQuery, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, columnQuery, args).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname"});
 			
@@ -3989,9 +3912,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"custom_type"});
 			
@@ -4029,9 +3950,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate("SET search_path TO "+schema+"; ");
-			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, args).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args).getRows();
 			
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"enum_labels"});
 			
@@ -4654,16 +4573,16 @@ public class Database {
                         questionMarks = Util.getStringOfQuestionMarks(oneRow);
 
                         String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNames, " text, ")+" text);";
-                        String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
+                        String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
                         
                         PostgresConnectionManager dc = getPostgresConnectionManager();
                         
                         try {
-                        	dc.sendUpdate(createTableQuery);
-                        	dc.sendUpdate(AddUploadedCommentQuery);
+                        	dc.sendUpdate(currentSchema, createTableQuery);
+                        	dc.sendUpdate(currentSchema, addUploadedCommentQuery);
                         } 
                         catch (Exception e) {
-                            throw new RuntimeException("Error while executing query "+createTableQuery + "\n" + AddUploadedCommentQuery, e);
+                            throw new RuntimeException("Error while executing query "+createTableQuery + "\n" + addUploadedCommentQuery, e);
                         }
 
 
@@ -4681,7 +4600,7 @@ public class Database {
                         
                         try {
 							if (columnNames.size() == oneRow.length && oneRow.length == ato.getSize()){
-								dc.sendPreparedUpdate(insertQuery, oneRow, ato, new DbResponseObject());
+								dc.sendPreparedUpdate(currentSchema, insertQuery, oneRow, ato, new DbResponseObject());
 							}
 							else {
 								System.out.println("Row #"+counter+" in uploaded "+fileType.toUpperCase()+"-file has a different number of columns than the header row. Skipping.");
@@ -4883,16 +4802,16 @@ public class Database {
 
 
 				String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNamesAndTypes, ", ")+");";
-				String AddUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
+				String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
 				
 				PostgresConnectionManager dc = getPostgresConnectionManager();
 				
 				try {
-					dc.sendUpdate(createTableQuery);
-					dc.sendUpdate(AddUploadedCommentQuery);
+					dc.sendUpdate(currentSchema, createTableQuery);
+					dc.sendUpdate(currentSchema, addUploadedCommentQuery);
 				} 
 				catch (Exception e) {
-					throw new RuntimeException("Error while executing query " + createTableQuery + "\n" + AddUploadedCommentQuery, e);
+					throw new RuntimeException("Error while executing query " + createTableQuery + "\n" + addUploadedCommentQuery, e);
 				}
 
 
@@ -4932,7 +4851,7 @@ public class Database {
 						
 						
 						try {
-							dc.sendPreparedUpdate(insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
+							dc.sendPreparedUpdate(currentSchema, insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
 						} 
 						catch (Exception e) {
 							throw new RuntimeException("Error while executing query "+insertQuery, e);
@@ -5007,7 +4926,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			dc.sendUpdate(dropTableIfExists);
+			dc.sendUpdate(currentSchema, dropTableIfExists);
 			ro.setResponse("OK");
 		} 
 		catch (Exception e) {

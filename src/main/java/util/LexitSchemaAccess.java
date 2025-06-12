@@ -140,7 +140,7 @@ public class LexitSchemaAccess {
 		dc = getPostgresConnectionManager();
 	
 		try {
-			dc.sendUpdate(query);
+			dc.sendUpdate(lexitSchemaAccessHash.get("schema"), query);
 		}
 		catch (Exception e) {  	    	
 			throw new RuntimeException("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error.", e);
@@ -419,7 +419,7 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	    	List<Map<String, Object>>  rs = dc.sendQuery(query, 0).getRows();
+	    	List<Map<String, Object>>  rs = dc.sendQuery(schemaName, query, 0).getRows();
 
 	    	res = Util.getResultSetCopyInAList(rs, new String[] { "username", "password" });
 	    	if (res.size() > 0) {
@@ -468,7 +468,7 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	    	List<Map<String, Object>> rs = dc.sendQuery(query, 0).getRows();
+	    	List<Map<String, Object>> rs = dc.sendQuery(schemaName, query, 0).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, new String[] { "username", "roles" });
 			if (res.size() > 0) {
@@ -509,8 +509,8 @@ public class LexitSchemaAccess {
 		deleteUserAto.addType("text");
 
 		try {
-			dc.sendPreparedUpdate(deleteUserQuery1, deleteUserArgs, deleteUserAto, null);
-			dc.sendPreparedUpdate(deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery1, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
@@ -541,7 +541,7 @@ public class LexitSchemaAccess {
 		deleteUserAto.addType("text");
 
 		try {
-			dc.sendPreparedUpdate(deleteUserQuery, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
@@ -574,7 +574,7 @@ public class LexitSchemaAccess {
 		ArrayList<String[]> res;
 		
 		try {
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(query, queryArgs, queryAto, 0).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schemaName, query, queryArgs, queryAto, 0).getRows();
 
 			res = Util.getResultSetCopyInAList(rs, new String[] { "default_access_role" });
 			if (res.size() > 0) {
@@ -600,8 +600,6 @@ public class LexitSchemaAccess {
 	public void setUserWithRole(String username, String password, String defaultRole, String dbName, String role) {
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
-		
-		
 		
 		// first of all: make sure that the publicreader is not messed up with!
 		
@@ -665,7 +663,7 @@ public class LexitSchemaAccess {
 	    	
 	    	
 	    	try {
-	    		dc.sendPreparedUpdate(addUserQuery, addUserArgs, addUserAto, null);
+	    		dc.sendPreparedUpdate(schemaName, addUserQuery, addUserArgs, addUserAto, null);
 	  	    }
 	  	    catch (Exception e) {  	    	
 	  	    	throw new RuntimeException("Adding a user caused an error.", e);
@@ -696,7 +694,7 @@ public class LexitSchemaAccess {
         	deletePreviousRoleAto.addType("text");
         	
         	try {
-        		dc.sendPreparedUpdate(deletePreviousRole, deletePreviousRoleArgs, deletePreviousRoleAto, null);
+        		dc.sendPreparedUpdate(schemaName, deletePreviousRole, deletePreviousRoleArgs, deletePreviousRoleAto, null);
     	    }
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Removing old user role caused an error.", e);
@@ -717,7 +715,7 @@ public class LexitSchemaAccess {
         	addUserRoleAto.addType("text");
         	
         	try {
-        		dc.sendPreparedUpdate(addUserRoleQuery, addUserRoleArgs, addUserRoleAto, null);
+        		dc.sendPreparedUpdate(schemaName, addUserRoleQuery, addUserRoleArgs, addUserRoleAto, null);
     	    }
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Adding a user and project role caused an error.", e);
