@@ -57,9 +57,11 @@ public class AppLifecycleListener implements ServletContextListener {
     	            }
         		}
         		 
-        		// finally, remove the project from the map after closing its data source
+        		// finally, remove the project from the maps after closing its data source
+        		// BEWARE: we don't remove the project2Credentials map, since that is needed when everything else was closed/removed
         		try {
         			project2DataSource.remove(project);
+        			project2TimeLastUsed.remove(project);
         		}
         		catch (Exception e) {
         			e.printStackTrace();
@@ -82,6 +84,8 @@ public class AppLifecycleListener implements ServletContextListener {
 	}
 	
 	// getter without time registration
+	// because the spy more is about monitoring the data sources
+	// but is definitely not about using them (so 'time last used' mustn't be updated) 
 	public static HikariDataSource getDataSourceForSpy(String projectName) {
 		
 		return project2DataSource.get(projectName);
@@ -109,9 +113,11 @@ public class AppLifecycleListener implements ServletContextListener {
 	            }
     		}
     		 
-    		// finally, remove the project from the map after closing its data source
+    		// finally, remove the project from the maps after closing its data source
+    		// BEWARE: we don't remove the project2Credentials map, since that is needed when everything else was closed/removed
     		try {
     			project2DataSource.remove(project);
+    			project2TimeLastUsed.remove(project);
     		}
     		catch (Exception e) {
     			e.printStackTrace();

@@ -2131,7 +2131,7 @@ public class TableResources {
 	
 	
 	// read the users access rights file
-	public String[] getUserRoles(ContextObject co) throws IOException{
+	public String[] getUserRoles(ContextObject co) throws IOException {
 		
 		// if the access rights file has already been read,
 		// return relevant content right away
@@ -2148,9 +2148,18 @@ public class TableResources {
 		
 		synchronized (TableResources.class){
 			
-			Util.debug(co, "Read user access rights...");			
-			users2roles = lexitInfo.getUsersRoles();			
-			return users2roles.get(co.getUsername());
+			try {
+				Util.debug(co, "Read user access rights...");			
+				users2roles = lexitInfo.getUsersRoles();			
+				return users2roles.get(co.getUsername());
+			}
+			catch (NullPointerException e) {
+				// this may happen when the access rights file is not available
+                // or when the user is not logged in
+                Util.debug(co, "No user roles found for user "+co.getUsername() + ". The user might not be logged in.");
+                return new String[]{};
+            }
+            
 		}		
 		
 	}

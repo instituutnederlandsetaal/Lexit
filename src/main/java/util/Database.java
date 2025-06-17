@@ -2242,9 +2242,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getCountQuery, e);
-		}
-		
+			// do nothing, just return the default count value
+		}		
 		
 		return count;
 		
@@ -4405,10 +4404,11 @@ public class Database {
 		// case [1] 
 		// if exact count is required, we must get an true count anyway
 		// OR
-		// if we have a view, get the true count
-		if ( bForceExactCount || !currentTableIsATrueTable ) {
+		// if we have a view, force the true count
+		if ( currentTableIsATrueTable && bForceExactCount || !currentTableIsATrueTable ) {
 			count = getTrueCountOfATable(tableNameOnly);
 		}
+		
 		
 		// case [2]
 		// if we have a table and exact count is not required, get a fast estimate count

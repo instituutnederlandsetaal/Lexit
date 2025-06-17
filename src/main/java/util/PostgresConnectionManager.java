@@ -372,9 +372,12 @@ public class PostgresConnectionManager {
 				if (e.getMessage().toLowerCase().contains("timeout")) {
 					
 					// show a message but throw no exception
-					// so this function will return null
-					long timeAfterQuery = new Date().getTime();
-					if (Constants.debug) System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
+					// so this function will return null					
+					if (Constants.debug) {
+						long timeAfterQuery = new Date().getTime();
+						System.out.println("## TIMEOUT ("+(timeAfterQuery - timeBeforeQuery)+" ms) while executing query "+query);
+					}
+						
 				}				
 				else if (Constants.debug)
 					e.printStackTrace();
