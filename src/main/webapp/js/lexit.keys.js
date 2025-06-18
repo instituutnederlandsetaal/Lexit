@@ -82,10 +82,21 @@ kf.registerPressedKey = function(event){
 		kf._setReleasedKey( kf._getPressedKey() );
 	kf._setPressedKey( kf._translateCode(iCode) );
 	
-	if (kf._getPressedKey() == 'shift' || kf._getPressedKey() == 'ctrl')
+	if (kf._getPressedKey() == 'shift' || kf._getPressedKey() == 'ctrl') {
+		
 		fn.setBackgroundColor("lightgrey");
-	else
+		
+		// we set a timeout function which makes sure that the key gets released after a few seconds
+		// in case it isn't yet, which can happen in some circumstances (like opening a link in a new tab with shift/ctrl pressed)
+		setTimeout(function(){
+			if (kf._getPressedKey() == 'shift' || kf._getPressedKey() == 'ctrl') {
+				kf.registerReleasedKey();
+			}
+		}, 5000);
+	}
+	else {
 		fn.setBackgroundColor("white");
+	}
 };
 
 //register the name of the pressed key, given its code
@@ -95,8 +106,9 @@ kf.registerReleasedKey = function(){
 		kf._setReleasedKey( kf._getPressedKey() );
 	kf._setPressedKey("released");	
 	
-	if ((kf._getReleasedKey() == 'shift' || kf._getReleasedKey() == 'ctrl') && ((kf._getPressedKey() != 'shift' && kf._getPressedKey() != 'ctrl')))
+	if ((kf._getReleasedKey() == 'shift' || kf._getReleasedKey() == 'ctrl') && ((kf._getPressedKey() != 'shift' && kf._getPressedKey() != 'ctrl'))){
 		fn.setBackgroundColor("white");
+	}
 };
 
 

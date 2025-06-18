@@ -1893,16 +1893,21 @@ conf.changeTableSettingValue = function(sSomeTableName, sSettingName, value){
 
 conf.getTableSettings = function(sTablename){
 	
-	for (sName in oTableSettingsList)
-		{
-		if (sName == sTablename)
-			{
+	for (sName in oTableSettingsList) {
+		
+		if (sName == sTablename) {
 			// add the table name as a key, 
 			// so we can retrieve the name of the table from its settings object!
+			
+			// add key table_name with value sName
+			if (typeof oTableSettingsList[sName] == 'undefined')
+			    oTableSettingsList[sName] = new Object();
+			
+			// add table name			
 			oTableSettingsList[sName]["table_name"] = sName;			
 			return oTableSettingsList[sName];
-			}			
-		}
+		}			
+	}
 	return {};
 };
 

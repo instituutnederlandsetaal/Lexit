@@ -89,7 +89,6 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 			"'"+sTableToCallUponStartUp+"': " +lang.error_opening_hidden_table+	" "+lexutil.getHttpParams().get("db")+".config.js");
 	}
 	
-	
 		
 	// process the xml table list
 	$(xml).find("oneTable").each(function(){

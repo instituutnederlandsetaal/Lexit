@@ -970,17 +970,16 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	// asTableTypes mustn't be undefined. If it is, the initialization is not
 	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
 	
-	var iTableIndex = $.inArray(sSomeTablename, asTableNames);
+	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
 	
 	if( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
-    else {
-		// reload the list of tables (might be needed when fn.setSchema was called)
-		fn.rebuildTablesMenu();
-		
-        setTimeout(function(){        	
+    else {		
+		// reload the list of tables (might be needed when fn.setSchema was called)		
+		fn.rebuildTablesMenu();		
+        setTimeout(function(){		        	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
         }, iWait);
     }
