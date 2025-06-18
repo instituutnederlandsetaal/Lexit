@@ -4269,7 +4269,7 @@ public class Database {
 	public PostgresConnectionManager getPostgresConnectionManager() {
 		if (this.pc == null) {
 			Util.debug("Reconnect to database");
-			this.pc = createPostgresConnectionManager();
+			this.pc = createPostgresConnectionManager();			
 		}
 		return this.pc;
 	}

@@ -1889,6 +1889,7 @@ public class TableResources {
 		Util.debug(co, "## >>> PAK DATABASE OBJECT "+cachingKey);
 		newDbObj = nameToDatabaseObject.get(cachingKey);
 		newDbObj.updateContextObject(co); // make sure that data newly added to context object is saved in DatabaseObject
+		
 		return newDbObj;
 	};
 	

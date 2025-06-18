@@ -51,6 +51,9 @@ public class PostgresConnectionManager {
 	public ContextObject getContextObject() {
 		return this.co;
 	}
+	public void setContextObject(ContextObject co) {
+		this.co = co;
+	}
 	
 	
 
@@ -95,6 +98,7 @@ public class PostgresConnectionManager {
             config.setJdbcUrl(location);
             config.setUsername(user);
             config.setPassword(password);
+            config.setAutoCommit(true);
             
             // the maximum number of connections in the pool has a default value declared in the Constants class
             // but it can be overridden by the project database config            
@@ -210,6 +214,10 @@ public class PostgresConnectionManager {
         	
         	// get the connection from the pool
         	conn = ds.getConnection();
+        	
+        	// register the user identity etc. in this session
+        	sendUserIdentityToDatabaseServer(conn);        	
+
 		} 
         catch (SQLException e) {
         	if (Constants.debug) e.printStackTrace();
@@ -229,6 +237,8 @@ public class PostgresConnectionManager {
 	 */
 	private void sendUserIdentityToDatabaseServer(Connection conn){
 		
+		
+		
 		// if the configuration tells us to send the tomcat username
 		// to the database server
 		// AND
@@ -239,45 +249,32 @@ public class PostgresConnectionManager {
 		// this temporary table is only visible within the user's session,
 		// so multiple active users will have their name stored in as many 
 		// temporary tables with the same name, but invisible to each other, 
-		// so no name conflict will occur, so I tested.
+		// so no name conflict will occur.
 		//
 		// The active username stored in the 'active_user' temporary table 
 		// can be read by trigger functions etc, by reading the 'username' field
 		// from the temporary table.
 		
 		
+		
 		if ( this.sendUserInfoToDb && this.co != null ) {	
 				
 				Statement stmt = null;
-				String query = "CREATE TEMPORARY TABLE active_user AS "+
+				String query1 = "DROP TABLE IF EXISTS active_user;";
+				String query2 = "CREATE TEMPORARY TABLE active_user AS "+
 					"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
 				
+				
 				try {
-					
 					// Create a Statement object
 					stmt = conn.createStatement();
-					stmt.executeUpdate(query);
-				}
-				
-				// if the temporary table exists already in the session, just update it!
-				catch (Exception e) {
+					stmt.executeUpdate(query1);
+					stmt.executeUpdate(query2);
 					
-					stmt = null;
-					query = "UPDATE active_user "+
-							"SET active_tab_id = '"+this.co.getActiveTabId()+"'::text "+
-							"WHERE username = '"+this.co.getUsername()+"'::text "+
-							"AND session_id = '"+this.co.getSessionId()+"'::text; ";
-					
-					try {
-						// Create a Statement object
-						stmt = conn.createStatement();
-						stmt.executeUpdate(query);
-					}
-					catch (Exception e2) {
-						if (Constants.debug) e2.printStackTrace();
-						throw new RuntimeException("Error while executing query "+query, e2);
-					}
-				}	
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}								
 			}	
 		
 	}
@@ -331,11 +328,7 @@ public class PostgresConnectionManager {
 		try (Connection conn = getConnectionFromPool()) {
 			
 			// set the schema for this connection, so that the query can be executed in the right context)
-			setSchema(conn, schema); 
-			
-			// register the user identity etc. in this session
-			sendUserIdentityToDatabaseServer(conn);
-			
+			setSchema(conn, schema);
 			
 			
 			// we organize the job in TWO try-catch blocks:
@@ -438,10 +431,8 @@ public class PostgresConnectionManager {
 		try (Connection conn = getConnectionFromPool()) {
 			
 			// set the schema for this connection, so that the query can be executed in the right context)
-			setSchema(conn, schema); 
+			setSchema(conn, schema); 			
 			
-			// register the user identity etc. in this session
-			sendUserIdentityToDatabaseServer(conn);
 			
 			// Create a Statement object
 			stmt = conn.createStatement();
@@ -483,10 +474,8 @@ public class PostgresConnectionManager {
 		try (Connection conn = getConnectionFromPool()) {
 			
 			// set the schema for this connection, so that the query can be executed in the right context)
-			setSchema(conn, schema); 
+			setSchema(conn, schema); 			
 			
-			// register the user identity etc. in this session
-			sendUserIdentityToDatabaseServer(conn);
 			
 			// prepare statement
 			prest = conn.prepareStatement(query,
@@ -545,11 +534,7 @@ public class PostgresConnectionManager {
 		try (Connection conn = getConnectionFromPool()) {
 			
 			// set the schema for this connection, so that the query can be executed in the right context)
-			setSchema(conn, schema); 
-			
-			// register the user identity etc. in this session
-			sendUserIdentityToDatabaseServer(conn);
-			
+			setSchema(conn, schema); 			
 			
 			
 			// we organize the job in TWO try-catch blocks:
@@ -731,8 +716,6 @@ public class PostgresConnectionManager {
 			// set the schema for this connection, so that the query can be executed in the right context)
 			setSchema(conn, schema); 
 			
-			// register the user identity etc. in this session
-			sendUserIdentityToDatabaseServer(conn);
 			
 			// Create a Statement object
 			prest = conn.prepareStatement(query);
