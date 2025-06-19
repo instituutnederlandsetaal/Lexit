@@ -240,10 +240,10 @@ button:hover {
 
 .dataTables_filter {
 	position: sticky;  /* fixed position in the top right corner */
-	width: 45vw;
-	top: 5px;
+	width: 45vw;	
 	left: 50vw;
-	text-align: right;	
+	text-align: right;
+	/* BEWARE: don't use 'top' property here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */	
 }
 
 .dataTables_wrapper .top button {
@@ -637,6 +637,7 @@ td.searchbox select {
 	height: 22px;
 	line-height: 22px;
 	margin: 7px;
+	/* BEWARE: don't use 'top' property here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
 }
 
 .paging_full_numbers a:active {
