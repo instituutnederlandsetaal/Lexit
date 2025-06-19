@@ -243,7 +243,7 @@ button:hover {
 	width: 45vw;	
 	left: 50vw;
 	text-align: right;
-	/* BEWARE: don't use 'top' property here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */	
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */	
 }
 
 .dataTables_wrapper .top button {
@@ -288,9 +288,9 @@ button:hover {
 
 .dataTables_paginate {
 	position: sticky;  /* fixed position in the bottom right corner */
-	bottom: 5px;
 	right: 5px;
 	text-align: right;
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
 }
 
 /* Pagination nested */
@@ -637,7 +637,7 @@ td.searchbox select {
 	height: 22px;
 	line-height: 22px;
 	margin: 7px;
-	/* BEWARE: don't use 'top' property here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
 }
 
 .paging_full_numbers a:active {
