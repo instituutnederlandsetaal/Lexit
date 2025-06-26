@@ -315,7 +315,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			"error": function(xhr, error, thrown) {
 				// added this to prevent the ugly ajax error message from datatables
 				console.log( 'An error has been reported by DataTables: ', error );
-				lexitReload();
+				// the error might be caused by an abort (triggered by click on 'reset' button), which is not a real error,
+				// but in other cases we reload the page 
+				if (error != 'abort') lexitReload();
 			},
 			"data": function ( d ) {
 

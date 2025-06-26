@@ -159,7 +159,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+deleteRecord);
-			throw new RuntimeException("Error while executing query "+deleteRecord, e);
+			throw new RuntimeException("Error while executing query "+deleteRecord+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 		
 	}
@@ -184,8 +186,7 @@ public class Database {
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		String[] valueTypes = getTypesOfColumns(tableName, columnNames);
-		for (int i = 0; i<columnNames.length; i++)
-		{
+		for (int i = 0; i<columnNames.length; i++) {
 			ato.setType(i, valueTypes[i]);
 			columnNames[i] = getSafeFieldName(columnNames[i]);
 		}			
@@ -203,7 +204,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+deleteRecords);
-			throw new RuntimeException("Error while executing query "+deleteRecords, e);
+			throw new RuntimeException("Error while executing query "+deleteRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 		
 	}
@@ -284,8 +287,7 @@ public class Database {
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
 			String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
-			for (int i=0; i<argsColumns.length; i++)
-			{
+			for (int i=0; i<argsColumns.length; i++) {
 				ato.setType(i, valueTypes[i]);
 			}
 			 
@@ -318,8 +320,7 @@ public class Database {
 				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
 			
 			// if filters are required, add those
-			if (filterColumns!=null)
-			{
+			if (filterColumns!=null) {
 				getRowNumberQuery += "	WHERE ";
 				String[] parts = new String[filterColumns.length];
 				for (int i=0; i<filterColumns.length; i++)
@@ -379,9 +380,7 @@ public class Database {
 		
 		// strategy #2 with use of primary key
 		
-		else
-			
-		{			
+		else {			
 			// put sort information into arrays
 					
 			String[] aSortBy = sortBy.split(",");
@@ -409,8 +408,7 @@ public class Database {
 			// set argument types
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			String[] valueTypes = getTypesOfColumns(tableName, argsColumns);
-			for (int i=0; i<argsColumns.length; i++)
-			{
+			for (int i=0; i<argsColumns.length; i++) {
 				ato.setType(i, valueTypes[i]);
 			}
 			 
@@ -447,8 +445,7 @@ public class Database {
 				"		 	FROM "+getSafeTableName(tableName, schema)+" ";
 			
 			// if filters are required, add those
-			if (filterColumns!=null)
-			{
+			if (filterColumns!=null) {
 				getRowNumberQuery += "	WHERE ";
 				String[] parts = new String[filterColumns.length];
 				for (int i=0; i<filterColumns.length; i++)
@@ -504,7 +501,8 @@ public class Database {
 					functionOuput = res.get(occurrenceNr)[0];
 				}
 				
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
 			} 
 			
@@ -660,8 +658,7 @@ public class Database {
     			"GROUP BY " + getSafeFieldName(columnName) + " " +
     			"ORDER BY " + getSafeFieldName(columnName) + ";";
     	
-    	if (limit != null)
-    	{
+    	if (limit != null) {
     		query = "SELECT n " +
     				"FROM (" +
     				"	SELECT " + getSafeFieldName(columnName) + " AS n " + 
@@ -1275,7 +1272,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertRecords);
-			throw new RuntimeException("Error while executing query "+insertRecords, e);
+			throw new RuntimeException("Error while executing query "+insertRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		} 
 	}
 	/**
@@ -1348,7 +1347,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertQuery);
-			throw new RuntimeException("Error while executing query "+insertQuery, e);
+			throw new RuntimeException("Error while executing query "+insertQuery+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 		
 	}
@@ -1384,8 +1385,7 @@ public class Database {
 		"SELECT ";
 		
 		String[] allParts = new String[filterColumnNames.length];
-		for (int i=0; i<filterColumnNames.length; i++)
-		{			
+		for (int i=0; i<filterColumnNames.length; i++) {			
 			String oneFilterColumnName = filterColumnNames[i];
 			String pattern = filterValues[i];
 			
@@ -1407,8 +1407,7 @@ public class Database {
 		"WHERE ";
 		
 		allParts = new String[filterColumnNames.length];
-		for (int i=0; i<filterColumnNames.length; i++)
-		{
+		for (int i=0; i<filterColumnNames.length; i++) {
 			String oneColumnName = filterColumnNames[i];
 			String pattern = filterValues[i];
 			allParts[i] = getSafeFieldName(oneColumnName) + 
@@ -1419,8 +1418,7 @@ public class Database {
 		insertQuery += Util.join(allParts, " AND ") + " ";
 		
 		// do we expect a value in return?
-		if (returningField != null && !returningField.equals("null"))
-		{
+		if (returningField != null && !returningField.equals("null")) {
 			type = "insert";
 			insertQuery += "RETURNING "+getSafeFieldName(idColumn);
 		}
@@ -1433,8 +1431,7 @@ public class Database {
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		String[] valueTypes = getTypesOfColumns(tableName, filterColumnNames);
-		for (int i = 0; i<filterColumnNames.length; i++)
-		{
+		for (int i = 0; i<filterColumnNames.length; i++) {
 			ato.setType(i, valueTypes[i]);
 		}
 		
@@ -1461,7 +1458,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertQuery);
-			throw new RuntimeException("Error while executing query "+insertQuery, e);
+			throw new RuntimeException("Error while executing query "+insertQuery+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		} 
 		
 	}
@@ -1486,8 +1485,7 @@ public class Database {
 		
 		String schema = getSchema(tableName);
 		
-		for (int i=0; i<columnNames.length; i++)
-		{
+		for (int i=0; i<columnNames.length; i++) {
 			columnNames[i] = getSafeFieldName(columnNames[i]);
 		}
 		
@@ -1499,8 +1497,7 @@ public class Database {
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		String[] valueTypes = getTypesOfColumns(tableName, columnNames);
-		for (int i = 0; i<columnNames.length; i++)
-		{
+		for (int i = 0; i<columnNames.length; i++) {
 			ato.setType(i, valueTypes[i]);			
 		}
 				
@@ -1516,7 +1513,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+insertRecords);
-			throw new RuntimeException("Error while executing query "+insertRecords, e);
+			throw new RuntimeException("Error while executing query "+insertRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		} 
 		
 	};
@@ -1596,7 +1595,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+duplicateRecord);
-			throw new RuntimeException("Error while executing query "+duplicateRecord, e);
+			throw new RuntimeException("Error while executing query "+duplicateRecord+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 		
 	};
@@ -1641,7 +1642,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords, e);
+			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 	}
 	
@@ -1743,7 +1746,6 @@ public class Database {
 	
 	
 	/**
-	 * checkIfIndexExists
 	 * Check whether some index (even multi-column one) exists or not
 	 * 
 	 * @param tableName
@@ -1830,7 +1832,11 @@ public class Database {
 	}
 
 
-
+	/**
+	 * check if a table exists
+	 * @param tableName
+	 * @return
+	 */
 	public Boolean checkIfTableExists(String tableName){
 
 		String schema = getSchemaName();
@@ -1911,7 +1917,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords, e);
+			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 	}
 	
@@ -1940,8 +1948,7 @@ public class Database {
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		
 		String[] valuesToUpdateTypes = getTypesOfColumns(tableName, columnNamesToUpdate);
-		for (int i = 0; i<columnNamesToUpdate.length; i++)
-		{
+		for (int i = 0; i<columnNamesToUpdate.length; i++) {
 			ato.setType(i, valuesToUpdateTypes[i]);
 		}	
 		
@@ -1949,22 +1956,19 @@ public class Database {
 		int countFrom = columnNamesToUpdate.length;
 		
 		String[] valuesToMatchTypes = getTypesOfColumns(tableName, columnNamesToMatch);
-		for (int i = 0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i = 0; i<columnNamesToMatch.length; i++) {
 			ato.setType(countFrom + i, valuesToMatchTypes[i]);
 		}	
 				
 		// setting pairs 
 		String[] settingPairs = new String[columnNamesToUpdate.length];
-		for (int i=0; i<columnNamesToUpdate.length; i++)
-		{
+		for (int i=0; i<columnNamesToUpdate.length; i++) {
 			settingPairs[i] = getSafeFieldName(columnNamesToUpdate[i]) + " = ?";
 		}
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
-		for (int i=0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i=0; i<columnNamesToMatch.length; i++) {
 			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
 					" " + getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
@@ -1982,7 +1986,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords, e);
+			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 				
 		
@@ -2012,8 +2018,7 @@ public class Database {
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		
 		String[] valueTypes = getTypesOfColumns(tableName, columnNamesToMatch);
-		for (int i = 0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i = 0; i<columnNamesToMatch.length; i++) {
 			ato.setType(i, valueTypes[i]);
 		}			
 		// set arguments
@@ -2021,8 +2026,7 @@ public class Database {
 		
 		// setting pairs [ SET colname = regexp_replace(colname, regexp, replacement) ]
 		String[] settingPairs = new String[columnNamesToUpdate.length];
-		for (int i=0; i<columnNamesToUpdate.length; i++)
-		{
+		for (int i=0; i<columnNamesToUpdate.length; i++) {
 			int indexOfMatcher = Util.getIndexOf(columnNamesToUpdate[i], columnNamesToMatch);
 			settingPairs[i] = getSafeFieldName(columnNamesToUpdate[i]) + " = " +
 			(
@@ -2034,8 +2038,7 @@ public class Database {
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
-		for (int i=0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i=0; i<columnNamesToMatch.length; i++) {
 			matchingPairs[i] = getSafeFieldName(columnNamesToMatch[i]) + 
 					" " + getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
@@ -2053,7 +2056,9 @@ public class Database {
 		}
 		catch (Exception e) {
 			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords, e);
+			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
+					Util.getFullStackTrace(e), e);
 		}
 		
 		
@@ -2546,16 +2551,14 @@ public class Database {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) )
-				{
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) " + getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
-				else
-				{
+				else {
 					queryParts.add(
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" " + getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false)
@@ -3027,14 +3030,12 @@ public class Database {
 			(int) (maxAllowedDuration * ((float)queryCost / (timeAfterCount - timeBeforeCount) ));
 		
 		// if maxAllowedCost was not initialized yet, do it now
-		if ( maxAllowedCost < 0)
-		{
+		if ( maxAllowedCost < 0) {
 			numberOfAllowedCostRecomputations = 1;
 			maxAllowedCost = currentMaxAllowedCost;			
 		}
 		// if we already have a maxAllowedCost, recompute it now
-		else
-		{
+		else {
 			// include this calculation in the average max allowed cost
 			int estimatedTotalOfAllPreviousComputations = numberOfAllowedCostRecomputations * maxAllowedCost;
 			
@@ -3043,8 +3044,7 @@ public class Database {
 			
 			// new average
 			maxAllowedCost = newTotalOfAllComputations / numberOfAllowedCostRecomputations; 
-		}
-		
+		}		
 		
 		Util.debug(co, ">>>>>> NEW maxAllowedCost = "+maxAllowedCost);
 		
@@ -3066,8 +3066,8 @@ public class Database {
 		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
 		
 		int lastQuestionMarkIndex = 0;
-		while ( (indexOfQuestionMark = query.indexOf("?", lastQuestionMarkIndex) ) > -1 )
-		{		
+		while ( (indexOfQuestionMark = query.indexOf("?", lastQuestionMarkIndex) ) > -1 ) {
+			
 			String argumentAtThisStep = arguments.remove(0);
 			
 			// put quotes around argument value, 
@@ -3075,18 +3075,15 @@ public class Database {
 			boolean regexHere = preceedingOperatorImpliesaRegex(query, indexOfQuestionMark);
 			
 			int stringLengthOfArgument = 4; // default in case the value is null (4 letters)
-			if (argumentAtThisStep != null) 
-				{				
-				if (regexHere)
-					{
+			if (argumentAtThisStep != null) {				
+				if (regexHere) {
 					argumentAtThisStep = "E'"+argumentAtThisStep.replaceAll("\\\\", "\\\\\\\\")+"'";					
-					}
-				else
-					{
-					argumentAtThisStep = "'"+argumentAtThisStep+"'";
-					}
-				stringLengthOfArgument = argumentAtThisStep.length();
 				}
+				else {
+					argumentAtThisStep = "'"+argumentAtThisStep+"'";
+				}
+				stringLengthOfArgument = argumentAtThisStep.length();
+			}
 				
 			
 			query = query.substring(0, indexOfQuestionMark)+
@@ -3113,8 +3110,7 @@ public class Database {
 		// (the question marks stands for an argument in a prepared query here)
 		String[] queryArr = query.split("\\s");
 		int i=0;
-		for (i=0; i+1<queryArr.length; i++)
-		{
+		for (i=0; i+1<queryArr.length; i++) {
 			if (queryArr[i+1].equals("somethingWeCanRecognize"))
 				break;
 		}
@@ -3279,11 +3275,10 @@ public class Database {
 		// use caching
 		// (if we have already looked up the primary key, it is stored in a hash)
 		
-		if ( tableNameToPrimaryKey.containsKey(schema+tableNameOnly) )
-			{
+		if ( tableNameToPrimaryKey.containsKey(schema+tableNameOnly) ) {
 			Util.debug(co, "## PK from cache: "+tableNameToPrimaryKey.get(schema+tableNameOnly));
 			return tableNameToPrimaryKey.get(schema+tableNameOnly);
-			}
+		}
 		
 		
 		// no cache, first lookup
@@ -3338,8 +3333,8 @@ public class Database {
 				
 				// we expect a view to have a given column which always 
 				// functions as a primary key 
-				if (currentTableIsaView)
-				{
+				if (currentTableIsaView) {
+					
 					// what are the available columns?
 					String[] availableColumns = getColumnNames(tableName);
 					
