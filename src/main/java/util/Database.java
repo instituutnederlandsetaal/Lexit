@@ -1072,8 +1072,7 @@ public class Database {
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		
 		String[] valueTypes = getTypesOfColumns(tableName, columnNamesToMatch);
-		for (int i = 0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i = 0; i<columnNamesToMatch.length; i++) {
 			ato.setType(i, valueTypes[i]);
 		}	
 		
@@ -1086,8 +1085,7 @@ public class Database {
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
-		for (int i=0; i<columnNamesToMatch.length; i++)
-		{
+		for (int i=0; i<columnNamesToMatch.length; i++) {
 			matchingPairs[i] = 
 					getSafeFieldName(columnNamesToMatch[i]) + " " + 
 					getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
@@ -1551,8 +1549,7 @@ public class Database {
 		
 		// set the column names
 		
-		for (int i=0; i<columnNames.length; i++)
-		{
+		for (int i=0; i<columnNames.length; i++) {
 			columnNames[i] = getSafeFieldName(columnNames[i]);
 		}
 		
@@ -1708,6 +1705,8 @@ public class Database {
 		// set arguments
 		String[] args = new String[]{schema, tableName};	
 		
+		// This query is Postgres 17 compatible
+		
 		String getIdQuery = 
 			"SELECT n.nspname AS \"schema\", "+
 			"c.relname AS \"table\", "+
@@ -1784,6 +1783,9 @@ public class Database {
 		// set arguments
 		String[] args = new String[]{schema, tableName, indexedFieldsStr};	
 		
+		
+		// This query is Postgres 17 compatible
+		
 		String checkExistenceQuery = 
 			"SELECT 1 AS result "+
 			"FROM " +
@@ -1840,6 +1842,8 @@ public class Database {
 	public Boolean checkIfTableExists(String tableName){
 
 		String schema = getSchemaName();
+		
+		// this query is Postgres 17 compatible
 
 		String query = "SELECT c.relname AS table_name " +
 				"FROM pg_catalog.pg_class c " +
@@ -2264,45 +2268,54 @@ public class Database {
 
 		String schema = getSchemaName();
 		
-		// BEWARE: the following shorter query seems to not work in Postgres 8 (only 9)
-		//         so we use a more complex query which is working in all versions (as far as we could test)
-		// 	SELECT table_name, 
-		// 	table_name||' ('||table_type||')' AS description 
-		// 	FROM information_schema.tables 
-		// 	WHERE table_schema = ? 
-		// 	ORDER BY table_name ASC;
+		// OLD query, still working in Postgres 17, but let's upgrade...
 		
-		// vocabulary in this query result:
-		//
-		// BASE TABLE	: physical structure that contains stored records
-		// VIEW			: named result of an SQL query 
+//		String query = "SELECT c.relname AS table_name, " +
+//				"c.relname||' ('||CASE c.relkind WHEN 'r' THEN 'BASE TABLE' WHEN 'v' THEN 'VIEW'  " +
+//				"END||')'  AS description, " + // view OR table
+//				"CASE c.relkind WHEN 'r' THEN 'BASE TABLE' WHEN 'v' THEN 'VIEW' END AS type, " +
+//				"obj_description(c.oid, 'pg_class') AS comment " + // show table comment if available				
+//				"FROM pg_catalog.pg_class c " +
+//				//"LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner " +
+//				"FULL JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
+//				"WHERE c.relkind IN ('r','v','') " + // now we only want views and tables
+//				"AND n.nspname = ? " +
+//				"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " +
+//				"AND n.nspname != 'information_schema' " + // this one instead of "AND pg_catalog.pg_table_is_visible(c.oid) "
+//				"ORDER BY 1,2;";
 		
-		String query = "SELECT c.relname AS table_name, " +
-				"c.relname||' ('||CASE c.relkind WHEN 'r' THEN 'BASE TABLE' WHEN 'v' THEN 'VIEW'  " +
-				"END||')'  AS description, " + // view OR table
-				"CASE c.relkind WHEN 'r' THEN 'BASE TABLE' WHEN 'v' THEN 'VIEW' END AS type, " +
-				"obj_description(c.oid, 'pg_class') AS comment " + // show table comment if available				
-				"FROM pg_catalog.pg_class c " +
-				//"LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner " +
-				"FULL JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
-				"WHERE c.relkind IN ('r','v','') " + // now we only want views and tables
-				"AND n.nspname = ? " +
-				"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " +
-				"AND n.nspname != 'information_schema' " + // this one instead of "AND pg_catalog.pg_table_is_visible(c.oid) "
-				"ORDER BY 1,2;";
 		
+		// this query is Postgres 17 compatible
+		
+		String query = 
+			"SELECT "+ 
+			"    t.table_name, "+
+			"    t.table_name || ' (' || t.table_type || ')' AS description, "+
+			"    t.table_type::text AS type, "+
+			"    d.description AS comment "+
+			"FROM information_schema.tables t "+
+			"LEFT JOIN pg_catalog.pg_class c "+
+			"    ON c.relname = t.table_name "+
+			"LEFT JOIN pg_catalog.pg_namespace n "+ 
+			"    ON n.oid = c.relnamespace "+
+			"LEFT JOIN pg_catalog.pg_description d "+
+			"    ON d.objoid = c.oid AND d.objsubid = 0 "+
+			"WHERE t.table_schema = ? "+ // schema
+			"  AND n.nspname = ? "+ // schema
+			"ORDER BY 1, 2;";
+		 
 		
 		
 		ArrayList<String[]> result = new ArrayList<String[]>();
 		
 		// prepare max allowed cost initialization
-		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, new String[]{schema}));
+		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, new String[]{schema, schema}));
 		long timeBefore = new Date().getTime();
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, new String[]{schema}).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, new String[]{schema, schema}).getRows();
 			
 			// compute max allowed cost (initialization)
 			long timeAfter = new Date().getTime();
@@ -2328,22 +2341,25 @@ public class Database {
 
 		String schema = getSchemaName();
 		
-		// BEWARE: the following shorter query doesn't seem to work in Postgres 8 (only 9)
-		//         so we use a more complex query which is working in all versions (as far as we could test)
-		// 	SELECT table_name, 
-		// 	table_name||' ('||table_type||')' AS description 
-		// 	FROM information_schema.tables 
-		// 	WHERE table_schema = ? 
-		// 	ORDER BY table_name ASC;
+		// this query is Postgres 17 compatible
 		
-		String query = "SELECT c.relname AS table_name " +
-				"FROM pg_catalog.pg_class c " +
-				"LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner " +
-				"LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
-				"WHERE c.relkind = 'r' " + // now we only want genuine tables (no views)
-				"AND n.nspname = ? " +
-				"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " +
-				"AND pg_catalog.pg_table_is_visible(c.oid);";
+		String query =
+				"SELECT table_name " +
+				"FROM information_schema.tables " + 
+				"WHERE table_schema = ? " + 
+				"AND table_type = 'BASE TABLE' " + // now we only want genuine tables (no views)
+				"ORDER BY table_name ASC; ";
+		
+		
+		// Not compatible with Postgres 17
+//		String query = "SELECT c.relname AS table_name " +
+//				"FROM pg_catalog.pg_class c " +
+//				"LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner " +
+//				"LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
+//				"WHERE c.relkind = 'r' " + // now we only want genuine tables (no views)
+//				"AND n.nspname = ? " +
+//				"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " +
+//				"AND pg_catalog.pg_table_is_visible(c.oid);";
 		
 		
 		
@@ -3285,27 +3301,57 @@ public class Database {
 		
 		String primaryKeyColumn = null;	
 					
+		// OLD query, still working in Postgres 17, but let's upgrade...
+//		String getPK = "SELECT " +
+//			"pg_attribute.attname AS column_name, " +
+//			"format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS data_type " +
+//			"FROM pg_index, pg_class, pg_attribute " +
+//			"WHERE pg_class.oid = ?::regclass " +
+//			"AND indrelid = pg_class.oid " +
+//			"AND pg_attribute.attrelid = pg_class.oid " +
+//			"AND pg_attribute.attnum = any(pg_index.indkey) " +
+//			"AND indisprimary ";	
 		
-		String getPK = "SELECT " +
-			"pg_attribute.attname, " +
-			"format_type(pg_attribute.atttypid, pg_attribute.atttypmod) " +
-			"FROM pg_index, pg_class, pg_attribute " +
-			"WHERE pg_class.oid = ?::regclass " +
-			"AND indrelid = pg_class.oid " +
-			"AND pg_attribute.attrelid = pg_class.oid " +
-			"AND pg_attribute.attnum = any(pg_index.indkey) " +
-			"AND indisprimary ";	
+		//String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };
 		
+		
+		// this query is Postgres 17 compatible
+		
+		String getPK = "SELECT "+ 
+			"    kcu.column_name, "+
+			"    c.data_type, "+
+			"    c.character_maximum_length, "+
+			"    c.numeric_precision, "+
+			"    c.numeric_scale "+
+			"FROM "+
+			"    information_schema.table_constraints tc "+
+			"JOIN "+
+			"    information_schema.key_column_usage kcu "+
+			"    ON tc.constraint_name = kcu.constraint_name "+
+			"    AND tc.table_schema = kcu.table_schema "+
+			"JOIN "+
+			"    information_schema.columns c "+
+			"    ON c.table_schema = kcu.table_schema "+
+			"    AND c.table_name = kcu.table_name "+
+			"    AND c.column_name = kcu.column_name "+
+			"WHERE "+
+			"    tc.constraint_type = 'PRIMARY KEY' "+
+			"    AND tc.table_schema = ? "+
+			"    AND tc.table_name = ? "+
+			"ORDER BY "+
+			"    kcu.ordinal_position; ";		
 		
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		
 		try {
-			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableName) };			
+			
+			String[] args = new String[]{ schema, tableNameOnly };
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getPK, args).getRows();
 			
-			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname", "format_type"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"column_name", "data_type"});
 			
 			
 			// Do we have an empty result?
@@ -3504,6 +3550,8 @@ public class Database {
 		String schema = getSchema(tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
 		
+		// this query still works in Postgres 17
+		
 		// see: http://stackoverflow.com/questions/15928118/how-to-get-column-attributes-query-from-table-name-using-postgresql
 		// (modified version of answer from Erwin Brandstetter)
 		String commentsQuery = "SELECT a.attname AS name, d.description AS comment "+
@@ -3559,6 +3607,8 @@ public class Database {
 	 */
 	public String[] getFunctionTypes(String functionName, int numberOfArgs){
 		
+		// this query still works in Postgres 17
+		
 		// (see: http://www.varlena.com/GeneralBits/39.php)
 		String functionDetailsQuery = "SELECT " +
 			"t.typname AS return_type, " +
@@ -3576,23 +3626,20 @@ public class Database {
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String schemaName = "public";
 		String numberOfArguments = String.valueOf(numberOfArgs);
-		if (functionName.indexOf(".")>0)
-			{
-				schemaName = functionName.split("\\.")[0];
-				functionName = functionName.split("\\.")[1];
-			}
+		if (functionName.indexOf(".")>0) {
+			schemaName = functionName.split("\\.")[0];
+			functionName = functionName.split("\\.")[1];
+		}
 		
 		String cachingKey = schemaName+functionName;
-		if ( functionNameToTypes.containsKey(cachingKey) )
-			{
-				if (Constants.debug) 
-					{
-					System.out.println("## Function args types from cache: ");
-					System.out.println( Arrays.toString(functionNameToTypes.get(cachingKey)) );
-					}
-				
-				return functionNameToTypes.get(cachingKey);
+		if ( functionNameToTypes.containsKey(cachingKey) ) {
+			if (Constants.debug) {
+				System.out.println("## Function args types from cache: ");
+				System.out.println( Arrays.toString(functionNameToTypes.get(cachingKey)) );
 			}
+			
+			return functionNameToTypes.get(cachingKey);
+		}
 		
 		
 		String[] argumentTypes = null;
@@ -3655,6 +3702,9 @@ public class Database {
 		// Finally, if it matches, return string 'writing', otherwise string 'reading',
 		// which describes the function operation type.
 		
+		
+		// this query still works in Postgres 17
+		
 		String functionQuery = 		
 			"SELECT CASE "+
 			" WHEN function_txt.fulltext ~ tables.all_writing_pattern THEN '"+Constants.USER_ALL_ACCESS+"' "+
@@ -3685,23 +3735,20 @@ public class Database {
 		
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String functionSchemaName = "public";
-		if (functionName.indexOf(".")>0)
-			{
+		if (functionName.indexOf(".")>0) {
 			functionSchemaName = functionName.split("\\.")[0];
 			functionName = functionName.split("\\.")[1];
-			}
+		}
 		
 		String cachingKey = functionSchemaName+functionName;
-		if ( functionNameToOperationType.containsKey(cachingKey) )
-			{
-			if (Constants.debug) 
-				{
+		if ( functionNameToOperationType.containsKey(cachingKey) ) {
+			if (Constants.debug)  {
 				System.out.println("## Function operation type from cache: ");
 				System.out.println(functionNameToOperationType.get(cachingKey));
-				}
+			}
 			
 			return functionNameToOperationType.get(cachingKey);
-			}
+		}
 		
 		
 		String functionOperationType = "read";
@@ -3742,6 +3789,8 @@ public class Database {
 	 */
 	public String getFunctionReturnType(String functionName, int numberOfArgs){
 		
+		// this query still works in Postgres 17
+		
 		// (see: http://www.varlena.com/GeneralBits/39.php)
 		String functionDetailsQuery = "SELECT " +
 			"t.typname AS return_type, " +
@@ -3757,23 +3806,20 @@ public class Database {
 		// if the function name contains a schema name (like 'api.blah'), extract it
 		String schemaName = "public";
 		String numberOfArguments = String.valueOf(numberOfArgs);
-		if (functionName.indexOf(".")>0)
-			{
-				schemaName = functionName.split("\\.")[0];
-				functionName = functionName.split("\\.")[1];
-			}
+		if (functionName.indexOf(".")>0) {
+			schemaName = functionName.split("\\.")[0];
+			functionName = functionName.split("\\.")[1];
+		}
 		
 		String cachingKey = schemaName+functionName;
-		if ( functionNameToReturnType.containsKey(cachingKey) )
-			{
-				if (Constants.debug) 
-					{
-					System.out.println("## Function return type from cache: ");
-					System.out.println(functionNameToReturnType.get(cachingKey));
-					}
-				
-				return functionNameToReturnType.get(cachingKey);
+		if ( functionNameToReturnType.containsKey(cachingKey) ) {
+			if (Constants.debug) {
+				System.out.println("## Function return type from cache: ");
+				System.out.println(functionNameToReturnType.get(cachingKey));
 			}
+			
+			return functionNameToReturnType.get(cachingKey);
+		}
 		
 		
 		String returnType = null;
@@ -3843,23 +3889,29 @@ public class Database {
 		// use caching
 		// (if we have looked up the column names already, they are stored in a hash)
 		String cachingKey = schema+tableNameOnly;
-		if ( tableNameToColumnNames.containsKey(cachingKey) )
-			{
+		if ( tableNameToColumnNames.containsKey(cachingKey) ) {
 			Util.debug(co, "## Column names from cache");
 			return tableNameToColumnNames.get(cachingKey);
-			}
+		}
 		
+		// OLD: this doesn't work anymore in Postgres 17
+//		String columnQuery = 
+//			"SELECT attname AS column_name " +
+//			"FROM pg_attribute, pg_class c, pg_namespace n " +
+//			"WHERE c.oid = attrelid " +
+//			" AND n.oid = c.relnamespace " +
+//			" AND attstattarget != 0 " + // added to prevent getting deleted columns!
+//			" AND attnum>0 " +
+//			" AND relname = ? " + // table name
+//			" AND nspname = ? "+ // schema name
+//			";";
 		
+		// Postgres 17 compliant query
 		String columnQuery = 
-			"SELECT attname " +
-			"FROM pg_attribute, pg_class c, pg_namespace n " +
-			"WHERE c.oid = attrelid " +
-			" AND n.oid = c.relnamespace " +
-			" AND attstattarget != 0 " + // added to prevent getting deleted columns!
-			" AND attnum>0 " +
-			" AND relname = ? " + // table name
-			" AND nspname = ? "+ // schema name
-			";";
+			"SELECT column_name " +
+			"FROM information_schema.columns " +
+			"WHERE table_name = ? " + // table name
+			"AND table_schema = ? ;";  // schema name;
 		
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
@@ -3869,7 +3921,7 @@ public class Database {
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, columnQuery, args).getRows();
 			
-			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"attname"});
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"column_name"});
 			
 			// read names
 			columnNames = new String[res.size()];
@@ -3887,6 +3939,9 @@ public class Database {
 		tableNameToColumnNames.put(cachingKey, columnNames);
 		return columnNames;
 	}
+	
+	
+	
 	
 	
 	/********************************************************************
@@ -3935,12 +3990,14 @@ public class Database {
 		String values = "";
 		String schema = getSchema(tableName);
 		
+		// this query is Postgres 17 compliant
+		
 		String query = "SELECT string_agg(e.enumlabel, '|') AS enum_labels "+
 			"FROM   pg_catalog.pg_type t "+
 			"JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace "+
 			"JOIN   pg_catalog.pg_enum e ON t.oid = e.enumtypid "+
 			"WHERE  t.typname = ? "+ // type name
-			"AND n.nspname = ? ;"; // schema name
+			"AND	n.nspname = ? ;"; // schema name
 		
 		String[] args = new String[]{typeName, schema};
 		
@@ -3972,22 +4029,19 @@ public class Database {
 		String tableNameOnly = getTableNameOnly(tableName);
 		String[] customTypes = new String[columnNames.length];
 		
-		for (int i=0; i<columnNames.length; i++)
-		{
+		for (int i=0; i<columnNames.length; i++) {
 			String customTypesOfThisColumn = "";
 			String columnName = columnNames[i];
 			
 			// use caching (speed!)
 			String cachingKey = schema+tableNameOnly+columnName;
 			
-			if (columnTypes[i].equalsIgnoreCase("USER-DEFINED"))
-			{
-				if (tableAndColumnNameToCustomTypesValues.containsKey(cachingKey))
-				{
+			if (columnTypes[i].equalsIgnoreCase("USER-DEFINED")) {
+				
+				if (tableAndColumnNameToCustomTypesValues.containsKey(cachingKey)) {
 					customTypesOfThisColumn = tableAndColumnNameToCustomTypesValues.get(cachingKey);
 				}
-				else
-				{
+				else {
 					// get the name of the user-defined type
 					String customtypeName = getUserDefinedTypeName(tableName, columnName);
 					// get the allowed values defined in this user-defined type
@@ -4441,10 +4495,9 @@ public class Database {
 		tableNameToPrimaryKey.remove(cachingKey);
 				
 		String[] columns = tableNameToColumnNames.get(cachingKey);
-		if (columns != null)
-		{
-			for (String oneColumn : columns)
-			{
+		if (columns != null) {
+			for (String oneColumn : columns) {
+				
 				tableAndColumnNameToTypes.remove(cachingKey+oneColumn);
 				tableAndColumnNameToCustomTypesValues.remove(cachingKey+oneColumn);
 			}
