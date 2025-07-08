@@ -725,7 +725,7 @@ lang.helpText =
 				"</TR>" +
 				"</TABLE>" +
 				"<BR><BR>" +
-				"Ten slotte is het ook mogelijk om te zoeken naar een lijst waarden:" +
+				"Verder is het ook mogelijk om te zoeken naar een lijst waarden:" +
 				"<BR><BR>" +
 				"<TABLE>" +
 				"<TR>" +
@@ -735,6 +735,23 @@ lang.helpText =
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>!{aap, noot, mies}</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die NIET overeenkomen met genoemde waarden</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR><BR>" +
+				"Ten slotte is het mogelijk om in &eacute;&eacute;n expressie iets te zoeken, maar tegelijkertijd ook iets uit te sluiten:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^aa[^n]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met 'aa' beginnen, behalve 'aan'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge(?!.*heid$)</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met 'ge' beginnen, maar NIET op 'heid' eindigen</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET met 'ge' beginnen, maar wel op 'heid' eindigen</TD>" +
 				"</TR>" +
 				"</TABLE>" +
 				"<SPAN class='query_builder_info'>"+				
@@ -1339,20 +1356,39 @@ lang.setLanguage = function(sLanguageCode){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>NULL</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> searches for cells containing a NULL value</TD>" +
 				"</TR>" +
-				"</TABLE>" +	
+				"</TABLE>" +
+					
 				"<BR><BR>" +
-				"Finally, it is also possible to search for a list of values:" +
+				"Furthermore, it is also possible to search for a list of values:" +
 				"<BR><BR>" +
 				"<TABLE>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>{cat, bat, mat}</I></TD>" +			
-				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that match the specified values</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that match match the listed values</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>!{cat, bat, mat}</I></TD>" +			
-				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that do not match the specified values</TD>" +
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that do NOT match the listed values</TD>" +
 				"</TR>" +
 				"</TABLE>" +
+				"<BR><BR>" +
+				"Finally, it is possible to search for something and simultaneously exclude something else in a single expression:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^aa[^n]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that start with 'aa', except 'aan'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge(?!.*heid$)</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that start with 'ge', but do NOT end with 'heid'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that do NOT start with 'ge', but do end with 'heid'</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				
 				"<SPAN class='query_builder_info'>" +			
 				"<BR><BR><BR>" +
 				"<B>Query builder / Selection help</B>" +
