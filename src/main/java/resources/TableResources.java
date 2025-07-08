@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The TableResources class is the main class in a Jersey project
+ * The TableResources class is the main class 
  * Here the different kinds of requests can be mapped to functions and classes
  * 
  * @author Mathieu Fannee (INL)
@@ -197,6 +197,7 @@ public class TableResources {
  	}
  	
  	
+ 	
  	@Path("delete_user")
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -350,6 +351,37 @@ public class TableResources {
  	}
 
  	// ------------------------------------------------------------------------------------------------
+ 	// Project reset
+ 	// ------------------------------------------------------------------------------------------------
+ 	
+ 	@Path("reset_project")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject resetProject(
+			@DefaultValue("") @QueryParam("db_name") String dbName, 
+ 			@Context ServletContext context,
+ 			@Context SecurityContext sc,
+ 			@Context HttpServletRequest httpServletRequest
+ 			) throws IOException {
+ 		
+ 		DbResponseObject dro = new DbResponseObject();
+ 		
+ 		String userName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		// remove the database object from the cache
+		try {
+			AppLifecycleListener.deletePool(dbName);
+			dro.setResponse("OK");
+		}
+		catch (Exception e) {
+			dro.setResponse("Something went wrong when resetting project "+dbName+" : "+e.getMessage());
+		}
+ 		return dro;
+ 	}
 
 
 	// --------------------------------------------------------------------------------------
@@ -396,8 +428,10 @@ public class TableResources {
 		try {
 			fileToSend = readWelcomeJsFile(context, dbName);
 		} catch (IOException e) {
+			
 			// a welcome page is not mandatory, so no need to throw an exception
-			fileToSend = "NOT_AVAILABLE";
+			
+			fileToSend = "NOT_AVAILABLE"; // don't change this value, as the client will check for it!
 		}
 		
 		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
@@ -474,8 +508,6 @@ public class TableResources {
 			response.setResponse("active_tab_id needn't to be set in "+dbName+" mode ");
 		}
 		else {
-			//if (lexitInfo == null)
-			//	lexitInfo = new LexitSchemaAccess(context, true);
 			
 			String userName = lexitInfo.getUserName(httpServletRequest);
 			ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);	
@@ -2087,7 +2119,7 @@ public class TableResources {
 		}
 		catch (Exception e){ 
 			sb = new StringBuilder();
-			sb.append("NOT_AVAILABLE");
+			sb.append("NOT_AVAILABLE"); // don't change this value, as the client will check for it!
 		}
 		
 		return sb.toString();

@@ -67,7 +67,7 @@ var aProjectList = [
 	 {
 			name: "Login overzicht",
 			config_filename: "spy",
-			description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
+			description: "Overzicht actieve accounts en connecties (wordt om de 2 sec bijgewerkt)",
 			goody: true
 	 },
 	 {

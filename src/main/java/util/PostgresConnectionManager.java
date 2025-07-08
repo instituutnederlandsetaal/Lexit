@@ -566,6 +566,7 @@ public class PostgresConnectionManager {
 					
 					String oneArg = args[i];
 					String oneType = ato.getType(i);
+					
 					// a string containing 'NULL' must be interpreted as null
 					if (oneArg.equals("NULL")) oneArg = null;
 					
@@ -594,6 +595,16 @@ public class PostgresConnectionManager {
 							prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 					}
 					
+					else if (oneType.endsWith("[]")) { // array
+						
+						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
+						boolean valueIsList = cleanValue.contains(",");
+						if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
+							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? cleanValue.split(",") : new String[]{cleanValue}));
+						else
+							prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? cleanValue.trim().split("[ ]*,[ ]*") : new String[]{cleanValue}));
+					}
+					
 					
 					else if ( isBigWholeNumberType(oneType) ) {
 						if (oneArg == null) 
@@ -616,14 +627,7 @@ public class PostgresConnectionManager {
 						else 
 							prest.setDouble(i+1, Double.parseDouble(oneArg)); 
 					}
-					else if (oneType.endsWith("[]")) { // array
 					
-						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
-						if (oneType.equals("_int4[]"))
-							prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
-						else
-							prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
-					}
 					else if (oneType.equals("jsonb")) {	
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.VARCHAR);
@@ -635,7 +639,13 @@ public class PostgresConnectionManager {
 							prest.setNull(i+1, java.sql.Types.VARCHAR);
 						else 
 							prest.setString(i+1, oneArg);
-					}				
+					}
+					
+					
+					if (Constants.debug) {
+						String showArg = oneArg!=null && oneArg.length()>40 ? oneArg.substring(0, 40)+"..." : oneArg;
+						System.out.println(i+1+" -> "+showArg+" "+oneType);
+					}
 				}
 				
 				
@@ -753,6 +763,16 @@ public class PostgresConnectionManager {
 						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 				}
 				
+				else if (oneType.endsWith("[]")) { // array
+					
+					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
+					boolean valueIsList = cleanValue.contains(",");
+					if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
+						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? cleanValue.split(",") : new String[]{cleanValue}));
+					else
+						prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? cleanValue.trim().split("[ ]*,[ ]*") : new String[]{cleanValue}));
+				}
+				
 				else if ( isBigWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
@@ -772,14 +792,7 @@ public class PostgresConnectionManager {
 					else 
 						prest.setDouble(i+1, Double.parseDouble(oneArg));
 				}
-				else if (oneType.endsWith("[]")) { // array
 				
-					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");					
-					if (oneType.equals("_int4[]"))
-						prest.setArray(i+1, conn.createArrayOf("integer", new String[]{cleanValue}));
-					else
-						prest.setArray(i+1, conn.createArrayOf("text", new String[]{cleanValue}));
-				}
 				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);

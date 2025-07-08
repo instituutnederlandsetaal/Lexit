@@ -154,5 +154,32 @@ public class AppLifecycleListener implements ServletContextListener {
  	private static long getTimeLastUsed(String project) {
 		return project2TimeLastUsed.get(project);
 	}
+ 	
+ 	
+ 	
+ 	/**
+ 	 * Delete the connection pool for a project (meant for resetting a project).
+ 	 * @param projectName
+ 	 */
+	public static void deletePool(String projectName) {
+ 		
+ 		// close the data source
+ 		HikariDataSource dataSource = project2DataSource.get(projectName);
+ 		if (dataSource != null) {
+ 			try {
+ 				dataSource.close();
+ 			} 
+ 			catch (Exception e) {
+ 				e.printStackTrace();
+ 			}
+ 		}
+ 		
+ 		// remove the project from the maps
+ 		project2DataSource.remove(projectName);
+ 		project2TimeLastUsed.remove(projectName);
+ 		
+ 		// we need to dispose of the credentials as well, as we might want to reload from another server later on
+ 		project2Credentials.remove(projectName);
+ 	}
 
 }

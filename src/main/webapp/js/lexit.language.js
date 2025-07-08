@@ -724,6 +724,19 @@ lang.helpText =
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die een NULL-waarde bevatten</TD>" +
 				"</TR>" +
 				"</TABLE>" +
+				"<BR><BR>" +
+				"Ten slotte is het ook mogelijk om te zoeken naar een lijst waarden:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>{aap, noot, mies}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die overeenkomen met genoemde waarden</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!{aap, noot, mies}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die NIET overeenkomen met genoemde waarden</TD>" +
+				"</TR>" +
+				"</TABLE>" +
 				"<SPAN class='query_builder_info'>"+				
 				"<BR><BR><BR>" +
 				"<B>Query-builder / Selectiehulp</B>" +
@@ -1327,6 +1340,19 @@ lang.setLanguage = function(sLanguageCode){
 				"<TD>&nbsp;&nbsp;</TD><TD> searches for cells containing a NULL value</TD>" +
 				"</TR>" +
 				"</TABLE>" +	
+				"<BR><BR>" +
+				"Finally, it is also possible to search for a list of values:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>{cat, bat, mat}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that match the specified values</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!{cat, bat, mat}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that do not match the specified values</TD>" +
+				"</TR>" +
+				"</TABLE>" +
 				"<SPAN class='query_builder_info'>" +			
 				"<BR><BR><BR>" +
 				"<B>Query builder / Selection help</B>" +

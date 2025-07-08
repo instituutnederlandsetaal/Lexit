@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.06.30
+	v2025.07.08
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -24,16 +24,12 @@
 				@import "css/buttons.dataTables.css";
 				
 	</style>
-	<!--
-				prettify.sunburst required by jquery.contextMenu
-	-->
+	<!-- prettify.sunburst required by jquery.contextMenu -->
 	
 	
 	
 	<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
-	<!--
-				jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8
-	-->
+	<!-- jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8 -->
 	
 	<!-- 
 	Javascript import with needed functionalities:
@@ -290,6 +286,8 @@
 			// set current user name
 			// and start app in the right mode			
 			fn.setCurrentUser(null, function(){
+				
+				// when a projectname is specified as URL param 'db', this function will call getConfigFilesList() and initialize() to start the project 
 				startInRightMode();	
 			});
 			

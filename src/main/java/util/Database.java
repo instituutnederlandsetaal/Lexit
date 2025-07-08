@@ -145,7 +145,7 @@ public class Database {
 		String[] args = new String[]{idValue};
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
-		ato.setType(0, getTypeOfColumn(tableName, idColumn));
+		ato.setType(0, getTypeOfColumn(tableName, idColumn, null));
 		
 		String deleteRecord = 
 			"DELETE FROM " + getSafeTableName(tableName, schema) + " " +
@@ -740,7 +740,7 @@ public class Database {
 			String oneColumnValue = columnNameAndValuePair[1];
 			
 			// check if current column can be searched given a search string
-			if ( !valueIsSuitableForColumnType(oneColumnValue, getTypeOfColumn(tableName, oneColumnName)) )
+			if ( !valueIsSuitableForColumnType(oneColumnValue, getTypeOfColumn(tableName, oneColumnName, null)) )
 			{
 				columnsFilters += (					
 						"AND " +
@@ -756,7 +756,7 @@ public class Database {
 								getSafeFieldName(oneColumnName)+" "+getSuitableOperatorAndArg(tableName, oneColumnName, oneColumnValue, false)+" "
 						);		
 				columnsValues.add(oneColumnValue);
-				ato.setType(columnsValues.size()-1, getTypeOfColumn(tableName, oneColumnName));
+				ato.setType(columnsValues.size()-1, getTypeOfColumn(tableName, oneColumnName, null));
 			}	
 			
 		}
@@ -847,7 +847,7 @@ public class Database {
 		TableRecordObject tro = new TableRecordObject();
 		String schema = getSchema(tableName);
 		String idColumn = getPrimaryKeyColumn(tableName);
-		String idColumnType = getTypeOfColumn(tableName, idColumn);
+		String idColumnType = getTypeOfColumn(tableName, idColumn, null);
 		
 		ArrayList<String[]> res;
 		
@@ -901,7 +901,7 @@ public class Database {
 		TableRecordsObject tro = new TableRecordsObject();
 		String schema = getSchema(tableName);
 		String idColumn = getPrimaryKeyColumn(tableName);
-		String idColumnType = getTypeOfColumn(tableName, idColumn);
+		String idColumnType = getTypeOfColumn(tableName, idColumn, null);
 		
 		String[] columnsNames = getColumnNames(tableName);
 		int idColumnIndex = Util.getIndexOf(idColumn, columnsNames);
@@ -1331,7 +1331,7 @@ public class Database {
 				
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
-		String valueTypeOfIdColumn = getTypeOfColumn(tableName, primaryKey);
+		String valueTypeOfIdColumn = getTypeOfColumn(tableName, primaryKey, null);
 				
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
@@ -1622,8 +1622,8 @@ public class Database {
 		String[] args = new String[]{valueToUpdate, rowId};		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
-		ato.setType(0, getTypeOfColumn(tableName, columnName));
-		ato.setType(1, getTypeOfColumn(tableName, idColumn));
+		ato.setType(0, getTypeOfColumn(tableName, columnName, null));
+		ato.setType(1, getTypeOfColumn(tableName, idColumn, null));
 		
 		
 		String updateRecords = 
@@ -1903,9 +1903,9 @@ public class Database {
 		{
 			String oneColumn = columnNames[i];
 			columnNames[i] = getSafeFieldName(columnNames[i]);
-			ato.setType(i, getTypeOfColumn(tableName, oneColumn));
+			ato.setType(i, getTypeOfColumn(tableName, oneColumn, null));
 		}		
-		ato.setType(columnNames.length, getTypeOfColumn(tableName, idColumn));
+		ato.setType(columnNames.length, getTypeOfColumn(tableName, idColumn, null));
 		
 		
 		String updateRecords = 
@@ -2034,7 +2034,7 @@ public class Database {
 			int indexOfMatcher = Util.getIndexOf(columnNamesToUpdate[i], columnNamesToMatch);
 			settingPairs[i] = getSafeFieldName(columnNamesToUpdate[i]) + " = " +
 			(
-				allowsRegex(getTypeOfColumn(tableName, columnNamesToUpdate[i])) && indexOfMatcher>-1 ?
+				allowsRegex(getTypeOfColumn(tableName, columnNamesToUpdate[i], null)) && indexOfMatcher>-1 ?
 					"regexp_replace("+getSafeFieldName(columnNamesToUpdate[i]) + ", '" + getDoubleEscape(valuesToMatch[indexOfMatcher]) + "', '" + getValidSqlBackReference(valuesToUpdate[i]) + "') " :
 						"'"+getValidSqlBackReference(valuesToUpdate[i])+"'"
 			);
@@ -2567,7 +2567,7 @@ public class Database {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) ) {
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) " + getSuitableOperatorAndArg(tableName, null, sSearch, false)
@@ -2579,7 +2579,7 @@ public class Database {
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" " + getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false)
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName, sSearch));
 				}
 				
 				
@@ -2620,7 +2620,7 @@ public class Database {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName)) ) {
+				if ( !valueIsSuitableForColumnType(sSearch, getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
 					
 					queryParts.add(
 							"CAST(" + getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
@@ -2633,7 +2633,7 @@ public class Database {
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" " + getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false) 
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName, sSearch));
 				}		
 								
 			}			
@@ -2656,7 +2656,7 @@ public class Database {
 				String currentSearchValue = aSearchColumnValues.get(i);
 				
 				// special case: 0/1 in a boolean must be translated to true/false
-				if (getTypeOfColumn(tableName, currentColumnName).equals("boolean") && 
+				if (getTypeOfColumn(tableName, currentColumnName, null).equals("boolean") && 
 						(currentSearchValue.equals("0") || currentSearchValue.equals("1")) ){
 					currentSearchValue = currentSearchValue.replace("0", "false").replace("1", "true");
 					aSearchColumnValues.set(i, currentSearchValue);
@@ -2668,7 +2668,7 @@ public class Database {
 				queryValues.add(currentSearchValue);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName)) ) {
+				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) "+ getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
@@ -2680,7 +2680,7 @@ public class Database {
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" " + getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn)  
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName, currentSearchValue));
 				}
 								
 			}
@@ -2711,7 +2711,7 @@ public class Database {
 				String currentSearchValue = aSearchColumnValues.get(i);
 				
 				// special case: 0/1 in a boolean must be translated to true/false
-				if (getTypeOfColumn(tableName, currentColumnName).equals("boolean") && 
+				if (getTypeOfColumn(tableName, currentColumnName, null).equals("boolean") && 
 						(currentSearchValue.equals("0") || currentSearchValue.equals("1")) ){
 					currentSearchValue = currentSearchValue.replace("0", "false").replace("1", "true");
 					aSearchColumnValues.set(i, currentSearchValue);
@@ -2723,7 +2723,7 @@ public class Database {
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
 				// check if current column can be searched given a search string
-				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName)) ) {
+				if ( !valueIsSuitableForColumnType(currentSearchValue, getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
 					queryParts.add(
 							"CAST("+getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" AS text) " + getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
@@ -2735,7 +2735,7 @@ public class Database {
 							getSafeTableNameOnly(tableName) + "." + getSafeFieldName(currentColumnName) + 
 							" " + getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn) 
 							);
-					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName));
+					ato.setType(queryValues.size()-1, getTypeOfColumn(tableName, currentColumnName, currentSearchValue));
 				}
 				
 			}
@@ -3134,57 +3134,7 @@ public class Database {
 	}
 	
 	
-	/**
-	 * Determine which operator suits a string (whether it is a regex or not, etc)
-	 * and return it.
-	 * NOTE this function is old, and less reliable than its 4 argument counterpart,
-	 * as it doesn't take column datatype into account (it was designed to work without that).
-	 * @param value
-	 * @return an operator as a string
-	 */
-	public String getSuitableOperator(String value, boolean caseSensitive){
 		
-		// get a version of the value without the operator
-		String cleanValue = removeFrontOperator(value);
-		
-		
-		// always check that one first (to prevent NullPointerException)
-		if (value == null || value.toLowerCase().equals("null") )
-			return " IS ";		
-		if (value.toLowerCase().equals("!null"))
-			return " IS NOT ";
-		
-		// negation operator
-		boolean negation = false;
-		if (value.startsWith("!"))
-			negation = true;
-		
-		// array search
-		if (value.startsWith("{") && value.endsWith("}"))
-			return "@>";
-		
-		// inequality operators
-		if (value.startsWith("<=") || value.startsWith(">="))
-			return value.substring(0,2);		
-		if (value.startsWith("<") || value.startsWith(">"))
-			return value.substring(0,1);
-		
-		// if value is an integer, just test equality (because it's faster)
-		// (NOTE that if <= or >= operators were required, those were catched hereabove)
-		if (Util.isInteger(cleanValue)) 
-			return (negation ? "!=" : "=");
-		
-		// booleans require '='
-		if (cleanValue.matches("true|false"))
-			return (negation ? "!=" : "=");
-		
-		// suitable operator for case (in)sensitive search and regex
-		return caseSensitive? 
-				(negation ? "!~" : "~") 
-				: 
-				(negation ? "!~*" : "~*");
-	}
-	
 	
 	/**
 	 * Determine which operator suits a value, given its type
@@ -3199,7 +3149,7 @@ public class Database {
 		
 		// get column type
 		String columnType = (columnName==null ? 
-					"text" : getTypeOfColumn(tableName, columnName));
+					"text" : getTypeOfColumn(tableName, columnName, null));
 			
 		// now the column value...
 		//
@@ -3211,15 +3161,29 @@ public class Database {
 		if (columnValue.toLowerCase().equals("!null"))
 			return " IS NOT " + arg;
 		
-		// unaccent
-		if (columnValue.contains("unaccent(")) {
-			arg = " unaccent(?) ";
-		}
+		
+		
 		
 		// negation operator
 		boolean negation = false;
 		if (columnValue.startsWith("!"))
 			negation = true;
+		
+		// special case: input value with curled brackets triggers search in an array of values
+		// (for any other case, the value is set given the column type!)
+		if ( columnValue.matches("!?\\{.*") && columnValue.endsWith("}") 
+				&& !columnType.equals("jsonb")) {			
+			return (negation ? "!= ALL (?) " : "= ANY (?) ");			
+		}
+		
+		
+		
+		// unaccent
+		if (columnValue.contains("unaccent(")) {
+			arg = " unaccent(?) ";
+		}
+		
+		
 		
 		// array type
 		if (columnType.endsWith("[]"))
@@ -3419,7 +3383,23 @@ public class Database {
 	 * @param columnName
 	 * @return
 	 */
-	public  String getTypeOfColumn(String tableName, String columnName){
+	public  String getTypeOfColumn(String tableName, String columnName, String columnValue){
+		
+		// in most cases, the columnValue will be empty
+		// but in some cases we want the type to be (temporarily) determined by the value type
+		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
+			// if the value contains letters, return a text array type
+			if (columnValue.matches("!?\\{.*[a-zA-Z]+.*\\}")) {
+				return "text[]";
+			}
+			// otherwise return a numeric array type
+			else {
+				return "numeric[]";
+			}
+		}
+		
+		
+		// normal mode: get the column type from the database
 		
 		String type = "";
 		String schema = getSchema(tableName);
@@ -4182,7 +4162,7 @@ public class Database {
 	    	System.out.println(columnNames.length+" => "+Util.join(columnNames, ", "));
 	    }
 	    for (int i = 0; i < columnNames.length; i++) {
-	    	columnTypes[i] = getTypeOfColumn(tableName, removeQuotesFromSqlReservedWord(columnNames[i]));
+	    	columnTypes[i] = getTypeOfColumn(tableName, removeQuotesFromSqlReservedWord(columnNames[i]), null);
 	    }	    
 	 
 	    if (Constants.debug) {	    	
