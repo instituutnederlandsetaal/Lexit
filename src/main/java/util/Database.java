@@ -3378,15 +3378,19 @@ public class Database {
 	
 	
 	/**
-	 * Get the type of one particular column
+	 * Get the type of one particular column. 
+	 * If the columnValue is null (normal mode), the type will be determined by the column data type in the database.
+	 * If the columnValue is not null (special mode), the type will be determined by the value type.
+	 * 
 	 * @param tableName
 	 * @param columnName
-	 * @return
+	 * @param columnValue (usually null)
+	 * @return data type of the column, as specified in the database (when columnValue is null) or computed given the columnValue (when that is not null)
 	 */
 	public  String getTypeOfColumn(String tableName, String columnName, String columnValue){
 		
-		// in most cases, the columnValue will be empty
-		// but in some cases we want the type to be (temporarily) determined by the value type
+		// special mode: compute type from value
+				
 		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
 			// if the value contains letters, return a text array type
 			if (columnValue.matches("!?\\{.*[a-zA-Z]+.*\\}")) {

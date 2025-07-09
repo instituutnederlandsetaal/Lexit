@@ -750,6 +750,10 @@ lang.helpText =
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met 'ge' beginnen, maar NIET op 'heid' eindigen</TD>" +
 				"</TR>" +
 				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge.*(?&lt;!heid)$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> idem</TD>" +
+				"</TR>" +
+				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET met 'ge' beginnen, maar wel op 'heid' eindigen</TD>" +
 				"</TR>" +
@@ -1382,6 +1386,10 @@ lang.setLanguage = function(sLanguageCode){
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge(?!.*heid$)</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> search for words that start with 'ge', but do NOT end with 'heid'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge.*(?&lt;!heid)$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> idem</TD>" +
 				"</TR>" +
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
