@@ -254,7 +254,7 @@ sf.goToPageGiveXmlResponse = function(xml, sSomeTablename){
 		
 		var sFieldToQuery = 	aSplitResponse[2];
 		// global: no var!
-		aGoToRowIds[sSomeTablename] = sFieldToQuery+":^(" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join("|") + ")$";
+		aGoToRowIds[sSomeTablename] = sFieldToQuery+":{" + ( (aSplitResponse[3]).split(ARG_INTERNAL_SEPARATOR) ).join(",") + "}";
 		
 		mt.getDataTableObjectOf(sSomeTablename).displayRow(iRowNumber).draw(false);
 	}
