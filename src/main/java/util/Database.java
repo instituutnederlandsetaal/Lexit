@@ -3175,7 +3175,7 @@ public class Database {
 		// (for any other case, the value is set given the column type!)
 		//
 		if ( columnValue.matches("!?\\{.*") && columnValue.endsWith("}") 
-				&& !columnType.equals("jsonb")) {			
+				&& !columnType.endsWith("[]")) {			
 			return (negation ? "!= ALL (?) " : "= ANY (?) ");			
 		}
 		
