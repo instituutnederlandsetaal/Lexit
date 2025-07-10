@@ -600,9 +600,9 @@ public class PostgresConnectionManager {
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 						boolean valueIsList = cleanValue.contains(",");
 						if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
-							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? cleanValue.split(",") : new String[]{cleanValue}));
+							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 						else
-							prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? cleanValue.trim().split("[ ]*,[ ]*") : new String[]{cleanValue}));
+							prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					}
 					
 					
@@ -768,9 +768,9 @@ public class PostgresConnectionManager {
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 					boolean valueIsList = cleanValue.contains(",");
 					if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
-						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? cleanValue.split(",") : new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					else
-						prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? cleanValue.trim().split("[ ]*,[ ]*") : new String[]{cleanValue}));
+						prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 				}
 				
 				else if ( isBigWholeNumberType(oneType) ) {

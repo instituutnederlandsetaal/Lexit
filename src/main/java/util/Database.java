@@ -3163,14 +3163,17 @@ public class Database {
 		
 		
 		
-		
 		// negation operator
+		//
 		boolean negation = false;
 		if (columnValue.startsWith("!"))
 			negation = true;
 		
+		
+		
 		// special case: input value with curled brackets triggers search in an array of values
 		// (for any other case, the value is set given the column type!)
+		//
 		if ( columnValue.matches("!?\\{.*") && columnValue.endsWith("}") 
 				&& !columnType.equals("jsonb")) {			
 			return (negation ? "!= ALL (?) " : "= ANY (?) ");			
@@ -3389,21 +3392,24 @@ public class Database {
 	 */
 	public  String getTypeOfColumn(String tableName, String columnName, String columnValue){
 		
+		
 		// special mode: compute type from value
-				
+		// ------------
+		// value is of array type (which is not necessarily the same as the column type), 
+		// so make sure its type is returned as an array type
 		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
-			// if the value contains letters, return a text array type
-			if (columnValue.matches("!?\\{.*[a-zA-Z]+.*\\}")) {
-				return "text[]";
-			}
-			// otherwise return a numeric array type
-			else {
-				return "numeric[]";
-			}
+			
+			// get the datatype of the column from the database
+			String typeOfCol = getTypeOfColumn(tableName, columnName, null);
+			
+			// make sure we now return an array type  
+			return typeOfCol + (typeOfCol.endsWith("[]") ? "":"[]");
+			
 		}
 		
 		
 		// normal mode: get the column type from the database
+		// -----------
 		
 		String type = "";
 		String schema = getSchema(tableName);

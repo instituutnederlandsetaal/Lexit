@@ -16,6 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -711,6 +713,55 @@ public class Util {
 				return i;
 		}
 		return -1;
+	}
+	
+	
+	/**
+	 * Split string into an array, especially when members contains (misleading) commas
+	 * 
+	 * @param str
+	 * @param separator
+	 * @return
+	 */
+	public static String[] splitString(String str, String separator) {
+		
+		// if empty string, return empty array right away
+        if (str == null || str.trim().isEmpty()) {
+            return new String[] {};
+        }
+        
+        
+        // string is not empty, so we need to process it
+        StringBuilder current = new StringBuilder();
+        boolean insideQuotes = false;
+        boolean escapeNext = false;
+        List<String> result = new ArrayList<>();
+        
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            
+            if (escapeNext) {
+                current.append(c);
+                escapeNext = false;
+            } else if (c == '\\') {
+                escapeNext = true;
+            } else if (c == '"') {
+                insideQuotes = !insideQuotes;
+                // Don't include the quotes in the result
+            } else if (c == separator.charAt(0) && !insideQuotes) {
+                // Found a delimiter outside quotes
+                result.add(current.toString().trim());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+        
+        // Add the last field
+        result.add(current.toString().trim());
+
+		// return the result as an array
+        return result.toArray(new String[0]);
 	}
 	
 	
