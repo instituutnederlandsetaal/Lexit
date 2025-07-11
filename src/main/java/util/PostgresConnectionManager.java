@@ -601,7 +601,11 @@ public class PostgresConnectionManager {
 						boolean valueIsList = cleanValue.contains(",");
 						if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
-						else
+                        // JW: explicit case for bigint[], because these are neither non-big whole number types nor strings
+                        // JW: they would therefore be treated as text as per the else below, resulting in an error
+                        else if (oneType.equals("bigint[]")) {
+                            prest.setArray(i+1, conn.createArrayOf("bigint", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
+                        } else
 							prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					}
 					
