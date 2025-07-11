@@ -3391,26 +3391,9 @@ public class Database {
 	 * @return data type of the column, as specified in the database (when columnValue is null) or computed given the columnValue (when that is not null)
 	 */
 	public  String getTypeOfColumn(String tableName, String columnName, String columnValue){
-		
-		
-		// special mode: compute type from value
-		// ------------
-		// value is of array type (which is not necessarily the same as the column type), 
-		// so make sure its type is returned as an array type
-		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
-			
-			// get the datatype of the column from the database
-			String typeOfCol = getTypeOfColumn(tableName, columnName, null);
-			
-			// make sure we now return an array type  
-			return typeOfCol + (typeOfCol.endsWith("[]") ? "":"[]");
-			
-		}
-		
-		
-		// normal mode: get the column type from the database
+
+        // normal mode: get the column type from the database
 		// -----------
-		
 		String type = "";
 		String schema = getSchema(tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
@@ -3452,7 +3435,16 @@ public class Database {
 			else {
 				type = "unknown";
 			}
-			
+
+			// special mode: compute type from value
+            // ------------
+            // value is of array type (which is not necessarily the same as the column type),
+            // so make sure its type is returned as an array type
+
+            if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
+                // make sure we return an array type
+                return type + (type.endsWith("[]") ? "" : "[]");
+            }
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Error while executing query "+typeQuery, e);
