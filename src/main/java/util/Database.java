@@ -3401,8 +3401,10 @@ public class Database {
 		// use caching
 		// (if we have looked up the column type already, it is stored in a hash)
 		String cachingKey = schema+tableNameOnly+columnName;
-		
-		if ( tableAndColumnNameToTypes.containsKey(cachingKey) ) {
+
+        // JW: columnValue == null is a condition because the reverse implies a search query on the user end
+        // JW: in the latter case the types need to be fetched elsewhere, see below towards "special mode"
+		if (tableAndColumnNameToTypes.containsKey(cachingKey) && columnValue == null) {
 			Util.debug(co, "## Column type from cache: "+columnName+" = "+tableAndColumnNameToTypes.get(cachingKey));
 			return tableAndColumnNameToTypes.get(cachingKey);
 		}
