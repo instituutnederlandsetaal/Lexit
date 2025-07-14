@@ -599,7 +599,7 @@ public class PostgresConnectionManager {
 						
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 						boolean valueIsList = cleanValue.contains(",");
-						if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
+						if (oneType.startsWith("_int") || isWholeNumberType(oneType) || isBigWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 						else
 							prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
@@ -767,7 +767,7 @@ public class PostgresConnectionManager {
 					
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 					boolean valueIsList = cleanValue.contains(",");
-					if (oneType.startsWith("_int") || isWholeNumberType(oneType) )
+					if (oneType.startsWith("_int") || isWholeNumberType(oneType) || isBigWholeNumberType(oneType) )
 						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, conn.createArrayOf("text", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
