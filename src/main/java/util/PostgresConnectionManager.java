@@ -631,8 +631,14 @@ public class PostgresConnectionManager {
 					else if (oneType.equals("jsonb")) {	
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.VARCHAR);
-						else 
-							prest.setString(i+1, "[{"+oneArg+"}]");
+						else {
+							// backwards compatibility: if the argument isn't starting with '{' nor '[{', we must add '[{...}]' around the argument
+							if (!oneArg.startsWith("{") && !oneArg.startsWith("[{")) {
+								oneArg = "[{"+oneArg+"}]";
+							}
+							// the right way to pass jsonb arguments
+							prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
+						}
 					}
 					else {
 						if (oneArg == null) 
@@ -796,8 +802,14 @@ public class PostgresConnectionManager {
 				else if (oneType.equals("jsonb")) {	
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.VARCHAR);
-					else 
-						prest.setString(i+1, "[{"+oneArg+"}]");
+					else {
+						// backwards compatibility: if the argument isn't starting with '{' nor '[{', we must add '[{...}]' around the argument
+						if (!oneArg.startsWith("{") && !oneArg.startsWith("[{")) {
+							oneArg = "[{"+oneArg+"}]";
+						}
+						// the right way to pass jsonb arguments
+						prest.setObject(i+1, oneArg, java.sql.Types.OTHER);
+					}
 				}
 				else {
 					if (oneArg == null) 

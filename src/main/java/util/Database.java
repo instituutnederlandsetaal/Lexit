@@ -96,16 +96,16 @@ public class Database {
 	//  [1] the last usage time of the database object (so it can be removed when it hasn't been used for some time)
 	//  [2] the tab the user is currently viewing (so we can simulate a session ID per TAB for example)
 	// Both behave differently:
-	//  [1] has is usage time set each time it's called... and at each call, we loop through to other cached ContextObjects and check if some usage time is too long ago
+	//  [1] has its usage time set each time it's called... and at each call, we loop through to other cached ContextObjects and check if some usage time is too long ago
 	//  [2] has its tab-id only set at tab creation or tab change, so the tab-id is lost at the very next round since the ContextObject by default only contains
 	//      server context info. So, to prevent loss, we check if the previous version (held in this class) had some tab-id, and copy it to the new ContextObject
 	public void updateContextObject(ContextObject co){
 		
 		// see explanation hereabove
 		
-		if ( (co.getActiveTabId() == null || co.getActiveTabId().isEmpty())			// THIS THE INPUT OBJECT TO BE UPDATED
+		if ( 	(co.getActiveTabId() == null || co.getActiveTabId().isEmpty())				// THIS IS THE INPUT OBJECT TO BE UPDATED
 				&&
-				(this.co.getActiveTabId() != null && !this.co.getActiveTabId().isEmpty())) 	// THIS IS OBJECT CACHED IN
+				(this.co.getActiveTabId() != null && !this.co.getActiveTabId().isEmpty())) 	// THIS IS THE OBJECT CACHED IN
 																							// THIS DATABASE OBJECT, WHICH WE WANT TO KEEP
 																							// THE ACTIVE TAB ID FROM
 		{			
@@ -3175,7 +3175,9 @@ public class Database {
 		// (for any other case, the value is set given the column type!)
 		//
 		if ( columnValue.matches("!?\\{.*") && columnValue.endsWith("}") 
-				&& !columnType.endsWith("[]")) {			
+				&& 
+			(!columnType.endsWith("[]") && !columnType.equals("jsonb")) ) {
+			
 			return (negation ? "!= ALL (?) " : "= ANY (?) ");			
 		}
 		
@@ -3189,12 +3191,14 @@ public class Database {
 		
 		
 		// array type
+		// (beware: the negation operator is deceiving here, as it is an exact inequality, so it's not a containment negation)
 		if (columnType.endsWith("[]"))
-			return "@>" + arg;
+			return (negation ? "<>" : "@>") + " " + arg;
 		
 		// json type
+		// (beware: the negation operator is deceiving here, as it is an exact inequality, so it's not a containment negation)
 		if (columnType.equals("jsonb")) {
-			return "@> " + arg + "::jsonb";
+			return (negation ? "<>" : "@>") + " " + arg + "::jsonb";
 		}
 		
 		// tsvector
