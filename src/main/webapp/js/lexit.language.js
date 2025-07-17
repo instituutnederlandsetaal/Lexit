@@ -737,6 +737,19 @@ lang.helpText =
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die NIET overeenkomen met genoemde waarden</TD>" +
 				"</TR>" +
 				"</TABLE>" +
+				"<BR></BR>"+
+				"Ook kan men in een bereik [A-B] zoeken:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[4,8]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar waarden tussen 4 en 8</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[1990-01-01,2020-12-31]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar datums tussen 1990-01-01 en 2020-12-31</TD>" +
+				"</TR>" +
+				"</TABLE>" +
 				"<BR><BR>" +
 				"Ten slotte is het mogelijk om in &eacute;&eacute;n expressie iets te zoeken, maar tegelijkertijd ook iets uit te sluiten:" +
 				"<BR><BR>" +
@@ -1373,6 +1386,19 @@ lang.setLanguage = function(sLanguageCode){
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>!{cat, bat, mat}</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that do NOT match the listed values</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR></BR>"+
+				"And it is also possible to search in a range [A,B]:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[4,8]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for a value between 4 and 8</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[1990-01-01,2020-12-31]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for dates between 1990-01-01 and 2020-12-31</TD>" +
 				"</TR>" +
 				"</TABLE>" +
 				"<BR><BR>" +

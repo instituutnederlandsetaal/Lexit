@@ -2395,19 +2395,27 @@ public class Database {
 	 */
 	public boolean valueIsSuitableForColumnType(String value, String columnType){
 		
-		// remove operators in front
-		value = removeFrontOperator(value);
-		
 		// null values
 		if (value == null)
 			return true;
+				
+		// remove operators in front
+		String cleanValue = removeFrontOperator(value);
+		
+		// range
+		if (value.startsWith("range[") && value.endsWith("]") 
+			&&
+		   (columnType.equals("date") || columnType.startsWith("timestamp") || PostgresConnectionManager.isNumericTypeOfSomeKind(columnType) )
+			) {
+			return true;
+		}
 		
 		// array
-		if (value.startsWith("{") && value.endsWith("}") && columnType.endsWith("[]"))
+		if (cleanValue.startsWith("{") && cleanValue.endsWith("}") && columnType.endsWith("[]"))
 			return true;
 		
 		// booleans
-		if (value.matches("true|false") && columnType.equals("boolean"))
+		if (cleanValue.matches("true|false") && columnType.equals("boolean"))
 			return true;
 		
 		// tsvector 
@@ -2420,22 +2428,22 @@ public class Database {
 		
 		// user-defined
 		// (searching a user-defined field with a string as '-' will cause a crash if we don't cast to text)
-		if ( columnType.equals("USER-DEFINED") && !Util.containsSomeLetters(value) )
+		if ( columnType.equals("USER-DEFINED") && !Util.containsSomeLetters(cleanValue) )
 			return false;
 		
 		// textual
 		// (a string containing letters is not suitable to a non-textual field)
-		if ( Util.containsSomeLetters(value) && !PostgresConnectionManager.isTextualType(columnType) )
+		if ( Util.containsSomeLetters(cleanValue) && !PostgresConnectionManager.isTextualType(columnType) )
 			return false;
 		
 		// numeric
 		
 		// (a string containing other things than digits is not suitable to whole number field)
-		if (value.matches(".*([^\\d]).*") && (PostgresConnectionManager.isWholeNumberType(columnType) || PostgresConnectionManager.isBigWholeNumberType(columnType)) )
+		if (cleanValue.matches(".*([^\\d]).*") && (PostgresConnectionManager.isWholeNumberType(columnType) || PostgresConnectionManager.isBigWholeNumberType(columnType)) )
 			return false;
 		
 		// (a string containing other things than digits and a dot is not suitable to real number field)
-		if (value.matches(".*([^\\d\\.]).*") && PostgresConnectionManager.isRealNumberType(columnType))
+		if (cleanValue.matches(".*([^\\d\\.]).*") && PostgresConnectionManager.isRealNumberType(columnType))
 			return false;
 		
 		return true;
@@ -2813,7 +2821,6 @@ public class Database {
 			dataQuery += " LIMIT " + iDisplayLength +" OFFSET " + iDisplayStart;
 		
 		
-		
 				
 		
 		// ******************************************
@@ -3171,7 +3178,10 @@ public class Database {
 		
 		
 		
-		// special case: input value with curled brackets triggers search in an array of values
+		// special cases
+		//--------------
+		
+		// input value with curled brackets triggers search in an array of values
 		// (for any other case, the value is set given the column type!)
 		//
 		if ( columnValue.matches("!?\\{.*") && columnValue.endsWith("}") 
@@ -3181,7 +3191,31 @@ public class Database {
 			return (negation ? "!= ALL (?) " : "= ANY (?) ");			
 		}
 		
+		// input is a range 
+		// (chosen notation is range[A,B], because only [A,B] is a regular expression) 
+		if ( columnValue.startsWith("range[") && columnValue.endsWith("]") ) {
+			
+			columnValue = removeFrontOperator(columnValue);
+			
+			if ( (columnType.equals("date")) || columnType.startsWith("timestamp") ) {
+				return "<@ " + arg + "::daterange";	
+			}
+			if (PostgresConnectionManager.isBigWholeNumberType(columnType)) {
+				return "<@ " + arg + "::int8range";
+		   }
+		   if (PostgresConnectionManager.isWholeNumberType(columnType)) {
+			   return "<@ " + arg + "::int4range";
+		   }
+		   if (PostgresConnectionManager.isRealNumberType(columnType)) {
+			   return "<@ " + arg + "::numrange";
+		   }
+			
+		}
 		
+		
+		
+		// normal business
+		// ---------------
 		
 		// unaccent
 		if (columnValue.contains("unaccent(")) {
@@ -3245,6 +3279,9 @@ public class Database {
 			return value.substring(2);
 		if (value.startsWith("<") || value.startsWith(">") || value.startsWith("!"))
 			return value.substring(1);
+		if (value.startsWith("range[") && value.endsWith("]")) {
+			return value.substring(5);
+		}
 		return value;
 	}
 	
@@ -3410,6 +3447,28 @@ public class Database {
 			return typeOfCol + (typeOfCol.endsWith("[]") ? "":"[]");
 			
 		}
+		
+		// value is a range
+		if (columnValue != null && columnValue.startsWith("range[") && columnValue.endsWith("]")) {
+			
+			// get the datatype of the column from the database
+			String typeOfCol = getTypeOfColumn(tableName, columnName, null);
+				
+		   if (typeOfCol.equals("date") || typeOfCol.startsWith("timestamp") ) {
+			   return "daterange";
+		   }
+		   if (PostgresConnectionManager.isBigWholeNumberType(typeOfCol)) {
+			   return "int8range";
+		   }
+		   if (PostgresConnectionManager.isWholeNumberType(typeOfCol)) {
+			   return "int4range";
+		   }
+		   if (PostgresConnectionManager.isRealNumberType(typeOfCol)) {
+			   return "numrange";
+		   }
+		}
+		
+		
 		
 		
 		// normal mode: get the column type from the database

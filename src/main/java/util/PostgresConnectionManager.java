@@ -595,6 +595,17 @@ public class PostgresConnectionManager {
 							prest.setBoolean(i+1, oneArg.equals("true")?true:false);
 					}
 					
+					else if (oneType.equalsIgnoreCase("int4range") || oneType.equalsIgnoreCase("int8range") || 
+							 oneType.equalsIgnoreCase("numrange") ||
+					         oneType.equalsIgnoreCase("daterange") || oneType.equalsIgnoreCase("tsrange") ||
+					         oneType.equalsIgnoreCase("tstzrange")) {
+					    if (oneArg == null) {
+					        prest.setNull(i + 1, java.sql.Types.OTHER);
+					    } else {
+					        prest.setObject(i + 1, oneArg, java.sql.Types.OTHER); // Pass as literal string
+					    }
+					}
+					
 					else if (oneType.endsWith("[]")) { // array
 						
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
@@ -767,6 +778,17 @@ public class PostgresConnectionManager {
 						prest.setNull(i+1, java.sql.Types.BOOLEAN);
 					else 
 						prest.setBoolean(i+1, oneArg.equals("true")?true:false);
+				}
+				
+				else if (oneType.equalsIgnoreCase("int4range") || oneType.equalsIgnoreCase("int8range") || 
+						 oneType.equalsIgnoreCase("numrange") ||
+				         oneType.equalsIgnoreCase("daterange") || oneType.equalsIgnoreCase("tsrange") ||
+				         oneType.equalsIgnoreCase("tstzrange")) {
+				    if (oneArg == null) {
+				        prest.setNull(i + 1, java.sql.Types.OTHER);
+				    } else {
+				        prest.setObject(i + 1, oneArg, java.sql.Types.OTHER); // Pass as literal string
+				    }
 				}
 				
 				else if (oneType.endsWith("[]")) { // array
