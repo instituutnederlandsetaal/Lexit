@@ -576,7 +576,22 @@ public class PostgresConnectionManager {
 						else 
 							prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
 					}
-					else if (oneType.startsWith("time")) {
+					else if (oneType.startsWith("timestamp")) {
+						if (oneArg == null) {
+					        prest.setNull(i + 1, java.sql.Types.TIMESTAMP);
+					    }
+						else {				
+							// depending on the value, process as a timestamp or as a date
+							boolean processDateInstead = !oneArg.contains(" ");
+							if (processDateInstead == true) {
+								prest.setDate(i + 1, java.sql.Date.valueOf(oneArg.split(" ")[0]));
+							}
+							else {
+								prest.setTimestamp(i + 1, java.sql.Timestamp.valueOf(oneArg));
+							}							
+						}						
+					}
+					else if (oneType.equals("time")) {
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.OTHER);
 						else 
@@ -761,7 +776,22 @@ public class PostgresConnectionManager {
 					else 
 						prest.setDate(i+1, java.sql.Date.valueOf(oneArg));
 				}
-				else if (oneType.startsWith("time")) {
+				else if (oneType.startsWith("timestamp")) {
+					if (oneArg == null) {
+				        prest.setNull(i + 1, java.sql.Types.TIMESTAMP);
+				    }
+					else {				
+						// depending on the value, process as a timestamp or as a date
+						boolean processDateInstead = !oneArg.contains(" ");
+						if (processDateInstead == true) {
+							prest.setDate(i + 1, java.sql.Date.valueOf(oneArg.split(" ")[0]));
+						}
+						else {
+							prest.setTimestamp(i + 1, java.sql.Timestamp.valueOf(oneArg));
+						}							
+					}	
+				}
+				else if (oneType.equals("time")) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.OTHER);
 					else 

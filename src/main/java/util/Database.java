@@ -3197,8 +3197,14 @@ public class Database {
 			
 			columnValue = removeFrontOperator(columnValue);
 			
-			if ( (columnType.equals("date")) || columnType.startsWith("timestamp") ) {
+			if ( columnType.equals("date")) {
 				return "<@ " + arg + "::daterange";	
+			}
+			if ( columnType.equals("timestamp without time zone") ) {
+				return "<@ " + arg + "::tsrange ";	
+			}
+			if ( columnType.equals("timestamp with time zone") ) {
+				return "<@ " + arg + "::tstzrange  ";	
 			}
 			if (PostgresConnectionManager.isBigWholeNumberType(columnType)) {
 				return "<@ " + arg + "::int8range";
@@ -3240,7 +3246,7 @@ public class Database {
 			return "@@ " + (negation ? "!!":"") + arg + "::tsquery ";
 		
 		// date
-		if (columnType.equals("date") && !(columnValue.startsWith("<")||columnValue.startsWith(">")))
+		if ((columnType.equals("date") || columnType.startsWith("timestamp") ) && !(columnValue.startsWith("<")||columnValue.startsWith(">")) )
 			return " = " + arg;
 		
 		// inequality operators 
@@ -3454,8 +3460,14 @@ public class Database {
 			// get the datatype of the column from the database
 			String typeOfCol = getTypeOfColumn(tableName, columnName, null);
 				
-		   if (typeOfCol.equals("date") || typeOfCol.startsWith("timestamp") ) {
+		   if (typeOfCol.equals("date") ) {
 			   return "daterange";
+		   }
+		   if (typeOfCol.equals("timestamp without time zone") ) {
+			   return "tsrange";
+		   }
+		   if (typeOfCol.equals("timestamp with time zone") ) {
+			   return "tstzrange";
 		   }
 		   if (PostgresConnectionManager.isBigWholeNumberType(typeOfCol)) {
 			   return "int8range";
