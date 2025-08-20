@@ -2774,6 +2774,12 @@ public class Database {
 				String thisColSort = String.valueOf(aSortCol[s]);
 				String thisSortDir = String.valueOf(aSortDir[s]);
 				
+				// get the datatype of thisColSort
+				String thisColType = getTypeOfColumn(tableName, thisColSort, null);
+				boolean isTextualType = PostgresConnectionManager.isTextualType(thisColType);
+				String customCollation = isTextualType ? this.getCustomCollation() : null;
+				String thisCollation = (customCollation != null && !customCollation.isEmpty()) ? "COLLATE \"" + customCollation + "\"" : "";
+				
 				// Should we apply reverse sorting?
 				boolean reverseSort = thisSortDir.toLowerCase().contains("_reverse");
 				thisSortDir = thisSortDir.replaceAll("(_reverse|_REVERSE)", "");
@@ -2790,11 +2796,11 @@ public class Database {
 					
 					// if custom reverse sort is defined, apply it
 					if (customReverseSortDefined) {
-						sortPart += sortSeparator + getSafeFieldName(thisColCustomReverseSort) + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomReverseSort) + " " + thisCollation + " " + thisSortDir;
 					}
 					// otherwise do reverse sort the default way
 					else {
-						sortPart += sortSeparator + "REVERSE("+getSafeFieldName(thisColSort) + ") " + thisSortDir;
+						sortPart += sortSeparator + "REVERSE("+getSafeFieldName(thisColSort) + ") " + thisCollation + " " + thisSortDir;
 					}
 					
 				}
@@ -2803,11 +2809,11 @@ public class Database {
 					
 					// if custom sort is defined, apply it
 					if (customSortDefined) {
-						sortPart += sortSeparator + getSafeFieldName(thisColCustomSort) + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomSort) + " " + thisCollation + " " + thisSortDir;
 					}
 					// otherwise do sort the default way
 					else {
-						sortPart += sortSeparator + getSafeFieldName(thisColSort) + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColSort) + " " + thisCollation + " " + thisSortDir;
 					}
 				}
 				sortSeparator = ", ";
@@ -2821,7 +2827,6 @@ public class Database {
 			dataQuery += " LIMIT " + iDisplayLength +" OFFSET " + iDisplayStart;
 		
 		
-				
 		
 		// ******************************************
 		//
@@ -4339,7 +4344,7 @@ public class Database {
 		String host = databaseAccessHash.get("host");
 		String port = databaseAccessHash.get("port");
 		String user = databaseAccessHash.get("user");
-		String pass = databaseAccessHash.get("pass");
+		String pass = databaseAccessHash.get("pass");		
 		
 		// Special setting for cases in which the database server needs to know
 		// which user is active (e.g. because some database trigger function
@@ -4388,6 +4393,27 @@ public class Database {
 		return this.pc;
 	}
 	
+	
+	/**
+	 * Get custom collation to use
+	 * @throws IOException
+	 */
+	public String getCustomCollation(){
+		
+		// first check if the database access data are known
+		// (that is: location, username, password, etc)
+		if ( databaseAccessHash.size() == 0 ) {
+			try {
+				readDatabasePropertiesFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				throw new RuntimeException(e);
+			}
+		}		
+		
+		return databaseAccessHash.get("collation");
+	}
+	
 	/**
 	 * Get schema to address
 	 * @throws IOException
@@ -4410,7 +4436,7 @@ public class Database {
 	
 	/**
 	 * Set a new schema to work in, if needed.
-	 * When this methode has been called, next database calls
+	 * When this method has been called, next database calls
 	 * will address this schema instead of the default one (t.i.
 	 * the one which is set in the .database config file)
 	 * @param newSchema

@@ -1404,14 +1404,22 @@ tb.setColumnProperties = function(sSomeTableName, bIgnoreInitialisationFilters){
 // (that is: remove html element, datatables object, buttons, everything)
 tb.destroyTable = function(sSomeTablename, fnFunction, bRemoveContainerDiv){
 	
+	var oTableSettings = conf.getTableSettings(sSomeTablename);
+	
+	// if the table has a destroy callback as part of its settings, call it now
+	var fnDestroyCallback = conf.getDestroyCallback(oTableSettings);	
+	if (fnDestroyCallback != null){
+		fnDestroyCallback(mt.getDataTableObjectOf(sSomeTablename));
+	}
+	
 	// Resizable etc. needs to be destroyed
-	if (conf.getTableResizable(conf.getTableSettings(sSomeTablename))) {
+	if (conf.getTableResizable(oTableSettings)) {
 		$("#"+sSomeTablename+"_dynamic").resizable("destroy");
 	}
 	
 	// If the table is draggable at the moment (that's only the case when the mouse
 	// is in the header, as the draggable is destroyed at 'mouseleave'), destroy it as well
-	if ( conf.getTableDraggable(conf.getTableSettings(sSomeTablename)) && $("#"+sSomeTablename+"_dynamic").hasClass("draggable") ) {
+	if ( conf.getTableDraggable(oTableSettings) && $("#"+sSomeTablename+"_dynamic").hasClass("draggable") ) {
 		$("#"+sSomeTablename+"_dynamic").draggable("destroy");
 		$("#"+sSomeTablename+"_dynamic").removeClass("draggable");
 	}

@@ -370,9 +370,13 @@ ts.callTable = function(haTableFilters, haTableSettings){
 	else {
 		// we make a clean start:
 		
-		// remove all table properties records
-		mt.removeAllTableRecords();
-		// and remove all table html frames
+		// destroy all loaded tables
+		var aLoaded = mt.getListOfLoadedTables();
+		for (var i = 0; i < aLoaded.length; i++) {
+			tb.destroyTable(aLoaded[i], null, false);
+		}		
+		
+		// remove all table html frames
 		$("#dynamic").children().remove();
 		// see:
 		// http://forum.jquery.com/topic/jquery-empty-does-not-destroy-ui-widgets-whereas-jquery-remove-does-using-ui-1-8-4
