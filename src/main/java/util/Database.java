@@ -2774,11 +2774,8 @@ public class Database {
 				String thisColSort = String.valueOf(aSortCol[s]);
 				String thisSortDir = String.valueOf(aSortDir[s]);
 				
-				// get the datatype of thisColSort
-				String thisColType = getTypeOfColumn(tableName, thisColSort, null);
-				boolean isTextualType = PostgresConnectionManager.isTextualType(thisColType);
-				String customCollation = isTextualType ? this.getCustomCollation() : null;
-				String thisCollation = (customCollation != null && !customCollation.isEmpty()) ? "COLLATE \"" + customCollation + "\"" : "";
+				// compute right collation clause to be used, if declared in .database file
+				String collationClause = this.getCollationClause(tableName, thisColSort);
 				
 				// Should we apply reverse sorting?
 				boolean reverseSort = thisSortDir.toLowerCase().contains("_reverse");
@@ -2796,11 +2793,11 @@ public class Database {
 					
 					// if custom reverse sort is defined, apply it
 					if (customReverseSortDefined) {
-						sortPart += sortSeparator + getSafeFieldName(thisColCustomReverseSort) + " " + thisCollation + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomReverseSort) + " " + collationClause + " " + thisSortDir;
 					}
 					// otherwise do reverse sort the default way
 					else {
-						sortPart += sortSeparator + "REVERSE("+getSafeFieldName(thisColSort) + ") " + thisCollation + " " + thisSortDir;
+						sortPart += sortSeparator + "REVERSE("+getSafeFieldName(thisColSort) + ") " + collationClause + " " + thisSortDir;
 					}
 					
 				}
@@ -2809,11 +2806,11 @@ public class Database {
 					
 					// if custom sort is defined, apply it
 					if (customSortDefined) {
-						sortPart += sortSeparator + getSafeFieldName(thisColCustomSort) + " " + thisCollation + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColCustomSort) + " " + collationClause + " " + thisSortDir;
 					}
 					// otherwise do sort the default way
 					else {
-						sortPart += sortSeparator + getSafeFieldName(thisColSort) + " " + thisCollation + " " + thisSortDir;
+						sortPart += sortSeparator + getSafeFieldName(thisColSort) + " " + collationClause + " " + thisSortDir;
 					}
 				}
 				sortSeparator = ", ";
@@ -3156,8 +3153,11 @@ public class Database {
 	 */
 	public String getSuitableOperatorAndArg(String tableName, String columnName, String columnValue, boolean caseSensitive){
 		
+		// collation clause, if needed
+		String collationClause = this.getCollationClause(tableName, columnName);
+		
 		// argument
-		String arg = " ? ";
+		String arg = (collationClause.isEmpty() ? " ? " : " ( ? " +collationClause+ " ) ");
 		
 		// get column type
 		String columnType = (columnName==null ? 
@@ -3230,7 +3230,7 @@ public class Database {
 		
 		// unaccent
 		if (columnValue.contains("unaccent(")) {
-			arg = " unaccent(?) ";
+			arg = " unaccent( ? "+collationClause+") ";
 		}
 		
 		
@@ -3605,6 +3605,33 @@ public class Database {
 		
 		
 		return columnTypes;
+	}
+	
+	
+	/**
+	 * Get the collation clause for a column, which is used in a query
+	 * 
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
+	public String getCollationClause(String tableName, String columnName) {
+		
+		// get the declared custom collation for this database
+		// and if none is declared, return an empty string
+		String declaredCustomCollation = this.getCustomCollation();
+		if (declaredCustomCollation == null || declaredCustomCollation.isEmpty())
+			return "";
+		
+		// we need to know the column type, since collation is only to be applied to textual columns
+		String thisColType = getTypeOfColumn(tableName, columnName, null);
+		boolean isTextualType = PostgresConnectionManager.isTextualType(thisColType);
+		String customCollation = isTextualType ? declaredCustomCollation : null;
+		
+		// build the right collection clause now
+		String thisCollation = (customCollation != null && !customCollation.isEmpty()) ? "COLLATE \"" + customCollation + "\"" : "";
+		
+		return thisCollation;
 	}
 	
 	
