@@ -2515,6 +2515,9 @@ fn.toggleCheckbox = function(nRow, sColumnName, fnCallback){
 // *     GENERAL COLUMN FUNCTIONS                                  *
 // *****************************************************************
 
+
+
+
 /**
  * Give the name of the column a cell node is part of
  * 
@@ -2542,7 +2545,7 @@ fn.getNameOfColumnForThisNode = function(nCell){
  * @param {Integer} iIndex - Visible index of a column (visible means hidden columns are skipped in the count)
  * @returns {String} Name of a column
  */
-fn.getNameOfColumnForThisVisibleIndex = function( sSomeTable, iIndex){
+fn.getNameOfColumnForThisVisibleIndex = function(sSomeTable, iIndex){
 	
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
@@ -2569,6 +2572,41 @@ fn.getColumnNumberOf = function(sSomeTable, sCellName){
 	// here we use getListOfColumnsOf because this function is about all columns, not only the visible ones
 	return $.inArray(sCellName, mt.getListOfColumnsOf(sSomeTable));
 };
+
+
+/**
+ * Get the allowed values of a column (for selectboxes).
+ * Beware: this works when values are declared in 'choosefrom' in the configuration file.
+ * If none was declared, but the column is an ENUM type in Postgres, the values are taken from there,
+ * but that only works if the table is loaded. 
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String} sColumnName - A column name
+ * @returns {String[]} An array of allowed values (or null if the column is not a selectbox)
+ * 
+ * @see lists.getAllowedValuesOfColumn()
+ */
+fn.getAllowedValuesOfColumn = function(sSomeTablename, sColumnName){
+
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	var aColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+	var iColumnNameIndex = fn.getColumnNumberOf(sSomeTablename, sColumnName);
+	
+	//    select values from 'choosefrom' in config.js file,
+	// or select values from Postgres ENUM custom type?
+	//
+	// [1] choosefrom
+	var aSelectBoxValues = conf.getSelectionBox(aColumnConfig);
+	// [2] ENUM
+	if (aSelectBoxValues == null)
+		aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTablename)[iColumnNameIndex];
+
+	return aSelectBoxValues;
+	
+}
 
 /**
  * Get the visible column number of a cell (so hidden columns are excluded from the count), given the column name
@@ -6899,7 +6937,8 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 	
 };
 
-
+// check if some function was called with a jQuery object
+// and give an error if it was!
 fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
 	if (oArgument instanceof jQuery){

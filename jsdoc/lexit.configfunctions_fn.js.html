@@ -332,7 +332,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
 
 
 /**
- * Add a balk on top of the screen, just like in any IvdNT website
+ * Add a border on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @param {Boolean} [bSetLinks=false] - set default links to help, about and contribute
  * @param {String} [sPathToCustomLogo=null] - path to a custom
@@ -359,6 +359,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 				// append about
 				$("#headerlinks #about_link")
 					.click(function() {
+						fn.closeDialog();
 						fn.message("About Lex'it", 
 							"&lt;table style='width: 400px'>&lt;tr>"+
 							"&lt;td>&lt;h1>Lex'it&lt;/h1>&lt;b>Lex&lt;/b>&lt;i>icon&lt;/i> &lt;b>I&lt;/b>&lt;i>nteractive&lt;/i> &lt;b>T&lt;/b>&lt;i>ool&lt;/i>&lt;BR>&lt;BR>&lt;a href='https://www.ivdnt.org' target='_blank''>www.ivdnt.org&lt;/a>&lt;/td>"+
@@ -373,6 +374,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 				// append contribute
 				$("#headerlinks #contribute_link")
 					.click(function() {
+						fn.closeDialog();
 						window.open("https://github.com/instituutnederlandsetaal/lexit", "_blank");
 					});
 			}, 500);
@@ -400,7 +402,6 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 
 // globals for the fn.setSchema() function
 var setSchemaNameCache = null;
-var setSchemaTimeOut = null;
 
 
 /**
@@ -426,36 +427,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	 	"success": function(xml) {
 
 			console.log("Lex'it: schema was set to "+sNewSchema);
-	 		
-	 		// Since the ContextObject (cache) of Lex'it is emptied after a few minutes of inactivity,
-			// we might end up with Lex'it addressing the default schema again (t.i. the one set in the .database config file), 
-	 		// instead of the schema set in this function.
-	 		// So, we need to set a TimeOut with a duration shorter than the ContextObject life duration,
-	 		// in such a way that this function is reactivated before the end of the ContextObject life cycle.
-	 		// ( about ContextObject life duration, see: java Constants.java, MAX_DB_OBJECT_DURATION )
-	 		
-	 		// But of course, if the code sets another schema later on,
-	 		// we must remove the TimeOut that was set to keep the previously set schema, 
-	 		// and set a new TimeOut as final step.
-	 		
-	 		if (setSchemaTimeOut != null) {
-	 			clearTimeout(setSchemaTimeOut);
-	 		}
-	 		
-	 		setSchemaNameCache = sNewSchema;
-	 		setSchemaTimeOut = setTimeout(
-					function(){
-						// BEWARE: the CALLBACK must be fired ONLY at the first call of fn.setSchema(),
-						// which is why we set is to be null at the end of this function.
-						// Calling the callback at every TimeOut could cause unexpected behavior to the developers:
-						// the developers most probably expect that a schema is set once and for all, 
-						// and do not know of the necessity to re-call the function regularly, as this is just
-						// a trick to deal with the short life of the ContextObject. As a consequence, the
-						// callback given as a parameter is called only at the first round, to meet this 
-						// probable expectation (of developers) of the function behavior. 
-						fn.setSchema(sNewSchema, null, fnErrorHandler);						
-						}, 
-					1000*60); 
+			setSchemaNameCache = sNewSchema;
 			
 	 		// callback if it is set
 	 		if (fnCallback!=null)
@@ -1026,18 +998,16 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	// asTableTypes mustn't be undefined. If it is, the initialization is not
 	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
 	
-	var iTableIndex = $.inArray(sSomeTablename, asTableNames);
+	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
 	
-	if( (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+	if( iTableIndex >=0 &amp;&amp; (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
-    else {
-		// reload the list of tables (might be needed when fn.setSchema was called)
-		ts.reinit();
-		ts.getListOfTables(null, "", "");
-		
-        setTimeout(function(){        	
+    else {		
+		// reload the list of tables (might be needed when fn.setSchema was called)		
+		fn.rebuildTablesMenu();		
+        setTimeout(function(){		        	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
         }, iWait);
     }
@@ -2573,6 +2543,9 @@ fn.toggleCheckbox = function(nRow, sColumnName, fnCallback){
 // *     GENERAL COLUMN FUNCTIONS                                  *
 // *****************************************************************
 
+
+
+
 /**
  * Give the name of the column a cell node is part of
  * 
@@ -2600,7 +2573,7 @@ fn.getNameOfColumnForThisNode = function(nCell){
  * @param {Integer} iIndex - Visible index of a column (visible means hidden columns are skipped in the count)
  * @returns {String} Name of a column
  */
-fn.getNameOfColumnForThisVisibleIndex = function( sSomeTable, iIndex){
+fn.getNameOfColumnForThisVisibleIndex = function(sSomeTable, iIndex){
 	
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
@@ -2627,6 +2600,41 @@ fn.getColumnNumberOf = function(sSomeTable, sCellName){
 	// here we use getListOfColumnsOf because this function is about all columns, not only the visible ones
 	return $.inArray(sCellName, mt.getListOfColumnsOf(sSomeTable));
 };
+
+
+/**
+ * Get the allowed values of a column (for selectboxes).
+ * Beware: this works when values are declared in 'choosefrom' in the configuration file.
+ * If none was declared, but the column is an ENUM type in Postgres, the values are taken from there,
+ * but that only works if the table is loaded. 
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String} sColumnName - A column name
+ * @returns {String[]} An array of allowed values (or null if the column is not a selectbox)
+ * 
+ * @see lists.getAllowedValuesOfColumn()
+ */
+fn.getAllowedValuesOfColumn = function(sSomeTablename, sColumnName){
+
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	var aColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+	var iColumnNameIndex = fn.getColumnNumberOf(sSomeTablename, sColumnName);
+	
+	//    select values from 'choosefrom' in config.js file,
+	// or select values from Postgres ENUM custom type?
+	//
+	// [1] choosefrom
+	var aSelectBoxValues = conf.getSelectionBox(aColumnConfig);
+	// [2] ENUM
+	if (aSelectBoxValues == null)
+		aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTablename)[iColumnNameIndex];
+
+	return aSelectBoxValues;
+	
+}
 
 /**
  * Get the visible column number of a cell (so hidden columns are excluded from the count), given the column name
@@ -3423,11 +3431,19 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	// a classic error is setting a callback function as the returnField, so we must check for it
+	if (typeof returnField == 'function') {
+		fn.message(lang.error,
+			lang.error_when_calling+ " fn.insertIntoDatabase("+sSomeTablename+"):&lt;BR>"+ 
+			lang.error_function_called_with_illegal_value+" (returnField parameter).");
+		return;
+	}
 	
 	var aColNamesToAdd = new Array();
-	var aValuesToAdd = new Array();	
-	
+	var aValuesToAdd = new Array();		
 	for (var sFieldName in aFieldsAndValuesToAdd) {
+		
 		aColNamesToAdd.push(sFieldName);
 		aValuesToAdd.push(aFieldsAndValuesToAdd[sFieldName]);
 	}
@@ -6949,7 +6965,8 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 	
 };
 
-
+// check if some function was called with a jQuery object
+// and give an error if it was!
 fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
 	if (oArgument instanceof jQuery){
@@ -6978,7 +6995,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Apr 17 2025 17:40:30 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Sep 02 2025 09:36:06 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>
