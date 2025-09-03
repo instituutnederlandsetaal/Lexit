@@ -214,6 +214,12 @@ var oTableSettingsList_example = {
 		"close_callback": function(t){ doSomething(); },
 
 
+		/**
+		 * @type {function} 
+		 * @description Callback to be executed when a table is being destroyed.
+		 */
+		"destroy_callback": function(t){ doSomething(); },
+
 		/** 
 		 * @type {boolean} 
 		 * @description Determine whether the number of results in the table 
@@ -1893,16 +1899,21 @@ conf.changeTableSettingValue = function(sSomeTableName, sSettingName, value){
 
 conf.getTableSettings = function(sTablename){
 	
-	for (sName in oTableSettingsList)
-		{
-		if (sName == sTablename)
-			{
+	for (sName in oTableSettingsList) {
+		
+		if (sName == sTablename) {
 			// add the table name as a key, 
 			// so we can retrieve the name of the table from its settings object!
+			
+			// add key table_name with value sName
+			if (typeof oTableSettingsList[sName] == 'undefined')
+			    oTableSettingsList[sName] = new Object();
+			
+			// add table name			
 			oTableSettingsList[sName]["table_name"] = sName;			
 			return oTableSettingsList[sName];
-			}			
-		}
+		}			
+	}
 	return {};
 };
 
@@ -2436,6 +2447,17 @@ conf.getCloseCallback = function(aTableSettings){
 	if (typeof aTableSettings["close_callback"] == 'undefined')
 		return null;
 	return aTableSettings["close_callback"];
+};
+
+// retrieve destroy callback function
+// (which is activated when a table is destroyed)
+// default is null
+
+conf.getDestroyCallback = function(aTableSettings){
+	
+	if (typeof aTableSettings["destroy_callback"] == 'undefined')
+		return null;
+	return aTableSettings["destroy_callback"];
 };
 
 

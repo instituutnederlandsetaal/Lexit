@@ -5,6 +5,10 @@
         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
   <display-name>lexit2</display-name>
+  
+  <listener>
+      <listener-class>resources.AppLifecycleListener</listener-class>
+  </listener>
 
   <filter>
     <filter-name>SessionFilter</filter-name>

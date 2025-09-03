@@ -211,7 +211,7 @@ lang.opening_config_file_failed = "Het configuratiebestand bestaat niet of het b
 lang.file_is_missing = "heeft mogelijk geen configuratie-bestand meer op deze server";
 lang.missing_database_indexes = "Voor de huidige sorteerkolommen zijn geen indexen beschikbaar.<BR>" +
 						"Dit vertraagt het werken met de database.<BR><BR>" +
-						"Betroffen kolommen:";
+						"Maak een samengestelde index aan voor deze kolommen:";
 lang.inform_admin = "Informeer de administrator.";
 lang.error_opening_hidden_table = "U probeert deze tabel te openen, " +
 				"maar volgens de configuratie moet deze tabel verborgen blijven. " +
@@ -722,6 +722,53 @@ lang.helpText =
 				"<TR>" +
 				"<TD>&nbsp;&nbsp;</TD><TD><I>NULL</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die een NULL-waarde bevatten</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR><BR>" +
+				"Verder is het ook mogelijk om te zoeken naar een lijst waarden:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>{aap, noot, mies}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die overeenkomen met genoemde waarden</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!{aap, noot, mies}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar cellen die NIET overeenkomen met genoemde waarden</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR></BR>"+
+				"Ook kan men in een bereik [A-B] zoeken:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[4,8]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar waarden tussen 4 en 8</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[1990-01-01,2020-12-31]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar datums tussen 1990-01-01 en 2020-12-31</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR><BR>" +
+				"Ten slotte is het mogelijk om in &eacute;&eacute;n expressie iets te zoeken, maar tegelijkertijd ook iets uit te sluiten:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^aa[^n]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met 'aa' beginnen, behalve 'aan'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge(?!.*heid$)</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die met 'ge' beginnen, maar NIET op 'heid' eindigen</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge.*(?&lt;!heid)$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> idem</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> zoek naar woorden die NIET met 'ge' beginnen, maar wel op 'heid' eindigen</TD>" +
 				"</TR>" +
 				"</TABLE>" +
 				"<SPAN class='query_builder_info'>"+				
@@ -1326,7 +1373,56 @@ lang.setLanguage = function(sLanguageCode){
 				"<TD>&nbsp;&nbsp;</TD><TD><I>NULL</I></TD>" +			
 				"<TD>&nbsp;&nbsp;</TD><TD> searches for cells containing a NULL value</TD>" +
 				"</TR>" +
-				"</TABLE>" +	
+				"</TABLE>" +
+					
+				"<BR><BR>" +
+				"Furthermore, it is also possible to search for a list of values:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>{cat, bat, mat}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that match match the listed values</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>!{cat, bat, mat}</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for cells that do NOT match the listed values</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR></BR>"+
+				"And it is also possible to search in a range [A,B]:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[4,8]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for a value between 4 and 8</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>range[1990-01-01,2020-12-31]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for dates between 1990-01-01 and 2020-12-31</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				"<BR><BR>" +
+				"Finally, it is possible to search for something and simultaneously exclude something else in a single expression:" +
+				"<BR><BR>" +
+				"<TABLE>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^aa[^n]</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that start with 'aa', except 'aan'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge(?!.*heid$)</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that start with 'ge', but do NOT end with 'heid'</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^ge.*(?&lt;!heid)$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> idem</TD>" +
+				"</TR>" +
+				"<TR>" +
+				"<TD>&nbsp;&nbsp;</TD><TD><I>^(?!ge).*heid$</I></TD>" +			
+				"<TD>&nbsp;&nbsp;</TD><TD> search for words that do NOT start with 'ge', but do end with 'heid'</TD>" +
+				"</TR>" +
+				"</TABLE>" +
+				
 				"<SPAN class='query_builder_info'>" +			
 				"<BR><BR><BR>" +
 				"<B>Query builder / Selection help</B>" +
@@ -1662,7 +1758,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.file_is_missing = "might not have any configuration file left on the server";
 		lang.missing_database_indexes = "No indexes available for the current sorting columns.<BR>" +
 						"This may cause database operations to be too slow.<BR><BR>" +
-						"Columns at stake:";
+						"Create a composite index for these columns:";
 		lang.inform_admin = "Please inform the administrator.";
 		lang.error_opening_hidden_table = "You're trying to open this table, " +
 				"but according to the configuration it should remain hidden. " +

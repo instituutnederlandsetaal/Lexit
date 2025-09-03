@@ -57,6 +57,20 @@ public class ContextObject {
 			this.username = username.trim();
 	}
 	
+	// mini constructor (t.i. without servlet context info etc.)
+	// (THIS IS MEANT FOR TEMPORARY USE WITHOUT CACHING)
+	public ContextObject(			
+			String dbName,
+			String username){
+		
+		this.dbName = dbName;
+		this.username = username.trim();	
+		// milliseconds since 1970
+		this.timeLastUsed = new Date().getTime();
+	}
+	
+	
+	
 	
 	public void setActiveTabId(String activeTab) {
 		this.activeTabId = activeTab;
@@ -69,7 +83,7 @@ public class ContextObject {
 		return this.username;
 	}
 	
-	// if the object left unused? 
+	// is the object left unused? 
 	// (t.i. last time is was used was longer ago than a given maximal duration)
 	public boolean isLeftUnused(){			
 		

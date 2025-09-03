@@ -7,6 +7,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
+
 import table.*;
 import util.Database;
 import util.LexitSchemaAccess;
@@ -25,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The TableResources class is the main class in a Jersey project
+ * The TableResources class is the main class 
  * Here the different kinds of requests can be mapped to functions and classes
  * 
  * @author Mathieu Fannee (INL)
@@ -44,10 +48,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TableResources {
 
 	// database access objects, needed for caching (for speed)
-	ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();
+	public ConcurrentHashMap<String, Database> nameToDatabaseObject = new ConcurrentHashMap<String, Database>();	
 
 	// users access rights
-    static ConcurrentHashMap<String, String[]> users2roles = new ConcurrentHashMap<String, String[]>();
+	public static ConcurrentHashMap<String, String[]> users2roles = new ConcurrentHashMap<String, String[]>();
 
     // container for user login and roles info
  	LexitSchemaAccess lexitInfo;
@@ -191,6 +195,7 @@ public class TableResources {
  		
  		return dro;
  	}
+ 	
  	
  	
  	@Path("delete_user")
@@ -346,6 +351,37 @@ public class TableResources {
  	}
 
  	// ------------------------------------------------------------------------------------------------
+ 	// Project reset
+ 	// ------------------------------------------------------------------------------------------------
+ 	
+ 	@Path("reset_project")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject resetProject(
+			@DefaultValue("") @QueryParam("db_name") String dbName, 
+ 			@Context ServletContext context,
+ 			@Context SecurityContext sc,
+ 			@Context HttpServletRequest httpServletRequest
+ 			) throws IOException {
+ 		
+ 		DbResponseObject dro = new DbResponseObject();
+ 		
+ 		String userName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		// remove the database object from the cache
+		try {
+			AppLifecycleListener.deletePool(dbName);
+			dro.setResponse("OK");
+		}
+		catch (Exception e) {
+			dro.setResponse("Something went wrong when resetting project "+dbName+" : "+e.getMessage());
+		}
+ 		return dro;
+ 	}
 
 
 	// --------------------------------------------------------------------------------------
@@ -392,8 +428,10 @@ public class TableResources {
 		try {
 			fileToSend = readWelcomeJsFile(context, dbName);
 		} catch (IOException e) {
+			
 			// a welcome page is not mandatory, so no need to throw an exception
-			fileToSend = "NOT_AVAILABLE";
+			
+			fileToSend = "NOT_AVAILABLE"; // don't change this value, as the client will check for it!
 		}
 		
 		return Response.ok(fileToSend, MediaType.TEXT_PLAIN).build();
@@ -470,8 +508,6 @@ public class TableResources {
 			response.setResponse("active_tab_id needn't to be set in "+dbName+" mode ");
 		}
 		else {
-			//if (lexitInfo == null)
-			//	lexitInfo = new LexitSchemaAccess(context, true);
 			
 			String userName = lexitInfo.getUserName(httpServletRequest);
 			ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);	
@@ -1865,9 +1901,6 @@ public class TableResources {
 		
 		for (String key : keysToDelete) {
 			
-			// close the connection to the database
-			nameToDatabaseObject.get(key).closeDatabase(); 
-			
 			// remove ContextObject since it's left unused
 			nameToDatabaseObject.remove(key);
 			Util.debug("Removed old Database object: "+key);
@@ -1888,11 +1921,13 @@ public class TableResources {
 		Util.debug(co, "## >>> PAK DATABASE OBJECT "+cachingKey);
 		newDbObj = nameToDatabaseObject.get(cachingKey);
 		newDbObj.updateContextObject(co); // make sure that data newly added to context object is saved in DatabaseObject
+		
 		return newDbObj;
 	};
 	
 	
-	// this is to be used by the spy tool
+	// This is to be used by the spy tool
+	// this function gets users' info out of the map of ContextObjects
 	//
 	// .../api/get_users
 	@Path("get_users")
@@ -1920,6 +1955,42 @@ public class TableResources {
 			ulo.addUserData(new String[]{dbName, (userName != null ? userName : "SYSTEM"), sessionId, (activeTabId != null ? activeTabId : "N/A"), lastActive, activeRecently});
 		}
 		return ulo;
+	}
+	
+	
+	
+	@Path("get_connections_state")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public ConnectionsListObject getConnectionsState() {
+		
+		ConnectionsListObject clo = new ConnectionsListObject();
+		
+		for (String project : AppLifecycleListener.project2DataSource.keySet()) {
+    		
+    		// get the source for the project
+    		HikariDataSource dataSource = AppLifecycleListener.getDataSourceForSpy(project);
+    		
+    		// If the data source is not null, close it
+    		if (dataSource != null) {	
+    			HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
+    			
+    			int activeConnections = poolMXBean.getActiveConnections();
+    			int idleConnections = poolMXBean.getIdleConnections();
+    			int totalConnections = poolMXBean.getTotalConnections();
+				int threadsAwaitingConnection = poolMXBean.getThreadsAwaitingConnection();				
+
+				// add the data to the ConnectionsListObject
+				clo.addConnectionData(
+						new String[] { project, String.valueOf(activeConnections), String.valueOf(idleConnections),
+								String.valueOf(totalConnections), String.valueOf(threadsAwaitingConnection) });
+    		}
+    		 
+    	}
+		
+		
+		return clo;
+		
 	}
 	
 	/**
@@ -2048,7 +2119,7 @@ public class TableResources {
 		}
 		catch (Exception e){ 
 			sb = new StringBuilder();
-			sb.append("NOT_AVAILABLE");
+			sb.append("NOT_AVAILABLE"); // don't change this value, as the client will check for it!
 		}
 		
 		return sb.toString();
@@ -2093,7 +2164,7 @@ public class TableResources {
 	
 	
 	// read the users access rights file
-	public String[] getUserRoles(ContextObject co) throws IOException{
+	public String[] getUserRoles(ContextObject co) throws IOException {
 		
 		// if the access rights file has already been read,
 		// return relevant content right away
@@ -2110,9 +2181,18 @@ public class TableResources {
 		
 		synchronized (TableResources.class){
 			
-			Util.debug(co, "Read user access rights...");			
-			users2roles = lexitInfo.getUsersRoles();			
-			return users2roles.get(co.getUsername());
+			try {
+				Util.debug(co, "Read user access rights...");			
+				users2roles = lexitInfo.getUsersRoles();			
+				return users2roles.get(co.getUsername());
+			}
+			catch (NullPointerException e) {
+				// this may happen when the access rights file is not available
+                // or when the user is not logged in
+                Util.debug(co, "No user roles found for user "+co.getUsername() + ". The user might not be logged in.");
+                return new String[]{};
+            }
+            
 		}		
 		
 	}

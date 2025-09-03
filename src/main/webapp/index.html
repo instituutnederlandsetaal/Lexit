@@ -1,14 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <link id="favicon" rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link id="favicon" rel="shortcut icon" href="favicon-klein.png" type="image/x-icon" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />	
 	
 	<title>
 	Lex'it
-	v2025.05.21
+	v2025.09.02
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -24,16 +24,12 @@
 				@import "css/buttons.dataTables.css";
 				
 	</style>
-	<!--
-				prettify.sunburst required by jquery.contextMenu
-	-->
+	<!-- prettify.sunburst required by jquery.contextMenu -->
 	
 	
 	
 	<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
-	<!--
-				jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8
-	-->
+	<!-- jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8 -->
 	
 	<!-- 
 	Javascript import with needed functionalities:
@@ -198,6 +194,9 @@
 	// spy datatables object
 	var oSpyTable;
 	
+	// connections datatables object
+	var oConnectionsTable;
+	
 	// about the database
 	var asTableNames = 			new Array();	// list of database tables names	
 	var asTableDescriptions =	new Array();	// list of database tables descriptions (visible to user)
@@ -287,6 +286,8 @@
 			// set current user name
 			// and start app in the right mode			
 			fn.setCurrentUser(null, function(){
+				
+				// when a projectname is specified as URL param 'db', this function will call getConfigFilesList() and initialize() to start the project 
 				startInRightMode();	
 			});
 			
@@ -518,7 +519,9 @@
 		// global spy mode (logging info)
 		else if (bSpyMode) {
 			
-			buildSpy();
+			buildUsersSpy();
+			
+			buildConnectionsSpy();
 		}
 
 		// reset user rights
@@ -623,13 +626,13 @@
 		
 	// spy mode
 		
-	function buildSpy(){
+	function buildUsersSpy(){
 		
-		var url = WEBSERV_URL+"/api/get_users";
+		var getUsersUrl = WEBSERV_URL+"/api/get_users";		
 		
 		$.ajax({
 			type: "GET",
-			url: url,
+			url: getUsersUrl,
 			data: {},
 			dataType: "xml",
 			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -644,7 +647,7 @@
 						.attr("id", "spytable")
 						.addClass("display")
 						.attr("cellspacing", "0")
-						.css("width", "90%");
+						.css("width", "65vw");
 					
 					var thead = $("<thead></thead>");
 					var thead_tr = $("<tr></tr>");
@@ -675,15 +678,16 @@
 					$("#dynamic").append(spyDiv);
 					
 					spyDiv
-					.css("position", "absolute")
-					.css("top", "100px")				
-					.css("width", "80%");
+						.css("position", "absolute")
+						.css("top", "100px")
+						.css("left", "2vw")
+						.css("width", "65vw");
 					
 					oSpyTable = $('#spytable').DataTable({
 						"dom": '<"top"f>t',
 						"pageLength": 100,
 						"language": {
-							"search": "Filter: "
+							"search": "<b>Active projects & users</b><br><br>Filter: "
 						}
 					}).column(2).order('desc').draw();
 					
@@ -692,6 +696,9 @@
 					$("#headerlinks").hide();
 					
 				}
+				
+				// set the width of the filter box
+				$("#spytable_filter").removeClass("dataTables_filter");
 				
 				// remove rows from previous cycle
 				oSpyTable.rows().remove();
@@ -706,8 +713,8 @@
 						UsersItems.eq(1).text(),
 						UsersItems.eq(2).text(),
 						UsersItems.eq(3).text(),
-						UsersItems.eq(4).text(),
-						UsersItems.eq(5).text()
+						UsersItems.eq(4).text().replaceAll(" ", "&nbsp;"),
+						UsersItems.eq(5).text().replaceAll(" ", "&nbsp;")
 						]);
 					});
 				
@@ -715,7 +722,111 @@
 				oSpyTable.draw();					
 				
 				// refresh after few seconds
-				setTimeout(function(){ buildSpy(); }, 2000);
+				setTimeout(function(){ buildUsersSpy(); }, 2000);
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
+			}
+		});
+		
+	};
+		
+	
+	
+	function buildConnectionsSpy(){
+		
+		var getConnectionsStateUrl = WEBSERV_URL+"/api/get_connections_state";
+		
+		$.ajax({
+			type: "GET",
+			url: getConnectionsStateUrl,
+			data: {},
+			dataType: "xml",
+			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+			success: function(xml) {
+				
+				// build the table if it doesn't exist yet
+				if ( !$("#connectionstable").elementExists() ) {
+					var connectionDiv = $("<div></div>")
+						.attr("id", "#connectionstable");
+				
+					var connectionTable = $("<table></table>")
+						.attr("id", "connectionstable")
+						.addClass("display")
+						.attr("cellspacing", "0")
+						.css("width", "28vw");
+					
+					var thead = $("<thead></thead>");
+					var thead_tr = $("<tr></tr>");
+					thead_tr.append( $("<th></th>").text("project_name") );
+					thead_tr.append( $("<th></th>").text("active") );
+					thead_tr.append( $("<th></th>").text("idle") );
+					thead_tr.append( $("<th></th>").text("total") );
+					thead_tr.append( $("<th></th>").text("awaiting") );					
+					thead.append(thead_tr);
+					connectionTable.append(thead);
+					
+					var tfoot = $("<tfoot></tfoot>");
+					var tfoot_tr = $("<tr></tr>");
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot_tr.append( $("<th></th>").text() );
+					tfoot.append(tfoot_tr);
+					connectionTable.append(tfoot);
+					
+					var tbody = $("<tbody></tbody>");
+					
+					connectionTable.append(tbody);
+					connectionDiv.append(connectionTable);				
+					$("#dynamic").append(connectionDiv);
+					
+					connectionDiv
+						.css("position", "absolute")
+						.css("top", "100px")
+						.css("left", "70vw")
+						.css("width", "28vw");
+					
+					oConnectionsTable = $('#connectionstable').DataTable({
+						"dom": '<"top"f>t',
+						"pageLength": 100,
+						"language": {
+							"search": "<b>Connections</b><br><br>Filter: "
+						}
+					}).draw();
+					
+					
+					// remove unneeded links
+					$("#headerlinks").hide();
+					
+				}
+				
+				// remove rows from previous cycle
+				oConnectionsTable.rows().remove();
+				
+				// set the width of the filter box
+				$("#connectionstable_filter").removeClass("dataTables_filter");
+				
+				// add the current info to the table
+				$(xml).find("connection").each(function(){
+					
+					var connectionsItems = $(this).find("item");
+					
+					oConnectionsTable.row.add([
+						connectionsItems.eq(0).text(),
+						"<center>"+connectionsItems.eq(1).text()+"</center>",
+						"<center>"+connectionsItems.eq(2).text()+"</center>",
+						"<center>"+connectionsItems.eq(3).text()+"</center>",
+						"<center>"+connectionsItems.eq(4).text()+"</center>"
+						]);
+					});
+				
+				// sort by column 'last_active'
+				oConnectionsTable.draw();					
+				
+				// refresh after few seconds
+				setTimeout(function(){ buildConnectionsSpy(); }, 2000);
 			},
 			error: function(jqXHR, textStatus, errorThrown){
 				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);

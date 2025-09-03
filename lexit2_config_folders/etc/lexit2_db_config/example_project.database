@@ -3,3 +3,5 @@ schema=public
 host=yourhost.com
 user=username
 pass=password
+max_pool_size=10
+send_username_to_db=true

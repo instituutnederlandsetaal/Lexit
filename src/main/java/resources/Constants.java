@@ -92,6 +92,29 @@ public class Constants {
 			1000;    // milliseconds
 	
 	
+	// maximal allowed cost of a count query (in terms of query duration)
+	public static int maxAllowedDuration = 2000; // 2 seconds
+	
+	
+	// ------------------------------------------------------------------------
+	// CONNECTION POOL DEFAULTS
+	// ------------------------------------------------------------------------
+	
+	// the max number of connections per database 
+	// (can be overridden in the database config file with the 'max_pool_size' parameter)
+	public static int maxPoolSize = 10; // (Hikari default: 10 connections)
+	
+	// maximum number of milliseconds that Lex'it will wait for a connection from the pool
+	public static long connectionTimeoutMs = 30000; // (Hikari default: 30 sec)
+	
+	// maximum amount of time that a connection is allowed to sit idle in the pool
+	public static long idleTimeoutMs = 600000; // (Hikari default: 10 min) 
+	
+	// maximum lifetime of a connection in the pool
+	// We give it the same value as TIME_GONE, the amount of time after which a user is considered to be gone
+	public static long maxLifetimeMs = TIME_GONE; // (Hikari default: 30 min) 
+	
+	
 	// ------------------------------------------------------------------------
 	// DEBUGGING
 	// ------------------------------------------------------------------------

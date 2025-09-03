@@ -37,7 +37,11 @@
     <div class="container-overview">
     
         
-            <div class="description">This set of functions is an extension to the basic set of functions contained in the fn namespace.<BR>The functions of the fx namespace make use of the <a href="http://datatables.net/reference/api/">'new' Datatables API</a>, that offers the possibility to point at rows and cells by using API object instances of rows and cells, instead of using TD/TR nodes (which is taken care of in the fn namespace).</div>
+            <div class="description">This set of functions is an extension to the basic set of functions contained in the fn namespace.<BR>
+The functions of the fx namespace make use of the 
+<a href="http://datatables.net/reference/api/">'new' Datatables API</a>, 
+that offers the possibility to point at rows and cells by using API object instances of rows and cells, 
+instead of using TD/TR nodes (which is taken care of in the fn namespace).</div>
         
 
         
@@ -119,7 +123,8 @@
 
 
 <div class="description">
-    Check if some function was called with an API instanceand give an error if it wasn't!
+    Check if some function was called with an API instance
+and give an error if it wasn't!
 </div>
 
 
@@ -207,7 +212,9 @@
 
 
 <div class="description">
-    Call a record.This does a job similar to fn.callDatabase(), but limited to a single recordwhich will be updated in the current table view.
+    Call a record.
+This does a job similar to fn.callDatabase(), but limited to a single record
+which will be updated in the current table view.
 </div>
 
 
@@ -780,7 +787,8 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var oRows = fx.getAllRows(t);oRows.every(function(){ ... });</code></pre>
+    <pre class="prettyprint"><code>var oRows = fx.getAllRows(t);
+oRows.every(function(){ ... });</code></pre>
 
 
 
@@ -1057,7 +1065,10 @@
 
 
 <div class="description">
-    Get a cell, given two possible kinds of input:[with 1 parameter] a cell node.[with 2 parameters] some row-like argument (a row node, or an API instance of a row) and a column name which points to the desired cell.
+    Get a cell, given two possible kinds of input:
+[with 1 parameter] a cell node.
+[with 2 parameters] some row-like argument (a row node, or an API instance of a row) and 
+a column name which points to the desired cell.
 </div>
 
 
@@ -1836,7 +1847,8 @@
 
 
 <div class="description">
-    Get the content of a cell,given a table name or datatable object, and a cell node
+    Get the content of a cell,
+given a table name or datatable object, and a cell node
 </div>
 
 
@@ -2343,7 +2355,8 @@
 
 
 <div class="description">
-    Get the content of a cell which is a sibling of another cell, given an API instance of that celland the name of the cell we want the content from
+    Get the content of a cell which is a sibling of another cell, given an API instance of that cell
+and the name of the cell we want the content from
 </div>
 
 
@@ -3812,7 +3825,8 @@
 
 
 <div class="description">
-    Get an API instance of a row out of an API instance of a cell(in case we happen to have an API instance of a cell while needing an instance of a row)
+    Get an API instance of a row out of an API instance of a cell
+(in case we happen to have an API instance of a cell while needing an instance of a row)
 </div>
 
 
@@ -4130,7 +4144,8 @@
 
 
 <div class="description">
-    Retrieve the number of a row node (0-based)that is: its index within the set of all database rows
+    Retrieve the number of a row node (0-based)
+that is: its index within the set of all database rows
 </div>
 
 
@@ -4289,7 +4304,8 @@
 
 
 <div class="description">
-    Retrieve the (0-based) number of a row node on the screen,that is: the row number within current display range [eg. 0-9]
+    Retrieve the (0-based) number of a row node on the screen,
+that is: the row number within current display range [eg. 0-9]
 </div>
 
 
@@ -4987,7 +5003,8 @@
 
 
 <div class="description">
-    Get selected text within a cell,and also get the start and end positions of the selected text.
+    Get selected text within a cell,
+and also get the start and end positions of the selected text.
 </div>
 
 
@@ -5195,7 +5212,8 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var sel = fx.getSelectedTextInCell(oCell);alert(sel.start + ": " + sel.end + " = " + sel.text);</code></pre>
+    <pre class="prettyprint"><code>var sel = fx.getSelectedTextInCell(oCell);
+alert(sel.start + ": " + sel.end + " = " + sel.text);</code></pre>
 
 
 
@@ -5375,7 +5393,8 @@
 
 
 <div class="description">
-    Select a word within a cell just by clicking on it, and also get the start and end positions of the selected word.
+    Select a word within a cell just by clicking on it, 
+and also get the start and end positions of the selected word.
 </div>
 
 
@@ -7932,7 +7951,9 @@
 
 
 <div class="description">
-    Update a 'visible' database table (that is loaded into the GUI),given an API instance of a cell/row, and an associative array of fields and values to update the corresponding row with.
+    Update a 'visible' database table (that is loaded into the GUI),
+given an API instance of a cell/row, and an associative array of fields and values to update 
+the corresponding row with.
 </div>
 
 
@@ -8304,7 +8325,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Apr 17 2025 17:40:31 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Sep 02 2025 09:36:07 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

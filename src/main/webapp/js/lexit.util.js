@@ -1589,8 +1589,13 @@ lexutil.getHttpParams = function(sParameter){
  * @param {String} sDomain - The domain to set (optional, default is "lex-it.ivdnt.org")
  */
 lexutil.setStatistics = function(sDomain = "lex-it.ivdnt.org"){
-	// append plausible.js to the header	
-	$("head").append('<script defer data-domain="'+sDomain+'" src="https://statistiek.ivdnt.org/js/script.js"></script>');
+	// we use vanilla javascript instead of jquery, because jquery intercepts appending script tags 
+	// and only executes the src, thus ignoring the data-domain attribute.
+	const script = document.createElement("script");
+	script.defer = true;
+	script.setAttribute("data-domain", sDomain);
+	script.src = "https://statistiek.ivdnt.org/js/script.js";
+	document.head.appendChild(script);
 };
 
 

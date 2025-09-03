@@ -1371,6 +1371,8 @@ lists.getColumnType = function(sTableName, sColumnName){
  * (this is about ENUM types)
  * @param {String} name of the table underlying the list
  * @param {String} name of the column
+ * 
+ * @see fn.getAllowedValuesOfColumn()
  */
 lists.getAllowedValuesOfColumn = function(sTableName, sColumnName){
 	

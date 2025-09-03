@@ -14,12 +14,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.SecurityContext;
 import jakarta.xml.bind.DatatypeConverter;
 
 import resources.Constants;
@@ -31,7 +34,7 @@ public class LexitSchemaAccess {
 	private String lexitSchemaFileName = Constants.ADMIN_CONFIG_FILENAME+".database";
 	
 	// database communication object (to be initialized)
-	private PostgresDatabaseCommunication dc;
+	private PostgresConnectionManager dc;
 	
 	// Lex'it schema database login info
 	private ConcurrentHashMap<String, String> lexitSchemaAccessHash = new ConcurrentHashMap<String, String>();
@@ -48,10 +51,14 @@ public class LexitSchemaAccess {
 	
 	
 	
+	// ------------------------------------------------------------------------
 	
-	// constructor
-	// the update parameter instructs the function to reload, so as to take new users' roles etc into account
-	
+	/**
+	 * Constructor
+	 * the update parameter instructs the function to reload, so as to take new users' roles etc into account
+	 * @param context
+	 * @param update
+	 */
 	public LexitSchemaAccess(ServletContext context, boolean update){
 		
 		Util.debug("Instantiating Lexit schema access");
@@ -81,6 +88,9 @@ public class LexitSchemaAccess {
 	};
 	
 	
+	/**
+	 * Redresh the users and roles info
+	 */
 	public void refresh() {
 		
 		users2passwords = new ConcurrentHashMap<String, String>();
@@ -91,7 +101,9 @@ public class LexitSchemaAccess {
 	}
 	
 	
-	// create the users table if it does not exist yet
+	/**
+	 * Create the users table if it does not exist yet
+	 */
 	private void createUsersTableIfNotExists() {
 		
 		String query = 
@@ -125,20 +137,21 @@ public class LexitSchemaAccess {
 				+ "$$;";
 		
 		// connect to the lex'it schema database 
-		dc = connectDatabase();
+		dc = getPostgresConnectionManager();
 	
 		try {
-			dc.sendUpdate(query);
+			dc.sendUpdate(lexitSchemaAccessHash.get("schema"), query);
 		}
 		catch (Exception e) {  	    	
 			throw new RuntimeException("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error.", e);
 		}
-		finally {
-			dc.closeConnection();
-		}
 	}
 	
 	
+	/**
+	 * Show the current content of the users, passwords and roles
+	 * For visual check
+	 */
 	public void showCurrentContent() {
 		
 		
@@ -171,8 +184,13 @@ public class LexitSchemaAccess {
 	}
 	
 	
-	// register a session ID corresponding to a given username
-	// this is needed because - after login - the session ID is the only request parameter allowing us to identify a user 
+	
+	/**
+	 * Register a session ID corresponding to a given username,
+	 * this is needed because - after login - the session ID is the only request parameter allowing us to identify a user
+	 * @param sessionId
+	 * @param username
+	 */
 	public void setSessionIdIsUsername(String sessionId, String username) {
 		
 		Util.debug(sessionId + " represents "+username);
@@ -192,41 +210,12 @@ public class LexitSchemaAccess {
 		}
 	}
 	
-	// clean up our knowledge about session ID - username correspondance
-	// when some sessions are finished
-//	public void cleanUpSessionIds(ConcurrentHashMap<String, Database> nameToDatabaseObject) {
-//		
-//		HashSet<String> activeSessionIds = new HashSet<String>();
-//		HashSet<String> activeUsers = new HashSet<String>();
-//		
-//		
-//		// gather the active session IDs
-//		for (String key : nameToDatabaseObject.keySet()) {
-//			
-//			Database currentDbObj = nameToDatabaseObject.get(key);			
-//			ContextObject co = currentDbObj.getContextObject();
-//			
-//			String sessionId = co.getSessionIdForSpy();
-//			String userName = co.getUsername();
-//			
-//			activeSessionIds.add(sessionId);
-//			activeUsers.add(userName);
-//		}
-//		
-//		// remove session IDs that are not active anymore
-//		// (check on username as well, otherwise we might remove a session ID that is still active)
-//		for (String sessionId : sessionIds2users.keySet()) {
-//			if ( !activeSessionIds.contains(sessionId) ) {		
-//				if ( !activeUsers.contains(sessionIds2users.get(sessionId))) {
-//					Util.debug("Cleaning up session ID "+sessionId);
-//					sessionIds2users.remove(sessionId);	
-//					System.out.println("Session ID "+sessionId+" removed.");
-//				}				
-//			}
-//		}
-//	}
+
 	
-	
+	/**
+	 * Remove a session ID from the list of registered session IDs
+	 * @param sessionId
+	 */
 	private void removeSessionId(String sessionId) {
 		sessionIds2users.remove(sessionId);
 		sessionIds2generationTime.remove(sessionId);
@@ -234,19 +223,26 @@ public class LexitSchemaAccess {
 	
 
 	
-	// user roles getter
-	
+	/**
+	 * User roles getter
+	 * @return
+	 */
 	public ConcurrentHashMap<String, String[]> getUsersRoles(){
 		return users2roles;		
 	}
 	
 	
-	// get/compute the username
-	// the way the username is retrieved depends on the way a user logged in.
-	// - in Clarin login, we read the remote_user header param
-	// - in normal mode, we read the username assigned to the current session ID header param
-	//   (after login, the session ID is the only request parameter allowing us to identify a user)
+
 	
+	/**
+	 * Get/compute the username
+	 * the way the username is retrieved depends on the way a user logged in.
+	 * - in Clarin login, we read the remote_user header param
+	 * - in normal mode, we read the username assigned to the current session ID header param
+	 *   (after login, the session ID is the only request parameter allowing us to identify a user)
+	 * @param httpServletRequest
+	 * @return
+	 */
 	public String getUserName(HttpServletRequest httpServletRequest) {
 		
 		// first try Clarin login
@@ -288,9 +284,12 @@ public class LexitSchemaAccess {
 		return userName;	
 	}
 	
-	/*
+	/**
 	 * Retrieve the session ID from the request
      * (might be shibSession if using Clarin login, or the session ID otherwise)
+     * 
+	 * @param request
+	 * @return
 	 */
 	public String getSessionId(HttpServletRequest request) {
 
@@ -321,20 +320,46 @@ public class LexitSchemaAccess {
     }
 	
 	
-	// connect to lex'it schema database
-	private PostgresDatabaseCommunication connectDatabase() {
+	/**
+	 * Create a PostgresConnectionManager to access the Lex'it schema database
+	 * @return
+	 */
+	private PostgresConnectionManager createPostgresConnectionManager() {
 
-		PostgresDatabaseCommunication postgresDc = new PostgresDatabaseCommunication(null, true);		
-		postgresDc.connectTo(	lexitSchemaAccessHash.get("host"), 
-								lexitSchemaAccessHash.get("port"), 
-								lexitSchemaAccessHash.get("db"), 
-								lexitSchemaAccessHash.get("user"), 
-								lexitSchemaAccessHash.get("pass"));
+		ContextObject co = new ContextObject(Constants.ADMIN_CONFIG_FILENAME, lexitSchemaAccessHash.get("user"));
+		PostgresConnectionManager postgresDc = new PostgresConnectionManager(co, true, Constants.maxPoolSize);		
+		postgresDc.createDataSourceInPool(	lexitSchemaAccessHash.get("host"), 
+											lexitSchemaAccessHash.get("port"), 
+											lexitSchemaAccessHash.get("db"), 
+											lexitSchemaAccessHash.get("user"), 
+											lexitSchemaAccessHash.get("pass"));
 		
 		return postgresDc;		
 	}
 	
-	// check if a username / password combination is ok to be allowed in.
+	/**
+	 * Retrieve the PostgresConnectionManager to access the Lex'it schema database
+	 * @return
+	 */
+	private PostgresConnectionManager getPostgresConnectionManager() {
+		if (this.dc == null) {
+			Util.debug("Reconnect to database");
+			this.dc = createPostgresConnectionManager();
+		}
+		return this.dc;
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Check if a username / password combination is ok to be allowed in.
+	 * 
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	public boolean checkCredentials(String username, String password) {
 		
 		//showCurrentContent();
@@ -360,7 +385,11 @@ public class LexitSchemaAccess {
 	}
 	
 	
-	// log out a user
+	/**
+	 * Log out a user
+	 * 
+	 * @param username
+	 */
 	public void logOutUser(String username) {
 
 		// remove the session ID - username correspondance
@@ -372,11 +401,13 @@ public class LexitSchemaAccess {
 	}
 	
 	
-	// read the users login info frm the database
+	/**
+	 * Read the users login info frm the database
+	 */
 	private void readUsersLogins() {
 		
 		// connect to the lex'it schema database 
-		dc = connectDatabase();
+		dc = getPostgresConnectionManager();
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
 		
@@ -388,31 +419,34 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-	      ResultSet rs = dc.sendQuery(query, 0);
+	    	List<Map<String, Object>>  rs = dc.sendQuery(schemaName, query, 0).getRows();
 
-	      res = getResultsInAList(rs, new String[] { "username", "password" });
-	      if (res.size() > 0) {
-	        for (String[] oneRecord : res){
-	        	users2passwords.put(oneRecord[0].trim(), oneRecord[1].trim());
-	        }
+	    	res = Util.getResultSetCopyInAList(rs, new String[] { "username", "password" });
+	    	if (res.size() > 0) {
+	    		for (String[] oneRecord : res){
+	    			String user = oneRecord[0].trim();
+	    			String pass = oneRecord[1].trim();	    			
+	    			users2passwords.put(user, pass);
+	    			
+	    		}
 	        
-	      }
+	    	}
 	    }
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users login info caused an error.", e);
 	    }
-	    finally {
-			dc.closeConnection();
-		}
 		
 	}
 	
 	
-	// read the users roles info from the database
+	/**
+	 * Read the users roles info from the database
+	 * 
+	 */
 	private void readUsersRoles() {
 		
 		// connect to the lex'it schema database 
-		dc = connectDatabase();
+		dc = getPostgresConnectionManager();
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
 		
@@ -434,9 +468,9 @@ public class LexitSchemaAccess {
 	    
 	    try {
 	      
-			ResultSet rs = dc.sendQuery(query, 0);
+	    	List<Map<String, Object>> rs = dc.sendQuery(schemaName, query, 0).getRows();
 			
-			res = getResultsInAList(rs, new String[] { "username", "roles" });
+			res = Util.getResultSetCopyInAList(rs, new String[] { "username", "roles" });
 			if (res.size() > 0) {
 			    for (String[] oneRecord : res){
 			    	users2roles.put(oneRecord[0].trim(), oneRecord[1].trim().split(","));
@@ -447,14 +481,14 @@ public class LexitSchemaAccess {
 	    catch (Exception e) {  	    	
 	    	throw new RuntimeException("Reading the users roles caused an error.", e);
 	    }
-	    finally {
-			dc.closeConnection();
-		}
 
 	}
 	
 	
-	
+	/**
+	 * Delete a user from the database.
+	 * @param username
+	 */
 	public void deleteUser(String username) {
 		
 		// the publicreader can't be deleted (delete its roles instead, so it's powerless!)
@@ -463,7 +497,7 @@ public class LexitSchemaAccess {
 		
 
 		// connect to the lex'it schema database
-		dc = connectDatabase();
+		dc = getPostgresConnectionManager();
 
 		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
 		
@@ -475,22 +509,24 @@ public class LexitSchemaAccess {
 		deleteUserAto.addType("text");
 
 		try {
-			dc.sendPreparedUpdate(deleteUserQuery1, deleteUserArgs, deleteUserAto, null);
-			dc.sendPreparedUpdate(deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery1, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
 		} 
-		finally {
-			dc.closeConnection();
-		}
 	}
 	
 	
+	/**
+	 * delete a role for a given user
+	 * @param username
+	 * @param dbName
+	 */
 	public void deleteProjectRoleForUser(String username, String dbName) {
 
 		// connect to the lex'it schema database
-		dc = connectDatabase();
+		dc = getPostgresConnectionManager();
 
 		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
 
@@ -505,26 +541,26 @@ public class LexitSchemaAccess {
 		deleteUserAto.addType("text");
 
 		try {
-			dc.sendPreparedUpdate(deleteUserQuery, deleteUserArgs, deleteUserAto, null);
+			dc.sendPreparedUpdate(schemaName, deleteUserQuery, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
 			throw new RuntimeException("Deleting a user caused an error.", e);
 		} 
-		finally {
-			dc.closeConnection();
-		}
 	}
 	
-	
+	/**
+	 * Retrieve the default role of a user (superreader, superuser, or none)
+	 * @param username
+	 * @return
+	 */
 	public String getUsersDefaultRole(String username) {
 	
 		// get the default role of a user		
 		String role = null;
 		
 		
-		// connect to the lex'it schema database
-		
-		dc = connectDatabase();
+		// connect to the lex'it schema database		
+		dc = getPostgresConnectionManager();
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
 		
@@ -538,9 +574,9 @@ public class LexitSchemaAccess {
 		ArrayList<String[]> res;
 		
 		try {
-			ResultSet rs = dc.sendPreparedQuery(query, queryArgs, queryAto, 0);
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schemaName, query, queryArgs, queryAto, 0).getRows();
 
-			res = getResultsInAList(rs, new String[] { "default_access_role" });
+			res = Util.getResultSetCopyInAList(rs, new String[] { "default_access_role" });
 			if (res.size() > 0) {
 				role = res.get(0)[0];
 			}
@@ -548,20 +584,22 @@ public class LexitSchemaAccess {
 		catch (Exception e) {
 			throw new RuntimeException("Reading the default role of a user caused an error.", e);
 		} 
-		finally {
-			dc.closeConnection();
-		}
 		
 		return role;
 	}	
 	
 	
-	// add a user and project role
+	/**
+	 * Add a user and project role
+	 * @param username
+	 * @param password
+	 * @param defaultRole
+	 * @param dbName
+	 * @param role
+	 */
 	public void setUserWithRole(String username, String password, String defaultRole, String dbName, String role) {
 		
 		String schemaName = "\""+lexitSchemaAccessHash.get("schema")+"\"";
-		
-		
 		
 		// first of all: make sure that the publicreader is not messed up with!
 		
@@ -606,7 +644,7 @@ public class LexitSchemaAccess {
 		if (defaultRole != null && !defaultRole.trim().isEmpty()) {
 			
 			// connect to the lex'it schema database 
-			dc = connectDatabase();
+			dc = getPostgresConnectionManager();
 			
 			String addUserQuery = 
 					"INSERT INTO "+schemaName+".users(username, password, default_access_role) "+
@@ -625,14 +663,11 @@ public class LexitSchemaAccess {
 	    	
 	    	
 	    	try {
-	    		dc.sendPreparedUpdate(addUserQuery, addUserArgs, addUserAto, null);
+	    		dc.sendPreparedUpdate(schemaName, addUserQuery, addUserArgs, addUserAto, null);
 	  	    }
 	  	    catch (Exception e) {  	    	
 	  	    	throw new RuntimeException("Adding a user caused an error.", e);
 	  	    }
-	    	finally {
-				dc.closeConnection();
-			}
 		}
 			
     	
@@ -646,7 +681,7 @@ public class LexitSchemaAccess {
     		
     		// first delete the previous role of the user for this project
     		
-    		dc = connectDatabase();
+    		dc = getPostgresConnectionManager();
     		
     		String deletePreviousRole = 
     				"DELETE FROM "+schemaName+".users_roles "+
@@ -659,20 +694,15 @@ public class LexitSchemaAccess {
         	deletePreviousRoleAto.addType("text");
         	
         	try {
-        		dc.sendPreparedUpdate(deletePreviousRole, deletePreviousRoleArgs, deletePreviousRoleAto, null);
+        		dc.sendPreparedUpdate(schemaName, deletePreviousRole, deletePreviousRoleArgs, deletePreviousRoleAto, null);
     	    }
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Removing old user role caused an error.", e);
     	    }
-        	finally {
-    			dc.closeConnection();
-    		}
         	
         	
         	// now, write the new role of the user for this project        	   		
-        	
-        	dc = connectDatabase();
-        	
+        	        	
     		String addUserRoleQuery = 
     				"INSERT INTO "+schemaName+".users_roles(user_id, projectname, access_role) "+
     				"SELECT id, '"+dbName+"', '"+role+"' "+
@@ -685,20 +715,20 @@ public class LexitSchemaAccess {
         	addUserRoleAto.addType("text");
         	
         	try {
-        		dc.sendPreparedUpdate(addUserRoleQuery, addUserRoleArgs, addUserRoleAto, null);
+        		dc.sendPreparedUpdate(schemaName, addUserRoleQuery, addUserRoleArgs, addUserRoleAto, null);
     	    }
     	    catch (Exception e) {  	    	
     	    	throw new RuntimeException("Adding a user and project role caused an error.", e);
     	    }
-        	finally {
-    			dc.closeConnection();
-    		}
     	}
     	
 	}
 	
 	
-	// get list of users and roles
+	/**
+	 * Get list of users and roles
+	 * @return
+	 */
 	public ArrayList<String> getListOfUsersAndRoles() {
 		
 		ArrayList<String> aOutput = new ArrayList<>();
@@ -724,7 +754,11 @@ public class LexitSchemaAccess {
 
 
 	
-	// read the host and credentials for accessing the Lex'it schema database 
+	/**
+	 * Read the host and credentials for accessing the Lex'it schema database 
+	 * @param context
+	 * @throws IOException
+	 */
 	private void readLexitSchemaLoginInfoFile(ServletContext context) throws IOException{
 		
 		
@@ -762,66 +796,14 @@ public class LexitSchemaAccess {
 			}
 			br.close();
 			in.close();
+			
+			// connect to the lex'it schema database 
+			dc = createPostgresConnectionManager();
 		}
 		catch (Exception e){//Catch exception if any
 			throw new RuntimeException("Error while reading the '"+lexitSchemaFileName+"' properties file", e);
 		}
 	}
-
 	
 	
-	// close the database connection
-//	private void closeDatabase()
-//	{
-//		if (dc != null)
-//			dc.closeConnection();
-//		if (Constants.debug)
-//			Util.debug("Connection with the Lex'it schema closed.\n");
-//	}
-	
-	
-	
-	// convert database output into an array list
-	
-	private ArrayList<String[]> getResultsInAList(ResultSet rs, String[] fieldnames) throws UnsupportedEncodingException, SQLException{
-		
-		ArrayList<String[]> list = new ArrayList<String[]>();
-		
-		if (rs == null)  {
-			Util.debug("Result list empty!");
-			return list;
-		}
-		
-		try  {
-			try {
-				while (rs.next()) {
-					
-					String[] fieldvalue = new String[fieldnames.length];
-					for (int i=0; i<fieldnames.length; i++) {
-						String veld = fieldnames[i];						
-						
-						byte[] col = rs.getBytes(veld);
-						if (col != null) {
-							String str = new String(col, "UTF-8");
-							fieldvalue[i] = str; 
-						}
-						else {
-							fieldvalue[i] = "";
-						}						
-					}
-					list.add(fieldvalue);
-					
-				}
-				return list;
-			}
-			finally {
-				rs.close();
-			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-	}
-
 }

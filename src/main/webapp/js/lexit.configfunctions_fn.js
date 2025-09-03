@@ -374,7 +374,6 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 
 // globals for the fn.setSchema() function
 var setSchemaNameCache = null;
-var setSchemaTimeOut = null;
 
 
 /**
@@ -400,36 +399,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	 	"success": function(xml) {
 
 			console.log("Lex'it: schema was set to "+sNewSchema);
-	 		
-	 		// Since the ContextObject (cache) of Lex'it is emptied after a few minutes of inactivity,
-			// we might end up with Lex'it addressing the default schema again (t.i. the one set in the .database config file), 
-	 		// instead of the schema set in this function.
-	 		// So, we need to set a TimeOut with a duration shorter than the ContextObject life duration,
-	 		// in such a way that this function is reactivated before the end of the ContextObject life cycle.
-	 		// ( about ContextObject life duration, see: java Constants.java, MAX_DB_OBJECT_DURATION )
-	 		
-	 		// But of course, if the code sets another schema later on,
-	 		// we must remove the TimeOut that was set to keep the previously set schema, 
-	 		// and set a new TimeOut as final step.
-	 		
-	 		if (setSchemaTimeOut != null) {
-	 			clearTimeout(setSchemaTimeOut);
-	 		}
-	 		
-	 		setSchemaNameCache = sNewSchema;
-	 		setSchemaTimeOut = setTimeout(
-					function(){
-						// BEWARE: the CALLBACK must be fired ONLY at the first call of fn.setSchema(),
-						// which is why we set is to be null at the end of this function.
-						// Calling the callback at every TimeOut could cause unexpected behavior to the developers:
-						// the developers most probably expect that a schema is set once and for all, 
-						// and do not know of the necessity to re-call the function regularly, as this is just
-						// a trick to deal with the short life of the ContextObject. As a consequence, the
-						// callback given as a parameter is called only at the first round, to meet this 
-						// probable expectation (of developers) of the function behavior. 
-						fn.setSchema(sNewSchema, null, fnErrorHandler);						
-						}, 
-					1000*60); 
+			setSchemaNameCache = sNewSchema;
 			
 	 		// callback if it is set
 	 		if (fnCallback!=null)
@@ -1000,18 +970,16 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	// asTableTypes mustn't be undefined. If it is, the initialization is not
 	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
 	
-	var iTableIndex = $.inArray(sSomeTablename, asTableNames);
+	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
 	
-	if( (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+	if( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
-    else {
-		// reload the list of tables (might be needed when fn.setSchema was called)
-		ts.reinit();
-		ts.getListOfTables(null, "", "");
-		
-        setTimeout(function(){        	
+    else {		
+		// reload the list of tables (might be needed when fn.setSchema was called)		
+		fn.rebuildTablesMenu();		
+        setTimeout(function(){		        	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
         }, iWait);
     }
@@ -2547,6 +2515,9 @@ fn.toggleCheckbox = function(nRow, sColumnName, fnCallback){
 // *     GENERAL COLUMN FUNCTIONS                                  *
 // *****************************************************************
 
+
+
+
 /**
  * Give the name of the column a cell node is part of
  * 
@@ -2574,7 +2545,7 @@ fn.getNameOfColumnForThisNode = function(nCell){
  * @param {Integer} iIndex - Visible index of a column (visible means hidden columns are skipped in the count)
  * @returns {String} Name of a column
  */
-fn.getNameOfColumnForThisVisibleIndex = function( sSomeTable, iIndex){
+fn.getNameOfColumnForThisVisibleIndex = function(sSomeTable, iIndex){
 	
 	if (typeof sSomeTable == 'object')
 		sSomeTable = fn.getTableName(sSomeTable);
@@ -2601,6 +2572,41 @@ fn.getColumnNumberOf = function(sSomeTable, sCellName){
 	// here we use getListOfColumnsOf because this function is about all columns, not only the visible ones
 	return $.inArray(sCellName, mt.getListOfColumnsOf(sSomeTable));
 };
+
+
+/**
+ * Get the allowed values of a column (for selectboxes).
+ * Beware: this works when values are declared in 'choosefrom' in the configuration file.
+ * If none was declared, but the column is an ENUM type in Postgres, the values are taken from there,
+ * but that only works if the table is loaded. 
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - A table name or object
+ * @param {String} sColumnName - A column name
+ * @returns {String[]} An array of allowed values (or null if the column is not a selectbox)
+ * 
+ * @see lists.getAllowedValuesOfColumn()
+ */
+fn.getAllowedValuesOfColumn = function(sSomeTablename, sColumnName){
+
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	var aColumnConfig = conf.getColumnConfig(oTableConfig, sColumnName);
+	var iColumnNameIndex = fn.getColumnNumberOf(sSomeTablename, sColumnName);
+	
+	//    select values from 'choosefrom' in config.js file,
+	// or select values from Postgres ENUM custom type?
+	//
+	// [1] choosefrom
+	var aSelectBoxValues = conf.getSelectionBox(aColumnConfig);
+	// [2] ENUM
+	if (aSelectBoxValues == null)
+		aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sSomeTablename)[iColumnNameIndex];
+
+	return aSelectBoxValues;
+	
+}
 
 /**
  * Get the visible column number of a cell (so hidden columns are excluded from the count), given the column name
@@ -6931,7 +6937,8 @@ fn._checkApiInstance = function(sFunctionName, oArgument){
 	
 };
 
-
+// check if some function was called with a jQuery object
+// and give an error if it was!
 fn._checkjQueryObject = function(sFunctionName, oArgument){
 	
 	if (oArgument instanceof jQuery){
