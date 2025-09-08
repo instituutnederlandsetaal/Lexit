@@ -201,6 +201,17 @@ button:hover {
 
 
 
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Context menu
+ */
+
+.lexit-context-menu span {
+	font-size: 80% !important;
+}
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables features
  */
@@ -235,7 +246,7 @@ button:hover {
 	top: 55px;
 	left: 25px;
 	font-size: 90%;
-	z-index: 2; /* keep the table length selector in front (prevents pagination div to get in front of this div */
+	z-index: 2; /* keep the table length selector in front (prevents pagination div from getting in front of this div) */
 }
 
 .dataTables_filter {

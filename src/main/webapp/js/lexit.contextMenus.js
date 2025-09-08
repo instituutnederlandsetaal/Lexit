@@ -17,12 +17,14 @@ var cm = {};
 
 
 // set a context menu for a given cell (or row if sColumnName is null)
-cm.setContextMenu = function(sSomeTable, sColumnName, oItems, fnCallback){
+cm.setContextMenu = function(sSomeTable, sColumnName, oItems, sClass = 'lexit-context-menu', fnCallback){
 	
 	// build content menu
 	 $.contextMenu({
 		 
 	        selector: cm._getSelectorForColumn(sSomeTable, sColumnName),
+	        
+	        className: sClass,
 	        
 	        callback: function(key, options){
 	        	

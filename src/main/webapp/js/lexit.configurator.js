@@ -1616,9 +1616,11 @@ var hPreviousStateOfLastSelectedRow = new Hashtable();
 
 var aListOfPossibleMouseActions = ["click", "dblclick", 
                                    "mouseup", "mousedown", 
-                                   "mouseover",
-                                   "mousemove",
-                                   "mouseout"];
+                                   "mouseover", "mouseout", 
+                                   "mousemove",                                   
+                                   "mouseenter", "mouseleave"
+                                   //"contextmenu" // this (mouse right click) is already in use as a Lex'it parameter key
+                                   ];
 
 // check if some column configuration has a mouse action assigned
 conf.someMouseActionIsAssigned = function(aColumnConfig){
@@ -1795,13 +1797,16 @@ conf.activateContextMenusForColumns = function(sSomeTablename){
 		// if we have a rightclick configuration, set the rightclick context menu
 		var oRightClickConfig = 	oColumnConfig["contextmenu"];
 		
+		// class to apply to the context menu
+		var sClass =				oColumnConfig["class"];
+		
 		if (typeof oRightClickConfig != 'undefined')
 			{
 			var oItems = 		oRightClickConfig["items"];
 			var fnCallback =	oRightClickConfig["callback"];
 			
 			if (typeof oItems != 'undefined' && typeof fnCallback != 'undefined')
-			cm.setContextMenu(sSomeTablename, sCurrentColumnName, oItems, fnCallback);
+			cm.setContextMenu(sSomeTablename, sCurrentColumnName, oItems, sClass, fnCallback);
 			}
 		}	
 };
@@ -2030,6 +2035,9 @@ conf.activateContextMenusForRows = function(sSomeTablename){
 	// retrieve table client settings
 	var aTableSettings = conf.getTableSettings(sSomeTablename);
 	
+	// class to apply to the context menu
+	var sClass = 			aTableSettings["class"];
+	
 	// if we have a rightclick configuration, set the rightclick context menu
 	var oRightClickSetting = aTableSettings["contextmenu"];
 	if (typeof oRightClickSetting != 'undefined')
@@ -2037,7 +2045,7 @@ conf.activateContextMenusForRows = function(sSomeTablename){
 		var oItems = oRightClickSetting["items"];
 		var fnCallback = oRightClickSetting["callback"];
 		if (typeof oItems != 'undefined' && typeof fnCallback != 'undefined')
-			cm.setContextMenu(sSomeTablename, null, oItems, fnCallback);
+			cm.setContextMenu(sSomeTablename, null, oItems, sClass, fnCallback);
 		}	
 };
 

@@ -13,6 +13,10 @@ lexitusers.oMenuOptions = {
 	},
 	"Add/update roles": function(){
 		lexitusers.addRoleInProject();
+	},
+	"null": null, // separator
+	"Change admin password": function(){
+		lexitusers.changeAdminPassword();
 	}
 };
 
@@ -357,9 +361,87 @@ lexitusers.addRoleInProject = function(){
 
 
 
+lexitusers.changeAdminPassword = function(){
+	
+	fn.prompt("Change admin password", ["current password", "new password"], null,
+	
+		function(resp){
+			
+			$.ajax({
+					"type": "GET",
+					"url": WEBSERV_URL+"/api/change_admin_password",
+					"data": {
+						"old_password": resp["current password"],
+						"new_password": resp["new password"],
+						"dummy": lexutil.getUniqueNumber()
+					},
+					"dataType": "xml", // get response as xml
+					"success": function(xml) {
+						
+						fn.closeDialog();
+						lexitusers.refreshUserRight(function(){
+							fn.message("OK", "The new admin password was set!", function(){
+								lexitusers.showMenu();
+							});				
+						});
+ 						
+					},
+					"error": function(jqXHR, textStatus, errorThrown){
+						
+						fn.message(lang.error, "Setting the new admin password went wrong: " + textStatus+" "+errorThrown);
+						
+						setTimeout(function(){							
+							fn.closeDialog();
+							lexitusers.showMenu();
+						}, 2000);
+					}
+ 				});
+			
+		},
+		function(){
+			// if cancelled reload,
+			fn.closeDialog();
+			lexitusers.showMenu();
+		}
+	);
+	
+};
+
+
+
+
 // ask the admin to choose 
-lexitusers.showMenu = function(){
+lexitusers._showMenu = function(){
 	lexitusers.refreshUserRight(function(){
         fn.askToChoose("User management", "Would you like to:", lexitusers.oMenuOptions);
     });
 };
+
+lexitusers.showMenu = function(){
+	
+	// build options, replacing "null" with the separator value (for empty line to separate groups)
+	var options = Object.keys(lexitusers.oMenuOptions).map(item => item === "null" ? null : item);;	
+	
+	// first refresh user rights and overview
+	lexitusers.refreshUserRight(function(){
+		
+		// show menu
+        fn.promptSelect(["User management", "Would you like to:"], 
+        options,
+        null, 
+        function(resp){
+			
+			// get callback function associated with the chosen option and call it
+			var fnCallBack = lexitusers.oMenuOptions[resp[0]];			
+			fnCallBack();			
+		},
+		function(){
+			
+			// if cancelled reload,
+			fn.closeDialog();
+			lexitusers.showMenu();
+		},
+		true);
+    });
+};
+

@@ -523,36 +523,9 @@ public class Util {
 //	
 	
 	
-	// ******************************************************************
-	// HASHES
-	// ******************************************************************
 	
-	// convert the password into a hash
-	public static String getHashOf(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+	
 		
-		MessageDigest m = MessageDigest.getInstance("MD5");
-		m.reset();
-		m.update(password.getBytes());
-		byte[] digest = m.digest();
-		BigInteger bigInt = new BigInteger(1,digest);
-		String hashtext = bigInt.toString(16);
-		// Now we need to zero pad it if you actually want the full 32 chars.
-		while(hashtext.length() < 32 ){
-		  hashtext = "0"+hashtext;
-		}
-				
-		return hashtext;
-	}
-	
-	public static int getIntValueOfHashOf(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		str = getHashOf(str);
-		int total = 0;
-		for (int i=0; i<str.length(); i++){
-			total += (int) str.charAt(i);
-		}
-		return total;
-	}
-	
 	
 	
 	// ******************************************************************

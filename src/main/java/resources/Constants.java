@@ -44,6 +44,7 @@ public class Constants {
 	
 	// default users
 	// the admin user, which declares users and their access rights in the admin GUI
+	public final static int ADMIN_ID = 0;
 	public final static String ADMIN_USER = "admin";	
 	public final static String ADMIN_USER_DEFAULT_ROLE = "admin";
 	// the public reader, which is allowed to access some projects without logging in, but only in read mode

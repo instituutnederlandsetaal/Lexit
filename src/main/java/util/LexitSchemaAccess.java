@@ -125,12 +125,16 @@ public class LexitSchemaAccess {
 				+ "		    CONSTRAINT users_roles_unique UNIQUE (user_id, projectname, access_role) "
 				+ "		); "
 				+ "		"
+				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".users(id, username, password, default_access_role) "
+						// admin user
+						// id specified on purpose, since the password encoding depends on it
+				+ "		VALUES ("+ Constants.ADMIN_ID +", '"+ Constants.ADMIN_USER +"', '7d0a0ba4bef831bf484c647fd5a2cf82da5d3ddbd5443a7ae2b02aa455827662', '"+ Constants.ADMIN_USER_DEFAULT_ROLE +"') "
+				+ "		ON CONFLICT DO NOTHING; "
+				        // public reader user
+						// (password null on purpose, since this user must be able to login without a password)				
 				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".users(username, password, default_access_role) "
 						// admin user
-				+ "		VALUES ('"+ Constants.ADMIN_USER +"', 'dfaef8346ba91dc59fa762dfc7fe6eac', '"+ Constants.ADMIN_USER_DEFAULT_ROLE +"'), "
-				        // public reader user
-						// (password null on purpose, since this user must be able to login without a password) 
-				+ "			   ('"+ Constants.PUBLIC_READER_USER +"', null, '"+ Constants.PUBLIC_READER_DEFAULT_ROLE +"') "
+				+ "		VALUES ('"+ Constants.PUBLIC_READER_USER +"', null, '"+ Constants.PUBLIC_READER_DEFAULT_ROLE +"') "
 				+ "		ON CONFLICT DO NOTHING; "
 				+ "		"
 				+ "END "
@@ -145,6 +149,51 @@ public class LexitSchemaAccess {
 		catch (Exception e) {  	    	
 			throw new RuntimeException("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error.", e);
 		}
+	}
+	
+	
+	/**
+	 * Change the admin password
+	 * 
+	 * @param oldPassword
+	 * @param newPassword
+	 */
+	public void changeAdminPassword(String oldPassword, String newPassword) {
+		
+		// check old password
+		if (!checkCredentials(Constants.ADMIN_USER, oldPassword)) {
+			throw new RuntimeException("Old admin password is incorrect.");
+		}
+
+		// encode the new password
+		int idOfUser = getIdOfUser(Constants.ADMIN_USER);
+		String salt = getSalt(idOfUser);
+		String passwordEncoded = getSha256EncodedPassword(newPassword, salt);
+
+		// connect to the lex'it schema database
+		dc = getPostgresConnectionManager();
+
+		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
+
+		String query = 
+				"UPDATE " + schemaName + ".users " + 
+				"SET password = ? " + 
+				"WHERE username = ?;";
+
+		String[] args = new String[] { passwordEncoded, Constants.ADMIN_USER };
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		ato.addType("text");
+		ato.addType("text");
+
+		try {
+			dc.sendPreparedUpdate(schemaName, query, args, ato, null);
+			// update local copy of users and passwords
+			users2passwords.put(Constants.ADMIN_USER, passwordEncoded);
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Changing the admin password caused an error.", e);
+		}
+		
 	}
 	
 	
@@ -362,25 +411,24 @@ public class LexitSchemaAccess {
 	 */
 	public boolean checkCredentials(String username, String password) {
 		
-		//showCurrentContent();
+		// get encoded password from database
+		String encodedPasswordInDatabase = users2passwords.get(username);
 		
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-	    md.update(password.getBytes());
-	    byte[] digest = md.digest();
-
+		// generate encoded version of given password
+		int idOfUser = getIdOfUser(username);
+		String salt = getSalt(idOfUser);
+		String sha256EncodedPassword = getSha256EncodedPassword(password, salt);
 		
-		String md5Hex = DatatypeConverter.printHexBinary(digest);		
-		String md5InDatabase = users2passwords.get(username);
+		// compare passwords given sha256 conversion  		
+		if (sha256EncodedPassword.equalsIgnoreCase(encodedPasswordInDatabase))
+			return true;
 						
-		// if MD5 conversion of password matches the database version of it! 
-		if (md5Hex.equalsIgnoreCase(md5InDatabase))
+		// if sha256 comparison failed, try md5 comparison (for backwards compatibility)
+		String md5EncodedPassword = getMD5EncodedPassword(password);
+		if (md5EncodedPassword.equalsIgnoreCase(encodedPasswordInDatabase))
 			return true;
 		
+		// all attempts failed
 		return false;
 	}
 	
@@ -618,24 +666,15 @@ public class LexitSchemaAccess {
 				
 		
 		
-		// convert the password to MD5
+		// encode the password 
 		
-		String passwordMd5Hex = null;		
+		String passwordEncoded = null;		
 		
 		if (password != null && !password.trim().isEmpty()) {
 			
-			password = password.trim();
-			
-			MessageDigest md = null;
-			try {
-				md = MessageDigest.getInstance("MD5");
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-		    md.update(password.getBytes());
-		    byte[] digest = md.digest();
-
-			passwordMd5Hex = DatatypeConverter.printHexBinary(digest);			
+			int nextId = getTheNextValueOfASequence(schemaName, "users", "id");
+			String salt = getSalt(nextId); 
+			passwordEncoded = getSha256EncodedPassword(password, salt);
 		}
 		
 		
@@ -650,10 +689,10 @@ public class LexitSchemaAccess {
 					"INSERT INTO "+schemaName+".users(username, password, default_access_role) "+
 					"VALUES (?, ?, ?) "+				
 					"ON CONFLICT (username) "+
-					"DO UPDATE SET default_access_role = '"+defaultRole+"' " +( (passwordMd5Hex != null ) ? ", password = '"+passwordMd5Hex+"'" : "") + " "+
+					"DO UPDATE SET default_access_role = '"+defaultRole+"' " +( (passwordEncoded != null ) ? ", password = '"+passwordEncoded+"'" : "") + " "+
 					"WHERE "+schemaName+".users.username = ?;";
 			
-			String[] addUserArgs = new String[] {username, passwordMd5Hex, defaultRole, username}; 
+			String[] addUserArgs = new String[] {username, passwordEncoded, defaultRole, username}; 
 	    	ArgumentTypesObject addUserAto = new ArgumentTypesObject();
 	    	addUserAto.addType("text");
 	    	addUserAto.addType("text");
@@ -722,6 +761,39 @@ public class LexitSchemaAccess {
     	    }
     	}
     	
+	}
+	
+	
+	public int getIdOfUser(String username) {
+
+		int id = -1;
+
+		// connect to the lex'it schema database
+		dc = getPostgresConnectionManager();
+
+		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
+
+		String query = "SELECT id " + "FROM " + schemaName + ".users " + "WHERE username = ?;";
+
+		String[] queryArgs = new String[] { username };
+		ArgumentTypesObject queryAto = new ArgumentTypesObject();
+		queryAto.addType("text");
+
+		ArrayList<String[]> res;
+
+		try {
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schemaName, query, queryArgs, queryAto, 0).getRows();
+
+			res = Util.getResultSetCopyInAList(rs, new String[] { "id" });
+			if (res.size() > 0) {
+				id = Integer.parseInt(res.get(0)[0]);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Reading the id of a user caused an error.", e);
+		}
+
+		return id;
+
 	}
 	
 	
@@ -803,6 +875,113 @@ public class LexitSchemaAccess {
 		catch (Exception e){//Catch exception if any
 			throw new RuntimeException("Error while reading the '"+lexitSchemaFileName+"' properties file", e);
 		}
+	}
+	
+	
+	/**
+	 * Generate a MD5 encoded version of a password (old way; kept for sake of backwards compatibility)
+	 * 
+	 * @param password
+	 * @return
+	 */
+	private String getMD5EncodedPassword(String password) {
+		
+		password = password.trim();
+		
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    md.update(password.getBytes());
+	    byte[] digest = md.digest();
+
+		return DatatypeConverter.printHexBinary(digest);
+	}
+	
+	/**
+	 * Generate a SHA-256 encoded version of a password (new way)
+	 * 
+	 * @param password
+	 * @param saltString
+	 * @return
+	 */
+	private String getSha256EncodedPassword(String password, String saltString) {
+		
+		// see: https://www.javaguides.net/2020/02/java-sha-256-hash-with-salt-example.html
+		
+		password = password.trim();
+		String generatedPassword = null;		
+		byte[] salt = saltString.getBytes();
+		
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    md.update(salt);
+	    byte[] digest = md.digest(password.getBytes());
+	    StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < digest.length; i++) {
+            sb.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        generatedPassword = sb.toString();
+
+		return generatedPassword;
+	}
+	
+	
+	/**
+	 * Get a salt string for a given integer value
+	 * 
+	 * @param intValue
+	 * @return
+	 */
+	public String getSalt(int intValue) {
+		
+		// salt must be at 16 characters long
+		String salt = String.valueOf(intValue) + "lexit_salt_value"; 
+		salt = salt.substring(0, 16);
+		return salt;
+	}
+
+	
+	/**
+	 * Get the next value of a sequence for a table column
+	 * 
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
+	public int getTheNextValueOfASequence(String schema, String tableName, String columnName) {
+		
+		String query = "SELECT currval(pg_get_serial_sequence(?, ?)) AS current_value ;";
+
+		int nextValue = -1;
+
+		PostgresConnectionManager dc = getPostgresConnectionManager();
+
+		try {
+			String[] args = new String[] { schema + "." + tableName, columnName };
+
+			ArgumentTypesObject ato = new ArgumentTypesObject();
+			ato.addType("text");
+			ato.addType("text");
+			
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args, ato, 0).getRows();
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "current_value" });
+
+			if (res.size() > 0) {
+				nextValue = Integer.parseInt(res.get(0)[0]) + 1;
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error while executing query " + query, e);
+		}
+
+		return nextValue;
 	}
 	
 	

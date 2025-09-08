@@ -303,6 +303,34 @@ public class TableResources {
  		return response;
  	}
  	
+ 	
+ 	@Path("change_admin_password")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject changeAdminPassword(
+ 			@DefaultValue("") @QueryParam("old_password") String oldPassword,
+ 			@DefaultValue("") @QueryParam("new_password") String newPassword,
+ 			@Context ServletContext context,
+ 			@Context SecurityContext sc,
+ 			@Context HttpServletRequest httpServletRequest
+ 			) throws IOException {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+ 		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
+ 		if ( !userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+ 			throw new RuntimeException("Permission denied to "+loginName);
+ 		}
+ 		
+ 		lexitInfo.changeAdminPassword(oldPassword, newPassword);
+ 		
+ 		DbResponseObject response = new DbResponseObject();
+ 		response.setResponse("OK");
+ 		
+ 		return response;
+ 	}
+ 	
+ 	
+ 	
  	@Path("get_list_of_users_and_roles")
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})

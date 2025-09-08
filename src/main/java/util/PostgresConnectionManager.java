@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -1067,6 +1069,7 @@ public class PostgresConnectionManager {
 		// rewrite query, args list, and argument types object				
 		return new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);
 	}
+	
 	
 	
 	
