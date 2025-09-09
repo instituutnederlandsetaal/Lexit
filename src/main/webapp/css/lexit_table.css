@@ -932,6 +932,10 @@ table.dataTable input[type=checkbox]
 #selectable .ui-selecting { background: #FECA40; }
 #selectable .ui-selected { background: #F39814; color: white; }
 
+#selectable li.ui-selectee { cursor: pointer; }
+#selectable li.ui-selectee span { cursor: pointer; }
+#selectable li.ui-selectee:hover { cursor: pointer; background: #e6e6e6; }
+
 
 /* we need to set this for inline edit textareas, so they inherit the fond family that is set,
    otherwise the font family will be unexpected.
