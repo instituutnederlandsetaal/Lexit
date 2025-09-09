@@ -479,8 +479,8 @@ form.buildViewGrid = function(sTableName){
 		.css("position", "relative")
 		.css("top", (iSearchBarHeight)+"px")
 		.css("left", sFormPosPix + "px")
-		.css("width", iFormWidth +"px")	
-		.css("height", iFormHeight +"px");
+		.css("width", iFormWidth +"px")
+		.css("min-height", iFormHeight +"px");
 	$( "#"+sTableName+"_wrapper" ).append(eFormParent);
 	
 
@@ -554,10 +554,6 @@ form.buildViewGrid = function(sTableName){
 					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")		
 					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 					.css("height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")		
-					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					//.css("height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");
 	
 	
 		// click events if declared
@@ -832,16 +828,12 @@ form.buildViewGrid = function(sTableName){
 					.css("position", "absolute")
 					.css("left", "calc("+aPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px");
 			}
 					
 			// text area size
 			$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
 				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
-				.css("min-height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")
-				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px")
-				//.css("height", (parseFloat(aCellSize[1]) *iGridHeightUnit) +"px")
+				.css("min-height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")				
 				.addClass("formview_textarea");			
 		}
 		else {
@@ -930,14 +922,10 @@ form.buildViewGrid = function(sTableName){
 				.css("position", "absolute")
 				.css("left", "calc("+aListPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 				.css("top", "calc("+aListPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-				//.css("left", (parseFloat(aListPosition[0]) * iGridWidthUnit) +"px")
-				//.css("top", (parseFloat(aListPosition[1]) * iGridHeightUnit) +"px");
 		}
 		listContainer
 			.css("width", "calc("+aListDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 			.css("height", "calc("+aListDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-			//.css("width", (parseFloat(aListDefinition[0]) * iGridWidthUnit) +"px")
-			//.css("height", (parseFloat(aListDefinition[1]) * iGridHeightUnit) +"px");
 
 		// build the HTML table for the list,
 		// attach it to the div,
@@ -1013,13 +1001,9 @@ form.buildViewGrid = function(sTableName){
 			.css("position", "absolute")
 			.css("left", "calc("+aButtonPosition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 			.css("top", "calc("+aButtonPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-			//.css("left", (parseFloat(aButtonPosition[0]) * iGridWidthUnit) +"px")
-			//.css("top", (parseFloat(aButtonPosition[1]) * iGridHeightUnit) +"px");
 		$("#"+sTableName+"_wrapper button#form_button_"+sButtonId)
 			.css("width", "calc("+aButtonDefinition[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 			.css("height", "calc("+aButtonDefinition[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
-			//.css("width", (parseFloat(aButtonDefinition[0]) * iGridWidthUnit) +"px")
-			//.css("height", (parseFloat(aButtonDefinition[1]) *iGridHeightUnit) +"px");
 	}
 
 
@@ -1030,8 +1014,6 @@ form.buildViewGrid = function(sTableName){
 	var iButtonDivLeft = "(var(--"+sFormContainerId+"_cellwidth))";
 	var iButtonDivTop = "calc("+ iFormHeight +" - (var(--"+sFormContainerId+"_cellheight)))";//(iFormHeight - iGridHeightUnit);
 	if (oFormGrid["buttonsbar_position"] != null){
-		//iButtonDivLeft = oFormGrid["buttonsbar_position"][0] * iGridWidthUnit;
-		//iButtonDivTop = oFormGrid["buttonsbar_position"][1] * iGridHeightUnit;
 		iButtonDivLeft = "calc("+ oFormGrid["buttonsbar_position"][0] +" * (var(--"+sFormContainerId+"_cellwidth)))";
 		iButtonDivTop = "calc("+ oFormGrid["buttonsbar_position"][1] +" * (var(--"+sFormContainerId+"_cellheight)))";
 	}  
@@ -1804,7 +1786,8 @@ form.activateAccordion = function(sTableName){
 		
 		    // make the accordion now
 			$( "#"+sTableName+"_inbetween_div" ).accordion({
-				animate: 100
+				animate: 100,
+				heightStyle: "content" // Each panel will be only as tall as its content
 			});
 		}
 	}
