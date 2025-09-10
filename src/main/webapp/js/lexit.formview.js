@@ -1460,7 +1460,7 @@ form.manageViewGrid = function(sTableName){
 
 	
 	// get the current row content
-	// fore looping through the cells
+	// for looping through the cells
 	
 	var nRow = fn.getActiveRowNode(sTableName);
 	if (nRow == null){
@@ -1758,8 +1758,10 @@ form.manageViewGrid = function(sTableName){
 /**
  * Activate the jquery UI accordion function
  * onto a form containing "cellgroups" sections
+ * @param {String|Object} sTableName table name or Datatable object of the form
+ * @param {Object} oAccordionConfig configuration object for the jquery UI accordion (see https://api.jqueryui.com/accordion/)
  */
-form.activateAccordion = function(sTableName){
+form.activateAccordion = function(sTableName, oAccordionConfig){
 	
 	if (typeof sTableName == 'object')
 		sTableName = fn.getTableName(sTableName);
@@ -1783,12 +1785,18 @@ form.activateAccordion = function(sTableName){
 				.not("#"+sTableName+"_formsbuttons")		// exclude the reset/save buttons
 				//.not(".formview_listlabel_container")		// exclude the lists
 				.appendTo("#"+sTableName+"_inbetween_div");
+				
+			// accordion config	
+			var oAccordionConfig = oAccordionConfig || {};
+			
+			// set defaults, if not set already
+			if (oAccordionConfig["animate"] == null)
+			    oAccordionConfig["animate"] = 100;
+			if (oAccordionConfig["heightStyle"] == null)
+			    oAccordionConfig["heightStyle"] = "content"; // Each panel will be only as tall as its content
 		
 		    // make the accordion now
-			$( "#"+sTableName+"_inbetween_div" ).accordion({
-				animate: 100,
-				heightStyle: "content" // Each panel will be only as tall as its content
-			});
+			$( "#"+sTableName+"_inbetween_div" ).accordion(oAccordionConfig);
 		}
 	}
 };

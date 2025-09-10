@@ -3135,6 +3135,7 @@ fn._selectionIsReliable = function(nCell, iStart, iEnd, sText){
  * @returns {Boolean} the checkbox value
  * 
  * @see fn.getDataFromCellNode
+ * @see lexutil.translateBoolean
  */
 fn.getCheckboxValue = function(nCell){
 	

@@ -892,6 +892,7 @@ fx.getWordClickedUponInCell = function(oMixed, sColumnName){
  * @returns {Boolean} the checkbox value
  * 
  * @see fx.getDataFromCell
+ * @see lexutil.translateBoolean
  */
 fx.getCheckboxValue = function(oCell){
 	
