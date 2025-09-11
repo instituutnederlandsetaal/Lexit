@@ -1131,14 +1131,18 @@ form.buildViewGrid = function(sTableName){
 				var nRow = fn.getActiveRowNode(sTableName);				
 
 				for (var sCellName in oCells){
+					
 					var cellSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
 					if ( cellSelector.hasClass("modified") ){
-
+						
 						// special case: read value of checkbox
-						if (cellSelector.find("input").length>0){
+						if (cellSelector.find("input").length>0 // checkbox or so (but definitely not a textarea!) 
+							&& 
+							cellSelector.find("textarea").length == 0 // this is needed for twtexteditor compatibility (since this editor adds an input field too)
+							){
 							oColumnNamesAndValues[sCellName] = cellSelector.find("input").prop("checked");
 						}
-						// general case
+						// general case (textarea or selectbox)
 						else {
 							oColumnNamesAndValues[sCellName] = cellSelector.children().first().val();
 						}
