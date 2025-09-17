@@ -5346,7 +5346,7 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 				liElement.addClass("ui-selected");
 				}
 			
-			var spanElement = $("<span></span>").text( $.trim(sOption) );
+			var spanElement = $("<span></span>").html( $.trim(sOption) );
 			liElement.append(spanElement);
 			selectableUl.append(liElement);
 		}
@@ -5400,8 +5400,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	
 	var aOriginalOrder = new Array();
 	
-	for (var i=0; i<aFieldNames.length; i++)
-		{
+	for (var i=0; i<aFieldNames.length; i++) {
 		var fieldLC = $.trim( lexutil.keepOnlyLettersAndDigits(aFieldNames[i].toLowerCase()) );
 		aOriginalOrder.push(fieldLC);
 		
@@ -5422,7 +5421,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 		liElement.append(spanElement);
 		liElement.append(spanElement2);
 		sortableUl.append(liElement);
-		}	
+	}	
 	
 	promptDiv.append(sortableUl);
 
