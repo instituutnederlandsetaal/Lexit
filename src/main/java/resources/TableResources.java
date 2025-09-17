@@ -1170,14 +1170,14 @@ public class TableResources {
 		// true null must be null (we must be able to make the difference between an empty string and null)
 		if (args != null && args.equals("true_null")) 
 			args = null;		
-		String[] argsStr = (args != null) ?
+		String[] argsArr = (args != null) ?
 				args.split(Constants.ARG_INTERNAL_SEPARATOR, -1)
 				:
 				new String[]{};		
 		
 		
 		// first check the function operation type (= writing/reading)
-		String functionOperationType = getDatabaseObject(co).getFunctionOperationType(functionName);
+		String functionOperationType = getDatabaseObject(co).getFunctionOperationType(functionName, argsArr.length);
 		
 		// DEBUG
 		//System.out.println(functionName+ " >> "+functionOperationType + " >> "+userIsAllowedTo(co, functionOperationType));
@@ -1187,7 +1187,7 @@ public class TableResources {
 			throw new RuntimeException("Permission denied to "+userName);	
 		
 		TableRecordObject tro = 
-			getDatabaseObject(co).callFunction(functionName, argsStr);
+			getDatabaseObject(co).callFunction(functionName, argsArr);
 				
 		return tro;
 	}

@@ -1153,11 +1153,12 @@ public class Database {
 		String[] argumentTypes = getFunctionTypes(functionName, args.length);
 		String returnType = getFunctionReturnType(functionName, args.length);
 		
+		
 		// process the argument list according to the type
 		// (t.i. add quotes for text args)
 		if (argumentTypes!= null && args.length == argumentTypes.length){
 			
-			for (int i=0; i<argumentTypes.length; i++) {
+			for (int i=0; i<argumentTypes.length; i++) {				
 				
 				// if we have a text argument, we need to deal with quotes inside it
 				if (argumentTypes[i].equals("text")
@@ -3728,7 +3729,7 @@ public class Database {
 			functionName = functionName.split("\\.")[1];
 		}
 		
-		String cachingKey = schemaName+functionName;
+		String cachingKey = schemaName+functionName+numberOfArguments;
 		if ( functionNameToTypes.containsKey(cachingKey) ) {
 			if (Constants.debug) {
 				System.out.println("## Function args types from cache: ");
@@ -3783,7 +3784,7 @@ public class Database {
 	 * @param functionName
 	 * @return
 	 */
-	public String getFunctionOperationType(String functionName){
+	public String getFunctionOperationType(String functionName, int numberOfArgs){
 		
 		String projectSchema = getSchemaName(); // get schema of project
 		
@@ -3813,8 +3814,9 @@ public class Database {
 			// this retrieves the function text
 			"(SELECT LOWER(regexp_replace(p.prosrc, E'[ \t\n\r]+', ' ', 'g')) AS fulltext " + 
 			"FROM pg_proc p, pg_namespace n " +
-			"WHERE p.proname = ? " +  // function name
-			"AND n.nspname = ?) function_txt, " + // function schema name
+			"WHERE p.proname = ? " +  	// function name
+			"AND n.nspname = ? "+		// function schema name
+			"AND p.pronargs = ?) function_txt, " + // number of arguments (needed for distinction since we sometimes have homonyms)
 			
 			// this generates the regex pattern matching writing operations
 			"(SELECT "+ // the schema name might be omitted here (eg. public), which is why we use '|' here
@@ -3837,7 +3839,8 @@ public class Database {
 			functionName = functionName.split("\\.")[1];
 		}
 		
-		String cachingKey = functionSchemaName+functionName;
+		String numberOfArguments = String.valueOf(numberOfArgs);
+		String cachingKey = functionSchemaName+functionName+numberOfArguments;
 		if ( functionNameToOperationType.containsKey(cachingKey) ) {
 			if (Constants.debug)  {
 				System.out.println("## Function operation type from cache: ");
@@ -3855,7 +3858,7 @@ public class Database {
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			String[] args = new String[]{functionName, functionSchemaName, projectSchema};		
+			String[] args = new String[]{functionName, functionSchemaName, numberOfArguments, projectSchema};		
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"function_operation"});
@@ -3908,7 +3911,7 @@ public class Database {
 			functionName = functionName.split("\\.")[1];
 		}
 		
-		String cachingKey = schemaName+functionName;
+		String cachingKey = schemaName+functionName+numberOfArguments;
 		if ( functionNameToReturnType.containsKey(cachingKey) ) {
 			if (Constants.debug) {
 				System.out.println("## Function return type from cache: ");
