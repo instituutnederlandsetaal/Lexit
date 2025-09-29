@@ -111,7 +111,7 @@ public class Util {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
         String formattedDateAndTime = now.format(formatter);
 		
-		String debugInfoForConsole = "Lex'it debug info | " + formattedDateAndTime + " | "+ errMessage + " | args: ["+Util.join(args, "] | [")+"]";		
+		String debugInfoForConsole = "Lex'it debug info | " + formattedDateAndTime + " | "+ errMessage + " | args: ["+Util.join(args, "; ")+"] | End of Lex'it debug info";		
 		
 		return debugInfoForConsole;
 	}
