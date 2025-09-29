@@ -971,7 +971,7 @@ public class LexitSchemaAccess {
 	 */
 	public int getTheNextValueOfASequence(String schema, String tableName, String columnName) {
 		
-		String query = "SELECT currval(pg_get_serial_sequence(?, ?)) AS current_value ;";
+		String query = "SELECT nextval(pg_get_serial_sequence(?, ?)) AS current_value ;";
 
 		int nextValue = -1;
 
