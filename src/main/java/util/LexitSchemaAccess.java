@@ -971,20 +971,28 @@ public class LexitSchemaAccess {
 	 */
 	public int getTheNextValueOfASequence(String schema, String tableName, String columnName) {
 		
-		String query = "SELECT nextval(pg_get_serial_sequence(?, ?)) AS current_value ;";
+		// Get the next value of a sequence for a table column
+		
+		// the following query does not only get the next value of a sequence, it also increments it! So it's not what we needed.
+		//String query = "SELECT nextval(pg_get_serial_sequence(?, ?)) AS current_value ;";
+		
+		// this query does instead get the max value without increasing the sequence
+		String query =	"SELECT COALESCE(MAX(\""+columnName+"\"), 0) + 1 AS current_value "+
+						"FROM \""+ schema + "\".\"" + tableName + "\";";
 
 		int nextValue = -1;
 
 		PostgresConnectionManager dc = getPostgresConnectionManager();
-		String[] args = new String[] { schema + "." + tableName, columnName };
-		ArgumentTypesObject ato = new ArgumentTypesObject();
-		ato.addType("text");
-		ato.addType("text");
+		//String[] args = new String[] { schema + "." + tableName, columnName };
+		//ArgumentTypesObject ato = new ArgumentTypesObject();
+		//ato.addType("text");
+		//ato.addType("text");
 		
 		try {
 			
 			
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args, ato, 0).getRows();
+			//List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args, ato, 0).getRows();
+			List<Map<String, Object>> rs = dc.sendQuery(schema, query, 0).getRows();
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "current_value" });
 
 			if (res.size() > 0) {
@@ -993,7 +1001,7 @@ public class LexitSchemaAccess {
 
 		} catch (Exception e) {
 			
-			String error = Util.getDebugInfoForConsole("Error while executing query " + query, args);			
+			String error = Util.getDebugInfoForConsole("Error while executing query " + query, new String[] {schema, tableName, columnName});			
 			throw new RuntimeException(error, e);
 		}
 
