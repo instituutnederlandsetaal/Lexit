@@ -419,9 +419,9 @@ public class LexitSchemaAccess {
 		String encodedPasswordInDatabase = users2passwords.get(username);
 		
 		// generate encoded version of given password
-		int idOfUser = getIdOfUser(username);
+		int idOfUser = getIdOfUser(username);		
 		String salt = getSalt(idOfUser);
-		String sha256EncodedPassword = getSha256EncodedPassword(password, salt);
+		String sha256EncodedPassword = getSha256EncodedPassword(password, salt);		
 		
 		// compare passwords given sha256 conversion  		
 		if (sha256EncodedPassword.equalsIgnoreCase(encodedPasswordInDatabase))
@@ -681,8 +681,13 @@ public class LexitSchemaAccess {
 		
 		if (password != null && !password.trim().isEmpty()) {
 			
-			int nextId = getTheNextValueOfASequence(schemaName, "users", "id");
-			String salt = getSalt(nextId); 
+			// if user already exists, we need its id to compute the password
+			int idOfUser = getIdOfUser(username);
+			// otherwise get the id that will be assigned to it
+			if (idOfUser < 0) {
+				idOfUser = getTheNextValueOfASequence(schemaName, "users", "id");
+			} 
+			String salt = getSalt(idOfUser); 
 			passwordEncoded = getSha256EncodedPassword(password, salt);
 		}
 		
@@ -785,7 +790,7 @@ public class LexitSchemaAccess {
 
 		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
 
-		String query = "SELECT id " + "FROM " + schemaName + ".users " + "WHERE username = ?;";
+		String query = "SELECT id FROM " + schemaName + ".users " + "WHERE username = ?;";
 
 		String[] queryArgs = new String[] { username };
 		ArgumentTypesObject queryAto = new ArgumentTypesObject();
@@ -971,41 +976,57 @@ public class LexitSchemaAccess {
 	 */
 	public int getTheNextValueOfASequence(String schema, String tableName, String columnName) {
 		
-		// Get the next value of a sequence for a table column
+		String sequenceName = "";
+		int lastGeneratedValue = -1;
 		
-		// the following query does not only get the next value of a sequence, it also increments it! So it's not what we needed.
-		//String query = "SELECT nextval(pg_get_serial_sequence(?, ?)) AS current_value ;";
-		
-		// this query does instead get the max value without increasing the sequence
-		String query =	"SELECT COALESCE(MAX(\""+columnName+"\"), 0) + 1 AS current_value "+
-						"FROM \""+ schema + "\".\"" + tableName + "\";";
-
-		int nextValue = -1;
-
 		PostgresConnectionManager dc = getPostgresConnectionManager();
-		//String[] args = new String[] { schema + "." + tableName, columnName };
-		//ArgumentTypesObject ato = new ArgumentTypesObject();
-		//ato.addType("text");
-		//ato.addType("text");
 		
-		try {
+		
+		// get the name of a psql sequence given the table and column name
+		
+		String getSequenceName = "SELECT pg_get_serial_sequence(?, ?) AS sequence_name;";
+		String[] getSequenceArgs = new String[] { schema + "." + tableName, columnName };
+		ArgumentTypesObject getSequenceAto = new ArgumentTypesObject();
+		getSequenceAto.addType("text");
+		getSequenceAto.addType("text");
+				
+		
+		try {			
 			
-			
-			//List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args, ato, 0).getRows();
-			List<Map<String, Object>> rs = dc.sendQuery(schema, query, 0).getRows();
-			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "current_value" });
-
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getSequenceName, getSequenceArgs, getSequenceAto, 0).getRows();			
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "sequence_name" });
 			if (res.size() > 0) {
-				nextValue = Integer.parseInt(res.get(0)[0]) + 1;
+				sequenceName = res.get(0)[0];
 			}
 
 		} catch (Exception e) {
 			
-			String error = Util.getDebugInfoForConsole("Error while executing query " + query, new String[] {schema, tableName, columnName});			
+			String error = Util.getDebugInfoForConsole("Error while executing query " + getSequenceName, new String[] {schema, tableName, columnName});			
+			throw new RuntimeException(error, e);
+		}
+		
+		
+		
+		// Get the last generated value from the sequence's internal state
+		
+		String getLastGeneratedValue =	
+				"SELECT last_value FROM "+sequenceName+";";
+
+		try {
+			List<Map<String, Object>> rs = dc.sendQuery(schema, getLastGeneratedValue, 0).getRows();
+			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "last_value" });
+
+			if (res.size() > 0) {
+				lastGeneratedValue = Integer.parseInt(res.get(0)[0]) + 1; // we want the next value, not the last one!
+			}
+
+		} catch (Exception e) {
+			
+			String error = Util.getDebugInfoForConsole("Error while executing query " + getLastGeneratedValue, new String[] {sequenceName});			
 			throw new RuntimeException(error, e);
 		}
 
-		return nextValue;
+		return lastGeneratedValue;
 	}
 	
 	
