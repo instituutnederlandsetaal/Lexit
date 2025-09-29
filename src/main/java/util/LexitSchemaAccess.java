@@ -81,7 +81,8 @@ public class LexitSchemaAccess {
 				
 				
 			} catch (IOException e) {
-				throw new RuntimeException("Error while reading the '"+lexitSchemaFileName+"' properties file", e);
+				String error = Util.getDebugInfoForConsole("Error while reading the '"+lexitSchemaFileName+"' properties file", new String[] {});
+				throw new RuntimeException(error, e);
 			}
 		}
 		
@@ -146,8 +147,9 @@ public class LexitSchemaAccess {
 		try {
 			dc.sendUpdate(lexitSchemaAccessHash.get("schema"), query);
 		}
-		catch (Exception e) {  	    	
-			throw new RuntimeException("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error.", e);
+		catch (Exception e) {
+			String error = Util.getDebugInfoForConsole("Creating the "+ Constants.ADMIN_CONFIG_FILENAME +" content caused an error", new String[] {});
+			throw new RuntimeException(error, e);
 		}
 	}
 	
@@ -162,7 +164,8 @@ public class LexitSchemaAccess {
 		
 		// check old password
 		if (!checkCredentials(Constants.ADMIN_USER, oldPassword)) {
-			throw new RuntimeException("Old admin password is incorrect.");
+			String error = Util.getDebugInfoForConsole("Old admin password is incorrect.", new String[] {});
+			throw new RuntimeException(error);
 		}
 
 		// encode the new password
@@ -191,7 +194,8 @@ public class LexitSchemaAccess {
 			users2passwords.put(Constants.ADMIN_USER, passwordEncoded);
 			
 		} catch (Exception e) {
-			throw new RuntimeException("Changing the admin password caused an error.", e);
+			String error = Util.getDebugInfoForConsole("Changing the admin password caused an error", new String[] {Constants.ADMIN_USER});
+			throw new RuntimeException(error, e);
 		}
 		
 	}
@@ -481,7 +485,8 @@ public class LexitSchemaAccess {
 	    	}
 	    }
 	    catch (Exception e) {  	    	
-	    	throw new RuntimeException("Reading the users login info caused an error.", e);
+	    	String error = Util.getDebugInfoForConsole("Reading the users login info caused an error", new String[] {});
+	    	throw new RuntimeException(error, e);
 	    }
 		
 	}
@@ -527,7 +532,8 @@ public class LexitSchemaAccess {
 			}
 	    }
 	    catch (Exception e) {  	    	
-	    	throw new RuntimeException("Reading the users roles caused an error.", e);
+	    	String error = Util.getDebugInfoForConsole("Reading the users roles caused an error", new String[] {});
+	    	throw new RuntimeException(error, e);
 	    }
 
 	}
@@ -561,7 +567,8 @@ public class LexitSchemaAccess {
 			dc.sendPreparedUpdate(schemaName, deleteUserQuery2, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Deleting a user caused an error.", e);
+			String error = Util.getDebugInfoForConsole("Deleting a user caused an error", new String[] {username});
+			throw new RuntimeException(error, e);			
 		} 
 	}
 	
@@ -592,7 +599,8 @@ public class LexitSchemaAccess {
 			dc.sendPreparedUpdate(schemaName, deleteUserQuery, deleteUserArgs, deleteUserAto, null);
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Deleting a user caused an error.", e);
+			String error = Util.getDebugInfoForConsole("Deleting a user caused an error", new String[] {username, dbName});
+			throw new RuntimeException(error, e);
 		} 
 	}
 	
@@ -630,7 +638,8 @@ public class LexitSchemaAccess {
 			}
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Reading the default role of a user caused an error.", e);
+			String error = Util.getDebugInfoForConsole("Reading the default role of a user caused an error", new String[] {username});
+			throw new RuntimeException(error, e);
 		} 
 		
 		return role;
@@ -705,7 +714,8 @@ public class LexitSchemaAccess {
 	    		dc.sendPreparedUpdate(schemaName, addUserQuery, addUserArgs, addUserAto, null);
 	  	    }
 	  	    catch (Exception e) {  	    	
-	  	    	throw new RuntimeException("Adding a user caused an error.", e);
+	  	    	String error = Util.getDebugInfoForConsole("Adding a user caused an error", new String[] {username, defaultRole});
+	  	    	throw new RuntimeException(error, e);
 	  	    }
 		}
 			
@@ -735,8 +745,9 @@ public class LexitSchemaAccess {
         	try {
         		dc.sendPreparedUpdate(schemaName, deletePreviousRole, deletePreviousRoleArgs, deletePreviousRoleAto, null);
     	    }
-    	    catch (Exception e) {  	    	
-    	    	throw new RuntimeException("Removing old user role caused an error.", e);
+    	    catch (Exception e) {  	    
+    	    	String error = Util.getDebugInfoForConsole("Removing old user role caused an error", deletePreviousRoleArgs);
+    	    	throw new RuntimeException(error, e);
     	    }
         	
         	
@@ -757,7 +768,8 @@ public class LexitSchemaAccess {
         		dc.sendPreparedUpdate(schemaName, addUserRoleQuery, addUserRoleArgs, addUserRoleAto, null);
     	    }
     	    catch (Exception e) {  	    	
-    	    	throw new RuntimeException("Adding a user and project role caused an error.", e);
+    	    	String error = Util.getDebugInfoForConsole("Adding a user and project role caused an error", new String[] {username});
+    	    	throw new RuntimeException(error, e);
     	    }
     	}
     	
@@ -789,7 +801,8 @@ public class LexitSchemaAccess {
 				id = Integer.parseInt(res.get(0)[0]);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Reading the id of a user caused an error.", e);
+			String error = Util.getDebugInfoForConsole("Reading the id of a user caused an error", new String[] {username});
+			throw new RuntimeException(error, e);
 		}
 
 		return id;
@@ -873,7 +886,8 @@ public class LexitSchemaAccess {
 			dc = createPostgresConnectionManager();
 		}
 		catch (Exception e){//Catch exception if any
-			throw new RuntimeException("Error while reading the '"+lexitSchemaFileName+"' properties file", e);
+			String error = Util.getDebugInfoForConsole("Error while reading the '\"+lexitSchemaFileName+\"' properties file", new String[] {filepath});
+			throw new RuntimeException(error, e);
 		}
 	}
 	
@@ -962,13 +976,13 @@ public class LexitSchemaAccess {
 		int nextValue = -1;
 
 		PostgresConnectionManager dc = getPostgresConnectionManager();
-
+		String[] args = new String[] { schema + "." + tableName, columnName };
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		ato.addType("text");
+		ato.addType("text");
+		
 		try {
-			String[] args = new String[] { schema + "." + tableName, columnName };
-
-			ArgumentTypesObject ato = new ArgumentTypesObject();
-			ato.addType("text");
-			ato.addType("text");
+			
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args, ato, 0).getRows();
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[] { "current_value" });
@@ -978,7 +992,9 @@ public class LexitSchemaAccess {
 			}
 
 		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query " + query, e);
+			
+			String error = Util.getDebugInfoForConsole("Error while executing query " + query, args);			
+			throw new RuntimeException(error, e);
 		}
 
 		return nextValue;

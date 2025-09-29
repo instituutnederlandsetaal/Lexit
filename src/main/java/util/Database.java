@@ -87,7 +87,8 @@ public class Database {
 			this.pc = createPostgresConnectionManager();
 			
 		} catch (IOException e) {
-			throw new RuntimeException("Error while reading the "+co.getDbName()+" properties file", e);
+			String error = Util.getDebugInfoForConsole("Error while reading the "+co.getDbName()+" properties file", new String[] {});
+			throw new RuntimeException(error, e);
 		}
 	};
 	
@@ -158,10 +159,11 @@ public class Database {
 			
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+deleteRecord);
-			throw new RuntimeException("Error while executing query "+deleteRecord+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+deleteRecord+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 	}
@@ -203,10 +205,11 @@ public class Database {
 			
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+deleteRecords);
-			throw new RuntimeException("Error while executing query "+deleteRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+deleteRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 	}
@@ -373,7 +376,8 @@ public class Database {
 				
 			} 
 			catch (Exception e) {
-				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
+				String error = Util.getDebugInfoForConsole("Error while executing query "+getRowNumberQuery, args);
+				throw new RuntimeException(error, e);
 			}
 		}
 		
@@ -503,7 +507,8 @@ public class Database {
 				
 			} 
 			catch (Exception e) {
-				throw new RuntimeException("Error while executing query "+getRowNumberQuery, e);
+				String error = Util.getDebugInfoForConsole("Error while executing query "+getRowNumberQuery, argValues);
+				throw new RuntimeException(error, e);
 			} 
 			
 		}	
@@ -571,7 +576,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getIdQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getIdQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		
@@ -697,7 +703,8 @@ public class Database {
         	}
   	    }
     	catch (Exception e) {
-    		throw new RuntimeException("Error while executing query " + query, e);
+    		String error = Util.getDebugInfoForConsole("Error while executing query " + query, new String[] {columnValueFilter});
+    		throw new RuntimeException(error, e);
     	}
     	
     	return uvo;
@@ -827,7 +834,8 @@ public class Database {
   	      	}
   	    }
     	catch (Exception e) {
-    		throw new RuntimeException("Error while executing query " + query, e);
+    		String error = Util.getDebugInfoForConsole("Error while executing query " + query, columnsValues.toArray(new String[columnsValues.size()]));
+    		throw new RuntimeException(error, e);
     	}
     	
     	return uvo;
@@ -883,7 +891,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecord, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return tro;
@@ -952,7 +961,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecords, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecords, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return tro;
@@ -1029,7 +1039,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecord, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return tro;
@@ -1130,7 +1141,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecord, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return tro;
@@ -1224,9 +1236,10 @@ public class Database {
 			}			
 			
 		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getRecord+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecord+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return tro;
@@ -1269,11 +1282,12 @@ public class Database {
 			dc.sendPreparedUpdate(schema, insertRecords, values, ato, dro);
 			
 		}
-		catch (Exception e) {
-			dro.setResponse("Error while executing query "+insertRecords);
-			throw new RuntimeException("Error while executing query "+insertRecords+" "+
+		catch (Exception e) {			
+			String error = Util.getDebugInfoForConsole("Error while executing query "+insertRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), values);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		} 
 	}
 	/**
@@ -1345,10 +1359,11 @@ public class Database {
 			
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+insertQuery);
-			throw new RuntimeException("Error while executing query "+insertQuery+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+insertQuery+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), rowIds);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 	}
@@ -1456,10 +1471,11 @@ public class Database {
 			
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+insertQuery);
-			throw new RuntimeException("Error while executing query "+insertQuery+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+insertQuery+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), filterValues);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		} 
 		
 	}
@@ -1511,10 +1527,11 @@ public class Database {
 			dro.setResponse(idOfCreatedRecord);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+insertRecords);
-			throw new RuntimeException("Error while executing query "+insertRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+insertRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), values);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		} 
 		
 	};
@@ -1592,10 +1609,11 @@ public class Database {
 			dro.setResponse(idOfCreatedRecord);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+duplicateRecord);
-			throw new RuntimeException("Error while executing query "+duplicateRecord+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+duplicateRecord+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), values);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 	};
@@ -1639,10 +1657,11 @@ public class Database {
 			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+updateRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);			
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 	}
 	
@@ -1683,8 +1702,9 @@ public class Database {
 			dc.sendUpdate(schema, setComment);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+setComment);
-			throw new RuntimeException("Error while executing query "+setComment, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+setComment, new String[] {});			
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 	}
@@ -1730,13 +1750,13 @@ public class Database {
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getIdQuery, args).getRows();
 			
 			res = Util.getResultSetCopyInAList(rs, new String[]{"comment"});
-			if (res.size()>0)
-				{
+			if (res.size()>0) {
 				sTableComment = res.get(0)[0];				
-				}
+			}
 			
 		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getIdQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getIdQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return sTableComment;	
@@ -1828,7 +1848,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+checkExistenceQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+checkExistenceQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		
@@ -1869,7 +1890,8 @@ public class Database {
 			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});
 
 		} catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return result.size() > 0;
@@ -1900,8 +1922,7 @@ public class Database {
 		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
-		for (int i=0; i< columnNames.length; i++)
-		{
+		for (int i=0; i< columnNames.length; i++) {
 			String oneColumn = columnNames[i];
 			columnNames[i] = getSafeFieldName(columnNames[i]);
 			ato.setType(i, getTypeOfColumn(tableName, oneColumn, null));
@@ -1921,10 +1942,10 @@ public class Database {
 			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+updateRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			throw new RuntimeException(error, e);
 		}
 	}
 	
@@ -1990,10 +2011,11 @@ public class Database {
 			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+updateRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 				
 		
@@ -2060,10 +2082,11 @@ public class Database {
 			dc.sendPreparedUpdate(schema, updateRecords, args, ato, dro);
 		}
 		catch (Exception e) {
-			dro.setResponse("Error while executing query "+updateRecords);
-			throw new RuntimeException("Error while executing query "+updateRecords+" "+
+			String error = Util.getDebugInfoForConsole("Error while executing query "+updateRecords+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
-					Util.getFullStackTrace(e), e);
+					Util.getFullStackTrace(e), args);
+			dro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 		
@@ -2132,7 +2155,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query1+" or "+query2, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query1+" or "+query2, new String[] {});
+			throw new RuntimeException(error, e);
 		}
 		
 		return count;		
@@ -2327,8 +2351,10 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, new String[] {schema, schema});
+			throw new RuntimeException(error, e);
 		}
+		
 		
 		return result;
 	}
@@ -2376,7 +2402,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, new String[] {schema});
+			throw new RuntimeException(error, e);
 		}
 		
 		// return one-dimensional array of table names
@@ -3364,10 +3391,9 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{ schema, tableNameOnly };
 		
 		try {
-			
-			String[] args = new String[]{ schema, tableNameOnly };
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, getPK, args).getRows();
 			
@@ -3418,8 +3444,9 @@ public class Database {
 			}
 			
 		} 
-		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+getPK, e);
+		catch (Exception e) {			
+			String error = Util.getDebugInfoForConsole("Error while executing query "+getPK, args);
+			throw new RuntimeException(error, e);
 		} 
 				
 		
@@ -3516,8 +3543,9 @@ public class Database {
 			
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{tableNameOnly, columnName, schema};
+		
 		try {
-			String[] args = new String[]{tableNameOnly, columnName, schema};		
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, typeQuery, args).getRows();
 			
@@ -3536,7 +3564,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+typeQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+typeQuery, args);
+			throw new RuntimeException(error, e);
 		} 
 		
 	
@@ -3600,7 +3629,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+typeQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+typeQuery, Util.concatArr(columns, new String[] {tableNameOnly, schema}) );
+			throw new RuntimeException(error, e);
 		} 
 		
 		
@@ -3668,17 +3698,15 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
+		
 		try {
-			String[] args = new String[]{ schema+"."+getSafeTableNameOnly(tableNameOnly) };
-			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, commentsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"name", "comment"});
 		
-			if (res.size()>0)
-			{
+			if (res.size()>0) {
 				// read the comments assigned to each column
-				for (int i = 0; i<columns.length; i++)
-				{
+				for (int i = 0; i<columns.length; i++) {
 					String columnName =    res.get(i)[0];
 					String columnComment = res.get(i)[1];
 					// get the index of the current column in the 'columns' array,
@@ -3689,7 +3717,8 @@ public class Database {
 			}			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+commentsQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+commentsQuery, args);
+			throw new RuntimeException(error, e);
 		} 
 		
 		
@@ -3746,8 +3775,9 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{functionName, schemaName, numberOfArguments };	
+		
 		try {
-			String[] args = new String[]{functionName, schemaName, numberOfArguments };		
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionDetailsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"argument_types"});
@@ -3764,7 +3794,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+functionDetailsQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 			
@@ -3857,8 +3888,9 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{functionName, functionSchemaName, numberOfArguments, projectSchema};
+		
 		try {
-			String[] args = new String[]{functionName, functionSchemaName, numberOfArguments, projectSchema};		
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"function_operation"});
@@ -3870,7 +3902,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+functionQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+functionQuery, args);
+			throw new RuntimeException(error, e);
 		}
 			
 		if (Constants.debug){
@@ -3928,8 +3961,9 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{functionName, schemaName, numberOfArguments};	
+		
 		try {
-			String[] args = new String[]{functionName, schemaName, numberOfArguments};		
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, functionDetailsQuery, args).getRows();				
 			ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"return_type"});
@@ -3941,7 +3975,8 @@ public class Database {
 			
 		} 
 		catch (Exception e)  {
-			throw new RuntimeException("Error while executing query "+functionDetailsQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+functionDetailsQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 			
@@ -3972,7 +4007,8 @@ public class Database {
 		    }
 			
 		} catch (SQLException e) {
-			throw new RuntimeException("Error while reading column names from ResultSet ", e);
+			String error = Util.getDebugInfoForConsole("Error while reading column names from ResultSet", new String[] {});
+			throw new RuntimeException(error, e);
 		}
 		
 		return columnNames.toArray(new String[columnNames.size()]);
@@ -4016,8 +4052,9 @@ public class Database {
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		String[] args = new String[]{tableNameOnly, schema}; 
+		
 		try {
-			String[] args = new String[]{tableNameOnly, schema}; 
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, columnQuery, args).getRows();
 			
@@ -4032,7 +4069,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+columnQuery, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+columnQuery, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		// store the column names for caching (speed improvement)
@@ -4075,7 +4113,8 @@ public class Database {
 			
 		} 
 		catch (Exception e)  {
-			throw new RuntimeException("Error while executing query "+query, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return nameOfCustomType;
@@ -4115,7 +4154,8 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			throw new RuntimeException("Error while executing query "+query, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, args);
+			throw new RuntimeException(error, e);
 		}
 		
 		return values;
@@ -4667,7 +4707,8 @@ public class Database {
 			bufferedStream.reset(); // Reset the stream to the beginning
 		}
 		catch (Exception e){
-			throw new RuntimeException("Error while converting file into table ", e);
+			String error = Util.getDebugInfoForConsole("Error while converting file into table", new String[] {});
+			throw new RuntimeException(error, e);
 		}
 		System.out.println("Opened an "+fileType.toUpperCase()+" file with "+ (encoding != null ? encoding : "DEFAULT (UTF-8)")+" encoding.");
 		if (encoding == null) { encoding = "UTF-8"; }
@@ -4707,7 +4748,8 @@ public class Database {
 						.build();
 			}
 			catch (Exception e) {
-				throw new RuntimeException("Error while creating CSVReader", e);
+				String error = Util.getDebugInfoForConsole("Error while creating CSVReader", new String[] {});
+				throw new RuntimeException(error, e);
 			}
 
 
@@ -4759,7 +4801,8 @@ public class Database {
                         	dc.sendUpdate(currentSchema, addUploadedCommentQuery);
                         } 
                         catch (Exception e) {
-                            throw new RuntimeException("Error while executing query "+createTableQuery + "\n" + addUploadedCommentQuery, e);
+                            String error = Util.getDebugInfoForConsole("Error while executing query "+createTableQuery + "\n" + addUploadedCommentQuery, new String[] {});
+                            throw new RuntimeException(error, e);
                         }
 
 
@@ -4785,7 +4828,8 @@ public class Database {
 
                         }
                         catch (Exception e) {
-                            throw new RuntimeException("Error while executing query "+insertQuery, e);
+                            String error = Util.getDebugInfoForConsole("Error while executing query "+insertQuery, oneRow);
+                            throw new RuntimeException(error, e);
                         }
                     }
 
@@ -4794,13 +4838,15 @@ public class Database {
 				}
 			}
 			catch (Exception e) {
-				throw new RuntimeException("Error while reading "+fileType.toUpperCase()+" file", e);
+				String error = Util.getDebugInfoForConsole("Error while reading "+fileType.toUpperCase()+" file", new String[] {});
+				throw new RuntimeException(error, e);
 			}
 
 
 		}
 		catch (Exception e){
-			throw new RuntimeException("Error while converting file into table ", e);
+			String error = Util.getDebugInfoForConsole("Error while converting file into table", new String[] {});
+			throw new RuntimeException(error, e);
 			//ro.setResponse("Error while converting file into table ");
 		}
 
@@ -4850,8 +4896,8 @@ public class Database {
 				}
 
 			} catch (Exception e) {
-
-				throw new RuntimeException("Error while instantiating wb ", e);
+				String error = Util.getDebugInfoForConsole("Error while instantiating wb", new String[] {});
+				throw new RuntimeException(error, e);
 			}
 
 
@@ -4988,7 +5034,8 @@ public class Database {
 					dc.sendUpdate(currentSchema, addUploadedCommentQuery);
 				} 
 				catch (Exception e) {
-					throw new RuntimeException("Error while executing query " + createTableQuery + "\n" + addUploadedCommentQuery, e);
+					String error = Util.getDebugInfoForConsole("Error while executing query " + createTableQuery + "\n" + addUploadedCommentQuery, new String[] {});
+					throw new RuntimeException(error, e);
 				}
 
 
@@ -5031,7 +5078,8 @@ public class Database {
 							dc.sendPreparedUpdate(currentSchema, insertQuery, values.toArray(new String[values.size()]), ato, new DbResponseObject());
 						} 
 						catch (Exception e) {
-							throw new RuntimeException("Error while executing query "+insertQuery, e);
+							String error = Util.getDebugInfoForConsole("Error while executing query "+insertQuery, values.toArray(new String[values.size()]));
+							throw new RuntimeException(error, e);
 						}
 						
 
@@ -5107,8 +5155,9 @@ public class Database {
 			ro.setResponse("OK");
 		} 
 		catch (Exception e) {
-			ro.setResponse("Error! Couln't remove table '"+tableName+"'.");
-			throw new RuntimeException("Error while executing query "+dropTableIfExists, e);
+			String error = Util.getDebugInfoForConsole("Error while executing query "+dropTableIfExists, new String[] {tableName});
+			ro.setResponse(error);
+			throw new RuntimeException(error, e);
 		}
 		
 		return ro;

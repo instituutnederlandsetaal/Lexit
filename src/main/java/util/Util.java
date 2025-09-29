@@ -7,6 +7,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -99,6 +101,19 @@ public class Util {
 	    PrintWriter pw = new PrintWriter(sw);
 	    e.printStackTrace(pw);
 	    return sw.toString();
+	}
+	
+	public static String getDebugInfoForConsole(String errMessage, String[] args) {
+		
+		if (args == null) args = new String[] {""}; // to avoid null pointer exception
+		
+		LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
+        String formattedDateAndTime = now.format(formatter);
+		
+		String debugInfoForConsole = "Lex'it debug info | " + formattedDateAndTime + " | "+ errMessage + " | args: ["+Util.join(args, "] | [")+"]";		
+		
+		return debugInfoForConsole;
 	}
 
 	
