@@ -1168,6 +1168,7 @@ fn.callDatabaseInNewTab = function(sSomeTablename, aContentToMatch, oExtraSettin
 	var sBaseUrl = fn._getBaseUrl();
 	var hParams = lexutil.getHttpParams();
 	var sDb = sProjectName == null ? hParams.get("db") : sProjectName;
+	var bTest = hParams.get("test");
 	var sUrl = sBaseUrl+"?db="+sDb+"&table="+sSomeTablename;
 	
 	for (var sOneKey in aContentToMatch) {
@@ -1176,8 +1177,14 @@ fn.callDatabaseInNewTab = function(sSomeTablename, aContentToMatch, oExtraSettin
 	for (var sOneKey in oExtraSettings) {
 		sUrl += "&"+"setting."+sOneKey+"="+oExtraSettings[sOneKey];
 	}
+	// if test mode was on in current window, keep it on in new window
+	if (bTest!=null){
+		sUrl += "&test="+bTest;
+	}
 	window.open( encodeURI(sUrl), '_blank');
 };
+
+
 
 /**
  * Synonym of fn.callDatabaseInNewTab
