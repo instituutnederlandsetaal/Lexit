@@ -183,7 +183,7 @@ public class PostgresConnectionManager {
 	/**
 	 * Get a connection from the pool
 	 * 
-	 * @return
+	 * @return Connection
 	 */
 	private Connection getConnectionFromPool() {
 		
@@ -235,18 +235,16 @@ public class PostgresConnectionManager {
 	 * Send the username and session id to the database server
 	 * (to be stored in a temporary table in the session) 
 	 * 
-	 * @param conn
+	 * @param Connection
 	 */
 	private void sendUserIdentityToDatabaseServer(Connection conn){
 		
-		
-		
-		// if the configuration tells us to send the tomcat username
+		// if the configuration tells us to send the username
 		// to the database server
 		// AND
 		// it hasn't been done yet, then:
 		//
-		// create a temporary table in which the tomcat username will be put,
+		// create a temporary table in which the username will be put,
 		// and call this table 'active_user';
 		// this temporary table is only visible within the user's session,
 		// so multiple active users will have their name stored in as many 
@@ -255,29 +253,28 @@ public class PostgresConnectionManager {
 		//
 		// The active username stored in the 'active_user' temporary table 
 		// can be read by trigger functions etc, by reading the 'username' field
-		// from the temporary table.
-		
+		// from this 'active_user' temporary table.		
 		
 		
 		if ( this.sendUserInfoToDb && this.co != null ) {	
 				
-				Statement stmt = null;
-				String query1 = "DROP TABLE IF EXISTS active_user;";
-				String query2 = "CREATE TEMPORARY TABLE active_user AS "+
-					"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
+			Statement stmt = null;
+			String query1 = "DROP TABLE IF EXISTS active_user;";
+			String query2 = "CREATE TEMPORARY TABLE active_user AS "+
+				"SELECT '"+ this.co.getUsername() +"'::text AS username, '"+ this.co.getSessionId() +"'::text AS session_id, '"+this.co.getActiveTabId() + "'::text AS active_tab_id;";
+			
+			
+			try {
+				// Create a Statement object
+				stmt = conn.createStatement();
+				stmt.executeUpdate(query1);
+				stmt.executeUpdate(query2);
 				
-				
-				try {
-					// Create a Statement object
-					stmt = conn.createStatement();
-					stmt.executeUpdate(query1);
-					stmt.executeUpdate(query2);
-					
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}								
-			}	
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}								
+		}	
 		
 	}
 	
@@ -313,7 +310,7 @@ public class PostgresConnectionManager {
 	 * Send a query with a time limit
 	 * @param query
 	 * @param timeLimitInMilliseconds
-	 * @return
+	 * @return ResultSetSnapshot
 	 */
 	public ResultSetSnapshot sendQuery(String schema, String query, int timeLimitInMilliseconds) {
 		
@@ -424,6 +421,11 @@ public class PostgresConnectionManager {
 		return rsCopy;
 	}
 
+	/**
+	 * Send a plain update query (no prepared statement)
+	 * 
+	 * @param query
+	 */
 	public void sendUpdate(String schema, String query) {
 		
 		if (Constants.debug) System.out.println(query);
@@ -451,6 +453,13 @@ public class PostgresConnectionManager {
 	}
 	
 	
+	/**
+	 * Send a prepared query
+	 * @param schema
+	 * @param query
+	 * @param args
+	 * @return ResultSetSnapshot
+	 */
 	public ResultSetSnapshot sendPreparedQuery(String schema, String query, String[] args) {
 		
 		// if the query args contains null values,
@@ -510,6 +519,15 @@ public class PostgresConnectionManager {
 		return rsCopy;
 	}
 	
+	/**
+	 * Send a prepared query with a time limit
+	 * @param schema
+	 * @param query
+	 * @param args
+	 * @param ato
+	 * @param timeLimitInMilliseconds
+	 * @return ResultSetSnapshot
+	 */
 	public ResultSetSnapshot sendPreparedQuery(String schema, String query, String[] args, ArgumentTypesObject ato, int timeLimitInMilliseconds) {
 		
 		// if the query args contains null values,
@@ -738,6 +756,14 @@ public class PostgresConnectionManager {
 		return rsCopy;
 	}
 	
+	/**
+	 * Send a prepared update query
+	 * @param schema
+	 * @param query
+	 * @param args
+	 * @param ato
+	 * @param dro
+	 */
 	public void sendPreparedUpdate(String schema, String query, String[] args, ArgumentTypesObject ato, DbResponseObject dro) {
 		
 		// if the query args contains null values,
@@ -899,10 +925,11 @@ public class PostgresConnectionManager {
 	
 	
 	/**
-	 * Somehow prepared statements don't work with " IS ? "
-	 * so in this special case, we need to replace the question mark by its value in the query
-	 * @param query
-	 * @param args
+	 * Rewrite the query if its args list contains null values:
+	 * Somehow prepared statements don't work with " IS ? ", with '?' standing for a NULL value.  
+	 * So in this special case, we need to replace the question mark by its value in the query
+	 * @param QueryObject
+	 * @return QueryObject
 	 */
 	private QueryObject rebuildQueryIfArgListContainsNullValues(QueryObject qo){
 				
@@ -962,10 +989,11 @@ public class PostgresConnectionManager {
 	
 	
 	/**
-	 * Change  [~* 'exact:word'] into  [= 'word']
-	 * This is convenient because = is much faster than ~* 
-	 * @param qo
-	 * @return
+	 * Rewrite a query if it contains an argument of the form 'exact:word':
+	 * this changes  [~* 'exact:word'] into  [= 'word']
+	 * which is convenient because '=' is much faster than '~*' 
+	 * @param QueryObject
+	 * @return QueryObject
 	 */
 	private QueryObject rebuildQueryIfArgRequiresStrictEquality(QueryObject qo){
 		
@@ -1074,11 +1102,15 @@ public class PostgresConnectionManager {
 	
 	
 	
-	/**
-	 * check which kind of data type we have
-	 */
+	// ------------------------------------------------
+	// Check which kind of data type we have
+	// ------------------------------------------------
 	
-	// do we have a textual type?
+	/**
+	 * Do we have a textual type?
+	 * @param data type name
+	 * @return true/false
+	 */
 	public static boolean isTextualType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-character.html
@@ -1090,12 +1122,21 @@ public class PostgresConnectionManager {
 	};
 	
 	
-	// do we have a numeric type?
-	
+	/**
+	 * Do we have a numeric type?
+	 * @param data type name
+	 * @return true/false
+	 */
 	public static boolean isNumericTypeOfSomeKind(String typeName){
 		return ( isWholeNumberType(typeName) || isRealNumberType(typeName) || isBigWholeNumberType(typeName) ); 
 	}
 	
+	/**
+	 * Do we have a whole number type?
+	 * 
+	 * @param data type name
+	 * @return true/false
+	 */
 	public static boolean isWholeNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
@@ -1106,6 +1147,11 @@ public class PostgresConnectionManager {
 			typeName.startsWith("numeric");
 	};
 	
+	/**
+	 * Do we have a big whole number type?
+	 * @param data type name
+	 * @return true/false
+	 */
 	public static boolean isBigWholeNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
@@ -1114,6 +1160,11 @@ public class PostgresConnectionManager {
 	};
 	
 	
+	/**
+	 * Do we have a real number type?
+	 * @param data type name
+	 * @return true/false
+	 */
 	public static boolean isRealNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
@@ -1122,6 +1173,11 @@ public class PostgresConnectionManager {
 			typeName.startsWith("double precision"); 
 	}
 	
+	/**
+	 * Remove the decimal part of a number if it is there
+	 * @param number as a String
+	 * @return number as a String, without decimal part
+	 */
 	public String getRidOfDecimal(String number){
 		if (number.indexOf(".")<0) return number;
         return number.replaceAll("\\.[0-9]+$", "");

@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A utility class to create a snapshot of a ResultSet.
- * This is needed because ResultSet objects get removed as soon as the connection is closed,
- * whereas we want to keep the data for later use, so that is copied into a ResultSetSnapshot.
+ * Utility class to create a snapshot of a ResultSet.
+ * This is needed because ResultSet objects get removed as soon as the database connection is closed,
+ * while we want to keep the data for later use. 
+ * This is why that is now copied into a ResultSetSnapshot.
  */
 public class ResultSetSnapshot {
 	
@@ -39,8 +40,9 @@ public class ResultSetSnapshot {
     /**
      * Constructor
      * 
-     * @param metadata
-     * @param rows
+     * @param list of columns metadata
+     * @param list of column names
+     * @param rows (list of maps, with each map being a row, associating column names to column values)
      */
     public ResultSetSnapshot(List<ColumnMeta> metadata, List<String> columns, List<Map<String, Object>> rows) {
         this.metadata = metadata;
@@ -50,9 +52,9 @@ public class ResultSetSnapshot {
 
     
     /**
-     * Make a copy of a ResultSet in a ResultSetSnapshot.
+     * Make a copy of a ResultSet into a ResultSetSnapshot.
      * 
-     * @param rs
+     * @param a ResultSet
      * @return ResultSetSnapshot
      * @throws SQLException
      */
@@ -81,7 +83,8 @@ public class ResultSetSnapshot {
             columns.add(meta.getColumnLabel(i));
         }
 
-        // get the data as a list
+        // get the data as a list of maps (column name -> column value),
+        // with one map per row
         
         List<Map<String, Object>> rows = new ArrayList<>();
         while (rs.next()) {
@@ -96,16 +99,30 @@ public class ResultSetSnapshot {
     }
     
     
+    // -------------
     // getters
+    // -------------
     
+    /**
+     * Get the list of rows, each row being a map of column name to column value.
+     * @return list of maps
+     */
     public List<Map<String, Object>> getRows(){
     	return this.rows;
     }
     
+    /**
+     * Get the list of column names.
+     * @return list of string
+     */
     public List<String> getColumnNames() {
     	return this.columns;
     }
     
+    /**
+     * Get the full metadata of the columns (name, type, etc.)
+     * @return list of ColumnMeta objects
+     */
     public List<ColumnMeta> getMetadata() {
     	return this.metadata;
     }

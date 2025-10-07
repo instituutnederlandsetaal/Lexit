@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.09.30
+	v2025.10.07
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -583,7 +583,7 @@
 					"dummy": getUniqueNumber()
 				},
 				"success": function(){
-
+					
 					// The ajax call gets the list of declared projects out of the projects overview file.
 					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
 					// In the end, this function will call initialize();
@@ -941,6 +941,24 @@
 					
 				} 
 				
+				// if the database configuration file is missing
+				else if (jqxhr.responseText.indexOf("Error while reading") >= 0 && jqxhr.responseText.indexOf(".database") >= 0) {
+					
+					// use timeout to allow all error messages to be shown:
+					// we will then close all dialogs
+					// and given one single USEFUL message to the user
+					
+					setTimeout(function(){
+						
+						fn.closeDialog();
+						fn.message(lang.error, (lang.error_database_configfile_missing).replace(/FILENAME/g, paramsHash.get("db")),
+							function () {
+								lexitReload();
+							}
+						);
+					}, 1000);
+				}
+				
 				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
 				// so we reload the page, which will trigger the user to log in again
 				else if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
@@ -974,6 +992,14 @@
 			initialize();
 		}
 		else {
+			
+			// within this function, the aProjectList variable is supposed to be filled already
+			// so if it isn't, something is wrong
+			if (aProjectList == null || aProjectList.length == 0){				
+				fn.message(lang.error, lang.loading_projects_list_failed);
+				return;
+			}
+				
 
 			// this might take a while, so put spinner
 			lexutil.showSpinner("#dynamic", true);

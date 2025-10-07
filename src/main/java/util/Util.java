@@ -77,23 +77,21 @@ public class Util {
 	
 	public static void debug(String output){
 		
-		if (Constants.debug) 
-			{
+		if (Constants.debug)  {
 			System.out.println("--- "+getTime());			
 			System.out.println(output);
-			}
+		}
 	}
 	
 	public static void debug(ContextObject co, String output){
 		
-		if (Constants.debug) 
-			{
+		if (Constants.debug) {
 			System.out.println("--- "+getTime());
 			System.out.print("DB: "+co.getDbName());
 			System.out.print("  ");
 			System.out.println("USER: "+co.getUsername());
 			System.out.println(output);
-			}
+		}
 	}
 	
 	public static String getFullStackTrace(Throwable e) {
@@ -103,6 +101,13 @@ public class Util {
 	    return sw.toString();
 	}
 	
+	/**
+	 * Get debug info for console output. This function adds a timestamp too, which is often lacking in Tomcat logs.
+	 * 
+	 * @param some error message
+	 * @param some parameters (the args of the entry point or so)
+	 * @return String with debug info
+	 */
 	public static String getDebugInfoForConsole(String errMessage, String[] args) {
 		
 		if (args == null) args = new String[] {""}; // to avoid null pointer exception
@@ -124,8 +129,12 @@ public class Util {
 	// ******************************************************************
 	
 	
-	// read a file
-	
+	/**
+	 * Read a file
+	 * 	
+	 * @param filename
+	 * @return the file contents as a string
+	 */
 	public static String readFile(String filename){
 		
 		StringBuilder sb = new StringBuilder();
@@ -143,138 +152,24 @@ public class Util {
 			in.close();
 		}
 		catch (Exception e){
-			throw new RuntimeException("Error while reading the "+filename+" properties file", e);
+			throw new RuntimeException("Error while reading the "+filename+" file", e);
 		}
 		
 		return sb.toString();		
 	}
 	
 	
-	// read a Excel file
-	//
-	// https://stackoverflow.com/questions/1516144/how-to-read-and-write-excel-file
-//	public static void readXlFile(String dbName, InputStream inputStream){
-//
-//
-//		try {
-//		    POIFSFileSystem fs = new POIFSFileSystem( inputStream );
-//		    HSSFWorkbook wb = new HSSFWorkbook(fs);
-//		    HSSFSheet sheet = wb.getSheetAt(0);
-//
-//			// the sheet name will be our table name
-//			String sheetName = wb.getSheetName(0);
-//
-//
-//
-//
-//		    HSSFRow row;
-//		    HSSFCell cell;
-//
-//		    int rows; // No of rows
-//		    rows = sheet.getPhysicalNumberOfRows();
-//
-//		    int cols = 0; // No of columns
-//		    int tmp = 0;
-//
-//		    // This trick ensures that we get the data properly even if it doesn't start from first few rows
-//		    for(int i = 0; i < 10 || i < rows; i++) {
-//		        row = sheet.getRow(i);
-//		        if(row != null) {
-//		            tmp = sheet.getRow(i).getPhysicalNumberOfCells();
-//		            if(tmp > cols) cols = tmp;
-//		        }
-//		    }
-//
-//		    for(int r = 0; r < rows; r++) {
-//		        row = sheet.getRow(r);
-//		        if(row != null) {
-//		            for(int c = 0; c < cols; c++) {
-//		                cell = row.getCell((short)c);
-//		                if(cell != null) {
-//
-//		                    // code what needs to be done here!!!
-//
-//		                }
-//		            }
-//		        }
-//		    }
-//		} catch(Exception ioe) {
-//		    ioe.printStackTrace();
-//		}
-//	}
-	
-	// write a Excel file
-	// see: http://poi.apache.org/components/spreadsheet/quick-guide.html#NewWorkbook
-//	public static void writeXlFile(String filepath, String tableName, ResultObject tableObject ){
-//		
-//		// get table content
-//		ArrayList<ConcurrentHashMap<String, String>> tableContent = tableObject.getTableContent();
-//		
-//		// number of rows, etc.
-//		int nrOfRows = tableContent.size();
-//		// build list of column names and their corresponding column number
-//		ConcurrentHashMap<String, Integer> fieldName2ColumnNr = new ConcurrentHashMap<String, Integer>();
-//		if (nrOfRows > 0)
-//		{
-//			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(0);
-//			for (String key : tableObjectRow.keySet())
-//			{
-//				int columnNr = fieldName2ColumnNr.size();
-//				fieldName2ColumnNr.put(key, columnNr);
-//			}
-//		}
-//		else
-//		{
-//			// if the table object is empty, do nothing
-//			return;
-//		}
-//		
-//		
-//		// Blank XL workbook
-//		HSSFWorkbook workbook = new HSSFWorkbook();
-//
-//	    // Create a blank sheet
-//		// (Safe way to create valid names, this replaces invalid characters with a space)
-//		String safeName = WorkbookUtil.createSafeSheetName(tableName); 
-//		Sheet sheet = workbook.createSheet(safeName);
-//		
-//		// Fill the XL workbook
-//		
-//		// column names at row #0
-//		Row row = sheet.createRow(0);
-//		for (String columnName : fieldName2ColumnNr.keySet())
-//		{
-//			int columnNr = fieldName2ColumnNr.get(columnName);
-//			row.createCell(columnNr).setCellValue(columnName);
-//		}
-//		// fill the table from row #1 on 
-//		for (int i=0; i<nrOfRows; i++)
-//		{
-//			ConcurrentHashMap<String, String> tableObjectRow = tableContent.get(i);
-//			row = sheet.createRow(i+1);  // row #0 is reserved for cell names, so we start counting at row #1
-//			for (String columnName : tableObjectRow.keySet())
-//			{
-//				int columnNr = fieldName2ColumnNr.get(columnName);
-//				String cellContent = tableObjectRow.get(columnName);
-//				row.createCell(columnNr).setCellValue(cellContent);				 
-//			}
-//			 
-//		}
-//		
-//		try (OutputStream fileOut = new FileOutputStream(filepath)) {
-//			
-//			workbook.write(fileOut);
-//			
-//	    } catch (IOException e) {
-//	    	throw new RuntimeException("Error while building the export file: "+filepath, e);
-//		}
-//	}
 	
 	
 	
-	
-	// read a properties file
-	
+	/**
+	 * Read a properties file 
+	 * and put the properties in the hash given as argument
+	 * 	
+	 * @param filename
+	 * @param the hash to put the properties in
+	 * @return the hash with the properties added (host, port, db, user, pass)
+	 */
 	public static ConcurrentHashMap<String, String> readPropertiesFile(
 			String filename, 
 			ConcurrentHashMap<String, String> databaseAccessHash){
@@ -305,8 +200,13 @@ public class Util {
 	}
 	
 	
-	// special version needed for get_configfiles_list
-	//
+	
+	/**
+	 * Special version of readPropertiesFile() needed for 'get_configfiles_list' entry point
+	 * 
+	 * @param filename
+	 * @return a hash with login info (host, port, db, user, pass)
+	 */
 	public static ConcurrentHashMap<String, String> readPropertiesFile(String filename){
 		
 		ConcurrentHashMap<String, String> logInfo = new ConcurrentHashMap<String, String>();
@@ -338,8 +238,13 @@ public class Util {
 	
 	
 	
-	// get list of files
 	
+	/**
+	 * Get list of files
+	 * 
+	 * @param path to the configuration file
+	 * @return a string with the list of files separated by Constants.ARG_INTERNAL_SEPARATOR
+	 */
 	public static String getListOfFiles(String path){
 		
 		File folder = new File(path);
@@ -401,7 +306,13 @@ public class Util {
 		return Util.join(sortedList, Constants.ARG_INTERNAL_SEPARATOR);		
 	}
 	
-	// check if a database is available
+	
+	/**
+	 * Check if a database is available by trying to connect to it
+	 * 
+	 * @param path to the configuration file
+	 * @return true/false
+	 */
 	private static boolean checkIfDbExists(String path) {
 		
 		String projectName = path.substring(path.lastIndexOf(File.separatorChar)+1);
@@ -431,24 +342,48 @@ public class Util {
 	// ******************************************************************
 
 	
-	// trim function that can cope with no-breaking space
+	/**
+	 * Trim function that can cope with no-breaking space
+	 * 
+	 * @param a string
+	 * @return trimmed string
+	 */
 	public static String powerTrim(String str){
 		return str.replace(String.valueOf((char) 160), " ").trim();
 	}
 	
-	// put escape before characters that need to be escaped
+	/**
+	 * Put escape before characters that need to be escaped
+	 * 
+	 * @param a string
+	 * @return the string with escape characters added
+	 */
 	public static String prepareStringForRegexMatching(String str){
 		return str.replaceAll("(\\(|\\)|\\-|\\*|\\+|\\?)", "\\\\$1");
 	}
 	
-	// check if a string contains some letters, including russian
+	// 
 	//
-	// but this might be better: value.matches(".*(\\p{L}+).*")
+	// 
+	
+	/**
+	 * Check if a string contains some letters, including Russian ones
+	 * [ but this might be better: value.matches(".*(\\p{L}+).*") ]
+	 * 
+	 * @param a string
+	 * @return true/false
+	 */
 	public static boolean containsSomeLetters(String value){
 		if (value == null) return false;
 		return value.matches(".*([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ\u0400-\u04FF]+).*");
 	}
 	
+	/**
+	 * Check if a string is a genuine word, including European or Russian letters
+	 * 
+	 * @param a string
+	 * @return true/false
+	 */
 	public static boolean isGenuineWord(String value){
 		if (value == null) return false;
 		return value.matches("^([a-zA-ZáéíóúýàèìòùâêîôûäëïöüÿñçÁÉÍÓÚÝÀÈÌÒÙÂÊÎÔÛÄËÏÖÜ\u0400-\u04FF]+)$");
@@ -463,11 +398,13 @@ public class Util {
 	// ******************************************************************
 	
 	/**
-	 * Returns a string like ?,?,?,...,?,?
-	 * needed for prepared updates.
-	 * The number of question marks depends on the number
-	 * of values to be represented
-	 * @param ref
+	 * Take an array of parameters for a prepared statement
+	 * and convert it into a string like ?,?,?,...,?,?
+	 * in which the number of question marks matches the number of parameters.
+	 * This is to be used in INSERT statements or in clauses like 'WHERE x IN (?,?,?,...)' etc.
+	 * 
+	 * @param an array of parameters
+	 * @return a string with question marks separated by commas
 	 */
 	public static String getStringOfQuestionMarks(String[] ref){
 		StringBuilder builder = new StringBuilder();
@@ -481,22 +418,23 @@ public class Util {
 
 
 	/**
-	 * In cases working with prepared statements is not convenient
-	 * We can check some list of args for semicolons and cut off
-	 * the string if it contains suspicious sql commands (prevent sql-injection)
+	 * When working with prepared statements is not convenient,
+	 * we can check some list of args for semicolons and 
+	 * cut off the string if it contains suspicious SQL commands 
+	 * (t.i. prevent SQL-injection)
+	 * 
 	 * @param args
 	 * @return
 	 */
 	public static String[] removeSuspiciousSql(String[] args){
 		
-		for (int i=0; i<args.length; i++)
-		{
+		for (int i=0; i<args.length; i++) {
+			
 			int index = args[i].indexOf(";");
 			boolean suspicious = false;
 			
 			// check if the string is really suspicious
-			if (index>-1)
-			{
+			if (index>-1) {
 				String stringToDoubleCheck = args[i].substring(index).toLowerCase();
 				suspicious = 
 					stringToDoubleCheck.indexOf("drop ")>-1 ||
@@ -512,33 +450,6 @@ public class Util {
 	
 	
 	
-
-	
-//	/**
-//	 * Transform the XML we got from the GTB or ANW webservices into a DOM object
-//	 * @param xmlString
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public static Document getDOMfrom(String xmlString) throws Exception{
-//		
-//	    //Create blank DOM Document
-//	    Document doc = null;
-//	        
-//		try {
-//			doc = XmlUtil.parseXml(xmlString);
-//			
-//		} catch (SAXException e) {
-//			// TODO Auto-generated catch block
-//			throw new RuntimeException(e);
-//		}
-//		
-//		return doc;
-//	}
-//	
-	
-	
-	
 	
 		
 	
@@ -547,21 +458,30 @@ public class Util {
 	// NUMBERS
 	// ******************************************************************
 	
-	// test if a string is a number
-
+	
+	/**
+	 * Test if a string is a integer
+	 * 
+	 * @param string
+	 * @return true/false
+	 */
 	public static boolean isInteger(String s) {
 		try {
 			Integer.parseInt(s);
 		}
 		catch (NumberFormatException e) {
 			return false;
-			}
-		return true;
 		}
+		return true;
+	}
 	
-
-	public static boolean isNumeric(String str)
-	{
+	/**
+	 * Test if a string is numeric (integer or decimal)
+	 * 
+	 * @param string
+	 * @return true/false
+	 */
+	public static boolean isNumeric(String str) {
 	  return str.matches("-?\\d+(.\\d+)?");
 	}
 	
@@ -571,7 +491,13 @@ public class Util {
 	// ******************************************************************
 	
 	
-	// get string into hash
+	/**
+	 * Get string (URL parameters or so) into a hash
+	 * 
+	 * @param string representation of key-value pairs
+	 * @param separator
+	 * @return hash containing the parsed parameter pairs
+	 */
 	public static ConcurrentHashMap<String, String> getHashFromString(String strRepresentation, String separator){
 		
 		ConcurrentHashMap<String, String> converted = new ConcurrentHashMap<String, String>();
@@ -587,7 +513,13 @@ public class Util {
 		return converted;
 	}
 	
-	// get hash into string
+	/**
+	 * Get hash into string (URL parameters or so)
+	 * 
+	 * @param hash representation
+	 * @param separator
+	 * @return string with concatenated key-value pairs
+	 */
 	public static String getStringFromHash(ConcurrentHashMap<String, String> hashRepresentation, String separator) {
 		
 		ArrayList<String> aConverted = new ArrayList<String>(); 
@@ -602,8 +534,14 @@ public class Util {
 	}
 	
 	
-	// concat two arrays
 	
+	/**
+	 * Concatenate two arrays
+	 * 
+	 * @param first array
+	 * @param second array
+	 * @return concatenated array
+	 */
 	public static String[] concatArr(String[] first, String[] second) {
 		if (first==null && second==null) return null;
 		else if (first==null) return second;
@@ -616,8 +554,12 @@ public class Util {
 	}
 	
 	
-	// clone an array
-	
+	/**
+	 * Clone an array
+	 * 
+	 * @param some array
+	 * @return the cloned array
+	 */
 	public static String[] cloneArr(String[] someArray){
 		List<String> newArr = new ArrayList<String>(someArray.length);
 	    Collections.addAll(newArr, someArray);
@@ -625,9 +567,15 @@ public class Util {
 	}
 	
 	
-	// remove element from array
-	// (Improved version of https://stackoverflow.com/questions/642897/removing-an-element-from-an-array-java)
 	
+	/**
+	 * Remove an element from an array
+	 * (Improved version of https://stackoverflow.com/questions/642897/removing-an-element-from-an-array-java)
+	 * 
+	 * @param input array
+	 * @param string element to be deleted
+	 * @return new array without the element
+	 */
 	public static String[] removeElement(String[] input, String deleteMe) {
 	    List<String> result = new LinkedList<String>();
 
@@ -640,13 +588,11 @@ public class Util {
 	
 	
 	/**
-	 * Join methods
-	 * @param s  a collection
-	 * @param delimiter
-	 * @return a string, separated with given delimiter
+	 * Join method
+	 * @param a collection
+	 * @param a delimiter
+	 * @return a string, separated with the given delimiter
 	 */
-
-	// special case which is not handled by Iterable version from InlJavaLib
 	public static String join(String[] s, String delimiter){
 		StringBuilder sb = new StringBuilder();
 		
@@ -671,7 +617,15 @@ public class Util {
 		return sb.toString();
 	}
 	
-	// extension of InlJavaLib version with quote sign
+	/**
+	 * Extension of InlJavaLib version with quote sign
+	 * 
+	 * @param <T>
+	 * @param s
+	 * @param delimiter
+	 * @param quoteSign
+	 * @return
+	 */
 	public static <T> String join(Iterable<T> s, String delimiter, String quoteSign){
 		
 		StringBuilder builder = new StringBuilder();
@@ -690,7 +644,13 @@ public class Util {
 		return builder.toString();
 	}
 	
-	// get the index of an element in an array
+	/**
+	 * Get the index of an element in an array
+	 * 
+	 * @param one value
+	 * @param an array
+	 * @return the index of the value in the array, or -1 if not found
+	 */
 	public static Integer getIndexOf(String oneValue, String[] values){
 		
 		for (int i=0; i<values.length; i++)
@@ -705,11 +665,13 @@ public class Util {
 	
 	
 	/**
-	 * Split string into an array, especially when members contains (misleading) commas
+	 * Split a string into an array. 
+	 * This function is meant to parse strings containing numbers in a reliable way 
+	 * (this is needed since members might contain misleading commas).
 	 * 
-	 * @param str
+	 * @param a string to be split
 	 * @param separator
-	 * @return
+	 * @return an array of strings
 	 */
 	public static String[] splitString(String str, String separator) {
 		
@@ -762,8 +724,47 @@ public class Util {
 	// ******************************************************************
 	
 	/**
-	 * get the results of a query in a List
+	 * Since the sendPreparedQuery() function now returns a ResultSnapshot instead of a ResultSet (see explanation in ResultSetSnapshot.java),
+	 * we have to convert the rows of a ResultSnapshot into a List of String arrays,
+	 * which is what most functions expect as input.
+	 * 
+	 * @param list of maps (each map being a row, with column name-value pairs)
+	 * @param list of column names
+	 * @return list of string arrays (each array being a row)
+	 * 
+	 * @throws UnsupportedEncodingException
+	 * @throws SQLException
+	 */
+	public static ArrayList<String[]> getResultSetCopyInAList(List<Map<String, Object>> data, String[] fieldnames) throws UnsupportedEncodingException, SQLException{
+		
+		ArrayList<String[]> output = new ArrayList<String[]>();
+		
+		if (data == null) {
+			return output;
+		}
+		
+		for (Map<String, Object> row : data) {
+			
+			String[] fieldvalues = new String[fieldnames.length];
+			for (int i=0; i<fieldnames.length; i++) {
+				String fieldname = fieldnames[i];
+				Object fieldvalue = row.get(fieldname);
+				fieldvalues[i] = (fieldvalue != null ? fieldvalue.toString() : "");				
+			}
+			output.add(fieldvalues);
+
+		}
+		return output;
+	}
+	
+	
+	/**
+	 * Get the results of a query into a List
 	 * each record is an array in that list
+	 * 
+	 * NOTE This function might be deprecated, since we are now using ResultSnapshots instead of ResultSets (see explanation in ResultSetSnapshot.java).
+	 * 
+	 * @deprecated
 	 * @param rs
 	 * @param velden
 	 * @return
@@ -778,25 +779,20 @@ public class Util {
 			return lijst;
 		}
 		
-		try 
-		{
-			try
-			{
-				while (rs.next())
-				{
+		try  {
+			try {
+				while (rs.next()) {
+					
 					String[] veldInhoud = new String[velden.length];
-					for (int i=0; i<velden.length; i++)
-					{
+					for (int i=0; i<velden.length; i++) {
 						String veld = velden[i];						
 						
 						byte[] col = rs.getBytes(veld);
-						if (col != null)
-						{
+						if (col != null) {
 							String str = new String(col, "UTF-8");
 							veldInhoud[i] = str; 
 						}
-						else
-						{
+						else {
 							veldInhoud[i] = "";
 						}
 						
@@ -816,6 +812,16 @@ public class Util {
 		
 	}
 	
+	/**
+	 * Get the results of a query into a List of ArrayLists
+	 * 
+	 * NOTE This function might be deprecated, since we are now using ResultSnapshots instead of ResultSets (see explanation in ResultSetSnapshot.java).
+	 * 
+	 * @deprecated
+	 * @param rs
+	 * @param velden
+	 * @return
+	 */
 	public ArrayList<ArrayList<String>> getResultsInArrayList(ResultSet rs, String[] velden){
 		
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
@@ -857,41 +863,20 @@ public class Util {
 	}
 	
 	
-	/**
-	 * Convert the rows of a ResultSnapshot into a List of String arrays.
-	 * @param data
-	 * @param fieldnames
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 * @throws SQLException
-	 */
-	public static ArrayList<String[]> getResultSetCopyInAList(List<Map<String, Object>> data, String[] fieldnames) throws UnsupportedEncodingException, SQLException{
-		
-		ArrayList<String[]> output = new ArrayList<String[]>();
-		
-		if (data == null) {
-			return output;
-		}
-		
-		for (Map<String, Object> row : data) {
-			
-			String[] fieldvalues = new String[fieldnames.length];
-			for (int i=0; i<fieldnames.length; i++) {
-				String fieldname = fieldnames[i];
-				Object fieldvalue = row.get(fieldname);
-				fieldvalues[i] = (fieldvalue != null ? fieldvalue.toString() : "");				
-			}
-			output.add(fieldvalues);
-
-		}
-		return output;
-	}
+	
 	
 	/**
-	 * Convert the rows of a ResultSnapshot into a List of ArrayLists.
-	 * @param data
-	 * @param fieldnames
-	 * @return
+	 * Since the sendPreparedQuery() function now returns a ResultSnapshot instead of a ResultSet (see explanation in ResultSetSnapshot.java),
+	 * we have to convert the rows of a ResultSnapshot into a List of ArrayLists,
+	 * which is what most functions expect as input.
+	 * 
+	 * NOTE This function was called once only, and could be easily replaced by getResultSetCopyInAList() as it's functionally the same.
+	 *      So getResultSetCopyInArrayList might now be considered as deprecated.
+	 * 
+	 * @deprecated
+	 * @param list of maps (each map being a row, with column name-value pairs)
+	 * @param list of column names
+	 * @return list of ArrayLists (each ArrayList being a row)
 	 */
 	public static ArrayList<ArrayList<String>> getResultSetCopyInArrayList(List<Map<String, Object>> data, String[] fieldnames){
 		

@@ -2855,7 +2855,7 @@ public class Database {
 		
 		// ******************************************
 		//
-		// queries are build, now get to the database
+		// queries are built, now get to the database
 		//
 		// ******************************************
 		
@@ -2936,9 +2936,17 @@ public class Database {
 							
 							rs2 = dc.sendPreparedQuery(schema, countQuery, args, ato, (bExactCountRequiredByUser ? 0 : this.maxAllowedDuration) ).getRows();							
 							
-							ArrayList<ArrayList<String>> countResult = Util.getResultSetCopyInArrayList(rs2, new String[]{"count"});
+							// old:
+							//ArrayList<ArrayList<String>> countResult = Util.getResultSetCopyInArrayList(rs2, new String[]{"count"});							
+							//count = Integer.parseInt(countResult.get(0).get(0));
+							// NB: for some unknown reason, we were using Util.getResultSetCopyInArrayList here (and only here)
+							//     while the elsewhere frequently used Util.getResultSetCopyInAList function could do the job too.
+							//     That means that Util.getResultSetCopyInArrayList will be considered deprecated from now on.
 							
-							count = Integer.parseInt(countResult.get(0).get(0));
+							// new:
+							ArrayList<String[]> countResult = Util.getResultSetCopyInAList(rs2, new String[]{"count"});
+							count = Integer.parseInt(countResult.get(0)[0]);
+							
 							exactCount = true;
 							recomputeMaxAllowedCost = true;
 						}

@@ -3,6 +3,9 @@ package util;
 /*
  * This object is meant to store a query (designed to be used within a prepared statement, containing '?')
  * with its arguments and argument types
+ * 
+ * This object is used AT ONE OF THE FINAL STEPS of query building (inside sendPrepareQuery() in DatabaseManager.java)
+ * just before the query is executed
  */
 public class QueryObject {
 	
