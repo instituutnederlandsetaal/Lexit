@@ -12,6 +12,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import util.Util;
 
 @WebListener
 public class AppLifecycleListener implements ServletContextListener {	
@@ -35,6 +36,8 @@ public class AppLifecycleListener implements ServletContextListener {
 	// setter
 	public static void registerDataSource(String newProjectName, HikariDataSource ds) {		
 		
+		Util.debug("### Registering new datasource and cleaning up cache:");
+		
 		// clean up the current list
 		
 		for (String project : project2TimeLastUsed.keySet()) {
@@ -47,12 +50,16 @@ public class AppLifecycleListener implements ServletContextListener {
     			// get the source for the project
         		HikariDataSource dataSource = project2DataSource.get(project);
         		
+        		Util.debug("### -> attempting to close datasource for "+project);
+        		
         		// If the data source is not null, close it
         		if (dataSource != null) {    			
         			try {
         				dataSource.close();
+        				Util.debug("### -> datasource for "+project+" closed");
     	            } 
     	       		catch (Exception e) {
+    	       			Util.debug("### -> ERROR: failed to close datasource for "+project);
     	       			e.printStackTrace();
     	            }
         		}
@@ -60,6 +67,7 @@ public class AppLifecycleListener implements ServletContextListener {
         		// finally, remove the project from the maps after closing its data source
         		// BEWARE: we don't remove the project2Credentials map, since that is needed when everything else was closed/removed
         		try {
+        			Util.debug("### -> removing "+project + " from cache");
         			project2DataSource.remove(project);
         			project2TimeLastUsed.remove(project);
         		}
@@ -71,20 +79,25 @@ public class AppLifecycleListener implements ServletContextListener {
 		
 		
 		// register the data source for the new project
+		Util.debug("### - register new datasource for "+newProjectName);
 		project2DataSource.put(newProjectName, ds);
     }
 	
 	// getter
 	public static HikariDataSource getDataSource(String projectName) {
 		
+		Util.debug("### Getting datasource for "+projectName+":");
+		
 		// register last used time
+		Util.debug("### -> setting last time used for "+projectName);
 		project2TimeLastUsed.put(projectName, new Date().getTime());
 		
+		Util.debug("### -> returning datasource for "+projectName);
 		return project2DataSource.get(projectName);
 	}
 	
 	// getter without time registration
-	// because the spy more is about monitoring the data sources
+	// because the spy is about monitoring the data sources
 	// but is definitely not about using them (so 'time last used' mustn't be updated) 
 	public static HikariDataSource getDataSourceForSpy(String projectName) {
 		
@@ -98,17 +111,23 @@ public class AppLifecycleListener implements ServletContextListener {
     	
     	// Close all HikariCP data sources
     	
+    	Util.debug("### Closing all HikariCP datasources:");
+    	
     	for (String project : project2DataSource.keySet()) {
     		
     		// get the source for the project
     		HikariDataSource dataSource = project2DataSource.get(project);
     		
+    		Util.debug("### -> attempting to close datasource for "+project);
+    		
     		// If the data source is not null, close it
     		if (dataSource != null) {    			
-    			try {
+    			try {    				
     				dataSource.close();
+    				Util.debug("### -> datasource for "+project+" closed");
 	            } 
 	       		catch (Exception e) {
+	       			Util.debug("### -> ERROR: failed to close datasource for "+project);
 	       			e.printStackTrace();
 	            }
     		}
@@ -116,6 +135,8 @@ public class AppLifecycleListener implements ServletContextListener {
     		// finally, remove the project from the maps after closing its data source
     		// BEWARE: we don't remove the project2Credentials map, since that is needed when everything else was closed/removed
     		try {
+    			Util.debug("### -> removing "+project+" from cache");
+    			
     			project2DataSource.remove(project);
     			project2TimeLastUsed.remove(project);
     		}
@@ -126,13 +147,17 @@ public class AppLifecycleListener implements ServletContextListener {
     	
         // Deregister JDBC drivers to avoid memory leaks
     	
+    	Util.debug("### -> attempting to deregister JDBC drivers to avoid memory leaks");
+    	
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
             if (driver.getClass().getClassLoader() == getClass().getClassLoader()) {
                 try {
                     DriverManager.deregisterDriver(driver);
+                    Util.debug("### -> JDBC drivers deregistered");
                 } catch (SQLException e) {
+                	Util.debug("### -> ERROR: failed to deregister JDBC drivers");
                     e.printStackTrace();
                 }
             }
@@ -147,7 +172,10 @@ public class AppLifecycleListener implements ServletContextListener {
     
     // is a DataSource left unused? 
  	// (t.i. last time is was used was longer ago than a given maximal duration)
-    private static boolean isLeftUnused(String project){ 		
+    private static boolean isLeftUnused(String project){ 
+    	
+    	Util.debug("### Reading "+project+" left unused for "+ ((new Date().getTime()) - getTimeLastUsed(project)) + " ms (max allowed: "+Constants.TIME_GONE+" ms)");
+    	
     	return ( (new Date().getTime()) - getTimeLastUsed(project) > Constants.TIME_GONE );	
  	}
  	
@@ -162,17 +190,25 @@ public class AppLifecycleListener implements ServletContextListener {
  	 * @param projectName
  	 */
 	public static void deletePool(String projectName) {
+		
+		Util.debug("### Deleting datasource for "+projectName+":");
+		
+		Util.debug("### -> attempting to close datasource for "+projectName);
  		
  		// close the data source
  		HikariDataSource dataSource = project2DataSource.get(projectName);
  		if (dataSource != null) {
  			try {
  				dataSource.close();
+ 				Util.debug("### -> datasource for "+projectName + " closed");
  			} 
  			catch (Exception e) {
+ 				Util.debug("### -> ERROR: failed to close datasource for "+projectName);
  				e.printStackTrace();
  			}
  		}
+ 				
+ 		Util.debug("### -> deleting "+projectName+" from cache");
  		
  		// remove the project from the maps
  		project2DataSource.remove(projectName);
