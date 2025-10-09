@@ -1005,14 +1005,15 @@ public class PostgresConnectionManager {
 		// if current query doesn't contain any 'exact equality' regex, leave right away
 		boolean found = false;
 		for (String oneArg : args) {
-			if (oneArg.startsWith("exact:")) 
-				{
+			if (oneArg.startsWith("exact:"))  {
 				found = true;
 				break;
-				}
+			}
 		}
 		if ( !found )
 			return qo;
+		
+		
 		
 		// Split the query into its elements.
 		// As we are dealing with a prepared statement, the question marks in the
@@ -1045,21 +1046,32 @@ public class PostgresConnectionManager {
 				
 				// 1. case sensitive
 				//    (exact equality operator)
-				if (rebuiltQuery.endsWith("~")) {
+				if (rebuiltQuery.replaceAll("\\($", "").trim().endsWith("~")) {
+					
+					// keep possible opening parenthesis, like in  ~ ( ? COLLATE "nl_NL.utf8" )
+					String suffix = rebuiltQuery.endsWith("(") ? "(" : ""; 
+					
 					// remove 'exact:'
 					newArgsList.add( args[i].substring("exact:".length()) );
+					
 					// set argument type
 					if (ato!=null) newAto.setType(newArgsList.size()-1, ato.getType(i));
+					
 					// change regex operator into strict equality
-					rebuiltQuery = rebuiltQuery.substring(0, rebuiltQuery.lastIndexOf("~")) + "=";
+					rebuiltQuery = rebuiltQuery.substring(0, rebuiltQuery.lastIndexOf("~")) + "=" + suffix;
 				}
 				
 				
 				// 2. or case insensitive 
 				//    (put everything to lowercase a both sides of equality operator)
-				else if (rebuiltQuery.endsWith("~*")) {
+				else if (rebuiltQuery.replaceAll("\\($", "").trim().endsWith("~*")) {
+					
+					// keep possible opening parenthesis, like in  ~ ( ? COLLATE "nl_NL.utf8" )
+					String suffix = rebuiltQuery.endsWith("(") ? "(" : "";
+					
 					// remove 'exact:' and lowercase the argument
 					newArgsList.add(args[i].substring("exact:".length()).toLowerCase());
+					
 					// set argument type
 					// it must be set to 'text' as we will cast the argument to text further on
 					if (ato!=null) newAto.setType(newArgsList.size()-1, "text"); 
@@ -1071,6 +1083,7 @@ public class PostgresConnectionManager {
 					
 					// remove the regex operator ~* 
 					String rebuiltQueryWithoutLastOperator = rebuiltQuery.substring(0, rebuiltQuery.lastIndexOf("~*")).trim();
+					
 					// the last column name might be the complex expression 'cast(... as text)'
 					// or otherwise just a column name
 					String expectedBeforeColumnName = " ";
@@ -1080,7 +1093,7 @@ public class PostgresConnectionManager {
 						rebuiltQueryWithoutLastOperator.substring(rebuiltQueryWithoutLastOperator.toLowerCase().lastIndexOf(expectedBeforeColumnName)+1);					
 					rebuiltQuery = 
 						rebuiltQueryWithoutLastOperator.substring(0, rebuiltQueryWithoutLastOperator.toLowerCase().lastIndexOf(expectedBeforeColumnName)) + 
-					" LOWER(CAST("+lastColumnName+" AS text)) = ";	// cast needed to support custom types columns 			
+					" LOWER(CAST("+lastColumnName+" AS text)) = " + suffix;	// cast needed to support custom types columns 			
 				}
 				// we keep the question mark and the corresponding argument
 				rebuiltQuery += "?";
@@ -1095,7 +1108,9 @@ public class PostgresConnectionManager {
 		}
 		
 		// rewrite query, args list, and argument types object				
-		return new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);
+		QueryObject newQo = new QueryObject(rebuiltQuery, newArgsList.toArray(new String[newArgsList.size()]), newAto);
+
+		return newQo;
 	}
 	
 	

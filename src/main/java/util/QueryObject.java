@@ -13,8 +13,7 @@ public class QueryObject {
 	String[] args = null; 
 	ArgumentTypesObject ato = null;
 	
-	public QueryObject(String query, String[] args, ArgumentTypesObject ato)
-	{
+	public QueryObject(String query, String[] args, ArgumentTypesObject ato) {
 		this.query = query;
 		this.args = args;
 		this.ato = ato;
@@ -37,6 +36,20 @@ public class QueryObject {
 	}
 	public void setAto(ArgumentTypesObject ato) {
 		this.ato = ato;
+	}
+	
+	/**
+	 * Prints the query, args and arg types to the console (for debug purposes)
+     */
+	public void print() {
+		System.out.println("Query: " + query);
+		System.out.print("Args: ");
+		for (int i = 0; i<args.length; i++) {
+			String arg = args[i];
+			String type = ato.getType(i);
+			System.out.print(i + ": " + arg + " ("+ type +")");
+		}		
+		System.out.println();
 	}
 	
 

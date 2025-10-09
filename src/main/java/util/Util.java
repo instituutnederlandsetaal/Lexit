@@ -152,7 +152,9 @@ public class Util {
 			in.close();
 		}
 		catch (Exception e){
-			throw new RuntimeException("Error while reading the "+filename+" file", e);
+			
+			String error = Util.getDebugInfoForConsole("Error while reading file", new String[] {filename});
+			throw new RuntimeException(error, e);
 		}
 		
 		return sb.toString();		
@@ -193,7 +195,9 @@ public class Util {
 			in.close();
 		}
 		catch (Exception e){//Catch exception if any
-			throw new RuntimeException("Error while reading the "+filename+" properties file", e);
+			
+			String error = Util.getDebugInfoForConsole("Error while reading properties file", new String[] {filename});
+			throw new RuntimeException(error, e);
 		}
 		
 		return databaseAccessHash;		
@@ -631,13 +635,11 @@ public class Util {
 		StringBuilder builder = new StringBuilder();
 		Iterator<T> iter = s.iterator();
 		
-		while (iter.hasNext())
-		{
+		while (iter.hasNext()) {
 			builder.append(quoteSign);
 			builder.append(iter.next());
 			builder.append(quoteSign);
-			if (iter.hasNext())
-			{
+			if (iter.hasNext()) {
 				builder.append(delimiter);
 			}
 		}
@@ -653,8 +655,7 @@ public class Util {
 	 */
 	public static Integer getIndexOf(String oneValue, String[] values){
 		
-		for (int i=0; i<values.length; i++)
-		{
+		for (int i=0; i<values.length; i++) {
 			if (oneValue == null && values[i] == null)
 				return i;
 			if (oneValue != null && values[i] != null && values[i].equals(oneValue))
