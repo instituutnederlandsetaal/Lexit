@@ -179,7 +179,7 @@ $.fn.isOnScreen = function(){
 
 /**
  * Scroll smoothly to a given anchor within a given div
- * @param {String} div - The div within scroll must be performed
+ * @param {String} div - The div within which scroll must be performed
  * @param {String} anchor - the anchor to scroll to
  * @param {Boolean} bVerticalOnly - if true, only scroll vertically; otherwise scroll both horizontally and vertically
  */

@@ -2164,7 +2164,11 @@ public class Database {
 	
 	
 	/**
-	 * get the cost of a query
+	 * Get the cost of a query. 
+	 * 
+	 * BEWARE the countQuery was pre-processed before, t.i. question marks were replaced by actual values!
+	 * This is needed to get a correct cost estimation!
+	 * 
 	 * @param tableName
 	 * @param query
 	 * @return
@@ -2184,6 +2188,10 @@ public class Database {
 		// change  [~*/~ 'exact:...']   into  [= '...']
 		//                                  1    2       3     4   5     6
 		countQuery = countQuery.replaceAll("(!|)(~\\*|~)(\\s+)(E)([\"'])(exact:)", "$1= $5");
+		
+		// NOTE countQuery was pre-processed before, t.i. question marks were replaced by actual values!
+		
+		
 		
 		String query1 = 
 				"DO LANGUAGE plpgsql " +

@@ -108,10 +108,10 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 					}
 					
 				}
-				sOutPut += "<TR><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;"+thisUser+"</TD><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;&nbsp;</TD><TD style='border-top: 1px dotted black; padding: 2px;'>"+aTheseRoles.join('<BR>')+"</TD></TR>";
+				sOutPut += "<TR id='user_"+thisUser.toLowerCase()+"'><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;"+thisUser+"</TD><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;&nbsp;</TD><TD style='border-top: 1px dotted black; padding: 2px;'>"+aTheseRoles.join('<BR>')+"</TD></TR>";
 			}
 			sOutPut += "</TABLE>";												
-			lexitusers.overviewOfUsersAndRoles = "<DIV style='max-height: 200px; overflow-x: hidden; overflow-y: scroll;'>"+sOutPut+"</DIV>";
+			lexitusers.overviewOfUsersAndRoles = "<DIV style='max-height: 200px; overflow-x: hidden; overflow-y: scroll;' id='usersoverview'>"+sOutPut+"</DIV>";
 			
 			if (fnCallback != null){
 				fnCallback();
@@ -238,6 +238,11 @@ lexitusers.deleteUser = function(){
 			// insert empty row after the default access role selector
 			setTimeout(function(){
 				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
+				
+				// make sure that when a user is selected, the overview scrolls to that user
+				$("#prompt_username").on("change", function(){					
+					lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
+				});
 			}, 100);
 			
 		},
@@ -348,6 +353,12 @@ lexitusers.addRoleInProject = function(){
 			// insert empty row after the default access role selector
 			setTimeout(function(){
 				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
+				
+				// make sure that when a user is selected, the overview scrolls to that user
+				$("#prompt_username").on("change", function(){					
+					lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
+				});
+				
 			}, 100);
 			
 		},
@@ -443,5 +454,20 @@ lexitusers.showMenu = function(){
 		},
 		true);
     });
+};
+
+
+lexitusers.smoothScroll = function(div, anchor) {
+	
+  var $div = $(div);
+  var $anchor = $(anchor);
+  if (!$div.length || !$anchor.length) return;
+
+  // Compute absolute target scroll positions relative to the scrollable div
+  var targetTop  = $anchor.offset().top  - $div.offset().top  + $div.scrollTop();
+  var targetLeft = $div.scrollLeft();
+
+  // Stop any ongoing scroll animations and jump to the correct absolute values
+  $div.stop(true).animate({ scrollTop: targetTop, scrollLeft: targetLeft }, 800);
 };
 
