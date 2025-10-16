@@ -377,6 +377,36 @@ public class TableResources {
  		
  		return response;	
  	}
+ 	
+ 	
+ 	@Path("get_list_of_existing_projects")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject getListOfExistingProjects(
+			@Context ServletContext context, 
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) throws IOException {
+
+		String loginName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
+		if (!userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+			throw new RuntimeException("Permission denied to " + loginName);
+		}
+
+		DbResponseObject response = new DbResponseObject();
+
+		String output = Util.join(lexitInfo.getListOfExistingProjects(), Constants.ARG_INTERNAL_SEPARATOR);
+		response.setResponse(output);
+
+		return response;
+	}
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
 
  	// ------------------------------------------------------------------------------------------------
  	// Project reset

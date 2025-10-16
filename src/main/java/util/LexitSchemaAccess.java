@@ -780,7 +780,11 @@ public class LexitSchemaAccess {
     	
 	}
 	
-	
+	/**
+	 * Get the id of a user given its username
+	 * @param username
+	 * @return ID
+	 */
 	public int getIdOfUser(String username) {
 
 		int id = -1;
@@ -817,7 +821,7 @@ public class LexitSchemaAccess {
 	
 	/**
 	 * Get list of users and roles
-	 * @return
+	 * @return array of usernames and roles (username:::role1,role2,...)
 	 */
 	public ArrayList<String> getListOfUsersAndRoles() {
 		
@@ -829,7 +833,12 @@ public class LexitSchemaAccess {
         }
 		return aOutput;
 	}
-	// get list of users
+	
+	
+	/**
+	 * get list of users
+	 * @return array of usernames
+	 */
 	public ArrayList<String> getListOfUsers(){
 		
 		ArrayList<String> aOutput = new ArrayList<>();
@@ -840,6 +849,41 @@ public class LexitSchemaAccess {
         }
 		return aOutput;
 
+	}
+	
+	/**
+	 * Get list of existing projects
+	 * @return array of project names
+	 */
+	public ArrayList<String> getListOfExistingProjects() {
+		
+		ArrayList<String> aOutput = new ArrayList<>();
+
+		// connect to the lex'it schema database
+		dc = getPostgresConnectionManager();
+
+		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
+
+		String query = "SELECT DISTINCT projectname FROM " + schemaName + ".users_roles " + "ORDER BY projectname;";
+
+		ArrayList<String[]> res;
+
+		try {
+			List<Map<String, Object>> rs = dc.sendQuery(schemaName, query, 0).getRows();
+
+			res = Util.getResultSetCopyInAList(rs, new String[] { "projectname" });
+			if (res.size() > 0) {
+				for (String[] oneRecord : res) {
+					aOutput.add(oneRecord[0].trim());
+				}
+			}
+		} catch (Exception e) {
+			String error = Util.getDebugInfoForConsole("Reading the list of existing projects caused an error",
+					new String[] {});
+			throw new RuntimeException(error, e);
+		}
+
+		return aOutput;
 	}
 
 

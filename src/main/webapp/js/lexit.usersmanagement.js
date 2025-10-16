@@ -24,6 +24,10 @@ lexitusers.oMenuOptions = {
 // kind of global store for overview of users and roles
 lexitusers.overviewOfUsersAndRoles;						 	
 
+
+/**
+ * Delete a project role for a user (after confirmation)
+ */
 lexitusers.dropProjectRoleForUser = function(project, username){	
 	
 	fn.confirm("Delete project role", "Do you really want to delete the role of '"+username+"' in project '"+project+"'?",
@@ -66,7 +70,9 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 };
 
 
-
+/**
+ * Update the overview of users and roles (store globally in lexitusers.overviewOfUsersAndRoles)
+ */
 lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 										
 	$.ajax({
@@ -111,7 +117,9 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 				sOutPut += "<TR id='user_"+thisUser.toLowerCase()+"'><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;"+thisUser+"</TD><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;&nbsp;</TD><TD style='border-top: 1px dotted black; padding: 2px;'>"+aTheseRoles.join('<BR>')+"</TD></TR>";
 			}
 			sOutPut += "</TABLE>";												
-			lexitusers.overviewOfUsersAndRoles = "<DIV style='max-height: 200px; overflow-x: hidden; overflow-y: scroll;' id='usersoverview'>"+sOutPut+"</DIV>";
+			lexitusers.overviewOfUsersAndRoles = 
+				"<DIV style='max-height: 200px; overflow-x: hidden; overflow-y: scroll; margin-bottom: 30px;' id='usersoverview'>"+sOutPut+"</DIV>"+
+				"<HR style= 'border-top: 2px dotted #bbb;''>";
 			
 			if (fnCallback != null){
 				fnCallback();
@@ -127,7 +135,9 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 };
 
 
-
+/**
+ * Refresh user rights and update overview of users and roles
+ */
 lexitusers.refreshUserRight = function(fnCallback){
 						 				
 	$.ajax({
@@ -147,6 +157,11 @@ lexitusers.refreshUserRight = function(fnCallback){
 	);
 };
 
+
+
+/**
+ * Get the default role for a user and pass it to the callback function
+ */
 lexitusers.getDefaultRole = function(someUser, fnCallback){
 	
 	$.ajax({
@@ -169,6 +184,9 @@ lexitusers.getDefaultRole = function(someUser, fnCallback){
 };
 
 
+/**
+ * Delete a user (after confirmation)
+ */
 lexitusers.deleteUser = function(){
 	
 	$.ajax({
@@ -235,8 +253,10 @@ lexitusers.deleteUser = function(){
  					}
  			);
 			
-			// insert empty row after the default access role selector
+			
+			// allow the prompt to be built before manipulating it
 			setTimeout(function(){
+				// insert empty row after the default access role selector
 				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
 				
 				// make sure that when a user is selected, the overview scrolls to that user
@@ -255,6 +275,10 @@ lexitusers.deleteUser = function(){
 	
 };
 
+
+/**
+ * Add or update a user
+ */
 lexitusers.createNewUser = function(){
 	
 	fn.prompt(["Create/update user", 
@@ -297,6 +321,10 @@ lexitusers.createNewUser = function(){
 	
 };
 	
+
+/**
+ * Add or update a role for a user in a project (db)
+ */
 lexitusers.addRoleInProject = function(){
 	
 	$.ajax({
@@ -350,14 +378,20 @@ lexitusers.addRoleInProject = function(){
  					}
  			);
 			
-			// insert empty row after the default access role selector
+			
+			// allow the prompt to be built before manipulating it
 			setTimeout(function(){
+				
+				// insert empty row after the default access role selector
 				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
 				
 				// make sure that when a user is selected, the overview scrolls to that user
 				$("#prompt_username").on("change", function(){					
 					lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
 				});
+				
+				// add autocomplete to project (db) field
+				lexitusers.setProjectAutoComplete();
 				
 			}, 100);
 			
@@ -371,7 +405,9 @@ lexitusers.addRoleInProject = function(){
 };
 
 
-
+/**
+ * Change the admin password (after confirmation)
+ */
 lexitusers.changeAdminPassword = function(){
 	
 	fn.prompt("Change admin password", ["current password", "new password"], null,
@@ -421,13 +457,19 @@ lexitusers.changeAdminPassword = function(){
 
 
 
-// ask the admin to choose 
+/**
+ * Ask the admin to choose what to do
+ */ 
 lexitusers._showMenu = function(){
 	lexitusers.refreshUserRight(function(){
         fn.askToChoose("User management", "Would you like to:", lexitusers.oMenuOptions);
     });
 };
 
+
+/**
+ * Show the main menu
+ */
 lexitusers.showMenu = function(){
 	
 	// build options, replacing "null" with the separator value (for empty line to separate groups)
@@ -457,6 +499,10 @@ lexitusers.showMenu = function(){
 };
 
 
+
+/**
+ * Smoothly scroll a scrollable div to an anchor inside that div
+ */
 lexitusers.smoothScroll = function(div, anchor) {
 	
   var $div = $(div);
@@ -471,3 +517,69 @@ lexitusers.smoothScroll = function(div, anchor) {
   $div.stop(true).animate({ scrollTop: targetTop, scrollLeft: targetLeft }, 800);
 };
 
+
+
+/**
+ * set autocomplete for project (db) field in addRoleInProject
+ */
+lexitusers.setProjectAutoComplete = function(){
+	
+	$("#prompt_projectdb").attr("placeholder", "Start typing to get project name...")
+	
+	// gist list of existing projects from entry point  
+	
+	$.ajax({
+		
+		"type": "GET",
+		"url": WEBSERV_URL+"/api/get_list_of_existing_projects",
+		"data": {
+			"dummy": lexutil.getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			
+			// set the autocomplete for the project (db) field
+			
+			var aListOfExistingProjects = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);			
+			
+			// remove any previous binding to prevent double bindings
+			$(document).off("focus", "#prompt_projectdb");
+	
+	        // when the project (db) field is focused, attach the autocomplete	
+			$(document).on(
+			      "focus", 
+			      "#prompt_projectdb", 
+			      function(event) {
+			      	
+			      	$(event.target).autocomplete({
+			          	
+			      		delay: 0,
+			            minLength: 1,
+				        source: aListOfExistingProjects,
+				        source: function(request, response) {
+							var results = $.ui.autocomplete.filter(
+								aListOfExistingProjects,
+								request.term
+							);
+						    // Filter again to only match from the start
+						    var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+						    response($.grep(results, function(item) {
+								return matcher.test(item);
+						    }));
+						},
+						open: function(event, ui){
+	
+							// make sure that the autocomplete won't disappear behind the dialog 
+							setTimeout(function(){
+								$(".ui-front").putInFront();
+							}, 100);
+						}
+			        });
+			          
+			      }
+			);
+		}
+	});
+	
+	
+}
