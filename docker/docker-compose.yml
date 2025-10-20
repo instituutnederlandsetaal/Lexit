@@ -13,3 +13,5 @@ services:
         volumes:
             - ./lexit2_db_config:/usr/local/tomcat/etc/lexit2_db_config
             - ./lexit2_config:/usr/local/tomcat/webapps/lexit2_config
+        environment: # Otherwise container doesn't restart on OutOfMemory
+            - JAVA_OPTS=-XX:+ExitOnOutOfMemoryError
