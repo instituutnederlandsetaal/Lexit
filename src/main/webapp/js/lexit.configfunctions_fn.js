@@ -5903,13 +5903,18 @@ fn.getFreeButtonCss = function(sTableName, sButtonLabel, sProperty){
  * @param {(String|API-object-instance)} sTableName - A table name or object
  * @param {String} sButtonLabel - a button label
  */
-fn.getFreeButtomElementByName = function(sTableName, sButtonLabel){
+fn.getFreeButtonElementByName = function(sTableName, sButtonLabel){
 	
 	if (typeof sTableName == 'object')
 		sTableName = fn.getTableName(sTableName);
 	
 	var sButtonId = sTableName+"_freebutton_"+(sButtonLabel.toLowerCase().replace(/ /g, "_"));
 	return $("button#"+sButtonId);
+}
+// alias with typo (for backward compatibility!!!)
+// @deprecated
+fn.getFreeButtomElementByName = function(sTableName, sButtonLabel){
+	return fn.getFreeButtonElementByName(sTableName, sButtonLabel);
 }
 
 
