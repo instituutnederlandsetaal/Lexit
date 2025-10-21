@@ -277,7 +277,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 //
 // create a table comment containing created/finished/processed + notes
 head._packinTableNotes = function(sCreated, sFinished, sProcessed, sNotes){
-	return [sCreated, sFinished, sProcessed, sNotes].join("|||||");;
+	return [sCreated, sFinished, sProcessed, sNotes].join("|||||");
 };
 // parse the table comment containing created/finished/processed + notes
 head._parseTableNotes = function(sNotes){
