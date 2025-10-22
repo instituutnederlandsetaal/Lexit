@@ -2963,12 +2963,13 @@ public class Database {
 							
 							if (Constants.debug) {
 								System.out.println("%%% NORMAL COUNT TIME OUT !!");
-								System.out.println("%%% We will use an estimate count");
-								// if the normal count timed out, we can't recompute the max allowed
-								// cost in a reliable way, because the duration won't relate to the
-								// query cost computed by the database. So, we have to cancel recomputation.
-								recomputeMaxAllowedCost = false;
+								System.out.println("%%% We will use an estimate count");								
 							}
+							// if the normal count timed out, we can't recompute the max allowed
+							// cost in a reliable way, because the duration won't relate to the
+							// query cost computed by the database. So, we have to cancel recomputation.
+							recomputeMaxAllowedCost = false;
+							
 							count = getEstimateCount(replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
 						}
