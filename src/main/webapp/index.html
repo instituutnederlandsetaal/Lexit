@@ -526,6 +526,13 @@
 			buildUsersSpy();
 			
 			buildConnectionsSpy();
+
+			// Make the container around the user and connections table flexy
+			$("#dynamic")
+				.css("display", "flex")
+				.css("flex-flow", "row wrap")
+				.css("gap", "1rem")
+				.css("padding", "1rem");
 		}
 
 		// reset user rights
@@ -651,7 +658,6 @@
 						.attr("id", "spytable")
 						.addClass("display")
 						.attr("cellspacing", "0")
-						.css("width", "65vw");
 					
 					var thead = $("<thead></thead>");
 					var thead_tr = $("<tr></tr>");
@@ -682,11 +688,8 @@
 					$("#dynamic").append(spyDiv);
 					
 					spyDiv
-						.css("position", "absolute")
-						.css("top", "100px")
-						.css("left", "2vw")
-						.css("width", "65vw");
-					
+						.css("width", "min-content")
+
 					oSpyTable = $('#spytable').DataTable({
 						"dom": '<"top"f>t',
 						"pageLength": 100,
@@ -758,7 +761,6 @@
 						.attr("id", "connectionstable")
 						.addClass("display")
 						.attr("cellspacing", "0")
-						.css("width", "28vw");
 					
 					var thead = $("<thead></thead>");
 					var thead_tr = $("<tr></tr>");
@@ -787,11 +789,8 @@
 					$("#dynamic").append(connectionDiv);
 					
 					connectionDiv
-						.css("position", "absolute")
-						.css("top", "100px")
-						.css("left", "70vw")
-						.css("width", "28vw");
-					
+						.css("width", "min-content")
+
 					oConnectionsTable = $('#connectionstable').DataTable({
 						"dom": '<"top"f>t',
 						"pageLength": 100,
