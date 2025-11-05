@@ -353,7 +353,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 		}
 		
 		if (sPathToCustomLogo != null) {
-			$("#square_logo").append(
+			$("#square_logo").empty().append(
 				$("<img>").attr("src", sPathToCustomLogo).css("height", sCustomLogoSize).css("width", sCustomLogoSize)
 			);
 		}
