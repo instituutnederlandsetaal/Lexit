@@ -90,9 +90,9 @@ var aProjectList =
 	// ========== DON'T MODIFY ANYTHING BELOW THIS LINE ================================================
 	
 	 {
-			name: "Login overzicht",
+			name: "Loginoverzicht",
 			config_filename: "spy",
-			description: "Overzicht actieve accounts (wordt om de 2 sec bijgewerkt)",
+			description: "Overzicht actieve accounts en connecties (wordt om de 2 sec bijgewerkt)",
 			goody: true
 	 },
 	 {
@@ -102,9 +102,9 @@ var aProjectList =
 			goody: true
 	},
 	 {
-			name: "Reset user rights",
+			name: "Toegangsrechten verversen",
 			config_filename: "reset_user_rights",
-			description: "Handmatig toegangsrechten resetten",
+			description: "Handmatig toegangsrechten verversen",
 			goody: true
 	 }
 	 
