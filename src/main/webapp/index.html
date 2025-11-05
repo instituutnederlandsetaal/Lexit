@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.10.22
+	v2025.11.05
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -266,6 +266,10 @@
 	
 	$(document).ready(function() {
 
+        // Add huisstijl balk and title
+		fn.setBalk(true, true, "favicon-klein.png", "50px")
+		$("#projectname").html(`<span><a href="/lexit2">lex'it</a></span>`)
+		
 		// put INL logo
 		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
 		
@@ -1251,47 +1255,28 @@
 		// keep this list private to internal environment
 		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
 
-			$("#indicator").empty().append(
-				$("<div></div>")
-					.attr("id", "welcome_in_lexit")
-					.html("<h2>" +lang.welcome+ "</h2>&nbsp;&nbsp;&nbsp;" +lang.choose_a_project+ "!<br>")
-			);
+            // Don't display table selector.
+			$("#indicator").empty();
 			
-			var docOpenTitle = $("<span></span>")
-				.addClass("lexit_menu_section")
-				.html("<b>" +lang.production+ "</b>");
-			var docOpen = $("<table></table>")
-				.addClass("lexit_menu_section")
-				.attr("id", "lexit_menu_production_section");
-			
-			var goodiesTitle = $("<span></span>")
-				.addClass("lexit_menu_section")
-				.html("<b>" +lang.goodies+ "</b>");
-			var goodies = $("<table></table>")
-				.addClass("lexit_menu_section")
-				.attr("id", "lexit_menu_goodies_section");
-			
-			var docDevelopmentTitle = $("<span></span>")
-				.addClass("lexit_menu_section")
-				.html("<b>" +lang.in_development+ "</b>");
-			var docDevelopment = $("<table></table>")
-				.addClass("lexit_menu_section")				
-				.attr("id", "lexit_menu_development_section");
-			
-			var docClosedTitle = $("<span></span>")
-				.addClass("lexit_menu_section")
-				.html("<b>" +lang.project_closed+ "</b>");
-			var docClosed = $("<table></table>")
-				.addClass("lexit_menu_section")
-				.attr("id", "lexit_menu_closed_section");
-			
-			var docUnknownTitle = $("<span></span>")
-				.addClass("lexit_menu_section")
-				.html("<b>" +lang.project_unknown+ "</b>");
-			var docUnknown = $("<table></table>")
-				.addClass("lexit_menu_section")
-				.attr("id", "lexit_menu_unknown_section");
-			
+            const productionSection = $(`<section id="production"><h2>${lang.production}</h2></section>`);
+            const productionTable = $("<table></table>");
+            productionSection.append(productionTable);
+
+            const goodiesSection = $(`<section id="goodies"><h2>${lang.goodies}</h2></section>`);
+            const goodiesTable = $("<table></table>");
+            goodiesSection.append(goodiesTable);
+
+            const developmentSection = $(`<section id="development"><h2>${lang.in_development}</h2></section>`);
+            const developmentTable = $("<table></table>");
+            developmentSection.append(developmentTable);
+
+            const closedSection = $(`<section id="closed"><h2>${lang.project_closed}</h2></section>`);
+            const closedTable = $("<table></table>");
+            closedSection.append(closedTable);
+
+            const unknownSection = $(`<section id="unknown"><h2>${lang.project_unknown}</h2></section>`);
+            const unknownTable = $("<table></table>");
+            unknownSection.append(unknownTable);
 			
 			// process list of all config files
 			var aKnownConfigFilesList = new Array();
@@ -1339,96 +1324,58 @@
 				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"")+
 					( sCurrentURL.indexOf("lang=")>-1 ? "&lang="+sCurrentURL.substring(sCurrentURL.indexOf("lang=")+"lang=".length, sCurrentURL.indexOf("lang=")+"lang=".length+2):"");
 				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
+
+                const sProjectTitleCell = `<td><a href="${sProjectLink}">${sProjectName}</a></td>`
+                let sProjectInfoCell = `<td><a title="${sProjectName}" onclick="showDatabaseInfo('${sProjectLinkPart}');"><span class='ui-icon ui-icon-info'></span></a>`;
+                // no project info for goodies
+                if (aProjectList[i]["goody"] !== undefined) {
+                    sProjectInfoCell = "<td></td>"
+                }
+                const sProjectDescriptionCell = `<td>${aProjectList[i]["description"]}</td>`
 				
-				var sProjectDescription =
-					"<td style='text-align: right; width: 37%'>"+
-					"<A href='"+sProjectLink+"'><B>"+sProjectName+
-					"</B></A></td>"+
-					"<td style='text-align: right; width: 3%; vertical-align: bottom;'>"+
-					(typeof aProjectList[i]["goody"] == 'undefined' ? 
-							"<A style='text-decoration: none; color: #A4A4A4;' "+ 
-							"   title='"+sProjectName+"' "+
-							"   href='#' "+
-							"   onclick='showDatabaseInfo(\""+sProjectLinkPart+"\"); return false;' "+
-							"   target='_blank'><span class='ui-icon ui-icon-info'></span></A>" : "")+
-					"</td>"+
-					"<td style='text-align: left; width: 60%'>" +
-					(typeof aProjectList[i]["description"] != 'undefined' && aProjectList[i]["description"] != "" ? 
-						" : <I>"+aProjectList[i]["description"]+"</I>" : "") + 
-					"</td>";
-				
-				var eProjectDiv = $("<tr></tr>").html(sProjectDescription);
+				const eProjectDiv = $("<tr></tr>").html(sProjectTitleCell + sProjectInfoCell + sProjectDescriptionCell);
 				
 				// Put the project in the right category:
 				
 				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"]) {
-					goodies.append(eProjectDiv)
+					goodiesTable.append(eProjectDiv)
 				}
 					
 				// project is closed
 				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"]) {
-					docClosed.append(eProjectDiv)
+					closedTable.append(eProjectDiv)
 				}
 				
 				// project is unknown
 				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"]) {
-					docUnknown.append(eProjectDiv);
+					unknownTable.append(eProjectDiv);
 				}
 				
 				// project is open
 				else {
 					// production
 					if (typeof aProjectList[i]["production"] != 'undefined' && aProjectList[i]["production"])
-						docOpen.append(eProjectDiv);
+						productionTable.append(eProjectDiv);
 					// development
 					else
-						docDevelopment.append(eProjectDiv);
+						developmentTable.append(eProjectDiv);
 				}
 			}
 			
-			// add each table part and
-			// (make sure each table is visible even when it's empty) 
-			
-			$("#indicator").append(
-				$("<div></div>")
-					.attr("id", "welcome_menu_tables")
-			);
-							
-			$("#indicator").find("#welcome_menu_tables")
-				.append(docOpenTitle)
-				.append(_deEmptyMenuList(docOpen))
-				.append($("<br>"))		
-				.append(goodiesTitle)
-				.append(_deEmptyMenuList(goodies))
-				.append($("<br>"))
-				.append(docDevelopmentTitle)
-				.append(_deEmptyMenuList(docDevelopment))
-				.append($("<br>"))
-				.append(docClosedTitle)
-				.append(_deEmptyMenuList(docClosed))	
-				.append($("<br>"))
-				.append(docUnknownTitle)
-				.append(_deEmptyMenuList(docUnknown));
-			
-			
+			// add each table
+			$("#page")
+				.append(productionSection)
+				.append(goodiesSection)
+                .append(developmentSection)
+                .append(closedSection)
+                .append(unknownSection)
+
 		}
 		else {
 			fn.message(lang.error, lang.access_denied);
 		}
 		
 	}
-	
-	// subroutine: make sure an empty menu list is visible, by addind an empty line
-	function _deEmptyMenuList(docList){
-		
-		var eEmptyCell = "<td style='text-align: right; width: 400px'>&nbsp;</td>"+
-		"<td>&nbsp;</td><td style='text-align: left; width: 700px'>&nbsp;</td>";
-		var eEmptyLine = $("<tr></tr>").html(eEmptyCell);
-		
-		return ( !$(docList).find("tr").length ) ? docList.append(eEmptyLine) : docList;
-		
-	}
-	
 	
 	// get all the properties belonging to the description of a project
 	function getProjectObject(sDbName){
@@ -1470,9 +1417,9 @@
 			<div id="home_logo" class="default"></div>
 			<div id="projectname" class="default"></div>
 			<div id="headerlinks" class="default">
-				<span id="help_link">Help</span>
-				<span id="about_link">About</span>
-				<span id="contribute_link">Contribute</span>
+				<span id="help_link">help</span>
+				<span id="about_link">about</span>
+				<span id="contribute_link">contribute</span>
 			</div>
 		</div>
 		
