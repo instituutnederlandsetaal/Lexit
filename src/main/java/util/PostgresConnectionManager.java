@@ -374,7 +374,8 @@ public class PostgresConnectionManager {
 				else if (Constants.debug)
 					e.printStackTrace();
 				throw new RuntimeException("Error while executing query " + query, e);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if (Constants.debug)
 					e.printStackTrace();
 				throw new RuntimeException("Error while executing query " + query, e);

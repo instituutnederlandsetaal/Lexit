@@ -61,7 +61,7 @@ sf.goTo = function(sSomeTablename){
 				$(this).find("select") : $(this).find("input");
 		
 		var sCurrentColumnName = mt.getListOfVisibleColumnsOf(sSomeTablename)[i]; 
-		var sCurrentColumnValue = $.trim(searchBoxSelector.val());
+		var sCurrentColumnValue = sf.giveRightShapeToSearchValue( sSomeTablename, sCurrentColumnName, $.trim(searchBoxSelector.val()) );
 		
 		// for checkboxes, we need to recompute the value
 		var bCurrentColumnIsACheckBox = fn.getTypeOfFilterBox(sSomeTablename, sCurrentColumnName) == 'checkbox';
