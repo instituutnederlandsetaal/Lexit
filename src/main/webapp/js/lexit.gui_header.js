@@ -1247,7 +1247,7 @@ head.putTableEraseButton = function(sSomeTablename){
 
 head.showGeneralHelp = function(){
 
-	$("#page #headergroup #headerlinks").find("span#help_link").bind("click", function(){
+	$("#page #headergroup #headerlinks").find("span#help_link").unbind("click").bind("click", function(){
 
 			// default
 			
