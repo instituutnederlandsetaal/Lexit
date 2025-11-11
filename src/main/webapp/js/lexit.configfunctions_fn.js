@@ -105,8 +105,8 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 	
 	// set text, color, size, etc
 	$("#projectname").find("span")
-	.text(sProjectName)
-	.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFontWeight);
+		.text(sProjectName)
+		.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFontWeight);
 	
 	// set title tab as well (and don't double the lex'it version number after the '-'
 	var sBaseTitle = $("title").text();

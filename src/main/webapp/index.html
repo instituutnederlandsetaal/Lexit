@@ -265,14 +265,15 @@
 	
 	
 	$(document).ready(function() {
-
-        // Add huisstijl balk and title
+		
+		// Add huisstijl balk and title
 		fn.setBalk(true, true, "favicon-klein.png", "50px")
-		$("#projectname").html(`<span><a href="/lexit2">lex'it</a></span>`)
+		$("#projectname").html(`<span><a href="/lexit2">lex'it</a></span>`);
 		
 		// put INL logo
 		$("#home_logo").html('<img src="'+BASE_URL+'/images/INT-logo.png" height="60px" width="136px">');
 		
+        
 		// get http parameters
 		paramsHash = lexutil.getHttpParams();
 
@@ -426,13 +427,28 @@
 			// try to load a login page, if available / otherwise do normal login
 			
 			if (bTest) {
-				$.getScript(paramsHash.get("db")+".welcome.js")
-				.done(function(){					
-					// no nothing, as the welcome page is supposed to start the lexit login programmatically
-				})
-				.fail(function(jqxhr, settings, exception){
-					// if no welcome page is available, do normal login
-					startLexitLogin();
+				
+				$.ajax({
+					"type": "GET",
+					"url": paramsHash.get("db")+".welcome.js",
+					"dataType": "text",
+					"data": {
+						"db_name": paramsHash.get("db"),
+						"dummy": getUniqueNumber()
+					},
+					"success": function(response){						
+						
+						// do nothing, as the welcome page is supposed to start the lexit login programmatically						
+						// get rid of default balk and title
+						fn.setBalk(false);
+						fn.setProjectTitle("");
+						// execute the script manually
+						$.globalEval(response);
+					},
+					"error": function(jqxhr, settings, exception){
+						// if no welcome page is available, do normal login
+						startLexitLogin();
+					}
 				});
 			}
 			
@@ -443,17 +459,25 @@
 				$.ajax({
 					"type": "GET",
 					"url": url,
-					"dataType": "script",
+					"dataType": "text",
 					"data": {
 						"db_name": paramsHash.get("db"),
 						"dummy": getUniqueNumber()
 					},
 					"success": function(response){						
+						
 						// if no welcome page available, do normal login
 						if (response == 'NOT_AVAILABLE'){
 							startLexitLogin();
 						}
-						// otherwise no nothing, as the welcome page is supposed to start the lexit login programmatically
+						// otherwise do nothing, as the welcome page is supposed to start the lexit login programmatically
+						else {												
+							// get rid of default balk and title
+							fn.setBalk(false);
+							fn.setProjectTitle("");
+							// execute the script manually
+							$.globalEval(response);
+						}
 					},
 					"error": function(jqxhr, settings, exception){
 						// if no welcome page is available, do normal login
@@ -1044,7 +1068,7 @@
 	
 	// Initialize the application.
 	// This happens once the libraries are fully loaded and we have a list of all projects 
-	// ( which is which this function will be called by getConfigFilesList )
+	// ( which is why this function will be called by getConfigFilesList )
 	
 	function initialize(){	
 		
@@ -1063,10 +1087,16 @@
 		
 		// get url parameters		
 		if (paramsHash == null || paramsHash.get("db") == null) {
+			
+			// No project selected: show list of projects
 			showListOfProjects();
 		}
 		else {			
 			// Normal case: start opening project
+			
+			// get rid of default huisstijl balk and title 
+			fn.setBalk(false);
+			fn.setProjectTitle("");
 		
 			// Assign key functions
 			// This needs to be called here because it has global scope
