@@ -74,7 +74,7 @@ sf.goTo = function(sSomeTablename){
 		
 		// selectboxes need 'exact:' in front, otherwise preset-values containing regex chars will be
 		// interpreted as regexes, which we don't want
-		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !lexutil.isRegex(sCurrentColumnValue))
+		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !$.startsWith(sCurrentColumnValue, "exact:") && !lexutil.isRegex(sCurrentColumnValue))
 			{
 			sCurrentColumnValue = "exact:"+sCurrentColumnValue;
 			}
