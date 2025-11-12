@@ -412,6 +412,10 @@ public class TableResources {
  	// Project reset
  	// ------------------------------------------------------------------------------------------------
  	
+ 	
+ 	// remove the database object from the cache
+ 	// call:
+ 	// .../api/reset_project
  	@Path("reset_project")
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -430,7 +434,7 @@ public class TableResources {
 		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
 		
-		// remove the database object from the cache
+		
 		try {
 			AppLifecycleListener.deletePool(dbName);
 			dro.setResponse("OK");

@@ -65,7 +65,7 @@ lang.choose_a_project = "Kies een project";
 lang.production = "Productie";
 lang.goodies = "Goodies en tools";
 lang.in_development = "In ontwikkeling";
-lang.project_closed = "Afgesloten";
+lang.project_closed = "Afgesloten - Archief";
 lang.project_unknown = "Onbekend";
 
 // table selection
@@ -1611,7 +1611,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.production = "Production";
 		lang.goodies = "Goodies and tools";
 		lang.in_development = "In development";
-		lang.project_closed = "Closed";
+		lang.project_closed = "Closed - Archive";
 		lang.project_unknown = "Unknown";
 
 		// table selection

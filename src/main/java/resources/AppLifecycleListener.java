@@ -40,7 +40,7 @@ public class AppLifecycleListener implements ServletContextListener {
 		
 		// clean up the current list
 		
-		for (String project : project2TimeLastUsed.keySet()) {
+		for (String project : project2DataSource.keySet()) {
     		
 			// if this project is unused, close its data source
 			// and remove it from the map
@@ -98,7 +98,7 @@ public class AppLifecycleListener implements ServletContextListener {
 	
 	// getter without time registration
 	// because the spy is about monitoring the data sources
-	// but is definitely not about using them (so 'time last used' mustn't be updated) 
+	// but is definitely not about using them (so 'time last used' mustn't be updated!) 
 	public static HikariDataSource getDataSourceForSpy(String projectName) {
 		
 		return project2DataSource.get(projectName);
@@ -174,9 +174,14 @@ public class AppLifecycleListener implements ServletContextListener {
  	// (t.i. last time is was used was longer ago than a given maximal duration)
     private static boolean isLeftUnused(String project){ 
     	
-    	Util.debug("### Reading "+project+" left unused for "+ ((new Date().getTime()) - getTimeLastUsed(project)) + " ms (max allowed: "+Constants.TIME_GONE+" ms)");
-    	
-    	return ( (new Date().getTime()) - getTimeLastUsed(project) > Constants.TIME_GONE );	
+    	try {
+	    	Util.debug("### Reading "+project+" left unused for "+ ((new Date().getTime()) - getTimeLastUsed(project)) + " ms (max allowed: "+Constants.TIME_GONE+" ms)");	    	
+	    	return ( (new Date().getTime()) - getTimeLastUsed(project) > Constants.TIME_GONE );
+    	}
+		catch (Exception e) {
+			Util.debug("### -> ERROR: could not determine last used time for " + project + ", assuming it is unused");
+			return true;
+		}
  	}
  	
  	private static long getTimeLastUsed(String project) {
