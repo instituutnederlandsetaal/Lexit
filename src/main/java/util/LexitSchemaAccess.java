@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -121,9 +122,29 @@ public class LexitSchemaAccess {
 				+ "		"
 				+ "		CREATE TABLE IF NOT EXISTS \""+ lexitSchemaAccessHash.get("schema") +"\".users_roles ( "
 				+ "		    user_id integer, "
-				+ "		    projectname text, "
+				+ "		    projectname text, "  // config filename
 				+ "		    access_role text, "
 				+ "		    CONSTRAINT users_roles_unique UNIQUE (user_id, projectname, access_role) "
+				+ "		); "
+				+ "		"
+				+ "		"
+				+ "		CREATE TABLE IF NOT EXISTS \""+ lexitSchemaAccessHash.get("schema") +"\".projects ( "
+				+ "		    project_id serial, "
+				+ "		    projectname text, "  // config filename
+				+ "		    name  text, "		 // human readable project name
+				+ "		    description  text, " // human readable project description
+				+ "		    status  text, "
+				+ "		    order_in_menu  integer, "
+				+ "		    message  text, "
+				+ "		    redirect  text, "
+				+ "		    CONSTRAINT projects_unique UNIQUE (projectname, name, description, status) "
+				+ "		); "
+				+ "		"
+				+ "		CREATE TABLE IF NOT EXISTS \""+ lexitSchemaAccessHash.get("schema") +"\".statuses ( "
+				+ "		    status  text, "
+				+ "		    description text, "
+				+ "         priority integer,"	// which status must come first in the menu
+				+ "		    CONSTRAINT statuses_unique UNIQUE (status) "
 				+ "		); "
 				+ "		"
 				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".users(id, username, password, default_access_role) "
@@ -131,11 +152,26 @@ public class LexitSchemaAccess {
 						// id specified on purpose, since the password encoding depends on it
 				+ "		VALUES ("+ Constants.ADMIN_ID +", '"+ Constants.ADMIN_USER +"', '7d0a0ba4bef831bf484c647fd5a2cf82da5d3ddbd5443a7ae2b02aa455827662', '"+ Constants.ADMIN_USER_DEFAULT_ROLE +"') "
 				+ "		ON CONFLICT DO NOTHING; "
+				+ "		"
 				        // public reader user
 						// (password null on purpose, since this user must be able to login without a password)				
 				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".users(username, password, default_access_role) "
 						// admin user
 				+ "		VALUES ('"+ Constants.PUBLIC_READER_USER +"', null, '"+ Constants.PUBLIC_READER_DEFAULT_ROLE +"') "
+				+ "		ON CONFLICT DO NOTHING; "
+				+ "		"
+				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".projects(projectname, name, description, status, order_in_menu) "
+				+ "		VALUES ('spy', 'Loginoverzicht', 'Overzicht actieve accounts en connecties (wordt om de 2 sec bijgewerkt)', 'goody', 0), "
+				+ "		       ('admin', 'Gebruikersbeheer', 'Gebruikersbeheer', 'goody', 1), "
+				+ "		       ('reset_user_rights', 'Toegangsrechten verversen', 'Handmatig toegangsrechten verversen', 'goody', 2) "
+				+ "		ON CONFLICT DO NOTHING; "
+				+ "		"
+				+ "		INSERT INTO \""+ lexitSchemaAccessHash.get("schema") +"\".statuses(status, description, priority) "
+				+ "		VALUES ('production', '', 0), "
+				+ "		       ('goody', '', 1), "
+				+ "		       ('development', '', 2), "
+				+ "		       ('closed', '', 3), "
+				+ "		       ('unknown', '', 4) "
 				+ "		ON CONFLICT DO NOTHING; "
 				+ "		"
 				+ "END "
@@ -853,37 +889,148 @@ public class LexitSchemaAccess {
 	
 	/**
 	 * Get list of existing projects
-	 * @return array of project names
+	 * @param fullInfo if true, return projectname (=config_filename), name, description, status, order_in_menu, message, redirect; if false, return only projectname
+	 * @return array of projectnames
 	 */
-	public ArrayList<String> getListOfExistingProjects() {
+	public ArrayList<String> getListOfExistingProjects(boolean fullInfo) {
 		
 		ArrayList<String> aOutput = new ArrayList<>();
+		
+		String[] fieldNames = fullInfo ? 
+				new String[] { "projectname", "name", "description", "status", "order_in_menu", "message", "redirect" } 
+				: 
+				new String[] { "projectname" };
 
 		// connect to the lex'it schema database
 		dc = getPostgresConnectionManager();
 
 		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
 
-		String query = "SELECT DISTINCT projectname FROM " + schemaName + ".users_roles " + "ORDER BY projectname;";
+		String query = fullInfo ?
+				"SELECT DISTINCT p.projectname, p.name, p.description, p.status, s.priority, p.order_in_menu, p.message, p.redirect "+
+				"FROM " + schemaName + ".projects p, " + schemaName + ".statuses s " +
+				"WHERE p.status = s.status "+
+				"UNION "+
+				"SELECT DISTINCT unknown.projectname, unknown.name, unknown.description, unknown.status, s.priority, max.order_in_menu + (row_number() over ()) AS order_in_menu, unknown.message, unknown.redirect "+
+				"FROM (" +
+				"	SELECT DISTINCT ur.projectname, '' AS name, '' AS description, 'unknown' AS status, '' AS message, '' AS redirect "+
+				"	FROM " + schemaName + ".users_roles ur " +
+				"	LEFT JOIN " + schemaName + ".projects p "+
+				"	ON ur.projectname = p.projectname "+
+				"	WHERE p.projectname IS NULL " +
+				") unknown, "+
+				"( " +
+				"	SELECT max(order_in_menu) AS order_in_menu "+
+				"	FROM " + schemaName + ".projects "+
+				") max, "+
+				schemaName + ".statuses s " +
+				"WHERE unknown.status = s.status "+
+				"ORDER BY priority, order_in_menu;"
+				:
+				"SELECT DISTINCT projectname "+
+				"FROM " + schemaName + ".users_roles " + 
+				"ORDER BY projectname;";
 
 		ArrayList<String[]> res;
 
 		try {
 			List<Map<String, Object>> rs = dc.sendQuery(schemaName, query, 0).getRows();
 
-			res = Util.getResultSetCopyInAList(rs, new String[] { "projectname" });
+			res = Util.getResultSetCopyInAList(rs, fieldNames);
 			if (res.size() > 0) {
 				for (String[] oneRecord : res) {
-					aOutput.add(oneRecord[0].trim());
+					
+					// trim each element of the fields array
+					Arrays.stream(oneRecord).map(s -> s.trim()).toArray();
+					// join the fields
+					aOutput.add( Util.join(oneRecord, ":::") );					
 				}
 			}
 		} catch (Exception e) {
 			String error = Util.getDebugInfoForConsole("Reading the list of existing projects caused an error",
-					new String[] {});
+					new String[] {"fullInfo: "+fullInfo});
 			throw new RuntimeException(error, e);
 		}
 
 		return aOutput;
+	}
+	
+	
+	/**
+	 * Set the list of existing projects in the projects table
+	 * @param projectList
+	 */
+	public void setListOfExistingProjects(String projectList) {
+		
+		// connect to the lex'it schema database
+		dc = getPostgresConnectionManager();
+
+		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
+		
+		String deleteProjectsQuery = "DELETE FROM " + schemaName + ".projects;";
+		String insertProjectQuery = 
+				"INSERT INTO " + schemaName + ".projects(projectname, name, description, status, order_in_menu, message, redirect) " +
+		        "VALUES ";
+		
+		String[] args = new String[] {};
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		String[] aProjectList = projectList.split(Constants.ARG_INTERNAL_SEPARATOR);
+		String separator = "";
+		for (String projectInfo : aProjectList) {
+			
+			// build the query
+			insertProjectQuery += separator + "(?, ?, ?, ?, ?, ?, ?)";
+			
+			// build the arguments
+			String[] thisProjectInfo = projectInfo.split(":::", -1); // -1 to include trailing empty strings
+			
+			args = Util.concatArr(args, thisProjectInfo);
+			ato.addType("text");
+			ato.addType("text");
+			ato.addType("text");
+			ato.addType("text");
+			ato.addType("integer");
+			ato.addType("text");
+			ato.addType("text");
+			
+			separator = ", ";
+		}
+		insertProjectQuery += ";";
+		
+		try {
+			dc.sendUpdate(schemaName, deleteProjectsQuery);
+			dc.sendPreparedUpdate(schemaName, insertProjectQuery, args, ato, null);
+		}
+		catch (Exception e) {
+			String error = Util.getDebugInfoForConsole("Updating the projects list caused an error", new String[] {});
+			throw new RuntimeException(error, e);
+		}
+	}
+	
+	/**
+	 * Delete a project from the projects table
+	 * @param projectname
+	 */
+	public void deleteProject(String projectname) {
+		
+		// connect to the lex'it schema database
+		dc = getPostgresConnectionManager();
+
+		String schemaName = "\"" + lexitSchemaAccessHash.get("schema") + "\"";
+		
+		String deleteProjectsQuery = "DELETE FROM " + schemaName + ".projects WHERE projectname = ?;";
+		String[] args = new String[] { projectname };
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		ato.addType("text");
+		
+		try {
+			dc.sendPreparedUpdate(schemaName, deleteProjectsQuery, args, ato, null);
+		}
+		catch (Exception e) {
+			String error = Util.getDebugInfoForConsole("Removing the project caused an error", new String[] {});
+			throw new RuntimeException(error, e);
+		}
+		
 	}
 
 

@@ -383,6 +383,7 @@ public class TableResources {
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject getListOfExistingProjects(
+			@DefaultValue("false") @QueryParam("fullinfo") String fullInfo,
 			@Context ServletContext context, 
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest) throws IOException {
@@ -395,17 +396,74 @@ public class TableResources {
 
 		DbResponseObject response = new DbResponseObject();
 
-		String output = Util.join(lexitInfo.getListOfExistingProjects(), Constants.ARG_INTERNAL_SEPARATOR);
+		boolean getFullInfo = fullInfo.equals("true");
+		String output = Util.join(lexitInfo.getListOfExistingProjects( getFullInfo ), Constants.ARG_INTERNAL_SEPARATOR);
 		response.setResponse(output);
 
 		return response;
 	}
  	
  	
+ 	@Path("set_list_of_existing_projects")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject setListOfExistingProjects(
+			@DefaultValue("") @QueryParam("projectlist") String projectList,
+			@Context ServletContext context, 
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) throws IOException {
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
+		if (!userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+			throw new RuntimeException("Permission denied to " + loginName);
+		}
+ 		
+ 		DbResponseObject response = new DbResponseObject();
+ 		
+ 		try {
+ 			lexitInfo.setListOfExistingProjects( projectList );
+ 			response.setResponse("OK");
+ 		}
+		catch (Exception e) {
+			response.setResponse("Something went wrong when setting the list of existing projects: " + e.getMessage());
+			return response;
+		}
+ 		
+ 		return response;
+ 	}
  	
  	
  	
- 	
+ 	@Path("remove_project")
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+ 	public DbResponseObject removeProject(
+			@DefaultValue("") @QueryParam("db_name") String dbName,
+			@Context ServletContext context, 
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) throws IOException {
+ 		
+ 		
+ 		String loginName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
+		if (!userIsAllowedTo(co, Constants.USER_IS_ADMIN)) {
+			throw new RuntimeException("Permission denied to " + loginName);
+		}
+ 		
+ 		DbResponseObject response = new DbResponseObject();
+ 		
+ 		try {
+ 			lexitInfo.deleteProject(dbName);
+ 			response.setResponse("OK");
+ 		}
+		catch (Exception e) {
+			response.setResponse("Something went wrong when deleting project '"+dbName+"': " + e.getMessage());
+			return response;
+		}
+ 		
+ 		return response;
+ 	}
  	
 
  	// ------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ var lexitusers = {}
 // menu uptions
 
 lexitusers.oMenuOptions = {
+	
 	"Add/update a user" : function(){
 		lexitusers.createNewUser();
 	},
@@ -14,7 +15,15 @@ lexitusers.oMenuOptions = {
 	"Add/update roles": function(){
 		lexitusers.addRoleInProject();
 	},
-	"null": null, // separator
+	
+	"separator1": null, // separator
+	
+	"Projects menu editor": function(){
+		lexitusers.setListOfProjects();
+	},
+	
+	"separator2": null, // separator
+	
 	"Change admin password": function(){
 		lexitusers.changeAdminPassword();
 	}
@@ -47,7 +56,10 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 					lexitusers.refreshUserRight(function(){
 						fn.message("OK", "The project/role was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 							lexitusers.showMenu();
-						});				
+						});	
+						setTimeout(function(){
+							lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+						}, 100);			
 					});
 				},
 				"error": function (jqXHR, textStatus, errorThrown) {
@@ -62,7 +74,10 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 			lexitusers.refreshUserRight(function(){
 				fn.message("OK", "The user was not deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 					lexitusers.showMenu();
-				});				
+				});	
+				setTimeout(function(){
+					lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+				}, 100);			
 			});
 		}
 	);
@@ -205,6 +220,8 @@ lexitusers.deleteUser = function(){
  					["username"], 
  					[aListOfUsers], 
  					function(resp){
+						
+						var username = resp["username"];
 				
 						fn.confirm("Delete user", "Do you really want to delete user '"+resp["username"]+"'?",
 							function(){
@@ -213,7 +230,7 @@ lexitusers.deleteUser = function(){
 									"type": "GET",
 									"url": WEBSERV_URL+"/api/delete_user",
 									"data": {
-										"username": resp["username"],
+										"username": username,
 										"dummy": lexutil.getUniqueNumber()
 									},
 									"dataType": "xml", // get response as xml
@@ -223,7 +240,10 @@ lexitusers.deleteUser = function(){
 										lexitusers.refreshUserRight(function(){
 											fn.message("OK", "The user was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 												lexitusers.showMenu();
-											});				
+											});	
+											setTimeout(function(){
+												lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+											}, 100);
 										});
 										
 									},
@@ -239,7 +259,10 @@ lexitusers.deleteUser = function(){
 								lexitusers.refreshUserRight(function(){
 									fn.message("OK", "No user was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
-									});				
+									});
+									setTimeout(function(){
+										lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+									}, 100);	
 								});
 								
 							}
@@ -286,13 +309,16 @@ lexitusers.createNewUser = function(){
 			["username", "password", "default access role"], 
 			["", "", ["-::selected", "superuser", "superreader"]], 
 			function(resp){
+				
+				var username = resp["username"];
+				var password = resp["password"];
 		
  				$.ajax({
 					"type": "GET",
 					"url": WEBSERV_URL+"/api/set_user_with_role",
 					"data": {
-						"username": resp["username"],
-						"password": resp["password"],
+						"username": username,
+						"password": password,
 						"default_role": resp["default access role"],
 						"dummy": lexutil.getUniqueNumber()
 					},
@@ -303,7 +329,10 @@ lexitusers.createNewUser = function(){
 						lexitusers.refreshUserRight(function(){
 							fn.message("OK", "The user was set!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 								lexitusers.showMenu();
-							});				
+							});
+							setTimeout(function(){
+								lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+							}, 100);				
 						});
  						
 					},
@@ -344,12 +373,14 @@ lexitusers.addRoleInProject = function(){
  					["username", "default access role", "project (db)", "role in project (db)"], 
  					[aListOfUsers, ["NO CHANGE::selected", "-", "superuser", "superreader"], "", ["all::selected", "write", "read"]], 
  					function(resp){
+						
+						var username = resp["username"];
  				
 		 				$.ajax({
 							"type": "GET",
 							"url": WEBSERV_URL+"/api/set_user_with_role",
 							"data": {
-								"username": resp["username"],
+								"username": username,
 								"default_role": ( resp["default access role"] == 'NO CHANGE' ? null : resp["default access role"]),
 								"db_name": resp["project (db)"],
 								"role": resp["role in project (db)"],
@@ -362,7 +393,10 @@ lexitusers.addRoleInProject = function(){
 								lexitusers.refreshUserRight(function(){
 									fn.message("OK", "The user role was set!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
-									});				
+									});
+									setTimeout(function(){
+										lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+									}, 100);				
 								});
 								
 							},
@@ -403,6 +437,451 @@ lexitusers.addRoleInProject = function(){
 	});
 											
 };
+
+
+
+/**
+ * Show an editable list of projects, to be shown in the projects menu
+ */
+lexitusers.setListOfProjects = function(){
+	
+	
+	$.ajax({
+		"type": "GET",
+		"url": WEBSERV_URL+"/api/get_list_of_existing_projects",
+		"data": {
+			"fullinfo": true, 
+			"dummy": lexutil.getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			
+			// we'll show a sortable list of projects
+			
+			var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
+			var someExplanatoryText = $("<p></p>").html("Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section");
+			var sortableId = "sortable"+lexutil.getUniqueNumber();
+			
+			var promptDiv = $("<div></div>")
+				.attr("id", promptDivId)
+				.attr("title", "Projects menu editor")
+				.css("font-size", "12px");
+			
+			
+			var sortableUl = $("<ul></ul>")
+				.attr("id", sortableId)
+				.css("list-style-type", "none")
+				.css("margin", "0")
+				.css("padding", "0")
+				.css("width", "100%");
+					
+			var aListOfProjects = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);
+						
+			var aSectionsLabels = {
+				"production": lang.production, 
+				"goody": lang.goodies, 
+				"development": lang.in_development, 
+				"closed": lang.project_closed,
+				"unknown": lang.project_unknown
+			};
+			var aListOfSections = Object.keys(aSectionsLabels);
+			
+			
+			// first append the sections
+			for (var s=0; s<aListOfSections.length; s++){
+				
+				var sThisStatus = aListOfSections[s];
+				
+				// get label of this section
+				var sSeparatorLabel = aSectionsLabels[sThisStatus];
+					
+				// create label
+					
+				var liElement = $("<li></li>")
+				    .addClass( "separator" )
+				    .addClass( "ui-state-default")
+					.addClass( "ui-state-disabled")
+					.css("color", "black")
+					.css("opacity", "0.6")					
+					.css("border", "0px")
+                    .css("margin", "0 3px 3px -25px")
+                    .css("padding", "0.4em")
+                    .css("padding-left", "1.5em")
+                    .css("margin-top", "15px")
+                    .css("font-size", "1.1em")
+                    .css("font-weight", "bold")
+                    .css("height", "18px")
+                    .attr("id", sThisStatus);
+                var spanElement = $("<span></span>")
+                	.text( sSeparatorLabel ); // show status as separator
+                        
+                // add elements to list
+                liElement.append(spanElement);
+                sortableUl.append(liElement);
+            }
+            
+            
+            // then append the projects, under their sections			
+			
+			for (var p = 0; p < aListOfProjects.length; p++) {
+				
+				// part the project's info  (projectname, name, description, status, order_in_menu, message, redirect)
+				var aProjectInfo = (aListOfProjects[p]).split(":::");
+				var sProjectConfigFileName = aProjectInfo[0];
+				var sHumanReadableName = aProjectInfo[1];
+				var sHumanReadableDescription = aProjectInfo[2];
+				var sStatus = aProjectInfo[3];
+				var sMessage = aProjectInfo[5];
+				var sRedirect = aProjectInfo[6];
+				
+				// show project info			
+					
+				var liElement = $("<li></li>")
+					.addClass( "ui-state-default")
+					.attr("id", sProjectConfigFileName)
+					.css("margin", "0 3px 3px 3px")
+					.css("padding", "0.4em")
+					.css("padding-left", "1.5em")
+					.css("font-size", "1.0em")
+					.css("width", "95%")
+					.css("height", "18px")
+					.data("status", sStatus); // remember the status				
+				var spanElement1 = $("<span></span>")
+					.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )	
+					.css("margin-left", "-18px");
+				var spanElement2 = $("<span></span>")
+					.text( sProjectConfigFileName ); // show project project config filename
+				var spanElement3 = $("<span></span>")
+					.addClass( "ui-icon ui-icon-circle-plus" )
+					.css("position", "absolute")
+					.css("left", "740px")
+					.css("margin-top", "3px")
+					.click( function(){
+						
+						// get parent li element
+						var $li = $(this).closest("li");
+						
+						if ($(this).hasClass("ui-icon-circle-plus")) {
+							// change to minus
+							$(this).removeClass("ui-icon-circle-plus").addClass("ui-icon-circle-minus");
+							// animate height to double height
+							$li.animate({ height: "70px" }, 300, function(){
+								$li.find(".prompt_extra_field").css("visibility", "visible"); // show extra fields after animation
+							});
+							
+						}
+						else if ($(this).hasClass("ui-icon-circle-minus")) {
+							// change to plus
+							$(this).removeClass("ui-icon-circle-minus").addClass("ui-icon-circle-plus");
+							$li.find(".prompt_extra_field").css("visibility", "hidden"); // hide extra fields before animation
+							// animate height to double height
+							$li.animate({ height: "18px" }, 300);
+						}
+					});
+				var spanElement4 = $("<span></span>")
+					.addClass( "ui-icon ui-icon-closethick" )	
+					.addClass("prompt_extra_field")
+					.css("visibility", "hidden")
+					.css("position", "absolute")
+					.css("left", "740px")
+					.css("margin-top", "28px")
+					.attr("id", "delete_project_"+sProjectConfigFileName)
+					.click( function(){
+						
+						var sThisProject = $(this).attr("id").replace("delete_project_","");
+						
+						fn.confirm("Delete project", "Do you really want to delete project '"+sThisProject+"'?<BR><BR>Beware: make sure no user is assigned to this project, otherwise the deletion will fail!",
+							function(){
+	                            $.ajax({
+									"type": "GET",
+									"url": WEBSERV_URL+"/api/remove_project",
+									"data": {
+										"db_name": sThisProject, 
+										"dummy": lexutil.getUniqueNumber()
+									},
+									"dataType": "xml", // get response as xml
+									"success": function(xml) {
+										fn.message("Ok", "Project  '"+sThisProject+"' was succesfully deleted.", function(){
+											// close the dialog
+						      				fn.closeDialog();
+						      				
+						      				// go back to menu 
+				 							lexitusers.showMenu();
+										});
+									},
+									"error": function(jqXHR, textStatus, errorThrown){
+									
+										fn.message(lang.error, "Deleting project '"+sThisProject+"' went wrong: " + textStatus+" "+errorThrown);
+									}
+								});
+	                        },
+	                        function(){
+	                            fn.message("Ok", "Deletion cancelled by user.");
+	                        }
+						);
+				});
+					
+				// input fields for name and description
+					
+				var inputDiv = $("<div></div>")
+					.css("position", "relative")
+					.css("left", "280px")
+					.css("top", "-17px")
+					.css("width", "425px")
+					.css("border", "0px")
+					.css("display", "flex")
+					.css("flex-direction", "row")
+					.css("flex-wrap", "wrap");
+					
+				var inputName = $("<input></input>")
+					.attr("type", "text")
+					.css("width", "150px")
+					.css("margin", "2px")
+					.attr("placeholder", "Project name")
+					.attr("name", "prompt_name_"+sProjectConfigFileName)			
+					.attr("id", "prompt_name_"+sProjectConfigFileName)
+					.val(sHumanReadableName); 
+				var inputDescription = $("<input></input>")
+					.attr("type", "text")					
+					.css("width", "250px")
+					.css("margin", "2px")
+					.attr("placeholder", "Project description")
+					.attr("name", "prompt_desc_"+sProjectConfigFileName)			
+					.attr("id", "prompt_desc_"+sProjectConfigFileName)
+					.val(sHumanReadableDescription); 	
+					
+				// these extra input fields are hidden by default		
+					
+				var inputMessage = $("<input></input>")
+					.addClass("prompt_extra_field")
+					.attr("type", "text")			
+					.css("width", "410px")
+					.css("margin", "2px")
+					.css("visibility", "hidden")
+					.attr("placeholder", "Message to users")
+					.attr("name", "prompt_msg_"+sProjectConfigFileName)			
+					.attr("id", "prompt_msg_"+sProjectConfigFileName)
+					.val(sMessage); 
+				var inputRedirect = $("<input></input>")
+					.addClass("prompt_extra_field")
+					.attr("type", "text")			
+					.css("width", "410px")
+					.css("margin", "2px")
+					.css("visibility", "hidden")
+					.attr("placeholder", "Redirect URL (eg. to other Lex'it instance)")
+					.attr("name", "prompt_redirect_"+sProjectConfigFileName)			
+					.attr("id", "prompt_redirect_"+sProjectConfigFileName)
+					.val(sRedirect); 
+				
+				// add elements to list
+				liElement.append(spanElement1);
+				liElement.append(spanElement2);
+				liElement.append(spanElement3);
+				liElement.append(spanElement4);
+				
+				inputDiv.append(inputName);
+				inputDiv.append(inputDescription);
+				inputDiv.append(inputMessage);
+				inputDiv.append(inputRedirect);
+				
+				liElement.append(inputDiv);
+				
+				// goody projects cannot be moved nor edited
+				if (sStatus == "goody"){
+					inputName.prop("disabled", true);
+					inputDescription.prop("disabled", true);
+					liElement.addClass("ui-state-disabled");
+				}	
+				
+				
+				// append it to the right section
+				
+				// find the section separator having id value equal to sStatus
+				var $targetSeparator = sortableUl.find("li.separator#"+sStatus);
+				// find the last li having this status
+				var $lastLi = sortableUl.find("li").filter(function () {
+					return $(this).data("status") === sStatus;
+				}).last();
+				
+				// insert after last li with this status, or after the separator if none yet
+				if ($lastLi.length > 0){
+					$lastLi.after(liElement);
+				}
+				else {
+					$targetSeparator.after(liElement);
+				}
+								
+			} // end of for-loop throught all projects
+			
+				                            
+			// build the content
+			
+			promptDiv.append(someExplanatoryText);
+			promptDiv.append(sortableUl);
+			
+			promptDiv.append($("<br><br><br><br>"));
+		
+			$(document.body).append(promptDiv);
+			
+			
+			
+			// build the dialog
+			
+			// array of buttons
+			var aButtons = [];
+			
+			// Put a OK button only if we have a callback function, even an empty one
+			
+			aButtons.push({
+				
+				text: lang.ok,
+		    	click: function(){
+		    		  
+		    		// gather the new order and info of the projects
+		    		var aProjectsInNewOrder = [];
+		    		$("#"+sortableId).children("li.ui-state-default:not(.separator)").each(function(iOrderInMenu){
+						var sProjectConfigFileName = $(this).attr("id");
+						var sProjectName = $("#prompt_name_"+sProjectConfigFileName).val();
+						var sProjectDescription = $("#prompt_desc_"+sProjectConfigFileName).val();
+						var sStatus = $(this).data("status");
+						var sMessage = $("#prompt_msg_"+sProjectConfigFileName).val();
+						var sRedirect = $("#prompt_redirect_"+sProjectConfigFileName).val();
+						var aAll = [sProjectConfigFileName, sProjectName, sProjectDescription, sStatus, iOrderInMenu, sMessage, sRedirect];
+						aProjectsInNewOrder.push( aAll.join(":::") );
+					});
+					
+					$.ajax({
+						"type": "GET",
+						"url": WEBSERV_URL+"/api/set_list_of_existing_projects",
+						"data": {
+							"projectlist": aProjectsInNewOrder.join(ARG_INTERNAL_SEPARATOR),
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							fn.message(lang.ok, "The projects list was updated", 
+								function(){
+									// close the dialog
+				      				fn.closeDialog();
+				      				
+				      				// go back to menu 
+		 							lexitusers.showMenu();
+								}
+							);
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, "Updating the projects list went wrong: " + textStatus+" "+errorThrown, 
+								function(){
+									// close the dialog
+				      				fn.closeDialog();
+				      				
+				      				// go back to menu 
+		 							lexitusers.showMenu();
+								}
+							);
+						}
+	 				});						                		
+						                			
+		      		
+		    		           		 
+		    	},
+		    	id: 'dialog_accept_button'
+			});
+			
+		
+			// A cancel button is always needed
+			
+			aButtons.push({
+		  	  text: lang.cancel,
+			  click: function() {
+				  // close the dialog
+      				fn.closeDialog();
+      				
+      				// go back to menu 
+					lexitusers.showMenu();				
+		      }
+			});
+			
+			
+			$( "#"+promptDivId ).dialog({
+				autoOpen: false,
+		        height: 650,
+		        width: 800,
+		        modal: true,
+		        buttons: aButtons,
+		        close: function(event, ui){
+		        	$( this ).remove();
+		        },
+		        open: function(event, ui){
+		        	// style
+		            $(".ui-dialog").addClass("ui-dialog-shadow");
+		            $( this ).closest(".ui-dialog").putInFront();
+		        }
+			})
+			.keyup(function(e) {
+				if (kf.isPressed("enter")){			
+					$( "#dialog_accept_button" ).click();
+					return false;
+				}
+			});
+			
+			$( "#"+promptDivId ).dialog( "open" );
+	
+			$( "#"+sortableId ).sortable({
+				start: function (event, ui) {
+			        // remember original position
+			        ui.item.data("oldIndex", ui.item.index());
+			    },
+				cancel: ".ui-state-disabled",	// cannot move disabled items
+				update: function( event, ui ) {
+					
+					// when an item was moved, make sure it get the status label of the section it's been dragged to
+					
+					// so first get old and new index
+					const oldIndex = ui.item.data("oldIndex");
+        			const newIndex = ui.item.index();
+        			
+					// get the separator preceeding this item (its id is the status name)
+					var sIdOfPrecedingSeparator = ui.item.prevAll("li.separator").first().attr("id");	
+					
+					// if the item was moved to the goodies, UNDO the change since this move is verbidden
+					if (sIdOfPrecedingSeparator == "goody"){
+						// Move item back to original position
+			            const $item = ui.item;
+			            const $parent = $item.parent();
+			            
+			            // Remove & reinsert at old position
+			            if (oldIndex === 0) {
+			                $parent.prepend($item);
+			            } 
+			            else {
+			                $parent.children().eq(oldIndex).before($item);
+			            }
+					}
+					// else just assign the status name to the item's data
+					else {
+						$(ui.item).data("status", sIdOfPrecedingSeparator);						
+					}
+					
+				}
+			});
+
+		    $( "#"+sortableId ).disableSelection();
+		    
+		    // make sure that clicking an input field focuses it
+		    $( "#"+sortableId ).find( "input").click(function( event ) {
+				$(this).focus();
+			});
+			
+		}
+	});
+	
+};
+
+
+
 
 
 /**
@@ -473,7 +952,7 @@ lexitusers._showMenu = function(){
 lexitusers.showMenu = function(){
 	
 	// build options, replacing "null" with the separator value (for empty line to separate groups)
-	var options = Object.keys(lexitusers.oMenuOptions).map(item => item === "null" ? null : item);;	
+	var options = Object.keys(lexitusers.oMenuOptions).map(item => $.startsWith(item, "separator") ? null : item);
 	
 	// first refresh user rights and overview
 	lexitusers.refreshUserRight(function(){

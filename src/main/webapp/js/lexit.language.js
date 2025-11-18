@@ -68,6 +68,9 @@ lang.in_development = "In ontwikkeling";
 lang.project_closed = "Afgesloten - Archief";
 lang.project_unknown = "Onbekend";
 
+// project editor
+lang.project_editor = "Projectmenu bewerken";
+
 // table selection
 lang.choose_a_table = "Kies een tabel: <I>(vooraf "+(lang.isMac?"Command":"CTRL")+" ingedrukt houden om tabel toe te voegen, of SHIFT voor tabel in nieuwe tab)</I>";
 lang.choose_a_table_default_value = "Kies een tabel";
@@ -208,6 +211,7 @@ lang.loading_projects_list_failed = "Het projectenoverzicht 'projects_overview.j
 lang.reading_internal_separator_failed = "Het ophalen van de Interne separator string is mislukt.";
 lang.saving_active_tab_failed = "Het registeren van de active tab is mislukt.";
 lang.reading_the_list_of_config_files_failed = "Het ophalen van de lijst configuratiebestanden is mislukt.";
+lang.getting_projectslist_from_service_failed = "Het ophalen van de lijst projecten van de webservice is mislukt.";
 lang.opening_config_file_failed = "Het configuratiebestand bestaat niet of het bevat fouten.";
 lang.file_is_missing = "heeft mogelijk geen configuratie-bestand meer op deze server";
 lang.missing_database_indexes = "Voor de huidige sorteerkolommen zijn geen indexen beschikbaar.<BR>" +
@@ -1613,6 +1617,9 @@ lang.setLanguage = function(sLanguageCode){
 		lang.in_development = "In development";
 		lang.project_closed = "Closed - Archive";
 		lang.project_unknown = "Unknown";
+		
+		// project editor
+		lang.project_editor = "Project menu editor";
 
 		// table selection
 		lang.choose_a_table = "Choose a table: <I>(first press "+(lang.isMac?"Command":"CTRL")+" & click to add a table, or press SHIFT & click to open it in a new tab)</I>";
@@ -1756,6 +1763,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.reading_internal_separator_failed = "Lex'it wasn't able to read the internal separator string";
 		lang.saving_active_tab_failed = "Lex'it wasn't able to save the active tab.";
 		lang.reading_the_list_of_config_files_failed = "Lex'it wasn't able to read the list of configuration files.";
+		lang.getting_projectslist_from_service_failed = "Lex'it wasn't able to get the projects list from the webservice.";
 		lang.opening_config_file_failed = "The config file doesn't exist or it may contain errors.";
 		lang.file_is_missing = "might not have any configuration file left on the server";
 		lang.missing_database_indexes = "No indexes available for the current sorting columns.<BR>" +

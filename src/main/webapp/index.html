@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.11.12
+	v2025.11.18
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -292,7 +292,7 @@
 			// and start app in the right mode			
 			fn.setCurrentUser(null, function(){
 				
-				// when a projectname is specified as URL param 'db', this function will call getConfigFilesList() and initialize() to start the project 
+				// when a projectname is specified as URL param 'db', this function will call startProjectOrGetConfigFilesList() and initialize() to start the project 
 				startInRightMode();	
 			});
 			
@@ -595,14 +595,14 @@
 					// The ajax call gets the list of declared projects out of the projects overview file.
 					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
 					// In the end, this function will call initialize();
-					getConfigFilesList();
+					startProjectOrGetConfigFilesList();
 
 				})
 				.fail(function(jqxhr, settings, exception){
-					// OLD behaviour: fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
-				
-					// missing the 'projects_overview.js' file is now allowed, just initialize
-					initialize();
+					
+					// the 'projects_overview.js' is missing
+					// try to get the list of config files directly from server
+					getProjectOverviewFromWebservice();
 				});
 		}
 
@@ -622,15 +622,14 @@
 					// The ajax call gets the list of declared projects out of the projects overview file.
 					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
 					// In the end, this function will call initialize();
-					getConfigFilesList();
+					startProjectOrGetConfigFilesList();
 
 				},
 				"error": function(jqxhr, settings, exception){
 					
-					// OLD behaviour: fn.message(lang.error, lang.loading_projects_list_failed +"<br><br>"+ lang.error +": ["+exception+"]<BR><BR>");
-					
-					// missing the 'projects_overview.js' file is now allowed, just initialize
-					initialize();
+					// the 'projects_overview.js' is missing
+					// try to get the list of config files directly from server
+					getProjectOverviewFromWebservice();
 				}
 
 			});
@@ -1011,9 +1010,10 @@
 	// We'll need this to be able to show projects which are not declared (yet?) in the projects overview file:
 	// the list will lack descriptions, but at least the projects will be shown and will be clickable!
 	
-	function getConfigFilesList(){
+	function startProjectOrGetConfigFilesList(){
 
-		// if some project was selected already, no need to get the list, 
+		// if some project was selected already, 
+		// no need to retrieve the list of config files from the SERVER, 
 		// initialize straight away!
 		if (paramsHash!=null &&	paramsHash.get("db")!=null){
 			initialize();
@@ -1060,6 +1060,75 @@
 
 	}
 	
+	
+	// Get full project overview from webservice
+	// (alternative to the projects_overview.js file)
+	function getProjectOverviewFromWebservice(){
+		
+		lexutil.showSpinner("#dynamic", true);
+		
+		var url = WEBSERV_URL+"/api/get_list_of_existing_projects";
+		
+		$.ajax({
+			"type": "GET",
+			"url": url,
+			"dataType": "xml", // get response as xml
+			"data": {
+				"fullinfo": true,
+				"dummy": getUniqueNumber()
+			},
+			"success": function(xml){
+				
+				var sList = fn.getDbResponse(xml);
+				aProjectInfo = sList.split(ARG_INTERNAL_SEPARATOR);
+				
+				// build project overview list
+				aProjectList = [];					
+				for (var i=0; i<aProjectInfo.length; i++){
+					
+					// [0] projectname (=configfile name), [1] name (=human readable name), [2] description, [3] status, [4] order_in_menu, [5] message, [6] redirect
+					var aOneProjectInfo = aProjectInfo[i].split(":::");
+					
+					console.log("Project info:", aOneProjectInfo);
+					
+					var oProject = {};
+					oProject["config_filename"] = aOneProjectInfo[0];
+					oProject["name"] = ( aOneProjectInfo[1] != '' ? aOneProjectInfo[1] : aOneProjectInfo[0]);
+					oProject["description"] = aOneProjectInfo[2];
+					
+					if (aOneProjectInfo[5] != null && aOneProjectInfo[5] != ''){
+						oProject["message"] = aOneProjectInfo[5];
+					}
+					if (aOneProjectInfo[6] != null && aOneProjectInfo[6] != ''){
+						oProject["redirect"] = aOneProjectInfo[6];
+					}
+					
+					var sStatus = aOneProjectInfo[3];
+					if ($.inArray(sStatus, ['production', 'closed', 'goody', 'unknown']) > -1) {
+						oProject[sStatus] = true; 
+					}						
+					
+					// add to list
+					aProjectList.push(oProject);
+					
+					console.log(oProject);
+				}
+
+				// remove spinner
+				lexutil.removeSpinner("#dynamic");
+				
+				// go!
+				initialize();
+			},
+			"error": function(jqxhr, settings, exception){
+				fn.message(lang.error, lang.getting_projectslist_from_service_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
+			}
+		});
+	
+	}
+		
+	
+	
 	// end of : called by $(document).ready()
 	
 	
@@ -1068,7 +1137,7 @@
 	
 	// Initialize the application.
 	// This happens once the libraries are fully loaded and we have a list of all projects 
-	// ( which is why this function will be called by getConfigFilesList )
+	// ( which is why this function will be called by startProjectOrGetConfigFilesList() )
 	
 	function initialize(){	
 		
@@ -1166,9 +1235,11 @@
 			// show message or warning for this project, if available
 			
 			var oProjectObject = getProjectObject(paramsHash.get("db"));
+			
+			console.log(oProjectObject);
 
 			// set a default project name for display on screen (and set front character in uppercase)
-			// this default name might be overwritten by configuration in project_overview.js, if some project 'name' was set there
+			// this default name might be overwritten by configuration in projects_overview.js, if some project 'name' was set there
 			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
 
 			if (typeof oProjectObject != 'undefined') {
@@ -1397,8 +1468,8 @@
 				.append(goodiesSection)
                 .append(developmentSection)
                 .append(closedSection)
-                .append(unknownSection)
-
+                .append(unknownSection);
+			
 		}
 		else {
 			fn.message(lang.error, lang.access_denied);
@@ -1408,6 +1479,8 @@
 	
 	// get all the properties belonging to the description of a project
 	function getProjectObject(sDbName){
+		
+		console.log(aProjectList);
 		
 		var oObjectToReturn;
 		
