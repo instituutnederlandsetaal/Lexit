@@ -12,7 +12,7 @@ lexitusers.oMenuOptions = {
 	"Delete a user": function () {
 		lexitusers.deleteUser();
 	},
-	"Add/update projects & roles": function(){
+	"Add/update roles": function(){
 		lexitusers.addRoleInProject();
 	},
 	
@@ -459,7 +459,9 @@ lexitusers.setListOfProjects = function(){
 			// we'll show a sortable list of projects
 			
 			var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
-			var someExplanatoryText = $("<p></p>").html("Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section");
+			var someExplanatoryText = $("<p></p>").html("<B>Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section</B><BR><BR>"+
+				"Please note: A project must be assigned to a user before it can be displayed here (check 'Add/update roles' in the menu)<BR>");
+			
 			var sortableId = "sortable"+lexutil.getUniqueNumber();
 			
 			var promptDiv = $("<div></div>")
