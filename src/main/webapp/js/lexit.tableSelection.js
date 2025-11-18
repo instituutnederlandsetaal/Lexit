@@ -296,6 +296,10 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 			// skip table that doesn't belong to current group
 			if ($.inArray(asTableNames[i], aCurrentGroupOfTables)<0)
 				continue;
+				
+			// skip table if it is already part of the list (to avoid duplicates)
+			if (selectTagToAdd.find("option[value='"+asTableNames[i]+"']").length > 0)
+				continue;
 			
 			// outside home environment, showing table comments is not allowed
 			var bShowTableComments = ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 );
