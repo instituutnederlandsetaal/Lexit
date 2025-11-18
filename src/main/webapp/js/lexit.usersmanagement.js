@@ -12,7 +12,7 @@ lexitusers.oMenuOptions = {
 	"Delete a user": function () {
 		lexitusers.deleteUser();
 	},
-	"Add/update roles": function(){
+	"Add/update projects & roles": function(){
 		lexitusers.addRoleInProject();
 	},
 	
