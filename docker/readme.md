@@ -13,6 +13,10 @@ LEXIT_SCHEMA_HOST=
 LEXIT_SCHEMA_USER=
 LEXIT_SCHEMA_PASSWORD=
 
+# Whether this is development deployment.
+# If so, we let *.dev.database override *.database (if present)
+DEV=false
+
 # projects retrieved from https://github.com/instituutnederlandsetaal/Lexit-configs by default
 PROJECTS_GIT=https://github.com/instituutnederlandsetaal/Lexit-configs
 # comma-or-newline-or-both separated projects list. Use a string when using newlines.

@@ -54,6 +54,18 @@ echo "host=$LEXIT_SCHEMA_HOST" >> $lexit_schema
 echo "user=$LEXIT_SCHEMA_USER" >> $lexit_schema
 echo "pass=$LEXIT_SCHEMA_PASSWORD" >> $lexit_schema
 
+# If this is development deployment, move each *.dev.database to *.database, overriding it.
+if [ "$DEV" == "true" ]; then
+    echo "Development deployment: overriding database configs with .dev versions where available"
+    for dev_db_file in $TMP_LEXIT_DB_CONFIG/*.dev.database; do
+        if [ -f "$dev_db_file" ]; then
+            base_db_file="${dev_db_file%.dev.database}.database"
+            mv "$dev_db_file" "$base_db_file"
+            echo "Overridden: $(basename "$base_db_file") with development version"
+        fi
+    done
+fi
+
 # rsync from tmp to real
 echo "Copying tmp folder to real folder"
 rsync -r --delete $TMP_LEXIT_CONFIG lexit2_config/ 2>/dev/null || echo -e "${YELLOW}WARNING: Incomplete rsync of lexit2_config ${NC}"
