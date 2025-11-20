@@ -2,44 +2,19 @@ var lexitusers = {}
 
 
 
-// menu uptions
-
-lexitusers.oMenuOptions = {
-	
-	"Add/update a user" : function(){
-		lexitusers.createNewUser();
-	},
-	"Delete a user": function () {
-		lexitusers.deleteUser();
-	},
-	"Add/update roles": function(){
-		lexitusers.addRoleInProject();
-	},
-	
-	"separator1": null, // separator
-	
-	"Projects menu editor": function(){
-		lexitusers.setListOfProjects();
-	},
-	
-	"separator2": null, // separator
-	
-	"Change admin password": function(){
-		lexitusers.changeAdminPassword();
-	}
-};
+// kind of global storage for overview of users and roles
+lexitusers.overviewOfUsersAndRoles;	
 
 
-// kind of global store for overview of users and roles
-lexitusers.overviewOfUsersAndRoles;						 	
 
 
 /**
  * Delete a project role for a user (after confirmation)
+ * This function is called when clicking a red cross next to a project role in the overview
  */
 lexitusers.dropProjectRoleForUser = function(project, username){	
 	
-	fn.confirm("Delete project role", "Do you really want to delete the role of '"+username+"' in project '"+project+"'?",
+	fn.confirm(lang.admingui_drop_projectrole_title, (lang.admingui_drop_projectrole_msg).replace(/USERNAME/g, username).replace(/PROJECTNAME/g, project),
 		function(){
 			
 			$.ajax({
@@ -54,7 +29,7 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 				"success": function(xml) {
 					fn.closeDialog();
 					lexitusers.refreshUserRight(function(){
-						fn.message("OK", "The project/role was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+						fn.message(lang.ok, lang.admingui_drop_projectrole_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 							lexitusers.showMenu();
 						});	
 						setTimeout(function(){
@@ -63,7 +38,7 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 					});
 				},
 				"error": function (jqXHR, textStatus, errorThrown) {
-						fn.message(lang.error, "Deleting the user role went wrong: " + textStatus + " " + errorThrown);
+						fn.message(lang.error, lang.admingui_drop_projectrole_error+" " + textStatus + " " + errorThrown);
 					}
 				}
 			);			
@@ -72,7 +47,7 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 			
 			fn.closeDialog();
 			lexitusers.refreshUserRight(function(){
-				fn.message("OK", "The user was not deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+				fn.message(lang.ok, lang.admingui_drop_projectrole_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 					lexitusers.showMenu();
 				});	
 				setTimeout(function(){
@@ -143,7 +118,7 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			
-			fn.message(lang.error, "Setting user right went wrong: " + textStatus+" "+errorThrown);
+			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
 		}
 	});			 				
 
@@ -166,7 +141,7 @@ lexitusers.refreshUserRight = function(fnCallback){
 			lexitusers.updateOverviewOfUsersAndRoles( function(){fnCallback();} );			
 		},
 		"error": function (jqXHR, textStatus, errorThrown) {
-				fn.message(lang.error, "Resetting users rights went wrong: " + textStatus + " " + errorThrown);
+				fn.message(lang.error, lang.admingui_refresh_users_rights_error+" " + textStatus + " " + errorThrown);
 			}
 		}
 	);
@@ -191,7 +166,7 @@ lexitusers.getDefaultRole = function(someUser, fnCallback){
 			fnCallback( $(xml).find("response").text() );
 		},
 		"error": function (jqXHR, textStatus, errorThrown) {
-				fn.message(lang.error, "Reading the default role went wrong: " + textStatus + " " + errorThrown);
+				fn.message(lang.error, lang.admingui_get_users_default_role_error+" " + textStatus + " " + errorThrown);
 			}
 		}
 	);
@@ -216,14 +191,14 @@ lexitusers.deleteUser = function(){
 			var aListOfUsers = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR).sort();
 			aListOfUsers = aListOfUsers.filter(someUser => someUser != "admin");
 			
-			fn.prompt(["Delete user", lexitusers.overviewOfUsersAndRoles +"<BR><DIV>Delete user:</DIV>"], 
+			fn.prompt([lang.admingui_deleteuser_title, lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_deleteuser_selector_msg+"</DIV>"], 
  					["username"], 
  					[aListOfUsers], 
  					function(resp){
 						
 						var username = resp["username"];
 				
-						fn.confirm("Delete user", "Do you really want to delete user '"+resp["username"]+"'?",
+						fn.confirm(lang.admingui_deleteuser_title, (lang.admingui_deleteuser_confirm_msg).replace(/USERNAME/g, username),
 							function(){
 							
 								$.ajax({
@@ -238,7 +213,7 @@ lexitusers.deleteUser = function(){
 										
 										fn.closeDialog();										
 										lexitusers.refreshUserRight(function(){
-											fn.message("OK", "The user was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+											fn.message(lang.ok, lang.admingui_deleteuser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 												lexitusers.showMenu();
 											});	
 											setTimeout(function(){
@@ -249,7 +224,7 @@ lexitusers.deleteUser = function(){
 									},
 									"error": function(jqXHR, textStatus, errorThrown){
 										
-										fn.message(lang.error, "Deleting the user went wrong: " + textStatus+" "+errorThrown);
+										fn.message(lang.error, lang.admingui_deleteuser_error+" " + textStatus+" "+errorThrown);
 									}
 				 				});
 							},
@@ -257,7 +232,7 @@ lexitusers.deleteUser = function(){
 								
 								fn.closeDialog();
 								lexitusers.refreshUserRight(function(){
-									fn.message("OK", "No user was deleted!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									fn.message(lang.ok, lang.admingui_deleteuser_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
 									});
 									setTimeout(function(){
@@ -291,7 +266,7 @@ lexitusers.deleteUser = function(){
 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			
-			fn.message(lang.error, "Setting user role went wrong: " + textStatus+" "+errorThrown);
+			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
 		}
 	});
 
@@ -304,8 +279,8 @@ lexitusers.deleteUser = function(){
  */
 lexitusers.createNewUser = function(){
 	
-	fn.prompt(["Create/update user", 
-			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>Create or update a user:<BR><BR>If 'password' needs no update, leave it empty!</DIV>"], 
+	fn.prompt([lang.admingui_adduser_title, 
+			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_adduser_msg+"</DIV>"], 
 			["username", "password", "default access role"], 
 			["", "", ["-::selected", "superuser", "superreader"]], 
 			function(resp){
@@ -327,7 +302,7 @@ lexitusers.createNewUser = function(){
 						
 						fn.closeDialog();
 						lexitusers.refreshUserRight(function(){
-							fn.message("OK", "The user was set!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+							fn.message("OK", lang.admingui_adduser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 								lexitusers.showMenu();
 							});
 							setTimeout(function(){
@@ -338,7 +313,7 @@ lexitusers.createNewUser = function(){
 					},
 					"error": function(jqXHR, textStatus, errorThrown){
 						
-						fn.message(lang.error, "Setting user right went wrong: " + textStatus+" "+errorThrown);
+						fn.message(lang.error, lang.admingui_adduser_error+" " + textStatus+" "+errorThrown);
 					}
  				});
 			},
@@ -368,8 +343,8 @@ lexitusers.addRoleInProject = function(){
 			var aListOfUsers = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);
 			aListOfUsers = aListOfUsers.filter(someUser => someUser != "admin").sort();
 			
-			fn.prompt(["Create/update roles", 
-				lexitusers.overviewOfUsersAndRoles +"<BR><DIV>Create/update roles:</DIV>"], 
+			fn.prompt([lang.admingui_addrole_title, 
+				lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_addrole_msg+"</DIV>"], 
  					["username", "default access role", "project (db)", "role in project (db)"], 
  					[aListOfUsers, ["NO CHANGE::selected", "-", "superuser", "superreader"], "", ["all::selected", "write", "read"]], 
  					function(resp){
@@ -391,7 +366,7 @@ lexitusers.addRoleInProject = function(){
 								
 								fn.closeDialog();
 								lexitusers.refreshUserRight(function(){
-									fn.message("OK", "The user role was set!<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									fn.message(lang.ok, lang.admingui_addrole_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
 									});
 									setTimeout(function(){
@@ -402,7 +377,7 @@ lexitusers.addRoleInProject = function(){
 							},
 							"error": function(jqXHR, textStatus, errorThrown){
 								
-								fn.message(lang.error, "Setting user right went wrong: " + textStatus+" "+errorThrown);
+								fn.message(lang.error, lang.admingui_addrole_error+" " + textStatus+" "+errorThrown);
 							}
 		 				});
  					},
@@ -432,7 +407,7 @@ lexitusers.addRoleInProject = function(){
 		},
 		"error": function(jqXHR, textStatus, errorThrown){
 			
-			fn.message(lang.error, "Setting user role went wrong: " + textStatus+" "+errorThrown);
+			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
 		}
 	});
 											
@@ -459,14 +434,13 @@ lexitusers.setListOfProjects = function(){
 			// we'll show a sortable list of projects
 			
 			var promptDivId = "dialog-message"+lexutil.getUniqueNumber();
-			var someExplanatoryText = $("<p></p>").html("<B>Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section</B><BR><BR>"+
-				"Please note: A project must be assigned to a user before it can be displayed here (check 'Add/update roles' in the menu)<BR>");
+			var someExplanatoryText = $("<p></p>").html(lang.admingui_projectmenu_msg);
 			
 			var sortableId = "sortable"+lexutil.getUniqueNumber();
 			
 			var promptDiv = $("<div></div>")
 				.attr("id", promptDivId)
-				.attr("title", "Projects menu editor")
+				.attr("title", lang.admingui_projectmenu_title)
 				.css("font-size", "12px");
 			
 			
@@ -592,7 +566,7 @@ lexitusers.setListOfProjects = function(){
 						
 						var sThisProject = $(this).attr("id").replace("delete_project_","");
 						
-						fn.confirm("Delete project", "Do you really want to delete project '"+sThisProject+"'?<BR><BR>Beware: make sure no user is assigned to this project, otherwise the deletion will fail!",
+						fn.confirm(lang.admingui_projectmenu_delete_project, (lang.admingui_projectmenu_delete_project_warning).replace(/PROJECTNAME/g, sThisProject),
 							function(){
 	                            $.ajax({
 									"type": "GET",
@@ -603,7 +577,7 @@ lexitusers.setListOfProjects = function(){
 									},
 									"dataType": "xml", // get response as xml
 									"success": function(xml) {
-										fn.message("Ok", "Project  '"+sThisProject+"' was succesfully deleted.", function(){
+										fn.message(lang.ok, (lang.admingui_projectmenu_delete_project_success).replace(/PROJECTNAME/g, sThisProject), function(){
 											// close the dialog
 						      				fn.closeDialog();
 						      				
@@ -613,12 +587,12 @@ lexitusers.setListOfProjects = function(){
 									},
 									"error": function(jqXHR, textStatus, errorThrown){
 									
-										fn.message(lang.error, "Deleting project '"+sThisProject+"' went wrong: " + textStatus+" "+errorThrown);
+										fn.message(lang.error, (lang.admingui_projectmenu_delete_project_error).replace(/PROJECTNAME/g, sThisProject)+" " + textStatus+" "+errorThrown);
 									}
 								});
 	                        },
 	                        function(){
-	                            fn.message("Ok", "Deletion cancelled by user.");
+	                            fn.message(lang.ok, lang.admingui_projectmenu_delete_project_cancel);
 	                        }
 						);
 				});
@@ -639,7 +613,7 @@ lexitusers.setListOfProjects = function(){
 					.attr("type", "text")
 					.css("width", "150px")
 					.css("margin", "2px")
-					.attr("placeholder", "Project name")
+					.attr("placeholder", lang.admingui_projectmenu_placeholder_projectname)
 					.attr("name", "prompt_name_"+sProjectConfigFileName)			
 					.attr("id", "prompt_name_"+sProjectConfigFileName)
 					.val(sHumanReadableName); 
@@ -647,7 +621,7 @@ lexitusers.setListOfProjects = function(){
 					.attr("type", "text")					
 					.css("width", "250px")
 					.css("margin", "2px")
-					.attr("placeholder", "Project description")
+					.attr("placeholder", lang.admingui_projectmenu_placeholder_projectdescription)
 					.attr("name", "prompt_desc_"+sProjectConfigFileName)			
 					.attr("id", "prompt_desc_"+sProjectConfigFileName)
 					.val(sHumanReadableDescription); 	
@@ -660,7 +634,7 @@ lexitusers.setListOfProjects = function(){
 					.css("width", "410px")
 					.css("margin", "2px")
 					.css("visibility", "hidden")
-					.attr("placeholder", "Message to users")
+					.attr("placeholder", lang.admingui_projectmenu_placeholder_message_to_users)
 					.attr("name", "prompt_msg_"+sProjectConfigFileName)			
 					.attr("id", "prompt_msg_"+sProjectConfigFileName)
 					.val(sMessage); 
@@ -670,7 +644,7 @@ lexitusers.setListOfProjects = function(){
 					.css("width", "410px")
 					.css("margin", "2px")
 					.css("visibility", "hidden")
-					.attr("placeholder", "Redirect URL (eg. to other Lex'it instance)")
+					.attr("placeholder", lang.admingui_projectmenu_placeholder_redirect_url)
 					.attr("name", "prompt_redirect_"+sProjectConfigFileName)			
 					.attr("id", "prompt_redirect_"+sProjectConfigFileName)
 					.val(sRedirect); 
@@ -762,7 +736,7 @@ lexitusers.setListOfProjects = function(){
 						"dataType": "xml", // get response as xml
 						"success": function(xml) {
 							
-							fn.message(lang.ok, "The projects list was updated", 
+							fn.message(lang.ok, lang.admingui_projectmenu_update_success, 
 								function(){
 									// close the dialog
 				      				fn.closeDialog();
@@ -774,7 +748,7 @@ lexitusers.setListOfProjects = function(){
 						},
 						"error": function(jqXHR, textStatus, errorThrown){
 							
-							fn.message(lang.error, "Updating the projects list went wrong: " + textStatus+" "+errorThrown, 
+							fn.message(lang.error, lang.admingui_projectmenu_update_error+" " + textStatus+" "+errorThrown, 
 								function(){
 									// close the dialog
 				      				fn.closeDialog();
@@ -891,7 +865,7 @@ lexitusers.setListOfProjects = function(){
  */
 lexitusers.changeAdminPassword = function(){
 	
-	fn.prompt("Change admin password", ["current password", "new password"], null,
+	fn.prompt(lang.admingui_changeadminpassword_title, [lang.admingui_changeadminpassword_old_password, lang.admingui_changeadminpassword_new_password], null,
 	
 		function(resp){
 			
@@ -899,8 +873,8 @@ lexitusers.changeAdminPassword = function(){
 					"type": "GET",
 					"url": WEBSERV_URL+"/api/change_admin_password",
 					"data": {
-						"old_password": resp["current password"],
-						"new_password": resp["new password"],
+						"old_password": resp[lang.admingui_changeadminpassword_old_password],
+						"new_password": resp[lang.admingui_changeadminpassword_new_password],
 						"dummy": lexutil.getUniqueNumber()
 					},
 					"dataType": "xml", // get response as xml
@@ -908,7 +882,7 @@ lexitusers.changeAdminPassword = function(){
 						
 						fn.closeDialog();
 						lexitusers.refreshUserRight(function(){
-							fn.message("OK", "The new admin password was set!", function(){
+							fn.message(lang.ok, lang.admingui_changeadminpassword_success, function(){
 								lexitusers.showMenu();
 							});				
 						});
@@ -916,7 +890,7 @@ lexitusers.changeAdminPassword = function(){
 					},
 					"error": function(jqXHR, textStatus, errorThrown){
 						
-						fn.message(lang.error, "Setting the new admin password went wrong: " + textStatus+" "+errorThrown);
+						fn.message(lang.error, lang.admingui_changeadminpassword_error+" " + textStatus+" "+errorThrown);
 						
 						setTimeout(function(){							
 							fn.closeDialog();
@@ -938,35 +912,37 @@ lexitusers.changeAdminPassword = function(){
 
 
 
-/**
- * Ask the admin to choose what to do
- */ 
-lexitusers._showMenu = function(){
-	lexitusers.refreshUserRight(function(){
-        fn.askToChoose("User management", "Would you like to:", lexitusers.oMenuOptions);
-    });
-};
-
 
 /**
  * Show the main menu
  */
 lexitusers.showMenu = function(){
 	
+	var oMenuOptions = {};
+	
+	// menu options in current language, with associated callback functions
+	oMenuOptions[lang.admingui_main_dialog_add_user] = 			function(){lexitusers.createNewUser();};
+	oMenuOptions[lang.admingui_main_dialog_delete_user] =		function(){lexitusers.deleteUser();};
+	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
+	oMenuOptions["separator1"] = 								null;
+	oMenuOptions[lang.admingui_main_dialog_projectmenu] =		function(){lexitusers.setListOfProjects();};	
+	oMenuOptions["separator2"] = 								null;	
+	oMenuOptions[lang.admingui_main_dialog_admin_password] =	function(){lexitusers.changeAdminPassword();};
+	
 	// build options, replacing "null" with the separator value (for empty line to separate groups)
-	var options = Object.keys(lexitusers.oMenuOptions).map(item => $.startsWith(item, "separator") ? null : item);
+	var options = Object.keys(oMenuOptions).map(item => $.startsWith(item, "separator") ? null : item);
 	
 	// first refresh user rights and overview
 	lexitusers.refreshUserRight(function(){
 		
 		// show menu
-        fn.promptSelect(["User management", "Would you like to:"], 
+        fn.promptSelect([lang.admingui_main_dialog_title, lang.admingui_main_dialog_msg], 
         options,
         null, 
         function(resp){
 			
 			// get callback function associated with the chosen option and call it
-			var fnCallBack = lexitusers.oMenuOptions[resp[0]];			
+			var fnCallBack = oMenuOptions[resp[0]];			
 			fnCallBack();			
 		},
 		function(){
@@ -1005,7 +981,7 @@ lexitusers.smoothScroll = function(div, anchor) {
  */
 lexitusers.setProjectAutoComplete = function(){
 	
-	$("#prompt_projectdb").attr("placeholder", "Start typing to get project name...")
+	$("#prompt_projectdb").attr("placeholder", lang.admingui_addrole_projectname_autocomplete);
 	
 	// gist list of existing projects from entry point  
 	

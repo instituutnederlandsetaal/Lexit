@@ -184,7 +184,67 @@ lang.paginate_previous = "Vorige";
 lang.paginate_next = "Volgende";
 lang.paginate_last = "Laatste";
 
-// error message
+
+// admin GUI
+lang.admingui_main_dialog_title = "Projecten- en gebruikersbeheer";
+lang.admingui_main_dialog_msg = "Maak een keuze:";
+lang.admingui_main_dialog_add_user = "Gebruiker toevoegen/bijwerken";
+lang.admingui_main_dialog_delete_user = "Gebruiker verwijderen";
+lang.admingui_main_dialog_add_role = "Gebruikersrol toevoegen/bijwerken";
+lang.admingui_main_dialog_projectmenu = "Projectmenu bewerken";
+lang.admingui_main_dialog_admin_password = "Admin wachtwoord wijzigen";
+
+lang.admingui_get_users_default_role_error = "Het lezen van de default-rol is mislukt:";
+lang.admingui_get_users_roles_error = "Het lezen van de lijst gebruikers en rechten is mislukt:";
+
+lang.admingui_refresh_users_rights_error = "Het verversen van de gebruikersrechten is mislukt:";  
+
+lang.admingui_adduser_title = "Gebruiker toevoegen/bijwerken";
+lang.admingui_adduser_msg = "Gebruiker toevoegen/bijwerken:<BR><BR>Als het 'password' geen update behoeft, laat het leeg!";
+lang.admingui_adduser_success = "De gebruiker is opgeslagen!";
+lang.admingui_adduser_error = "Het opslaan van de gebruiker is mislukt:";
+
+lang.admingui_deleteuser_title = "Gebruiker verwijderen";
+lang.admingui_deleteuser_selector_msg = "Gebruiker verwijderen:";
+lang.admingui_deleteuser_confirm_msg = "Weet u zeker dat u gebruiker 'USERNAME' wilt verwijderen?";
+lang.admingui_deleteuser_success = "De gebruiker is verwijderd!";
+lang.admingui_deleteuser_error = "Het verwijderen van de gebruiker is mislukt:";
+lang.admingui_deleteuser_cancel = "Het verwijderen van de gebruiker is geannuleerd!";		
+
+lang.admingui_drop_projectrole_title = "Verwijder gebruikersrol in project";
+lang.admingui_drop_projectrole_msg = "Weet u zeker dat u de rol van gebruiker 'USERNAME' in project 'PROJECTNAME' wilt verwijderen?";
+lang.admingui_drop_projectrole_success = "De gebruikersrol is verwijderd!";
+lang.admingui_drop_projectrole_cancel = "Het verwijderen van de gebruikersrol is geannuleerd!";
+lang.admingui_drop_projectrole_error = "Het verwijderen van de gebruikersrol is mislukt:";
+
+lang.admingui_addrole_title = "Gebruikersrol toevoegen/bijwerken";
+lang.admingui_addrole_msg = "Gebruikersrol toevoegen/bijwerken:";
+lang.admingui_addrole_projectname_autocomplete = "Tik een projectnaam...";
+lang.admingui_addrole_success = "De Gebruikersrol is opgeslagen!";
+lang.admingui_addrole_error = "Het opslaan van de Gebruikersrol is mislukt:";
+
+lang.admingui_projectmenu_title = "Projectmenu bewerken";
+lang.admingui_projectmenu_msg = "<B>Vul een projectnaam en -omschrijving in &nbsp;&nbsp;|&nbsp;&nbsp; sleep naar de juiste sectie</B><BR><BR>"+
+		"Let wel: een project wordt hier pas zichtbaar als het eerst aan een gebruiker is toegekend (zie '"+lang.admingui_addrole_title+"' in hoofdmenu)<BR>";
+lang.admingui_projectmenu_placeholder_projectname = "Projectnaam";
+lang.admingui_projectmenu_placeholder_projectdescription = "Projectomschrijving";
+lang.admingui_projectmenu_placeholder_message_to_users = "Bericht aan gebruikers (getoond na inloggen)";
+lang.admingui_projectmenu_placeholder_redirect_url = "Redirect URL (bijv. naar een andere instantie)";
+lang.admingui_projectmenu_update_success = "Het projectmenu is opgeslagen!";
+lang.admingui_projectmenu_update_error = "Het opslaan van het projectmenu is mislukt:";
+lang.admingui_projectmenu_delete_project = "Verwijder project";
+lang.admingui_projectmenu_delete_project_warning = "Weet u zeker dat u project 'PROJECTNAME' wilt verwijderen?<BR><BR>Let wel: het project kan niet worden verwijderd als er nog gebruikers aan gekoppeld zijn!<BR>(zie '"+lang.admingui_addrole_title+"' in hoofdmenu)";
+lang.admingui_projectmenu_delete_project_success = "Project 'PROJECTNAME' is verwijderd.";
+lang.admingui_projectmenu_delete_project_error = "Het verwijderen van project 'PROJECTNAME' is mislukt:";
+lang.admingui_projectmenu_delete_project_cancel = "Het verwijderen van het project is geannuleerd.";
+
+lang.admingui_changeadminpassword_title = "Admin wachtwoord wijzigen";
+lang.admingui_changeadminpassword_old_password = "huidig wachtwoord";
+lang.admingui_changeadminpassword_new_password = "nieuw wachtwoord";
+lang.admingui_changeadminpassword_success = "Het nieuwe wachtwoord is opgeslagen!";
+lang.admingui_changeadminpassword_error = "Het opslaan van het nieuwe wachtwoord is mislukt:";
+
+// error messages
 lang.check_the_console = "Check de console voor meer info.";
 lang.loading_xml_failed = "XML laden mislukt";
 lang.error = "Fout";
@@ -1736,7 +1796,66 @@ lang.setLanguage = function(sLanguageCode){
 		lang.paginate_last = "Last";
 
 
-		// error message
+		// admin GUI
+		lang.admingui_main_dialog_title = "Projects & User management";
+		lang.admingui_main_dialog_msg = "Would you like to:";
+		lang.admingui_main_dialog_add_user = "Add/update a user";
+		lang.admingui_main_dialog_delete_user = "Delete a user";
+		lang.admingui_main_dialog_add_role = "Add/update roles";
+		lang.admingui_main_dialog_projectmenu = "Projects menu editor";
+		lang.admingui_main_dialog_admin_password = "Change admin password";
+		
+		lang.admingui_get_users_default_role_error = "Reading the default role went wrong:";
+		lang.admingui_get_users_roles_error = "Getting the list of users and roles went wrong:";
+		
+		lang.admingui_refresh_users_rights_error = "Refreshing the users' rights went wrong:";  
+		
+		lang.admingui_adduser_title = "Create/update user";
+		lang.admingui_adduser_msg = "Create or update a user:<BR><BR>If 'password' needs no update, leave it empty!";
+		lang.admingui_adduser_success = "The user was set!";
+		lang.admingui_adduser_error = "Setting the user went wrong:";
+		
+		lang.admingui_deleteuser_title = "Delete user";
+		lang.admingui_deleteuser_selector_msg = "Delete user:";
+		lang.admingui_deleteuser_confirm_msg = "Do you really want to delete user 'USERNAME'?";
+		lang.admingui_deleteuser_success = "The user was deleted!";
+		lang.admingui_deleteuser_error = "Deletion of the user went wrong:";
+		lang.admingui_deleteuser_cancel = "Deletion of the user was cancelled!";		
+		
+		lang.admingui_drop_projectrole_title = "Delete user role in project";
+		lang.admingui_drop_projectrole_msg = "Do you really want to delete the role of 'USERNAME' in project 'PROJECTNAME'?";
+		lang.admingui_drop_projectrole_success = "The user role was deleted!";
+		lang.admingui_drop_projectrole_cancel = "Deletion of user role was cancelled!";
+		lang.admingui_drop_projectrole_error = "Deletion of the user role went wrong:";
+		
+		lang.admingui_addrole_title = "Add/update user roles";
+		lang.admingui_addrole_msg = "Add/update user roles:";
+		lang.admingui_addrole_projectname_autocomplete = "Type a project name...";
+		lang.admingui_addrole_success = "The user role was set!";
+		lang.admingui_addrole_error = "Setting the user role went wrong:";
+		
+		lang.admingui_projectmenu_title = "Projects menu editor";
+		lang.admingui_projectmenu_msg = "<B>Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section</B><BR><BR>"+
+				"Please note: A project must be assigned to a user before it can be displayed here (check '"+lang.admingui_addrole_title+"' in main menu)<BR>";
+		lang.admingui_projectmenu_placeholder_projectname = "Project name";
+		lang.admingui_projectmenu_placeholder_projectdescription = "Project description";
+		lang.admingui_projectmenu_placeholder_message_to_users = "Message to users (to be shown after login)";
+		lang.admingui_projectmenu_placeholder_redirect_url = "Redirect URL (eg. to other Lex'it instance)";
+		lang.admingui_projectmenu_update_success = "The projects menu was updated!";
+		lang.admingui_projectmenu_update_error = "Updating the projects menu went wrong:";
+		lang.admingui_projectmenu_delete_project = "Delete project";
+		lang.admingui_projectmenu_delete_project_warning = "Do you really want to delete project 'PROJECTNAME'?<BR><BR>Beware: make sure no user is assigned to this project, otherwise the deletion will fail!<BR>(check '"+lang.admingui_addrole_title+"' in main menu)";
+		lang.admingui_projectmenu_delete_project_success = "Project 'PROJECTNAME' was succesfully deleted.";
+		lang.admingui_projectmenu_delete_project_error = "Deleting project 'PROJECTNAME' went wrong:";
+		lang.admingui_projectmenu_delete_project_cancel = "Deletion cancelled by user.";
+		
+		lang.admingui_changeadminpassword_title = "Change admin password";
+		lang.admingui_changeadminpassword_old_password = "current password";
+		lang.admingui_changeadminpassword_new_password = "new password";
+		lang.admingui_changeadminpassword_success = "The new admin password was set!";
+		lang.admingui_changeadminpassword_error = "Setting the new admin password went wrong:";
+
+		// error messages
 		lang.check_the_console = "Check the console for more information.";
 		lang.loading_xml_failed = "Loading XML failed";
 		lang.error = "Error";
