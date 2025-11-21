@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.11.20
+	v2025.11.21
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -1088,9 +1088,7 @@
 					
 					// [0] projectname (=configfile name), [1] name (=human readable name), [2] description, [3] status, [4] order_in_menu, [5] message, [6] redirect
 					var aOneProjectInfo = aProjectInfo[i].split(":::");
-					
-					console.log("Project info:", aOneProjectInfo);
-					
+										
 					var oProject = {};
 					oProject["config_filename"] = aOneProjectInfo[0];
 					oProject["name"] = ( aOneProjectInfo[1] != '' ? aOneProjectInfo[1] : aOneProjectInfo[0]);
@@ -1111,7 +1109,6 @@
 					// add to list
 					aProjectList.push(oProject);
 					
-					console.log(oProject);
 				}
 
 				// remove spinner

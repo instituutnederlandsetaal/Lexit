@@ -326,15 +326,12 @@ public class PostgresConnectionManager {
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
-			// set the schema for this connection, so that the query can be executed in the right context)
+			// we need to disable auto-commit mode to allow setting the timeout for the transaction
+			conn.setAutoCommit(false);
+			
+			// set the schema for this connection, so that the query can be executed in the right context
 			setSchema(conn, schema);
 			
-			
-			// we organize the job in TWO try-catch blocks:
-			// - #1 to set the timeout, if required
-			// - #2 to reset the timeout to default, to prevent the timeout from applying to following queries
-			
-			// block #1
 			
 			try {
 				
@@ -345,20 +342,25 @@ public class PostgresConnectionManager {
 				
 				if (timeLimitInMilliseconds > 0) {
 					
-					// set a timeout in milliseconds if required
+					// set a LOCAL timeout in milliseconds if required
 					// (beware: setting this must happen in a separate query: we can't bundle this
 					//  with the main query, or it won't have any effect!)
 					
-					String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+					String SetTimeOutQuery = "SET LOCAL statement_timeout TO " + timeLimitInMilliseconds + ";";
 					stmt.executeUpdate(SetTimeOutQuery);
 				}
 				
 				// the timeout is set, now execute the query
 				rs = stmt.executeQuery(query);		
 				rsCopy = ResultSetSnapshot.copy(rs);
+				
+				// commit the transaction
+				conn.commit();
 			
 			}
 			catch (SQLException e) {
+				
+				conn.rollback();
 				
 				// if the error is a timeout error
 				if (e.getMessage().toLowerCase().contains("timeout")) {
@@ -376,36 +378,48 @@ public class PostgresConnectionManager {
 				throw new RuntimeException("Error while executing query " + query, e);
 			}
 			catch (Exception e) {
-				if (Constants.debug)
-					e.printStackTrace();
-				throw new RuntimeException("Error while executing query " + query, e);
-			}
-			
-			
-			// block #2
-			
-			try {
-				// finally, reset the original timeout settings
 				
-				if (timeLimitInMilliseconds > 0) {
-					
-					String ResetTimeOutQuery = "RESET statement_timeout;";		
-					
-					// Create a new Statement object
-					stmt = conn.createStatement();
-					// reset timeout
-					stmt.executeUpdate(ResetTimeOutQuery);
-				}
-			}
-			catch (SQLException e) {
-				if (Constants.debug)
-					e.printStackTrace();
-				throw new RuntimeException("Error while executing query " + query, e);
-			} catch (Exception e) {
+				conn.rollback();
+				
 				if (Constants.debug)
 					e.printStackTrace();
 				throw new RuntimeException("Error while executing query " + query, e);
 			}
+			finally {
+				// back to auto-commit mode
+			    conn.setAutoCommit(true);
+			}
+			
+			
+			// the following is not needed anymore because 
+			// of the use of SET LOCAL statement_timeout
+			// which ensures that the timeout only applies 
+			// to the current transaction
+			
+//			// block #2
+//			
+//			try {
+//				// finally, reset the original timeout settings
+//				
+//				if (timeLimitInMilliseconds > 0) {
+//					
+//					String ResetTimeOutQuery = "RESET statement_timeout;";		
+//					
+//					// Create a new Statement object
+//					stmt = conn.createStatement();
+//					// reset timeout
+//					stmt.executeUpdate(ResetTimeOutQuery);
+//				}
+//			}
+//			catch (SQLException e) {
+//				if (Constants.debug)
+//					e.printStackTrace();
+//				throw new RuntimeException("Error while executing query " + query, e);
+//			} catch (Exception e) {
+//				if (Constants.debug)
+//					e.printStackTrace();
+//				throw new RuntimeException("Error while executing query " + query, e);
+//			}
 			
 			
 		}
@@ -418,6 +432,7 @@ public class PostgresConnectionManager {
 			if (Constants.debug) e.printStackTrace();
 			throw new RuntimeException("Error while executing plain query (with time limit) "+query, e);
 		}
+		
 		
 		return rsCopy;
 	}
@@ -554,15 +569,13 @@ public class PostgresConnectionManager {
 		
 		try (Connection conn = getConnectionFromPool()) {
 			
-			// set the schema for this connection, so that the query can be executed in the right context)
+			// we need to disable auto-commit mode to allow setting the timeout for the transaction
+			conn.setAutoCommit(false);
+			
+			// set the schema for this connection, so that the query can be executed in the right context
 			setSchema(conn, schema); 			
 			
 			
-			// we organize the job in TWO try-catch blocks:
-			// - #1 to set the timeout, if required
-			// - #2 to reset the timeout to default, to prevent the timeout from applying to following queries
-			
-			// block #1
 			
 			try {
 				// if required, set a timeout 
@@ -571,10 +584,10 @@ public class PostgresConnectionManager {
 					// Create a Statement object
 					stmt = conn.createStatement();
 					
-					// set a timeout in milliseconds
+					// set a LOCAL timeout in milliseconds
 					// (beware: setting this must happen in a separate query: we can't bundle this
 					//  with the main query, or it won't have any effect!)
-					String SetTimeOutQuery = "SET statement_timeout TO " + timeLimitInMilliseconds + ";";
+					String SetTimeOutQuery = "SET LOCAL statement_timeout TO " + timeLimitInMilliseconds + ";";
 					stmt.executeUpdate(SetTimeOutQuery);				
 				}
 				
@@ -706,44 +719,62 @@ public class PostgresConnectionManager {
 				rs = prest.executeQuery();
 				rsCopy = ResultSetSnapshot.copy(rs);
 				
-			
-			}
-			catch (SQLException e) {
-				if (Constants.debug)
-					e.printStackTrace();
-				throw new RuntimeException("Error while executing query " + query, e);
-			} catch (Exception e) {
-				if (Constants.debug)
-					e.printStackTrace();
-				throw new RuntimeException("Error while executing query " + query, e);
-			}
-			
-			
-			// block #2
-			
-			try {
-				// reset the original timeout settings
-				
-				if (timeLimitInMilliseconds > 0) {
-					
-					String ResetTimeOutQuery = "RESET statement_timeout;";	
-					
-					// Create a new Statement object
-					stmt = conn.createStatement();
-					// reset timeout
-					stmt.executeUpdate(ResetTimeOutQuery);
-				}
+				// commit the transaction
+				conn.commit();
 				
 			}
 			catch (SQLException e) {
-				if (Constants.debug)
-					e.printStackTrace();
-				throw new RuntimeException("Error while executing query " + query, e);
-			} catch (Exception e) {
+				
+				conn.rollback();
+				
 				if (Constants.debug)
 					e.printStackTrace();
 				throw new RuntimeException("Error while executing query " + query, e);
 			}
+			catch (Exception e) {
+				
+				conn.rollback();
+				
+				if (Constants.debug)
+					e.printStackTrace();
+				throw new RuntimeException("Error while executing query " + query, e);
+			}
+			finally {
+				// back to auto-commit mode
+			    conn.setAutoCommit(true);
+			}
+			
+			
+			// the following is not needed anymore because 
+			// of the use of SET LOCAL statement_timeout
+			// which ensures that the timeout only applies 
+			// to the current transaction
+			
+//			// block #2
+//			
+//			try {
+//				// reset the original timeout settings
+//				
+//				if (timeLimitInMilliseconds > 0) {
+//					
+//					String ResetTimeOutQuery = "RESET statement_timeout;";	
+//					
+//					// Create a new Statement object
+//					stmt = conn.createStatement();
+//					// reset timeout
+//					stmt.executeUpdate(ResetTimeOutQuery);
+//				}
+//				
+//			}
+//			catch (SQLException e) {
+//				if (Constants.debug)
+//					e.printStackTrace();
+//				throw new RuntimeException("Error while executing query " + query, e);
+//			} catch (Exception e) {
+//				if (Constants.debug)
+//					e.printStackTrace();
+//				throw new RuntimeException("Error while executing query " + query, e);
+//			}
 		}
 		catch (SQLException e) {
 			if (Constants.debug) e.printStackTrace();
