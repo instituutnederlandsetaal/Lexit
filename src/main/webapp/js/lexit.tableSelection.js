@@ -298,7 +298,7 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 				continue;
 				
 			// skip table if it is already part of the list (to avoid duplicates)
-			if (selectTagToAdd.find("option[value='"+asTableNames[i]+"']").length > 0)
+			if (groupTagToAdd.find("option[value='"+asTableNames[i]+"']").length > 0)
 				continue;
 			
 			// outside home environment, showing table comments is not allowed
