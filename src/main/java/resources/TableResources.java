@@ -405,10 +405,10 @@ public class TableResources {
  	
  	
  	@Path("set_list_of_existing_projects")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject setListOfExistingProjects(
-			@DefaultValue("") @QueryParam("projectlist") String projectList,
+			@DefaultValue("") @FormParam("projectlist") String projectList,
 			@Context ServletContext context, 
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest) throws IOException {

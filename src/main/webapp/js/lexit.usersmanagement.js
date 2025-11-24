@@ -727,7 +727,7 @@ lexitusers.setListOfProjects = function(){
 					});
 					
 					$.ajax({
-						"type": "GET",
+						"type": "POST",
 						"url": WEBSERV_URL+"/api/set_list_of_existing_projects",
 						"data": {
 							"projectlist": aProjectsInNewOrder.join(ARG_INTERNAL_SEPARATOR),
