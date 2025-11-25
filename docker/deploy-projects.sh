@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # version
-echo "=== Lexit Configs Deployer v2025.05.21 ==="
+echo "=== Lexit Configs Deployer v2025.11.25 ==="
 
 RED='\033[31m'
 GREEN='\033[32m'
