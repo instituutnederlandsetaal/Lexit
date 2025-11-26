@@ -137,10 +137,11 @@ public class TableResources {
 
 		for (String key : nameToDatabaseObject.keySet()){
 			
-			Database tmpDbObj = nameToDatabaseObject.get(key);		
+			Database tmpDbObj = nameToDatabaseObject.get(key);
+			String thisUserName = tmpDbObj.getContextObject().getUsername();
 			
 			// match the user? note it must be thrown away
-			if ( tmpDbObj.getContextObject().getUsername().equals(username) ) {
+			if ( thisUserName == null || thisUserName.equals(username) ) {
 				keysToDelete.add(key);
 			}
 		}
