@@ -6,7 +6,7 @@
 
 ## ✨ What is Lex’it?
 
-**Lex’it** is a customizable web interface for databases. Originally developed for lexicographic databases, Lex’it is also suitable for other database-driven projects.
+**Lex’it** is a customizable web interface for databases. Originally developed for lexicographic databases, Lex’it is also suitable for other database-driven projects. Mozilla Firefox and Google Chrome are supported.
 
 Out of the box, it allows you to:  
 - View or edit database tables in a webpage  
