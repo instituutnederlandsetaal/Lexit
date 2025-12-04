@@ -416,8 +416,15 @@
 	// called by $(document).ready()
 
 	
-	function startInRightMode(){		
-				 
+	function startInRightMode(){
+		
+		// fade in the body
+		// (as a way to prevent unstyled content to appear briefly on screen at startup)
+		$('body').removeClass('preload').hide().fadeIn(500);
+		
+		
+		// now set the right mode
+		
 		if (	// user tries to access a project other than the admin console
 				!bAdmin && (paramsHash != null && paramsHash.get("db") != null) 
 				&& 
@@ -1508,7 +1515,7 @@
 	
 </head>
 
-<body class="default">
+<body class="default preload">
 	<div id="page">
 		<div id="headergroup" class="default">
 			<div id="square_logo" class="default"></div>
