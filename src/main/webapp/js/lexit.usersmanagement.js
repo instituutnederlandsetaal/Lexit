@@ -1038,5 +1038,52 @@ lexitusers.setProjectAutoComplete = function(){
 		}
 	});
 	
+};
+
+
+
+/**
+ * make sure that public user session is kept alive
+ */
+lexitusers.keepPublicReaderAlive = function(){
 	
-}
+	if (fn.getCurrentUser() != "publicreader") {
+		return;
+	}
+	
+	$.ajax({
+		"type": "POST",
+		headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+
+		"url": WEBSERV_URL+"/api/reader_login",
+		"data": {
+			"dummy": getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			
+			// check for access denied
+			var sResp = fn.getDbResponse(xml);
+	 		if (sResp == 'Access denied'){
+	 			fn.closeDialog();
+	 			fn.message(sResp, sResp, function(){
+	 				lexitReload();
+	 			});
+	 		}
+	 		
+	 		// if successful, set timeout to call this function again after a while
+	 		// just to make sure that the publicreader keeps alive
+	 		else {
+	 			setTimeout(function(){
+					lexitusers.keepPublicReaderAlive();
+				}, 
+				15*60*1000); // BEWARE: this must be less than the session timeout on the server (Constants.MAX_SESSION_ID_DURATION in Java code)
+	 		}
+	 	},
+		"error": function(jqXHR, textStatus, errorThrown){			
+			fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+		}
+	});
+	
+};

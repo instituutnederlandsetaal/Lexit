@@ -291,7 +291,7 @@ public class LexitSchemaAccess {
 		for (String key : sessionIds2users.keySet()) {
 			
 			Util.debug(key + " => "+sessionIds2users.get(key));			
-			if ( (new Date().getTime()) - sessionIds2generationTime.get(key) > Constants.MAX_SESSION_ID_DURATION ) {
+			if ( (new Date().getTime() - sessionIds2generationTime.get(key)) > Constants.MAX_SESSION_ID_DURATION ) {
 								
 				removeSessionId(key);
 			}

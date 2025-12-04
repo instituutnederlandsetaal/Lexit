@@ -266,6 +266,10 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 				lexutil.showSpinner('#indicators');
 				$(this).dequeue();
 			} ).delay(10).queue(function(){
+				
+				//console.log(haTableFilters.get($(this).find(":selected").val()));
+				//console.log(haTableSettings.get($(this).find(":selected").val()));
+				
 				ts.callTable(haTableFilters, haTableSettings);
 				$(this).dequeue();
 			});		

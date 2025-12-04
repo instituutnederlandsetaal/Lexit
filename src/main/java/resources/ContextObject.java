@@ -87,13 +87,18 @@ public class ContextObject {
 	// (t.i. last time is was used was longer ago than a given maximal duration)
 	public boolean isLeftUnused(){			
 		
-		return ( (new Date().getTime()) - getTimeLastUsed() > Constants.MAX_DB_OBJECT_DURATION );			
+		return ( 
+			(new Date().getTime() - getTimeLastUsed()) > Constants.MAX_DB_OBJECT_DURATION  
+		);			
 	}
 	
 	// is the user gone?
+	// (only in use in spy mode)
 	public boolean userIsGone(){			
 		
-		return ( (new Date().getTime()) - getTimeLastUsed() > Constants.TIME_GONE );			
+		return ( 
+			(new Date().getTime() - getTimeLastUsed()) > Constants.TIME_GONE 
+		);			
 	}
 	
 	
@@ -117,7 +122,7 @@ public class ContextObject {
 	// so we update the last-time-used parameter on the fly
 	//
 	// The second set of methods [part b] are not called
-	// during user activity, be are called by a 'spy' to investigate 
+	// during user activity, but are called by a 'spy' to investigate 
 	// who is active etc. This is why we mustn't update the 
 	// last-time-used parameter in this second set of methods.
 	
@@ -181,35 +186,35 @@ public class ContextObject {
 	
 	
 	 /*
-		 * Retrieve the session ID from the request
-	     * (might be shibSession if using Clarin login, or the session ID otherwise)
-		 */
-	    private String getSessionId(HttpServletRequest request) {
+	 * Retrieve the session ID from the request
+     * (might be shibSession if using Clarin login, or the session ID otherwise)
+	 */
+    private String getSessionId(HttpServletRequest request) {
 
-			String sessionId = getShibSession(request);
-			if (sessionId == null)
-				sessionId = request.getSession().getId();
+		String sessionId = getShibSession(request);
+		if (sessionId == null)
+			sessionId = request.getSession().getId();
 
-			return sessionId;
-		}
-		
-		
-		/**
-		 * Retrieve the Shibboleth session ID from the cookies (when using Clarin login)
-		 * 
-		 * @param request
-		 * @return
-		 */
-		private String getShibSession(HttpServletRequest request) {
-	        Cookie[] cookies = request.getCookies();
-	        if (cookies != null) {
-	            for (Cookie cookie : cookies) {
-	                if (cookie.getName().startsWith("_shibsession_")) {
-	                    return cookie.getValue();
-	                }
-	            }
-	        }
-	        return null;
-	    }
+		return sessionId;
+	}
+	
+	
+	/**
+	 * Retrieve the Shibboleth session ID from the cookies (when using Clarin login)
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private String getShibSession(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().startsWith("_shibsession_")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
 	
 }

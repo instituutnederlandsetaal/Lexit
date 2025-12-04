@@ -329,15 +329,6 @@ sf.enableSearchFields = function(someTablename){
         	sf.startMultiColumnSearch(someTablename);
 		}
 
-		// SOMEHOW not needed anymore? 
-		// tab should lead to next input field 
-		// if (kf.isPressed("tab")) {
-		// 	var next = $(thisInput).parent().next("td:has(input)");
-		// 	if (next != null){				
-		// 		$(next).find("input").focus();
-		// 	}
-			
-		// }
 	});
 	
 

@@ -1681,6 +1681,9 @@ public class TableResources {
 
 		String userName = lexitInfo.getUserName(httpServletRequest);		
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_WRITE_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
 
 		DbResponseObject ro = getDatabaseObject(co).convertFileIntoTable(dbName, fileInputStream, fileMetaData);
 
@@ -1701,6 +1704,9 @@ public class TableResources {
 
 		String userName = lexitInfo.getUserName(httpServletRequest);		
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		if ( !userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
 
 		DbResponseObject ro = getDatabaseObject(co).removeUploadedFile(tableName);
 

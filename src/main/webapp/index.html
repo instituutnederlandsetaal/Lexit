@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.11.26
+	v2025.12.04
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -1232,8 +1232,6 @@
 			// show message or warning for this project, if available
 			
 			var oProjectObject = getProjectObject(paramsHash.get("db"));
-			
-			console.log(oProjectObject);
 
 			// set a default project name for display on screen (and set front character in uppercase)
 			// this default name might be overwritten by configuration in projects_overview.js, if some project 'name' was set there
@@ -1273,6 +1271,9 @@
 
 			// show the project name at the top of the screen
 			fn.setProjectTitle(sProjectName);
+			
+			// if the public reader has logged in, keep it alive
+			lexitusers.keepPublicReaderAlive();
 			
 			// statistics
 			lexutil.setStatistics();
@@ -1476,8 +1477,6 @@
 	
 	// get all the properties belonging to the description of a project
 	function getProjectObject(sDbName){
-		
-		console.log(aProjectList);
 		
 		var oObjectToReturn;
 		
