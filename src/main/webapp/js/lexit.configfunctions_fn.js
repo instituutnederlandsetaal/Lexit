@@ -368,6 +368,11 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 		$("#headerlinks").removeClass("huisstijl").addClass("default");
 	}
 	
+	
+	// fade in the body
+	// (as a way to prevent unstyled content to appear briefly on screen at startup)
+	$('body').delay( 800 ).animate({ opacity: 1 }, 500);
+	
 };
 
 

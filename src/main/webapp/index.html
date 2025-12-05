@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2025.12.04
+	v2025.12.05
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -309,9 +309,6 @@
 	// ( synonym: fn.startLexitLogin() )
 	function startLexitLogin(){
 		
-		// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-		fadeIn();
-				
 		fn.prompt("LOGIN", ["Username", "Password"], ["", ""], 
 				function(resp){
 			
@@ -449,9 +446,6 @@
 						fn.setProjectTitle("");
 						// execute the script manually
 						$.globalEval(response);
-						
-						// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-						fadeIn();
 					},
 					"error": function(jqxhr, settings, exception){
 						// if no welcome page is available, do normal login
@@ -485,9 +479,6 @@
 							fn.setProjectTitle("");
 							// execute the script manually
 							$.globalEval(response);
-							
-							// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-							fadeIn();
 						}
 					},
 					"error": function(jqxhr, settings, exception){
@@ -502,9 +493,6 @@
 		// admin mode (access to admin console only)
 		
 		else if (bAdmin) {
-			
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
 			
 			fn.prompt("ADMIN LOGIN", ["Username", "Password"], ["admin::disabled", ""], 
 					function(resp){
@@ -558,9 +546,6 @@
 		// global spy mode (logging info)
 		else if (bSpyMode) {
 			
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
-			
 			buildUsersSpy();
 			
 			buildConnectionsSpy();
@@ -576,9 +561,6 @@
 		// reset user rights
 		else if (bResetUserRights){
 			var url = WEBSERV_URL+"/api/reset_user_rights";
-
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
 			
 			$.ajax({
 				"type": "GET",
@@ -1038,9 +1020,7 @@
 			
 			// within this function, the aProjectList variable is supposed to be filled already
 			// so if it isn't, something is wrong
-			if (aProjectList == null || aProjectList.length == 0){		
-				// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-				fadeIn();
+			if (aProjectList == null || aProjectList.length == 0){	
 				
 				fn.message(lang.error, lang.loading_projects_list_failed);
 				return;
@@ -1067,15 +1047,10 @@
 					// remove spinner
 					lexutil.removeSpinner("#dynamic");
 					
-					// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-					fadeIn();
-					
 					// go!
 					initialize();
 				},
 				"error": function(jqxhr, settings, exception){
-					// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-					fadeIn();
 					
 					fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
 				}
@@ -1139,15 +1114,10 @@
 				// remove spinner
 				lexutil.removeSpinner("#dynamic");
 				
-				// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-				fadeIn();
-				
 				// go!
 				initialize();
 			},
 			"error": function(jqxhr, settings, exception){
-				// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-				fadeIn();
 				
 				fn.message(lang.error, lang.getting_projectslist_from_service_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
 			}
@@ -1220,14 +1190,8 @@
 						$(window).bind('beforeunload', function(){   
 							return false;
 						});
-					
-					// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-					fadeIn();
 				})
 				.fail(function(jqxhr, settings, exception){
-					
-					// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-					fadeIn();
 					
 					fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
 					throw new Error("Execution stopped: "+lang.opening_config_file_failed);
@@ -1257,14 +1221,8 @@
 							$(window).bind('beforeunload', function(){   
 								return false;
 							});
-						
-						// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-						fadeIn();
 					},
 					"error": function(jqxhr, settings, exception){
-						
-						// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-						fadeIn();
 						
 						fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
 						throw new Error("Execution stopped: "+lang.opening_config_file_failed);
@@ -1322,9 +1280,6 @@
 			
 			// statistics
 			lexutil.setStatistics();
-			
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
 		}
 		
 	};
@@ -1516,12 +1471,8 @@
                 .append(closedSection)
                 .append(unknownSection);
 			
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
 		}
 		else {
-			// fade in the body (prevent unstyled content to appear briefly on screen at startup)
-			fadeIn();
 			
 			fn.message(lang.error, lang.access_denied);
 		}
@@ -1552,11 +1503,6 @@
 		location.reload();
 	}
 	
-	function fadeIn(){
-		// fade in the body
-		// (as a way to prevent unstyled content to appear briefly on screen at startup)
-		$('body').removeClass('preload').css("opacity", 0).animate({ opacity: 1 }, 1000);
-	}
 	
 	
 	// end of : called by initialize()
@@ -1567,7 +1513,7 @@
 	
 </head>
 
-<body class="default preload">
+<body class="default" style="opacity: 0">
 	<div id="page">
 		<div id="headergroup" class="default">
 			<div id="square_logo" class="default"></div>
