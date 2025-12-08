@@ -1050,8 +1050,7 @@ fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExt
 	un.cleanUndoStack(sSomeTablename);
 	
 	// if the table doesn't exist yet, create it with the right settings
-	if ( !mt.tableExists(sSomeTablename))
-	{
+	if ( !mt.tableExists(sSomeTablename)) {
 		// create a table properties record		
 		// we pass a function and its arguments for initial call
 		// (this function can only be called after the table was created, which is why we store it and call it only later)
@@ -1122,7 +1121,6 @@ fn._callTableSilentlySub = function(sSomeTableName){
 			"db_name": lexutil.getHttpParams().get("db") 
 		},
 		dataType: "xml",
-		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
 			
@@ -1142,7 +1140,6 @@ fn._callTableBuildSilently = function(sSomeTableName){
 	var aTableSettings =				conf.getTableSettings(sSomeTableName);	
 	var sViewtype = (aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
 	mt.setViewType(sSomeTableName, sViewtype);	
-	//mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
 	un.cleanUndoStack(sSomeTableName);	
 	tb.setColumnProperties(sSomeTableName, true);
 };

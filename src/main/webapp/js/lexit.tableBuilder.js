@@ -39,10 +39,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var bExportButtonsAvailable =		(aTableSettings["export_buttons"] ?? true);
 	var bKeepSmallHeight =				(aTableSettings["keep_small"] ?? false);
 	
-	// table or view?
-	var iIndexOfTable =					$.inArray(sSomeTableName, asTableNames);
-	var bTableIsaView =					(asTableTypes[iIndexOfTable] == "view");
-	
 	
 	// ********************************************************************************
 	// In the following we always first check the oExtraTableSettings and apply those.
@@ -614,11 +610,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	
 	// add click event to row counter, to trigger exact count
 	head.putExactCountEvent(sSomeTableName);
-	
-	// put the datatable object in multitable administration			
-	mt.setDataTableObjectOf(sSomeTableName, oTable);
-	mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
-	
+		
+	// put the datatable object in multitable register			
+	mt.setDataTableObjectOf(sSomeTableName, oTable);	
+		
 	// keep or remove main search input field
 	head.setMainSearch(sSomeTableName);	
 	

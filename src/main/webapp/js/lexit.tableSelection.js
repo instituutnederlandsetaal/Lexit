@@ -191,6 +191,9 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 				[ sTableDescription, sTableType.toLowerCase(), oTableComments["notes"] ]
 		);
 		
+		// set table type in mt module
+		mt.setTableType(sTableName, sTableType.toLowerCase());
+		
 		
 		// if a table must be hidden (as stated in config file) then we skip it
 		if ( !bTableVisible )
