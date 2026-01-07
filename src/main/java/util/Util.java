@@ -419,6 +419,27 @@ public class Util {
 		}
 		return builder.toString();
 	}
+	
+	
+	/**
+	 * Take an array of parameters for a prepared statement
+	 * and convert it into a string like CAST(? AS type1), CAST(? AS type2), CAST(? AS type3), ...
+	 * in which the number of question marks matches the number of parameters.
+	 * This is to be used in INSERT statements or in clauses like 'WHERE x IN (?,?,?,...)' etc.
+	 * 
+	 * @param an array of parameters
+	 * @param ArgumentTypesObject containing the types of the parameters
+	 * @return a string with CAST question marks separated by commas
+	 */
+	public static String getStringOfQuestionMarksWithCast(String[] ref, ArgumentTypesObject ato){
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i<ref.length; i++)
+		{
+			if ( i>0) builder.append(",");
+			builder.append("CAST(? AS "+ato.getType(i)+")");
+		}
+		return builder.toString();
+	}
 
 
 	/**
@@ -480,6 +501,22 @@ public class Util {
 	}
 	
 	/**
+	 * Test if a string is a double
+	 * 
+	 * @param string
+	 * @return true/false
+	 */
+	public static boolean isDouble(String s) {
+		try {
+			Double.parseDouble(s);
+		}
+		catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * Test if a string is numeric (integer or decimal)
 	 * 
 	 * @param string
@@ -488,6 +525,18 @@ public class Util {
 	public static boolean isNumeric(String str) {
 	  return str.matches("-?\\d+(.\\d+)?");
 	}
+	
+	
+	/**
+	 * Test if a string is a boolean
+	 * 
+	 * @param string
+	 * @return true/false
+	 */
+	public static boolean isBoolean(String s) {
+		return s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false");
+	}
+
 	
 	
 	// ******************************************************************

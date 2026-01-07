@@ -1161,6 +1161,8 @@ public class Database {
 		// prevent sql injection
 		args = Util.removeSuspiciousSql(args);
 		
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		
 		// get the function argument types
 		String[] argumentTypes = getFunctionTypes(functionName, args.length);
 		String returnType = getFunctionReturnType(functionName, args.length);
@@ -1170,40 +1172,35 @@ public class Database {
 		// (t.i. add quotes for text args)
 		if (argumentTypes!= null && args.length == argumentTypes.length){
 			
-			for (int i=0; i<argumentTypes.length; i++) {				
+			for (int i=0; i<argumentTypes.length; i++) {			
 				
+				// remove quotes around text arguments, if any
+				// (quotes used to be needed in an older version of Lex'it, as a way of distinguishing text arguments from others, but are no longer necessary)
+				if (args[i].trim().startsWith("'") && args[i].trim().endsWith("'"))  {                      
+					args[i] = args[i].trim().substring(1, args[i].trim().length()-1);
+				}
+				
+				// set the argument type
+				ato.addType(argumentTypes[i]);
+				
+								
 				// if we have a text argument, we need to deal with quotes inside it
 				if (argumentTypes[i].equals("text")
 						&& !args[i].equals("NULL") // exclude null, which must be interpreted as a null value further on
 					) {
 					// make sure inside-quotes are escaped in the Postgres way:
 					
-					// in strings like in "zzp\\'er" or "zzp\'er" (with slash) -> "zzp''er" (with double quote)
-					args[i] = (args[i]).replaceAll("([\\\\]+)(')(.)", "$2$2$3");
+					// in strings like in "zzp\\'er" or "zzp\'er" (with slash) -> "zzp'er"
+					args[i] = (args[i]).replaceAll("([\\\\]+)(')(.)", "$2$3");
 					
-					// in strings like in "zzp'er" (without slash) -> "zzp''er" (with double quote)
-					args[i] = (args[i]).replaceAll("([^'])(')([^'])", "$1$2$2$3");
-						
-					// in strings beginning or ending with a single quote (like in "'s ochtends")
-					// (but of course, there must be no quote at the other end, in which case the quotes plays a different role)
-					
-					args[i] = ( !args[i].endsWith("'") ) ? (args[i]).replaceAll("^(')([^'])", "$1$1$2") : args[i];
-					
-					args[i] = ( !args[i].startsWith("'") ) ? (args[i]).replaceAll("([^'])(')$", "$1$2$2") : args[i];
-					
-					
-					// special case
-					// (single quote must be escaped, and it needs quotes around it (otherwise it would be interpreted as empty string)
-					args[i] = (args[i]).replaceAll("^(')$", "''''");
-					
-					
-					// last step:
-					// add quotes around string iff they are missing!
-					if (!(args[i].startsWith("'") && args[i].endsWith("'")) ) {
-						args[i] = "'" +	args[i] + "'";	
-					}	
 					
 				}
+				
+				// NULL string must be interpreted as null
+				if (args[i].equals("NULL")) {
+					args[i] = null;
+				}
+				
 			}
 		}
 		
@@ -1212,17 +1209,18 @@ public class Database {
 		ArrayList<String[]> res;
 		
 		String getRecord = returnType.equals("record") ? 
-			"SELECT (" + functionName + "("+Util.join(args, ",")+")).*;" 
+			"SELECT (" + functionName + "("+Util.getStringOfQuestionMarksWithCast(args, ato)+")).*;" 
 			:
-			"SELECT " + functionName + "("+Util.join(args, ",")+");";	
+			"SELECT " + functionName + "("+Util.getStringOfQuestionMarksWithCast(args, ato)+");";	
 				
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
+		
 		try {
 			
 			// call the function
-			ResultSetSnapshot snapshot = dc.sendQuery("public", getRecord, 0);
+			ResultSetSnapshot snapshot = dc.sendPreparedQuery("public", getRecord, args, ato, 0);
 			
 			String[] columnsNames = snapshot.getColumnNames().toArray(new String[0]);			
 			res = Util.getResultSetCopyInAList(snapshot.getRows(), columnsNames);			
