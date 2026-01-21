@@ -9,6 +9,10 @@
   <listener>
       <listener-class>resources.AppLifecycleListener</listener-class>
   </listener>
+  
+  <listener>
+      <listener-class>resources.StartupListener</listener-class>
+  </listener>
 
   <filter>
     <filter-name>SessionFilter</filter-name>

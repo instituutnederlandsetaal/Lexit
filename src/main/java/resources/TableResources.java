@@ -79,6 +79,11 @@ public class TableResources {
  		// if login is successful, return the session ID
  		if (loginSuccessfull) {
  			
+ 			// set the session timeout to the maximum allowed duration
+ 	 		// (this is needed to avoid that sessions expire too soon, as set in Tomcat's web.xml)
+ 	 		//context.setSessionTimeout( (int) (Constants.MAX_SESSION_ID_DURATION / (60*1000)) ); // (needs to be set in minutes!)
+ 			
+ 	 		// get session ID
  			String sessionId = lexitInfo.getSessionId(httpServletRequest);
  			
  			// remember that this session ID represents this user

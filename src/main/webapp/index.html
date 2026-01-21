@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2026.01.07
+	v2026.01.21
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -917,8 +917,11 @@
 
 
 
-	// tell the webservice which tab is currently active
-	// in the current session
+	// Tell the webservice which tab is currently active in the current session.
+	// (this function is called whenever the tab gets focus)
+	//
+	// NB: when a session is inactive for too long, this function will get a 'Permission denied' response from the webservice,
+	//     which will trigger an exception to force the user to log in again.
 
 	function sendActiveTabIdToService(sPageId){
 		
@@ -984,13 +987,13 @@
 				}
 				
 				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
-				// so we reload the page, which will trigger the user to log in again
+				// so we throw an exception, which will trigger the user to log in again
 				else if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
-					throw new Error("Execution stopped: "+lang.saving_active_tab_failed); // prevents infinite loop!
+					throw new Error("Execution stopped: "+lang.saving_active_tab_failed); // prevents infinite loop of page-reload!
 				}
 				
 				// otherwise, an error in this function indicates a problem with the webservice
-				// we we must tell the user firt about the error before reloading the page
+				// we we must tell the user about the error before reloading the page
 				else {						
 					fn.closeDialog();
 					fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +jqxhr.responseText+ ": ["+exception+"]",

@@ -83,7 +83,7 @@ public class Constants {
 	// maximal allowed time a user session is allowed to keep alive
 	// after which the user will have to log in again!
 	public static long MAX_SESSION_ID_DURATION = 
-			24 * // hours
+			2 * // hours
 			60 * // minutes
 			60 * // seconds
 			1000; // milliseconds
