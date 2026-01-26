@@ -1956,8 +1956,9 @@ public class TableResources {
 		String cleanValue = Database.removeFrontOperator(value);
 		String operator   = value.substring(0, value.length()-cleanValue.length());
 		
-		if ( (cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) || 
-			 (cleanValue.startsWith("'") && cleanValue.endsWith("'")) )
+		if ( (cleanValue.length()>=2 && cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) 
+				|| 
+			 (cleanValue.length()>=2 && cleanValue.startsWith("'") && cleanValue.endsWith("'")) )
 		{
 			// in a jsonb query, we might have quotes which have to be kept!
 			// (like {"name": "Piet"})			
