@@ -434,7 +434,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 fn.getCurrentSchema = function(){
 	
 	return setSchemaNameCache;	
-}
+};
 
 
 
@@ -445,7 +445,7 @@ fn.getCurrentSchema = function(){
 fn.rebuildTablesMenu = function(){
 	ts.reinit();
 	ts.getListOfTables(null, {}, {});
-}
+};
 
 
 
@@ -792,18 +792,63 @@ fn.getCurrentDisplayLength = function(sSomeTablename){
 	return mt.getDataTableObjectOf(sSomeTablename).page.len();
 };
 
-
 /**
  * Get the current index at which display of rows currently starts
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @returns {Integer} Index at which display of rows currently starts
+ * @see fn.getCurrentPageIndex
  */
 fn.getCurrentDisplayStart = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 		
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().start;
+};
+
+/**
+ * Get the total number of rows of a table
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} total number of rows of a table
+ * @see fn.getTotalNumberOfPages
+ */
+fn.getTotalNumberOfRows = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsTotal;	
+};
+
+
+/**
+ * Get the total number of pages of a table
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} total number of pages
+ * @see fn.getTotalNumberOfRows
+ */
+fn.getTotalNumberOfPages = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().pages;	
+};
+
+/**
+ * Get the current page index of a table (1-based)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} Index at which display of pages currently starts
+ * @see fn.getCurrentDisplayStart
+ */
+fn.getCurrentPageIndex = function(sSomeTablename){
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().page + 1;
 };
 
 

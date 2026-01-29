@@ -1212,16 +1212,15 @@ public class Database {
 			"SELECT (" + functionName + "("+Util.getStringOfQuestionMarksWithCast(args, ato)+")).*;" 
 			:
 			"SELECT " + functionName + "("+Util.getStringOfQuestionMarksWithCast(args, ato)+");";	
-				
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		
-		try {
+		try {			
 			
 			// call the function
 			ResultSetSnapshot snapshot = dc.sendPreparedQuery("public", getRecord, args, ato, 0);
-			
+						
 			String[] columnsNames = snapshot.getColumnNames().toArray(new String[0]);			
 			res = Util.getResultSetCopyInAList(snapshot.getRows(), columnsNames);			
 			
@@ -1233,7 +1232,8 @@ public class Database {
 				tro.addColumnAndValue(columnsNames[i], Util.join(allCells, Constants.ARG_INTERNAL_SEPARATOR));
 			}			
 			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			String error = Util.getDebugInfoForConsole("Error while executing query "+getRecord+" "+
 					// make sure that the full stacktrace is returned, so as to allow the GUI to show custom <lexit> error messages sent by the database
 					Util.getFullStackTrace(e), args);

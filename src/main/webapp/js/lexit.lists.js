@@ -744,6 +744,134 @@ lists.addButtonToListHeader = function(oButtons, aColumnsToDisplay){
 }
 
 
+/**
+ * Add a new row to a list, given an associative array of columns and values.
+ * 
+ * @param {String} sThisListLabel the label of the list to which to add the row
+ * @param {Object} oColumnsAndValues associative array of columns and values
+ * @param {Function} fnCallback a callback function to call after the row has been added
+ */
+lists.addRowToList = function(sThisListLabel, oColumnsAndValues, fnCallback){
+		
+	// get the list config
+	var sFormContainerId = 	hFormListLabel2formId.get( sThisListLabel );
+	var sFormTable = 		form.getFeedingTable(sFormContainerId);
+	var oTableSettings =	conf.getTableSettings(sFormTable);
+	var oFormGrid = 		conf.getFormGrid(oTableSettings);
+	var oLists = 			oFormGrid["lists"];
+	var oThisList = 		oLists[sThisListLabel];
+	
+	// get datatables object of the list
+	var oTable = 			lists.getDataTableObjectOf(sThisListLabel);
+	
+	// get columns of the list
+	var sThisListTableName =	lists.getFeedingTable(sThisListLabel);
+	var aAllColumns = 			lists.getAllColumns(sThisListTableName);
+	
+	
+	// get the buttons config	
+	var oButtons = 	oThisList["buttons"];
+	var oAdd = oButtons["add"];
+	
+	// if some values have to be copied given the config
+	var oToBeCopied = {};
+	if (oAdd["copy"] != null){
+		
+		var oCopy = oAdd["copy"];	
+		
+		for (var sOneColumnToFeed in oCopy){
+	
+			// if a value must be copied, oCopyFrom will contain an array {listlabel: column}
+			
+			var oCopyFrom = oCopy[sOneColumnToFeed];
+	
+			// special case:
+			//  if a column must be skipped (t.i. not fed but skipped), oCopyFrom will have a null value
+			//  NB: typically, a column is skipped because it is a serial type, and will get its value from the database
+			if (oCopyFrom == null){
+	
+				oToBeCopied[sOneColumnToFeed] = null;
+			}
+			// normal case: 
+			// get value from specified source columns
+			else {
+	
+				// this must contain only one pair actually!
+				for (var sListToRead in oCopyFrom){ 
+	
+					// read from a LIST cell
+					if (sListToRead != "form"){
+						// get the selected row to copy the values from
+						var oSelectedRow = lists.getSelectedRows(sListToRead, true);
+						var iRowNumber = $(oSelectedRow.nodes()).index();
+						// read value from that row
+						if (iRowNumber < 0){
+							fn.message(lang.beware, (lang.formlist_select_a_row_first).replace(/LISTNAME/, sListToRead));
+							return true;
+						}
+						oToBeCopied[sOneColumnToFeed] = lists.getDataFromCell(sListToRead, iRowNumber, oCopyFrom[sListToRead]);
+					}	
+	
+					// or read from a FORM cell
+					else {
+						oToBeCopied[sOneColumnToFeed] = form.getDataFromCell(sFormTable, oCopyFrom[sListToRead], true);
+					}
+						
+				}
+			}
+								
+		}
+	}
+	
+	
+	// First: if we have a list of values to be copied, add those to the record.
+	// (in theory, this might replace some values typed in the dialog)
+	for (var sOneColumn in oToBeCopied){
+		var sKeyInResp = lists.getNiceColumnName(sThisListLabel, sOneColumn);
+		oColumnsAndValues[sKeyInResp] = oToBeCopied[sOneColumn];
+	}
+	
+	// build record to insert
+	var aRecord = new Array();
+	for (var j=0; j<aAllColumns.length; j++){
+
+		var sColumnName = aAllColumns[j];
+		var sKeyInResp = lists.getNiceColumnName(sThisListLabel, sColumnName);
+		var valToAssign = oColumnsAndValues[sKeyInResp];
+		aRecord.push( valToAssign != null ? valToAssign : "<NULL>"); // this tells form.addNewRows() to assign no value to this cell
+	}
+	
+	
+	// add column for 'show' and 'delete' buttons
+	lists.addButtonsToRow(oButtons, aRecord);
+
+	// add record
+	var nNewNode = oTable.row.add(aRecord).node();
+	// mark it as 'added'
+	$(nNewNode).addClass("added");
+	// draw it
+	oTable.draw(false);
+
+	// editability
+	form.makeListEditable(sThisListLabel, sThisListTableName);
+
+	// assign functions to 'show' and 'delete' icons
+	lists.assignShowAndDeleteFunction(oTable);
+
+	// attract attention from user to send button, which must be pressed 
+	// since some content was modified,
+	// and show that reset is possible now
+										
+	var sFormTable = lists.getFormContainerId(sThisListLabel);
+	sFormTable = form.getFeedingTable(sFormTable);
+	form.setSendButtonToSetting(sFormTable, "payattention");
+	form.setResetButtonToSetting(sFormTable, "active");
+	
+	// finally callback if any
+	if (fnCallback != null) fnCallback();
+};
+
+
 // assign the 'show' and 'delete' functions  
 // to the row buttons
 lists.assignShowAndDeleteFunction = function(oTable){

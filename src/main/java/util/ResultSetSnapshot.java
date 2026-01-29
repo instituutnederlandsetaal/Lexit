@@ -120,7 +120,7 @@ public class ResultSetSnapshot {
     }
     
     /**
-     * Get the full metadata of the columns (name, type, etc.)
+     * Get the full metadata of the columns (name, type, typeName, etc.)
      * @return list of ColumnMeta objects
      */
     public List<ColumnMeta> getMetadata() {
