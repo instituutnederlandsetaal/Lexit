@@ -133,8 +133,8 @@ fn.setProjectTitle = function(sProjectName, sColor, sFontSize, sFontWeight){
 	
 	// set text, color, size, etc
 	$("#projectname").find("span")
-	.text(sProjectName)
-	.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFontWeight);
+		.text(sProjectName)
+		.css("font-size", sFontSize).css("color", sColor).css("font-weight", sFontWeight);
 	
 	// set title tab as well (and don't double the lex'it version number after the '-'
 	var sBaseTitle = $("title").text();
@@ -381,7 +381,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 		}
 		
 		if (sPathToCustomLogo != null) {
-			$("#square_logo").append(
+			$("#square_logo").empty().append(
 				$("&lt;img>").attr("src", sPathToCustomLogo).css("height", sCustomLogoSize).css("width", sCustomLogoSize)
 			);
 		}
@@ -395,6 +395,11 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 		$("#indicators").removeClass("huisstijl").addClass("default");
 		$("#headerlinks").removeClass("huisstijl").addClass("default");
 	}
+	
+	
+	// fade in the body
+	// (as a way to prevent unstyled content to appear briefly on screen at startup)
+	$('body').delay( 800 ).animate({ opacity: 1 }, 500);
 	
 };
 
@@ -457,7 +462,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 fn.getCurrentSchema = function(){
 	
 	return setSchemaNameCache;	
-}
+};
 
 
 
@@ -468,7 +473,7 @@ fn.getCurrentSchema = function(){
 fn.rebuildTablesMenu = function(){
 	ts.reinit();
 	ts.getListOfTables(null, {}, {});
-}
+};
 
 
 
@@ -815,18 +820,63 @@ fn.getCurrentDisplayLength = function(sSomeTablename){
 	return mt.getDataTableObjectOf(sSomeTablename).page.len();
 };
 
-
 /**
  * Get the current index at which display of rows currently starts
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @returns {Integer} Index at which display of rows currently starts
+ * @see fn.getCurrentPageIndex
  */
 fn.getCurrentDisplayStart = function(sSomeTablename){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 		
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().start;
+};
+
+/**
+ * Get the total number of rows of a table
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} total number of rows of a table
+ * @see fn.getTotalNumberOfPages
+ */
+fn.getTotalNumberOfRows = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsTotal;	
+};
+
+
+/**
+ * Get the total number of pages of a table
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} total number of pages
+ * @see fn.getTotalNumberOfRows
+ */
+fn.getTotalNumberOfPages = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().pages;	
+};
+
+/**
+ * Get the current page index of a table (1-based)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} Index at which display of pages currently starts
+ * @see fn.getCurrentDisplayStart
+ */
+fn.getCurrentPageIndex = function(sSomeTablename){
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().page + 1;
 };
 
 
@@ -1073,8 +1123,7 @@ fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExt
 	un.cleanUndoStack(sSomeTablename);
 	
 	// if the table doesn't exist yet, create it with the right settings
-	if ( !mt.tableExists(sSomeTablename))
-	{
+	if ( !mt.tableExists(sSomeTablename)) {
 		// create a table properties record		
 		// we pass a function and its arguments for initial call
 		// (this function can only be called after the table was created, which is why we store it and call it only later)
@@ -1145,7 +1194,6 @@ fn._callTableSilentlySub = function(sSomeTableName){
 			"db_name": lexutil.getHttpParams().get("db") 
 		},
 		dataType: "xml",
-		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			td.processColumnResponse(xml, sSomeTableName, function(){}, {},
 			
@@ -1165,7 +1213,6 @@ fn._callTableBuildSilently = function(sSomeTableName){
 	var aTableSettings =				conf.getTableSettings(sSomeTableName);	
 	var sViewtype = (aTableSettings!=null ? conf.getViewtype(aTableSettings) : "table");
 	mt.setViewType(sSomeTableName, sViewtype);	
-	//mt.setTableType(sSomeTableName, asTableTypes[$.inArray(sSomeTableName, asTableNames)]);
 	un.cleanUndoStack(sSomeTableName);	
 	tb.setColumnProperties(sSomeTableName, true);
 };
@@ -7007,7 +7054,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Oct 22 2025 10:32:53 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jan 29 2026 12:20:39 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>
