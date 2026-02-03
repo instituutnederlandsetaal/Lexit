@@ -21,6 +21,13 @@ ts.reinit = function(){
 // But those variables can be set so as to be able to open a table upon startup and apply some filters to it 
 ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings){
 	
+	// set globals for table to open at startup time, if declared!
+	if (sTableToCallUponStartUp != null){
+		sStartUpTable = sTableToCallUponStartUp;
+		oStartUpContentToMatch = oContentToMatchUponStartUp;
+		oStartUpTableSettings = oTableSettings;
+	}
+	
 	lexutil.showSpinner('#indicators');
 				
 	var url = WEBSERV_URL+"/api/gettables";
@@ -37,7 +44,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 		success: function(xml) {
 			
 			lexutil.removeSpinner('#indicators');					
-			ts.processTableListResponse(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml);
+			ts.processTableListResponse(sTableToCallUponStartUp, xml);
 		},
 		error: function(jqXHR, textStatus, errorThrown){
 			
@@ -53,13 +60,9 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 // process list of tables and views obtained from the database
 // (this is called by the previous function ts.getListOfTables)
 
-ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, xml){
-	
+ts.processTableListResponse = function(sTableToCallUponStartUp, xml){
+		
 	var iNumberOfVisibleTables = 0;
-	
-	// filters or settings to apply to a table being opened upon startup (url parameter table=...)
-	var haTableFilters = 	new Hashtable();
-	var haTableSettings =	new Hashtable();
 	
 	// lists of tables groups
 	// (the array will contain the names of the groups, sorted in order of creation;
@@ -201,15 +204,6 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 		else
 			iNumberOfVisibleTables++;
 		
-		// set the filters of the table to be called upon startup
-		if (tableItems.eq(0).text() == sTableToCallUponStartUp) {
-			haTableFilters.put( sTableName, oContentToMatchUponStartUp );
-			haTableSettings.put( sTableName, oTableSettings );
-		}			
-		else {
-			haTableFilters.put( sTableName, {} );
-			haTableSettings.put( sTableName, {} );
-		}
 	});	
 	
 	
@@ -224,38 +218,39 @@ ts.processTableListResponse = function(sTableToCallUponStartUp, oContentToMatchU
 
 	
 	// build a selection list now
-	ts.buildListOfTables(haTableFilters, haTableSettings, aTableGroups, haTableGroups);
+	ts.buildListOfTables(aTableGroups, haTableGroups, function(){
+		
+		// if we have only one table to choose from
+		// load that table automatically (at least if default behaviour,
+		// as stated in bOpenSingleTableAtStartup variable, wasn't turned off in config.js file)
+		if (iNumberOfVisibleTables==1 && bOpenSingleTableAtStartup) {
+			
+			var iIndexOfFirstVisibleTable = $.inArray(true, abTableVisible, 1);
+			$("#selected_source").val(asTableNames[iIndexOfFirstVisibleTable]).change();
+			
+			// if we have only one table available, let's hide the table selector (which is meaningless now)
+			$("#selected_source").hide();
+			$("#indicator").find("span").eq(0).hide();
+		}
+		// else if we are required to open a given table at start up, do it
+		else if (sTableToCallUponStartUp != null) {
+			$("#selected_source").val(sTableToCallUponStartUp).change();
+		}
+		
+	});
 	
-	// if we have only one table to choose from
-	// load that table automatically (at least if default behaviour,
-	// as stated in bOpenSingleTableAtStartup variable, wasn't turned off in config.js file)
-	if (iNumberOfVisibleTables==1 && bOpenSingleTableAtStartup) {
-		
-		var iIndexOfFirstVisibleTable = $.inArray(true, abTableVisible, 1);
-		$("#selected_source").val(asTableNames[iIndexOfFirstVisibleTable]).change();
-		
-		// if we have only one table available, let's hide the table selector (which is meaningless now)
-		$("#selected_source").hide();
-		$("#indicator").find("span").eq(0).hide();
-	}
-	// else if we are required to open a given table at start up, do it
-	else if (sTableToCallUponStartUp != null) {
-		$("#selected_source").val(sTableToCallUponStartUp).change();
-	}
+	
 };
 		
 
 // build and show list of tables/views
 
-ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, haTableGroups){
-			
+ts.buildListOfTables = function(aTablesGroups, haTableGroups, fnCallback){
+	
 	$("#tablechoice").empty();
 	
 	var formTagToAdd = $("<form></form>")
 		.attr("action", "#");
-	
-	var labelTagToAdd = $("<label></label>")
-		.attr("for", "source_form");
 
 	// action on choosing a table
 	
@@ -270,15 +265,11 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 				$(this).dequeue();
 			} ).delay(10).queue(function(){
 				
-				//console.log(haTableFilters.get($(this).find(":selected").val()));
-				//console.log(haTableSettings.get($(this).find(":selected").val()));
-				
-				ts.callTable(haTableFilters, haTableSettings);
+				ts.callTable();
 				$(this).dequeue();
 			});		
 			
 			return;
-
 		});
 
 	for (var j=0; j<aTablesGroups.length; j++) {
@@ -341,15 +332,22 @@ ts.buildListOfTables = function(haTableFilters, haTableSettings, aTablesGroups, 
 	$("#tablechoice").append(formTagToAdd);
 	
 	// generate select menu
-	$("#source_form").selectmenu();
 	
+	$(this).queue( function(){
+		$("#source_form").selectmenu();
+		$(this).dequeue();
+	} )	.delay(500).queue(function(){				
+		if (fnCallback != null) fnCallback();
+		$(this).dequeue();
+	});	
+		
 };
 
-ts.callTable = function(haTableFilters, haTableSettings){
+ts.callTable = function(){
 	
 	// read the name of the chosen table
 	var sTableName = $("#selected_source").find(":selected").val();
-	
+		
 	// and put the selector back into neutral position
 	$("#selected_source").val(lang.choose_a_table_default_value);
 	
@@ -392,8 +390,11 @@ ts.callTable = function(haTableFilters, haTableSettings){
 		// see:
 		// http://forum.jquery.com/topic/jquery-empty-does-not-destroy-ui-widgets-whereas-jquery-remove-does-using-ui-1-8-4
 		
-		// load the chosen table:				
-		fn.callDatabase(sTableName, haTableFilters.get(sTableName), null, haTableSettings.get(sTableName));
+		// load the chosen table:
+		if (sTableName == sStartUpTable)				
+			fn.callDatabase(sTableName, oStartUpContentToMatch, null, oStartUpTableSettings);
+		else
+			fn.callDatabase(sTableName); 
 	}
 };
 

@@ -34,6 +34,14 @@ form.send_button_icon_payattention = "ui-icon ui-icon-alert";
 form.send_button_icon_alliswel = "ui-icon ui-icon-check";
 
 
+form.aListOfPossibleMouseActions = ["click", "dblclick", 
+                                   "mouseup", "mousedown", 
+                                   "mouseover", "mouseout", 
+                                   "mousemove",                                   
+                                   "mouseenter", "mouseleave"
+                                   //"contextmenu" // this (mouse right click) is already in use as a Lex'it parameter key
+                                   ];
+
 
 // give the undo/reset-button a special background-color etc. 
 // given a given status (parameter: sSetting)
@@ -529,7 +537,7 @@ form.buildViewGrid = function(sTableName){
 		var aBlockSize = 	oTextBlock["definition"];
 		var sBlockClass = 	oTextBlock["class"];
 		var sBlockText = 	oTextBlock["text"];
-		var fnBlockClick = 	oTextBlock["click"];
+		
 		
 		if (aPosition == null){
 			fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, "textblocks:{"+sTextBlockName+":{position}}"));
@@ -556,12 +564,18 @@ form.buildViewGrid = function(sTableName){
 					.css("height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
 	
 	
-		// click events if declared
+		// handle mouse events if declared
+		// (try to assign any of those, if declared)
 		
-		if (fnBlockClick != null){
-			$("#"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_"))
-				.click(function(){
-					
+		for (var iMe=0; iMe < form.aListOfPossibleMouseActions.length; iMe++){
+			
+			var sEventName = form.aListOfPossibleMouseActions[iMe];
+			var fnBlockEvent = 	oTextBlock[sEventName];
+			
+			if (fnBlockEvent != null){
+				
+				$("#"+sTableName+"_form_textblock_"+sTextBlockName.replace(/ /g, "_")).on(sEventName, function(e){
+						
 					// get config given this node
 					var sTableName = 		form.getFeedingTable(this);
 					var sTextBlockName = 	$(this).attr("id").replace(/^.+_form_textblock_/g, "");
@@ -569,12 +583,14 @@ form.buildViewGrid = function(sTableName){
 					var oTableSettings =    conf.getTableSettings(sTableName);
 					var oFormGrid =         conf.getFormGrid(oTableSettings);
 					var oTextBlocks = 		oFormGrid["textblocks"];
-					var fnBlockClick = 		oTextBlocks[sTextBlockName]["click"];
+					var fnThisBlockEvent = 	oTextBlocks[sTextBlockName][e.type];
 					
 					// call function with table object as parameter
-					fnBlockClick( mt.getDataTableObjectOf(sTableName) );
+					fnThisBlockEvent( mt.getDataTableObjectOf(sTableName) );
 				});
+			}
 		}
+		
 	}
 	
 	
@@ -636,15 +652,28 @@ form.buildViewGrid = function(sTableName){
 					
 					// user the id of the container, find a list container inside
 					var sContainerId = $("#"+sDivId).find("div.formview_list").attr("id");
+										
 					if (sContainerId != null){
 						
-						// if the list and its ID was found, use that to retrieve the list label
-						var sListLabel = lists.getLabelFromContainerId(sContainerId);						
-						setTimeout(function(){
+						// In previous version, we assumed that each textblock had only one list,
+						// so if the list and its ID was found, we use that to retrieve the list label
+						// with the following function, which gave one listlabel and only one!
+						//var sListLabel = lists.getLabelFromContainerId(sContainerId);
+						
+						// in the current version, we allow a textblock to contain multiple lists,
+						// so we get the listlabels from their containers inside the textblock:
+						 
+						var aListsInBlock = $("#"+sDivId).find("div.formview_listlabel");
+						
+						$(aListsInBlock).each(function(){
 							
-							// use the list label to retrieve the list DataTable object and redraw it
-							(lists.getDataTableObjectOf(sListLabel)).draw();
-						}, 200);
+							var sListLabel = $(this).attr("id").replace(/^formview_listlabel_/, "");							
+							setTimeout(function(){							
+								// use the list label to retrieve the list DataTable object and redraw it
+								(lists.getDataTableObjectOf(sListLabel)).draw();
+							}, 200);
+						});
+						
 					}	
 				}				
 			});
@@ -1591,27 +1620,36 @@ form.manageViewGrid = function(sTableName){
 
 
 			// is the cell clickable?
+			
+			// handle mouse events if declared
+			// (try to assign any of those, if declared)
+			
+			for (var iMe=0; iMe < form.aListOfPossibleMouseActions.length; iMe++){
+				
+				var sEventName = form.aListOfPossibleMouseActions[iMe];
+				var fnCellEvent = oFormGrid["cells"][sCellName][sEventName];
+				
+				if (fnCellEvent != null){
 
-			if (oFormGrid["cells"][sCellName]["click"] != null){
-
-				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).off("click");
-				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).on("click", function(){
-
-					var nFormCell = this;
-
-					var sCellId = 			$(nFormCell).closest("div[id^='form_cellvalue_'")[0].id;
-					var sCellName = 		sCellId.replace(/^form_cellvalue_/, "");
-					var sFormTable = 		form.getFeedingTable(nFormCell);
-					var aTableSettings = 	conf.getTableSettings(sFormTable);
-					var oFormGrid = 		conf.getFormGrid(aTableSettings);
-					var fnFunction =  		oFormGrid["cells"][sCellName]["click"];				
-
-					// call function
-					fnFunction( mt.getDataTableObjectOf(sFormTable), nFormCell );
-				});
-
-
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).off(sEventName);
+					$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).on(sEventName, function(e){
+	
+						var nFormCell = this;
+	
+						var sCellId = 			$(nFormCell).closest("div[id^='form_cellvalue_'")[0].id;
+						var sCellName = 		sCellId.replace(/^form_cellvalue_/, "");
+						var sFormTable = 		form.getFeedingTable(nFormCell);
+						var aTableSettings = 	conf.getTableSettings(sFormTable);
+						var oFormGrid = 		conf.getFormGrid(aTableSettings);
+						var fnFunction =  		oFormGrid["cells"][sCellName][e.type];				
+	
+						// call function
+						fnFunction( mt.getDataTableObjectOf(sFormTable), nFormCell );
+					});
+	
+				}
 			}
+
 			
 
 			// ----------------------------------
@@ -1889,7 +1927,6 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		var sColName = lists.getTrueColumnName(sListLabel, $(eThisCol).text());
 		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColName);
 		var bEditable = conf.getEditability(oColumnConfig);
-		var bClickable = false; // in this case, we don't use the table config, since it mostly doesn't meet the form logic
 		
 		// we will need the column index
 		var iColIndex = $("#"+sFormAndListLabel+" thead").find("th").index(eThisCol);
@@ -1901,8 +1938,6 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 			if (oColumnsConfig[sColName]["editable"] != null)
 				bEditable = oColumnsConfig[sColName]["editable"];
 
-			if (oColumnsConfig[sColName]["click"] != null)
-				bClickable = true;
 		}
 		
 		
@@ -1939,27 +1974,42 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 		}
 
 		// if column must be clickable:
-		if (bClickable){
-
-			$('table#'+sFormAndListLabel+' tbody tr').off("click", 'td:eq('+iColIndex+')');
-			$('table#'+sFormAndListLabel+' tbody tr').on("click", 'td:eq('+iColIndex+')', function(event){
-
-				var nCell = this;
-
-				var sListLabel = 		lists.getLabelFromNode(nCell);
-				var sFormContainerId =	lists.getFormContainerId(sListLabel);
-				var sFormTable = 		form.getFeedingTable(sFormContainerId);
-				var aTableSettings = 	conf.getTableSettings(sFormTable);
-				var oFormGrid = 		conf.getFormGrid(aTableSettings);
-
-				// get function and call it with the needed arguments
-				var fnFunction = oFormGrid["lists"][sListLabel]["table"]["columns"][sColName]["click"];
-				fnFunction(sListLabel, nCell);
-
-
-			});
-
+		// in this case, we don't use the table config, since it mostly doesn't meet the form logic
+			
+		// handle mouse events if declared
+		// (try to assign any of those, if declared)
+		
+		for (var iMe=0; iMe < form.aListOfPossibleMouseActions.length; iMe++){
+			
+			var sEventName = form.aListOfPossibleMouseActions[iMe];
+			var fnListCellEvent = 	oColumnsConfig[sColName] != null ? oColumnsConfig[sColName][sEventName] : null;
+			
+			if (fnListCellEvent != null){
+				
+				$('table#'+sFormAndListLabel+' tbody tr').off(sEventName, 'td:eq('+iColIndex+')');
+				$('table#'+sFormAndListLabel+' tbody tr').on(sEventName, 'td:eq('+iColIndex+')', function(e){
+	
+					var nCell = this;
+	
+					var sListLabel = 		lists.getLabelFromNode(nCell);
+					var sFormContainerId =	lists.getFormContainerId(sListLabel);
+					var sFormTable = 		form.getFeedingTable(sFormContainerId);
+					var aTableSettings = 	conf.getTableSettings(sFormTable);
+					var oFormGrid = 		conf.getFormGrid(aTableSettings);
+	
+	
+					// get current column name given the clicked cell					
+					var iColIndex = $(nCell).closest("tr").find("td").index(nCell);
+					var sColName = lists.getTrueColumnName(sListLabel, $(nCell).closest("table").find("thead th").eq(iColIndex).text());
+	
+					// get function and call it with the needed arguments
+					var fnFunction = oFormGrid["lists"][sListLabel]["table"]["columns"][sColName][e.type];
+					fnFunction(sListLabel, nCell);	
+				});				
+			}
+			
 		}
+		
 	});
 
 

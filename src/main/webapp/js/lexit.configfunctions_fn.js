@@ -443,6 +443,7 @@ fn.getCurrentSchema = function(){
  * This function is to be called when table visibility was changed (oHiddenTablesList or oShowOnlyTables), etc.
  */
 fn.rebuildTablesMenu = function(){
+	
 	ts.reinit();
 	ts.getListOfTables(null, {}, {});
 };
@@ -998,7 +999,7 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callTableSilently
  */
 fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-	
+		
 	// default value
 	var iWait = 250; // ms
 	
@@ -1049,7 +1050,7 @@ fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSetti
 
 // subroutine of fn.callDatabase
 fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-
+	
 	// check possible pre-init function for existence
 	var aTableSettings = conf.getTableSettings(sSomeTablename);
 	var fnPreInit = conf.getPreInitCallback(aTableSettings);
@@ -1081,7 +1082,7 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 
 
 fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-
+	
 	// the content to match must be at least an empty array
 	if (aContentToMatch == null)
 		aContentToMatch = {};

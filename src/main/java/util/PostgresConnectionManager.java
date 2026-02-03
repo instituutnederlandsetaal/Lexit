@@ -660,8 +660,10 @@ public class PostgresConnectionManager {
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 						String nonArrayType = oneType.replaceAll("^_", "").replaceAll("\\[\\]$", "");
 						boolean valueIsList = cleanValue.contains(",");
-						if (oneType.startsWith("_int") || isWholeNumberType(oneType) || isBigWholeNumberType(oneType) )
+						if (isWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
+						else if (isBigWholeNumberType(oneType) )
+							prest.setArray(i+1, conn.createArrayOf("bigint", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 						else
 							prest.setArray(i+1, conn.createArrayOf(nonArrayType, valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					}
@@ -887,8 +889,10 @@ public class PostgresConnectionManager {
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
 					String nonArrayType = oneType.replaceAll("^_", "").replaceAll("\\[\\]$", "");
 					boolean valueIsList = cleanValue.contains(",");
-					if (oneType.startsWith("_int") || isWholeNumberType(oneType) || isBigWholeNumberType(oneType) )
+					if (isWholeNumberType(oneType) )
 						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
+					else if (isBigWholeNumberType(oneType) )
+						prest.setArray(i+1, conn.createArrayOf("bigint", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, conn.createArrayOf(nonArrayType, valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 				}
@@ -1187,11 +1191,13 @@ public class PostgresConnectionManager {
 	public static boolean isWholeNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
-		return typeName.startsWith("integer") ||
-			typeName.startsWith("smallint") ||
-			typeName.startsWith("decimal") ||		// user-specified precision, exact
-			typeName.startsWith("serial") ||
-			typeName.startsWith("numeric");
+		return	typeName.startsWith("_int2") ||
+				typeName.startsWith("_int4") ||
+				typeName.startsWith("integer") ||
+				typeName.startsWith("smallint") ||
+				typeName.startsWith("decimal") ||		// user-specified precision, exact
+				typeName.startsWith("serial") ||
+				typeName.startsWith("numeric");
 	};
 	
 	/**
@@ -1202,8 +1208,9 @@ public class PostgresConnectionManager {
 	public static boolean isBigWholeNumberType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-numeric.html
-		return typeName.startsWith("bigint") ||
-			typeName.startsWith("bigserial") ;
+		return 	typeName.startsWith("bigint") ||
+				typeName.startsWith("bigserial") ||
+				typeName.startsWith("_int8");
 	};
 	
 	
