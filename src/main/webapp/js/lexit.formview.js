@@ -527,6 +527,7 @@ form.buildViewGrid = function(sTableName){
 	
 	// ------------------------------------------
 	// text blocks loop
+	// (those are just text fields, not attached to any cell, but just floating on the form, used for titles, labels)
 	// ------------------------------------------
 	
 	var oTextBlocks =  oFormGrid["textblocks"];

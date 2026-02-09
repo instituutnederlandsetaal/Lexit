@@ -998,10 +998,11 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callTable
  * @see fn.callTableSilently
  */
-fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-		
-	// default value
-	var iWait = 250; // ms
+fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, _bWaitedAlready = 0){
+	
+	// if a table is not yet ready to be called (for example because the initialization of the GUI is not yet finished), wait a bit and try again
+	// (default value is ms)
+	var iWait = 250; 
 	
 	// make sure sSomeTablename contains a string
 	if (typeof sSomeTablename == 'object')
@@ -1011,7 +1012,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	if (fn.tableExists(sSomeTablename))
 		fn.saveTableState(sSomeTablename);
 	
-	// In some rare cases, when a config.js-file calls a table straight
+	// In some cases, when a config.js-file calls a table straight
 	// at initialization time, the function competes with the normal initialization 
 	// functions, so some general data (tables list and types, etc.) are loaded too late,
 	// t.i. after the current function call. To prevent this, we check here if
@@ -1019,11 +1020,29 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	
 	// Trick to do that:
 	// asTableTypes mustn't be undefined. If it is, the initialization is not
-	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
+	// finished, so wait a bit. Otherwise, carry on with fn._callDatabase
 	
 	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
 	
-	if( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+	// is the table known already?
+	if ( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined" 
+		&&  (
+			// If we're NOT calling the table at startup, then its configuration must be available already, so we're ready to call the table			
+			(
+				// the table wasn't set as a startup table
+				sStartUpTable != sSomeTablename 
+				&& 
+				// the source selector is visible, which means there are multiple tables to choose from, so we won't open a (single) table automcatically
+				$("#selected_source").is(":visible")) 
+			|| 
+			// Otherwise, check if the table configuration is available
+			// (we need to check in case we're using dynamically loaded libraries, otherwise the table will be called without configuration!) 
+			(oTableSettingsList[sSomeTablename] != null && oTableConfigurationList[sSomeTablename] != null)
+			||
+			// Otherwise, make sure we won't be waiting longer then 2 seconds. If we are, something is probably wrong, but let's try to call the table anyway
+			_bWaitedAlready > 2000 
+			)
+		){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
@@ -1031,7 +1050,9 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 		// reload the list of tables (might be needed when fn.setSchema was called)		
 		fn.rebuildTablesMenu();		
         setTimeout(function(){		        	
-        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
+        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, 
+        		_bWaitedAlready + iWait // remember how long we have waited already, to prevent infinite waiting
+        	);        	
         }, iWait);
     }
 	
@@ -1051,12 +1072,16 @@ fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSetti
 // subroutine of fn.callDatabase
 fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
 	
+	// reset the startup config, to prevent that from interfering with the later function call
+	sStartUpTable = "";
+	oStartUpContentToMatch = {};
+	oStartUpTableSettings = {};
+	
 	// check possible pre-init function for existence
 	var aTableSettings = conf.getTableSettings(sSomeTablename);
 	var fnPreInit = conf.getPreInitCallback(aTableSettings);
 
 	var bTableAlreadyLoaded = fn.tableExists(sSomeTablename);
-
 	
 	// If pre-init function does exist, make sure it's executed before calling the table
 	if ( !bTableAlreadyLoaded && fnPreInit != null ){
