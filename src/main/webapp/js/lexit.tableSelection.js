@@ -19,7 +19,7 @@ ts.reinit = function(){
 // Request list of available tables and views from the database
 // In most cases, all input variables are null
 // But those variables can be set so as to be able to open a table upon startup and apply some filters to it 
-ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings){
+ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartUp, oTableSettings, _bShowSpinner=true){
 	
 	// set globals for table to open at startup time, if declared!
 	if (sTableToCallUponStartUp != null){
@@ -28,7 +28,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 		oStartUpTableSettings = oTableSettings;
 	}
 	
-	lexutil.showSpinner('#indicators');
+	if (_bShowSpinner) lexutil.showSpinner('#indicators');
 				
 	var url = WEBSERV_URL+"/api/gettables";
 	
@@ -43,7 +43,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 		//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			
-			lexutil.removeSpinner('#indicators');					
+			if (_bShowSpinner) lexutil.removeSpinner('#indicators');					
 			ts.processTableListResponse(sTableToCallUponStartUp, xml);
 		},
 		error: function(jqXHR, textStatus, errorThrown){
