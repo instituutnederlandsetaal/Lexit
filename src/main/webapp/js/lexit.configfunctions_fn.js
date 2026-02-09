@@ -998,7 +998,7 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callTable
  * @see fn.callTableSilently
  */
-fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, _bWaitedAlready = 0){
+fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, _iWaitedAlready = 0){
 	
 	// if a table is not yet ready to be called (for example because the initialization of the GUI is not yet finished), wait a bit and try again
 	// (default value is ms)
@@ -1023,24 +1023,20 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	// finished, so wait a bit. Otherwise, carry on with fn._callDatabase
 	
 	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
-	
+		
 	// is the table known already?
 	if ( iTableIndex >=0 && (typeof asTableTypes[ iTableIndex ]) !== "undefined" 
 		&&  (
 			// If we're NOT calling the table at startup, then its configuration must be available already, so we're ready to call the table			
-			(
-				// the table wasn't set as a startup table
-				sStartUpTable != sSomeTablename 
-				&& 
-				// the source selector is visible, which means there are multiple tables to choose from, so we won't open a (single) table automcatically
-				$("#selected_source").is(":visible")) 
+			sStartUpTable != sSomeTablename
 			|| 
 			// Otherwise, check if the table configuration is available
-			// (we need to check in case we're using dynamically loaded libraries, otherwise the table will be called without configuration!) 
-			(oTableSettingsList[sSomeTablename] != null && oTableConfigurationList[sSomeTablename] != null)
+			// We need to check in case we're using dynamically loaded libraries, otherwise the table will be called without configuration!
+			// (we use a OR condition here, because there might be only limited configuration for this table, which is legal) 
+			(oTableSettingsList[sSomeTablename] != null || oTableConfigurationList[sSomeTablename] != null)
 			||
 			// Otherwise, make sure we won't be waiting longer then 2 seconds. If we are, something is probably wrong, but let's try to call the table anyway
-			_bWaitedAlready > 2000 
+			_iWaitedAlready > 2000 
 			)
 		){ 
     	
@@ -1051,7 +1047,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 		fn.rebuildTablesMenu();		
         setTimeout(function(){		        	
         	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, 
-        		_bWaitedAlready + iWait // remember how long we have waited already, to prevent infinite waiting
+        		_iWaitedAlready + iWait // remember how long we have waited already, to prevent infinite waiting
         	);        	
         }, iWait);
     }
