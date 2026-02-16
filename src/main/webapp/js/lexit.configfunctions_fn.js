@@ -1591,8 +1591,6 @@ fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	var tableYpos1 = tableRef1.offset().top;	
 	
 	// Put the second table next to the first one
-	// we need to set an absolute position instead of a relative one, since
-	// any change in the height of the first table will cause the second one to shift up or down!
 	tableRef2.css("position", "absolute");
 	tableRef2.css("left", (tableXpos1+tableWidth1)+"px");
 	tableRef2.css("top", tableYpos1+"px");
@@ -1626,9 +1624,7 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	var tableXpos1 = tableRef1.offset().left;
 	var tableYpos1 = tableRef1.offset().top;
 	
-	// Put the second table next to the first one
-	// we need to set an absolute position instead of a relative one, since
-	// any change in the height of the first table will cause the second one to shift up or down!
+	// Put the second table under the first one
 	tableRef2.css("position", "absolute");
 	tableRef2.css("left", tableXpos1+"px");
 	tableRef2.css("top", (tableYpos1+tableHeight1)+"px");
@@ -2592,6 +2588,34 @@ fn.toggleCheckbox = function(nRow, sColumnName, fnCallback){
 // *****************************************************************
 
 
+
+/**
+ * Get the list of (both visible or hidden) columns of a table
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ * @returns {String[]} An array of column names
+ * 
+ * @see fn.getVisibleColumns, lists.getAllColumns
+ */
+fn.getAllColumns = function(sSomeTable){
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+
+	return mt.getListOfColumnsOf(sSomeTable);
+};
+
+/**
+ * Get the list of visible columns of a table
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ * @returns {String[]} An array of column names
+ * 
+ * @see fn.getAllColumns
+ */
+fn.getVisibleColumns = function(sSomeTable){
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+
+	return mt.getListOfVisibleColumnsOf(sSomeTable);
+};
 
 
 /**

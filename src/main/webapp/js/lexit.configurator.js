@@ -1097,17 +1097,6 @@ conf.getVisibility = function(aColumnConfig){
 };
 
 
-// retrieve col width settings
-// default is null
-
-conf.getWidth = function(aColumnConfig){
-	
-	if (typeof aColumnConfig["width"] == 'undefined')
-		return null;
-	return aColumnConfig["width"];
-};
-
-
 // retrieve flexible_visibility settings
 // default is flexible_visibility:true
 
@@ -1253,6 +1242,11 @@ conf.getWidthSetting = function(aColumnConfig){
 	if (typeof aColumnConfig["width"] == 'undefined')
 		return null;
 	return aColumnConfig["width"];
+};
+
+// for backwards compatibility
+conf.getWidth = function(aColumnConfig){	
+	return conf.getWidthSetting(aColumnConfig);
 };
 
 

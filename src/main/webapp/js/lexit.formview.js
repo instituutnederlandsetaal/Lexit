@@ -174,7 +174,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	// ------------------------------------------
 
 	// get visible columns
-	var aSearchFields = 			form.getVisibleColumnsOf(sTableName);
+	var aSearchFields = 			form.getVisibleColumns(sTableName);
 	var aSearchFieldsNiceNames = 	form.getColumnsNiceNames(sTableName); 
 
 
@@ -425,7 +425,7 @@ form.buildViewGrid = function(sTableName){
 	mt.getDataTableObjectOf(sTableName).displayRow(iNowIndex);
 
 	// get column names
-	var aSearchFields = form.getVisibleColumnsOf(sTableName);
+	var aSearchFields = form.getVisibleColumns(sTableName);
 	var aSearchFieldsNiceNames = form.getColumnsNiceNames(sTableName);
 
 	// ------------------------------------------
@@ -2650,7 +2650,7 @@ form.resetSearchFields = function(sTableName){
 	for (var sCellName in oCells){
 
 		// get selector of current search field in underlying table
-		var aVisibleCols = form.getVisibleColumnsOf(sTableName);
+		var aVisibleCols = form.getVisibleColumns(sTableName);
 		var iTableColIndex = $.inArray(sCellName, aVisibleCols);
 		var eThisTableSearchBox = $("#"+sTableName+"_searchboxes td:eq("+ iTableColIndex +")");
 		var eThisFormSearchBox = $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:eq("+ iFormColIndex +")");
@@ -2758,8 +2758,10 @@ form.getColumnConfig = function(sTableName, sCellName){
  * (if the visibility parameter is set in both, the form config parameter setting wins)
  * @param {String} name of the table underlying the form
  * @returns {Array} list of visible columns in the form 
+ * 
+ * @see fn.getVisibleColumns
  */
-form.getVisibleColumnsOf = function(sTableName){
+form.getVisibleColumns = function(sTableName){
 
 	// get visibility according to table config
 	var aVisibleColumns = lexutil.cloneArray( mt.getListOfVisibleColumnsOf(sTableName) );
@@ -2794,6 +2796,13 @@ form.getVisibleColumnsOf = function(sTableName){
 	return aVisibleColumns;
 }
 
+// for backwardscompatibility
+form.getVisibleColumnsOf = function(sTableName){
+	return form.getVisibleColumns(sTableName);
+};
+
+
+
 
 /**
  * Compute the list of nice names of form columns, given the table config AND the form config
@@ -2808,7 +2817,7 @@ form.getColumnsNiceNames = function(sSomeTable){
 	var aTableSettings = conf.getTableSettings(sTableName);
 	var oGrid = conf.getFormGrid(aTableSettings);
 	
-	var aColsList = form.getVisibleColumnsOf(sTableName);
+	var aColsList = form.getVisibleColumns(sTableName);
 	
 	if (oGrid["cells"] == null){		
 		//fn.message(lang.error, (lang.formlist_missing_parameter).replace(/TABLENAME/g, sTableName).replace(/PARAM/g, param));
@@ -2910,6 +2919,8 @@ form.getNameOfCell = function(nCellValueNode){
  * Determine whether the form is in 'unsaved' state or not
  * @param {String} name of the table underlying the form
  * @returns {Boolean} true if the form is not saved yet, otherwise false 
+ * @see form.saveForm
+ * @see form.resetForm
  */
 form.isUnsaved = function(sTableName){
 	var eFormButtons = $("#"+sTableName+"_formsbuttons");
@@ -2919,8 +2930,34 @@ form.isUnsaved = function(sTableName){
 	);
 };
 
+/**
+ * Save a form (t.i. click the save button programmatically) if it's not saved yet
+ * @param {String} name of the table underlying the form
+ * @see form.isUnsaved
+ * @see form.resetForm
+ */
+form.saveForm = function(sTableName){
+	$("#"+sTableName+"_formsbuttons").find("#send_button.payattention").click();
+};
+
+/**
+ * Reset a form programmatically
+ * @param {String} name of the table underlying the form
+ * @see form.saveForm
+ * @see form.isUnsaved
+ */
+form.resetForm = function(sTableName){
+	$("#"+sTableName+"_formsbuttons").find("#reset_button").click();
+};
 
 
-
-
+/**
+ * Refresh the form, by refreshing the underlying table
+ * @param {String} name of the table underlying the form
+ * @param {Function} callback function to be executed after the refresh is done
+ * @see lists.refresh
+ */
+form.refresh = function(sTableName, fnCalkback){
+	fn.refreshTable(sTableName, fnCalkback);
+};
 

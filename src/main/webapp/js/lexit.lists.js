@@ -292,6 +292,7 @@ lists.buildLists = function(sFormTable, iListNr){
  * @param {String} the label of the list to refresh
  * @param {Function} a callback function to call after the list has been refreshed
  * @param {Boolean} [bHardRefresh=true] a flag to force a hard refresh (true) or a soft refresh (false)
+ * @see form.refresh
  */
 lists.refresh = function(sListLabel, fnCallback, bHardRefresh){
 	
@@ -872,6 +873,42 @@ lists.addRowToList = function(sThisListLabel, oColumnsAndValues, fnCallback){
 };
 
 
+/**
+ * Remove a row from a list
+ * 
+ * @param {String} sThisListLabel the label of the list to which to add the row
+ * @param {Node} nRow rode of a row
+ * @param {Function} fnCallback a callback function to call after the row has been added
+ */
+lists.removeRowFromList = function(sThisListLabel, nRow, fnCallback){
+	
+	// keep array of rowId to delete
+	var nRowId = nRow.id;
+
+	var sThisFormListDivId = $(nRow).closest('div.formview_list')[0].id;					
+	var sListToRemove = $("#"+sThisFormListDivId).attr("remove_ids");
+	sListToRemove = (sListToRemove!=null ? sListToRemove : "");
+	sListToRemove += (sListToRemove == "" ? "": ",")+nRowId;
+	$("#"+sThisFormListDivId).attr("remove_ids", sListToRemove);
+	$("#"+sThisFormListDivId).addClass("rows_to_be_deleted");
+
+	// remove row from view
+	oTable.row( $(nRow)).remove().draw();
+
+	// attract attention from user to send button, which must be pressed 
+	// since some content was modified,
+	// and show that reset is possible now
+										
+	var sFormTable = lists.getFormContainerId(sThisListLabel);
+	sFormTable = form.getFeedingTable(sFormTable);
+	form.setSendButtonToSetting(sFormTable, "payattention");
+	form.setResetButtonToSetting(sFormTable, "active");
+	
+	// finally callback if any
+	if (fnCallback != null) fnCallback();
+};
+
+
 // assign the 'show' and 'delete' functions  
 // to the row buttons
 lists.assignShowAndDeleteFunction = function(oTable){
@@ -1429,6 +1466,8 @@ lists.getColumnsToUse = function(oLists, sListLabel){
  * (from the database at first call; and from call at following calls)
  * @param {String} name of the table underlying the list 
  * @param {Function} a callback function which processed the response 
+ * 
+ * @see fn.getAllColumns
  */
 lists.getAllColumns = function(sSomeTableName, fnCallback){
 
@@ -1484,7 +1523,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 /**
  * Get the type of a column, given the feeding table name and the column name
  * @param {String} name of the table underlying the list
- * @param {String} name of the column
+ * @param {String} type of the column
  */
 lists.getColumnType = function(sTableName, sColumnName){
 	
@@ -1751,7 +1790,7 @@ lists.getSelectedRows = function(sListLabel, bGetDataTableObject){
     	
     // default: return row nodes
 	return oTable.rows(".selected").nodes();
-}
+};
 
 
 /**
@@ -1764,7 +1803,19 @@ lists.selectRow = function(sListLabel, mMixed){
 	var eRow = lists.getRow(sListLabel, mMixed);
 	if ( eRow!= null && !$(eRow).hasClass("selected"))
 		$(eRow).addClass("selected");
-}
+};
+
+/**
+ * Unselect a particular row in a list, given its id
+ * @param {String} label of the list 
+ * @param {Array|String} associative array of column names and values OR id of the row (primary key in database terms) 
+ */
+lists.unselectRow = function(sListLabel, mMixed){
+
+	var eRow = lists.getRow(sListLabel, mMixed);
+	if ( eRow!= null && $(eRow).hasClass("selected"))
+		$(eRow).removeClass("selected");
+};
 
 /**
  * Get a particular row in a list, given its id
