@@ -428,7 +428,7 @@ public class Database {
 				"	FROM ("+
 				
 				// we will return to the client:
-				// * a row number, which will be use for pagination
+				// * a row number, which will be used for pagination
 				// * the name of the PK column, and all the values of the PK to be found on a page [given an occurrence number ~ call number]
 				//
 				
@@ -470,12 +470,7 @@ public class Database {
 				"	) grouped "+
 				"	 WHERE \"conditionIsMet_arr\" @> ARRAY[true];"; 
 			
-			
-			
-			//System.out.println(getRowNumberQuery);
-
-			
-			
+						
 			
 			// build a key for storing the query and the resultset, for the next goto-call
 			

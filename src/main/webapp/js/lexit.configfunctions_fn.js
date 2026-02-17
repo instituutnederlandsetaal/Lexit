@@ -1419,6 +1419,37 @@ fn.declareNewTable = function(sTableName, sTableDescription, sType, sTableCommen
 
 
 /**
+ * Assign a table to another group
+ * 
+ * @param {(String|API-object-instance)} sTableName - Name of the table to assign to another group
+ * @param {String} sGroupName - Name of the group to which the table has to be assigned (or null for 'default' group)
+ */
+fn.assignTableToGroup = function(sTableName, sGroupName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+
+	if (sGroupName == null){
+		
+		// get the table settings
+		var oCurrentTableSettings = conf.getTableSettings(sTableName);
+		
+		// if the table settings do not exist yet, create them
+		if (oCurrentTableSettings == null) {
+			oCurrentTableSettings = {};
+		}
+		
+		// get rid of the group name in the table settings, so that the table will be assigned to the default group
+		const { group, ...oNewTableSettings } = oCurrentTableSettings;
+		oTableSettingsList[sTableName] = oNewTableSettings;
+	}
+	else {
+		conf.changeTableSettingValue(sTableName, "group", sGroupName);
+	}	
+};
+
+
+/**
  * In case only one single table is available to the user to choose from,
  * this table will normally be opened automatically. But in
  * projects in which this behaviour is not desired, it can be switched off

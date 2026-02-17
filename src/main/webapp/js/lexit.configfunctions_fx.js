@@ -47,9 +47,6 @@ fx.getTableName = function(oMixed){
  * @param {(String|API-object-instance)} someTable - Table name or object
  * @returns {Integer} The number of visible rows
  */
-// get the number of visible rows
-// input   : table name
-// returns : integer
 fx.getNumberOfVisibleRows = function(oSomeTable){
 	
 	if (typeof oSomeTable == 'string')
