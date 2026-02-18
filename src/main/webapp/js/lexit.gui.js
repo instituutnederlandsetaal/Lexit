@@ -27,6 +27,21 @@ gui.getTiptipConfig = function(){
 	
 }
 
+// activate the table (give it focus) at mouseover, if configuration requires that
+gui.activeAtMouseOver = function(sSomeTableName){
+	
+	// retrieve the table settings
+	var oTableSettings = conf.getTableSettings(sSomeTableName);
+	
+	if (conf.getFocusAtMouseover(oTableSettings)) {
+		$("#"+sSomeTableName+"_dynamic").mouseenter(function(){
+			fn.setActiveTable(sSomeTableName);
+		});
+	}
+	
+};
+
+
 // Activate ellipsis on columns where this is required by configuration
 gui.activateEllipsis = function(sSomeTableName){
 	

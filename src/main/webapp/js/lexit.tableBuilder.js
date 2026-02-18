@@ -700,6 +700,10 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		tb.addExportButtons(sSomeTableName);	
 	}
 	
+	// give table focus automatically when mouse is over it, to allow navigation with keys without clicking first on the table
+	// (only if config says so)
+	gui.activeAtMouseOver(sSomeTableName);
+	
 	
 	// Force tooltip to fadeout 
 	// This is sometimes needed when we choosed a new table to load from the pulldown menu

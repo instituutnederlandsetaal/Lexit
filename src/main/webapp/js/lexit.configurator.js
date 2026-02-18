@@ -126,6 +126,13 @@ var oTableSettingsList_example = {
 		 * */
 		"exact_count": true,
 		
+		/** 
+		 * @type {boolean} 
+		 * @description Give a table focus (set it as active) if the mouse enters its container. 
+		 * (default: false)
+		 * */
+		"focus_at_mouseover": true,
+		
 		
 		/**
 		 * @type {string}
@@ -2549,6 +2556,14 @@ conf.getHeaderHeight = function(aTableSettings){
 conf._defaultHeight = function(){
 	return "55px"; // less than 55px gives overlap problems in Google Chrome
 };
+
+
+conf.getFocusAtMouseover = function(aTableSettings){
+	if (typeof aTableSettings["focus_at_mouseover"] == 'undefined')
+		return false;
+	return aTableSettings["focus_at_mouseover"];
+};
+
 
 conf.getFooterHeight = function(aTableSettings){
 	
