@@ -145,52 +145,6 @@
 
         <tr>
             
-                <td class="name"><code>click</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Function to be triggered when clicking in a specific column, etc.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dblclick</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Function to be triggered when double-clicking in a specific column, etc.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>bgcolor</code></td>
             
 
@@ -329,29 +283,6 @@
 
         <tr>
             
-                <td class="name"><code>select_trigger_event</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">An editable cell where only a limited number of values are allowed is typically edited via a select box. With this parameter, you can declare which mouse event should trigger the display of the select box. The default is 'mouseover'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>class</code></td>
             
 
@@ -375,13 +306,13 @@
 
         <tr>
             
-                <td class="name"><code>nice_name</code></td>
+                <td class="name"><code>click</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -391,7 +322,7 @@
 
             
 
-            <td class="description last">When a column has a technical, non-user-friendly name, you can give it a more user-friendly name for display using this parameter.</td>
+            <td class="description last">Function to be triggered when clicking in a specific column, etc.</td>
         </tr>
 
     
@@ -450,7 +381,7 @@
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -461,6 +392,29 @@
             
 
             <td class="description last">If this is true, the content of this column will be copied during a Search&Add action (insert). Columns with this setting set to false will not be included in the insert.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dblclick</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function to be triggered when double-clicking in a specific column, etc.</td>
         </tr>
 
     
@@ -513,6 +467,29 @@
 
         <tr>
             
+                <td class="name"><code>editerrorhandler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Handler that is called when editing an editable field causes an error.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>editfunc</code></td>
             
 
@@ -530,6 +507,29 @@
             
 
             <td class="description last">Custom function to be executed after editing a cell. This function is intended to replace the default handling of cell input: normally, the software would update the edited cell directly in the database, but when the screen table is a view, other tables need to be updated instead, and this can be declared in 'editfunc'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>editpreprocess</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function for preprocessing an entered value before Lex'it inserts it into the database.</td>
         </tr>
 
     
@@ -582,52 +582,6 @@
 
         <tr>
             
-                <td class="name"><code>editpreprocess</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Function for preprocessing an entered value before Lex'it inserts it into the database.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>editerrorhandler</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Handler that is called when editing an editable field causes an error.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>ellipsis</code></td>
             
 
@@ -674,29 +628,6 @@
 
         <tr>
             
-                <td class="name"><code>ellipsis_width</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">'max-width' attribute for ellipsis.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>ellipsis_height</code></td>
             
 
@@ -714,6 +645,29 @@
             
 
             <td class="description last">'max-height' attribute for ellipsis. When this value is exceeded by the cell content, a scrollbar will appear.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ellipsis_keep_selected_unwrapped</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? (default: true)</td>
         </tr>
 
     
@@ -743,13 +697,13 @@
 
         <tr>
             
-                <td class="name"><code>ellipsis_keep_selected_unwrapped</code></td>
+                <td class="name"><code>ellipsis_width</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">string</span>
 
 
             
@@ -759,7 +713,7 @@
 
             
 
-            <td class="description last">Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? (default: true)</td>
+            <td class="description last">'max-width' attribute for ellipsis.</td>
         </tr>
 
     
@@ -829,6 +783,29 @@
             
 
             <td class="description last">If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 'RESET' button is clicked. If you want to prevent the filter from being modified in the meantime, set "searchable": false for the same column.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nice_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">When a column has a technical, non-user-friendly name, you can give it a more user-friendly name for display using this parameter.</td>
         </tr>
 
     
@@ -927,6 +904,29 @@
 
         <tr>
             
+                <td class="name"><code>render</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Modify the text of a cell before it is displayed on the screen. This is purely for rendering purposes. It does not affect the underlying data, so search queries are not influenced by this function</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>searchable</code></td>
             
 
@@ -944,29 +944,6 @@
             
 
             <td class="description last">Searchability of a column.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sortable</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Sortability of a column.</td>
         </tr>
 
     
@@ -996,13 +973,13 @@
 
         <tr>
             
-                <td class="name"><code>render</code></td>
+                <td class="name"><code>select_trigger_event</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">string</span>
 
 
             
@@ -1012,7 +989,30 @@
 
             
 
-            <td class="description last">Modify the text of a cell before it is displayed on the screen. This is purely for rendering purposes. It does not affect the underlying data, so search queries are not influenced by this function</td>
+            <td class="description last">An editable cell where only a limited number of values are allowed is typically edited via a select box. With this parameter, you can declare which mouse event should trigger the display of the select box. The default is 'mouseover'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sortable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sortability of a column.</td>
         </tr>
 
     
@@ -1235,7 +1235,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line390">line 390</a>
+        <a href="lexit.configurator.js.html">lexit.configurator.js</a>, <a href="lexit.configurator.js.html#line481">line 481</a>
     </li></ul></dd>
     
 
@@ -1300,13 +1300,13 @@
 
         <tr>
             
-                <td class="name"><code>group</code></td>
+                <td class="name"><code>callback</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1316,20 +1316,20 @@
 
             
 
-            <td class="description last">If you want to group tables into subcategories in the tables menu (e.g., a category 'task tables', a category 'lookup tables', etc.), it is sufficient to assign a 'group' to the relevant tables. All tables that share the same group name will be grouped together in the table selection menu, with this group name as the header.</td>
+            <td class="description last">Callback after a table draw. With 'repeat_callback: false', the callback is only triggered when the table opens. With 'repeat_callback: true', the callback is triggered on every table draw (refresh, pagination, etc.).</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>header_color</code></td>
+                <td class="name"><code>close_callback</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1339,20 +1339,20 @@
 
             
 
-            <td class="description last">By default, the header of a table has a light gray background. However, with 'header_color', a custom color can be specified. When multiple tables are displayed on the screen, a unique color makes a table easier to recognize. If you don't want to choose a color yourself, Lex'it can select one automatically: set 'header_color' to 'auto'.</td>
+            <td class="description last">Callback to be executed when clicking the 'close' button (closing the table).</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>nice_name</code></td>
+                <td class="name"><code>columns_button</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -1362,191 +1362,7 @@
 
             
 
-            <td class="description last">If a table has an unattractive 'technical' name, * it can still be displayed with a nicer name in the interface. * Specify this name using this setting.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>top</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">integer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified vertical position.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>left</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">integer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified horizontal position.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>displaylength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">integer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">By default, a table displays 10 rows at a time. The user can manually change this number in the GUI. However, if you want a different default number of rows without having to adjust it manually each time, you can specify it using 'displaylength'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>displaylength_menu</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Define the options available in the 'Show ... rows' menu (in the table header). * To display all rows, use the value -1.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pagingtype</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Define the paging type of a table (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers). The default is 'full_numbers'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>viewtype</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Define the default display mode of the table: 'table' (normal) or 'form' (form view). The default is 'table'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>formgrid</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Declare a form as a custom view for a table (this is explained in detail in the manual).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>info</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">To provide more information about a table in the table overview, define the details here. This information will appear in the menu under 'Choose a table'.</td>
+            <td class="description last">Show or hide the "Column Selection" button, allowing the user to choose which columns are visible. (default: true)</td>
         </tr>
 
     
@@ -1599,13 +1415,13 @@
 
         <tr>
             
-                <td class="name"><code>grouping_column</code></td>
+                <td class="name"><code>contextmenu</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1615,20 +1431,20 @@
 
             
 
-            <td class="description last">When a table contains a column by which rows can be grouped (because multiple rows share the same value in that column), it is possible to make these groups visible. Use the "grouping_column" parameter to specify the column name for grouping. Note: This parameter only makes groups visually distinguishable on the screen. To actually group the data, the table must be pre-sorted by the same column.</td>
+            <td class="description last">Ensure that a context menu appears when a row in the table is clicked</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>size</code></td>
+                <td class="name"><code>destroy_callback</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">function</span>
 
 
             
@@ -1638,20 +1454,20 @@
 
             
 
-            <td class="description last">Width of the table. (synonym: "width")</td>
+            <td class="description last">Callback to be executed when a table is being destroyed.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>width</code></td>
+                <td class="name"><code>displaylength</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">integer</span>
 
 
             
@@ -1661,20 +1477,20 @@
 
             
 
-            <td class="description last">Width of the table. (synonym: "size")</td>
+            <td class="description last">By default, a table displays 10 rows at a time. The user can manually change this number in the GUI. However, if you want a different default number of rows without having to adjust it manually each time, you can specify it using 'displaylength'.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>header_height</code></td>
+                <td class="name"><code>displaylength_menu</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">array</span>
 
 
             
@@ -1684,7 +1500,99 @@
 
             
 
-            <td class="description last">Height of the header above the table. (default is 50px)</td>
+            <td class="description last">Define the options available in the 'Show ... rows' menu (in the table header). * To display all rows, use the value -1.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>drag_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback triggered after dragging a table</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>draggable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Make the table draggable (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>export_buttons</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Display the export button at the bottom of the table  (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>exact_count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Determine whether the number of results in the table should always be counted exactly. (default: false)</td>
         </tr>
 
     
@@ -1714,6 +1622,328 @@
 
         <tr>
             
+                <td class="name"><code>formgrid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Declare a form as a custom view for a table (this is explained in detail in the manual).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>full_export_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Add a full export button to the table footer (see the manual for more information).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>get_focus_on_tab</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The table receives focus when the Tab key is pressed, if it is the table's turn [because tables receive focus in turn].(default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>goto_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Show or hide the "Go To" button.(default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>group</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If you want to group tables into subcategories in the tables menu (e.g., a category 'task tables', a category 'lookup tables', etc.), it is sufficient to assign a 'group' to the relevant tables. All tables that share the same group name will be grouped together in the table selection menu, with this group name as the header.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>grouping_column</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">When a table contains a column by which rows can be grouped (because multiple rows share the same value in that column), it is possible to make these groups visible. Use the "grouping_column" parameter to specify the column name for grouping. Note: This parameter only makes groups visually distinguishable on the screen. To actually group the data, the table must be pre-sorted by the same column.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>header_color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">By default, the header of a table has a light gray background. However, with 'header_color', a custom color can be specified. When multiple tables are displayed on the screen, a unique color makes a table easier to recognize. If you don't want to choose a color yourself, Lex'it can select one automatically: set 'header_color' to 'auto'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>header_height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Height of the header above the table. (default is 50px)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>help_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Show or hide the "?" button.(default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>info</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">To provide more information about a table in the table overview, define the details here. This information will appear in the menu under 'Choose a table'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keep_small</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Keep the height of the table as small as the content allows (default is false)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keydown</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Assign a function to a key on keydown</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keyup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Assign a function to a key on keyup</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>left</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified horizontal position.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>main_search</code></td>
             
 
@@ -1737,13 +1967,13 @@
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>menu</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">object</span>
 
 
             
@@ -1753,14 +1983,37 @@
 
             
 
-            <td class="description last">Callback after a table draw. With 'repeat_callback: false', the callback is only triggered when the table opens. With 'repeat_callback: true', the callback is triggered on every table draw (refresh, pagination, etc.).</td>
+            <td class="description last">Ensure that a dropdown menu appears when a button in the table header is clicked.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>repeat_callback</code></td>
+                <td class="name"><code>nice_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If a table has an unattractive 'technical' name, * it can still be displayed with a nicer name in the interface. * Specify this name using this setting.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pagination_at_bottom</code></td>
             
 
             <td class="type">
@@ -1776,7 +2029,53 @@
 
             
 
-            <td class="description last">Repeat the callback every time the table is redrawn. (default: false)</td>
+            <td class="description last">Display pagination at bottom of the table content. (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pagination_on_top</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Display pagination on top of the table content. (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pagingtype</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Define the paging type of a table (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers). The default is 'full_numbers'.</td>
         </tr>
 
     
@@ -1829,53 +2128,7 @@
 
         <tr>
             
-                <td class="name"><code>close_callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Callback to be executed when clicking the 'close' button (closing the table).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>destroy_callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Callback to be executed when a table is being destroyed.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>exact_count</code></td>
+                <td class="name"><code>refresh_button</code></td>
             
 
             <td class="type">
@@ -1891,30 +2144,7 @@
 
             
 
-            <td class="description last">Determine whether the number of results in the table should always be counted exactly. (default: false)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>get_focus_on_tab</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The table receives focus when the Tab key is pressed, if it is the table's turn [because tables receive focus in turn].(default: true)</td>
+            <td class="description last">Show or hide the "Refresh" button. (default: true)</td>
         </tr>
 
     
@@ -1944,7 +2174,7 @@
 
         <tr>
             
-                <td class="name"><code>reset_button</code></td>
+                <td class="name"><code>repeat_callback</code></td>
             
 
             <td class="type">
@@ -1960,76 +2190,7 @@
 
             
 
-            <td class="description last">Show or hide the "RESET" button. (default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>columns_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Show or hide the "Column Selection" button, allowing the user to choose which columns are visible. (default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>viewtype_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Show or hide the "Form/Table View" button (default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>refresh_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Show or hide the "Refresh" button. (default: true)</td>
+            <td class="description last">Repeat the callback every time the table is redrawn. (default: false)</td>
         </tr>
 
     
@@ -2053,6 +2214,121 @@
             
 
             <td class="description last">Show or hide the "Search & Edit" button. (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>reset_button</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Show or hide the "RESET" button. (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>resizable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Make the table resizable (default: true)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>resize_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback triggered after resizing a table</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>save_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback to be executed after a form was saved</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selected</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">When a 'menu' is declared, the "selected" option allows preselecting a menu item. The value should be the name of the menu option that should be preselected.</td>
         </tr>
 
     
@@ -2105,6 +2381,52 @@
 
         <tr>
             
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Width of the table. (synonym: "width")</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>top</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified vertical position.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>undo_button</code></td>
             
 
@@ -2128,122 +2450,7 @@
 
         <tr>
             
-                <td class="name"><code>goto_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Show or hide the "Go To" button.(default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>help_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Show or hide the "?" button.(default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>full_export_button</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Add a full export button to the table footer (see the manual for more information).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contextmenu</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Ensure that a context menu appears when a row in the table is clicked</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>menu</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Ensure that a dropdown menu appears when a button in the table header is clicked.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>selected</code></td>
+                <td class="name"><code>viewtype</code></td>
             
 
             <td class="type">
@@ -2259,60 +2466,14 @@
 
             
 
-            <td class="description last">When a 'menu' is declared, the "selected" option allows preselecting a menu item. The value should be the name of the menu option that should be preselected.</td>
+            <td class="description last">Define the default display mode of the table: 'table' (normal) or 'form' (form view). The default is 'table'.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>keyup</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Assign a function to a key on keyup</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>keydown</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Assign a function to a key on keydown</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>draggable</code></td>
+                <td class="name"><code>viewtype_button</code></td>
             
 
             <td class="type">
@@ -2328,20 +2489,20 @@
 
             
 
-            <td class="description last">Make the table draggable (default: true)</td>
+            <td class="description last">Show or hide the "Form/Table View" button (default: true)</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>drag_callback</code></td>
+                <td class="name"><code>width</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">string</span>
 
 
             
@@ -2351,53 +2512,7 @@
 
             
 
-            <td class="description last">Callback triggered after dragging a table</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>resizable</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Make the table resizable (default: true)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>resize_callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Callback triggered after resizing a table</td>
+            <td class="description last">Width of the table. (synonym: "size")</td>
         </tr>
 
     
@@ -2874,7 +2989,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jan 29 2026 12:20:40 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 18 2026 11:18:46 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

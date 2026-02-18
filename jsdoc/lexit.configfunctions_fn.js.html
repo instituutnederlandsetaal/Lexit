@@ -471,8 +471,9 @@ fn.getCurrentSchema = function(){
  * This function is to be called when table visibility was changed (oHiddenTablesList or oShowOnlyTables), etc.
  */
 fn.rebuildTablesMenu = function(){
+	
 	ts.reinit();
-	ts.getListOfTables(null, {}, {});
+	ts.getListOfTables(null, {}, {}, false);
 };
 
 
@@ -1025,10 +1026,11 @@ fn.tableIsEditable = function(sTableName){
  * @see fn.callTable
  * @see fn.callTableSilently
  */
-fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
+fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, _iWaitedAlready = 0){
 	
-	// default value
-	var iWait = 250; // ms
+	// if a table is not yet ready to be called (for example because the initialization of the GUI is not yet finished), wait a bit and try again
+	// (default value is ms)
+	var iWait = 250; 
 	
 	// make sure sSomeTablename contains a string
 	if (typeof sSomeTablename == 'object')
@@ -1038,7 +1040,7 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	if (fn.tableExists(sSomeTablename))
 		fn.saveTableState(sSomeTablename);
 	
-	// In some rare cases, when a config.js-file calls a table straight
+	// In some cases, when a config.js-file calls a table straight
 	// at initialization time, the function competes with the normal initialization 
 	// functions, so some general data (tables list and types, etc.) are loaded too late,
 	// t.i. after the current function call. To prevent this, we check here if
@@ -1046,11 +1048,25 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 	
 	// Trick to do that:
 	// asTableTypes mustn't be undefined. If it is, the initialization is not
-	// finished, so wait another 250 ms. Otherwise, carry on with fn._callDatabase
+	// finished, so wait a bit. Otherwise, carry on with fn._callDatabase
 	
 	var iTableIndex = $.inArray(sSomeTablename, asTableNames);	
-	
-	if( iTableIndex >=0 &amp;&amp; (typeof asTableTypes[ iTableIndex ]) !== "undefined"){ 
+		
+	// is the table known already?
+	if ( iTableIndex >=0 &amp;&amp; (typeof asTableTypes[ iTableIndex ]) !== "undefined" 
+		&amp;&amp;  (
+			// If we're NOT calling the table at startup, then its configuration must be available already, so we're ready to call the table			
+			sStartUpTable != sSomeTablename
+			|| 
+			// Otherwise, check if the table configuration is available
+			// We need to check in case we're using dynamically loaded libraries, otherwise the table will be called without configuration!
+			// (we use a OR condition here, because there might be only limited configuration for this table, which is legal) 
+			(oTableSettingsList[sSomeTablename] != null || oTableConfigurationList[sSomeTablename] != null)
+			||
+			// Otherwise, make sure we won't be waiting longer then 2 seconds. If we are, something is probably wrong, but let's try to call the table anyway
+			_iWaitedAlready > 2000 
+			)
+		){ 
     	
     	fn._callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);
     }
@@ -1058,7 +1074,9 @@ fn.callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSe
 		// reload the list of tables (might be needed when fn.setSchema was called)		
 		fn.rebuildTablesMenu();		
         setTimeout(function(){		        	
-        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings);        	
+        	fn.callDatabase(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings, 
+        		_iWaitedAlready + iWait // remember how long we have waited already, to prevent infinite waiting
+        	);        	
         }, iWait);
     }
 	
@@ -1077,13 +1095,17 @@ fn.callTable = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSetti
 
 // subroutine of fn.callDatabase
 fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-
+	
+	// reset the startup config, to prevent that from interfering with the later function call
+	sStartUpTable = "";
+	oStartUpContentToMatch = {};
+	oStartUpTableSettings = {};
+	
 	// check possible pre-init function for existence
 	var aTableSettings = conf.getTableSettings(sSomeTablename);
 	var fnPreInit = conf.getPreInitCallback(aTableSettings);
 
 	var bTableAlreadyLoaded = fn.tableExists(sSomeTablename);
-
 	
 	// If pre-init function does exist, make sure it's executed before calling the table
 	if ( !bTableAlreadyLoaded &amp;&amp; fnPreInit != null ){
@@ -1109,7 +1131,7 @@ fn._callDatabase = function(sSomeTablename, aContentToMatch, fnFunction, oExtraS
 
 
 fn._callDatabaseSub = function(sSomeTablename, aContentToMatch, fnFunction, oExtraSettings){
-
+	
 	// the content to match must be at least an empty array
 	if (aContentToMatch == null)
 		aContentToMatch = {};
@@ -1425,6 +1447,37 @@ fn.declareNewTable = function(sTableName, sTableDescription, sType, sTableCommen
 
 
 /**
+ * Assign a table to another group
+ * 
+ * @param {(String|API-object-instance)} sTableName - Name of the table to assign to another group
+ * @param {String} sGroupName - Name of the group to which the table has to be assigned (or null for 'default' group)
+ */
+fn.assignTableToGroup = function(sTableName, sGroupName){
+	
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+
+	if (sGroupName == null){
+		
+		// get the table settings
+		var oCurrentTableSettings = conf.getTableSettings(sTableName);
+		
+		// if the table settings do not exist yet, create them
+		if (oCurrentTableSettings == null) {
+			oCurrentTableSettings = {};
+		}
+		
+		// get rid of the group name in the table settings, so that the table will be assigned to the default group
+		const { group, ...oNewTableSettings } = oCurrentTableSettings;
+		oTableSettingsList[sTableName] = oNewTableSettings;
+	}
+	else {
+		conf.changeTableSettingValue(sTableName, "group", sGroupName);
+	}	
+};
+
+
+/**
  * In case only one single table is available to the user to choose from,
  * this table will normally be opened automatically. But in
  * projects in which this behaviour is not desired, it can be switched off
@@ -1597,8 +1650,6 @@ fn.alignTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	var tableYpos1 = tableRef1.offset().top;	
 	
 	// Put the second table next to the first one
-	// we need to set an absolute position instead of a relative one, since
-	// any change in the height of the first table will cause the second one to shift up or down!
 	tableRef2.css("position", "absolute");
 	tableRef2.css("left", (tableXpos1+tableWidth1)+"px");
 	tableRef2.css("top", tableYpos1+"px");
@@ -1632,9 +1683,7 @@ fn.pileupTables = function(sSomeTablename1, sSomeTablename2, fnCallback){
 	var tableXpos1 = tableRef1.offset().left;
 	var tableYpos1 = tableRef1.offset().top;
 	
-	// Put the second table next to the first one
-	// we need to set an absolute position instead of a relative one, since
-	// any change in the height of the first table will cause the second one to shift up or down!
+	// Put the second table under the first one
 	tableRef2.css("position", "absolute");
 	tableRef2.css("left", tableXpos1+"px");
 	tableRef2.css("top", (tableYpos1+tableHeight1)+"px");
@@ -2598,6 +2647,34 @@ fn.toggleCheckbox = function(nRow, sColumnName, fnCallback){
 // *****************************************************************
 
 
+
+/**
+ * Get the list of (both visible or hidden) columns of a table
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ * @returns {String[]} An array of column names
+ * 
+ * @see fn.getVisibleColumns, lists.getAllColumns
+ */
+fn.getAllColumns = function(sSomeTable){
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+
+	return mt.getListOfColumnsOf(sSomeTable);
+};
+
+/**
+ * Get the list of visible columns of a table
+ * @param {(String|API-object-instance)} sSomeTable - A table name or object
+ * @returns {String[]} An array of column names
+ * 
+ * @see fn.getAllColumns
+ */
+fn.getVisibleColumns = function(sSomeTable){
+	if (typeof sSomeTable == 'object')
+		sSomeTable = fn.getTableName(sSomeTable);
+
+	return mt.getListOfVisibleColumnsOf(sSomeTable);
+};
 
 
 /**
@@ -7054,7 +7131,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jan 29 2026 12:20:39 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 18 2026 11:18:45 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

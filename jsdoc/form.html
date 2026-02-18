@@ -243,7 +243,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line1768">line 1768</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line1807">line 1807</a>
     </li></ul></dd>
     
 
@@ -403,7 +403,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2696">line 2696</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2747">line 2747</a>
     </li></ul></dd>
     
 
@@ -563,7 +563,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2753">line 2753</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2813">line 2813</a>
     </li></ul></dd>
     
 
@@ -768,7 +768,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2792">line 2792</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2852">line 2852</a>
     </li></ul></dd>
     
 
@@ -909,7 +909,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2667">line 2667</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2718">line 2718</a>
     </li></ul></dd>
     
 
@@ -1068,7 +1068,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2852">line 2852</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2912">line 2912</a>
     </li></ul></dd>
     
 
@@ -1126,7 +1126,7 @@ onto a form containing "cellgroups" sections
     
 
     
-    <h4 class="name" id=".getVisibleColumnsOf"><span class="type-signature">(static) </span>getVisibleColumnsOf<span class="signature">(name)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id=".getVisibleColumns"><span class="type-signature">(static) </span>getVisibleColumns<span class="signature">(name)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
 
     
@@ -1228,12 +1228,19 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2711">line 2711</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2764">line 2764</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="fn.html#.getVisibleColumns">fn.getVisibleColumns</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -1387,12 +1394,21 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2863">line 2863</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2925">line 2925</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="form.html#.saveForm">form.saveForm</a></li>
+        
+            <li><a href="form.html#.resetForm">form.resetForm</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -1434,6 +1450,319 @@ onto a form containing "cellgroups" sections
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".refresh"><span class="type-signature">(static) </span>refresh<span class="signature">(name, callback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Refresh the form, by refreshing the underlying table
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="String.html">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">of the table underlying the form</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">function to be executed after the refresh is done</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2960">line 2960</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="lists.html#.refresh">lists.refresh</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".resetForm"><span class="type-signature">(static) </span>resetForm<span class="signature">(name)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reset a form programmatically
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="String.html">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">of the table underlying the form</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2949">line 2949</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="form.html#.saveForm">form.saveForm</a></li>
+        
+            <li><a href="form.html#.isUnsaved">form.isUnsaved</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1546,12 +1875,158 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2585">line 2585</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2636">line 2636</a>
     </li></ul></dd>
     
 
     
 
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".saveForm"><span class="type-signature">(static) </span>saveForm<span class="signature">(name)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Save a form (t.i. click the save button programmatically) if it's not saved yet
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="String.html">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">of the table underlying the form</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2939">line 2939</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="form.html#.isUnsaved">form.isUnsaved</a></li>
+        
+            <li><a href="form.html#.resetForm">form.resetForm</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -1808,7 +2283,7 @@ onto a form containing "cellgroups" sections
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2828">line 2828</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line2888">line 2888</a>
     </li></ul></dd>
     
 
@@ -2040,7 +2515,7 @@ This can be called (e.g. in 'resize_callback') to make sure that the form keeps 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line1348">line 1348</a>
+        <a href="lexit.formview.js.html">lexit.formview.js</a>, <a href="lexit.formview.js.html#line1378">line 1378</a>
     </li></ul></dd>
     
 
@@ -2092,7 +2567,7 @@ This can be called (e.g. in 'resize_callback') to make sure that the form keeps 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jan 29 2026 12:20:40 GMT+0100 (Midden-Europese standaardtijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Feb 18 2026 11:18:46 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

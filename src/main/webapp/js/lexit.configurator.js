@@ -13,102 +13,34 @@ var conf = {};
  * @enum {string}
  */
 var oTableSettingsList_example = {
-
-		/**
-		 * @type {string}
-		 * @description If you want to group tables into subcategories in the tables menu 
-		 * (e.g., a category 'task tables', a category 'lookup tables', etc.), 
-		 * it is sufficient to assign a 'group' to the relevant tables. 
-		 * All tables that share the same group name will be grouped together 
-		 * in the table selection menu, with this group name as the header. 
+	
+	
+		/** 
+		 * @type {function} 
+		 * @description Callback after a table draw. 
+		 * With 'repeat_callback: false', the callback is only triggered when the table opens. 
+		 * With 'repeat_callback: true', the callback is triggered on every table draw 
+		 * (refresh, pagination, etc.).
 		 */
-		"group": "...",
+		"callback": function(t){ doSomething(); },
 		
 		
 		/**
-		 * @type {string}
-		 * @description By default, the header of a table has a light gray background. 
-		 * However, with 'header_color', a custom color can be specified. 
-		 * When multiple tables are displayed on the screen, a unique color 
-		 * makes a table easier to recognize. 
-		 * If you don't want to choose a color yourself, Lex'it can select one automatically: 
-		 * set 'header_color' to 'auto'.
+		 * @type {function} 
+		 * @description Callback to be executed when clicking the 'close' button (closing the table).
 		 */
-		"header_color": "...",
-		
-		/**
-		 * @type {string}
-		 * @description If a table has an unattractive 'technical' name, 
-		 * * it can still be displayed with a nicer name in the interface. 
-		 * * Specify this name using this setting.
-		 */
-		"nice_name": "...",     
+		"close_callback": function(t){ doSomething(); },
 		
 		
-		/**
-		 * @type {integer}
-		 * @description If declared, the (top-left corner of the) table will be positioned 
-		 * * at the specified vertical position.
-		 */
-		"top": 50,
-
-		/**
-		 * @type {integer}
-		 * @description If declared, the (top-left corner of the) table will be positioned 
-		 * * at the specified horizontal position.
-		 */
-		"left": 50,
+		/** 
+		 * @type {boolean} 
+		 * @description Show or hide the "Column Selection" button, 
+		 * allowing the user to choose which columns are visible. 
+		 * (default: true)
+		 * */
+		"columns_button": true,
 		
-		/**
-		 * @type {integer}
-		 * @description By default, a table displays 10 rows at a time. 
-		 * The user can manually change this number in the GUI. 
-		 * However, if you want a different default number of rows 
-		 * without having to adjust it manually each time, 
-		 * you can specify it using 'displaylength'.
- 		 */
-		"displaylength": 50,
-		
-		
-		/**
-		 * @type {array}
-		 * @description Define the options available in the 'Show ... rows' menu (in the table header). 
-		 * * To display all rows, use the value -1.
-		 */
-		"displaylength_menu": [1, 5, 10, 50],
-				
-		/**
-		 * @type {string}
-		 * @description Define the paging type of a table (numbers, simple, simple_numbers, full, 
-		 * full_numbers, first_last_numbers). 
-		 * The default is 'full_numbers'.
-		 */
-		"pagingtype": "full_numbers",
-		
-		/**
-		 * @type {string}
-		 * @description Define the default display mode of the table: 
-		 * 'table' (normal) or 'form' (form view). 
-		 * The default is 'table'.
-		 */
-		"viewtype": "form",
-		
-		/**
-		 * @type {object}
-		 * @description Declare a form as a custom view for a table (this is explained in detail in the manual).
-		 * @example: "formgrid": {"size": [], "definition": [], "cells": {}, etc.}
-		 */
-		"formgrid": {},
-		
-		
-		/**
-		 * @type {string}
-		 * @description To provide more information about a table in the table overview, 
-		 * define the details here. 
-		 * This information will appear in the menu under 'Choose a table'.
-		 */
-		"info": "Deze tabel is ....",
-		
+	
 		/** 
 		 * @type {array} 
 		 * @description Defines the order in which columns should be displayed, 
@@ -126,6 +58,129 @@ var oTableSettingsList_example = {
 		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
 		
 		
+		/** 
+		 * @type {function} 
+		 * @description Ensure that a context menu appears when a row in the table is clicked
+		 */
+		"contextmenu": {
+			"items": {"some-key": "some-label"}, 
+			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
+		},
+		
+		
+		/**
+		 * @type {function} 
+		 * @description Callback to be executed when a table is being destroyed.
+		 */
+		"destroy_callback": function(t){ doSomething(); },
+		
+	
+		/**
+		 * @type {integer}
+		 * @description By default, a table displays 10 rows at a time. 
+		 * The user can manually change this number in the GUI. 
+		 * However, if you want a different default number of rows 
+		 * without having to adjust it manually each time, 
+		 * you can specify it using 'displaylength'.
+ 		 */
+		"displaylength": 50,
+		
+		
+		/**
+		 * @type {array}
+		 * @description Define the options available in the 'Show ... rows' menu (in the table header). 
+		 * * To display all rows, use the value -1.
+		 */
+		"displaylength_menu": [1, 5, 10, 50],
+		
+		
+		/** 
+		 * @type {function} 
+		 * @description Callback triggered after dragging a table 
+		 * */
+		"drag_callback": function(t, ui){ doSomething(); },
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Make the table draggable 
+		 * (default: true)
+		 * */
+		"draggable": true,
+		
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Display the export button at the bottom of the table  
+		 * (default: true)
+		 * */
+		"export_buttons": true,
+				
+
+		/** 
+		 * @type {boolean} 
+		 * @description Determine whether the number of results in the table 
+		 * should always be counted exactly. 
+		 * (default: false)
+		 * */
+		"exact_count": true,
+		
+		
+		/**
+		 * @type {string}
+		 * @description Height of the footer below the table. 
+		 * (default is 50px)
+		 */
+		"footer_height": "30px",
+		
+		
+		/**
+		 * @type {object}
+		 * @description Declare a form as a custom view for a table (this is explained in detail in the manual).
+		 * @example: "formgrid": {"size": [], "definition": [], "cells": {}, etc.}
+		 */
+		"formgrid": {},
+		
+		
+		/** 
+		 * @type {object} 
+		 * @description Add a full export button to the table footer 
+		 * (see the manual for more information).
+		 */
+		"full_export_button": {},
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description The table receives focus when the Tab key is pressed, 
+		 * if it is the table's turn [because tables receive focus in turn].
+		 * (default: true)
+		 * */
+		"get_focus_on_tab": true,
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Show or hide the "Go To" button.
+		 * (default: true)
+		 * */
+		"goto_button": true,
+		
+
+		/**
+		 * @type {string}
+		 * @description If you want to group tables into subcategories in the tables menu 
+		 * (e.g., a category 'task tables', a category 'lookup tables', etc.), 
+		 * it is sufficient to assign a 'group' to the relevant tables. 
+		 * All tables that share the same group name will be grouped together 
+		 * in the table selection menu, with this group name as the header. 
+		 */
+		"group": "...",
+		
+		
+		
+		
 		/**
 		 * @type {string}
 		 * @description When a table contains a column by which rows can be grouped 
@@ -138,19 +193,18 @@ var oTableSettingsList_example = {
 		 */
 		"grouping_column": "...",
 		
-		/**
-		 * @type {string}
-		 * @description Width of the table. 
-		 * (synonym: "width")
-		 */
-		"size": "60%",
 		
 		/**
 		 * @type {string}
-		 * @description Width of the table. 
-		 * (synonym: "size")
+		 * @description By default, the header of a table has a light gray background. 
+		 * However, with 'header_color', a custom color can be specified. 
+		 * When multiple tables are displayed on the screen, a unique color 
+		 * makes a table easier to recognize. 
+		 * If you don't want to choose a color yourself, Lex'it can select one automatically: 
+		 * set 'header_color' to 'auto'.
 		 */
-		"width": "60%",
+		"header_color": "...",
+		
 		
 		/**
 		 * @type {string}
@@ -159,12 +213,55 @@ var oTableSettingsList_example = {
 		 */
 		"header_height": "150px",
 		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Show or hide the "?" button.
+		 * (default: true)
+		 */
+		"help_button": true,
+		
+		
 		/**
 		 * @type {string}
-		 * @description Height of the footer below the table. 
-		 * (default is 50px)
+		 * @description To provide more information about a table in the table overview, 
+		 * define the details here. 
+		 * This information will appear in the menu under 'Choose a table'.
 		 */
-		"footer_height": "30px",
+		"info": "This table is ....",
+		
+		
+		/**
+		 * @type {boolean}
+		 * @description Keep the height of the table as small as the content allows 
+		 * (default is false)
+		 */
+		"keep_small": true,
+		
+		
+		/** 
+		 * @type {function} 
+		 * @description Assign a function to a key on keydown
+		 * */
+		"keydown" : function(t){ doSomething(); },
+		
+		
+		/**
+		 *  @type {function} 
+		 *  @description Assign a function to a key on keyup
+		 *  */
+		"keyup" : function(t){ doSomething(); },
+		
+		
+		
+		
+		/**
+		 * @type {integer}
+		 * @description If declared, the (top-left corner of the) table will be positioned 
+		 * * at the specified horizontal position.
+		 */
+		"left": 50,
+		
 		
 		/**
 		 * @type {boolean}
@@ -172,31 +269,57 @@ var oTableSettingsList_example = {
 		 * (searching all fields at once) should be available. 
 		 * (default is true)
 		 */
-		"main_search": true,		
-
+		"main_search": true,
+		
+		
 		/** 
-		 * @type {function} 
-		 * @description Callback after a table draw. 
-		 * With 'repeat_callback: false', the callback is only triggered when the table opens. 
-		 * With 'repeat_callback: true', the callback is triggered on every table draw 
-		 * (refresh, pagination, etc.).
+		 * @type {object} 
+		 * @description Ensure that a dropdown menu appears when a button in the table header is clicked.
+		 * */
+		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },		
+
+		
+		/**
+		 * @type {string}
+		 * @description If a table has an unattractive 'technical' name, 
+		 * * it can still be displayed with a nicer name in the interface. 
+		 * * Specify this name using this setting.
 		 */
-		"callback": function(t){ doSomething(); },
+		"nice_name": "...",
+		
 		
 		/** 
 		 * @type {boolean} 
-		 * @description Repeat the callback every time the table is redrawn. 
-		 * (default: false)
+		 * @description Display pagination at bottom of the table content. 
+		 * (default: true)
 		 * */
-		"repeat_callback": true,
-
-
+		"pagination_at_bottom": true,
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Display pagination on top of the table content. 
+		 * (default: true)
+		 * */
+		"pagination_on_top": true,     
+		
+		
+				
+		/**
+		 * @type {string}
+		 * @description Define the paging type of a table (numbers, simple, simple_numbers, full, 
+		 * full_numbers, first_last_numbers). 
+		 * The default is 'full_numbers'.
+		 */
+		"pagingtype": "full_numbers",
+		
+		
 		/**
 		 * @type {function} 
 		 * @description Callback to be executed before a table is displayed and populated with data. 
 		 * This allows modifications to the table data before it is shown.
 		 */
 		"preinit_callback": function(t){ doSomething(); },
+		
 		
 		/**
 		 * @type {function} 
@@ -207,34 +330,14 @@ var oTableSettingsList_example = {
 		"prereset_callback": function(t){ doSomething(); },
 		
 		
-		/**
-		 * @type {function} 
-		 * @description Callback to be executed when clicking the 'close' button (closing the table).
-		 */
-		"close_callback": function(t){ doSomething(); },
-
-
-		/**
-		 * @type {function} 
-		 * @description Callback to be executed when a table is being destroyed.
-		 */
-		"destroy_callback": function(t){ doSomething(); },
-
 		/** 
 		 * @type {boolean} 
-		 * @description Determine whether the number of results in the table 
-		 * should always be counted exactly. 
-		 * (default: false)
-		 * */
-		"exact_count": true,
-		
-		/** 
-		 * @type {boolean} 
-		 * @description The table receives focus when the Tab key is pressed, 
-		 * if it is the table's turn [because tables receive focus in turn].
+		 * @description Show or hide the "Refresh" button. 
 		 * (default: true)
 		 * */
-		"get_focus_on_tab": true,
+		"refresh_button": true,
+		
+				
 		
 		/** 
 		 * @type {boolean} 
@@ -243,6 +346,24 @@ var oTableSettingsList_example = {
 		 * */
 		"refresh_upon_focus": true,
 		
+						
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Repeat the callback every time the table is redrawn. 
+		 * (default: false)
+		 * */
+		"repeat_callback": true,
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Show or hide the "Search & Edit" button. 
+		 * (default: true)
+		 * */
+		"replace_button": true,
+		
+		
 		/** 
 		 * @type {boolean} 
 		 * @description Show or hide the "RESET" button. 
@@ -250,92 +371,29 @@ var oTableSettingsList_example = {
 		 * */
 		"reset_button": true,
 		
+		
 		/** 
 		 * @type {boolean} 
-		 * @description Show or hide the "Column Selection" button, 
-		 * allowing the user to choose which columns are visible. 
+		 * @description Make the table resizable 
 		 * (default: true)
 		 * */
-		"columns_button": true,
+		"resizable": true,
 		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Form/Table View" button 
-		 * (default: true)
-		 * */
-		"viewtype_button": true,
 		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Refresh" button. 
-		 * (default: true)
-		 * */
-		"refresh_button": true,
 		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Search & Edit" button. 
-		 * (default: true)
-		 * */
-		"replace_button": true,  
-		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Row Selection" button. 
-		 * (default: true)
-		 * */
-		"selection_button": true,  
-		
-		/** 
-		 * @type {boolean} 
-		 * @description Enable or disable the "Row Selection" button by default. 
-		 * (default: false, meaning selection mode is OFF)
-		 * */
-		"selection_button_active": true,
-		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Undo" button.
-		 * (default: true)
-		 * */
-		"undo_button": true,     
-		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "Go To" button.
-		 * (default: true)
-		 * */
-		"goto_button": true,
-		
-		/** 
-		 * @type {boolean} 
-		 * @description Show or hide the "?" button.
-		 * (default: true)
-		 */
-		"help_button": true,
-		
-		/** 
-		 * @type {object} 
-		 * @description Add a full export button to the table footer 
-		 * (see the manual for more information).
-		 */
-		"full_export_button": {},
-
-
 		/** 
 		 * @type {function} 
-		 * @description Ensure that a context menu appears when a row in the table is clicked
-		 */
-		"contextmenu": {
-			"items": {"some-key": "some-label"}, 
-			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
-		},
+		 * @description Callback triggered after resizing a table 
+		 * */
+		"resize_callback": function(t, ui){ doSomething(); },
+		
 		
 		/** 
-		 * @type {object} 
-		 * @description Ensure that a dropdown menu appears when a button in the table header is clicked.
+		 * @type {function} 
+		 * @description Callback to be executed after a form was saved 
 		 * */
-		"menu": { "option 1": function(t){ doSomething(); }, "option 2": function(t){ doSomethingElse(); } },
+		"save_callback": function(t, ui){ doSomething(); },
+		
 		
 		/** 
 		 * @type {string}
@@ -345,62 +403,83 @@ var oTableSettingsList_example = {
 		 * */
 		"selected": "...",
 		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Show or hide the "Row Selection" button. 
+		 * (default: true)
+		 * */
+		"selection_button": true,  
+		
+		
+		/** 
+		 * @type {boolean} 
+		 * @description Enable or disable the "Row Selection" button by default. 
+		 * (default: false, meaning selection mode is OFF)
+		 * */
+		"selection_button_active": true,
+		
+		
 		/**
-		 *  @type {function} 
-		 *  @description Assign a function to a key on keyup
-		 *  */
-		"keyup" : function(t){ doSomething(); },
+		 * @type {string}
+		 * @description Width of the table. 
+		 * (synonym: "width")
+		 */
+		"size": "60%",
 		
-		/** 
-		 * @type {function} 
-		 * @description Assign a function to a key on keydown
-		 * */
-		"keydown" : function(t){ doSomething(); },
-
+		
+		/**
+		 * @type {integer}
+		 * @description If declared, the (top-left corner of the) table will be positioned 
+		 * * at the specified vertical position.
+		 */
+		"top": 50,
+		
+		
 		/** 
 		 * @type {boolean} 
-		 * @description Make the table draggable 
+		 * @description Show or hide the "Undo" button.
 		 * (default: true)
 		 * */
-		"draggable": true,
+		"undo_button": true,
 		
-		/** 
-		 * @type {function} 
-		 * @description Callback triggered after dragging a table 
-		 * */
-		"drag_callback": function(t, ui){ doSomething(); },
-
+		
+		/**
+		 * @type {string}
+		 * @description Define the default display mode of the table: 
+		 * 'table' (normal) or 'form' (form view). 
+		 * The default is 'table'.
+		 */
+		"viewtype": "form",
+		
+		
+		
 		/** 
 		 * @type {boolean} 
-		 * @description Make the table resizable 
+		 * @description Show or hide the "Form/Table View" button 
 		 * (default: true)
 		 * */
-		"resizable": true,
+		"viewtype_button": true,
 		
-		/** 
-		 * @type {function} 
-		 * @description Callback triggered after resizing a table 
-		 * */
-		"resize_callback": function(t, ui){ doSomething(); }
+		
+		/**
+		 * @type {string}
+		 * @description Width of the table. 
+		 * (synonym: "size")
+		 */
+		"width": "60%"		
+
+		
 };
+
+
+
 
 /**
  * @enum {string}
  */
 var oTableConfigurationList_example = {
-		
-		/** 
-		 * @type {function} 
-		 * @description Function to be triggered when clicking in a specific column, etc.
-
-		 * */
-		"click": function(t, n, event){ doSomething(); },
-		
-		/**
-		 * @type {function}
-		 * @description Function to be triggered when double-clicking in a specific column, etc.
-		 */
-		"dblclick": function(t, n, event){ doSomething(); },
+	
 		
 		/**
 		 * @type {string}
@@ -415,6 +494,7 @@ var oTableConfigurationList_example = {
 		 */
 		"bgcolor": "",
 		
+		
 		/**
 		 * @type {string}
 		 * @description Place a button in a column with the specified name as a string. 
@@ -424,6 +504,7 @@ var oTableConfigurationList_example = {
 		 */
 		"button": "",
 		
+		
 		/**
 		 * @type {string}
 		 * @description Add a tooltip to a button, visible on mouseover. 
@@ -432,12 +513,14 @@ var oTableConfigurationList_example = {
 		 */
 		"button_tooltip": "",
 		
+		
 		/**
 		 * @type {string}
 		 * @description Add a tooltip to a cell, visible on mouseover. 
 		 * This is useful for indicating that clicking on a cell has a function..
 		 */
 		"cell_tooltip": "",
+		
 		
 		/**
 		 * @type {array}
@@ -452,6 +535,7 @@ var oTableConfigurationList_example = {
 		 */
 		"choosefrom": ["val1", "val2"],
 		
+		
 		/**
 		 * @type {object}
 		 * @description Declare labels for the values of a select box. 
@@ -459,15 +543,8 @@ var oTableConfigurationList_example = {
 		 * to be made understandable to the user.
 		 */
 		"choosefrom_labels": {"val1": "label1", "val2": "label2"},
-
-
-		/**
-		 * @type {string}
-		 * @description An editable cell where only a limited number of values are allowed is typically edited via a select box. 
-		 * With this parameter, you can declare which mouse event should trigger the display of the select box. 
-		 * The default is 'mouseover'.
-		 */
-		"select_trigger_event": "mouseover",
+		
+		
 		
 		
 		/**
@@ -481,12 +558,13 @@ var oTableConfigurationList_example = {
 		"class": "",
 		
 		
-		/**
-		 * @type {string}
-		 * @description When a column has a technical, non-user-friendly name, 
-		 * you can give it a more user-friendly name for display using this parameter.
-		 */
-		"nice_name": "",
+		/** 
+		 * @type {function} 
+		 * @description Function to be triggered when clicking in a specific column, etc.
+
+		 * */
+		"click": function(t, n, event){ doSomething(); },
+		
 		
 		/**
 		 * @type {string}
@@ -501,6 +579,7 @@ var oTableConfigurationList_example = {
 		 */
 		"colsort": "",
 		
+		
 		/**
 		 * @type {object}
 		 * @description Context menu that should appear when clicking on a cell. 
@@ -512,13 +591,22 @@ var oTableConfigurationList_example = {
 			"callback": function(t, n, key, options){if (key == "some-key"){ doSomething(); }}
 		},
 		
+		
 		/**
-		 * @type {object}
+		 * @type {boolean}
 		 * @description If this is true, the content of this column will be copied during a Search&Add action (insert). 
 		 * Columns with this setting set to false will not be included in the insert. 
 		 */
 		"copy_upon_insert": {},
+
 		
+		/**
+		 * @type {function}
+		 * @description Function to be triggered when double-clicking in a specific column, etc.
+		 */
+		"dblclick": function(t, n, event){ doSomething(); },
+
+
 		/**
 		 * @type {boolean}
 		 * @description Editability of a column.
@@ -533,6 +621,14 @@ var oTableConfigurationList_example = {
 		 */
 		"editcallback": function(t, n, newValue){},
 		
+		
+		/**
+		 * @type {function}
+		 * @description Handler that is called when editing an editable field causes an error. 
+		 */
+		"editerrorhandler": function(err){},
+		
+		
 		/**
 		 * @type {function}
 		 * @description Custom function to be executed after editing a cell. 
@@ -543,30 +639,29 @@ var oTableConfigurationList_example = {
 		 */
 		"editfunc": function(t, n, newValue){},
 		
+		
+		/**
+		 * @type {function}
+		 * @description Function for preprocessing an entered value before Lex'it inserts it into the database.
+		 * @see searchpreprocess 
+		 */
+		"editpreprocess": function(value){ return doSomething(value); },
+		
+		
 		/**
 		 * @type {array}
 		 * @description List of tables that should be refreshed after editing a cell.
 		 */
 		"editrefresh": ["table1", "table2"],
 		
+		
 		/**
 		 * @description Regex that the edited cell content must match to trigger the 'editfunc'. 
 		 * If 'edittrigger' is null, 'editfunc' will always be triggered.
 		 */
 		"edittrigger": "",
-
-		/**
-		 * @description Function for preprocessing an entered value before Lex'it inserts it into the database.
-		 * @see searchpreprocess 
-		 */
-		"editpreprocess": "",
 		
 		
-		/**
-		 * @type {function}
-		 * @description Handler that is called when editing an editable field causes an error. 
-		 */
-		"editerrorhandler": function(err){},
 		
 		/**
 		 * @type {boolean}
@@ -587,23 +682,9 @@ var oTableConfigurationList_example = {
 		
 		/**
 		 * @type {string}
-		 * @description 'max-width' attribute for ellipsis.
-		 */
-		"ellipsis_width": "200px",
-
-
-		/**
-		 * @type {string}
 		 * @description 'max-height' attribute for ellipsis. When this value is exceeded by the cell content, a scrollbar will appear. 
 		 */
 		"ellipsis_height": "150px",
-		
-		/**
-		 * @type {boolean}
-		 * @description Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. 
-		 * (default: true)
-		 */
-		"ellipsis_unwrap": true,
 		
 		
 		/**
@@ -613,12 +694,31 @@ var oTableConfigurationList_example = {
 		 */
 		"ellipsis_keep_selected_unwrapped": true,
 		
+		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. 
+		 * (default: true)
+		 */
+		"ellipsis_unwrap": true,
+		
+		
+		
+		
+		/**
+		 * @type {string}
+		 * @description 'max-width' attribute for ellipsis.
+		 */
+		"ellipsis_width": "200px",
+		
+		
 		/**
 		 * @type {string}
 		 * @description Column filter that should be applied immediately upon initializing the table. 
 		 * To maintain the filter after initialization, set 'keepfilter': true as well.
 		 */
 		"filter": "",
+		
 		
 		/**
 		 * @type {boolean}
@@ -627,6 +727,7 @@ var oTableConfigurationList_example = {
 		 */
 		"flexible_visibility": true,
 		
+		
 		/**
 		 * @type {boolean}
 		 * @description If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 
@@ -634,6 +735,15 @@ var oTableConfigurationList_example = {
 		 * set "searchable": false for the same column. 
 		 */
 		"keepfilter": true,
+		
+		
+		
+		/**
+		 * @type {string}
+		 * @description When a column has a technical, non-user-friendly name, 
+		 * you can give it a more user-friendly name for display using this parameter.
+		 */
+		"nice_name": "",
 		
 		
 		/**
@@ -666,17 +776,22 @@ var oTableConfigurationList_example = {
 		 */
 		"query_builder_settings": {"grid": false, "preselected": "some_value", "autostart": true},
 		
+		
+		/**
+		 * @type {function}
+		 * @description Modify the text of a cell before it is displayed on the screen. 
+		 * This is purely for rendering purposes. 
+		 * It does not affect the underlying data, so search queries are not influenced by this function
+		 */
+		"render": function(text){},
+		
+
 		/**
 		 * @type {boolean}
 		 * @description Searchability of a column.
 		 */
 		"searchable": true,
 		
-		/**
-		 * @type {boolean}
-		 * @description Sortability of a column.
-		 */
-		"sortable": true,
 		
 		/**
 		 * @type {function}
@@ -687,13 +802,22 @@ var oTableConfigurationList_example = {
 		 */
 		"searchpreprocess": function(text){},
 
+
 		/**
-		 * @type {function}
-		 * @description Modify the text of a cell before it is displayed on the screen. 
-		 * This is purely for rendering purposes. 
-		 * It does not affect the underlying data, so search queries are not influenced by this function
+		 * @type {string}
+		 * @description An editable cell where only a limited number of values are allowed is typically edited via a select box. 
+		 * With this parameter, you can declare which mouse event should trigger the display of the select box. 
+		 * The default is 'mouseover'.
 		 */
-		"render": function(text){},
+		"select_trigger_event": "mouseover",
+		
+		
+		/**
+		 * @type {boolean}
+		 * @description Sortability of a column.
+		 */
+		"sortable": true,
+		
 		
 		/**
 		 * @type {string}
@@ -725,6 +849,10 @@ var oTableConfigurationList_example = {
 		 */
 		"textweight": "",
 		
+		
+		
+		
+		
 		/**
 		 * @type {string}
 		 * @description When using select boxes, it may happen that a user accidentally clicks a value. 
@@ -740,7 +868,8 @@ var oTableConfigurationList_example = {
 		 * To prevent this (e.g., because a column contains 'secret' information), 
 		 * you should also set "flexible_visibility": false.
 		 */
-		"visible": true,
+		"visible": true,	
+		
 		
 		/**
 		 * @type {string}
