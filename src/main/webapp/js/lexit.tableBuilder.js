@@ -420,9 +420,9 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			//  were set in the code here above)
 			gui.buildFormViewIfRequired(sSomeTableName);
 			
-			// generate row tooltips showing the row numbers and such
+			// take care of custom cell content rendering and tooltips
 			// (only if that is allowed)
-			if (mt.tableExists(sSomeTableName) && bTooltipsAllowedInTable ) {
+			if (mt.tableExists(sSomeTableName) ) {
 				
 				var oTable = 		mt.getDataTableObjectOf(sSomeTableName);
 				
@@ -434,18 +434,25 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 					for (var iColNumber=0; iColNumber<mt.getListOfVisibleColumnsOf(sSomeTableName).length; iColNumber++){
 						var currentColumnName =	mt.getListOfVisibleColumnsOf(sSomeTableName)[iColNumber]; 
 		        		var oColumnConfig =		conf.getColumnConfig(oTableConfig, currentColumnName);
-		        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
-		        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
 		        		
-		        		$("td:eq("+iColNumber+")", oCurrentRow.node())
-			        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
-							.addClass("tooltip");
+		        		// generate row tooltips showing the row numbers and such, if required by config					
+		        		if (bTooltipsAllowedInTable){							
+						
+			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
+			        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
+			        		
+			        		$("td:eq("+iColNumber+")", oCurrentRow.node())
+				        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
+								.addClass("tooltip");
+						}
 							
-						// special rendering if required by config
-						var textRendering = 	conf.getTextRendering(oColumnConfig);
-						if (textRendering != null){
+						// special rendering, if required by config
+						var fnTextRendering = 	conf.getTextRendering(oColumnConfig);
+						if (fnTextRendering != null){
 							var sTextVal = $("td:eq("+iColNumber+")", oCurrentRow.node()).text();
-							sTextVal = textRendering(sTextVal);
+							
+							// apply the custum rendering function
+							sTextVal = fnTextRendering(sTextVal);
 							if (lexutil.hasTags(sTextVal)) {
 								$("td:eq("+iColNumber+")", oCurrentRow.node()).html(sTextVal);
 							}
