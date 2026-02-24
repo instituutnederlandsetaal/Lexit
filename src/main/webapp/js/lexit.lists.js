@@ -240,7 +240,53 @@ lists.buildLists = function(sFormTable, iListNr){
 			},
 			drawCallback: function( settings ) {
 				
+				// get list config
 				var oListConfig = lists.getConfig(this);
+				var sFormListLabel = lists.getLabelFromNode(this);
+				var sFeedingTable = lists.getFeedingTable(sFormListLabel);
+				
+				var oTable = $(this).DataTable();
+				var aVisibleColumnNames = lists.getVisibleColumns(sFormListLabel);
+				
+				// get columns config 
+				var oColumnsConfig = oListConfig["table"]["columns"];
+				
+				// if the table columns info is not yet available, allow some time for it to be filled in cache
+				// (it is filled asynchronously when the list is built), before trying to apply render functions and so on
+				
+				var iWait = (hListTable2Cols.get(sFeedingTable) != null) ? 0 : 1000;
+				setTimeout(function(){
+					
+					oTable.rows().every(function(iRowIndex){
+						
+						var oCurrentRow = this;
+						for (var iColNr= 0; iColNr<aVisibleColumnNames.length; iColNr++){
+							
+							var sColName = aVisibleColumnNames[iColNr];
+							var oCellConfig = oColumnsConfig[sColName];
+							
+							if (oCellConfig != null) {
+								
+								var fnRender = oCellConfig["render"];
+								if (fnRender != null){
+									var sCellValue = lists.getDataFromCell(sFormListLabel, iRowIndex, sColName)
+									var sFormattedValue = fnRender(sCellValue);
+									// update cell value with formatted value
+									if (lexutil.hasTags(sFormattedValue)) {
+										$("td:eq("+iColNr+")", oCurrentRow.node()).html(sFormattedValue);
+									}
+									else {
+										$("td:eq("+iColNr+")", oCurrentRow.node()).text(sFormattedValue);
+									}
+								}
+							}
+								
+						}
+						
+					});
+					
+				}, iWait);
+				
 				
 				// is there a callback to call?
 				// NB: the callback can be set at list level or at table level
