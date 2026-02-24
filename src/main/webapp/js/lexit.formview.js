@@ -1608,7 +1608,7 @@ form.manageViewGrid = function(sTableName){
 			// textbox
 			else {
 				var fnRender = oFormGrid["cells"][sCellName]["render"];
-				var sTextData = (fnRender != null ? fnRender(sData) : sData); 
+				var sTextData = (fnRender != null ? fnRender(sData, nRow) : sData); 
 				
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
 					.val(sTextData)

@@ -452,7 +452,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 							var sTextVal = $("td:eq("+iColNumber+")", oCurrentRow.node()).text();
 							
 							// apply the custum rendering function
-							sTextVal = fnTextRendering(sTextVal);
+							sTextVal = fnTextRendering(sTextVal, oCurrentRow.node());
 							if (lexutil.hasTags(sTextVal)) {
 								$("td:eq("+iColNumber+")", oCurrentRow.node()).html(sTextVal);
 							}

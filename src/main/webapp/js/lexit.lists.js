@@ -270,7 +270,7 @@ lists.buildLists = function(sFormTable, iListNr){
 								var fnRender = oCellConfig["render"];
 								if (fnRender != null){
 									var sCellValue = lists.getDataFromCell(sFormListLabel, iRowIndex, sColName)
-									var sFormattedValue = fnRender(sCellValue);
+									var sFormattedValue = fnRender(sCellValue, oCurrentRow.node());
 									// update cell value with formatted value
 									if (lexutil.hasTags(sFormattedValue)) {
 										$("td:eq("+iColNr+")", oCurrentRow.node()).html(sFormattedValue);
