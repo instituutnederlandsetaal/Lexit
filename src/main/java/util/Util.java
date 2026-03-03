@@ -421,6 +421,8 @@ public class Util {
 	}
 	
 	
+	
+	
 	/**
 	 * Take an array of parameters for a prepared statement
 	 * and convert it into a string like CAST(? AS type1), CAST(? AS type2), CAST(? AS type3), ...

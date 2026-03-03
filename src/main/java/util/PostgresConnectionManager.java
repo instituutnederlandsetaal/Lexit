@@ -658,7 +658,7 @@ public class PostgresConnectionManager {
 					else if (oneType.endsWith("[]")) { // array
 						
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
-						String nonArrayType = oneType.replaceAll("^_", "").replaceAll("\\[\\]$", "");
+						String nonArrayType = getNonArrayType(oneType);
 						boolean valueIsList = cleanValue.contains(",");
 						if (isWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
@@ -887,7 +887,7 @@ public class PostgresConnectionManager {
 				else if (oneType.endsWith("[]")) { // array
 					
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
-					String nonArrayType = oneType.replaceAll("^_", "").replaceAll("\\[\\]$", "");
+					String nonArrayType = getNonArrayType(oneType);
 					boolean valueIsList = cleanValue.contains(",");
 					if (isWholeNumberType(oneType) )
 						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
@@ -1165,10 +1165,10 @@ public class PostgresConnectionManager {
 	public static boolean isTextualType(String typeName){
 		
 		// see: http://www.postgresql.org/docs/9.0/static/datatype-character.html
-		return typeName.startsWith("character varying(") ||
-			typeName.startsWith("varchar(") ||
-			typeName.startsWith("character(") ||
-			typeName.startsWith("char(")||
+		return typeName.startsWith("character varying") ||
+			typeName.startsWith("varchar") ||
+			typeName.startsWith("character") ||
+			typeName.startsWith("char")||
 			typeName.equals("text");
 	};
 	
@@ -1236,6 +1236,19 @@ public class PostgresConnectionManager {
 		if (number.indexOf(".")<0) return number;
         return number.replaceAll("\\.[0-9]+$", "");
     }
+	
+	
+	/**
+	 * Convert an array type into a legal non array type (e.g. character varying[] -> varchar, _int4[] -> int)
+	 * @param type
+	 * @return non array type
+	 */
+	public String getNonArrayType(String type) {
+		
+		return 	type.replace("character varying", "varchar")
+					.replaceAll("^_", "")
+					.replaceAll("\\[\\]$", "");
+	}
 
 	
 }
