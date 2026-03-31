@@ -19,6 +19,9 @@ var hsTableType = new Hashtable();
 // hash mapping table name to its view type (table vs. form)
 var hsViewType = new Hashtable();
 
+// hash mapping table name to keys being active or not
+var hsTableKeysActive = new Hashtable();
+
 // hash mapping table name to its list of Datatables columns properties
 var hsaDatatablesProps = new Hashtable();
 
@@ -132,6 +135,18 @@ mt.setViewType = function(sTableName, sViewType){
 };
 
 
+// get/set if the key functions are active
+
+mt.getTableKeysActive = function(sTableName){
+	if (hsTableKeysActive.get(sTableName) == null) return true;
+	return hsTableKeysActive.get(sTableName);
+};
+
+mt.setTableKeysActive = function(sTableName, bActive){
+	hsTableKeysActive.put(sTableName, bActive);
+};
+
+
 // get/set if table callback was called already or not
 
 mt.setCallbackWasCalledAlready = function(sTableName){
@@ -224,6 +239,7 @@ mt.removeAllTableRecords = function(){
 	hoTable = new Hashtable();
 	hsTableType = new Hashtable();
 	hsViewType = new Hashtable();
+	hsTableKeysActive = new Hashtable();
 	hsaDatatablesProps = new Hashtable();
 	hsfTableFilterFunction = new Hashtable();
 	hsfTableFilterValues = new Hashtable();
@@ -261,6 +277,7 @@ mt.createTableRecordWithFilter = function(sSomeTablename, fnCallTableWithFilter,
 	
 	dbTableNames.push(sSomeTablename);
 	hsViewType.put(sSomeTablename, 'table');
+	hsTableKeysActive.put(sSomeTablename, true);
 	hsfTableFilterFunction.put(sSomeTablename, fnCallTableWithFilter );
 	hsfTableFilterValues.put(sSomeTablename, aCallTableWithFilterValues);	
 };
@@ -287,6 +304,7 @@ mt.removeTableRecord = function(sSomeTablename){
 	hoTable.remove(sSomeTablename);
 	hsTableType.remove(sSomeTablename);
 	hsViewType.remove(sSomeTablename);
+	hsTableKeysActive.remove(sSomeTablename);
 	hsaDatatablesProps.remove(sSomeTablename);
 	hsfTableFilterFunction.remove(sSomeTablename);
 	hsfTableFilterValues.remove(sSomeTablename);

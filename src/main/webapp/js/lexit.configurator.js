@@ -646,6 +646,18 @@ var oTableConfigurationList_example = {
 		 */
 		"editfunc": function(t, n, newValue){},
 		
+		/**
+		 * @type {boolean}
+		 * @description Convert a cell into a wysiwyg editor for editing.
+		 */
+		"editor": true,
+		
+		/**
+		 * @type {function}
+		 * @description Custom function to be executed after clicking the Save button of the wysiwyg editor.
+		 */
+		"editor_callback": function(t, n, newValue){},
+		
 		
 		/**
 		 * @type {function}
@@ -1585,6 +1597,20 @@ conf.getEditFunction = function(aColumnConfig){
 		return null;
 	return aColumnConfig["editfunc"];
 };
+
+conf.getEditor = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["editor"] == 'undefined')
+		return false;
+	return aColumnConfig["editor"];
+};
+
+conf.getEditorCallback = function(aColumnConfig){
+	if (typeof aColumnConfig["editor_callback"] == 'undefined')
+		return null;
+	return aColumnConfig["editor_callback"];
+};
+
 
 
 // retrieve function to preprocess info BEFORE

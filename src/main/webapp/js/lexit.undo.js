@@ -175,7 +175,7 @@ un.undoEvent = function(sSomeTableName){
 		gui.showProcessingMsg(sSomeTableName);		
 		var url = WEBSERV_URL+"/api/setvalue";
 		$.ajax( {
-			"type": "GET",
+			"type": "POST",
 			"async": false,
 			"url": url,
 			"data": {

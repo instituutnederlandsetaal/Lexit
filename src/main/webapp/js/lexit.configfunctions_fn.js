@@ -307,7 +307,7 @@ fn.setProjectFont = function(sFontFamily, sFontSize){
  * Add a border on top of the screen, just like in any IvdNT website
  * @param {Boolean} bSetting - apply if true, otherwise unapply
  * @param {Boolean} [bSetLinks=false] - set default links to help, about and contribute
- * @param {String} [sPathToCustomLogo=null] - path to a custom
+ * @param {String} [sPathToCustomLogo=null] - path to a custom logo
  * @param {String} [sCustomLogoSize="52px"] - size of the custom logo
  */
 fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoSize="52px"){
@@ -321,7 +321,7 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 		$("#indicators").removeClass("default").addClass("huisstijl");
 		$("#headerlinks").removeClass("default").addClass("huisstijl");
 		
-		if (bSetLinks){
+		if (bSetLinks == true){
 			// assign functions
 			setTimeout(function(){
 				
@@ -393,7 +393,7 @@ fn.setSchema = function(sNewSchema, fnCallback, fnErrorHandler){
 	
 	var url = WEBSERV_URL+"/api/set_schema"; 
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"db_name": lexutil.getHttpParams().get("db"),
@@ -1533,7 +1533,7 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 	// update the database
 	var url = WEBSERV_URL+"/api/cleancache"; 
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"db_name": lexutil.getHttpParams().get("db"),
@@ -3379,7 +3379,7 @@ fn.updateDatabaseGivenANode = function(nMixed, aColumnNamesAndValues, fnCallback
 	aColumnValues = lexutil.convertNullToString(aColumnValues);
 	
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"db_name": lexutil.getHttpParams().get("db"),
@@ -3467,7 +3467,7 @@ fn.updateDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValuesToM
 	aValuesToUpdate = lexutil.convertNullToString(aValuesToUpdate);
 	
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"db_name": lexutil.getHttpParams().get("db"),
@@ -3559,7 +3559,7 @@ fn.insertIntoDatabase = function(sSomeTablename, aFieldsAndValuesToAdd, returnFi
 	aValuesToAdd = lexutil.convertNullToString(aValuesToAdd);
 	
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"async": false,
 		"url": url,
 		"data": {
@@ -3629,7 +3629,7 @@ fn.duplicateRecord = function(sSomeTablename, aListOfColumnsToSkip, pkSubstitute
 	var url = WEBSERV_URL+"/api/duplicaterecord"; 
 	
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"async": false,
 		"url": url,
 		"data": {
@@ -3793,7 +3793,7 @@ fn.removeFromDatabaseGivenANode = function(nRow, fnCallback, fnErrorHandler){
 	// update the database
 	var url = WEBSERV_URL+"/api/delete_row"; 
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"row_id": sNodeId,
@@ -3867,7 +3867,7 @@ fn.removeFromDatabaseGivenFieldValues = function(sSomeTablename, aFieldsAndValue
 	aValuesToMatch = lexutil.convertNullToString(aValuesToMatch);
  
 	$.ajax( {
-		"type": "GET",
+		"type": "POST",
 		"url": url,
 		"data": {
 			"db_name": lexutil.getHttpParams().get("db"),
@@ -4929,6 +4929,23 @@ fn._computeDialogPosition = function(){
 };
 
 
+/**
+ * Reposition the dialog, for example after the user resized the window, or after some content was loaded into the dialog which changed its dimensions
+ * @param {Boolean} bCenter - If true, the dialog will be centered in the window. If false, the dialog will be repositioned according to the current active row in the table (in such a way that it won't hide that row)
+ */
+fn.repositionDialog = function(bCenter){
+	
+	var aPosition = bCenter ? {
+		my: "center",
+	    at: "center",
+	    of: window
+	} : fn._computeDialogPosition();
+	
+	$("div[id^='dialog-message']").dialog("option", "position", aPosition);
+	
+};
+
+
 
 /**
  * Generate a prompt pop-up, requesting some input from the user
@@ -4950,14 +4967,18 @@ fn._computeDialogPosition = function(){
  * @see fn.getPromptBoxInput
  * @see fn.promptSelect
  * @see fn.promptReorder
+ * @see fn.repositionDialog
  * @see fn.closeDialog
  */
 fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction, bTextarea, aColsAndRows){
 	
 	fn._clearUserInput();
 
-	// list of datepickers to be activated when diolog is opened
+	// list of datepickers to be activated when dialog is opened
 	var aDatePickersIds = [];
+	
+	// list of editors to be activated when dialog is opened
+	var aEditorsId = [];
 
 	// deal with title/message input
 	var sMessage = "";
@@ -4987,12 +5008,15 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		var bDatePicker = false;
 		// textarea type
 		var bOneTextarea = false;
+		// editor type
+		var bEditor = false;
 
 		if (aValues != null && 
 				(aValues[i] instanceof String || typeof aValues[i] === "string") ) { // make sure we have a string, or this will crash!
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
+			bEditor = (aValues[i]).indexOf("::editor")>-1;
 			aValues[i] = (aValues[i]).split("::")[0];
 		}
 
@@ -5000,6 +5024,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		// should the input field be an select box?
 		// (in that case we expect the value at the current index i to contain an array of values to select from)
 		var bSelectBox = (aValues != null && typeof aValues[i] === 'object');
+		
 		// or a checkbox?
 		var bCheckBox = (aValues != null && typeof aValues[i] === 'boolean');
 		
@@ -5013,9 +5038,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		
 		var input;
 		
-		// select box type
 		
-		
+		// select box type	
 		
 		if (bSelectBox) {
 			
@@ -5085,6 +5109,23 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				});
 		}
 		
+		//  editor field type
+		else if (bEditor) {
+			
+			input = $("<textarea></textarea>")
+				.attr("type", "text" )
+				.attr("name", fieldLC)
+				.attr("id", "prompt_"+fieldLC)
+				.prop('disabled', bFixedValue);
+				
+			input.attr("cols", 50);
+			input.attr("rows", 25);
+				
+			input.html("<p>"+(aValues!=null ? aValues[i]: "")+"</p>");		
+			
+			aEditorsId.push("prompt_" + fieldLC);
+		}
+		
 		// text field type
 		
 		else {
@@ -5110,11 +5151,10 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				input.attr("rows", aColsAndRows[1]);
 			}
 
-			// add datepicker is needed
+			// add datepicker if needed
 			if (bDatePicker) {
 				aDatePickersIds.push( "prompt_"+fieldLC );
 			}
-			
 		}				
 		
 		// append the current field
@@ -5208,17 +5248,21 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
         },
         position: fn._computeDialogPosition(),
         buttons: aButtons
-	}) 
-	.keyup(function() {		 
-		if (	kf.isPressed("enter") && 
-				// enter when selecting from autocomplete mustn't trigger closing dialog
-				// (in case an autocomplete has been set for this prompt)
-				!$(".ui-autocomplete-input").elementExists() 
-				) {		
-			$( "#dialog_accept_button" ).click();
-			return false;
-		}
 	});
+	
+	// when editors are present, enter is used for creating new lines, so it mustn't trigger closing dialog
+	if (aEditorsId.length == 0){
+		$( "#"+promptDivId ).keyup(function() {
+			if (	kf.isPressed("enter") && 
+					// enter when selecting from autocomplete mustn't trigger closing dialog
+					// (in case an autocomplete has been set for this prompt)
+					!$(".ui-autocomplete-input").elementExists() 
+					) {
+				$( "#dialog_accept_button" ).click();
+				return false;
+			}
+		});
+	}
 	
 	$( "#"+promptDivId ).dialog( "open" );
 
@@ -5229,11 +5273,45 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				dateFormat: "dd-mm-yy"
 			});
 		}
-	}, 1000);
-
+	}, 500);
+	
+	// activate the editors
+	setTimeout(function(){
+		for (var i=0; i<aEditorsId.length; i++){
+			fn._createEditorForPrompt(aEditorsId[i]);
+		}
+		if (aEditorsId.length > 0)
+		setTimeout(function(){fn.repositionDialog(true);}, 100); // reposition dialog after editor is created, since that might change dialog dimensions
+	}, 500);
+	
+	// get rid of focus
 	if ( $.inArray( $(':focus').attr("id"), aDatePickersIds ) == 0)
 		$(':focus').blur();
+	if ( $.inArray( $(':focus').attr("id"), aEditorsId ) == 0)
+		$(':focus').blur();
+
 	
+	
+};
+
+
+// create a trumbowyg editor for a given field in a prompt dialog
+fn._createEditorForPrompt = function(fieldId){
+	
+	$("#"+fieldId).trumbowyg({
+		lang: lang.getLanguageCode(),
+	    btns: [
+	        ['viewHTML'],
+	        ['formatting'],
+	        ['strong', 'em', 'del'],
+	        ['superscript', 'subscript'],
+	        ['link'],
+	        ['insertImage'],
+	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+	        ['unorderedList', 'orderedList'],
+	        ['removeformat']
+	    ]
+	});
 };
 
 
@@ -5250,6 +5328,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
  * 
  * @see fn.prompt
  * @see fn.askToChoose
+ * @see fn.repositionDialog
  * @see fn.closeDialog
  */
 fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCancelFunction, mSelectionMode){
@@ -5499,6 +5578,7 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
  * @see fn.getPromptBoxOrder
  * @see fn.getNewPositionOfElementAt
  * @see fn.processPromptBoxOrder
+ * @see fn.repositionDialog
  * @see fn.prompt
  */
 fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
@@ -6696,7 +6776,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		
 		var ajaxParams = {
 			url: WEBSERV_URL+"/api/call_external_service",
-			method: "GET",
+			method: "POST",
 			data: {
 				"url": sUrl,
 				"type": sMethod,
@@ -7034,12 +7114,26 @@ fn.triggerKeyStrikeOnElement = function(iKeyCode, nElement, nSubElement){
 	var e = $.Event('keydown');
 	e.which = iKeyCode;
 	
+	if (typeof nElement == 'undefined')
+	    nElement = document;
+	
 	if (typeof nSubElement == 'undefined')
 		$(nElement).trigger(e);
 	else
 		$(nElement).find(nSubElement).trigger(e);
 };
 
+
+/**
+ * Trigger key strike on a given element, given the name of the key
+ * @param {String} sKeyName - Name of the key (eg. 'enter', 'tab', 'esc', etc.)
+ * @param {Node} nElement - Some dom element node
+ * @param {Node} [nSubElement=null] - Some dom element node that is part of nElement
+ */
+fn.pressKey = function(sKeyName, nElement, nSubElement){
+	var iKeyCode = kf._getKeyCode(sKeyName);
+	fn.triggerKeyStrikeOnElement(iKeyCode, nElement, nSubElement);	
+}
 
 
 // this a subroutine, needed to parse database (server) response if needed

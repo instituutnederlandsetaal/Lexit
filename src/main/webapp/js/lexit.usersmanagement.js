@@ -18,7 +18,7 @@ lexitusers.dropProjectRoleForUser = function(project, username){
 		function(){
 			
 			$.ajax({
-				"type": "GET",
+				"type": "POST",
 				"url": WEBSERV_URL+"/api/delete_projectrole_for_user",
 				"data": {
 					"username": username,
@@ -131,7 +131,7 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 lexitusers.refreshUserRight = function(fnCallback){
 						 				
 	$.ajax({
-		"type": "GET",
+		"type": "POST",
 		"url": WEBSERV_URL+"/api/reset_user_rights",
 		"data": {
 			"dummy": lexutil.getUniqueNumber()
@@ -202,7 +202,7 @@ lexitusers.deleteUser = function(){
 							function(){
 							
 								$.ajax({
-									"type": "GET",
+									"type": "POST",
 									"url": WEBSERV_URL+"/api/delete_user",
 									"data": {
 										"username": username,
@@ -289,7 +289,7 @@ lexitusers.createNewUser = function(){
 				var password = resp["password"];
 		
  				$.ajax({
-					"type": "GET",
+					"type": "POST",
 					"url": WEBSERV_URL+"/api/set_user_with_role",
 					"data": {
 						"username": username,
@@ -352,7 +352,7 @@ lexitusers.addRoleInProject = function(){
 						var username = resp["username"];
  				
 		 				$.ajax({
-							"type": "GET",
+							"type": "POST",
 							"url": WEBSERV_URL+"/api/set_user_with_role",
 							"data": {
 								"username": username,
@@ -569,7 +569,7 @@ lexitusers.setListOfProjects = function(){
 						fn.confirm(lang.admingui_projectmenu_delete_project, (lang.admingui_projectmenu_delete_project_warning).replace(/PROJECTNAME/g, sThisProject),
 							function(){
 	                            $.ajax({
-									"type": "GET",
+									"type": "POST",
 									"url": WEBSERV_URL+"/api/remove_project",
 									"data": {
 										"db_name": sThisProject, 
@@ -870,7 +870,7 @@ lexitusers.changeAdminPassword = function(){
 		function(resp){
 			
 			$.ajax({
-					"type": "GET",
+					"type": "POST",
 					"url": WEBSERV_URL+"/api/change_admin_password",
 					"data": {
 						"old_password": resp[lang.admingui_changeadminpassword_old_password],

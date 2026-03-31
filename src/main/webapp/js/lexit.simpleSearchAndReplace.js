@@ -431,7 +431,7 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			var columnsToCopy = conf.getListOfColumnsToCopyUponInsert(sSomeTablename);
 			
 			$.ajax( {
-				"type": "GET",
+				"type": "POST",
 				"url": url,
 				"data": {
 					"async": false,
@@ -477,7 +477,7 @@ ssr.alterTable = function(sSomeTablename, bReallyChange){
 			var url = WEBSERV_URL+"/api/setvalue";
 			
 			$.ajax( {
-				"type": "GET",
+				"type": "POST",
 				"url": url,
 				"data": {
 					"async": false,

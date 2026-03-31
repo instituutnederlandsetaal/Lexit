@@ -216,7 +216,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 							
 								// update the database							 
 								$.ajax( {
-									"type": "GET",
+									"type": "POST",
 									"url": WEBSERV_URL+"/api/setcomment",
 									"data": {
 										"db_name": lexutil.getHttpParams().get("db"),
@@ -1203,7 +1203,7 @@ head.putTableEraseButton = function(sSomeTablename){
 				function(){
 
 					$.ajax( {
-						"type": "GET",
+						"type": "POST",
 						"url": WEBSERV_URL+"/api/remove_uploaded_table",
 						"data": {
 							"db_name": lexutil.getHttpParams().get("db"),

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2026.03.03
+	v2026.03.31
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -20,6 +20,7 @@
 				@import "css/jquery-ui.theme.css";
 				@import "css/tipTip.css";
 				@import "css/jquery.contextMenu.css";
+				@import "trumbowyg/trumbowyg.min.css";
 				@import "prettify/prettify.sunburst.css";
 				@import "css/buttons.dataTables.css";
 				
@@ -98,6 +99,7 @@
 	<script type="text/javascript" language="javascript" src="js/dataTables.buttons.js"></script>
 	<script type="text/javascript" language="javascript" src="js/buttons.html5.js"></script>
 	<script type="text/javascript" language="javascript" src="js/buttons.print.js"></script>
+	<script type="text/javascript" language="javascript" src="trumbowyg/trumbowyg.min.js"></script>
 	
 	
 	<!-- extensions -->
@@ -251,6 +253,9 @@
 
 	// font size memory
 	var iFontSize = "100%";
+	
+	// set the location of the icons for the trumbowyg editor
+	$.trumbowyg.svgPath = 'trumbowyg/icons.svg';
 
 	// are we on Mac or PC?
 	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
@@ -384,7 +389,7 @@
 		var url = WEBSERV_URL+"/api/logout";
 		
 		$.ajax({
-			"type": "GET",
+			"type": "POST",
 			"url": url,
 			"data": {
 				"username": fn.getCurrentUser(),
@@ -567,7 +572,7 @@
 			var url = WEBSERV_URL+"/api/reset_user_rights";
 			
 			$.ajax({
-				"type": "GET",
+				"type": "POST",
 				"url": url,
 				"data": {
 					"dummy": getUniqueNumber()
@@ -861,27 +866,6 @@
 			}
 		});
 	};
-
-
-	function sayHello(){
-
-		var url = WEBSERV_URL+"/hello/lexit";
-
-		$.ajax({
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				// nothing to do
-			},
-			"error": function(jqxhr, settings, exception){
-				fn.message(lang.error, lang.saying_hello_failed +"<br><br>" +lang.error +": ["+exception+"]");
-			}
-		});
-	}
 	
 	
 	// get internal separator in use in webservice  
@@ -939,7 +923,7 @@
 
 		$.ajax({
 			"async": false, // needed to block code execution while awaiting the server response
-			"type": "GET",
+			"type": "POST",
 			"url": url,
 			"dataType": "xml", // get response as xml
 			"data": {

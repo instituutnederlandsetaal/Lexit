@@ -5,6 +5,7 @@
 var tb = {};
 
 
+
 // Load the table column names and types.
 // From now on, the table "frame" will be build
 
@@ -434,9 +435,11 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 					for (var iColNumber=0; iColNumber<mt.getListOfVisibleColumnsOf(sSomeTableName).length; iColNumber++){
 						var currentColumnName =	mt.getListOfVisibleColumnsOf(sSomeTableName)[iColNumber]; 
 		        		var oColumnConfig =		conf.getColumnConfig(oTableConfig, currentColumnName);
+		        		var bEditor =			conf.getEditor(oColumnConfig);
+		        		
 		        		
 		        		// generate row tooltips showing the row numbers and such, if required by config					
-		        		if (bTooltipsAllowedInTable){							
+		        		if (bTooltipsAllowedInTable){
 						
 			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
 			        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
@@ -460,7 +463,112 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 								$("td:eq("+iColNumber+")", oCurrentRow.node()).text(sTextVal);
 							}
 						}
-					}
+						
+						
+						// if the cell is configured as an editor, set it
+						
+						if (bEditor){
+							
+							// editor bulder
+							
+							var fnEditorBuilder = function(elem){
+								
+								// check if the click was inside an already opened editor, in which case we don't need to instantiate another one!
+								var bClickedInsideEditor = $(elem).closest(".trumbowyg-editor-box").elementExists();
+								if ( !bClickedInsideEditor ){
+								
+									// now instantiate the editor
+									// and make sure it's marked as active when it is.
+									$(elem)
+										.trumbowyg(oEditorConfig)
+										.on('tbwfocus focus click', function(){											
+											// remove any old 'active' mark 
+											$(".trumbowyg_editor_active").removeClass("trumbowyg_editor_active");											
+											// mark the current editor as active 
+											$(this).addClass("trumbowyg_editor_active")
+										});	
+								}									
+							};
+						
+							// editor configuration	
+							// (mostly about the save button, which needs to save data to the server and refresh the row)
+							
+							var oEditorConfig = {
+								lang: lang.getLanguageCode(),
+								btnsDef: {
+							        save: {
+										fn: function() {
+											
+											// get active row
+											var nRow = $(".trumbowyg_editor_active").closest("tr").get(0);
+											
+											// get the editor and its content
+											var thisEditor = $(nRow).find('.trumbowyg-editor');
+											var sNewValue = $(thisEditor).prop('innerHTML');
+											
+											// get the cell content, which is now nested into the editor HTML
+											// (we'll use this to restore the cell HTML later on, when the editor is closed)
+											var $tdInThisEditor = $(thisEditor).closest("td");
+											
+											// get the column name and the new value, to prepare the data to update
+											var sThisColName = fn.getNameOfColumnForThisNode( $tdInThisEditor.get(0) );
+											var oUpdateData = {}; 
+											oUpdateData[sThisColName] = sNewValue;
+											
+											// blur the editor and carry out the update, then refresh the row
+											$(thisEditor).trigger('tbwblur'); 
+											fn.updateTableGivenANode(nRow, oUpdateData, function(){
+												
+												// destroy the editor (otherwise it would stay in sight)
+												$(thisEditor).trumbowyg('destroy');
+												
+												// restore the cell HTML
+												// and re-assign the click event to instantiate the editor again when clicking on the cell
+												$(nRow).find("div.trumbowyg-editor-box").replaceWith($tdInThisEditor);
+												
+												$(nRow).find("td."+sThisColName).click(function(){
+													fnEditorBuilder(this);
+												});
+												
+												// execute the editor callback (if any)
+												var sTableName = 		fn.getTableName(nRow);
+												var oTableConfig =		conf.getTableConfig(sTableName);
+												var oColumnConfig =		conf.getColumnConfig(oTableConfig, sThisColName);
+												var fnEditorCallback =	conf.getEditorCallback(oColumnConfig);
+												if (fnEditorCallback != null){
+													fnEditorCallback(mt.getDataTableObjectOf(sTableName), nRow, sNewValue);
+												}
+												
+											});
+							            },
+							            hasIcon : false,
+							            text: lang.save						        
+							        }
+							    },
+							    btns: [
+							        ['viewHTML'],
+							        ['formatting'],
+							        ['strong', 'em', 'del'],
+							        ['superscript', 'subscript'],
+							        ['link'],
+							        ['insertImage'],
+							        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+							        ['unorderedList', 'orderedList'],
+							        ['removeformat'],
+							     	['save']
+							    ]
+							};
+							
+							// the editor should be triggered on click
+															
+							$("td:eq(" + iColNumber + ")", oCurrentRow.node()).click(function(){
+								fnEditorBuilder(this);
+							});
+													
+							
+						}
+						
+					} // end of loop through columns
 
 				});				
 		        

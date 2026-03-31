@@ -10,6 +10,20 @@ lang.BASE_URL = "../lexit2";
 // are we on Mac or PC?
 lang.isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 
+/**
+ * Get the active language code (which can be set with the 'lang' parameter in the URL).)
+ * @return the active language code (e.g. "en", "nl", etc.)
+ */
+lang.getLanguageCode = function(){
+	// get http parameters
+	paramsHash = lexutil.getHttpParams();
+
+	// get active language code 
+	return (paramsHash!=null && paramsHash.get("lang")!=null ?
+				paramsHash.get("lang").toLowerCase() : "nl" );
+};
+	
+
 // default is Dutch
 
 // general
@@ -248,6 +262,7 @@ lang.admingui_changeadminpassword_error = "Het opslaan van het nieuwe wachtwoord
 lang.check_the_console = "Check de console voor meer info.";
 lang.loading_xml_failed = "XML laden mislukt";
 lang.error = "Fout";
+lang.error_possible_cause = "Mogelijke oorzaak:";
 lang.error_database_configfile_missing = "Het 'FILENAME.database'-configuratiebestand ontbreekt of bevat fouten";
 lang.error_button_config = "Aan deze button is geen functie toegekend.";
 lang.some_error_has_occurred = "Er is een fout opgetreden";
@@ -257,7 +272,8 @@ lang.error_column_doesnot_exist = "De opgegeven kolom komt niet voor in de tabel
 lang.error_function_called_with_illegal_value = "De functie is aangeroepen met een illegale waarde";
 lang.error_function_called_with_illegal_value_input = "Invoer";
 lang.error_function_called_with_illegal_value_expected = "Verwacht";
-lang.error_table_has_no_row_ids = "De Tabel heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " +
+lang.error_table_has_no_row_ids = "De tabel heeft geen IDs. Rijen aanwijzen zonder IDs is onmogelijk. " + 
+				"<BR>" +
 				"[Het antwoord van de server bevat waarschijnlijk geen waarde voor DT_RowId " +
 				"omdat de tabel geen primary key noch pkid-veld heeft; " +
 				"LET erop dat multicolumns primary keys niet ondersteund worden]";
@@ -1859,6 +1875,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.check_the_console = "Check the console for more information.";
 		lang.loading_xml_failed = "Loading XML failed";
 		lang.error = "Error";
+		lang.error_possible_cause = "Possible cause:";
 		lang.error_database_configfile_missing = "The 'FILENAME.database' configuration file is missing or contains errors";
 		lang.error_button_config = "This button has no function assigned yet.";
 		lang.some_error_has_occurred = "Something went wrong";
@@ -1868,7 +1885,8 @@ lang.setLanguage = function(sLanguageCode){
 		lang.error_function_called_with_illegal_value = "The function was called with an illegal value";
 		lang.error_function_called_with_illegal_value_input = "Input";
 		lang.error_function_called_with_illegal_value_expected = "Expected";
-		lang.error_table_has_no_row_ids = "The Table has no IDs. Pointing at rows without IDs is impossible. " +
+		lang.error_table_has_no_row_ids = "The table has no IDs. Pointing at rows without IDs is impossible. " +
+				"<BR>" +
 				"[The response of the server has probably no value for DT_RowId " +
 				"because the table has nor primary key nor pkid column; " +
 				"BEWARE: multicolumns primary keys are not supported (yet)]";

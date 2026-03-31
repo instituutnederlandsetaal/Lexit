@@ -123,16 +123,16 @@ public class TableResources {
  	}
  	
  	
+ 	// logout user from lex'it
  	@Path("logout")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject logout(
- 			@QueryParam("username") String username,
+ 			@FormParam("username") String username,
  			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest			
  			) {
- 		
  		
  		System.out.println("### Logging out user "+username);
  		
@@ -171,7 +171,7 @@ public class TableResources {
  	
  	// reset user rights 
  	@Path("reset_user_rights")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject resetConfig(
  			@Context ServletContext context,
@@ -203,12 +203,12 @@ public class TableResources {
  	}
  	
  	
- 	
+ 	// remove a user
  	@Path("delete_user")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject deleteUser(
- 			@DefaultValue("") @QueryParam("username") String username,
+ 			@DefaultValue("") @FormParam("username") String username,
  			@Context SecurityContext sc,
  			@Context ServletContext context,
  			@Context HttpServletRequest httpServletRequest
@@ -227,14 +227,15 @@ public class TableResources {
  		
  		return response;
  	}
+
  	
- 	
+ 	// remove a user's project role
  	@Path("delete_projectrole_for_user")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject deleteProjectRoleForUser(
-			@DefaultValue("") @QueryParam("username") String username,
-			@DefaultValue("") @QueryParam("db_name") String dbname, 
+			@DefaultValue("") @FormParam("username") String username,
+			@DefaultValue("") @FormParam("db_name") String dbname, 
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -253,6 +254,7 @@ public class TableResources {
 
 		return response;
 	}
+
  	
  	
  	@Path("get_user_default_role")
@@ -280,19 +282,21 @@ public class TableResources {
 
  	}
  	
+ 	// set a user with a default role  and a project role
  	@Path("set_user_with_role")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject setUserWithRole(
- 			@DefaultValue("") @QueryParam("username") String username,
- 			@DefaultValue("") @QueryParam("password") String password,
- 			@DefaultValue("") @QueryParam("default_role") String defaultRole,
- 			@DefaultValue("") @QueryParam("db_name") String dbName,
- 			@DefaultValue("") @QueryParam("role") String role,
+ 			@DefaultValue("") @FormParam("username") String username,
+ 			@DefaultValue("") @FormParam("password") String password,
+ 			@DefaultValue("") @FormParam("default_role") String defaultRole,
+ 			@DefaultValue("") @FormParam("db_name") String dbName,
+ 			@DefaultValue("") @FormParam("role") String role,
  			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
  			) throws IOException {
+ 		
  		
  		String loginName = lexitInfo.getUserName(httpServletRequest);
  		ContextObject co = new ContextObject(context, sc, httpServletRequest, Constants.ADMIN_DB, loginName);
@@ -310,12 +314,13 @@ public class TableResources {
  	}
  	
  	
+ 	// change the password of the admin user
  	@Path("change_admin_password")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject changeAdminPassword(
- 			@DefaultValue("") @QueryParam("old_password") String oldPassword,
- 			@DefaultValue("") @QueryParam("new_password") String newPassword,
+ 			@DefaultValue("") @FormParam("old_password") String oldPassword,
+ 			@DefaultValue("") @FormParam("new_password") String newPassword,
  			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
@@ -334,6 +339,7 @@ public class TableResources {
  		
  		return response;
  	}
+
  	
  	
  	
@@ -385,6 +391,7 @@ public class TableResources {
  	}
  	
  	
+ 	// get the list of existing projects and their info (if fullinfo=true)
  	@Path("get_list_of_existing_projects")
  	@GET
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -410,6 +417,7 @@ public class TableResources {
 	}
  	
  	
+ 	// set the list of existing projects 
  	@Path("set_list_of_existing_projects")
  	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -440,12 +448,12 @@ public class TableResources {
  	}
  	
  	
- 	
+ 	// remove a project
  	@Path("remove_project")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject removeProject(
-			@DefaultValue("") @QueryParam("db_name") String dbName,
+			@DefaultValue("") @FormParam("db_name") String dbName,
 			@Context ServletContext context, 
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest) throws IOException {
@@ -481,10 +489,10 @@ public class TableResources {
  	// call:
  	// .../api/reset_project
  	@Path("reset_project")
- 	@GET
+ 	@POST
  	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
  	public DbResponseObject resetProject(
-			@DefaultValue("") @QueryParam("db_name") String dbName, 
+			@DefaultValue("") @FormParam("db_name") String dbName, 
  			@Context ServletContext context,
  			@Context SecurityContext sc,
  			@Context HttpServletRequest httpServletRequest
@@ -508,6 +516,7 @@ public class TableResources {
 		}
  		return dro;
  	}
+
 
 
 	// --------------------------------------------------------------------------------------
@@ -619,11 +628,11 @@ public class TableResources {
 	// register the active tab a user is currently viewing 
 	// .../api/set_active_tab_id
 	@Path("set_active_tab_id")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setActiveTab(
-			@QueryParam("db_name") String dbName,
-			@QueryParam("active_tab_id") String activeTabId,
+			@FormParam("db_name") String dbName,
+			@FormParam("active_tab_id") String activeTabId,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest){
@@ -656,14 +665,39 @@ public class TableResources {
 	// call:
 	// .../api/set_schema?db_name=...&schema_name=...
 	@Path("set_schema")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setSchema(
+			@FormParam("db_name") String dbName,
+			@FormParam("schema_name") String schemaName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest){
+		
+		return doSetSchema(dbName, schemaName, context,	sc,	httpServletRequest);
+	}
+	
+	// keep this one for backwards compatibility (some old config.js target this endpoint), but it's better to use the POST version of this function (see above)
+	@Path("set_schema")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject setSchemaGet(
 			@QueryParam("db_name") String dbName,
 			@QueryParam("schema_name") String schemaName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest){
+		
+		return doSetSchema(dbName, schemaName, context,	sc,	httpServletRequest);
+	}
+	
+	// private helper for functions hereabove
+	private DbResponseObject doSetSchema(
+			String dbName,
+			String schemaName,
+			ServletContext context,
+			SecurityContext sc,
+			HttpServletRequest httpServletRequest){
 		
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
@@ -744,11 +778,11 @@ public class TableResources {
 	// call:
 	// .../webservice/api/cleancache?table_name=...&db_name=...
 	@Path("cleancache")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject cleanCache(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -946,14 +980,14 @@ public class TableResources {
 	// they must be comma-separated
 	// (see explanation in code)
 	@Path("setvalue")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValue(
-			@QueryParam("row_id") String rowId,
-			@QueryParam("table_name") String tableName,
-			@QueryParam("column_name") String columnName,
-			@QueryParam("new_value") String newValue,
-			@QueryParam("db_name") String dbName,
+			@FormParam("row_id") String rowId,
+			@FormParam("table_name") String tableName,
+			@FormParam("column_name") String columnName,
+			@FormParam("new_value") String newValue,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -971,7 +1005,6 @@ public class TableResources {
 		String[] rowIds = rowId.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		String[] newValues = newValue.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
 		String[] columnNames = columnName.split(Constants.ARG_INTERNAL_SEPARATOR, -1);
-		
 		
 		
 		// two possibilities:
@@ -994,17 +1027,19 @@ public class TableResources {
 		
 		return dro;
 	}
+	
+	
 
 	// .../api/setcomment
 	// set the comment of a table or view
 	@Path("setcomment")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setComment(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("new_comment") String newComment,
-			@QueryParam("table_type") String tableType,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("new_comment") String newComment,
+			@FormParam("table_type") String tableType,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1219,15 +1254,15 @@ public class TableResources {
 	// call:
 	// .../api/call_external_service
 	@Path("call_external_service")
-	@GET
+	@POST
 	@Produces({MediaType.TEXT_PLAIN})
-	public Response callExternalServiceGet(
-			@QueryParam("url") String url,
-			@DefaultValue("GET") @QueryParam("type") String requestMethod, 
-			@QueryParam("data") String urlParameters, 
-			@DefaultValue("UTF-8") @QueryParam("encoding") String charEncoding, 
-			@DefaultValue("application/x-www-form-urlencoded") @QueryParam("contentType") String contentType,
-			@DefaultValue("xml") @QueryParam("dataType") String dataType,
+	public Response callExternalService(
+			@FormParam("url") String url,
+			@DefaultValue("GET") @FormParam("type") String requestMethod, 
+			@FormParam("data") String urlParameters, 
+			@DefaultValue("UTF-8") @FormParam("encoding") String charEncoding, 
+			@DefaultValue("application/x-www-form-urlencoded") @FormParam("contentType") String contentType,
+			@DefaultValue("xml") @FormParam("dataType") String dataType,
 			@Context HttpServletRequest httpServletRequest
 			) {
 		
@@ -1294,15 +1329,15 @@ public class TableResources {
 	// they must be comma-separated
 	// (see explanation in code)
 	@Path("setvalue_without_id")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValueWithoutId(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("column_name_to_match") String columnNameToMatch,
-			@QueryParam("value_to_match") String valueToMatch,
-			@QueryParam("column_name_to_update") String columnNameToUpdate,
-			@QueryParam("value_to_update") String valueToUpdate,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("column_name_to_match") String columnNameToMatch,
+			@FormParam("value_to_match") String valueToMatch,
+			@FormParam("column_name_to_update") String columnNameToUpdate,
+			@FormParam("value_to_update") String valueToUpdate,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1330,20 +1365,22 @@ public class TableResources {
 	}
 	
 	
+	
+	
 	// .../api/setvalue_without_id_for_search_and_replace
 	// it is possible to send more row_id's, new_value's and column names as input,
 	// they must be comma-separated
 	// (see explanation in code)
 	@Path("setvalue_without_id_for_search_and_replace")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject setValueWithoutIdForSearchAndReplace(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("column_name_to_match") String columnNameToMatch,
-			@QueryParam("value_to_match") String valueToMatch,
-			@QueryParam("column_name_to_update") String columnNameToUpdate,
-			@QueryParam("value_to_update") String valueToUpdate,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("column_name_to_match") String columnNameToMatch,
+			@FormParam("value_to_match") String valueToMatch,
+			@FormParam("column_name_to_update") String columnNameToUpdate,
+			@FormParam("value_to_update") String valueToUpdate,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1375,19 +1412,19 @@ public class TableResources {
 	// .../api/insertvalue
 	// insert a new record into a table
 	@Path("insertvalue")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject insertRecord(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("column_name") String columnName,
-			@QueryParam("value") String newValue,
-			@QueryParam("returning") String returningField,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("column_name") String columnName,
+			@FormParam("value") String newValue,
+			@FormParam("returning") String returningField,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
 			){
-		
+				
 		String userName = lexitInfo.getUserName(httpServletRequest);
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		Util.debug(co, "### Insert record into "+tableName);
@@ -1419,14 +1456,14 @@ public class TableResources {
 	// .../api/duplicaterecord
 	// duplicate a record in a table and get its id
 	@Path("duplicaterecord")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject duplicateRecord(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("columns_to_skip") String columnsToSkip,
-			@QueryParam("pk_substitute") String pkSubstitute,
-			@QueryParam("pk_value") String pkValue,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("columns_to_skip") String columnsToSkip,
+			@FormParam("pk_substitute") String pkSubstitute,
+			@FormParam("pk_value") String pkValue,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1456,16 +1493,16 @@ public class TableResources {
 	// insert some new records based on existing records with ids
 	// which will be re-inserted with modified values, according to some patterns and replacement strings
 	@Path("insertmodified")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject insertRecordModified(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("filter_column_name") String filterColumnName,
-			@QueryParam("filter_value") String filterValue,
-			@QueryParam("replacement_value") String replacementValue,
-			@QueryParam("column_to_copy") String columnToCopy,
-			@QueryParam("row_id") String rowId,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("filter_column_name") String filterColumnName,
+			@FormParam("filter_value") String filterValue,
+			@FormParam("replacement_value") String replacementValue,
+			@FormParam("column_to_copy") String columnToCopy,
+			@FormParam("row_id") String rowId,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1492,22 +1529,23 @@ public class TableResources {
 		
 		return dro;
 	}
+
 	
 	
 	// .../tabel/insertmodified_without_id
 	// insert some new records based on existing records
 	// which will be re-inserted with modified values, according to some patterns and replacement strings
 	@Path("insertmodified_without_id")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject insertRecordModifiedWithoutId(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("filter_column_name") String filterColumnName,
-			@QueryParam("filter_value") String filterValue,
-			@QueryParam("replacement_column_name") String replacementColumnName,
-			@QueryParam("replacement_value") String replacementValue,
-			@QueryParam("returning") String returningField,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("filter_column_name") String filterColumnName,
+			@FormParam("filter_value") String filterValue,
+			@FormParam("replacement_column_name") String replacementColumnName,
+			@FormParam("replacement_value") String replacementValue,
+			@FormParam("returning") String returningField,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1539,12 +1577,12 @@ public class TableResources {
 	// .../api/delete_row
 	// delete a record from a table, given its id
 	@Path("delete_row")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject deleteRecord(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("row_id") String rowId,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("row_id") String rowId,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1563,6 +1601,7 @@ public class TableResources {
 		
 		return dro;
 	}
+
 	
 	
 	
@@ -1570,13 +1609,13 @@ public class TableResources {
 	// delete a record from a table, 
 	// given some column names and values to match
 	@Path("delete_row_without_id")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject deleteRecordWithoutId(
-			@QueryParam("table_name") String tableName,
-			@QueryParam("column_name") String columnName,
-			@QueryParam("value") String value,
-			@QueryParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
+			@FormParam("column_name") String columnName,
+			@FormParam("value") String value,
+			@FormParam("db_name") String dbName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest
@@ -1598,6 +1637,7 @@ public class TableResources {
 		
 		return dro;
 	}
+
 	
 	
 
@@ -1695,11 +1735,11 @@ public class TableResources {
 	}
 	
 	@Path("remove_uploaded_table")
-	@GET
+	@POST
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public DbResponseObject removeUploadedFile(
-			@QueryParam("db_name") String dbName,
-			@QueryParam("table_name") String tableName,
+			@FormParam("db_name") String dbName,
+			@FormParam("table_name") String tableName,
 			@Context ServletContext context,
 			@Context SecurityContext sc,
 			@Context HttpServletRequest httpServletRequest) throws Exception {

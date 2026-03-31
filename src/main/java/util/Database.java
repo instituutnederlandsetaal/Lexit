@@ -748,7 +748,7 @@ public class Database {
 						"AND " +
 								"CAST(" +getSafeFieldName(oneColumnName)+" AS text) "+getSuitableOperatorAndArg(tableName, null, oneColumnValue, false)+" "
 						);		
-				columnsValues.add(oneColumnValue);
+				columnsValues.add(removeFrontOperator(oneColumnValue));
 				ato.setType(columnsValues.size()-1, "text");
 			}
 			else
@@ -757,7 +757,7 @@ public class Database {
 						"AND " +
 								getSafeFieldName(oneColumnName)+" "+getSuitableOperatorAndArg(tableName, oneColumnName, oneColumnValue, false)+" "
 						);		
-				columnsValues.add(oneColumnValue);
+				columnsValues.add(removeFrontOperator(oneColumnValue));
 				ato.setType(columnsValues.size()-1, getTypeOfColumn(tableName, oneColumnName, null));
 			}	
 			

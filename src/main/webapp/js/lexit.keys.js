@@ -16,31 +16,95 @@ var sActiveTableName = null;
 var aActiveRowNumber = {};
 
 
-// get and set the active table (t.i. the table that has focus for arrow keys)
+
+// mapping of key codes to key names
+
+const KEY_NAMES = {
+  [-1]: "released",
+  8: "backspace",
+  9: "tab",
+  13: "enter",
+  16: "shift",
+  17: "ctrl",
+  18: "alt",
+  19: "pause",
+  20: "capslock",
+  27: "escape",
+  32: "spacebar",
+  33: "pageup",
+  34: "pagedown",
+  35: "end",
+  36: "home",
+  37: "leftarrow",
+  38: "uparrow",
+  39: "rightarrow",
+  40: "downarrow",
+  45: "insert",
+  46: "delete",
+  91: "leftwindow",
+  92: "rightwindow",
+  93: "select",
+  106: "*",
+  107: "+",
+  109: "-",
+  110: ".",
+  111: "/",
+  112: "f1",
+  113: "f2",
+  114: "f3",
+  115: "f4",
+  116: "f5",
+  117: "f6",
+  118: "f7",
+  119: "f8",
+  120: "f9",
+  121: "f10",
+  122: "f11",
+  123: "f12",
+  192: "`"
+};
+
+const CODE_BY_NAME = Object.fromEntries(
+  Object.entries(KEY_NAMES).map(([code, name]) => [name, Number(code)])
+);
+
+
+
+
+/**
+ * Set the active table (t.i. the table that has focus for arrow keys)
+ */
 kf.setActiveTable = function(sTableName){
 	
 	var sPreviousActiveTable = kf.getActiveTable();
-	if (sPreviousActiveTable != null)
-		{
+	if (sPreviousActiveTable != null) {
 		// show focus is lost on current active table
 		$("#"+sPreviousActiveTable+"_tablename").css("color", "#A4A4A4");
-		}
+	}
 	
 	sActiveTableName = sTableName;
 	// show focus is gained
 	$("#"+sActiveTableName+"_tablename").css("color", "#000000");
 };
 
+/**
+ * Get the active table (t.i. the table that has focus for arrow keys)
+ */
 kf.getActiveTable = function(){
 	return sActiveTableName;
 };
 
 
-// get and set the active row (t.i. the table/row that has focus for arrow keys)
+/**
+ * Set the active row (t.i. the table/row that has focus for arrow keys)
+ */
 kf.setActiveRowNumber = function(iRowNumber){
 	aActiveRowNumber[kf.getActiveTable()] = iRowNumber;
 };
 
+/**
+ * Get the active row (t.i. the table/row that has focus for arrow keys)
+ */
 kf.getActiveRowNumber = function(){
 	
 	// if some process deleted some rows, in such a way that the current active row
@@ -116,6 +180,31 @@ kf.registerReleasedKey = function(){
 
 
 /**
+ * Enable all key functions.
+ * By default the key functions are enabled, but if needed, those can be turned off
+ * eg. when a wysiwyg editor is open, to prevent interference with the editor's own key functions
+ * @param {String} sTableName - Name of the table
+ * @see kf.disableKeys
+ */
+kf.enableKeys = function(sTableName){
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName);
+	mt.setTableKeysActive(sTableName, true);
+};
+
+/**
+ * Disable all key functions (eg. when a wysiwyg editor is open, to prevent interference with the editor's own key functions)
+ * @param {String} sTableName - Name of the table
+ * @see kf.enableKeys
+ */
+kf.disableKeys = function(sTableName){
+	if (typeof sTableName == 'object')
+		sTableName = fn.getTableName(sTableName); 
+	mt.setTableKeysActive(sTableName, false); 
+};
+
+
+/**
  * Get the name of the last pressed key
  * @returns {String} Name of a key (eg. 'f1', 'esc', 'a', 'b', ...)
  */
@@ -179,154 +268,57 @@ kf._setReleasedKey = function(sKeyName){
 
 
 
+/**
+ * translate a key code into a human readable key name
+ * @param {Number} iCode - Key code (eg. 13, 27, 112, ...)
+ */
+kf._translateCode = function (iCode) {
+  // top-row 0-9
+  if (iCode >= 48 && iCode <= 57) {
+    return String.fromCharCode(iCode);
+  }
 
-kf._translateCode = function(iCode){
-	
-	var translation = "unknown";
-	
-	if ((iCode>=48 & iCode<=90) || (iCode>=96 & iCode<=105))
-		{
-		return String.fromCharCode(iCode).toLowerCase();
-		}
-	
-	switch(iCode)
-	{
-	case -1:		
-		translation = "released";
-		break;
-	case 8:
-		translation = "backspace";
-		break;
-	case 9:
-		translation = "tab";
-		break;
-	case 13:
-		translation = "enter";
-		break;
-	case 16:
-		translation = "shift";
-		break;
-	case 17:
-		translation = "ctrl";
-		break;
-	case 18:
-		translation = "alt";
-		break;
-	case 19:
-		translation = "pause";
-		break;
-	case 20:
-		translation = "capslock";
-		break;
-	case 27:
-		translation = "escape";
-		break;
-	case 32:
-		translation = "spacebar";
-		break;
-	case 33:
-		translation = "pageup";
-		break;
-	case 34:
-		translation = "pagedown";
-		break;
-	case 35:
-		translation = "end";
-		break;
-	case 36:
-		translation = "home";
-		break;
-	case 37:
-		translation = "leftarrow";
-		break;
-	case 38:
-		translation = "uparrow";
-		break;
-	case 39:
-		translation = "rightarrow";
-		break;
-	case 40:
-		translation = "downarrow";
-		break;
-	case 45:
-		translation = "insert";
-		break;
-	case 46:
-		translation = "delete";
-		break;
-	case 91:
-		translation = "leftwindow";
-		break;
-	case 92:
-		translation = "rightwindow";
-		break;
-	case 93:
-		translation = "select";
-		break;
-	case 106:
-		translation = "*";
-		break;
-	case 107:
-		translation = "+";
-		break;
-	case 109:
-		translation = "-";
-		break;
-	case 110:
-		translation = ".";
-		break;
-	case 111:
-		translation = "/";
-		break;
-	case 112:
-		translation = "f1";
-		break;
-	case 113:
-		translation = "f2";
-		break;
-	case 114:
-		translation = "f3";
-		break;
-	case 115:
-		translation = "f4";
-		break;
-	case 116:
-		translation = "f5";
-		break;
-	case 117:
-		translation = "f6";
-		break;
-	case 118:
-		translation = "f7";
-		break;
-	case 119:
-		translation = "f8";
-		break;
-	case 120:
-		translation = "f9";
-		break;
-	case 121:
-		translation = "f10";
-		break;
-	case 122:
-		translation = "f11";
-		break;
-	case 123:
-		translation = "f12";
-		break;
-	case 192:
-		translation = "`";
-		break;
-	default:
-		translation = "unknown";
-	};
-	
-	return translation;
+  // A-Z
+  if (iCode >= 65 && iCode <= 90) {
+    return String.fromCharCode(iCode).toLowerCase();
+  }
+
+  // numpad 0-9
+  if (iCode >= 96 && iCode <= 105) {
+    return String(iCode - 96);
+  }
+
+  return KEY_NAMES[iCode] || "unknown";
+};
+
+
+/**
+ * translate a key name into a key code
+ * @param {String} keyName - Name of a key (eg. 'f1', 'esc', 'a', 'b', ...)
+ */
+kf._getKeyCode = function (keyName) {
+  if (typeof keyName !== "string") {
+    return null;
+  }
+
+  const key = keyName.toLowerCase();
+
+  // a-z
+  if (key.length === 1 && key >= "a" && key <= "z") {
+    return key.toUpperCase().charCodeAt(0);
+  }
+
+  // 0-9
+  if (key.length === 1 && key >= "0" && key <= "9") {
+    return key.charCodeAt(0);
+  }
+
+  return CODE_BY_NAME[key] ?? null;
 };
 
 
 
-//add key detection
+// add key detection
 kf.addKeyFunctions = function(){
 	
 	// context menu key/button function
@@ -351,34 +343,36 @@ kf.addKeyFunctions = function(){
 	// normal key functions
 	
 	$(document).unbind('keydown');	
-	$(document).bind('keydown', function(e) {
+	$(document).bind('keydown', function(event) {	
 		
+		// detect if the searchbox of the active table has focus
 		var bSearchboxOfActiveTableHasFocus = $("div.dataTables_wrapper div div input").is(":focus");
 		
 		// detect if some dialog box is open or some autocomplete pulldown
 		// (as we need to prevent scrolling down the table rows when the
-		//  user actually means to scroll within a box of pulldown menu)
-		
+		//  user actually means to scroll within a box of pulldown menu)		
 		var bSomeDialogBoxIsOpen = 	$("div.ui-dialog").elementExists() ||
 									$(".ui-autocomplete-input").elementExists();
+									
+		// detect if we are inside an trumbowwyg editor
+		var bInsideEditor = $(event.target).closest(".trumbowyg-editor-box").elementExists() || $("div[id^='dialog-message']").closest(".trumbowyg-editor-box").elementExists();
+		
 		
 		
 		// register which key was pressed
-		kf.registerPressedKey(e);
+		kf.registerPressedKey(event);
 		
-		// prevent default behaviour (eg.scrolling of screen) when pressing the up/down arrows etc
+		// prevent default behaviour (eg.scrolling of screen) 
+		// when pressing the up/down arrows, page up/down, F5, F8, tab or enter (when a dialog box is open)
+		
 		if (
+				// F8 is reserved for tooltip, when working in Lex'it
 				kf.isPressed("f8") ||
+				
+				// pageup/down are reserved for pagination
 				kf.isPressed("pageup") || kf.isPressed("pagedown") ||
 				
-				// one exception is when we are within a textarea, because we want
-				// to be able to navigate in there!
-				( (kf.isPressed("uparrow") || kf.isPressed("downarrow")) 
-						&& !$("td form textarea").elementExists()
-						&& !($(e.target).is('textarea')) // not in a form
-					) ||
-				
-				// one another exception is when the cursor is in a searchbox of the active table,
+				// one exception is when the cursor is in a searchbox of the active table,
 				// or when the cursor is in a field of a dialog box:
 				// switching to next searchbox by pressing tab must be possible then
 				(kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus && !bSomeDialogBoxIsOpen ) ||
@@ -386,22 +380,35 @@ kf.addKeyFunctions = function(){
 				// pressing enter mustn't submit the form of the dialog box
 				// (which would cause page reload; strange enough this happens only with forms having only one field)
 				// (see: http://stackoverflow.com/questions/15488411/why-does-my-jquery-dialog-reload-the-page-when-enter-is-pressed)
-				(kf.isPressed("enter") && bSomeDialogBoxIsOpen) ||
+				(kf.isPressed("enter") && bSomeDialogBoxIsOpen && !bInsideEditor ) ||
 				
 				// f5 will be used to table refresh instead of page reload
-				kf.isPressed("f5")
+				kf.isPressed("f5") ||
+				
+				// one exception is when we are within a textarea, because we want
+				// to be able to navigate in there!
+				( (kf.isPressed("uparrow") || kf.isPressed("downarrow")) 
+				        && !bInsideEditor // trumbowwyg
+						&& !$("td form textarea").elementExists()
+						&& !($(event.target).is('textarea')) // not in a form
+				) 
 				
 			) {
-						
-			e.preventDefault();
+					
+			event.preventDefault();
 		}
 		
 		// call user key functions
-    	kf._callCustomKeyFunctions('keydown');
+    	kf._callCustomKeyFunctions('keydown', event);
     	
-    	// F8 (toggle tooltips in table)
+    	
+    	// F8 : toggle tooltips in table
+    	
     	if (kf.isPressed("f8")){
+			
+			// toggle
     		bTooltipsAllowedInTable = !bTooltipsAllowedInTable;
+    		
     		// force tooltip to fadeout (otherwise it will keep in sight)
 			$("#tiptip_holder").fadeOut();
 			
@@ -414,7 +421,8 @@ kf.addKeyFunctions = function(){
     		
     	}
     	
-    	// refresh active table
+    	// F5 : refresh active table
+    	
     	if (kf.isPressed("f5")){
     		// make sure the dropdown menus disappear in IE
 			$(".ui-menu-item").hide();
@@ -425,22 +433,26 @@ kf.addKeyFunctions = function(){
     			fn.refreshTable(sActiveTable);
     	}
     	
-    	// logout
-    	if ( (kf.isPressed("l") && e.ctrlKey && e.shiftKey) ){
+    	
+    	// ctrl + shift + L : logout
+    	
+    	if ( (kf.isPressed("l") && event.ctrlKey && event.shiftKey) ){
 			startLexitLogout(function(){
 				lexitReload();
 			});
 		}
 
-		// upload file
-		if (  (kf.isPressed("u") && e.ctrlKey && e.shiftKey) 
+
+		// ctrl + shift + U : upload file
+		
+		if (  (kf.isPressed("u") && event.ctrlKey && event.shiftKey) 
 				&& !$("div#context-menu-layer").elementExists() // don't interfere with context menu, text area etc
 				&& !$("td form textarea").elementExists()
-				&& !($(e.target).is('textarea')) // not in a form
+				&& !($(event.target).is('textarea')) // not in a form
 				&& !bSomeDialogBoxIsOpen
 			){
 				
-			e.preventDefault();
+			event.preventDefault();
 			var sUploadForm =
 				"	 <BR>" +
 				"    <form id=\"fileUploadForm\">" +
@@ -465,7 +477,8 @@ kf.addKeyFunctions = function(){
 			
 		}
 
-    	// refresh active table AND force exact count
+    	// Pause key : refresh active table AND force exact count
+    	
     	if (kf.isPressed("pause")){
     		// force exact count!
     		// this will be set back to false (default value) in function tb.processExtraParamsFromServerResponse
@@ -476,9 +489,11 @@ kf.addKeyFunctions = function(){
     	}
     	
     	
-    	// F2 (shortcut for rows selection button)
+    	// F2 : shortcut for rows selection button
+    	
     	if (kf.isPressed("f2")){
     		var sActiveTable = kf.getActiveTable();
+    		if (sActiveTable == null || mt.getTableKeysActive(sActiveTable) == false) return;
     		
     		// special case: search and replace panel is opened (and table header is hidden)
     		if ($("#"+sActiveTable+"_search_and_replace").elementExists() ){
@@ -492,8 +507,10 @@ kf.addKeyFunctions = function(){
     	
     	
     	// pageup/down
+    	
     	if ( kf.isPressed("pageup") || kf.isPressed("pagedown") ){			
 			var sActiveTable = kf.getActiveTable();
+			if (sActiveTable == null || mt.getTableKeysActive(sActiveTable) == false) return;
 			
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
@@ -548,9 +565,11 @@ kf.addKeyFunctions = function(){
 		
 		
 		// home/end keys
+		
     	if ( kf.isPressed("home") || kf.isPressed("end")){		
 			
 			var sActiveTable = kf.getActiveTable();	
+			if (sActiveTable == null || mt.getTableKeysActive(sActiveTable) == false) return;
 			
 			// 1. there must be some table active 
 			// 2. don't interfere with context menu
@@ -559,12 +578,13 @@ kf.addKeyFunctions = function(){
 			if (sActiveTable != null 
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
-					&& !($(e.target).is('textarea')) // not in a form
-					&& !($(e.target).is('input'))
-					&& !bSomeDialogBoxIsOpen					
-					)
-				{
-					e.preventDefault();
+					&& !($(event.target).is('textarea')) // not in a form
+					&& !($(event.target).is('input'))
+					&& !bSomeDialogBoxIsOpen		
+					&& !bInsideEditor			
+					) {
+						
+					event.preventDefault();
 					
 					if (kf.isPressed("home")){
 						mt.getDataTableObjectOf(sActiveTable).page("first").draw("page");
@@ -572,12 +592,14 @@ kf.addKeyFunctions = function(){
 					else if (kf.isPressed("end")){
 						mt.getDataTableObjectOf(sActiveTable).page("last").draw("page");
 					}
-				}
+			}
 				
 		}
     	
-		// arrow keys		
-		if (kf.isPressed("uparrow") || kf.isPressed("downarrow")){	
+    	
+		// up/adown arrow keys	
+			
+		if (kf.isPressed("uparrow") || kf.isPressed("downarrow")){
 			var sActiveTable = kf.getActiveTable();	
 			var iNumberOfRows = fn.getNumberOfVisibleRows(sActiveTable);
 			
@@ -587,16 +609,15 @@ kf.addKeyFunctions = function(){
 			// 4. don't interfere with dialog box
 			// 5. there must be some rows in the table
 			if (sActiveTable != null 
+					&& mt.getTableKeysActive(sActiveTable)
 					&& !$("div#context-menu-layer").elementExists()
 					&& !$("td form textarea").elementExists()
-					&& !($(e.target).is('textarea')) // not in a form
+					&& !($(event.target).is('textarea')) // not in a form
 					&& !bSomeDialogBoxIsOpen
+					&& !bInsideEditor
 					&& iNumberOfRows>0
-					)
-				{
-					
-				
-				
+					){
+									
 				var iActiveRow = kf.getActiveRowNumber();				
 				var iMaximalIndex = fn.getNumberOfVisibleRows(sActiveTable) - 1;
 				var nActiveRowNode = kf._getTrElement(sActiveTable, iActiveRow);
@@ -606,7 +627,7 @@ kf.addKeyFunctions = function(){
 					// remove highlight from current row
 					// except in selection mode when shiftkey is pressed
 					if ($(nActiveRowNode).hasClass('selected') && 
-							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) ){
+							!(mt.rowSelectionIsAllowed(sActiveTable) && event.shiftKey ) ){
 								
 						$(nActiveRowNode).toggleClass('selected');						
 					}
@@ -633,7 +654,7 @@ kf.addKeyFunctions = function(){
 					// remove highlight from current row
 					// except in selection mode when shiftkey is pressed
 					if ($(nActiveRowNode).hasClass('selected') && 
-							!(mt.rowSelectionIsAllowed(sActiveTable) && e.shiftKey ) ){
+							!(mt.rowSelectionIsAllowed(sActiveTable) && event.shiftKey ) ){
 								
 						$(nActiveRowNode).toggleClass('selected');
 					}
@@ -682,80 +703,64 @@ kf.addKeyFunctions = function(){
 			// exception: when we are inside a textarea, where default behaviour of
 			//            arrow keys is needed for navigation in the textarea 
 			if (	!$("td form textarea").elementExists() 
-				&& 	!($(e.target).is('textarea')))
+				&& 	!($(event.target).is('textarea'))
+				&&  !bInsideEditor 
+				) {
+					
 				return false;
-		}
+			}
+				
+		} // end of up/adown arrow keys
 
-		// font size 
-		if (kf.isPressed("+") && e.shiftKey){
+
+		
+		// shift with +/- (shortcut for font size increase/decrease/reset)
+
+		if (kf.isPressed("+") && event.shiftKey){
 			var iSize = parseInt($("td").css("font-size"));
 			iFontSize = iSize*1.1;
 			$("td").css("font-size", iFontSize);
 			return false;
 		}
-		if (kf.isPressed("-") && e.shiftKey){
+		if (kf.isPressed("-") && event.shiftKey){
 			var iSize = parseInt($("td").css("font-size"));
 			iFontSize = iSize*0.9;
 			$("td").css("font-size", iFontSize);
 			return false;
 		}
-		if (kf.isPressed("/") && e.shiftKey){
+		if (kf.isPressed("/") && event.shiftKey){
 			iFontSize = "100%";
 			$("td").css("font-size", iFontSize);
 			return false;
 		}
 		
-		// if (kf.isPressed("leftarrow") && e.ctrlKey)
-		// 	{
-		// 	var iXposition = $('html, body').scrollLeft();
-		// 	var iStep = $('html').width()/2;
-		// 	$('html, body').animate({scrollLeft: iXposition-iStep}, 250);
-		// 	e.preventDefault();
-		// 	}
-		
-		// if (kf.isPressed("rightarrow") && e.ctrlKey)
-		// 	{
-		// 	var iXposition = $('html, body').scrollLeft();
-		// 	var iStep = $('html').width()/2;
-		// 	$('html, body').animate({scrollLeft: iXposition+iStep}, 250);
-		// 	e.preventDefault();
-		// 	}
 
-		if (kf.isPressed("leftarrow") && e.ctrlKey){
+		// left/right array keys
+		
+		if (kf.isPressed("leftarrow") && event.ctrlKey){
 			var sActiveTable = kf.getActiveTable();
 			var nSelector = "#"+sActiveTable+"_wrapper div.dataTables_scrollBody";
 			var iXposition = $(nSelector).scrollLeft();
 			var iStep = $('html').width()/2;
 			$(nSelector).animate({scrollLeft: iXposition-iStep}, 250);
-			e.preventDefault();
+			event.preventDefault();
 		}
 		
-		if (kf.isPressed("rightarrow") && e.ctrlKey){
+		if (kf.isPressed("rightarrow") && event.ctrlKey){
 			var sActiveTable = kf.getActiveTable();
 			var nSelector = "#"+sActiveTable+"_wrapper div.dataTables_scrollBody";
 			var iXposition = $(nSelector).scrollLeft();
 			var iStep = $('html').width()/2;
 			$(nSelector).animate({scrollLeft: iXposition+iStep}, 250);
-			e.preventDefault();
+			event.preventDefault();
 		}
 		
-		// call context menu
-		// and don't interfere with inline edit (jeditable)
-//		if (kf.isPressed("+") && !$("td form input").elementExists())
-//			{			
-//			var sActiveTable = kf.getActiveTable();
-//			var iActiveRow = kf.getActiveRowNumber();
-//			// triggers jQuery.contextMenu 
-//			// (see: http://medialize.github.com/jQuery-contextMenu/docs.html)
-//			$("#"+sActiveTable+" tbody tr:eq("+iActiveRow+") td").contextMenu();
-//			
-//			}
 		
-		// switch table
-		if (kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus && !bSomeDialogBoxIsOpen)
-			{	
+		// tab: switch table
+		if (kf.isPressed("tab") && !bSearchboxOfActiveTableHasFocus && !bSomeDialogBoxIsOpen) {	
 			
 			var sActiveTable = kf.getActiveTable();
+			if (sActiveTable == null || mt.getTableKeysActive(sActiveTable) == false) return;
 			// look up the current table in the list of available tables
 			// get its index and compute the index of the next table,
 			// then switch!
@@ -768,7 +773,7 @@ kf.addKeyFunctions = function(){
 			
 			// this will call a header function, which will make this table active
 			$("#" + aTableList[iIndexOfActiveTable] + "_wrapper div.top").mousedown();			
-			}
+		}
     });
     
 	$(document).unbind('keyup');
@@ -776,7 +781,7 @@ kf.addKeyFunctions = function(){
     	
     	// call user key functions
     	// (needs to be called before kf.registerReleasedKey)
-    	kf._callCustomKeyFunctions('keyup'); 
+    	kf._callCustomKeyFunctions('keyup', event); 
     	
     	// register that all keys are released
     	kf.registerReleasedKey();  
@@ -800,20 +805,20 @@ kf._getListOfTablesGettingFocusUponTab = function(){
 };
 
 // call user key functions, if defined in the user configuration
-kf._callCustomKeyFunctions = function(sKeyEventType){
+kf._callCustomKeyFunctions = function(sKeyEventType, event){
 	
 	// prevents execution while editing a cell or typing a search query
 	if ($("input:focus").elementExists()) return false;
 	
 	var sActiveTable = kf.getActiveTable();	
+	if (sActiveTable == null || mt.getTableKeysActive(sActiveTable) == false) return;
 	var aTableSettings = conf.getTableSettings(sActiveTable);
 	var aKeySettings = conf.getKeysSettings(aTableSettings, sKeyEventType);
 	var sPressedKey = kf._getPressedKey();
 	
-	if (aKeySettings!= null && aKeySettings[sPressedKey] != null)
-		{
-		aKeySettings[sPressedKey](sActiveTable);
-		}
+	if (aKeySettings!= null && aKeySettings[sPressedKey] != null) {
+		aKeySettings[sPressedKey](sActiveTable, event);
+	}
 };
 
 kf._getTrElement = function(sTableName, iRowNumber){

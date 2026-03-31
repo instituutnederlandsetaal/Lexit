@@ -258,7 +258,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").css("background-color", "#DDDDDD").css("border", "1px solid #FFFFFF");
 		}
 		
-		//console.log("--" +sCellName, $("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").get(0));
+		
 
 		// if we have a selectbox, select the selected value
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("select").length > 0){
@@ -267,12 +267,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 					.find("#"+sTableName+"_searchbox_"+sCellName);				
 			var sSelectedValueInUnderlyingTable = searchBoxInUnderlyingTable.val();
 			
-			//console.log("-------+");
-			//console.log(sTableName);
-			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").get(0));
-			//console.log($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last select").length);
-			//console.log(searchBoxInUnderlyingTable.get(0));
-			//console.log(sSelectedValueInUnderlyingTable);
+			
 			
 			// small pauze needed in some cases, or it will crash 
 			setTimeout(function(){
@@ -730,6 +725,7 @@ form.buildViewGrid = function(sTableName){
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
 		var sPlaceholder = oCell["tooltip"];
+		var bHasTextEditor = oCell["editor"] != null ? oCell["editor"] : false;
 		
 		
 		if (aPosition == null && sCellBlockName == null){
@@ -864,7 +860,14 @@ form.buildViewGrid = function(sTableName){
 			$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea")
 				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 				.css("min-height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")				
-				.addClass("formview_textarea");			
+				.addClass("formview_textarea");
+				
+			// editor size
+			if (bHasTextEditor){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
+				.css("height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+			}			
 		}
 		else {
 			$("#" + sTableName + "_wrapper #"+sTableName+"_form_cell_"+sCellName).hide();
@@ -1162,19 +1165,29 @@ form.buildViewGrid = function(sTableName){
 
 				for (var sCellName in oCells){
 					
-					var cellSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
+					var bCellEditor = 	oCells[sCellName]["editor"] != null ? oCells[sCellName]["editor"] : false;
+					var cellSelector = 	bCellEditor ?
+						$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" div.trumbowyg-editor-box")
+						: 
+						$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName);
+					
+					
 					if ( cellSelector.hasClass("modified") ){
 						
-						// special case: read value of checkbox
+						// special case #1: read value of checkbox
 						if (cellSelector.find("input").length>0 // checkbox or so (but definitely not a textarea!) 
 							&& 
 							cellSelector.find("textarea").length == 0 // this is needed for twtexteditor compatibility (since this editor adds an input field too)
 							){
 							oColumnNamesAndValues[sCellName] = cellSelector.find("input").prop("checked");
 						}
+						// special case #2: read value of text editor
+						else if (bCellEditor){
+							oColumnNamesAndValues[sCellName] = cellSelector.children().first().html();
+						}
 						// general case (textarea or selectbox)
 						else {
-							oColumnNamesAndValues[sCellName] = cellSelector.children().first().val();
+							oColumnNamesAndValues[sCellName] = cellSelector.children().first().val();							
 						}
 
 					}
@@ -1557,6 +1570,8 @@ form.manageViewGrid = function(sTableName){
 			// Or do we have a select box?		
 			var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 			if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
+			// do an editor?
+			var bHasTextEditor = oFormGrid["cells"][sCellName]["editor"] != null ? oFormGrid["cells"][sCellName]["editor"] : false;
 
 
 			// is the cell editable?
@@ -1616,6 +1631,21 @@ form.manageViewGrid = function(sTableName){
 					.css("pointer-events", bEditable ? "auto" : "none"); // trick to allow click event, which 'disabled' doesn't
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 					.removeClass("modified");
+					
+				// instantiate an editor if needed
+				
+				if (bHasTextEditor){
+					
+					var editorSelector = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" div.trumbowyg-editor-box");
+					var bEditorAlreadyInstantiated = editorSelector.elementExists();
+					if (bEditorAlreadyInstantiated){
+						var thisEditor = $(editorSelector).find('.trumbowyg-editor');
+						$(thisEditor).html(sTextData);
+					}
+					else {
+						form._createEditorForCell($("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea"));
+					}
+				}
 			}
 
 
@@ -1656,6 +1686,44 @@ form.manageViewGrid = function(sTableName){
 			// ----------------------------------
 			// keep track of modified fields
 			// ----------------------------------
+			
+			if (bHasTextEditor){
+				
+				// BEWARE : we don't register keyup events in the 'view HTML' textarea of the editor, because those are applied to the cell content only when
+				// the user switches back to the WYSIWYG view. Before this switch, the cell value is not modified YET!
+				
+				$(".trumbowyg-editor").keyup(function(){
+					
+					// some keys are not to be considered as 'content modification'
+					var sPressedKey = kf._getPressedKey();
+					var aNonCharKeys = ["uparrow", "downarrow", "leftarrow", "rightarrow", "shift", "ctrl", "alt", "home", "end", "pageup", "pagedown", "insert"];
+					if ($.inArray(sPressedKey, aNonCharKeys)>=0) return;
+					
+					// past this point, we do have a content modification
+					$(this).parent().addClass("modified");
+
+					// attract attention from user to send button, which must be pressed 
+					// since some content was modified,
+					// and show that reset is possible now
+														
+					form.setSendButtonToSetting(sTableName, "payattention");
+					form.setResetButtonToSetting(sTableName, "active");
+				});	
+				
+				$(".trumbowyg-button-pane").click(function(e){
+										
+					// past this point, we do have a content modification
+					$(this).parent().find(".trumbowyg-editor-box").addClass("modified");
+
+					// attract attention from user to send button, which must be pressed 
+					// since some content was modified,
+					// and show that reset is possible now
+														
+					form.setSendButtonToSetting(sTableName, "payattention");
+					form.setResetButtonToSetting(sTableName, "active");
+				});	
+								
+			}
 
 			if (bEditable){
 
@@ -1797,6 +1865,27 @@ form.manageViewGrid = function(sTableName){
 	return fnDoListsUpdates;
 	
 };
+
+
+
+form._createEditorForCell = function(nCell){
+	
+	$(nCell).trumbowyg({
+		lang: lang.getLanguageCode(),
+	    btns: [
+	        ['viewHTML'],
+	        ['formatting'],
+	        ['strong', 'em', 'del'],
+	        ['superscript', 'subscript'],
+	        ['link'],
+	        ['insertImage'],
+	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+	        ['unorderedList', 'orderedList'],
+	        ['removeformat']
+	    ]
+	});
+};
+
 
 /**
  * Activate the jquery UI accordion function
@@ -2230,7 +2319,7 @@ form.makeListEditable = function(sListLabel, sTableToFeedTheListWith){
 									var rowId = this.parentNode.getAttribute('id');
 									var url = WEBSERV_URL+"/api/setvalue";
 									$.ajax( {
-										"type": "GET",
+										"type": "POST",
 										"async": false,
 										"url": url,
 										"data": {
@@ -2399,7 +2488,7 @@ form.addNewRows = function(eListContainer, fnCallback){
 			aValuesToAdd = lexutil.convertNullToString(aValuesToAdd);
 			
 			$.ajax( {
-				"type": "GET",
+				"type": "POST",
 				"async": false,
 				"url": url,
 				"data": {
@@ -2499,7 +2588,7 @@ form.updateModifiedRows = function(eListContainer, fnCallback){
 				aColumnValues = lexutil.convertNullToString(aColumnValues);
 
 				$.ajax( {
-					"type": "GET",
+					"type": "POST",
 					"url": url,
 					"data": {
 						"db_name": lexutil.getHttpParams().get("db"),
@@ -2578,7 +2667,7 @@ form.removeRows = function(eListContainer, fnCallback){
 
 			var url = WEBSERV_URL+"/api/delete_row"; 
 			$.ajax( {
-				"type": "GET",
+				"type": "POST",
 				"url": url,
 				"data": {
 					"row_id": sNodeId,

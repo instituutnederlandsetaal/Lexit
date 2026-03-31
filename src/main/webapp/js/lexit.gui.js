@@ -725,7 +725,7 @@ gui.makeTableEditable = function(sSomeTablename){
 				var rowId = this.parentNode.getAttribute('id');
 				var url = WEBSERV_URL+"/api/setvalue";
 				$.ajax( {
-					"type": "GET",
+					"type": "POST",
 					"async": false,
 					"url": url,
 					"data": {
@@ -769,13 +769,14 @@ gui.makeTableEditable = function(sSomeTablename){
 								});
 						}
 						else {
+							var bIdIsMissing = ($(fn.getRowNode(nCurrentNode)).attr('id') == undefined);
 							fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-									lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
+									lang.some_error_has_occurred+ ": "+
+									(bIdIsMissing ? lang.error_table_has_no_row_ids : textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR)),
 									function(){
 										gui.refreshTable(sSomeTablename);
-										//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
-										}
-								);
+									}
+							);
 						}
 						
 					}
@@ -940,7 +941,7 @@ gui.makeTableEditable = function(sSomeTablename){
 		else {
 			var url = WEBSERV_URL+"/api/setvalue";
 			$.ajax( {
-				"type": "GET",
+				"type": "POST",
 				"async": false,
 				"url": url,
 				"data": {
@@ -975,8 +976,10 @@ gui.makeTableEditable = function(sSomeTablename){
 						});
 					}
 					else {
+						var bIdIsMissing = ($(fn.getRowNode(nCurrentNode)).attr('id') == undefined);
 						fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-							lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
+							lang.some_error_has_occurred+ ": "+
+							(bIdIsMissing ? lang.error_table_has_no_row_ids : textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR)),
 							function(){
 								gui.refreshTable(sSomeTablename);
 							}
@@ -1114,16 +1117,15 @@ gui.makeTableEditable = function(sSomeTablename){
 											fnEditCallback(mt.getDataTableObjectOf(sSomeTablename), nCurrentNode, value);
 										// refresh the tables that config file requires to be refreshed upon editing of current cell
 										conf.refreshTables(oColumnConfig);
-										}
+									}
 									
 									// normal case: we apply the normal edit function 
-									else
-										{
+									else {
 										gui.showProcessingMsg(sSomeTablename);
 										var rowId = this.parentNode.getAttribute('id');
 										var url = WEBSERV_URL+"/api/setvalue";
 										$.ajax( {
-											"type": "GET",
+											"type": "POST",
 											"async": false,
 											"url": url,
 											"data": {
@@ -1154,7 +1156,6 @@ gui.makeTableEditable = function(sSomeTablename){
 										 					lang.some_error_has_occurred+ " ["+gui.getDbResponse(xml)+"]",
 										 					function(){
 																gui.refreshTable(sSomeTablename);
-																//mt.getDataTableObjectOf(sSomeTablename).fnDraw();
 															}
 										 			);
 										 		}
@@ -1169,8 +1170,10 @@ gui.makeTableEditable = function(sSomeTablename){
 														});
 												}
 												else {
+													var bIdIsMissing = ($(fn.getRowNode(nCurrentNode)).attr('id') == undefined);
 													fn.message(lang.error_occurred_in_table+ " '"+sSomeTablename+"'", 
-															lang.some_error_has_occurred+ ": "+textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR),
+															lang.some_error_has_occurred+ ": "+
+															(bIdIsMissing ? lang.error_table_has_no_row_ids : textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR)),
 															function(){
 																gui.refreshTable(sSomeTablename);
 															}
