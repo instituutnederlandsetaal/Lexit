@@ -39,6 +39,7 @@ const KEY_NAMES = {
   38: "uparrow",
   39: "rightarrow",
   40: "downarrow",
+  44: "printscreen",
   45: "insert",
   46: "delete",
   91: "leftwindow",
@@ -61,6 +62,8 @@ const KEY_NAMES = {
   121: "f10",
   122: "f11",
   123: "f12",
+  144: "numlock",
+  145: "scrolllock",
   192: "`"
 };
 
