@@ -541,6 +541,9 @@ head.putResetButton = function(sSomeTablename){
 			}
 			else {
 				
+				// get the table type
+				var sTableType = mt.getAvailableTableDetails(sSomeTablename)[1];
+				
 				// abort the running database draw
 				mt.getDataTableObjectOf(sSomeTablename).abortCall();
 				
@@ -561,52 +564,57 @@ head.putResetButton = function(sSomeTablename){
 				// cancel optimal mode in any case
 				mt.setTableMustBeOptimal(sSomeTablename, false);
 				
-				// force webservice to clean its counter cache etc
-				fn.cleanTableCache(sSomeTablename, 
-					function(){
+				var fnResetCallback = function(){
 					
-						// send empty search request			
-						mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters();
-						
-						// call the pre-reset callback before the table is actually reset
-						if (conf.getPreResetCallback( conf.getTableSettings(sSomeTablename)) != null)
-							conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
-						
-						// this one does the table refresh!
-						var aSorting = conf.getDefaultSortingSettings(sSomeTablename);
-						
-						// see https://www.datatables.net/plug-ins/api/order.neutral%28%29
-						if (aSorting.length==0) 
-							mt.getDataTableObjectOf(sSomeTablename).order.neutral();
-						else
-							mt.getDataTableObjectOf(sSomeTablename).order(aSorting);
-	
-						// make sure that the form sorting labels are updated too
-						// (can only be done after re-ordering the table)
-						fn.addDrawCallback(sSomeTablename, function(){
-							setTimeout(function(){
-								form.synchronizeSorting(sSomeTablename);
-							}, 1000);						
-						});
-						
-						// update the table now!
-						mt.getDataTableObjectOf(sSomeTablename).draw();
+					// send empty search request			
+					mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters();
 					
-						// put the current search filters values into the search boxes
-						sf.putCurrentValueInAllSearchBoxes(sSomeTablename);
-						
-						// finally set the form searchbox too (if needed)
-						form.resetSearchFields(sSomeTablename);
-						
-				});
+					// call the pre-reset callback before the table is actually reset
+					if (conf.getPreResetCallback( conf.getTableSettings(sSomeTablename)) != null)
+						conf.getPreResetCallback( conf.getTableSettings(sSomeTablename))(mt.getDataTableObjectOf(sSomeTablename));
+					
+					// this one does the table refresh!
+					var aSorting = conf.getDefaultSortingSettings(sSomeTablename);
+					
+					// see https://www.datatables.net/plug-ins/api/order.neutral%28%29
+					if (aSorting.length==0) 
+						mt.getDataTableObjectOf(sSomeTablename).order.neutral();
+					else
+						mt.getDataTableObjectOf(sSomeTablename).order(aSorting);
+
+					// make sure that the form sorting labels are updated too
+					// (can only be done after re-ordering the table)
+					fn.addDrawCallback(sSomeTablename, function(){
+						setTimeout(function(){
+							form.synchronizeSorting(sSomeTablename);
+						}, 1000);						
+					});
+					
+					// update the table now!
+					mt.getDataTableObjectOf(sSomeTablename).draw();
 				
+					// put the current search filters values into the search boxes
+					sf.putCurrentValueInAllSearchBoxes(sSomeTablename);
+					
+					// finally set the form searchbox too (if needed)
+					form.resetSearchFields(sSomeTablename);
+					
+				};
+				
+				// force webservice to clean its counter cache etc
+				if (sTableType == "materialized view"){
+					fn.refreshView(sSomeTablename, fnResetCallback);
+				}
+				else {
+					fn.cleanTableCache(sSomeTablename, fnResetCallback);
+				}
 			}
 			
 		});
 	
 	$("#"+sSomeTablename+"_filter").append(
 			$("<div></div>").attr("id", sSomeTablename+"_resetbutton").css("display", "inline").append(resetButton)
-			);
+		);
 	
 };
 
@@ -770,18 +778,35 @@ head.putRefreshButton = function(sSomeTablename){
 		.addClass("header_button")
 		.bind("click", function(){
 			
+			// get the table type
+			var sTableType = mt.getAvailableTableDetails(sSomeTablename)[1];			
+			
 			// abort the running database draw
 			mt.getDataTableObjectOf(sSomeTablename).abortCall();
 			
 			// clean the undo stack
 			un.cleanUndoStack(sSomeTablename);
 			
-			// force webservice to clean its counter cache etc
-			fn.cleanTableCache(sSomeTablename, 
+			// clean cache and refresh
+			if (sTableType == "materialized view"){
+				
+				fn.refreshView(sSomeTablename, 
 					function(){
 						fn.refreshTable(sSomeTablename);
 						}
-			);
+				);
+			}
+			// force webservice to clean its counter cache etc
+			else {
+				
+				fn.cleanTableCache(sSomeTablename, 
+					function(){
+						fn.refreshTable(sSomeTablename);
+						}
+				);				
+			}
+			
+			
 
 		});
 	

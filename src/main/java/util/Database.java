@@ -1729,7 +1729,7 @@ public class Database {
 			"FULL JOIN pg_catalog.pg_index i ON i.indexrelid = c.oid "+
 			"FULL JOIN pg_catalog.pg_class c2 ON i.indrelid = c2.oid "+
 			"FULL JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "+
-			"WHERE (c.relkind = 'r' OR c.relkind = 'v') "+
+			"WHERE c.relkind IN ('r', 'v', 'm') "+
 			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "+
 			"AND n.nspname != 'information_schema' "+
 			"AND n.nspname = ? " + // schema
@@ -1864,7 +1864,7 @@ public class Database {
 				"FROM pg_catalog.pg_class c " +
 				"FULL JOIN pg_catalog.pg_namespace n "+
 				"ON n.oid = c.relnamespace " +
-				"WHERE c.relkind IN ('r','v','') " + // now we only want views and tables
+				"WHERE c.relkind IN ('r', 'v', 'm', '') " + // views, materialized view, and tables
 				"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " +
 				"AND n.nspname != 'information_schema' " + // exclude information schema
 				"AND n.nspname = ? " +	// schema
@@ -2312,36 +2312,63 @@ public class Database {
 		
 		
 		// this query is Postgres 17 compatible
+		// but it doesn't show materialized views, which are supported by Postgres 17, so let's upgrade it again to show them as well
 		
-		String query = 
-			"SELECT "+ 
-			"    t.table_name, "+
-			"    t.table_name || ' (' || t.table_type || ')' AS description, "+
-			"    t.table_type::text AS type, "+
-			"    d.description AS comment "+
-			"FROM information_schema.tables t "+
-			"LEFT JOIN pg_catalog.pg_class c "+
-			"    ON c.relname = t.table_name "+
-			"LEFT JOIN pg_catalog.pg_namespace n "+ 
-			"    ON n.oid = c.relnamespace "+
-			"LEFT JOIN pg_catalog.pg_description d "+
-			"    ON d.objoid = c.oid AND d.objsubid = 0 "+
-			"WHERE t.table_schema = ? "+ // schema
-			"  AND n.nspname = ? "+ // schema
-			"ORDER BY 1, 2;";
+//		String query = 
+//			"SELECT "+ 
+//			"    t.table_name, "+
+//			"    t.table_name || ' (' || t.table_type || ')' AS description, "+
+//			"    t.table_type::text AS type, "+
+//			"    d.description AS comment "+
+//			"FROM information_schema.tables t "+
+//			"LEFT JOIN pg_catalog.pg_class c "+
+//			"    ON c.relname = t.table_name "+
+//			"LEFT JOIN pg_catalog.pg_namespace n "+ 
+//			"    ON n.oid = c.relnamespace "+
+//			"LEFT JOIN pg_catalog.pg_description d "+
+//			"    ON d.objoid = c.oid AND d.objsubid = 0 "+
+//			"WHERE t.table_schema = ? "+ // schema
+//			"  AND n.nspname = ? "+ // schema
+//			"ORDER BY 1, 2;";
 		 
+		// this query gives tables, views, and materialized views, and is Postgres 17 compatible
+		String query = 
+			"SELECT "+
+			"    c.relname AS table_name, "+
+			"    c.relname || ' (' || "+
+			"    CASE c.relkind "+
+			"        WHEN 'r' THEN 'BASE TABLE' "+
+			"        WHEN 'v' THEN 'VIEW' "+
+			"        WHEN 'm' THEN 'MATERIALIZED VIEW' "+
+			"    END || ')' AS description, "+
+			"    CASE c.relkind "+
+			"    	WHEN 'r' THEN 'BASE TABLE' "+
+			"    	WHEN 'v' THEN 'VIEW' "+
+			"    	WHEN 'm' THEN 'MATERIALIZED VIEW' "+
+			"    END AS type, "+
+			"    d.description AS comment "+
+			
+			"    FROM pg_catalog.pg_class c "+
+			"    JOIN pg_catalog.pg_namespace n "+
+			"        ON n.oid = c.relnamespace "+
+			"    LEFT JOIN pg_catalog.pg_description d "+
+			"        ON d.objoid = c.oid AND d.objsubid = 0 "+
+			"    WHERE n.nspname = ? "+
+			"    AND c.relkind IN ('r', 'v', 'm') "+
+			"    ORDER BY 1, 2; ";
 		
 		
 		ArrayList<String[]> result = new ArrayList<String[]>();
+		String[] args = new String[]{schema};
 		
 		// prepare max allowed cost initialization
-		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, new String[]{schema, schema}));
+		int queryCost = getQueryCost(replaceQuestionMarksByArgsInQuery(query, args));
 		long timeBefore = new Date().getTime();
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		try {
-			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, new String[]{schema, schema}).getRows();
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args).getRows();
 			
 			// compute max allowed cost (initialization)
 			long timeAfter = new Date().getTime();
@@ -2352,7 +2379,7 @@ public class Database {
 			
 		} 
 		catch (Exception e) {
-			String error = Util.getDebugInfoForConsole("Error while executing query "+query, new String[] {schema, schema});
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, args);
 			throw new RuntimeException(error, e);
 		}
 		
@@ -3866,7 +3893,7 @@ public class Database {
 			"FROM pg_catalog.pg_class c " +
 			"FULL JOIN pg_catalog.pg_namespace n " + 
 			"ON n.oid = c.relnamespace " +
-			"WHERE c.relkind IN ('r','v','') " +
+			"WHERE c.relkind IN ('r', 'v', 'm', '') " +
 			"AND n.nspname NOT IN ('pg_catalog', 'pg_toast') " + 
 			"AND n.nspname != 'information_schema' " +
 			"AND n.nspname = ? " + // project schema name
@@ -4053,11 +4080,26 @@ public class Database {
 //			";";
 		
 		// Postgres 17 compliant query
+//		String columnQuery = 
+//			"SELECT column_name " +
+//			"FROM information_schema.columns " +
+//			"WHERE table_name = ? " + // table name
+//			"AND table_schema = ? ;";  // schema name;
+		
+		// the preceeding query does not return columns of materialized views, so we need to use a different query for views
+		
 		String columnQuery = 
-			"SELECT column_name " +
-			"FROM information_schema.columns " +
-			"WHERE table_name = ? " + // table name
-			"AND table_schema = ? ;";  // schema name;
+			"SELECT a.attname AS column_name "+
+			"FROM pg_catalog.pg_attribute a "+
+			"JOIN pg_catalog.pg_class c "+
+			"  ON c.oid = a.attrelid " +
+			"JOIN pg_catalog.pg_namespace n "+
+			"  ON n.oid = c.relnamespace "+
+			"WHERE c.relname = ? "+
+			"  AND n.nspname = ? "+
+			"  AND a.attnum > 0 "+
+			"  AND NOT a.attisdropped "+ // the proper way to exclude dropped columns
+			"ORDER BY a.attnum;";
 		
 		
 		PostgresConnectionManager dc = getPostgresConnectionManager();
@@ -4652,6 +4694,31 @@ public class Database {
 	}
 	
 	
+	
+	/**
+	 * Refresh a materialized view, given its name.
+	 * @param viewName
+	 */
+	public void refreshMaterializedView(String viewName) {
+        
+        String schema = getSchema(viewName);
+        String viewNameOnly = getTableNameOnly(viewName);
+        
+        String query = "REFRESH MATERIALIZED VIEW "+getSafeTableName(viewNameOnly, schema)+";";
+        
+        PostgresConnectionManager dc = getPostgresConnectionManager();
+        
+        try {
+            dc.sendUpdate(schema, query);
+        } 
+        catch (Exception e) {
+            String error = Util.getDebugInfoForConsole("Error while executing query "+query, new String[] {});
+            throw new RuntimeException(error, e);
+        }
+        
+        // after refreshing a materialized view, we need to clean the cache of this view
+        cleanCache(viewName);        
+    }
 	
 	
 	

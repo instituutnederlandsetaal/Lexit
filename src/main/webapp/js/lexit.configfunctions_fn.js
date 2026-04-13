@@ -1564,6 +1564,51 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
 	} );
 };
 
+/**
+ * Request the Lex'it webservice to refresh a materialized view (t.i. to update the database and clean the cache)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @param {Function} fnCallback - Some function to call after the cache was cleaned
+ * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ */
+fn.refreshView = function(sSomeTablename, fnCallback, fnErrorHandler){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	// force webservice to refresh a materialized view
+	// this will automatically lead to the cache to be cleaned as well, so we don't need to call fn.cleanTableCache separately
+	var url = WEBSERV_URL+"/api/refresh_materialized_view"; 
+	$.ajax( {
+		"type": "POST",
+		"url": url,
+		"data": {
+			"db_name": lexutil.getHttpParams().get("db"),
+			"table_name": sSomeTablename,
+			"dummy": lexutil.getUniqueNumber()
+			},
+	 	"dataType": "xml", // get response as xml
+	 	"success": function(xml) {
+	 		// callback if it is set
+	 		if (fnCallback!=null)
+	 				fnCallback();
+	 	},
+		"error": function(jqXHR, textStatus, errorThrown){
+			fn.refreshTable(sSomeTablename);
+			
+			if (fnErrorHandler!=null)
+				fnErrorHandler({
+					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
+					"lexit_function": "fn.refreshView",
+					"sSomeTablename": sSomeTablename
+					});
+			else
+				fn.message(lang.error, lang.error_when_calling+ " fn.refreshView("+sSomeTablename+"): " +				
+				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
+		}
+	} );
+};
+
 
 /**
  * Define a table draw callback, if one is needed

@@ -806,6 +806,36 @@ public class TableResources {
 	}
 	
 	
+	// refresh a materialized view
+	// call:
+	// .../webservice/api/refresh_materialized_view?table_name=...&db_name=...
+	@Path("refresh_materialized_view")
+	@POST
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public DbResponseObject refreshMaterializedView(
+			@FormParam("table_name") String tableName,
+			@FormParam("db_name") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) {
+		
+		String userName = lexitInfo.getUserName(httpServletRequest);
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		Util.debug(co, "### Refresh materialized view "+tableName);
+		
+		DbResponseObject dro = new DbResponseObject();
+		
+		if ( !userIsAllowedTo(co, Constants.USER_READ_ACCESS))
+			throw new RuntimeException("Permission denied to "+co.getUsername());
+		
+		getDatabaseObject(co).refreshMaterializedView(tableName);
+		
+		dro.setResponse("OK");
+		
+		return dro;
+	}
+	
+	
 	
 	
 	
