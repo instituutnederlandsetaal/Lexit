@@ -1394,12 +1394,12 @@ fn.registerNewTable = function(sTableName, sTableDescription, sType, sTableComme
 	asTableNames.push( sTableName );
 	asTableDescriptions.push( sTableDescription );
 	asTableComments.push( sTableComment );
-	asTableTypes.push( sType );
+	asTableTypes.push( sType.toLowerCase() );
 	abTableVisible.push( false ); // the table list in the GUI won't be rebuilt, so it won't be visible in there...
 	
 	// details of the table
 	
-	mt.addAvailableTableDetails( sTableName, [ sTableDescription, sType, sTableComment ]);
+	mt.addAvailableTableDetails( sTableName, [ sTableDescription, sType.toLowerCase(), sTableComment ]);
 	
 	// table configuration and settings
 	
