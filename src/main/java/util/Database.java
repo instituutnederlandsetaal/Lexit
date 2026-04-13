@@ -3620,11 +3620,26 @@ public class Database {
 		
 		// this query will be used to query the column type one column at the time
 		// use COALESCE to prevent datatype from being NULL
-		String typeQuery = "SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
-			"FROM information_schema.columns " +
-			"WHERE table_name = ? " +
-			"AND column_name = ? " +
-			"AND table_schema = ? ;";
+//		String typeQuery = "SELECT COALESCE( data_type||'('||character_maximum_length||')', replace(data_type, 'ARRAY', udt_name||'[]') ) AS type "+
+//			"FROM information_schema.columns " +
+//			"WHERE table_name = ? " +
+//			"AND column_name = ? " +
+//			"AND table_schema = ? ;";
+		
+		// the preceeding query doesn't work for materialized views, because those don't have entries in information_schema.columns, so we use the following query for them
+		
+		String typeQuery = 
+				"SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS type "+
+				"FROM pg_catalog.pg_attribute a "+
+				"JOIN pg_catalog.pg_class c "+
+				"  ON c.oid = a.attrelid "+
+				"JOIN pg_catalog.pg_namespace n "+
+				"  ON n.oid = c.relnamespace "+
+				"WHERE c.relname = ? "+ // table
+				"  AND a.attname = ? "+ // column
+				"  AND n.nspname = ? "+	// schema	
+				"  AND a.attnum > 0 "+
+				"  AND NOT a.attisdropped;";
 		
 		String schema = getSchema(tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
