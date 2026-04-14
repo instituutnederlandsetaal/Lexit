@@ -427,13 +427,37 @@ kf.addKeyFunctions = function(){
     	// F5 : refresh active table
     	
     	if (kf.isPressed("f5")){
+			
     		// make sure the dropdown menus disappear in IE
 			$(".ui-menu-item").hide();
 			
 			// refresh the active table
     		var sActiveTable = kf.getActiveTable();
-    		if (sActiveTable!=null)
-    			fn.refreshTable(sActiveTable);
+    		if (sActiveTable!=null){
+				
+				// get the table type
+				var sTableType = mt.getAvailableTableDetails(sActiveTable)[1];
+				
+				// abort the running database draw
+				mt.getDataTableObjectOf(sActiveTable).abortCall();
+				
+				// clean the undo stack
+				un.cleanUndoStack(sActiveTable);
+				
+				if (sTableType == "materialized view"){
+				
+					fn.refreshMaterializedView(sActiveTable, function(){
+						fn.refreshTable(sActiveTable);
+					});
+				}
+				// force webservice to clean its counter cache etc
+				else {
+					
+					fn.cleanTableCache(sActiveTable, function(){
+						fn.refreshTable(sActiveTable);
+					});				
+				}
+			}
     	}
     	
     	

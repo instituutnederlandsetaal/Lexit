@@ -307,7 +307,7 @@ ts.buildListOfTables = function(aTablesGroups, haTableGroups, fnCallback){
 			var optionTagToAdd = $("<option></option>")
 					.attr("value", asTableNames[i] )
 					.html( asTableDescriptions[i] )	
-					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : "white" ))
+					.css("background", (asTableTypes[i] == "view" ? "#E8E8E8" : (asTableTypes[i] == "materialized view" ? "#F2F2F2" : "white" ) ))
 					.attr("title", bShowTableComments ? asTableComments[i] : "")
 					.attr("disabled", (asTableComments[i] == "separator"));
 			
