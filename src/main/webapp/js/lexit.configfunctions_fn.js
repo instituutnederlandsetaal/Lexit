@@ -1571,10 +1571,13 @@ fn.cleanTableCache  = function(sSomeTablename, fnCallback, fnErrorHandler){
  * @param {Function} fnCallback - Some function to call after the cache was cleaned
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  */
-fn.refreshView = function(sSomeTablename, fnCallback, fnErrorHandler){
+fn.refreshMaterializedView = function(sSomeTablename, fnCallback, fnErrorHandler){
 	
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
+		
+	// the process might take some time, so show a processing message	
+	gui.showProcessingMsg(sSomeTablename, true);
 	
 	// force webservice to refresh a materialized view
 	// this will automatically lead to the cache to be cleaned as well, so we don't need to call fn.cleanTableCache separately
@@ -1589,6 +1592,10 @@ fn.refreshView = function(sSomeTablename, fnCallback, fnErrorHandler){
 			},
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
+			
+			// remove the processing message
+			gui.removeProcessingMsg(sSomeTablename);
+			
 	 		// callback if it is set
 	 		if (fnCallback!=null)
 	 				fnCallback();
@@ -1599,11 +1606,11 @@ fn.refreshView = function(sSomeTablename, fnCallback, fnErrorHandler){
 			if (fnErrorHandler!=null)
 				fnErrorHandler({
 					"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown,
-					"lexit_function": "fn.refreshView",
+					"lexit_function": "fn.refreshMaterializedView",
 					"sSomeTablename": sSomeTablename
 					});
 			else
-				fn.message(lang.error, lang.error_when_calling+ " fn.refreshView("+sSomeTablename+"): " +				
+				fn.message(lang.error, lang.error_when_calling+ " fn.refreshMaterializedView("+sSomeTablename+"): " +				
 				textStatus+" "+errorThrown+"; "+lexutil.getJqXHRInfo(jqXHR));
 		}
 	} );

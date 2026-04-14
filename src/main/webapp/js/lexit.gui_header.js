@@ -603,7 +603,7 @@ head.putResetButton = function(sSomeTablename){
 				
 				// force webservice to clean its counter cache etc
 				if (sTableType == "materialized view"){
-					fn.refreshView(sSomeTablename, fnResetCallback);
+					fn.refreshMaterializedView(sSomeTablename, fnResetCallback);
 				}
 				else {
 					fn.cleanTableCache(sSomeTablename, fnResetCallback);
@@ -790,7 +790,7 @@ head.putRefreshButton = function(sSomeTablename){
 			// clean cache and refresh
 			if (sTableType == "materialized view"){
 				
-				fn.refreshView(sSomeTablename, 
+				fn.refreshMaterializedView(sSomeTablename, 
 					function(){
 						fn.refreshTable(sSomeTablename);
 						}
