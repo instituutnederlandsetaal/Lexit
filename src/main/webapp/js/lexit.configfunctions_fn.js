@@ -214,7 +214,9 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * @see fn.getLibrary
  */
-fn.getLibraries = function(sPathToFolder="", aLibraryFiles, fnCallback, fnErrorHandler){
+fn.getLibraries = function(sPathToFolder, aLibraryFiles, fnCallback, fnErrorHandler){
+	
+	if (sPathToFolder == null) sPathToFolder = "";
 	
 	// Default behaviour, when no sPathToFolder was specified:	
 	// in test mode, we load the files locally, but on the server we load the file from the 'lexit2_config' folder 
