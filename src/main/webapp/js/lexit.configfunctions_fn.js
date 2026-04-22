@@ -671,6 +671,8 @@ fn.getTableExtraSettings = function(sSomeTablename){
  * 
  * @param {(String|Node|API-object-instance)} mixed - Table name, table object, or some node of the table
  * @returns {String} The name of the table
+ * 
+ * @see fn.getTableNode
  */
 fn.getTableName = function(mixed){	
 	
@@ -2168,6 +2170,37 @@ fn.respawnTable = function(sSomeTablename, aExclude=[], fnCallBack){
 	
 };
 
+
+/**
+ * Get the table wrapper, given a node within the table or an API instance of the table.
+ * @param {(String|Node|API-object-instance)} mixed - Table node within the table or API instance of the table
+ * @returns {Node} The node of the table wrapper
+ * 
+ * @see fn.getTableName
+ */
+fn.getTableNode = function(mixed){
+	
+	// if input is a string
+	if (typeof mixed == 'string' && mt.tableExists(mixed))
+		return $("#"+mixed+"_wrapper")[0];
+	
+	// if input is a node, get the closest table name
+	if ( $(mixed).is("td") || $(mixed).is("tr") ){
+		
+		if ($( mixed ).closest('div.dataTables_wrapper').length > 0)
+			return $( mixed ).closest('div.dataTables_wrapper')[0];
+
+		// in some rare cases, closest return nothing, don't know why...
+		// so here's a rescue operation: extract the table name from the row class name
+		var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
+		var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
+		var sTableWrapperId = aRowClassName[0].replace("_row", "_wrapper");
+		return $("#"+sTableWrapperId).get(0);
+	}	
+	
+	// otherwise we must have an API instance
+	return fx.getTableNode(mixed);
+};
 
 
 // *****************************************************************

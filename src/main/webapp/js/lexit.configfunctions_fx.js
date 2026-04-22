@@ -16,6 +16,8 @@ var fx = {};
  * 
  * @param {(String|API-object-instance)} oMixed - Table name, or API instance of a cell or row
  * @returns {String} The name of the table
+ * 
+ * @see fx.getTableNode
  */
 fx.getTableName = function(oMixed){
 	
@@ -38,6 +40,36 @@ fx.getTableName = function(oMixed){
 	// Otherwise we might have some nodes at our disposal
 	return $( oMixed.node() ).closest('table')[0].id;
 	
+}
+
+
+/**
+ * Get the table wrapper, given one of its cells or rows
+ * @param {(String|API-object-instance)} oMixed - Table name, or API instance of a cell or row
+ * @returns {Node} The node of the table wrapper
+ * 
+ * @see fx.getTableName
+ */
+fx.getTableNode = function(oMixed){
+	
+	// if input is a string
+	if (typeof oMixed == 'string')
+		return $("#"+oMixed+"_wrapper")[0];
+	
+	fx._checkApiInstance("fx.getTableId", oMixed);
+	
+	// Depending on the state of the API instance
+	// we have different functions at our disposal
+	// allowing different strategies for getting the table name
+	
+	// If the table() function is now available,
+	// extract the name from the table container
+	
+	if (typeof oMixed.table == 'function')	
+		return $("#"+oMixed.table().container().id)[0];
+	
+	// Otherwise we might have some nodes at our disposal
+	return $( oMixed.node() ).closest('div.dataTables_wrapper')[0];	
 }
 
 
