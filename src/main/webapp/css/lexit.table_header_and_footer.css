@@ -225,7 +225,6 @@
 	padding: 2px 5px;
 	margin: 0 3px;
 	cursor: pointer;
-	*cursor: hand;
 	color: #333 !important;	
 }
 
@@ -248,7 +247,6 @@
 	height: 19px;
 	float: left;
 	cursor: pointer;
-	*cursor: hand;
 	color: #111 !important;
 }
 .paginate_disabled_previous:hover, .paginate_enabled_previous:hover,
@@ -327,6 +325,32 @@
 	}
 }
 
+
+
+
+/*******************************************************************
+ * Panes in footer
+ *******************************************************************/
+
+.bottom_pane {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	margin: 5px;
+	height: 30px;
+	padding-right: 15px;
+	top: 0px;
+}
+
+.export_pane {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	margin: 5px;
+	height: 30px;
+	padding-right: 15px;
+	top: 30px;
+}
 
 
 /*******************************************************************
