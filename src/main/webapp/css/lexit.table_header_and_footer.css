@@ -25,7 +25,7 @@
  * Table info (name, number of rows)
  *******************************************************************/
  
-.table_name {
+.top .table_name {
  	margin-right: 10px;
 	position: absolute;
 	top: 2px;
@@ -33,11 +33,11 @@
 	text-align: left;
  }
 
-.table_name_span {
+.top .table_name_span {
 	font-weight: bold;
 	color: #A4A4A4;
 }
-.table_name_span.active {
+.top .table_name_span.active {
 	color: #000000;
 }
 
