@@ -1,0 +1,152 @@
+
+
+
+/*******************************************************************
+ * Font definitions 
+ *******************************************************************/
+
+@font-face {
+    font-family: "Schoolboek";
+    src: url("font/Schoolboek-Regular.woff") format("woff");
+}
+
+
+/* for historical characters */
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVRG__.TTF') format('truetype');
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVI___.TTF') format('truetype');
+    font-style: italic;
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVB___.TTF') format('truetype');
+    font-weight: bold;
+}
+
+@font-face{
+    font-family: gtb;
+    src: url('font/INLVBI__.TTF') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+
+/*******************************************************************
+ * General font settings
+ * Both for Huisstijl mode or default mode
+ *******************************************************************/
+
+body.default {
+    font-family: 'Times New Roman', Times, serif, gtb;
+}
+body.huisstijl {
+	font-family: Verdana, sans-serif, gtb;
+	margin: 0px;
+}
+
+
+
+/*******************************************************************
+ * classes available for using GTB/INL font (historical characters)
+ *******************************************************************/
+
+.inlfont {
+	font-family: Verdana, sans-serif, gtb;
+}
+
+.inlfont10pt {
+	font-family: Verdana, sans-serif, gtb;
+	font-size: 10pt;
+}
+
+
+
+/******************************************************************* 
+ * Hide everything when Lex'it is loading, 
+ * as we might switch styles etc. at load time 
+ *******************************************************************/
+body.preload {
+    opacity: 0;
+}
+
+
+
+
+/******************************************************************* 
+ * All buttons must show they're hovered 
+ *******************************************************************/
+button:hover {
+	filter: brightness(92%);
+	cursor: pointer;
+}
+
+
+/******************************************************************* 
+ * label for the table selector below the header 
+ *******************************************************************/
+ 
+ #indicators.default #indicator {
+	display: inline;
+}
+#indicators.default #tablechoice {
+	display: inline;
+}
+
+
+#indicators.huisstijl {
+	margin-top: 10px;
+	margin-left: 8px;
+}
+#indicators.huisstijl #indicator {
+	display: none;
+}
+
+
+#tablechoice #selected_source {
+	
+	option.base_table {
+		background: white;
+	}
+	option.view {
+		background: #E8E8E8;
+	}
+	option.materialized_view {
+		background: #F2F2F2;
+	}
+}
+
+
+/******************************************************************* 
+ * tables container
+ *******************************************************************/
+
+#dynamic {
+	
+}
+
+
+/* spy mode */
+
+#dynamic.spy {
+	
+	display: flex;
+	flex-flow: row wrap;
+	gap: 1rem;
+	padding: 1rem;
+	
+	div#connectionsdiv {
+		width: min-content;
+		order: 1;
+	}
+	div#spydiv {
+		width: min-content;
+		order: 2;
+	}
+}

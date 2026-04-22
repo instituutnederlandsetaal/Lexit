@@ -1,0 +1,356 @@
+
+
+/*******************************************************************
+ * General
+ *******************************************************************/
+
+/* datatables header class */
+
+.top {
+	position: relative;
+	padding: 15px;
+	background-color: #F5F5F5;
+	border: 1px solid #CCCCCC;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
+}
+
+
+.clear {
+	clear: both;
+}
+
+
+/*******************************************************************
+ * Table info (name, number of rows)
+ *******************************************************************/
+ 
+.table_name {
+ 	margin-right: 10px;
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	text-align: left;
+ }
+
+.table_name_span {
+	font-weight: bold;
+	color: #A4A4A4;
+}
+.table_name_span.active {
+	color: #000000;
+}
+
+.dataTables_info {
+	position: absolute;  /* fixed position left under the table name */
+	top: 30px;
+	left: 25px;
+	font-size: 90%;
+	
+	float: none;
+}
+
+/*******************************************************************
+ * Table length selector (number of rows to show at once) 
+ *******************************************************************/
+ 
+.dataTables_length {
+	position: absolute; /* fixed position left under the table info */
+	top: 55px;
+	left: 25px;
+	font-size: 90%;
+	z-index: 2; /* keep the table length selector in front (prevents pagination div from getting in front of this div) */
+}
+
+/*******************************************************************
+ * Table global search box
+ *
+ * BEWARE: at the moment, the header buttons are attached to this element (bad, should be fixed in the future)
+ *******************************************************************/
+ 
+.dataTables_filter {
+	position: sticky;  /* fixed position in the top right corner */
+	width: 45vw;	
+	left: 50vw;
+	text-align: right;
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */	
+}
+
+
+/*******************************************************************
+ * Header buttons - general
+ *******************************************************************/
+
+.dataTables_wrapper .top button {
+	border: 1px solid #000000;
+	margin: 1px;
+}
+
+
+/*******************************************************************
+ * Main table header buttons 
+ * (Reset, Refresh, Undo, Columns selection, View type, etc.) 
+ *******************************************************************/
+
+.header_button {
+	font-family: "Helvetica Narrow","Arial Narrow",Tahoma,Arial,Helvetica,sans-serif;
+	letter-spacing: 0px;
+	font-size: 80%;
+}
+
+.header_button.reset_button {
+	background-color: #F5BCA9;
+}
+
+.header_button.refresh_button {
+	background-color: #99CCFF;
+}
+
+.header_button.search_replace_button {
+	background-color: #D8F781;
+}
+
+.header_button.rowsel_button.functions_are_asleep {
+	background-color: #EE0000;
+}
+.header_button.rowsel_button.functions_are_awake {
+	background-color: #99CCFF;
+}
+
+.header_button.goto_button {
+	background-color: #FF8585;
+}
+
+.header_button.undo_button.nothing_to_undo {
+	background-color: #D5DAE4;
+}
+.header_button.undo_button.ready_to_undo {
+	background-color: #8591A0;
+}
+
+.header_button.colsel_button.normalmode {
+	background-color: #B2DEF7;
+}
+.header_button.colsel_button.optimalmode {
+	background-color: #00A2E0;
+}
+
+.header_button.viewtype_button {
+	background-color: #F4FA58;
+}
+
+.header_button.help_button {
+	background-color: #B4F0D2;
+}
+
+
+/*******************************************************************
+ * Custom header buttons 
+ *******************************************************************/
+
+/* break between header buttons and custom buttons */
+.room_between_buttons {
+	display: inline;
+}
+
+.free_header_button_div {
+	display: inline;
+}
+
+
+/*******************************************************************
+ * Header button for closing a table
+ * or erasing an uploaded table
+ *******************************************************************/
+
+.tableclosebutton {
+	display: inline;
+	margin-right: 10px;
+} 
+.tableclosebutton button {
+	background-color: #FF8585;
+	font-weight: bold;
+	font-size: 7pt;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+
+.tableerasebutton {
+	display: inline;
+	margin-right: 10px;
+}
+.tableerasebutton button {
+	background-color: #9FF781;
+	font-weight: bold;
+	font-size: 7pt;	
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+
+
+/******************************************************************* 
+ * Pagination buttons 
+ *******************************************************************/
+ 
+.dataTables_paginate {
+	position: sticky;  /* fixed position in the bottom right corner */
+	right: 5px;
+	text-align: right;
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
+} 
+ 
+ .paging_full_numbers {
+	position: sticky;
+	width: 45vw; 
+	left: 50vw;
+	height: 22px;
+	line-height: 22px;
+	margin: 7px;
+	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */
+}
+
+.paging_full_numbers a:active {
+	outline: none;
+}
+
+.paging_full_numbers a:hover {
+	text-decoration: none;
+}
+
+.paging_full_numbers a.paginate_button,
+.paging_full_numbers a.paginate_active {
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
+	margin: 0 3px;
+	cursor: pointer;
+	*cursor: hand;
+	color: #333 !important;	
+}
+
+.paging_full_numbers a.paginate_button {
+	background-color: #ddd;
+}
+
+.paging_full_numbers a.paginate_button:hover {
+	background-color: #ccc;
+	text-decoration: none !important;
+}
+
+.paging_full_numbers a.current {
+	background-color: #99B3FF;
+}
+ 
+ 
+.paginate_disabled_previous, .paginate_enabled_previous,
+.paginate_disabled_next, .paginate_enabled_next {
+	height: 19px;
+	float: left;
+	cursor: pointer;
+	*cursor: hand;
+	color: #111 !important;
+}
+.paginate_disabled_previous:hover, .paginate_enabled_previous:hover,
+.paginate_disabled_next:hover, .paginate_enabled_next:hover {
+	text-decoration: none !important;
+}
+.paginate_disabled_previous:active, .paginate_enabled_previous:active,
+.paginate_disabled_next:active, .paginate_enabled_next:active {
+	outline: none;
+}
+
+.paginate_disabled_previous,
+.paginate_disabled_next {
+	color: #666 !important;
+}
+.paginate_disabled_previous, .paginate_enabled_previous {
+	padding-left: 23px;
+}
+.paginate_disabled_next, .paginate_enabled_next {
+	padding-right: 23px;
+	margin-left: 10px;
+}
+
+.paginate_disabled_previous {
+	background: url('../images/back_disabled.png') no-repeat top left;
+}
+
+.paginate_enabled_previous {
+	background: url('../images/back_enabled.png') no-repeat top left;
+}
+.paginate_enabled_previous:hover {
+	background: url('../images/back_enabled_hover.png') no-repeat top left;
+}
+
+.paginate_disabled_next {
+	background: url('../images/forward_disabled.png') no-repeat top right;
+}
+
+.paginate_enabled_next {
+	background: url('../images/forward_enabled.png') no-repeat top right;
+}
+.paginate_enabled_next:hover {
+	background: url('../images/forward_enabled_hover.png') no-repeat top right;
+}
+
+
+
+/*******************************************************************
+ * Columns search boxes (one per column, under the column headers)
+ *******************************************************************/
+
+.table_searchboxes {
+	
+	display: block;
+	height: 25px;
+	padding: 0;
+	margin: 0;
+	
+	td {
+		padding: 0;
+		margin: 0;
+		border: 0px;
+	}
+	
+	td:has(input[type="checkbox"]) {
+		text-align: center;
+	}
+	td.neutral:has(input[type="checkbox"]) {
+		background-color: #FFFFFF;
+	}
+	td.on:has(input[type="checkbox"]) {
+		background-color: #D8F6CE;
+	}
+	td.off:has(input[type="checkbox"]) {
+		background-color: #F5A9A9;
+	}
+}
+
+
+
+/*******************************************************************
+ * Export buttons
+ *******************************************************************/
+
+.dataTables_wrapper div.export_pane div.dt-buttons {
+	float: right;
+}
+
+/*full export button */
+
+.normal_buttons_group {
+	display: inline-block;
+	text-decoration: none;
+	position: relative;
+	padding: 0.5em;
+	top: -0.7em;
+}
+
+.fullexport_buttons_group {
+	display: inline-block;
+	text-decoration: none;
+	position: relative;
+	padding: 0.5em;
+	top: -0.7em;
+}

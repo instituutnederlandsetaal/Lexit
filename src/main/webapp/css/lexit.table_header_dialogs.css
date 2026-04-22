@@ -1,0 +1,168 @@
+
+/*******************************************************************
+ * Search and replace interface
+ *******************************************************************/
+ 
+div.simple_search_and_replace {
+	font-size: 80%;
+	width: 100%;
+	position: relative;
+	padding: 15px;
+	background-color: #D8F781;
+	border: 1px solid #CCCCCC;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;	
+	
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+}
+
+div.simple_search_and_replace div.ssr_title_wrapper {
+	
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	
+	div.ssr_title_div {
+		
+		padding-right: 10px;
+		
+		span.ssr_title {
+			font-weight: bold;
+			font-size: 100%;
+		}
+	}
+	
+	div.ssr_button_div {
+	
+		padding-left: 10px;
+		
+		button#selectionbutton.functions_are_asleep {
+			background-color: #EE0000;
+		}
+		button#selectionbutton.functions_are_awake {
+			background-color: #99CCFF;
+		}
+	}
+}
+
+ 
+
+div.simple_search_and_replace form {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	
+	div.ssr_old_and_new_value {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		gap: 3px;
+	}
+}
+
+div.simple_search_and_replace div.ssr_buttons_span {
+	margin-left: 10px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	gap: 3px;
+	
+	button {
+		background-color: #F5F5F5;
+		border: 1px solid #aaa;
+    	-webkit-border-radius: 5px;
+    	color: #333 !important;
+	}
+}
+
+
+/*******************************************************************
+ * Columns selection interface
+ *******************************************************************/
+ 
+ div.columns_selection_interface {
+ 
+ 	font-size: 12px;
+ 	
+ 	ul {
+ 		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		width: 60%;
+		
+		li {
+			margin: 0 3px 3px 3px;
+			padding: 0.4em;
+			padding-left: 1.5em;
+			font-size: 1.0em;
+			height: 18px;
+			
+			span.ui-icon.ui-icon-arrowthick-2-n-s {
+				position: absolute;
+				margin-left: -3.0em;
+			}
+		
+		}		
+ 	}
+}
+
+
+/*******************************************************************
+ * Query builder interface (ctrl + click in columns search boxes) 
+ *******************************************************************/
+
+div.querybuilder_prompt {
+	
+	font-size: 12px;
+	
+	div.option_on_top {
+		background-color: #E0E6F8;
+		border: 1px black outset;
+		padding: 3px;
+	}
+	
+	div.filter_input {
+	
+		input#querybuilder_valuefilter {
+			width: 150px;
+		}
+		input#querybuilder_limit {
+			width: 30px;
+		}
+	}
+	
+	ol#selectable.list {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		width: auto;
+		
+		li {
+			margin: 3px;
+			padding: 0.4em;
+			font-size: 12px;
+			height: 18px;
+		}
+	}
+	
+	ol#selectable.grid {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		width: 80%;
+		
+		li {
+			margin: 3px;
+			padding: 1px;
+			float: left;				
+			width: 200px;
+			height: 40px;
+			line-height: 40px; /* should be the same as height (https://stackoverflow.com/questions/3400548/how-to-vertically-align-li-elements-in-ul) */
+			font-size: 12px;
+			text-align: center;
+		}
+	}
+}
+

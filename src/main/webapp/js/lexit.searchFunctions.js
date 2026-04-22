@@ -65,19 +65,17 @@ sf.goTo = function(sSomeTablename){
 		
 		// for checkboxes, we need to recompute the value
 		var bCurrentColumnIsACheckBox = fn.getTypeOfFilterBox(sSomeTablename, sCurrentColumnName) == 'checkbox';
-		if (bCurrentColumnIsACheckBox)
-			{
+		if (bCurrentColumnIsACheckBox) {
 			var iCycleValue = searchBoxSelector.attr("cycle_value");		
 			var sVisibleColumnNumber = $.inArray(sCurrentColumnName, mt.getListOfVisibleColumnsOf(sSomeTablename));
 			sCurrentColumnValue = sf.buildCorrectCheckboxFilterValue(sSomeTablename, sVisibleColumnNumber, iCycleValue);			
-			}
+		}
 		
 		// selectboxes need 'exact:' in front, otherwise preset-values containing regex chars will be
 		// interpreted as regexes, which we don't want
-		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !$.startsWith(sCurrentColumnValue, "exact:") && !lexutil.isRegex(sCurrentColumnValue))
-			{
+		if (bCurrentColumnIsASelectBox && sCurrentColumnValue!="" && !$.startsWith(sCurrentColumnValue, "exact:") && !lexutil.isRegex(sCurrentColumnValue)) {
 			sCurrentColumnValue = "exact:"+sCurrentColumnValue;
-			}
+		}
 				
 		
 		// if we have any value, use it
@@ -95,14 +93,12 @@ sf.goTo = function(sSomeTablename){
 			// The value of the searchbox that has focus (the last one clicked upon)
 			// is the one we will use a the value to GO TO.
 			// Other values will be set as normal filters
-			if (bThisBoxHasFocus)
-				{
+			if (bThisBoxHasFocus) {
 				// GoTo-filter is set now!
 				sColumnName = sCurrentColumnName;
 				sColumnValue = sCurrentColumnValue;
-				}
-			else
-				{
+			}
+			else {
 				// other search fields are added as common filters
 				filterColumnNames.push(sCurrentColumnName);
 				filterValues.push(sCurrentColumnValue);
@@ -111,8 +107,8 @@ sf.goTo = function(sSomeTablename){
 				var tmpArray = new Array();
 				tmpArray[sCurrentColumnName] = sCurrentColumnValue;
 				mt.getDataTableObjectOf(sSomeTablename).addSearchFilters(tmpArray);
-				}
 			}
+		}
 	});
 	
 	if (sColumnName==""){
@@ -127,16 +123,14 @@ sf.goTo = function(sSomeTablename){
 	// gather the compulsory filters 
 	
 	var oTableConfig = conf.getTableConfig(sSomeTablename);
-	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++)
-		{
+	for (var i=0; i<mt.getListOfColumnsOf(sSomeTablename).length; i++) {
 		var aColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfColumnsOf(sSomeTablename)[i]);		
 		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
-		if (keepfilter)
-			{
+		if (keepfilter) {
 			filterColumnNames.push(mt.getListOfColumnsOf(sSomeTablename)[i]);
 			filterValues.push(conf.getFilter(aColumnConfig));
-			}
 		}
+	}
 	
 	
 	// now request the corresponding row number
@@ -359,14 +353,14 @@ sf.enableSearchFields = function(someTablename){
 	
 	var oTableConfig = conf.getTableConfig(someTablename);	
 	
-	var sSearchBoxesDiv = $("<table></table>")
+	var sSearchBoxesTable = $("<table></table>")
 		.attr("id", someTablename+"_searchboxes")
+		.addClass("table_searchboxes")
 		.bind("mouseenter", function(){gui.setSearchboxesCss(someTablename);})
-		.css("display", "block")
-		.css("visibility", "hidden");
+		.css("visibility", "hidden"); // start with invisible searchboxes, as they are first being built (will be made visible later on)
 
 	var sSearchBoxesTr = $("<tr></tr>");
-	sSearchBoxesDiv.append(sSearchBoxesTr);
+	sSearchBoxesTable.append(sSearchBoxesTr);
 	
 	$('#'+someTablename+'_wrapper div.dataTables_scrollHeadInner table.display th').each( function(i){
 		
@@ -479,11 +473,14 @@ sf.enableSearchFields = function(someTablename){
 		// the right filter type is set,	
 		// now append the search box to the user interface
 				
-		sCurrentSearchBoxDiv = 
+		sCurrentSearchBoxTd = 
 			$("<td></td>")
 				.addClass("searchbox")
 				.append( inputTag.attr("id", someTablename+"_searchbox_"+sCurrentColumnName) );
-		sSearchBoxesTr.append(sCurrentSearchBoxDiv);
+		sSearchBoxesTr.append(sCurrentSearchBoxTd);
+		
+		if (isACheckBox)
+			sCurrentSearchBoxTd.addClass("neutral"); // start with neutral color for checkbox filters
 		
 		
 		// *************************		
@@ -521,7 +518,7 @@ sf.enableSearchFields = function(someTablename){
 			}
 
 			// give the checkbox filter the right color etc
-			sf.setCheckboxRight(sCurrentSearchBoxDiv, iCycleValue);	
+			sf.setCheckboxRight(sCurrentSearchBoxTd, iCycleValue);	
 		}
 			
 	});
@@ -532,7 +529,7 @@ sf.enableSearchFields = function(someTablename){
 		$("table#"+someTablename+"_searchboxes").replaceWith(sSearchBoxesTr);
 	}
 	else {
-		$("#"+someTablename+"_wrapper div.dataTables_scrollHeadInner table").before(sSearchBoxesDiv);
+		$("#"+someTablename+"_wrapper div.dataTables_scrollHeadInner table").before(sSearchBoxesTable);
 	}
 	
 	
@@ -670,7 +667,7 @@ sf.clearPerColumnSearchFields = function(someTablename){
 		var isACheckBox = $(this).find("input").eq(0).attr("type")=="checkbox";
 		if(isACheckBox) {
 			// remove the color indicating some value is activated (true or false)
-			$(this).css("background-color", "#FFFFFF");
+			$(this).removeClass("neutral on off").addClass("neutral");
 			$(this).find("input").eq(0).removeAttr("checked").prop('checked', false);	
 			// the value of the checkbox needs to be set (doesn't happen upon checking the box!)
 			$(this).find("input").eq(0).val("");
@@ -873,7 +870,7 @@ sf.putCurrentValueInAllSearchBoxes = function(sTablename){
 // give the checkbox filter the right color etc., 
 // so as to make the filter setting visible to the user
 
-sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
+sf.setCheckboxRight = function(sSearchBoxesTd, iCycleValue){
 
 	// checkboxes have a cycle value 
 	// values of several settings depend on the phase in the cycle (0 to 2)
@@ -886,12 +883,12 @@ sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
 	// the code will be executed before setLanguge can bet called,
 	// causing checkboxes to keep default tooltip, instead of in the
 	// chosen language
-	var aCheckboxBackgroundColors =	["#FFFFFF",	"#D8F6CE",	"#F5A9A9"];
+	var aCheckboxClasses =			["neutral",	"on",		"off"];
 	var aCheckboxCheckvalue =     	["",		"1",		"0"];
 	var aCheckboxCheckvalueTitle =	[lang.neutral,lang.on,  lang.off];
 	var aCheckboxVisibleSetting = 	[false,  	true,		false];
 	
-	var inputTag = sSearchBoxesDiv.find("input").eq(0);
+	var inputTag = sSearchBoxesTd.find("input").eq(0);
 	
 	inputTag.attr("cycle_value", iCycleValue);
 		
@@ -899,7 +896,7 @@ sf.setCheckboxRight = function(sSearchBoxesDiv, iCycleValue){
 	
 	// put the right color, to make the true checkbox value visible
 	// since 'false' and 'no value' would otherwise look the same (unchecked)
-	sSearchBoxesDiv.css("background-color", aCheckboxBackgroundColors[iCycleValue]);
+	sSearchBoxesTd.removeClass("neutral on off").addClass(aCheckboxClasses[iCycleValue]);
 	inputTag.attr("title", aCheckboxCheckvalueTitle[iCycleValue]);
 	
 	// the value of the checkbox needs to be set (doesn't happen upon checking the box!)
@@ -1030,7 +1027,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)
 		.attr("title", lang.search_help)
-		.css("font-size", "12px")
+		.addClass("querybuilder_prompt")
 		.append(sMessageP);
 	
 	
@@ -1040,15 +1037,13 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	
 	var bNegation = false;	
 	var negationCheck = $("<div ></div>")
-		.css("background-color", "#E0E6F8")
+		.addClass("option_on_top")
 		.append(
 			$('<label />').html(lang.search_help_search_for_contrary).prepend(
 					$("<input />", {"type": "checkbox", "id": "querybuilder_negation_checkbox", "name": "querybuilder_negation_checkbox"})
 						.click(function(){bNegation = !bNegation;})
 					)
-			)
-		.css("border", "1px black outset")
-		.css("padding", "3px");
+			);
 	promptDiv.append(negationCheck);
 	promptDiv.append("<p></p>");
 	
@@ -1056,15 +1051,13 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	
 	var bExactMatch = false;
 	var exactMatchCheck = $("<div></div>")
-		.css("background-color", "#E0E6F8")
+		.addClass("option_on_top")
 		.append(
 			$('<label />').html(lang.search_help_search_for_exact_match).prepend(
 					$("<input />", {"type": "checkbox", "id": "querybuilder_exactmatch_checkbox", "name": "querybuilder_exactmatch_checkbox"})
 						.click(function(){bExactMatch = !bExactMatch;})
 					)
-			)
-		.css("border", "1px black outset")
-		.css("padding", "3px");
+			);
 	promptDiv.append(exactMatchCheck);
 	promptDiv.append("<p></p>");
 	
@@ -1072,13 +1065,12 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	// filter input
 	
 	var filter = $("<div></div>")
+		.addClass("filter_input")
 		.append(
-			$("<span></span>")
-				.text(lang.filter_regex+ ": ")
+			$("<span></span>").text(lang.filter_regex+ ": ")
 		)
 		.append(
 			$("<input></input>")
-				.css("width", "150px")
 				.attr("id", "querybuilder_valuefilter")
 				.bind("input propertychange", function (evt) {
 					// https://stackoverflow.com/questions/5917344/jquery-value-change-event-delay
@@ -1117,12 +1109,10 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				})
 		)
 		.append(
-			$("<span></span>")
-				.text(" " +lang.show_max+ " ")
+			$("<span></span>").text(" " +lang.show_max+ " ")
 		)
 		.append(
 			$("<input></input>")
-			.css("width", "30px")
 			.val(20)
 			.attr("id", "querybuilder_limit")
 			.bind("input propertychange", function (evt) {
@@ -1161,8 +1151,7 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 				})
 		)
 		.append(
-			$("<span></span>")
-				.text(" "+lang.options+" ")
+			$("<span></span>").text(" "+lang.options+" ")
 		)
 		.append(
 			$("<select></select>")
@@ -1215,21 +1204,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 	
 	// 'selectable' part: the options to choose from	
 	
-	var selectableUl = bGrid ?
-				$("<ol></ol>")							// grid type
+	var selectableUl =  $("<ol></ol>")							
 				.attr("id", selectableId)
-				.css("list-style-type", "none")
-				.css("margin", "0")
-				.css("padding", "0")
-				.css("width", "80%")
-			:
-				$("<ol></ol>")							// list type
-				.attr("id", selectableId)
-				.css("list-style-type", "none")
-				.css("margin", "0")
-				.css("padding", "0")
-				.css("width", "auto") // allow longer values to be rendered nicely
-			;
+				.addClass( bGrid ? "grid" : "list"); // grid type or list type (list allows longer values to be rendered nicely)
 	
 	
 	// build the elements of the list to choose from
@@ -1239,25 +1216,9 @@ sf.getQueryBuilder = function(sTableName, sColumnName, sOtherColumnsFiltersAndVa
 		for (sOption in oKeysAndValues){
 		
 			// one element 		
-			var liElement =  bGrid ?
-					$("<li></li>")							// grid type
-					.addClass( "ui-state-default" )
-					.css("margin", "3px")
-					.css("padding", "1px")
-					.css("float", "left")				
-					.css("width", "200px")
-					.css("height", "40px")
-					.css("line-height", "40px") // should be the same as height (https://stackoverflow.com/questions/3400548/how-to-vertically-align-li-elements-in-ul)
-					.css("font-size", "12px")
-					.css("text-align", "center")
-				:
-					$("<li></li>")							// list type
-					.addClass( "ui-widget-content" )
-					.css("margin", "3px")
-					.css("padding", "0.4em")
-					.css("font-size", "12px")
-					.css("height", "18px")
-				;	
+			var liElement =  $("<li></li>")							
+				.addClass( bGrid ? "ui-state-default" : "ui-widget-content" ); // grid type or list type
+					
 			
 			// if some item was pre-selected, assign it the selected class
 			if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1){
@@ -1419,7 +1380,7 @@ sf.getUniqueValuesForQueryBuilder = function(sSomeTableName, sCurrentColumnName)
 	
 	// gather the filters surrounding the column we search the uniques values of
 
-	var oOtherFilters = mt.getDataTableObjectOf(sSomeTableName).getSearchFilters();
+	var oOtherFilters = mt.getDataTableObjectOf(sSomeTableName).getSearchFilters(true);
 	var aOtherColumnsFiltersAndValues = new Array();
 	for (var sOneFilter in oOtherFilters){
 		if (sOneFilter != sCurrentColumnName && oOtherFilters[sOneFilter] != null && oOtherFilters[sOneFilter] != ''){

@@ -75,8 +75,8 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 		"success": function(xml) {
 			
 			var aUsersAndRoles = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR).sort();
-			var sOutPut = "<TABLE style='min-width: 400px; border: 1px dotted black'>";
-			sOutPut += "<TR><TD style='border-top: 1px dotted black; padding: 2px;'>USERNAME</TD><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;&nbsp;</TD><TD style='border-top: 1px dotted black; padding: 2px;'>USER ROLES</TD></TR>";
+			var sOutPut = "<TABLE id='userstable'>";
+			sOutPut += "<TR><TD>USERNAME</TD><TD>&nbsp;&nbsp;</TD><TD>USER ROLES</TD></TR>";
 			for (var u=0; u<aUsersAndRoles.length; u++){
 				var aOneUserRole = aUsersAndRoles[u].split(":::");
 				
@@ -104,12 +104,12 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 					}
 					
 				}
-				sOutPut += "<TR id='user_"+thisUser.toLowerCase()+"'><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;"+thisUser+"</TD><TD style='border-top: 1px dotted black; padding: 2px;'>&nbsp;&nbsp;</TD><TD style='border-top: 1px dotted black; padding: 2px;'>"+aTheseRoles.join('<BR>')+"</TD></TR>";
+				sOutPut += "<TR id='user_"+thisUser.toLowerCase()+"'><TD>&nbsp;"+thisUser+"</TD><TD>&nbsp;&nbsp;</TD><TD>"+aTheseRoles.join('<BR>')+"</TD></TR>";
 			}
 			sOutPut += "</TABLE>";												
 			lexitusers.overviewOfUsersAndRoles = 
-				"<DIV style='max-height: 200px; overflow-x: hidden; overflow-y: scroll; margin-bottom: 30px;' id='usersoverview'>"+sOutPut+"</DIV>"+
-				"<HR style= 'border-top: 2px dotted #bbb;''>";
+				"<DIV id='usersoverview'>"+sOutPut+"</DIV>"+
+				"<HR>";
 			
 			if (fnCallback != null){
 				fnCallback();
@@ -440,16 +440,11 @@ lexitusers.setListOfProjects = function(){
 			
 			var promptDiv = $("<div></div>")
 				.attr("id", promptDivId)
-				.attr("title", lang.admingui_projectmenu_title)
-				.css("font-size", "12px");
+				.addClass("projectmenu_prompt_div")
+				.attr("title", lang.admingui_projectmenu_title);
 			
 			
-			var sortableUl = $("<ul></ul>")
-				.attr("id", sortableId)
-				.css("list-style-type", "none")
-				.css("margin", "0")
-				.css("padding", "0")
-				.css("width", "100%");
+			var sortableUl = $("<ul></ul>").attr("id", sortableId);
 					
 			var aListOfProjects = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);
 						
@@ -476,17 +471,7 @@ lexitusers.setListOfProjects = function(){
 				var liElement = $("<li></li>")
 				    .addClass( "separator" )
 				    .addClass( "ui-state-default")
-					.addClass( "ui-state-disabled")
-					.css("color", "black")
-					.css("opacity", "0.6")					
-					.css("border", "0px")
-                    .css("margin", "0 3px 3px -25px")
-                    .css("padding", "0.4em")
-                    .css("padding-left", "1.5em")
-                    .css("margin-top", "15px")
-                    .css("font-size", "1.1em")
-                    .css("font-weight", "bold")
-                    .css("height", "18px")
+					.addClass( "ui-state-disabled")					
                     .attr("id", sThisStatus);
                 var spanElement = $("<span></span>")
                 	.text( sSeparatorLabel ); // show status as separator
@@ -513,25 +498,19 @@ lexitusers.setListOfProjects = function(){
 				// show project info			
 					
 				var liElement = $("<li></li>")
+					.addClass( "project_info" )
 					.addClass( "ui-state-default")
-					.attr("id", sProjectConfigFileName)
-					.css("margin", "0 3px 3px 3px")
-					.css("padding", "0.4em")
-					.css("padding-left", "1.5em")
-					.css("font-size", "1.0em")
-					.css("width", "95%")
-					.css("height", "18px")
+					.attr("id", sProjectConfigFileName)					
 					.data("status", sStatus); // remember the status				
 				var spanElement1 = $("<span></span>")
-					.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )	
-					.css("margin-left", "-18px");
+					.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )
+					.addClass( "project_move_icon")
 				var spanElement2 = $("<span></span>")
+					.addClass("project_config_filename")	
 					.text( sProjectConfigFileName ); // show project project config filename
 				var spanElement3 = $("<span></span>")
-					.addClass( "ui-icon ui-icon-circle-plus" )
-					.css("position", "absolute")
-					.css("left", "740px")
-					.css("margin-top", "3px")
+					.addClass("project_expand_icon")
+					.addClass( "ui-icon ui-icon-circle-plus" )					
 					.click( function(){
 						
 						// get parent li element
@@ -556,11 +535,7 @@ lexitusers.setListOfProjects = function(){
 					});
 				var spanElement4 = $("<span></span>")
 					.addClass( "ui-icon ui-icon-closethick" )	
-					.addClass("prompt_extra_field")
-					.css("visibility", "hidden")
-					.css("position", "absolute")
-					.css("left", "740px")
-					.css("margin-top", "28px")
+					.addClass("prompt_extra_field")					
 					.attr("id", "delete_project_"+sProjectConfigFileName)
 					.click( function(){
 						
@@ -599,28 +574,18 @@ lexitusers.setListOfProjects = function(){
 					
 				// input fields for name and description
 					
-				var inputDiv = $("<div></div>")
-					.css("position", "relative")
-					.css("left", "280px")
-					.css("top", "-17px")
-					.css("width", "425px")
-					.css("border", "0px")
-					.css("display", "flex")
-					.css("flex-direction", "row")
-					.css("flex-wrap", "wrap");
+				var inputDiv = $("<div></div>").addClass("input_fields");
 					
 				var inputName = $("<input></input>")
-					.attr("type", "text")
-					.css("width", "150px")
-					.css("margin", "2px")
+					.addClass("human_readable_name")
+					.attr("type", "text")					
 					.attr("placeholder", lang.admingui_projectmenu_placeholder_projectname)
 					.attr("name", "prompt_name_"+sProjectConfigFileName)			
 					.attr("id", "prompt_name_"+sProjectConfigFileName)
 					.val(sHumanReadableName); 
 				var inputDescription = $("<input></input>")
+					.addClass("human_readable_description")
 					.attr("type", "text")					
-					.css("width", "250px")
-					.css("margin", "2px")
 					.attr("placeholder", lang.admingui_projectmenu_placeholder_projectdescription)
 					.attr("name", "prompt_desc_"+sProjectConfigFileName)			
 					.attr("id", "prompt_desc_"+sProjectConfigFileName)
@@ -630,20 +595,14 @@ lexitusers.setListOfProjects = function(){
 					
 				var inputMessage = $("<input></input>")
 					.addClass("prompt_extra_field")
-					.attr("type", "text")			
-					.css("width", "410px")
-					.css("margin", "2px")
-					.css("visibility", "hidden")
+					.attr("type", "text")					
 					.attr("placeholder", lang.admingui_projectmenu_placeholder_message_to_users)
 					.attr("name", "prompt_msg_"+sProjectConfigFileName)			
 					.attr("id", "prompt_msg_"+sProjectConfigFileName)
 					.val(sMessage); 
 				var inputRedirect = $("<input></input>")
 					.addClass("prompt_extra_field")
-					.attr("type", "text")			
-					.css("width", "410px")
-					.css("margin", "2px")
-					.css("visibility", "hidden")
+					.attr("type", "text")					
 					.attr("placeholder", lang.admingui_projectmenu_placeholder_redirect_url)
 					.attr("name", "prompt_redirect_"+sProjectConfigFileName)			
 					.attr("id", "prompt_redirect_"+sProjectConfigFileName)
@@ -1068,7 +1027,7 @@ lexitusers.keepPublicReaderAlive = function(){
 	 		if (sResp == 'Access denied'){
 	 			fn.closeDialog();
 	 			fn.message(sResp, sResp, function(){
-	 				lexitReload();
+	 				lexitinit.lexitReload();
 	 			});
 	 		}
 	 		

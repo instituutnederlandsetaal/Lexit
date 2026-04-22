@@ -1,0 +1,100 @@
+
+
+/******************************************************************* 
+ * Main table container 
+ * 
+ * This contains all the table elements (wrapper, resizable div, etc.) 
+ *******************************************************************/
+
+.table_div {	
+	min-height: 500px;
+	border-radius: 15px;
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    max-width: 99vw; /* maximum width of the table, to prevent it from being too wide, since have a bit of margin on the left */
+    min-width: 50vw; /* minimum width of the table, to prevent it from being too small (since the pagination div is 45vw wide!) */
+	margin-right: 10px;
+	width: 100%;
+}
+
+
+/* this is applied when the 'keep_small' parameter is used in config */
+
+.table_div.smallheight {
+	min-height: 0px !important;
+}
+
+
+/*******************************************************************
+ * Table wrapper
+ *
+ * The wrapper contains:
+ * - the table header (.top),
+ * - the table body (.dataTables_scroll), 
+ * - and the bottom elements (.bottom_pane, export_pane)
+ *******************************************************************/
+
+.dataTables_wrapper {
+	position: relative;
+	clear: both;
+	zoom: 1; /* Feeling sorry for IE */
+}
+
+
+
+/******************************************************************* 
+ * Draggable helper when dragging a table
+ *******************************************************************/
+ 
+.draggableHelper {	
+	border-radius: 15px; /* give the helpen the same form as the table! */
+    border: 2px dashed #cccccc;    
+    background: black;
+    opacity: 0.2;
+}
+
+
+/******************************************************************* 
+ * Context menu (on cell upon rightclick, when 
+ * the 'contextmenu' parameter is set in the config)
+ *******************************************************************/
+.lexit-context-menu span {
+	font-size: 80% !important;
+}
+
+
+
+/******************************************************************* 
+ * Default DataTables classes
+ *******************************************************************/
+
+.dataTables_processing {
+	position: fixed;  
+	top: 150px;
+	left: 50%;
+	width: 100px;
+	height: 100px;
+	margin-left: -125px;
+	margin-top: -15px;
+	padding: 14px 0 2px 0;
+	text-align: center;
+	color: #000000;
+	font-weight: bold;
+	font-size: 14px;
+	background: url(../images/ajax-loader.gif) no-repeat center top;
+	index-z: 1; 
+}
+
+.dataTables_empty {
+	text-align: center;
+}
+
+
+/* not sure if it's still needed */
+
+.bottom {
+	position: relative;
+	padding: 15px;
+	background-color: #F5F5F5;
+	border: 1px solid #CCCCCC;
+}

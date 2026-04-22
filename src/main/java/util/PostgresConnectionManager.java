@@ -599,7 +599,7 @@ public class PostgresConnectionManager {
 				for (int i=0; i<args.length; i++) {
 					
 					String oneArg = args[i];
-					String oneType = ato.getType(i);
+					String oneType = ato.getType(i);					
 					
 					// a string containing 'NULL' must be interpreted as null
 					if (oneArg.equals("NULL")) oneArg = null;

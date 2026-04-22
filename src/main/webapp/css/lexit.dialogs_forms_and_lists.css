@@ -1,0 +1,180 @@
+
+/******************************************************************* 
+ * Style for jquery ui selectable 
+ * used in dialogs for picking items out of a list
+ *******************************************************************/
+ 
+#selectable .ui-selecting { background: #FECA40; }
+#selectable .ui-selected { background: #F39814; color: white; }
+
+#selectable li.ui-selectee { cursor: pointer; }
+#selectable li.ui-selectee span { cursor: pointer; }
+#selectable li.ui-selectee:hover { cursor: pointer; background: #e6e6e6; }
+
+
+
+/*******************************************************************
+ * Shadow around dialog boxes
+ *******************************************************************/
+
+/* https://stackoverflow.com/questions/3448813/jqueryui-how-to-make-a-shadow-around-a-dialog-box */
+.ui-dialog-shadow {
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+
+
+/*******************************************************************
+ * Forms 
+ *******************************************************************/
+
+/*******************************************************************
+ * Forms search and sort bar (just like for tables)
+ *******************************************************************/
+ 
+/* main container */
+.search_and_sort_div {
+	margin: 0;
+	position: relative;
+	top: 10px;
+}
+
+/* table inside the container */
+
+.search_and_sort_bar {
+	margin: auto;
+	min-width: 50%;
+}
+.search_and_sort_bar span.colname {
+	cursor: pointer;
+	font-weight: bold;
+	padding-right: 18px;
+}
+.search_and_sort_bar td.checkbox {
+	background-color: #DDDDDD;
+	border:1px solid #FFFFFF;
+}
+
+
+/*******************************************************************
+ * Form body 
+ *******************************************************************/
+ 
+.formgrid {
+	margin: 0;
+	position: relative;
+	background-color: #E6E6E6;
+}
+
+
+.form_celllabel {
+	font-weight: bold;
+}
+
+ 
+.form_cellvalue input[type="checkbox"] {
+	margin: 5px;
+}
+.form_cellvalue select {
+	padding: 5px;
+}
+.form_cellvalue textarea {
+	padding: 5px;
+}
+
+
+
+/*******************************************************************
+ * Form's lists 
+ *******************************************************************/
+
+.formview_listlabel {
+	font-weight: bold;
+}
+
+.formview table.display {
+	width: 100%;
+}
+ 
+ /*******************************************************************
+ * Forms buttons 
+ *******************************************************************/
+ 
+/* general buttons style */
+.formview_button {
+	font-family: "Helvetica Narrow","Arial Narrow",Tahoma,Arial,Helvetica,sans-serif;
+	letter-spacing: 0px;
+	font-size: 90%;
+	border: 1px solid #000000;
+	margin: 1px;
+	width: 100px;
+}
+
+.formview_button:not(#reset_button,#send_button) span {
+	color: white;
+}
+
+ /*******************************************************************
+ * Forms reset and send buttons 
+ *******************************************************************/
+
+/* default label color on reset and save buttons */
+#reset_button.formview_button {
+	color: #000000;
+}
+#send_button.formview_button {
+	color: #000000;
+}
+
+/* reset button neutral */
+#reset_button:has(> span.ui-icon.ui-icon-close){
+	background-color: #DDDDDD;
+	color: #000000;
+}
+/* reset button active */
+#reset_button:has(> span.ui-icon.ui-icon-arrowreturnthick-1-w){
+	background-color: #F5BCA9 !important;
+	color: #000000;
+}
+
+
+/* send button neutral */
+#send_button:has(> span.ui-icon.ui-icon-disk){
+	background-color: #DDDDDD;
+	color: #000000;
+}
+
+/* send button pay attention */
+#send_button:has(> span.ui-icon.ui-icon-alert){
+	background-color: red !important;
+	color: white !important;
+}
+
+/* send button all is well */
+#send_button:has(> span.ui-icon.ui-icon-check){
+	background-color: #D8F781 !important;
+	color: #000000 !important;
+}
+
+
+
+
+ /*******************************************************************
+ * Other forms elements 
+ *******************************************************************/
+
+/* textarea in a form cell */
+.formview_textarea {
+	/* border-radius: 5px; */
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* list container in a form */
+.formview_list {
+	border: 1px solid grey;
+	/* border-radius: 5px; */
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}

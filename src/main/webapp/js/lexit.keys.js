@@ -82,12 +82,12 @@ kf.setActiveTable = function(sTableName){
 	var sPreviousActiveTable = kf.getActiveTable();
 	if (sPreviousActiveTable != null) {
 		// show focus is lost on current active table
-		$("#"+sPreviousActiveTable+"_tablename").css("color", "#A4A4A4");
+		$("#"+sPreviousActiveTable+"_tablename").removeClass("active");
 	}
 	
 	sActiveTableName = sTableName;
 	// show focus is gained
-	$("#"+sActiveTableName+"_tablename").css("color", "#000000");
+	$("#"+sActiveTableName+"_tablename").addClass("active");
 };
 
 /**
@@ -464,8 +464,8 @@ kf.addKeyFunctions = function(){
     	// ctrl + shift + L : logout
     	
     	if ( (kf.isPressed("l") && event.ctrlKey && event.shiftKey) ){
-			startLexitLogout(function(){
-				lexitReload();
+			lexitlogin.startLexitLogout(function(){
+				lexitinit.lexitReload();
 			});
 		}
 

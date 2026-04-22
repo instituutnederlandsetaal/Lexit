@@ -96,7 +96,7 @@ function onchange (evt) {
   	if ( sWindowVisibility=="visible" && fn.getCurrentUser() != null) {
 	  	$.cookie('active_lexit_window', idOfThisInstance);
 	  	// and tell the webservice which tab the user is working in
-	  	sendActiveTabIdToService(idOfThisInstance);
+	  	lexitinit.sendActiveTabIdToService(idOfThisInstance);
  	}
   
 }

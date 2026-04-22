@@ -2011,9 +2011,9 @@ public class TableResources {
 	// normally does nothing, but
 	// special cases: 
 	// - NULL in a string should be interpreted as null
-	// - "..." should behave like in google
+	// - "..." means case sensitive
 	// - "" should be interpreted as an empty string
-	private static String setRightSearchValue(String value){
+	public static String setRightSearchValue(String value){
 		
 		if (value.equals("NULL")) {
 			return null;

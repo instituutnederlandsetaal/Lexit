@@ -12,7 +12,7 @@ var un = {};
 // changing tooltips of the undo button in the header needs reactivation of tipTip
 // on time, t.i. before the user reaches the undo button, when entering the table header.
 $(document).on("mouseenter", "div.top", function(){
-	$(".tooltip").tipTip( gui.getTiptipConfig() );
+		$(".tooltip").tipTip( gui.getTiptipConfig() );
 	});
 
 
@@ -29,7 +29,8 @@ un.cleanUndoStack = function(sSomeTableName){
 	
 	// change the color of the button since it won't work anymore now (because stack is empty)
 	$("#"+sSomeTableName+"_wrapper #"+sSomeTableName+"_undo_button")
-		.css("background-color", "#D5DAE4");
+		.removeClass("ready_to_undo")
+		.addClass("nothing_to_undo");
 
 	// tooltip
 	$("#"+sSomeTableName+"_wrapper #"+sSomeTableName+"_undo_button")
@@ -99,8 +100,8 @@ un.addEvent = function(sSomeTableName, sRowId, iColumnNr, sOldValue){
 	
 	// change color of button since the undo button will work now
 	$("#"+sSomeTableName+"_wrapper #"+sSomeTableName+"_undo_button")
-		.css("background-color", "#8591A0");
-	
+		.removeClass("nothing_to_undo")
+		.addClass("ready_to_undo");
 	
 };
 

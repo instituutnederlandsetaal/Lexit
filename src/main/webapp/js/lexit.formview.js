@@ -17,15 +17,7 @@ var form = {};
 // ----------------------------------------------
 
 
-
-
-// icons/colors of buttons
-
-form.reset_button_color_active = "#F5BCA9";
-form.reset_button_color_neutral = "#DDDDDD";
-form.send_button_color_neutral = "#DDDDDD";
-form.send_button_color_payattention = "red";
-form.send_button_color_alliswel = "#D8F781";
+// icons of buttons
 
 form.reset_button_icon_active = "ui-icon ui-icon-arrowreturnthick-1-w";
 form.reset_button_icon_neutral = "ui-icon ui-icon-close";
@@ -48,22 +40,7 @@ form.aListOfPossibleMouseActions = ["click", "dblclick",
 //
 form.setResetButtonToSetting = function(sTableName, sSetting){
 
-	// default is neutral
-	var sColor = "#000000";
-	var sBgColor = form.reset_button_color_neutral;
-	var sIcon = form.reset_button_icon_neutral;
-
-	// otherwise
-	if (sSetting == 'active'){
-		sBgColor = form.reset_button_color_active;	
-		sIcon = form.reset_button_icon_active;
-	}
-
-	$("#"+sTableName+"_formsbuttons #reset_button")
-		.css("background-color", sBgColor);
-	$("#"+sTableName+"_formsbuttons #reset_button")
-		.find("span:eq(0)")
-		.css("color", sColor);
+	var sIcon = (sSetting == 'active' ? form.reset_button_icon_active : form.reset_button_icon_neutral);
 
 	$("#"+sTableName+"_formsbuttons #reset_button")
 		.find("span:eq(1)")
@@ -82,15 +59,11 @@ form.setResetButtonToSetting = function(sTableName, sSetting){
 form.setSendButtonToSetting = function(sTableName, sSetting){
 
 	// default is neutral
-	var sColor = "#000000";
-	var sBgColor = form.send_button_color_neutral;
 	var sIcon = form.send_button_icon_neutral;
 	
 
 	// otherwise
-	if (sSetting == 'payattention'){
-		sColor = "white";
-		sBgColor = form.send_button_color_payattention;	
+	if (sSetting == 'payattention'){	
 		sIcon = form.send_button_icon_payattention;
 
 		if ( !$("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
@@ -116,7 +89,6 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		$("#"+sTableName+"_formsbuttons #send_button").addClass("payattention");
 	}
 	else if (sSetting == 'alliswel'){
-		sBgColor = form.send_button_color_alliswel;
 		sIcon = form.send_button_icon_alliswel;
 		
 		if ( $("#"+sTableName+"_formsbuttons #send_button").hasClass("payattention")){
@@ -129,11 +101,6 @@ form.setSendButtonToSetting = function(sTableName, sSetting){
 		}
 	}
 
-	$("#"+sTableName+"_formsbuttons #send_button")
-		.css("background-color", sBgColor);
-	$("#"+sTableName+"_formsbuttons #send_button")
-		.find("span:eq(0)")
-		.css("color", sColor);
 
 	$("#"+sTableName+"_formsbuttons #send_button")
 		.find("span:eq(1)")
@@ -160,8 +127,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 	eSearchDiv.append(
 		$("<table></table>")
 			.attr("id", sTableName+"_search_and_sort_table")
-			.css("margin", "auto")
-			.css("min-width", "50%")
+			.addClass("search_and_sort_bar")			
 	);
 
 	$("#"+sTableName+"_search_and_sort_table")
@@ -203,10 +169,9 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 					.css("width", "calc("+iPercentage+" * (var(--"+sTableName+"_form_cellwidth)))")
 					.css("text-align", "center")
 					.append(
-						$("<span></span>")
-							.css("font-weight", "bold")
-							.css("padding-right", "18px")
+						$("<span></span>")							
 							.text(sNiceName)
+							.addClass("colname")
 							.addClass( form.getSortingModeOfTableColumn(sTableName, sCellName) )
 							.attr("id", sCellName)
 							.click(function(e){
@@ -255,7 +220,7 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 
 		// if we have a checkbox, add default background color
 		if ($("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").find("input").attr("cycle_value") != null){
-			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").css("background-color", "#DDDDDD").css("border", "1px solid #FFFFFF");
+			$("#"+sTableName+"_search_and_sort_table tr:eq(1) td:last").addClass("checkbox");
 		}
 		
 		
@@ -341,7 +306,8 @@ form.buildSearchAndSortBar = function(eSearchDiv, sTableName, oFormGrid, iGridWi
 							.find("input#"+sId);
 						var iCycleVal = eSelector.attr("cycle_value");
 						var bChecked = eSelector.prop("checked");
-						var sBackground = iCycleVal != 0 ? eSelector.parent().css("background-color") : "#DDDDDD";
+						var sBackground = iCycleVal != 0 ? eSelector.parent().css("background-color") : ""; 
+						// empty string removes the property if it has already been directly applied, so it will fall back to the default css 
 
 						thisCheckBox
 							.attr("cycle_value", iCycleVal)							
@@ -463,9 +429,7 @@ form.buildViewGrid = function(sTableName){
 	// search div on top of form
 	var eSearchDiv = $("<div></div>")
 		.attr("id", sTableName+"_search_and_sort")
-		.css("margin", 0)
-		.css("position", "relative")
-		.css("top", "10px")
+		.addClass("search_and_sort_div")		
 		.css("left", sFormPosPix + "px")
 		.css("width", iFormWidth +"px")
 		.css("height", iSearchBarHeight+"px")
@@ -478,8 +442,6 @@ form.buildViewGrid = function(sTableName){
 	var eFormParent = $("<div></div>")
 		.attr("id", sFormContainerId)
 		.addClass("formgrid")
-		.css("margin", 0)
-		.css("position", "relative")
 		.css("top", (iSearchBarHeight)+"px")
 		.css("left", sFormPosPix + "px")
 		.css("width", iFormWidth +"px")
@@ -488,7 +450,7 @@ form.buildViewGrid = function(sTableName){
 	
 
 	// set form background color
-	var sBgColor = oFormGrid["bgcolor"] != null ? oFormGrid["bgcolor"] : "#E6E6E6";
+	var sBgColor = oFormGrid["bgcolor"] != null ? oFormGrid["bgcolor"] : "";
 	eFormParent.css("background-color", sBgColor);
 
 	// get definition size
@@ -682,10 +644,7 @@ form.buildViewGrid = function(sTableName){
 					.css("top", "calc("+aPosition[1]+" * (var(--"+sFormContainerId+"_cellheight)))")  		
 					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
-					//.css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					//.css("top", (parseFloat(aPosition[1]) * iGridHeightUnit) +"px")  		
-					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					
 		}
 		
 		// now add the cell block
@@ -701,10 +660,7 @@ form.buildViewGrid = function(sTableName){
 					.css("top", "calc("+(aPosition[1]+ (sBlockText != null ? 1:0)) + " * (var(--"+sFormContainerId+"_cellheight)))") // if text is given, add one iGridHeightUnit
 					.css("width", "calc("+aBlockSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
 					.css("min-height", "calc("+aBlockSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");	// min-height to prevent overlapping in flex mode
-					// .css("left", (parseFloat(aPosition[0]) * iGridWidthUnit) +"px")
-					//.css("top", (parseFloat(aPosition[1] + (sBlockText != null ? 1:0)) * iGridHeightUnit) +"px") // if text is given, add one iGridHeightUnit
-					//.css("width", (parseFloat(aBlockSize[0]) * iGridWidthUnit) +"px")
-					//.css("min-height", (parseFloat(aBlockSize[1]) *iGridHeightUnit) +"px");	// min-height to prevent overlapping in flex mode
+					
 					
 	}
 
@@ -750,8 +706,7 @@ form.buildViewGrid = function(sTableName){
 				.attr("id", sTableName+"_form_cell_"+sCellName);
 		var eCellLabel = $("<div></div>")
 				.addClass("form_celllabel")
-				.attr("id", "form_celllabel_"+sCellName)
-				.css("font-weight", "bold")
+				.attr("id", "form_celllabel_"+sCellName)				
 				.text(sNiceName)
 		var eCellField = $("<div></div>")
 				.addClass("form_cellvalue")
@@ -801,9 +756,7 @@ form.buildViewGrid = function(sTableName){
 
 		if (bCheckBoxType){
 			eCellField.append(
-				$("<input></input>")
-					.attr("type", "checkbox")
-					.css("padding", "5px")
+				$("<input></input>").attr("type", "checkbox")
 			);
 		}
 
@@ -818,9 +771,7 @@ form.buildViewGrid = function(sTableName){
 			if (iIndexOfEmptyRegex>0) aNewSelectBoxValues.splice(iIndexOfEmptyRegex, 1);			
 			
 			var eSelectBox = $("<select></select>")
-				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
-				//.css("width", (parseFloat(aCellSize[0]) * iGridWidthUnit) +"px") // prevent large string values from making selectbox too large!
-				.css("padding", "5px");
+				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))");
 			for (var i=0; i<aNewSelectBoxValues.length; i++){
 				eSelectBox.append(
 					$("<option></option>")
@@ -835,9 +786,7 @@ form.buildViewGrid = function(sTableName){
 
 		else {
 			eCellField.append(
-				$("<textarea></textarea>")
-					.css("padding", "5px")
-					.attr("placeholder", sPlaceholder ?? "")
+				$("<textarea></textarea>").attr("placeholder", sPlaceholder ?? "")
 			);
 		}
 		
@@ -912,8 +861,7 @@ form.buildViewGrid = function(sTableName){
 				.append(
 					$("<div></div>")
 						.addClass("formview_listlabel")
-						.attr("id", "formview_listlabel_"+sListLabel)
-						.css("font-weight", "bold")
+						.attr("id", "formview_listlabel_"+sListLabel)						
 						.text(sListLabelInGUI != null ? sListLabelInGUI : sListLabel) 
 				);
 		var listContainer = $("<div></div>")
@@ -999,9 +947,9 @@ form.buildViewGrid = function(sTableName){
 		var customButton = $("<button>")
 			.addClass("formview_button")
 			.append( 
-				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "white") ).html(sButtonNiceName ?? sButtonName) 
+				$("<span></span>").css("color", (sButtonColor!=null ? sButtonColor : "") ).html(sButtonNiceName ?? sButtonName) 
 			)
-			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "blue") )
+			.css("background-color", (sButtonBgColor!=null ? sButtonBgColor : "") )
 			.attr("id", "form_button_"+sButtonId)
 			.attr("name", sButtonName)
 			.click(function(){
@@ -1063,12 +1011,11 @@ form.buildViewGrid = function(sTableName){
 	var formResetButton = $("<button>")
 		.addClass("formview_button")
 		.append( 
-			$("<span></span>").css("color", "#000000").text(lang.undo) 
+			$("<span></span>").text(lang.undo) 
 		)
 		.append( 
 			$("<span></span>").addClass(form.reset_button_icon_neutral) 
-		)
-		.css("background-color", form.reset_button_color_neutral)
+		)		
 		.attr("id", "reset_button")
 		.click(function(){
 
@@ -1095,12 +1042,11 @@ form.buildViewGrid = function(sTableName){
 	var formSendButton = $("<button>")
 		.addClass("formview_button")
 		.append( 
-			$("<span></span>").css("color", "#000000").text(lang.save) 
+			$("<span></span>").text(lang.save) 
 		)
 		.append( 
 			$("<span></span>").addClass(form.send_button_icon_neutral) 
 		)
-		.css("background-color", form.send_button_color_neutral)
 		.attr("id", "send_button")		
 		.click(function(){
 

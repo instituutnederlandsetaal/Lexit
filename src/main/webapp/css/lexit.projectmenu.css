@@ -1,0 +1,64 @@
+
+
+/******************************************************************* 
+ * huisstijl welcome tables 
+ *******************************************************************/
+
+body.huisstijl #page section {
+    font-family: Schoolboek, Verdana, sans-serif, gtb;
+    padding: 0.5rem 1rem 1rem 1rem;
+    margin: 0 1rem 0.5rem 1rem;
+    max-width: 1000px;
+    h2 {
+        font-size: 24px;
+        text-transform: lowercase;
+        border-bottom: 1px black solid;
+        margin: 0 0 0.5rem 0;
+        padding: 0 0 0.25rem 0.5rem;
+        font-weight: normal;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        tr td {
+            vertical-align: initial;
+            padding: 0.15rem 0;
+            a {
+                color: black;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: none;
+                }
+            }
+            &:nth-child(1) {
+                text-align: right;
+                width: 37%;
+                padding-right: 0.5rem;
+            }
+            &:nth-child(2) {
+                text-align: center;
+            }
+            &:nth-child(3) {
+                width: 60%;
+                border-left: 1px black solid;
+                padding-left: 0.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    }
+    &#production {
+        background: color(from #89C24B srgb r g b / 0.7); /* INT-green */
+    }
+    &#goodies {
+        background: color(from #43BDF7 srgb r g b / 0.8); /* Insta-blue */
+    }
+    &#development {
+        background: color(from #FFF064 srgb r g b / 0.8); /* INT-yellow */
+    }
+    &#closed {
+        background: color(from #E8503D srgb r g b / 0.8); /* INT-red */
+    }
+    &#unknown {
+        background: #CCCDCC; /* INT-lightgrey */
+    }
+}

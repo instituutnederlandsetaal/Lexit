@@ -304,25 +304,18 @@ td.selectColumns = function(sSomeTablename){
 	
 	var promptDiv = $("<div></div>")
 		.attr("id", promptDivId)
-		.attr("title", lang.columns_selection_and_order)
-		.css("font-size", "12px");
+		.addClass("columns_selection_interface")
+		.attr("title", lang.columns_selection_and_order);	
 	
-	
-	var sortableUl = $("<ul></ul>")
-		.attr("id", sortableId)
-		.css("list-style-type", "none")
-		.css("margin", "0")
-		.css("padding", "0")
-		.css("width", "60%");
-	
+	var sortableUl = $("<ul></ul>").attr("id", sortableId);	
 	
 	// get list of columns to choose from
 	var aColumnNames = mt.getListOfColumnsOf(sSomeTablename);
 	
 	// build the list of draggable and clickable columns
 	
-	for (var i=0; i<aColumnNames.length; i++)
-		{
+	for (var i=0; i<aColumnNames.length; i++) {
+		
 		// get column name
 		var fieldLC = aColumnNames[i];
 		
@@ -342,7 +335,9 @@ td.selectColumns = function(sSomeTablename){
 			.attr("name", fieldLC)			
 			.attr("id", "prompt_"+fieldLC)
 			// some users (un)checking a box implies that the table is NOT in automatic/optimal mode  
-			.click(function(){bOptimal = false;}); 
+			.click(function(){
+				bOptimal = false;
+			}); 
 		
 		// check the box if the column is visible
 		if (columnVisible)
@@ -354,17 +349,11 @@ td.selectColumns = function(sSomeTablename){
 		var liElement = $("<li></li>")
 			.addClass( "ui-state-default" )
 			.attr("id", fieldLC)
-			.css("margin", "0 3px 3px 3px")
-			.css("padding", "0.4em")
-			.css("padding-left", "1.5em")
-			.css("font-size", "1.0em")
-			.css("height", "18px")
 			.prepend(input);		
 		var spanElement1 = $("<span></span>")
-			.addClass( "ui-icon ui-icon-arrowthick-2-n-s" )	
-			.css("position", "absolute")
-			.css("margin-left", "-3.0em");
+			.addClass( "ui-icon ui-icon-arrowthick-2-n-s" );
 		var spanElement2 = $("<span></span>")
+			.addClass("colname")
 			.text( sNiceName != null ? sNiceName : fieldLC ); // show column name of (if available) a preferred, GUI friendly name
 		liElement.append(spanElement1);
 		liElement.append(spanElement2);

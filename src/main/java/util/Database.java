@@ -28,6 +28,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import resources.Constants;
 import resources.ContextObject;
 import resources.DbResponseObject;
+import resources.TableResources;
 import table.TableAndCountObject;
 import table.TableRecordObject;
 import table.TableRecordsObject;
@@ -712,7 +713,10 @@ public class Database {
 	public UniqueValuesObject getUniqueValuesWithFreqs(String tableName, String columnName, String columnValueFilter, String otherFiltersAndValues, String limit, boolean sortByFreq) {
 		
 		String schema = getSchema(tableName);		
-		if (columnValueFilter == null) columnValueFilter = "";
+		if (columnValueFilter == null) 
+			columnValueFilter = "";
+		else
+			columnValueFilter = TableResources.setRightSearchValue(columnValueFilter);
 		
 		
 		// prepare the column filters part
@@ -739,7 +743,7 @@ public class Database {
 			String[] columnNameAndValuePair = aOtherFiltersAndValues[i].split("###");
 			if (columnNameAndValuePair.length != 2) continue;
 			String oneColumnName = columnNameAndValuePair[0];
-			String oneColumnValue = columnNameAndValuePair[1];
+			String oneColumnValue = TableResources.setRightSearchValue(columnNameAndValuePair[1]);
 			
 			// check if current column can be searched given a search string
 			if ( !valueIsSuitableForColumnType(oneColumnValue, getTypeOfColumn(tableName, oneColumnName, null)) )
@@ -802,9 +806,7 @@ public class Database {
         			"GROUP BY " + getSafeFieldName(columnName) + " " +
         			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") + " " +
         			"LIMIT " + limit + ";";
-    	}
-    	
-    	    	
+    	}    	  
     	
 
 	    UniqueValuesObject uvo = new UniqueValuesObject();
@@ -1660,7 +1662,8 @@ public class Database {
 	
 	
 	/**
-	 * update the comment of a table
+	 * Update the comment of a table
+	 * 
 	 * like:
 	 * COMMENT ON TABLE mytable IS 'This is my table.';
 	 * @param tableName
@@ -1704,8 +1707,8 @@ public class Database {
 	
 	
 	/**
-	 * getComment
 	 * Get the comment on a table
+	 * 
 	 * @param tableName
 	 * @return
 	 */
@@ -1850,9 +1853,10 @@ public class Database {
 
 
 	/**
-	 * check if a table exists
+	 * Check if a table exists
+	 * 
 	 * @param tableName
-	 * @return
+	 * @return true/false
 	 */
 	public Boolean checkIfTableExists(String tableName){
 
@@ -2287,8 +2291,9 @@ public class Database {
 	
 	/**
 	 * Get list of available tables and views
+	 * 
 	 * @param tableName
-	 * @return
+	 * @return ArrayList
 	 */
 	public  ArrayList<String[]> getTableList(){
 
@@ -2389,8 +2394,8 @@ public class Database {
 	
 	/**
 	 * Get list of available tables (NO views)
-	 * @param tableName
-	 * @return
+	 * 
+	 * @return ArrayList
 	 */
 	public  ArrayList<String> getTrueTablesList(){
 
@@ -3514,7 +3519,8 @@ public class Database {
 		// ------------
 		// value is of array type (which is not necessarily the same as the column type), 
 		// so make sure its type is returned as an array type
-		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")) {
+		if (columnValue != null && columnValue.matches("!?\\{.*") && columnValue.endsWith("}")
+				&& !Util.isJsonObject(columnValue)) {
 			
 			// get the datatype of the column from the database
 			String typeOfCol = getTypeOfColumn(tableName, columnName, null);
@@ -3579,24 +3585,47 @@ public class Database {
 		
 		// the preceeding query is not compatible with materialized views, so we use the following query for them
 		
+//		String typeQuery = 
+//				"SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS type "+
+//				"FROM pg_catalog.pg_attribute a "+
+//				"JOIN pg_catalog.pg_class c "+
+//				"  ON c.oid = a.attrelid "+
+//				"JOIN pg_catalog.pg_namespace n "+
+//				"  ON n.oid = c.relnamespace "+
+//				"WHERE c.relname = ? "+ // table
+//				"  AND a.attname = ? "+ // column
+//				"  AND n.nspname = ? "+	// schema	
+//				"  AND a.attnum > 0 "+
+//				"  AND NOT a.attisdropped;";
+		
+		// this query works for both tables and materialized views
+		
 		String typeQuery = 
-				"SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS type "+
+				"SELECT "+
+				"  CASE "+
+				"    WHEN t.typtype = 'e' THEN 'USER-DEFINED' "+ // enum
+				"    WHEN tn.nspname NOT IN ('pg_catalog', 'information_schema') THEN 'USER-DEFINED' "+
+				"    ELSE pg_catalog.format_type(a.atttypid, a.atttypmod) "+
+				"  END AS type "+
 				"FROM pg_catalog.pg_attribute a "+
 				"JOIN pg_catalog.pg_class c "+
 				"  ON c.oid = a.attrelid "+
 				"JOIN pg_catalog.pg_namespace n "+
 				"  ON n.oid = c.relnamespace "+
+				"JOIN pg_catalog.pg_type t "+
+				"  ON t.oid = a.atttypid "+
+				"JOIN pg_catalog.pg_namespace tn "+
+				"  ON tn.oid = t.typnamespace "+
 				"WHERE c.relname = ? "+ // table
 				"  AND a.attname = ? "+ // column
 				"  AND n.nspname = ? "+	// schema	
 				"  AND a.attnum > 0 "+
-				"  AND NOT a.attisdropped;";
-		
+				"  AND NOT a.attisdropped;"; // exclude dropped columns
 			
 		PostgresConnectionManager dc = getPostgresConnectionManager();
 		
 		String[] args = new String[]{tableNameOnly, columnName, schema};
-		
+				
 		try {
 			
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, typeQuery, args).getRows();
@@ -3626,10 +3655,11 @@ public class Database {
 	
 	
 	/**
-	 * get the types of all columns
+	 * Get the types of all columns
+	 * 
 	 * @param tableName
-	 * @param columns
-	 * @return
+	 * @param array of columns
+	 * @return array of types
 	 */
 	public  String[] getTypesOfColumns(String tableName, String[] columns){
 		
@@ -3644,17 +3674,26 @@ public class Database {
 		// the preceeding query doesn't work for materialized views, because those don't have entries in information_schema.columns, so we use the following query for them
 		
 		String typeQuery = 
-				"SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS type "+
+				"SELECT "+
+				"  CASE "+
+				"    WHEN t.typtype = 'e' THEN 'USER-DEFINED' "+ // enum
+				"    WHEN tn.nspname NOT IN ('pg_catalog', 'information_schema') THEN 'USER-DEFINED' "+
+				"    ELSE pg_catalog.format_type(a.atttypid, a.atttypmod) "+
+				"  END AS type "+
 				"FROM pg_catalog.pg_attribute a "+
 				"JOIN pg_catalog.pg_class c "+
 				"  ON c.oid = a.attrelid "+
 				"JOIN pg_catalog.pg_namespace n "+
 				"  ON n.oid = c.relnamespace "+
+				"JOIN pg_catalog.pg_type t "+
+				"  ON t.oid = a.atttypid "+
+				"JOIN pg_catalog.pg_namespace tn "+
+				"  ON tn.oid = t.typnamespace "+
 				"WHERE c.relname = ? "+ // table
 				"  AND a.attname = ? "+ // column
 				"  AND n.nspname = ? "+	// schema	
 				"  AND a.attnum > 0 "+
-				"  AND NOT a.attisdropped;";
+				"  AND NOT a.attisdropped;"; // exclude dropped columns
 		
 		String schema = getSchema(tableName);
 		String tableNameOnly = getTableNameOnly(tableName);
@@ -3682,6 +3721,7 @@ public class Database {
 				// (and put result in cache for later call)
 				else {
 					String[] args = new String[]{tableNameOnly, columns[i], schema};		
+					
 					
 					List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, typeQuery, args).getRows();				
 					ArrayList<String[]> res = Util.getResultSetCopyInAList(rs, new String[]{"type"});						
@@ -3755,7 +3795,7 @@ public class Database {
 			"LEFT   JOIN pg_description d ON d.objoid  = a.attrelid AND d.objsubid = a.attnum "+
 			"LEFT   JOIN pg_attrdef f ON f.adrelid = a.attrelid  AND f.adnum = a.attnum "+
 			"WHERE  a.attnum > 0 "+
-			"AND    NOT a.attisdropped "+
+			"AND    NOT a.attisdropped "+ // exclude dropped columns
 			"AND    a.attrelid = ?::regclass "+
 			"ORDER  BY a.attnum; ";
 		
@@ -3796,8 +3836,10 @@ public class Database {
 	
 	/**
 	 * get the argument types of a function
+	 * 
 	 * @param functionName
-	 * @return
+	 * @param number of arguments (needed for distinction since we sometimes have homonyms)
+	 * @return array of argument types
 	 */
 	public String[] getFunctionTypes(String functionName, int numberOfArgs){
 		
@@ -3879,8 +3921,10 @@ public class Database {
 	/**
 	 * Determine if a function is a writing function (return 'writing')
 	 * or just a reading function  (return 'reading')
+	 * 
 	 * @param functionName
-	 * @return
+	 * @param number of arguments (needed for distinction since we sometimes have homonyms)
+	 * @return string 'writing' or 'reading', describing the function operation type
 	 */
 	public String getFunctionOperationType(String functionName, int numberOfArgs){
 		
@@ -3984,8 +4028,10 @@ public class Database {
 	
 	/**
 	 * get the return type of a function
+	 * 
 	 * @param functionName
-	 * @return
+	 * @param number of arguments (needed for distinction since we sometimes have homonyms)
+	 * @return return type of the function
 	 */
 	public String getFunctionReturnType(String functionName, int numberOfArgs){
 		
@@ -4082,7 +4128,11 @@ public class Database {
 
 	}
 	
-	// get the column names of a table
+	/** Get the column names of a table
+	 * 
+	 * @param tableName
+	 * @return array of column names
+	 */
 	public  String[] getColumnNames(String tableName){
 		
 		String[] columnNames;		
@@ -4128,7 +4178,7 @@ public class Database {
 			"WHERE c.relname = ? "+
 			"  AND n.nspname = ? "+
 			"  AND a.attnum > 0 "+
-			"  AND NOT a.attisdropped "+ // the proper way to exclude dropped columns
+			"  AND NOT a.attisdropped "+ // exclude dropped columns
 			"ORDER BY a.attnum;";
 		
 		
@@ -4174,11 +4224,29 @@ public class Database {
 		String nameOfCustomType = "";
 		String schema = getSchema(tableName);
 		
-		String query = "SELECT udt_name AS custom_type "+
-			"FROM information_schema.COLUMNS "+
-			"WHERE table_name  = ? "+
-			"AND column_name = ? " +
-			"AND table_schema = ? ;";
+		// this query won't work with materialized views
+		
+//		String query = "SELECT udt_name AS custom_type "+
+//			"FROM information_schema.COLUMNS "+
+//			"WHERE table_name  = ? "+
+//			"AND column_name = ? " +
+//			"AND table_schema = ? ;";
+		
+		// compatible with materialized views
+		String query = 
+				"SELECT t.typname AS custom_type "+
+				"FROM pg_catalog.pg_attribute a "+
+				"JOIN pg_catalog.pg_class c "+
+				"  ON c.oid = a.attrelid "+
+				"JOIN pg_catalog.pg_namespace n "+
+				"  ON n.oid = c.relnamespace "+
+				"JOIN pg_catalog.pg_type t "+
+				"  ON t.oid = a.atttypid "+
+				"WHERE c.relname = ? "+
+				"  AND a.attname = ? "+
+				"  AND n.nspname = ? "+
+				"  AND a.attnum > 0 "+
+				"  AND NOT a.attisdropped;"; // exclude dropped columns
 		
 		String[] args = new String[]{tableName, columnName, schema};
 		

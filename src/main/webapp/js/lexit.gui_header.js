@@ -164,10 +164,9 @@ head.showNameOfTheTable = function(sSomeTablename){
 	
 	var tableNameElement = $("<span></span>")
 		.text(sNameToShow+":")
-		.css("font-weight", "bold")
-		.css("color", "#A4A4A4")
 		.attr("id", sSomeTablename+"_tablename")
 		.attr("title", ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 ) ? lang.click_to_add_a_note:"" )
+		.addClass("table_name_span")
 		.addClass( ( (document.URL).regexIndexOf( INL_HOMEURL )>-1 ) ? "tooltip":"" );
 
 
@@ -262,13 +261,7 @@ head.showNameOfTheTable = function(sSomeTablename){
 	$("#"+sSomeTablename+"_info").before(
 			$("<div></div>")
 			.attr("id", sSomeTablename+"_table_name")
-			.addClass("table_name")
-			.css("margin-right", "10px")
-			.css("position", "absolute")
-			.css("top", "2px")
-			.css("left", "2px")
-			.css("heigth", "30%")
-			.css("text-align", "left")			
+			.addClass("table_name")						
 			.append(tableNameElement)
 			);
 };
@@ -373,10 +366,10 @@ head.putFreeHeaderButtons = function(sSomeTableName){
 		if (sButtonClass != null)
 			freeButton.addClass(sButtonClass);
 
-		// append the button to the top
+		// append the button to the header
 		var buttonDiv = $("<div></div>")
 				.attr("id", sButtonDivId)
-				.css("display", "inline")
+				.addClass("free_header_button_div")
 				.append(freeButton);
 		$("#" + sSomeTableName + "_wrapper div.top").append(buttonDiv);
 		
@@ -410,7 +403,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 		$("#"+sSomeTableName+"_filter").append(
 				$("<div></div>")
 				.attr("id", sSomeTableName+"_room_between_buttons")
-				.css("display", "inline")
+				.addClass("room_between_buttons")
 				.append($("<br/>"))
 				);
 	
@@ -524,10 +517,10 @@ head.putResetButton = function(sSomeTablename){
 			
 	var resetButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#F5BCA9")
 		.append($("<span></span>").addClass("ui-icon ui-icon-home"))
 		.attr("title", lang.reset_button).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("reset_button")
 		.bind("click", function(){
 			
 			if (kf._getPressedKey() == 'shift'){
@@ -634,6 +627,7 @@ head.putColumnSelectionButton = function(sSomeTablename){
 		.append($("<span></span>").addClass("ui-icon ui-icon-wrench"))
 		.attr("title", lang.columns_selection).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("colsel_button")
 		.bind("click", function(){
 			
 			td.selectColumns(sSomeTablename);
@@ -641,7 +635,7 @@ head.putColumnSelectionButton = function(sSomeTablename){
 	
 	$("#"+sSomeTablename+"_filter").append(
 			$("<div></div>").attr("id", sSomeTablename+"_colselect_button").css("display", "inline").append(colSelectButton)
-			);
+		);
 	
 	// if the 'optimal' mode is turned on, it must be visible (colored button)
 	head.setColorOfColumnSelectionButton(sSomeTablename, bOptimal);	
@@ -653,8 +647,11 @@ head.putColumnSelectionButton = function(sSomeTablename){
 // if in optimal mode, the column setting button should look a bit darker
 head.setColorOfColumnSelectionButton = function(sTableName, bOptimal){
 	
-	$("#"+sTableName+"_colselect_button button")
-		.css("background-color", bOptimal ? "#00A2E0" : "#B2DEF7")
+	var aClasses = (bOptimal ? ["normalmode", "optimalmode"] : ["optimalmode", "normalmode"]);
+	
+	$("#"+sTableName+"_colselect_button button.colsel_button")
+		.removeClass(aClasses[0])
+		.addClass(aClasses[1])
 		.attr("title", bOptimal ? 
 				lang.columns_selection_optimal_mode : 
 				lang.columns_selection);
@@ -741,10 +738,10 @@ head.putViewTypeButton = function(sSomeTablename){
 			
 	var viewtypeButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#F4FA58")
 		.append($("<span></span>").addClass("ui-icon ui-icon-document"))
 		.attr("title", lang.view_type_button).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("viewtype_button")
 		.bind("click", function(){
 
 			// remove focus from button to prevent 'enter' strike to reactivate it
@@ -771,11 +768,11 @@ head.putRefreshButton = function(sSomeTablename){
 	if ( !conf.getRefreshButton(aTableSettings)) return true;
 			
 	var refreshButton = $("<button/>")
-		.attr("type", "button")
-		.css("background-color", "#99CCFF")
+		.attr("type", "button")		
 		.append($("<span></span>").addClass("ui-icon ui-icon-refresh"))
 		.attr("title", lang.refresh_button).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("refresh_button")
 		.bind("click", function(){
 			
 			// get the table type
@@ -793,7 +790,7 @@ head.putRefreshButton = function(sSomeTablename){
 				fn.refreshMaterializedView(sSomeTablename, 
 					function(){
 						fn.refreshTable(sSomeTablename);
-						}
+					}
 				);
 			}
 			// force webservice to clean its counter cache etc
@@ -802,7 +799,7 @@ head.putRefreshButton = function(sSomeTablename){
 				fn.cleanTableCache(sSomeTablename, 
 					function(){
 						fn.refreshTable(sSomeTablename);
-						}
+					}
 				);				
 			}
 			
@@ -837,8 +834,9 @@ head.putUndoButton = function(sSomeTablename){
 	var undoButton = $("<button/>")
 		.attr("type", "button")
 		.attr("id", sSomeTablename+"_undo_button")
-		.css("background-color", "#D5DAE4")		
 		.addClass("header_button")
+		.addClass("undo_button")
+		.addClass("nothing_to_undo")
 		.bind("click", function(){
 			
 			if (kf._getPressedKey() == 'shift') {
@@ -879,10 +877,10 @@ head.putGoToButton = function(sSomeTablename){
 	
 	var goToButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#FF8585")
 		.append($("<span></span>").addClass("ui-icon ui-icon-circle-arrow-e"))
 		.attr("title", lang.goto_button).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("goto_button")
 		.bind("click", function(){
 			
 			// special case: shift was pressed
@@ -946,11 +944,10 @@ head.putSearchAndReplaceButton = function(sSomeTablename){
 	
 	var searchAndReplaceButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#D8F781")
 		.append($("<span></span>").addClass("ui-icon ui-icon-search"))
 		.attr("title", lang.header_search_and_replace_button).addClass("tooltip")
-		//.addClass("functions_are_asleep")
 		.addClass("header_button")
+		.addClass("search_replace_button")
 		.bind("click", function(){			
 			
 			$("#"+sSomeTablename+"_search_and_replace").remove();
@@ -967,6 +964,7 @@ head.putSearchAndReplaceButton = function(sSomeTablename){
 							$("#"+sSomeTablename+"_old_string").val(mt.getPreviousOldString(sSomeTablename));
 						if (mt.getPreviousNewString(sSomeTablename) != null)
 							$("#"+sSomeTablename+"_new_string").val(mt.getPreviousNewString(sSomeTablename));
+							
 						var sPreviousColumnToAlter = mt.getPreviousColumnToAlter(sSomeTablename);
 						if (sPreviousColumnToAlter != '' && sPreviousColumnToAlter != null)
 							$("#"+sSomeTablename+"_selected_column option[value='"+sPreviousColumnToAlter+"']").attr('selected','selected');
@@ -1012,16 +1010,13 @@ head.putSelectionButton = function(sSomeTablename){
 		.css("background-color", sBackgroundColor)
 		.addClass(sFunctionAwakeOrAsleep)
 		.addClass("header_button")
+		.addClass("rowsel_button")
 		.append($("<span></span>").addClass("ui-icon ui-icon-pin-s"))
 		.attr("title", sButtonMsg).addClass("tooltip");
 	
-//	$("#"+sSomeTablename+"_filter").append(
-//			$("<div></div>").css("display", "inline").prepend(makeSelectionButton)
-//			);
-	
 	$("#"+sSomeTablename+"_filter").append(
-			$("<div></div>").css("display", "inline").append(makeSelectionButton)
-			);
+			$("<div></div>").attr("id", sSomeTablename+"_selectionbutton").css("display", "inline").append(makeSelectionButton)
+		);
 	
 	$(".tooltip").tipTip( gui.getTiptipConfig() );
 	
@@ -1036,9 +1031,8 @@ head.putSelectionButton = function(sSomeTablename){
 				
 		// give button the right settings
 		$("#"+sSomeTablename+"_wrapper #selectionbutton")
-			.css("background-color", "#EE0000")
-			.attr("title", lang.turn_row_selection_off).addClass("tooltip");
-		$("#"+sSomeTablename+"_wrapper #selectionbutton")
+			.attr("title", lang.turn_row_selection_off)
+			.addClass("tooltip")
 			.delay(500).removeClass("functions_are_awake").addClass("functions_are_asleep");
 		
 		$(".tooltip").tipTip( gui.getTiptipConfig() );
@@ -1053,10 +1047,9 @@ head.putSelectionButton = function(sSomeTablename){
 		$('#'+sSomeTablename+' td.editable_checkbox input').attr("disabled", false);		
 		
 		// give button the right settings
-		$("#"+sSomeTablename+"_wrapper #selectionbutton")
-			.css("background-color", "#99CCFF")
-			.attr("title", lang.turn_row_selection_on).addClass("tooltip");
-		$("#"+sSomeTablename+"_wrapper #selectionbutton")
+		$("#"+sSomeTablename+"_wrapper #selectionbutton")			
+			.attr("title", lang.turn_row_selection_on)
+			.addClass("tooltip")
 			.delay(500).removeClass("functions_are_asleep").addClass("functions_are_awake");
 		
 		$(".tooltip").tipTip( gui.getTiptipConfig() );
@@ -1081,10 +1074,10 @@ head.putHelpButton = function(sSomeTablename){
 			
 	var helpButton = $("<button/>")
 		.attr("type", "button")
-		.css("background-color", "#B4F0D2")
 		.append($("<span></span>").addClass("ui-icon ui-icon-help"))
 		.attr("title", lang.help_button).addClass("tooltip")
 		.addClass("header_button")
+		.addClass("help_button")
 		.bind("click", function(){
 
 			// detect which buttons are visible at the moment, 
@@ -1098,7 +1091,7 @@ head.putHelpButton = function(sSomeTablename){
 			var bRefreshButton =	$(nTable).find("div#"+sTableName+"_refreshbutton").length > 0;
 			var bReplaceButton = 	$(nTable).find("div#"+sTableName+"_searchandreplacebutton").length > 0;
 			var bGotoButton = 		$(nTable).find("div#"+sTableName+"_goto_button").length > 0;
-			var bRowSelect =		$(nTable).find("button#selectionbutton").length > 0;
+			var bRowSelect =		$(nTable).find("div#"+sTableName+"_selectionbutton").length > 0;
 			var bUndoButton = 		$(nTable).find("div#"+sTableName+"_undo_button_div").length > 0;
 			var bColSelect =		$(nTable).find("div#"+sTableName+"_colselect_button").length > 0;
 			var bViewMode = 		$(nTable).find("div#"+sTableName+"_viewtypebutton").length > 0;
@@ -1114,8 +1107,7 @@ head.putHelpButton = function(sSomeTablename){
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)
-				.attr("title", lang.help_button)
-				.css("font-size", "12px");			
+				.attr("title", lang.help_button);			
 			
 			helpDiv.append(lang.helpText);			
 			$(document.body).append(helpDiv);
@@ -1170,12 +1162,6 @@ head.putTableCloseButton = function(sSomeTablename){
 	var tableCloseButton = $("<button/>")
 		//.attr("title", lang.close).addClass("tooltip")  // remove tooltip, as it remains visible when the table is closed (needs to be fixed properly) 
 		.attr("type", "button")
-		.css("background-color", "#FF8585")  //"#DF3A01")		
-		.css("font-weight", "bold")
-		.css("font-size", "7pt")
-		.css("margin-right", "10px")
-		.css("-webkit-border-radius", "15px")
-		.css("-moz-border-radius", "15px")
 		.append($("<span></span>").addClass("ui-icon ui-icon-closethick"))
 		.bind("click", function(){
 			
@@ -1197,7 +1183,6 @@ head.putTableCloseButton = function(sSomeTablename){
 	$("#"+sSomeTablename+"_table_name").prepend(
 		$("<div></div>")
 			.attr("id", sSomeTablename+"_tableclosebutton")
-			.css("display", "inline")
 			.addClass("tableclosebutton")
 			.append(tableCloseButton)
 	);
@@ -1215,12 +1200,6 @@ head.putTableEraseButton = function(sSomeTablename){
 	var tableEraseButton = $("<button/>")
 		.attr("title", lang.import_erase_tooltip).addClass("tooltip")
 		.attr("type", "button")
-		.css("background-color", "#9FF781")
-		.css("font-weight", "bold")
-		.css("font-size", "7pt")
-		.css("margin-right", "10px")
-		.css("-webkit-border-radius", "15px")
-		.css("-moz-border-radius", "15px")
 		.append($("<span></span>").addClass("ui-icon ui-icon-trash"))
 		.bind("click", function(){
 			
@@ -1263,7 +1242,10 @@ head.putTableEraseButton = function(sSomeTablename){
 		});
 
 	$("#"+sSomeTablename+"_table_name").prepend(
-		$("<div></div>").attr("id", sSomeTablename+"_tableerasebutton").css("display", "inline").append(tableEraseButton)
+		$("<div></div>")
+			.attr("id", sSomeTablename+"_tableerasebutton")
+			.addClass("tableerasebutton")			
+			.append(tableEraseButton)			
 	);
 
 };
@@ -1294,8 +1276,7 @@ head.showGeneralHelp = function(){
 			
 			var helpDiv = $("<div></div>")
 				.attr("id", helpDivId)
-				.attr("title", lang.help_button)
-				.css("font-size", "12px");			
+				.attr("title", lang.help_button);			
 			
 			helpDiv.append(lang.helpText);			
 			$(document.body).append(helpDiv);

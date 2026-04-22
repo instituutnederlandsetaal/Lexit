@@ -75,8 +75,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	if ( !$("#"+sSomeTableName+"_dynamic").elementExists() ) {
 		$("#dynamic").append(
 				$("<div></div>")
-				.attr("id", sSomeTableName+"_dynamic")
-				.css("z-index", 0)
+					.attr("id", sSomeTableName+"_dynamic")
+					.css("z-index", 0)
 				);		
 	}
 	
@@ -84,9 +84,8 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	$("#"+sSomeTableName+"_dynamic")
 		.addClass("table_div") // table div recognizable as such
 		.addClass("ui-widget-content") // needed for resizable, draggable etc
-		.css("width", sTableWidth)
-		.css("min-width", "50vw") // minimum width of the table, to prevent it from being too small (since the pagination div is 45vw wide!)
-		.css("margin-right", "10px");
+		.css("width", sTableWidth);
+		
 	
 	// if the table is set to be kept small, add the needed class
 	if (bKeepSmallHeight)
@@ -171,8 +170,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		.attr("cellpadding", "0")
 		.attr("cellspacing", "0")
 		.attr("border", "0")
-		.attr("class", "display")
-		.css("width", "100%")
+		.attr("class", "display")		
 		.attr("id", sSomeTableName);
 		
 	// if some class was declared, apply to the table
@@ -314,7 +312,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 				console.log( 'An error has been reported by DataTables: ', error );
 				// the error might be caused by an abort (triggered by click on 'reset' button), which is not a real error,
 				// but in other cases we reload the page 
-				if (error != 'abort') lexitReload();
+				if (error != 'abort') lexitinit.lexitReload();
 			},
 			"data": function ( d ) {
 
@@ -707,7 +705,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	// prevent ugly DataTables Ajax error
 	.on( 'error.dt', function ( e, settings, techNote, message ) {
 		console.log( 'An error has been reported by DataTables: ', message );
-		lexitReload();        
+		lexitinit.lexitReload();        
     } );  	
 	//end of datatable definition
 
@@ -906,20 +904,15 @@ tb.addExportButtons = function(sSomeTableName){
 	oTable.buttons().container()
 		.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
 	
-	// put buttons on the right side
-	$('#'+sSomeTableName+'_wrapper div.export_pane').find('div.dt-buttons')
-		.css("float", "right");
 
 	// add button groups label
 	if (aFullButtonSettings != null && aFullButtonSettings["buttons_groups_labels"] != null){
 
 		// this is a 2-members array as [<label of normal export buttons group>, <label of full export button group>]
 		var aButtonGroupsLabel = aFullButtonSettings["buttons_groups_labels"];
-		var eNormalButtonsGroup = $("<a></a>").attr("href", "#").text(aButtonGroupsLabel[0]);
-		var eFullExportButtonGroup = $("<a></a>").attr("href", "#").text(aButtonGroupsLabel[1]);
-		$(eNormalButtonsGroup).css("display", "inline-block").css("text-decoration", "none").css("position", "relative").css("padding", "0.5em").css("top", "-0.7em");
-		$(eFullExportButtonGroup).css("display", "inline-block").css("text-decoration", "none").css("position", "relative").css("padding", "0.5em").css("top", "-0.7em");
-
+		var eNormalButtonsGroup = $("<a></a>").addClass("normal_buttons_group").attr("href", "#").text(aButtonGroupsLabel[0]);
+		var eFullExportButtonGroup = $("<a></a>").addClass("fullexport_buttons_group").attr("href", "#").text(aButtonGroupsLabel[1]);
+		
 		if (mPosition == null || mPosition == 'first'){
 			eFullExportButtonGroup.insertBefore( "#"+sSomeTableName+"_wrapper div.export_pane div.dt-buttons a:eq(0)" );
 			eNormalButtonsGroup.insertAfter( "#"+sSomeTableName+"_wrapper div.export_pane div.dt-buttons a:eq(1)" );

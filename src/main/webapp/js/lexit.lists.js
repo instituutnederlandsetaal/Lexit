@@ -130,8 +130,7 @@ lists.buildLists = function(sFormTable, iListNr){
 		var sFormAndList = 		lists.buildTableId(sFormContainerId, sFormListLabel);
 		var eTable = $("<table></table>")
 			.attr("id", sFormAndList)
-			.addClass("display")
-			.css("width", "100%");
+			.addClass("display");
 
 		// THEAD
 		var eThead = $("<thead></thead>");

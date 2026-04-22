@@ -323,7 +323,7 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_goto_button").css("display", "inline");
 			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_colselect_button").css("display", "inline");
 			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_searchandreplacebutton").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top button#selectionbutton").parent().css("display", "inline");
+			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_selectionbutton").css("display", "inline");
 			$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_selectionbutton").parent().css("display", "inline");
 
 		}
@@ -474,8 +474,6 @@ gui.buildFormViewIfRequiredOLD = function(sSomeTablename){
 			.css("width", (iMaxColumnTitleWidth*1.5)+"px")
 			.css("height", (iBaseHeight)+"px" );
 
-	 
-		//$(eCellValue).find("input").css("pointer-events", "none");	// enough to disable anything inside if needed!
 		
 	});
 	
@@ -1508,10 +1506,9 @@ gui.setSearchboxesCss = function(sSomeTableName){
 	// reapply font size
 	$("td").css("font-size", iFontSize);
 	
-	$("#"+sSomeTableName+"_searchboxes").css("height", "25px");
+	// synchronize with table width, to prevent misalignment 
 	$("#"+sSomeTableName+"_searchboxes").css("width", $("#"+sSomeTableName).width());
-	$("#"+sSomeTableName+"_searchboxes").css("padding", 0);
-	$("#"+sSomeTableName+"_searchboxes").css("margin", 0);
+	
 	
 	// Compute the width and relative position of each search box.
 	// We will use the column names in THEAD as a reference for width, because
@@ -1525,11 +1522,7 @@ gui.setSearchboxesCss = function(sSomeTableName){
 
 		// now set the width of the searchboxes according to the table columns
 
-		$("#"+sSomeTableName+"_searchboxes td:eq("+i+")")
-			.css("width", iWidth)
-			.css("margin", 0)
-			.css("padding", 0)
-			.css("border", "0px");
+		$("#"+sSomeTableName+"_searchboxes td:eq("+i+")").css("width", iWidth);
 		
 
 		// small tune up for particular types of search boxes 
@@ -1538,11 +1531,7 @@ gui.setSearchboxesCss = function(sSomeTableName){
 		var sCurrentColumnName =	mt.getListOfVisibleColumnsOf(sSomeTableName)[i];
 		var sFilterBoxType =		fn.getTypeOfFilterBox(sSomeTableName, sCurrentColumnName);
 		
-		// checkboxes need to be centered
-		if (sFilterBoxType == 'checkbox'){
-			$("#"+sSomeTableName+"_searchboxes td:eq("+i+")")
-				.css("text-align", "center");
-		}
+		
 		// text and select boxes need to have full width
 		if (sFilterBoxType == 'text' || sFilterBoxType == 'select'){
 		

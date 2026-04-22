@@ -192,7 +192,7 @@ $.fn.dataTable.Api.register('setSearchFilters()', function(oFilters, bUpdateSear
 
 
 // returns: associative array
-$.fn.dataTable.Api.register('getSearchFilters()', function() {
+$.fn.dataTable.Api.register('getSearchFilters()', function(bKeepExactPrefix=false) {
 	
 	var oTable = 		this.table();
 	var sTableName =	fx.getTableName(oTable);
@@ -206,7 +206,7 @@ $.fn.dataTable.Api.register('getSearchFilters()', function() {
 		var sValue = 		oTable.column(i).search();
 		
 		// remove the 'exact:' prefix belonging to search values of select boxes
-		if (typeof sValue == 'string')
+		if (typeof sValue == 'string' && !bKeepExactPrefix)
 			sValue = sValue.replace("exact:", "");
 		
 		filterList[sColumnName] = sValue;

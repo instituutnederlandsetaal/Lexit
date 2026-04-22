@@ -8,13 +8,23 @@
 	
 	<title>
 	Lex'it
-	v2026.04.14
+	v2026.04.22
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
 	<style type="text/css" title="currentStyle">
 				
-				@import "css/lexit_table.css";		
+				@import "css/lexit.page_header.css";
+				@import "css/lexit.page_body.css";
+				@import "css/lexit.projectmenu.css";
+				@import "css/lexit.table_body.css";
+				@import "css/lexit.table_general.css";
+				@import "css/lexit.table_header_and_footer.css";
+				@import "css/lexit.table_header_dialogs.css";
+				@import "css/lexit.table_search_and_sort_bar.css";
+				@import "css/lexit.dialogs_forms_and_lists.css";
+				@import "css/lexit.usersmanagement.css";
+				
 				@import "css/jquery-ui.css";
 				@import "css/jquery-ui.structure.css";
 				@import "css/jquery-ui.theme.css";
@@ -28,9 +38,7 @@
 	<!-- prettify.sunburst required by jquery.contextMenu -->
 	
 	
-	
 	<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
-	<!-- jquery 2.x is the same as jquery 1.x except it doesn't support IE 6, 7 and 8 -->
 	
 	<!-- 
 	Javascript import with needed functionalities:
@@ -56,27 +64,30 @@
 		
 	<!-- 
 	
-	Lex'it javascript functions are spread among different name spaces:
+	Lex'it javascript functions are spread across different namespaces (check the jsdoc for details):
 	
-	cm  : Context menus
-	conf: Configurator (process configuration)
-	fn	: User Functions, the functions designed to configurate the client
-	gui : Graphic User Interface functions
-	head: Table header
-	kf  : Key functions
-	mt	: Multitable (table properties registration, taking care 
-	      of doing that for more than one table at once)
-	refr: Refresh table when browser tab is regaining focus 
-	row : Row selection
-	sf  : Search functions
-	ssr	: simple search and replace function
-	tb	: Table Builder, builds the table html frame 
-	      and the Datatable object
-	td  : Functions about table details
-	ts  : Functions about table selection
-	un	: Undo function
-	lexitusers : users management
-	lexutil : utilities
+	cm  : 		Context menus functions
+	conf: 		Configurator (process configuration)
+	fn	: 		Functions targeting nodes (old DataTables API) 
+	fx  : 		Functions targeting API-instances (new DataTables API)
+	gui : 		Graphic User Interface functions
+	head: 		Table header functions
+	kf  : 		Key functions
+	lang : 		Language support
+	lexitinit: 	Initialization functions (at start up)
+	lexitspy : 	Spy mode functions (active users and connections overview)
+	lexitusers: Users management
+	lexutil : 	Utilities
+	mt	: 		Multitable (table properties registration, taking care 
+	      		of doing that for more than one table at once)
+	refr: 		Refresh table when browser tab is regaining focus 
+	row : 		Row selection
+	sf  : 		Search functions
+	ssr	: 		Simple search and replace function
+	tb	: 		Table Builder, builds the table html frame and the Datatable object (API-instance)
+	td  : 		Functions about table details
+	ts  : 		Functions about table selection
+	un	: 		Undo function
 	-->
 	
 	
@@ -91,18 +102,18 @@
 	<!-- Export facilities-->
 	
 	<script type="text/javascript" language="javascript" src="js/jszip.min.js"></script>
-	<script type="text/javascript" language="javascript" src="js/pdfmake.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/pdfmake.min.js"></script>	
 	<script type="text/javascript" language="javascript" src="js/vfs_fonts.js"></script>
-	
 	
 	<script type="text/javascript" language="javascript" src="js/dataTables.buttons.js"></script>
 	<script type="text/javascript" language="javascript" src="js/buttons.html5.js"></script>
-	<script type="text/javascript" language="javascript" src="js/buttons.print.js"></script>
-	<script type="text/javascript" language="javascript" src="trumbowyg/trumbowyg.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/buttons.print.js"></script>	
 	
 	
 	<!-- extensions -->
 	
+	<!-- wysiwyg editor -->
+	<script type="text/javascript" language="javascript" src="trumbowyg/trumbowyg.min.js"></script>
 	<!-- hashes -->
 	<script type="text/javascript" language="javascript" src="js/jshashtable.js"></script>
 	<!-- general (Lex'it) util functions -->
@@ -128,6 +139,7 @@
 	
 	<!-- Lex'it code -->
 	
+	<script type="text/javascript" language="javascript" src="js/lexit.init.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.searchFunctions.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.tableDetails.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.simpleSearchAndReplace.js"></script>	
@@ -143,6 +155,9 @@
 	<script type="text/javascript" language="javascript" src="js/lexit.usersmanagement.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.queues.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.util.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.spy.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.login.js"></script>
+	<script type="text/javascript" language="javascript" src="js/lexit.projectsmenu.js"></script>
 	
 	<!-- extra custom dataTables functions as an extension to the standard installation -->
 	
@@ -170,7 +185,7 @@
 	
 	// Argument separator within single string 
 	// this will be loaded from webservice (so we're sure the same value is used both in client and server)
-	// It will be set by setInternalSeparator() at initialization time
+	// It will be set by lexitinit.setInternalSeparator() at initialization time
 	var ARG_INTERNAL_SEPARATOR = null;
 	
 	// Data type returned by database when a field type is user-defined
@@ -259,11 +274,9 @@
 	// are we on Mac or PC?
 	var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	
-	// tell IE won't work
-	var msie = /MSIE|Trident/.test(window.navigator.userAgent);
-		
-	if (msie > 0){		
-		alert("Internet Explorer is not supported.");
+	// tell some browsers are not supported
+	if (bowser.msie || bowser.safari){		
+		alert("This browser is not supported. Use Chrome, Edge or Firefox.");
 	}	
 
 	
@@ -286,1216 +299,29 @@
 		paramsHash = lexutil.getHttpParams();
 
 		// set language to be used
-		sLexitLanguage = (paramsHash!=null && paramsHash.get("lang")!=null ?
-				paramsHash.get("lang").toLowerCase() : "nl" );
+		sLexitLanguage = lang.getLanguageCode();
 		lang.setLanguage(sLexitLanguage);
 		
 		// set neutral internal separator
-		setInternalSeparator(function(){
+		lexitinit.setInternalSeparator(function(){
 
 			// compute mode
-			computeOperatingMode();
+			lexitinit.computeOperatingMode();
 
 			// set current user name
 			// and start app in the right mode			
 			fn.setCurrentUser(null, function(){
 				
-				// when a projectname is specified as URL param 'db', this function will call startProjectOrGetConfigFilesList() and initialize() to start the project 
-				startInRightMode();	
+				// when a projectname is specified as URL param 'db', this function 
+				// will call lexitmenu.startProjectOrGetConfigFilesList() and lexitinit.initialize() 
+				// to start the project 
+				lexitinit.startInRightMode();	
 			});
 			
 		});
-
-
 					
-	});	 // end of start up
+	});	
 	
-	
-	// *********************************************************************************************************
-	
-	// login function must be accessible from anywhere, to be able to call it programmatically if needed
-	// ( synonym: fn.startLexitLogin() )
-	function startLexitLogin(){
-		
-		fn.prompt("LOGIN", ["Username", "Password"], ["", ""], 
-				function(resp){
-			
-					var url = WEBSERV_URL+"/api/login"; 
-			
-					$.ajax({
-						"type": "POST",
-						headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-			            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
-
-						"url": url,
-						"data": {
-							"username": resp["Username"],
-							"password": resp["Password"],
-							"dummy": getUniqueNumber()
-						},
-						"dataType": "xml", // get response as xml
-						"success": function(xml) {
-							var sResp = fn.getDbResponse(xml);
-					 		if (sResp == 'Access denied'){
-					 			fn.closeDialog();
-					 			fn.message(sResp, sResp, function(){
-					 				lexitReload();
-					 			});
-					 		}
-					 		else {
-					 			setTimeout(function(){lexitReload();}, 500);
-					 		}
-					 	},
-						"error": function(jqXHR, textStatus, errorThrown){
-							
-							fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
-						}
-					});
-			
-				},
-				function(){
-					// if cancel then reload
-					lexitReload();
-					
-				}
-		);
-		
-		// set password type etc
-		setTimeout(	function(){
-			$("div[id^='dialog-message']").find("form").attr("id", "loginForm");
-			$("div[id^='dialog-message']").find("input#prompt_username").attr("autocomplete", "username");
-			$("div[id^='dialog-message']").find("input#prompt_password").attr("autocomplete", "current-password");
-			
-			$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
-			fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
-			
-			$("div[id^='dialog-message']").find("input#prompt_username").focus();
-			
-		}, 100); 
-		
-	};
-	
-	
-	// logout function must be accessible from anywhere, to be able to call it programmatically if needed
-	// ( synonym: fn.startLexitLogout() )
-	function startLexitLogout(fnCallback){
-		
-		if (fn.getCurrentUser() == null){
-			console.log("Username is already empty, which means that log out was performed already.");
-			return;
-		}		
-		
-		var url = WEBSERV_URL+"/api/logout";
-		
-		$.ajax({
-			"type": "POST",
-			"url": url,
-			"data": {
-				"username": fn.getCurrentUser(),
-				"dummy": getUniqueNumber()
-			},
-			"dataType": "xml", // get response as xml
-			"success": function(xml) {
-				
-				// reset!
-				USERNAME = null;
-				SESSION_ID = null;
-				
-				// if a callback was set, call it
-				if (fnCallback != null){
-					fnCallback();
-				}
-				else {
-					fn.closeDialog();
-		 			fn.message("Log out", fn.getDbResponse(xml), function(){
-		 				lexitReload();
-		 			});
-				}
-				
-		 	},
-			"error": function(jqXHR, textStatus, errorThrown){
-				
-				fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
-			}
-		});
-		
-	};
-
-	// called by $(document).ready()
-
-	
-	function startInRightMode(){
-		
-		// now set the right mode
-		
-		if (	// user tries to access a project other than the admin console
-				!bAdmin && (paramsHash != null && paramsHash.get("db") != null) 
-				&& 
-				// and no user is logged in, or the user had proviously logged in as admin (which is the same, since that only allows access to admin console)
-				(fn.getCurrentUser() == null || fn.getCurrentUser() == "null" || fn.getCurrentUser() == "admin")){
-			
-			// try to load a login page, if available / otherwise do normal login
-			
-			if (bTest) {
-				
-				$.ajax({
-					"type": "GET",
-					"url": paramsHash.get("db")+".welcome.js",
-					"dataType": "text",
-					"data": {
-						"db_name": paramsHash.get("db"),
-						"dummy": getUniqueNumber()
-					},
-					"success": function(response){						
-						
-						// do nothing, as the welcome page is supposed to start the lexit login programmatically						
-						// get rid of default balk and title
-						fn.setBalk(false);
-						fn.setProjectTitle("");
-						// execute the script manually
-						$.globalEval(response);
-					},
-					"error": function(jqxhr, settings, exception){
-						// if no welcome page is available, do normal login
-						startLexitLogin();
-					}
-				});
-			}
-			
-			// normal mode (production)
-			else {
-				var url = WEBSERV_URL+"/api/get_welcome_page";
-				
-				$.ajax({
-					"type": "GET",
-					"url": url,
-					"dataType": "text",
-					"data": {
-						"db_name": paramsHash.get("db"),
-						"dummy": getUniqueNumber()
-					},
-					"success": function(response){						
-						
-						// if no welcome page available, do normal login
-						if (response == 'NOT_AVAILABLE'){
-							startLexitLogin();
-						}
-						// otherwise do nothing, as the welcome page is supposed to start the lexit login programmatically
-						else {												
-							// get rid of default balk and title
-							fn.setBalk(false);
-							fn.setProjectTitle("");
-							// execute the script manually
-							$.globalEval(response);
-						}
-					},
-					"error": function(jqxhr, settings, exception){
-						// if no welcome page is available, do normal login
-						startLexitLogin();
-					}
-				});
-			}
-			
-		}
-		
-		// admin mode (access to admin console only)
-		
-		else if (bAdmin) {
-			
-			fn.prompt("ADMIN LOGIN", ["Username", "Password"], ["admin::disabled", ""], 
-					function(resp){
-				
-						// temporarily turn off the Chrome fix
-						// this is needed to allow reloading, without triggering a dialog in Chrome preventing it!
-						$(window).off('beforeunload'); 
-				
-						$.ajax({
-							"type": "POST",
-							"url": WEBSERV_URL+"/api/login",
-							"data": {
-								"username": "admin",
-								"password": resp["Password"],
-								"dummy": getUniqueNumber()
-							},
-							"dataType": "xml", // get response as xml
-							"success": function(xml) {
-								
-								var sResp = fn.getDbResponse(xml);
-						 		if (sResp == 'Access denied'){
-						 			fn.closeDialog();
-						 			fn.message(sResp, sResp, function(){
-						 				lexitReload();
-						 			});
-						 		}
-						 		else {						 			
-						 			lexitusers.updateOverviewOfUsersAndRoles( function(){lexitusers.showMenu();} );						 																	 		
-						 		}
-						 	},
-							"error": function(jqXHR, textStatus, errorThrown){
-								fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
-							}
-						});
-						
-						
-				
-					},
-					function(){
-						lexitReload();
-					}
-			);
-			
-			// set password type
-			setTimeout(	function(){	
-				$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
-				fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
-			}, 100);
-		}
-
-		// global spy mode (logging info)
-		else if (bSpyMode) {
-			
-			buildUsersSpy();
-			
-			buildConnectionsSpy();
-
-			// Make the container around the user and connections table flexy
-			$("#dynamic")
-				.css("display", "flex")
-				.css("flex-flow", "row wrap")
-				.css("gap", "1rem")
-				.css("padding", "1rem");
-		}
-
-		// reset user rights
-		else if (bResetUserRights){
-			var url = WEBSERV_URL+"/api/reset_user_rights";
-			
-			$.ajax({
-				"type": "POST",
-				"url": url,
-				"data": {
-					"dummy": getUniqueNumber()
-				},
-				"dataType": "xml", // get response as xml
-				"success": function(xml) {
-					var sResp = fn.getDbResponse(xml);
-					fn.message(lang.reset, lang.response+ ": " + sResp);
-				},
-				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
-				}
-			});
-		}
-		
-		
-
-		// last case: 
-		// if 'db' parameter is NOT set, show the list of project
-		// but if 'db' parameter is set, open that project
-		
-		// in test mode (development)
-		else if (bTest) {
-			$.getScript("projects_overview.js")
-				.done(function(){
-
-					// The ajax call gets the list of declared projects out of the projects overview file.
-					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
-					// In the end, this function will call initialize();
-					startProjectOrGetConfigFilesList();
-
-				})
-				.fail(function(jqxhr, settings, exception){
-					
-					// the 'projects_overview.js' is missing
-					// try to get the list of config files directly from server
-					getProjectOverviewFromWebservice();
-				});
-		}
-
-		// in normal mode (production)
-		else {
-			var url = WEBSERV_URL+"/api/get_projects_overview";
-
-			$.ajax({
-				"type": "GET",
-				"url": url,
-				"dataType": "script",
-				"data": {
-					"dummy": getUniqueNumber()
-				},
-				"success": function(){
-					
-					// The ajax call gets the list of declared projects out of the projects overview file.
-					// As a second step, we call a function which generates a list of all projects, as some might not have been declared.
-					// In the end, this function will call initialize();
-					startProjectOrGetConfigFilesList();
-
-				},
-				"error": function(jqxhr, settings, exception){
-					
-					// the 'projects_overview.js' is missing
-					// try to get the list of config files directly from server
-					getProjectOverviewFromWebservice();
-				}
-
-			});
-
-		}
-	}
-
-
-	// compute operating mode
-
-	function computeOperatingMode(){
-		
-		// administrator mode		
-		bAdmin = (paramsHash!=null && paramsHash.get("db")=='admin');
-
-		// Are we in development (test) mode?
-		// if so, we'll be loading the file from webcontent (with $.getScript)
-		// if not, we'll be loading the file from the configuration directory (with ajax call to webservice, which is the normal mode)
-		bTest = (paramsHash!=null && paramsHash.get("test")=='true');
-
-		// are we getting a look into the active users list?
-		bSpyMode = (paramsHash!=null && paramsHash.get("db")=='spy');
-
-		// are we resetting the user rights?
-		bResetUserRights = (paramsHash!=null && paramsHash.get("db")=='reset_user_rights');
-	}
-	
-		
-	// spy mode
-		
-	function buildUsersSpy(){
-		
-		var getUsersUrl = WEBSERV_URL+"/api/get_users";		
-		
-		$.ajax({
-			type: "GET",
-			url: getUsersUrl,
-			data: {},
-			dataType: "xml",
-			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-			success: function(xml) {
-				
-				// build the table if it doesn't exist yet
-				if ( !$("#spytable").elementExists() ) {
-					var spyDiv = $("<div></div>")
-						.attr("id", "#spytable");
-				
-					var spyTable = $("<table></table>")
-						.attr("id", "spytable")
-						.addClass("display")
-						.attr("cellspacing", "0")
-					
-					var thead = $("<thead></thead>");
-					var thead_tr = $("<tr></tr>");
-					thead_tr.append( $("<th></th>").text("project_name") );
-					thead_tr.append( $("<th></th>").text("active_user") );
-					thead_tr.append( $("<th></th>").text("session_id") );
-					thead_tr.append( $("<th></th>").text("active_tab") );
-					thead_tr.append( $("<th></th>").text("last_active") );
-					thead_tr.append( $("<th></th>").text("status") );
-					thead.append(thead_tr);
-					spyTable.append(thead);
-					
-					var tfoot = $("<tfoot></tfoot>");
-					var tfoot_tr = $("<tr></tr>");
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot.append(tfoot_tr);
-					spyTable.append(tfoot);
-					
-					var tbody = $("<tbody></tbody>");
-					
-					spyTable.append(tbody);
-					spyDiv.append(spyTable);				
-					$("#dynamic").append(spyDiv);
-					
-					spyDiv
-						.css("width", "min-content")
-
-					oSpyTable = $('#spytable').DataTable({
-						"dom": '<"top"f>t',
-						"pageLength": 100,
-						"language": {
-							"search": "<b>Active projects & users</b><br><br>Filter: "
-						}
-					}).column(2).order('desc').draw();
-					
-					
-					// remove unneeded links
-					$("#headerlinks").hide();
-					
-				}
-				
-				// set the width of the filter box
-				$("#spytable_filter").removeClass("dataTables_filter");
-				
-				// remove rows from previous cycle
-				oSpyTable.rows().remove();
-				
-				// add the current info to the table
-				$(xml).find("user").each(function(){
-					
-					var UsersItems = $(this).find("item");
-					
-					oSpyTable.row.add([
-						UsersItems.eq(0).text(),
-						UsersItems.eq(1).text(),
-						UsersItems.eq(2).text(),
-						UsersItems.eq(3).text(),
-						UsersItems.eq(4).text().replaceAll(" ", "&nbsp;"),
-						UsersItems.eq(5).text().replaceAll(" ", "&nbsp;")
-						]);
-					});
-				
-				// sort by column 'last_active'
-				oSpyTable.draw();					
-				
-				// refresh after few seconds
-				setTimeout(function(){ buildUsersSpy(); }, 2000);
-			},
-			error: function(jqXHR, textStatus, errorThrown){
-				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
-			}
-		});
-		
-	};
-		
-	
-	
-	function buildConnectionsSpy(){
-		
-		var getConnectionsStateUrl = WEBSERV_URL+"/api/get_connections_state";
-		
-		$.ajax({
-			type: "GET",
-			url: getConnectionsStateUrl,
-			data: {},
-			dataType: "xml",
-			contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-			success: function(xml) {
-				
-				// build the table if it doesn't exist yet
-				if ( !$("#connectionstable").elementExists() ) {
-					var connectionDiv = $("<div></div>")
-						.attr("id", "#connectionstable");
-				
-					var connectionTable = $("<table></table>")
-						.attr("id", "connectionstable")
-						.addClass("display")
-						.attr("cellspacing", "0")
-					
-					var thead = $("<thead></thead>");
-					var thead_tr = $("<tr></tr>");
-					thead_tr.append( $("<th></th>").text("project_name") );
-					thead_tr.append( $("<th></th>").text("active") );
-					thead_tr.append( $("<th></th>").text("idle") );
-					thead_tr.append( $("<th></th>").text("total") );
-					thead_tr.append( $("<th></th>").text("awaiting") );					
-					thead.append(thead_tr);
-					connectionTable.append(thead);
-					
-					var tfoot = $("<tfoot></tfoot>");
-					var tfoot_tr = $("<tr></tr>");
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot_tr.append( $("<th></th>").text() );
-					tfoot.append(tfoot_tr);
-					connectionTable.append(tfoot);
-					
-					var tbody = $("<tbody></tbody>");
-					
-					connectionTable.append(tbody);
-					connectionDiv.append(connectionTable);				
-					$("#dynamic").append(connectionDiv);
-					
-					connectionDiv
-						.css("width", "min-content")
-
-					oConnectionsTable = $('#connectionstable').DataTable({
-						"dom": '<"top"f>t',
-						"pageLength": 100,
-						"language": {
-							"search": "<b>Connections</b><br><br>Filter: "
-						}
-					}).draw();
-					
-					
-					// remove unneeded links
-					$("#headerlinks").hide();
-					
-				}
-				
-				// remove rows from previous cycle
-				oConnectionsTable.rows().remove();
-				
-				// set the width of the filter box
-				$("#connectionstable_filter").removeClass("dataTables_filter");
-				
-				// add the current info to the table
-				$(xml).find("connection").each(function(){
-					
-					var connectionsItems = $(this).find("item");
-					
-					oConnectionsTable.row.add([
-						connectionsItems.eq(0).text(),
-						"<center>"+connectionsItems.eq(1).text()+"</center>",
-						"<center>"+connectionsItems.eq(2).text()+"</center>",
-						"<center>"+connectionsItems.eq(3).text()+"</center>",
-						"<center>"+connectionsItems.eq(4).text()+"</center>"
-						]);
-					});
-				
-				// sort by column 'last_active'
-				oConnectionsTable.draw();					
-				
-				// refresh after few seconds
-				setTimeout(function(){ buildConnectionsSpy(); }, 2000);
-			},
-			error: function(jqXHR, textStatus, errorThrown){
-				fn.message(lang.error, lang.loading_xml_failed +": "+textStatus+" "+errorThrown);
-			}
-		});
-	};
-	
-	
-	// get internal separator in use in webservice  
-	// and set the same separator in this client
-	
-	function setInternalSeparator(fnCallback){
-		
-		var url = WEBSERV_URL+"/api/get_neutral_separator";
-		
-		$.ajax({
-			"async": false, // needed to block code execution while awaiting the server response
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				ARG_INTERNAL_SEPARATOR = fn.getDbResponse(xml);
-
-				fnCallback();
-			},
-			"error": function(jqxhr, settings, exception){
-
-				fn.message(lang.error, "<B>"+lang.some_error_has_occurred +"</B>" +"<br>" +
-						"<br>"+
-						"HTTP status code: "+ jqxhr.status +"<br>"+
-						"Status text of the response: "+ jqxhr.statusText +"<br>"+
-						"<br>"+
-						"<B>"+lang.check_the_console+"</B>");
-				
-				console.log("jqxhr:", jqxhr);
-				console.log("HTTP headers: ", jqxhr.getAllResponseHeaders());					
-				console.log("Raw response: ", jqxhr.responseText);							}
-		});
-	}
-
-
-
-	// Tell the webservice which tab is currently active in the current session.
-	// (this function is called whenever the tab gets focus)
-	//
-	// NB: when a session is inactive for too long, this function will get a 'Permission denied' response from the webservice,
-	//     which will trigger an exception to force the user to log in again.
-
-	function sendActiveTabIdToService(sPageId){
-		
-		if (	USERNAME == 'null' // this happens when the fn.setCurrentUser() function returned null username (as a string indeed)
-				|| 
-				paramsHash == null || paramsHash.get("db") == null || paramsHash.get("db") == 'spy'
-			)
-			return;
-
-		var url = WEBSERV_URL+"/api/set_active_tab_id";
-
-		$.ajax({
-			"async": false, // needed to block code execution while awaiting the server response
-			"type": "POST",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"db_name": paramsHash.get("db"),
-				"active_tab_id": sPageId,
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				// nothing to do
-			},
-			"error": function(jqxhr, settings, exception){
-				
-				// connection failed
-				if (jqxhr.responseText.indexOf("Connection failed")>=0){
-					
-					// use timeout to allow all error messages to be shown:
-					// we will then close all dialogs
-					// and given one single USEFUL message to the user
-					
-					setTimeout(function(){
-						
-						fn.closeDialog();
-						fn.message(lang.error, "<B>" + jqxhr.responseText + "</B>",
-							function () {
-								lexitReload();
-							}
-						);
-						
-					}, 1000);
-					
-				} 
-				
-				// if the database configuration file is missing
-				else if (jqxhr.responseText.indexOf("Error while reading") >= 0 && jqxhr.responseText.indexOf(".database") >= 0) {
-					
-					// use timeout to allow all error messages to be shown:
-					// we will then close all dialogs
-					// and given one single USEFUL message to the user
-					
-					setTimeout(function(){
-						
-						fn.closeDialog();
-						fn.message(lang.error, (lang.error_database_configfile_missing).replace(/FILENAME/g, paramsHash.get("db")),
-							function () {
-								lexitReload();
-							}
-						);
-					}, 1000);
-				}
-				
-				// if the user has logged into another account in another tab, this will cause the current tab to misbehave
-				// so we throw an exception, which will trigger the user to log in again
-				else if (jqxhr.responseText != "Permission denied to "+fn.getCurrentUser()){
-					throw new Error("Execution stopped: "+lang.saving_active_tab_failed); // prevents infinite loop of page-reload!
-				}
-				
-				// otherwise, an error in this function indicates a problem with the webservice
-				// we we must tell the user about the error before reloading the page
-				else {						
-					fn.closeDialog();
-					fn.message(lang.error, lang.saving_active_tab_failed+ "<br><br>" +jqxhr.responseText+ ": ["+exception+"]",
-						function () {
-							lexitReload();
-						}
-					);					
-				}				 
-			}
-		});
-	}
-	
-	
-	// Get full list of projects config files from server.
-	// We'll need this to be able to show projects which are not declared (yet?) in the projects overview file:
-	// the list will lack descriptions, but at least the projects will be shown and will be clickable!
-	
-	function startProjectOrGetConfigFilesList(){
-
-		// if some project was selected already, 
-		// no need to retrieve the list of config files from the SERVER, 
-		// initialize straight away!
-		if (paramsHash!=null &&	paramsHash.get("db")!=null){
-			initialize();
-		}
-		else {
-			
-			// within this function, the aProjectList variable is supposed to be filled already
-			// so if it isn't, something is wrong
-			if (aProjectList == null || aProjectList.length == 0){	
-				
-				fn.message(lang.error, lang.loading_projects_list_failed);
-				return;
-			}
-				
-
-			// this might take a while, so put spinner
-			lexutil.showSpinner("#dynamic", true);
-			
-			var url = WEBSERV_URL+"/api/get_configfiles_list";
-			
-			$.ajax({
-				"type": "GET",
-				"url": url,
-				"dataType": "xml", // get response as xml
-				"data": {
-					"dummy": getUniqueNumber()
-				},
-				"success": function(xml){
-					
-					var sList = fn.getDbResponse(xml);
-					aFullConfigFilesList = sList.split(ARG_INTERNAL_SEPARATOR);
-
-					// remove spinner
-					lexutil.removeSpinner("#dynamic");
-					
-					// go!
-					initialize();
-				},
-				"error": function(jqxhr, settings, exception){
-					
-					fn.message(lang.error, lang.reading_the_list_of_config_files_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
-				}
-			});
-
-		}
-
-	}
-	
-	
-	// Get full project overview from webservice
-	// (alternative to the projects_overview.js file)
-	function getProjectOverviewFromWebservice(){
-		
-		lexutil.showSpinner("#dynamic", true);
-		
-		var url = WEBSERV_URL+"/api/get_list_of_existing_projects";
-		
-		$.ajax({
-			"type": "GET",
-			"url": url,
-			"dataType": "xml", // get response as xml
-			"data": {
-				"fullinfo": true,
-				"dummy": getUniqueNumber()
-			},
-			"success": function(xml){
-				
-				var sList = fn.getDbResponse(xml);
-				aProjectInfo = sList.split(ARG_INTERNAL_SEPARATOR);
-				
-				// build project overview list
-				aProjectList = [];					
-				for (var i=0; i<aProjectInfo.length; i++){
-					
-					// [0] projectname (=configfile name), [1] name (=human readable name), [2] description, [3] status, [4] order_in_menu, [5] message, [6] redirect
-					var aOneProjectInfo = aProjectInfo[i].split(":::");
-										
-					var oProject = {};
-					oProject["config_filename"] = aOneProjectInfo[0];
-					oProject["name"] = ( aOneProjectInfo[1] != '' ? aOneProjectInfo[1] : aOneProjectInfo[0]);
-					oProject["description"] = aOneProjectInfo[2];
-					
-					if (aOneProjectInfo[5] != null && aOneProjectInfo[5] != ''){
-						oProject["message"] = aOneProjectInfo[5];
-					}
-					if (aOneProjectInfo[6] != null && aOneProjectInfo[6] != ''){
-						oProject["redirect"] = aOneProjectInfo[6];
-					}
-					
-					var sStatus = aOneProjectInfo[3];
-					if ($.inArray(sStatus, ['production', 'closed', 'goody', 'unknown']) > -1) {
-						oProject[sStatus] = true; 
-					}						
-					
-					// add to list
-					aProjectList.push(oProject);
-					
-				}
-
-				// remove spinner
-				lexutil.removeSpinner("#dynamic");
-				
-				// go!
-				initialize();
-			},
-			"error": function(jqxhr, settings, exception){
-				
-				fn.message(lang.error, lang.getting_projectslist_from_service_failed+ "<br><br>" +lang.error+ ": ["+exception+"]");
-			}
-		});
-	
-	}
-		
-	
-	
-	// end of : called by $(document).ready()
-	
-	
-	
-	// *********************************************************************************************************
-	
-	// Initialize the application.
-	// This happens once the libraries are fully loaded and we have a list of all projects 
-	// ( which is why this function will be called by startProjectOrGetConfigFilesList() )
-	
-	function initialize(){	
-		
-		// generate unique id for this page
-		// we will need this to detect page focus/blur in a reliable way
-		var sPageId = getUniqueNumber();
-		$("#page_id").attr("name", sPageId);
-		$.cookie('active_lexit_window', sPageId);
-		sendActiveTabIdToService(sPageId);
-		
-		// user instruction for accessing tables
-		$("#indicator").empty().append(
-				$("<span></span>")
-				.html(lang.choose_a_table)
-				);
-		
-		// get url parameters		
-		if (paramsHash == null || paramsHash.get("db") == null) {
-			
-			// No project selected: show list of projects
-			showListOfProjects();
-		}
-		else {			
-			// Normal case: start opening project
-			
-			// get rid of default huisstijl balk and title 
-			fn.setBalk(false);
-			fn.setProjectTitle("");
-		
-			// Assign key functions
-			// This needs to be called here because it has global scope
-			// and recalling it at each new table creation will alter other key functions 
-			// which then malfunction (because of unbinds)
-			kf.addKeyFunctions();
-			
-			
-			// load the specific client configuration file for the required database
-			// and get the list of tables (getScript never reads this file from cache)
-			
-			
-			// test mode (development)
-			if (bTest) {
-				$.getScript(paramsHash.get("db")+".config.js")
-				.done(function(){
-					
-					var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
-					ts.getListOfTables( paramsHash.get("table"), 
-							oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings  );
-					
-					// prevent Chrome bug (sometimes pressing backslash causes navigating away)
-					if (bowser.chrome)
-						$(window).bind('beforeunload', function(){   
-							return false;
-						});
-				})
-				.fail(function(jqxhr, settings, exception){
-					
-					fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
-					throw new Error("Execution stopped: "+lang.opening_config_file_failed);
-				});
-			}
-			
-			// normal mode (production)
-			else {
-				var url = WEBSERV_URL+"/api/get_configfile";
-				
-				$.ajax({
-					"type": "GET",
-					"url": url,
-					"dataType": "script",
-					"data": {
-						"db_name": paramsHash.get("db"),
-						"dummy": getUniqueNumber()
-					},
-					"success": function(){
-						
-						var oFiltersAndSettings = getTableFiltersAndSettings(paramsHash);
-						ts.getListOfTables( paramsHash.get("table"), 
-								oFiltersAndSettings.contentToMatch , oFiltersAndSettings.extraSettings );
-						
-						// prevent Chrome bug (sometimes pressing backslash causes navigating away)
-						if (bowser.chrome)
-							$(window).bind('beforeunload', function(){   
-								return false;
-							});
-					},
-					"error": function(jqxhr, settings, exception){
-						
-						fn.message(lang.error, lang.opening_config_file_failed+ "<br><br>" +lang.error+ ": ["+exception+"]<BR><BR>");
-						throw new Error("Execution stopped: "+lang.opening_config_file_failed);
-					}
-				});
-			}
-			
-			
-			
-			// show message or warning for this project, if available
-			
-			var oProjectObject = getProjectObject(paramsHash.get("db"));
-
-			// set a default project name for display on screen (and set front character in uppercase)
-			// this default name might be overwritten by configuration in projects_overview.js, if some project 'name' was set there
-			var sProjectName = paramsHash.get("db").substring(0,1).toUpperCase()+paramsHash.get("db").substring(1);
-
-			if (typeof oProjectObject != 'undefined') {
-				
-				// message
-				if (typeof oProjectObject["message"] != 'undefined') {
-					var sWarning = oProjectObject["message"];
-					var bPrivate = (typeof oProjectObject["private"] != 'undefined') ?
-						oProjectObject["private"] : false; // default is 'false'
-					var fnMsgCallback = (typeof oProjectObject["message_callback"] != 'undefined') ?
-								oProjectObject["message_callback"] : null;
-						 
-					// show warning message if available
-					if (	sWarning != '' &&   
-							// except if it should be kept private to home
-							!(bPrivate && (document.URL).regexIndexOf( INL_HOMEURL )<0 ) 
-						){
-						fn.message(paramsHash.get("db"), sWarning, fnMsgCallback);
-						console.log("warning for project '"+paramsHash.get("db")+"': "+sWarning);
-						}
-				}
-				
-				// redirect to other URL (rare, but it has been required in the past)
-				if (typeof oProjectObject["redirect"] != 'undefined') {
-					window.location.href = oProjectObject["redirect"];
-				}
-
-				// is some project name was set, overwrite the default one
-				if (typeof oProjectObject["name"] != 'undefined') {
-					sProjectName = oProjectObject["name"];
-				}
-			}
-
-
-			// show the project name at the top of the screen
-			fn.setProjectTitle(sProjectName);
-			
-			// if the public reader has logged in, keep it alive
-			lexitusers.keepPublicReaderAlive();
-			
-			// statistics
-			lexutil.setStatistics();
-		}
-		
-	};
-	
-	
-	
-	// *********************************************************************************************************
-	
-	// called by initialize()
-	
-	
-	// get table filters from url if available (... &filter_a=... & filter_b=...)
-	function getTableFiltersAndSettings(paramsHash){
-		
-		var oContentToMatch = new Array();
-		var oExtraSettings = new Array();
-		for (var i=0; i<paramsHash.keys().length; i++) {
-			var sOneParam = paramsHash.keys()[i];
-			// read all parameters, except 'db' and 'table', since we process those elsewhere
-			if ( $.inArray(sOneParam, ["db", "table"])<0 ) {
-				// table setting parameters
-				if ($.startsWith(sOneParam, "setting.")) {
-					var sTrueSettingName = sOneParam.replace("setting.", "");
-					oExtraSettings[sTrueSettingName] = paramsHash.get(sOneParam);					
-				}
-				// table filters
-				else {
-					oContentToMatch[sOneParam] = paramsHash.get(sOneParam);
-				}				
-			}
-		}
-		
-		return { 
-			contentToMatch: oContentToMatch,
-			extraSettings: oExtraSettings
-		};
-	}
-	
-	
-	
-	
-	// get technical database info and show it in a pop-up 
-	function showDatabaseInfo(sDbName){
-		
-		var url = WEBSERV_URL+"/api/get_dbinfo";
-		
-		$.ajax({
-			"type": "GET",
-			"url": url,
-			"data": {
-				"db": sDbName,
-				"dummy": getUniqueNumber()
-			},
-			"dataType": "xml", // get response as xml
-			"success": function(xml) {
-				var sResp = fn.getDbResponse(xml);
-		 		fn.message(lang.database_info, sResp);
-		 	},
-			"error": function(jqXHR, textStatus, errorThrown){
-				
-				fn.message(lang.error, "'"+sDbName+"' " +lang.file_is_missing+ ": " + textStatus+" "+errorThrown);
-			}
-		});
-		
-	}
-
-	
-	// generate a welcome page with a project overview 
-	// (projects have to be declared and described in file 'projects_overview.js' so as to be show here)
-	function showListOfProjects(){
-		
-		var sCurrentURL = document.URL;
-		
-		// keep this list private to internal environment
-		if ( sCurrentURL.regexIndexOf( INL_HOMEURL )>-1 || bTest) {
-
-            // Don't display table selector.
-			$("#indicator").empty();
-			
-            const productionSection = $(`<section id="production"><h2>${lang.production}</h2></section>`);
-            const productionTable = $("<table></table>");
-            productionSection.append(productionTable);
-
-            const goodiesSection = $(`<section id="goodies"><h2>${lang.goodies}</h2></section>`);
-            const goodiesTable = $("<table></table>");
-            goodiesSection.append(goodiesTable);
-
-            const developmentSection = $(`<section id="development"><h2>${lang.in_development}</h2></section>`);
-            const developmentTable = $("<table></table>");
-            developmentSection.append(developmentTable);
-
-            const closedSection = $(`<section id="closed"><h2>${lang.project_closed}</h2></section>`);
-            const closedTable = $("<table></table>");
-            closedSection.append(closedTable);
-
-            const unknownSection = $(`<section id="unknown"><h2>${lang.project_unknown}</h2></section>`);
-            const unknownTable = $("<table></table>");
-            unknownSection.append(unknownTable);
-			
-			// process list of all config files
-			var aKnownConfigFilesList = new Array();
-			
-			// get list of known projects in projects overview
-			for (var i=0; i<aProjectList.length; i++) {
-				aKnownConfigFilesList.push(aProjectList[i]["config_filename"]);				
-			}
-			
-			// now, if some configfile is no part of the projects overview list, 
-			// it will be added to it as part of the 'unknown projects' category
-			// (so it will appear as such in the menu)
-			for (var i=0; i<aFullConfigFilesList.length; i++) {
-
-				var sOneConfigFile = aFullConfigFilesList[i];
-				
-				// if server return some description/message, set it
-
-				var aOneConfigFile = sOneConfigFile.split(":::");
-				var sOneDescription = lang.unknown;	// default: 'unknown'
-				if (aOneConfigFile.length>1){
-					sOneConfigFile  = aOneConfigFile[0];
-					sOneDescription = aOneConfigFile[1];
-				}
-
-				// add unknown project
-
-				if (aKnownConfigFilesList.indexOf(sOneConfigFile) < 0) {
-					aProjectList.push({
-						"name": sOneConfigFile,
-						"config_filename": sOneConfigFile,
-						"description": sOneDescription,
-						"unknown": true
-				 	});
-				}
-			}
-			
-			
-			// build menu now!
-			for (var i=0; i<aProjectList.length; i++){
-
-				// set project name to be rendered and a project link to be clicked upon
-
-				var sProjectLinkPart = aProjectList[i]["config_filename"];
-				var sProjectLink = sCurrentURL.substring(0, sCurrentURL.indexOf("/lexit2"))+"/lexit2/?db="+sProjectLinkPart+( sCurrentURL.indexOf("test=true")>-1 ? "&test=true":"")+
-					( sCurrentURL.indexOf("lang=")>-1 ? "&lang="+sCurrentURL.substring(sCurrentURL.indexOf("lang=")+"lang=".length, sCurrentURL.indexOf("lang=")+"lang=".length+2):"");
-				var sProjectName = (typeof aProjectList[i]["name"] != 'undefined' ? aProjectList[i]["name"] : sProjectLinkPart);
-
-                const sProjectTitleCell = `<td><a href="${sProjectLink}">${sProjectName}</a></td>`
-                let sProjectInfoCell = `<td><a title="${sProjectName}" onclick="showDatabaseInfo('${sProjectLinkPart}');"><span class='ui-icon ui-icon-info'></span></a>`;
-                // no project info for goodies
-                if (aProjectList[i]["goody"] !== undefined) {
-                    sProjectInfoCell = "<td></td>"
-                }
-                const sProjectDescriptionCell = `<td>${aProjectList[i]["description"]}</td>`
-				
-				const eProjectDiv = $("<tr></tr>").html(sProjectTitleCell + sProjectInfoCell + sProjectDescriptionCell);
-				
-				// Put the project in the right category:
-				
-				if (typeof aProjectList[i]["goody"] != 'undefined' && aProjectList[i]["goody"]) {
-					goodiesTable.append(eProjectDiv)
-				}
-					
-				// project is closed
-				else if (typeof aProjectList[i]["closed"] != 'undefined' && aProjectList[i]["closed"]) {
-					closedTable.append(eProjectDiv)
-				}
-				
-				// project is unknown
-				else if (typeof aProjectList[i]["unknown"] != 'undefined' && aProjectList[i]["unknown"]) {
-					unknownTable.append(eProjectDiv);
-				}
-				
-				// project is open
-				else {
-					// production
-					if (typeof aProjectList[i]["production"] != 'undefined' && aProjectList[i]["production"])
-						productionTable.append(eProjectDiv);
-					// development
-					else
-						developmentTable.append(eProjectDiv);
-				}
-			}
-			
-			// add each table
-			$("#page")
-				.append(productionSection)
-				.append(goodiesSection)
-                .append(developmentSection)
-                .append(closedSection)
-                .append(unknownSection);
-			
-		}
-		else {
-			
-			fn.message(lang.error, lang.access_denied);
-		}
-		
-	}
-	
-	// get all the properties belonging to the description of a project
-	function getProjectObject(sDbName){
-		
-		var oObjectToReturn;
-		
-		for (var i=0; i<aProjectList.length; i++) {
-			if (aProjectList[i]["config_filename"] != sDbName) {
-				continue;
-			}
-			else {
-				oObjectToReturn = new lexutil.cloneObject(aProjectList[i]);
-				break;
-			}
-		}
-		return oObjectToReturn;
-	}
-	
-	function lexitReload(){
-		// temporarily turn off the Chrome fix
-		// this is needed to allow reloading, without triggering a dialog in Chrome preventing it!
-		$(window).off('beforeunload');
-		location.reload();
-	}
-	
-	
-	
-	// end of : called by initialize()
 	
 	// *********************************************************************************************************
 		
@@ -1525,7 +351,7 @@
 	
 			<div id="dynamic">
 			
-				<!--  this is the table container -->
+				<!--  this is the tables container -->
 				
 			</div>	
 			<div id="temporary_stuff">

@@ -7026,7 +7026,7 @@ fn.getCurrentSessionId = function(){
  * Open a Lex'it login dialog
  */
 fn.startLexitLogin = function(){
-	startLexitLogin();
+	lexitlogin.startLexitLogin();
 };
 
 /**
@@ -7035,7 +7035,7 @@ fn.startLexitLogin = function(){
  * @param {Function} fnCallback - some function to call after logging out
  */
 fn.startLexitLogout = function(fnCallback){
-	startLexitLogout(fnCallback);
+	lexitlogin.startLexitLogout(fnCallback);
 };
 
 
@@ -7060,11 +7060,11 @@ fn.startPublicReader = function(){
 	 		if (sResp == 'Access denied'){
 	 			fn.closeDialog();
 	 			fn.message(sResp, sResp, function(){
-	 				lexitReload();
+	 				lexitinit.lexitReload();
 	 			});
 	 		}
 	 		else {
-	 			lexitReload();
+	 			lexitinit.lexitReload();
 	 		}
 	 	},
 		"error": function(jqXHR, textStatus, errorThrown){			

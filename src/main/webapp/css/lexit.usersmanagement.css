@@ -1,0 +1,109 @@
+
+
+
+/*******************************************************************
+ * Users roles dialog 
+ *******************************************************************/
+
+div#usersoverview {
+	max-height: 200px; 
+	overflow-x: hidden; 
+	overflow-y: scroll; 
+	margin-bottom: 30px;
+	
+	table#userstable {
+		min-width: 400px; 
+		border: 1px dotted black;
+		
+		tr td {
+			border-top: 1px dotted black; 
+			padding: 2px;
+		}
+	}
+}
+
+hr {
+	border-top: 2px dotted #bbb;
+} 
+
+
+
+/*******************************************************************
+ * Project management dialog
+ *******************************************************************/
+
+div.projectmenu_prompt_div {
+	font-size: 12px;
+	
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		
+		li.separator {
+			color: black;
+			opacity: 0.6;					
+			border: 0px;
+            margin: 0 3px 3px -25px;
+            padding: 0.4em;
+            padding-left: 1.5em;
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            height: 18px;
+		}
+		
+		li.project_info {
+			margin: 0 3px 3px 3px;
+			padding: 0.4em;
+			padding-left: 1.5em;
+			font-size: 1.0em;
+			width: 95%;
+			height: 18px;
+			
+			span.project_move_icon {
+				margin-left: -18px;
+			}
+			
+			span.project_expand_icon {
+				position: absolute;
+				left: 740px;
+				margin-top: 3px;
+			}
+			
+			span.prompt_extra_field {
+				visibility: hidden;
+				position: absolute;
+				left: 740px;
+				margin-top: 28px;
+			}
+			
+			
+			div.input_fields {			
+				position: relative;
+				left: 280px;
+				top: -17px;
+				width: 425px;
+				border: 0px;
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;		
+				
+				input.human_readable_name {
+					width: 150px;
+					margin: 2px;
+				}
+				input.human_readable_description {
+					width: 250px;
+					margin: 2px;	
+				}
+				input.prompt_extra_field {
+					width: 410px;
+					margin: 2px;
+					visibility: hidden;
+				}
+			}
+		}
+	}
+}

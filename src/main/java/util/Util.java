@@ -21,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.SecurityContext;
@@ -394,6 +398,28 @@ public class Util {
 	}
 	
 	
+	// ******************************************************************
+	// JSON
+	// ******************************************************************
+
+	/**
+	 * Check if a string is a JSON object
+	 * @param s
+	 * @return
+	 */
+	public static boolean isJsonObject(String s) {
+        if (s == null) {
+            return false;
+        }
+
+        try (JsonReader reader = Json.createReader(new StringReader(s))) {
+            JsonStructure json = reader.read();
+
+            return json.getValueType() == JsonValue.ValueType.OBJECT;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 	
 	
 	

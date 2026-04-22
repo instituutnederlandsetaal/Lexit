@@ -1217,7 +1217,7 @@ lexutil.getTrueIndexes = function(sRangeStringDecodedEntities, sNodeStringEncode
 	// if required (it is when a word has been clicked upon, so we search for its boundaries automatically)
 	// check if the word is truely surrounded by spaces or such. If not, look for the true boundaries of the word.
 	// (this is needed, because the selection was obtained by checking the node what was clicked upon; but sometimes
-	//  a word can be spread among several nodes, because of in-between tags for style etc).
+	//  a word can be spread across several nodes, because of in-between tags for style etc).
 	if (bPushWordBoundaries) {
 		newSelectionStartIndex = lexutil.getIndexOfPreviousSpace(mainString, newSelectionStartIndex) + 1;
 		newSelectionEndIndex   = lexutil.getIndexOfFollowingSpace(mainString, newSelectionEndIndex);
