@@ -81,12 +81,6 @@ var hOccurenceNrForTable = new Hashtable();
 var undoStacks = new Hashtable();
 var undoTooltips = new Hashtable();
 
-// form view:
-// max width of a column in form view
-var hMaxColumnTitleWidth = new Hashtable();
-// dimension of the form table
-var hFormViewDimensionHash = new Hashtable();
-
 // columns highlight
 var hNodeColorsMap = new Hashtable();
 var hNodeHighlightColorsMap = new Hashtable();
@@ -176,10 +170,6 @@ mt.setTableMustBeOptimal = function(sTableName, bOptimal){
 	
 	head.setColorOfColumnSelectionButton(sTableName, bOptimal);
 	hbTableMustBeOptimal.put(sTableName, bOptimal);
-	
-	// when this is being reset, we must clean some cache depending of this
-	mt.formviewCleanDimensions(sTableName);
-	mt.formviewCleanColumnTitleWidth(sTableName);
 };
 mt.getTableMustBeOptimal = function(sTableName){
 	var bOptimal = hbTableMustBeOptimal.get(sTableName);
@@ -256,8 +246,6 @@ mt.removeAllTableRecords = function(){
 	hOccurenceNrForTable = new Hashtable();
 	undoStacks = new Hashtable();
 	undoTooltips = new Hashtable();
-	hMaxColumnTitleWidth = new Hashtable();
-	hFormViewDimensionHash = new Hashtable();
 	hNodeColorsMap = new Hashtable();
 	hNodeHighlightColorsMap = new Hashtable();
 	hSortingColumnForColorMap = new Hashtable();
@@ -319,8 +307,6 @@ mt.removeTableRecord = function(sSomeTablename){
 	hOccurenceNrForTable.remove(sSomeTablename);
 	undoStacks.remove(sSomeTablename);
 	undoTooltips.remove(sSomeTablename);
-	hMaxColumnTitleWidth.remove(sSomeTablename);
-	hFormViewDimensionHash.remove(sSomeTablename);
 	hNodeColorsMap.remove(sSomeTablename);
 	hNodeHighlightColorsMap.remove(sSomeTablename);
 	hSortingColumnForColorMap.remove(sSomeTablename);
@@ -574,30 +560,6 @@ mt.getUndoTooltips = function(sSomeTableName){
 	return undoTooltips.get(sSomeTableName);
 };
 
-
-// ********************************* form view *************************************
-
-// store/get/clean the max column width per table
-mt.formviewGetColumnTitleWidth = function(sSomeTablename){
-	return hMaxColumnTitleWidth.get(sSomeTablename);
-};
-mt.formviewPutColumnTitleWidth = function(sSomeTablename, iMaxColumnTitleWidth){
-	hMaxColumnTitleWidth.put(sSomeTablename, iMaxColumnTitleWidth);
-};
-mt.formviewCleanColumnTitleWidth = function(sSomeTablename){
-	hMaxColumnTitleWidth.remove(sSomeTablename);
-};
-
-// store/get/clean the form table dimensions
-mt.formviewGetDimensions = function(sSomeTablename){
-	return hFormViewDimensionHash.get(sSomeTablename);
-};
-mt.formviewPutDimensions = function(sSomeTablename, aDimensions){
-	hFormViewDimensionHash.put(sSomeTablename, aDimensions);
-};
-mt.formviewCleanDimensions = function(sSomeTablename){
-	hFormViewDimensionHash.remove(sSomeTablename);
-};
 
 
 // *************************** columns highlight ************************************

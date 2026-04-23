@@ -69,18 +69,28 @@
 
 
 .form_celllabel {
+	font-size: 80%;
 	font-weight: bold;
 }
 
  
-.form_cellvalue input[type="checkbox"] {
-	margin: 5px;
+.form_cellvalue {
+	
+	font-size: 80%;
+	
+	input[type="checkbox"] {
+		margin: 5px;
+	}
+	select {
+		padding: 5px;
+	}
+	textarea {
+		padding: 5px;
+	}
 }
-.form_cellvalue select {
-	padding: 5px;
-}
-.form_cellvalue textarea {
-	padding: 5px;
+
+.form_cellvalue:has(> input[type="checkbox"]) {
+	text-align: center;
 }
 
 

@@ -292,235 +292,110 @@ gui.buildFormViewIfRequired = function(sSomeTablename){
 		}
 	}
 
-	// if we don't, fall back to the old type of form view
+
+	// if no formgrid is configured, create a simple, default form
 	if (oFormGrid == null) {
-		gui.buildFormViewIfRequiredOLD(sSomeTablename);
-
-	}
-
-	// otherwise do build the formgrid defined in config, if required now
-	else {
-
-		// we do this only in the 'form' view type of course!
-		if (mt.getViewType(sSomeTablename) == 'table') {
-
-			// undo form view settings
-
-			// if form view is not built yet, build it!
-			if ( $("#"+sSomeTablename+"_form").elementExists() ){
-				$("#"+sSomeTablename+"_form").remove();
-				$("#"+sSomeTablename+"_search_and_sort").remove();
+		
+		// default form definition: 20 columns, 10 rows
+		var aFormDefinition = [40, 10];		
+		
+		// build the cells
+		var oFormCells = {};		
+		var aListOfColumns = mt.getListOfVisibleColumnsOf(sSomeTablename);
+		var aListOfTypes = mt.getListOfTypesOfVisibleColumnsOf(sSomeTablename);
+		
+		var iRowNumber = 1;
+		var iColumnNumber = 1;
+		var iMaxColumnNumber = aFormDefinition[0];
+		
+		var iMaxCellWidthPlusRoom = 5; 
+		var iEstimatedNumberOfCellsPerRow = (aFormDefinition[0] / iMaxCellWidthPlusRoom);
+		var bLotOfRoom = (aListOfColumns.length < iEstimatedNumberOfCellsPerRow);
+		var iRoom =  aFormDefinition[0] - ((iEstimatedNumberOfCellsPerRow - aListOfColumns.length) * iMaxCellWidthPlusRoom);
+		var iRoomBetweenCells = (bLotOfRoom ? (iRoom / aListOfColumns.length) : 1);
+		
+		// loop through cells and computer their dimensions / positions
+		for (var i=0; i<aListOfColumns.length; i++){
+			
+			var sColumnName = aListOfColumns[i];
+			var sColumnType = aListOfTypes[i];
+			var iCellWidth = (sColumnType == "text" ? 4 : 2);
+			var oCellDefinition = [iCellWidth, 1];
+			
+			// if the cell doesn't fit in the current row, put it in the next row
+			if (iColumnNumber + iCellWidth + iRoomBetweenCells > iMaxColumnNumber){
+				iRowNumber += 2;
+				iColumnNumber = 1;
 			}
-
-			// make main table visible again
-			$("#"+sSomeTablename+"_dynamic .dataTables_scroll").css("display", "block");
-			$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_undo_button").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .bottom_pane").show();
-			$("#"+sSomeTablename+"_dynamic .export_pane").show();
-
-			// make buttons visible again
-			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_undo_button_div").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_goto_button").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_colselect_button").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_searchandreplacebutton").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_selectionbutton").css("display", "inline");
-			$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_selectionbutton").parent().css("display", "inline");
-
+			var oCellPosition = [iColumnNumber, iRowNumber];
+			
+			// add to formgrid
+			oFormCells[sColumnName] = {
+				"position": oCellPosition,
+				"definition": oCellDefinition
+			};	
+			
+			// next cell will be put after the current one, so move the column number accordingly
+			iColumnNumber += (iCellWidth + iRoomBetweenCells);		
 		}
-		else {
+		
+		// put the buttons bar in the next row after the last cell
+		oButtonBarPosition = [aFormDefinition[0] / 2 - 2, iRowNumber + 2.5];
+		
+		// build the complete form object
+		var oFormGrid = {
+			"searchbar": false,
+			"definition": aFormDefinition,
+			"cells": oFormCells,
+			"buttonsbar_position": oButtonBarPosition
+		};		
+				
+		// assign form object to configuration
+		conf.changeTableSettingValue(sSomeTablename, "formgrid", oFormGrid);
 
-			form.manageViewGrid(sSomeTablename);
-		}
 	}
-
-};
-
-
-// build the form view
-gui.buildFormViewIfRequiredOLD = function(sSomeTablename){
 	
+
+
+	// ready to build the formgrid now	
+
 	// we do this only in the 'form' view type of course!
 	if (mt.getViewType(sSomeTablename) == 'table') {
 
-		// remove any left label of previous round
-		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove(); 
-		$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
+		// undo form view settings
 
-		// in table view mode, make sure the export buttons are visible
-		$("#"+sSomeTablename+"_wrapper div.export_pane").show();
-		$("#"+sSomeTablename+"_wrapper div.bottom_pane").show();
+		// if form view is not built yet, build it!
+		if ( $("#"+sSomeTablename+"_form").elementExists() ){
+			$("#"+sSomeTablename+"_form").remove();
+			$("#"+sSomeTablename+"_search_and_sort").remove();
+		}
 
-		$("#"+sSomeTablename+"_searchboxes").show();
-		$("#"+sSomeTablename+"_wrapper table thead").show();
+		// make main table visible again
+		$("#"+sSomeTablename+"_dynamic .dataTables_scroll").css("display", "block");
+		$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_undo_button").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .bottom_pane").show();
+		$("#"+sSomeTablename+"_dynamic .export_pane").show();
 
-		gui.setSearchboxesCss(sSomeTablename);
+		// make buttons visible again
+		$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_undo_button_div").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_goto_button").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_colselect_button").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_searchandreplacebutton").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .top div#"+sSomeTablename+"_selectionbutton").css("display", "inline");
+		$("#"+sSomeTablename+"_dynamic .top button#"+sSomeTablename+"_selectionbutton").parent().css("display", "inline");
 
-		return;
 	}
-		
-	// make sure only one row at the time will be shown
-	var iNowIndex = fn.getCurrentDisplayStart(sSomeTablename);
-	mt.getDataTableObjectOf(sSomeTablename).page.len(1);
-	mt.getDataTableObjectOf(sSomeTablename).displayRow(iNowIndex);
-	
-	// in form view mode, hide the export buttons
-	$("#"+sSomeTablename+"_wrapper div.export_pane").hide();
-	$("#"+sSomeTablename+"_wrapper div.bottom_pane").hide();
-	// and hide the search boxes
-	$("#"+sSomeTablename+"_searchboxes").hide();
-	$("#"+sSomeTablename+"_wrapper table thead").hide();
-		
-	
-	// remove the built-in datatables row even/odd class names, to prevent row highlight
-	// (as a form represents only one row, row highlight is of no use)
-	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tr:not('.group')").removeClass("odd");
-	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tr:not('.group')").removeClass("even");
-	
-	// room to keep between top of form and bottom of header
-	var iRoomAboveAll = parseInt( $("#"+sSomeTablename+"_wrapper").find("div.top").height()) + 35;
-	
-	// compute the cell referential positions etc
-	// so as to be able to put the cells at new screen positions
-	
-	var nReference = $( "#"+sSomeTablename+"_wrapper div.dataTables_scrollBody table");
-	var nReferentialTr = $("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tbody").find("tr:not('.group')").eq(0);
-	var iBaseLeft = parseInt(nReference.position().left) + 5;
-	var iBaseTop = parseInt(nReference.position().top);
-	
-	var iBaseHeight = 30 + // fixed, instead of 'parseInt(nReferentialTr.css("height"))',
-	                       // which sometimes causes very ugly layout because of 
-	                       // long, thus multilines column names.
-		parseInt(nReferentialTr.css("padding-top")) +
-		parseInt(nReferentialTr.css("padding-bottom")) +
-		parseInt(nReferentialTr.css("margin-top")) +
-		parseInt(nReferentialTr.css("margin-bottom"));
-	
-	// put the cells at new positions (as a form instead of as a table)
-	// and add labels 
-	$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_label").remove(); // remove any left label of previous round
-	$("#"+sSomeTablename+"_wrapper div."+sSomeTablename+"_cell_value").remove();
-	
-	var iMaxColumnTitleWidth = gui.getMaxColumnTitleWidth(sSomeTablename);
-	
-	// compute number of row/columns to be built
-	var iNumberOfTableColumns = $("#"+sSomeTablename+"_wrapper thead").find("th").length;
-	var aFormDimensions = gui.getFormViewDimensions(sSomeTablename, iMaxColumnTitleWidth, iNumberOfTableColumns);
-	var iNumberOfFormColumns  = aFormDimensions[0]; // x
-	var iNumberOfFormRows     = aFormDimensions[1]; // y	
-	
-	
-	$("#"+sSomeTablename+"_wrapper div.dataTables_scrollBody tbody").find("td").each(function(i){
-		
-		var thisCell = this;
+	else {
 
-		var y = i%iNumberOfFormRows ;
-		var x = Math.floor(i/iNumberOfFormRows);
-		
-		// ------------
-		// cell labels
-		// ------------
-
-		var nReferentialColumn = $("#"+sSomeTablename+"_wrapper thead").find("th").eq(i);
-		var iFontSize = parseInt(nReferentialColumn.css("font-size"));
-		var sColumnTitle = nReferentialColumn.text();
-		var oTableConfig = conf.getTableConfig(sSomeTablename);
-		var oColumnConfig = conf.getColumnConfig(oTableConfig, sColumnTitle);
-		var sColNameToRender = conf.getColumnNiceName( oColumnConfig );
-		if (sColNameToRender == null) sColNameToRender = sColumnTitle;
-		
-
-		var eCellLabel = $("<div></div>")			
-			.addClass(sSomeTablename+"_cell_label")
-			.css("width", iMaxColumnTitleWidth)
-			.css("background-color", "#E2E4FF")
-			.append(
-				$("<b></b>").text(sColNameToRender).css("font-size", iFontSize)
-			);	
-		
-		var iNewTop  = iBaseTop + y*(iBaseHeight+2);
-		var iNewLeft = iBaseLeft + x*(2.5*iMaxColumnTitleWidth) + x*40;
-		
-		eCellLabel
-			.css("position", "absolute")
-			.css("left", iNewLeft)
-			.css("top", iNewTop + iRoomAboveAll )
-			.css("padding", "0px 0px 0px 3px")
-			.css("margin", "0px 0px 0px 0px")
-			.css("height", (iBaseHeight+2)+"px")
-			.css("border", "1px dotted black");
-		// tooltip for content, since long text can't be fully read in form view type
-		eCellLabel
-			.addClass("tooltip")
-			.attr("title", $(this).text());
-		$("#"+sSomeTablename+"_wrapper").append(eCellLabel);
-		
-		// ------------
-		// cells values
-		// ------------
-
-		var sBgColor = conf.getBackgroundColor(oColumnConfig);
-		var sBgColorToRender = (sBgColor == null ? "#FFFFFF" : ((sBgColor+",").split(","))[0] ); // deal with doubled color codes in config
-
-		$(thisCell)
-			.css("display", "block")
-			.addClass(sSomeTablename+"_cell_value")
-			.css("background-color", sBgColorToRender)
-			.css("border", "1px dotted black")
-			.css("position", "relative")
-			.css("left", iNewLeft + parseInt( $(eCellLabel).css("width") ) + 15 +"px")
-			.css("top", 3-(x*(iNumberOfFormRows*(iBaseHeight+2))))
-			.css("padding", "0px 0px 0px 3px")
-			.css("margin", "0px 0px 0px 0px")
-			.css("width", (iMaxColumnTitleWidth*1.5)+"px")
-			.css("height", (iBaseHeight)+"px" );
-
-		
-	});
+		form.manageViewGrid(sSomeTablename);
+	}
 	
-	
-	// activate tipTip jquery plugin for nice cross-browser tooltips
-	// (needs to be reactivated at each draw, so it seems)
-	$(".tooltip").tipTip( gui.getTiptipConfig() );	
-	
+
 };
 
-// subroutine of gui.buildFormViewIfRequired (hier above)
-// needed to get (and cache a constant value of) the max column width
 
-gui.getMaxColumnTitleWidth = function(sSomeTablename){
-	
-	if ( mt.formviewGetColumnTitleWidth(sSomeTablename) == null)
-		{
-		var iMaxColumnTitleWidth = 0;
-		$("#"+sSomeTablename+"_wrapper thead").find("th").each(function(){
-			var iColumnTitleWidth = parseInt($(this).css("width"));
-			if (iColumnTitleWidth>iMaxColumnTitleWidth) iMaxColumnTitleWidth = iColumnTitleWidth;
-			});
-		mt.formviewPutColumnTitleWidth(sSomeTablename, iMaxColumnTitleWidth);
-		}
-	
-	return mt.formviewGetColumnTitleWidth(sSomeTablename);
-};
 
-// subroutine of gui.buildFormViewIfRequired (hier above)
-// needed to compute (and cache constant) suitable form dimensions (y, x) given the number of table columns
 
-gui.getFormViewDimensions = function(sSomeTablename, iMaxColumnTitleWidth, iNumberOfTableColumns){
-	
-	// compute the dimensions if they were are not computed yet,
-	// or return the earlier computed values
-	if ( mt.formviewGetDimensions(sSomeTablename) == null )
-		{
-		var aDimensions = new Array();
-		// x
-		aDimensions[0] = Math.floor( screen.width / (2*iMaxColumnTitleWidth));
-		// y
-		aDimensions[1] = Math.ceil(iNumberOfTableColumns / aDimensions[0]);
-		mt.formviewPutDimensions(sSomeTablename, aDimensions);
-		}
-		
-	return mt.formviewGetDimensions(sSomeTablename);
-};
 
 
 // Show a warning when the user has applied some change in a cell belonging to a column
@@ -538,13 +413,12 @@ gui.showWarningWhenRefreshingIsRequired = function(sTableName, sColumnName){
 	
 	var sSearchValue = fn.getValueOfFilterBox(sTableName, sColumnName);
 	
-	if ( sSearchValue!= '')
-		{
+	if ( sSearchValue!= '') {
 		var sWarning = "<SPAN><B>"+ lang.display_differs_from_selection +"!</B></SPAN>";
 		
 		$("#"+sTableName+"_wrapper .paginate_button").hide();
 		$("#"+sTableName+"_wrapper .dataTables_paginate").html(sWarning).addClass("dont_paginate");
-		}
+	}
 	
 };
 
