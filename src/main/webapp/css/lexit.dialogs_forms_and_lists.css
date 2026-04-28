@@ -12,6 +12,16 @@
 #selectable li.ui-selectee:hover { cursor: pointer; background: #e6e6e6; }
 
 
+/******************************************************************* 
+ * Style for jquery ui menu item 
+ * used in dialogs for picking items out of an autocomplete list
+ *******************************************************************/
+
+.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+    background-color: #2b7cff;
+    color: white;
+}
+
 
 /*******************************************************************
  * Shadow around dialog boxes
