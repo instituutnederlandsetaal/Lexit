@@ -1776,3 +1776,19 @@ lexutil.uploadFile = function(sFileName) {
 
 
 //******************************************************* 
+
+lexutil.generatePassword = function() {
+  const consonants = "bcdfghjklmnpqrstvwxyz";
+  const vowels = "aeiou";
+
+  let password = "";
+
+  for (let i = 0; i < 4; i++) {
+    const consonant = consonants[Math.floor(Math.random() * consonants.length)];
+    const vowel = vowels[Math.floor(Math.random() * vowels.length)];
+
+    password += consonant + vowel;
+  }
+
+  return password;
+};

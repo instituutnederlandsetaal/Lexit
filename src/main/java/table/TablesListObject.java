@@ -6,6 +6,12 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+/**
+ * The TablesListObject holds a list of table informations.
+ * 
+ * Each entry consists of a table name, type, comment and owner
+ */
+
 @XmlRootElement(name="root")
 public class TablesListObject {
 

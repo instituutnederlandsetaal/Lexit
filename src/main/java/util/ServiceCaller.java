@@ -9,6 +9,10 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+/**
+ * This class is about calling services (using the Lex'it webservice as a proxy)
+ */
+
 public class ServiceCaller {
 	
 	String url = "";

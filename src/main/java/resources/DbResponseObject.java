@@ -5,10 +5,10 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
- * DbResponseObject is meant to be sent
- * as a response to the web application after some request
+ * DbResponseObject is a general (therefore often used) response object,
+ * meant to send a response to the client after some request to the webservice.
+ * 
  * The object contains a field response with 'OK' or some error message
- * @author Fannee
  *
  */
 @XmlRootElement(name="root")

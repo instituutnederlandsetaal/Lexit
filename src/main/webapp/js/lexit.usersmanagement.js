@@ -323,6 +323,16 @@ lexitusers.createNewUser = function(){
 			}
 	);
 	
+	// allow dialog to be built before adding password generator
+	setTimeout(function(){
+		
+		$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
+		$("#password_generator").click(function(){
+			$("#prompt_password").val(lexutil.generatePassword());
+		});
+		$("#password_generator").after("<br>");
+	}, 100);
+	
 };
 	
 
@@ -411,6 +421,154 @@ lexitusers.addRoleInProject = function(){
 		}
 	});
 											
+};
+
+
+
+/**
+ * Add multiple users to a project (db)
+ */
+lexitusers.addMultipleUsersToProject = function(){
+	
+	var aSelectedUsers = [];
+	
+	fn.prompt([lang.admingui_add_multipleusers_title, 
+		lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleusers_msg+"</DIV>"], 
+			["project (db)", "role in project (db)"], 
+			["::compulsory", ["all::selected", "write", "read"]], 
+			function(resp){
+				
+				// function for assigning project to selected users
+				var fnSetUserWithRole = function(aSelectedUsers, iUserName=0){					
+					
+					$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": aSelectedUsers[iUserName],
+							"default_role": null,
+							"db_name": resp["project (db)"],
+							"role": resp["role in project (db)"],
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							// process the next user 
+							if (iUserName < aSelectedUsers.length){
+								
+								fnSetUserWithRole(aSelectedUsers, iUserName+1);
+							}
+							
+							// if we're done, show the result
+							else {
+								fn.closeDialog();
+								lexitusers.refreshUserRight(function(){
+									fn.message(lang.ok, lang.admingui_add_multipleusers_title+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+										lexitusers.showMenu();
+									});				
+								});
+							}							
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_add_multipleusers_error+" " + textStatus+" "+errorThrown);
+						}
+	 				});
+				};				
+				
+				
+				// start the job!
+				fnSetUserWithRole(aSelectedUsers);
+			},
+			function(){
+				fn.closeDialog();
+				lexitusers.showMenu();
+			}
+	);
+	
+	
+	// allow the prompt to be built before manipulating it
+	
+	setTimeout(function(){
+		
+		// add a checkbox selector to the list of users
+		
+		$("table#userstable tbody").find("tr").each(function(i){
+			
+			var $thisRow = $(this);
+			
+			// change columns title
+			if (i==0){
+				$thisRow.append(
+					$("<td></td>").text("SELECTION")
+				);
+			}
+			// some users should not be edited (like publicreader)
+			// so those users will not be given a checkbox
+			else if ($thisRow.attr("id") == 'user_publicreader'){
+				$thisRow.append(
+					$("<td></td>").text("")
+				);
+			}
+			// normal case: put checkbox
+			else {
+				
+				var $tdWithCheckbox = 
+					$("<td></td>")
+						.append(
+							
+							$("<input></input>")
+								.attr("type", "checkbox")
+						)
+						// append click event to TD (that will catch click on checkbox as well)
+						.click(function(event){
+							
+							// If the user clicked the checkbox itself, let the browser handle it,
+							// otherwise the TD click would toggle it twice
+							if ( $(event.target).is(":checkbox")){
+								return;
+							}		
+							
+							// if the TD was clicked, set the checkbox value and
+							// trigger a change event on the checkbox
+							var $thisCheckBox = $(this).find(":checkbox");
+							$thisCheckBox
+								.prop("checked", !$thisCheckBox.prop("checked"))
+								.trigger("change");						
+						})
+				
+				
+				// check event on checkbox should cause (de)selection of users
+				$tdWithCheckbox.find(":checkbox")
+					.on("change", function (){
+						
+						// read username and checkbox status
+						var username = $(this).closest("tr").attr("id").replace(/^user_/, "");
+						var userchecked = $(this).prop("checked");
+						
+						// add or remove user to/from selection given the checkbox status
+						if (userchecked){
+							aSelectedUsers.push(username);
+						}
+						else {
+							aSelectedUsers = aSelectedUsers.filter(x => x !== username);
+						}
+						
+					});
+					
+				$thisRow.append(	
+					$tdWithCheckbox
+				);
+			}
+			
+		});
+		
+		// add autocomplete to project (db) field
+		lexitusers.setProjectAutoComplete();
+		
+	}, 100);
 };
 
 
@@ -883,6 +1041,7 @@ lexitusers.showMenu = function(){
 	oMenuOptions[lang.admingui_main_dialog_add_user] = 			function(){lexitusers.createNewUser();};
 	oMenuOptions[lang.admingui_main_dialog_delete_user] =		function(){lexitusers.deleteUser();};
 	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
+	oMenuOptions[lang.admingui_add_multipleusers] = 			function(){lexitusers.addMultipleUsersToProject();};
 	oMenuOptions["separator1"] = 								null;
 	oMenuOptions[lang.admingui_main_dialog_projectmenu] =		function(){lexitusers.setListOfProjects();};	
 	oMenuOptions["separator2"] = 								null;	

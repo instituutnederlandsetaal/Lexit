@@ -7,8 +7,10 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
-// this class allows for storage of multiple table rows,  
-// as a list of three-membered arrays  [0:record-id, 1:column name, 2:value]
+/**
+ * The TableRecordsObject allows for storage of multiple table rows, 
+ * as a list of three-membered arrays  [0:record-id, 1:column name, 2:value]
+ */
 
 @XmlRootElement(name="results")
 public class TableRecordsObject {

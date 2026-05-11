@@ -113,7 +113,7 @@ lexitinit.startInRightMode = function(){
 	
 	else if (bAdmin) {
 		
-		fn.prompt("ADMIN LOGIN", ["Username", "Password"], ["admin::disabled", ""], 
+		fn.prompt("ADMIN LOGIN", ["Username", "Password"], ["admin::disabled", "::password"], 
 				function(resp){
 			
 					// temporarily turn off the Chrome fix
@@ -155,9 +155,8 @@ lexitinit.startInRightMode = function(){
 				}
 		);
 		
-		// set password type
+		// set focus
 		setTimeout(	function(){	
-			$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
 			fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
 		}, 100);
 	}

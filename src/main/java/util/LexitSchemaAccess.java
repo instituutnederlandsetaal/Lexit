@@ -29,6 +29,10 @@ import jakarta.xml.bind.DatatypeConverter;
 import resources.Constants;
 import resources.ContextObject;
 
+/**
+ * This class deals with user accounts, access rights, etc. 
+ */
+
 public class LexitSchemaAccess {
 	
 	// default name of the Lex'it schema database
@@ -1082,7 +1086,7 @@ public class LexitSchemaAccess {
 			dc = createPostgresConnectionManager();
 		}
 		catch (Exception e){//Catch exception if any
-			String error = Util.getDebugInfoForConsole("Error while reading the '\"+lexitSchemaFileName+\"' properties file", new String[] {filepath});
+			String error = Util.getDebugInfoForConsole("Error while reading the '"+lexitSchemaFileName+"' properties file", new String[] {filepath});
 			throw new RuntimeException(error, e);
 		}
 	}

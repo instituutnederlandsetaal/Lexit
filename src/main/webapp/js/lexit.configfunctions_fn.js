@@ -5098,12 +5098,16 @@ fn.repositionDialog = function(bCenter){
  * 
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
- * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
+ * @param {Array} aValues - Default string values (pre-filled when dialog opens). 
+ * When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
  * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default /
- * When when one needs a datepicker, add '::datepicker' to the value string. /
- * When when one needs a text area for one field only, add '::textarea' to the value string. / 
- * And when one needs a selectbox, give an array of values to choose from. 
- * The value to be selected by default must have '::selected' attached in its string value.  
+ * When one needs a datepicker, add '::datepicker' to the string value. /
+ * When one needs a text area for one field only, add '::textarea' to the string value. / 
+ * When one needs a field to be compulsory, add '::compulsory' to the string value. / 
+ * When one needs a username field (for a login prompt or so), add '::username' to the string value. / 
+ * When one needs a password field (for a login prompt or so), add '::password' to the string value. / 
+ * And when one needs a selectbox, give an array of values to choose from; 
+ * the value to be selected by default must have '::selected' attached in its string value.  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
@@ -5124,6 +5128,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	// list of editors to be activated when dialog is opened
 	var aEditorsId = [];
+	
+	// list of compulsory fields
+	var aCompulsoryFields = [];
 
 	// deal with title/message input
 	var sMessage = "";
@@ -5147,6 +5154,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	var promptForm = $("<form></form>");
 	var promptFieldSet = $("<fieldset></fieldset>");
 	for (var i=0; i<aFieldNames.length; i++) {
+		
 		// should the input field be editable?
 		var bFixedValue = false;
 		// datepicker?
@@ -5155,13 +5163,30 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		var bOneTextarea = false;
 		// editor type
 		var bEditor = false;
+		
+		// login types
+		var bUsername = false;
+		var bPassword = false;
 
+		// process default field values and parameters (::compulsory, ::textarea, etc.)
 		if (aValues != null && 
 				(aValues[i] instanceof String || typeof aValues[i] === "string") ) { // make sure we have a string, or this will crash!
+			
+			// register compulsory fields
+			if ( (aValues[i]).indexOf("::compulsory")>-1 ){
+				aCompulsoryFields.push(aFieldNames[i]);
+			}
+			
+			// read other parameters
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			bEditor = (aValues[i]).indexOf("::editor")>-1;
+			
+			bUsername = (aValues[i]).indexOf("::username")>-1;
+			bPassword = (aValues[i]).indexOf("::password")>-1;
+			
+			// extract the value (cut of the parameter)
 			aValues[i] = (aValues[i]).split("::")[0];
 		}
 
@@ -5276,10 +5301,18 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		else {
 			var sInputType = (bTextarea || bOneTextarea) ? "textarea" : "input";
 			input = $("<"+sInputType+"></"+sInputType+">")
-				.attr("type", "text" )
+				.attr("type", (bPassword ? "password" : "text") )
 				.attr("name", fieldLC)
 				.attr("id", "prompt_"+fieldLC)
 				.prop('disabled', bFixedValue);
+				
+			// if login parameters
+			if (bUsername){
+				input.attr("autocomplete", "username");
+			}
+			if (bPassword){
+				input.attr("autocomplete", "current-password");
+			}
 			
 			// preset the input value, if available
 			if ((bTextarea || bOneTextarea)) {
@@ -5322,10 +5355,13 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		aButtons.push({
        	 text: lang.ok,
     	 click: function(){
+			
+			// for now, we don't know of any compulsory field that wasn't filled in
+			var bFailedCompulsoryField = false;
     		 
     		var aPromptResponse = {}; 
-     		for (var i=0; i<aFieldNames.length; i++)
-    		{
+     		for (var i=0; i<aFieldNames.length; i++) {
+				
      			// fieldname
      			var thisFieldName = $.trim(aFieldNames[i]);
      			
@@ -5335,6 +5371,14 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
     			// first try special case (select box), and then the normal case (text)
     			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
     			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
+    			
+    			// if the current field is a compulsory one,
+    			// and its value is empty, stop right away and show an error
+    			if ($.inArray(aFieldNames[i], aCompulsoryFields)>-1 && (thisValue == null || thisValue.trim() == '')){
+					bFailedCompulsoryField = true;
+					fn.message(lang.error, lang.forgot_compulsory_field.replace(/FIELDNAME/g, aFieldNames[i]));
+					break;
+				}
     			
     			
     			// compute output for fn.getPromptBoxInput
@@ -5349,10 +5393,16 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
     			aPromptResponse[thisFieldName] = thisValue;
     			
     		}
-     		$( this ).dialog( "close" );  
-    		// call callback
-     		fnFunction(aPromptResponse); 
-    		              		
+    		
+    		// all done?
+    		if ( !bFailedCompulsoryField){
+				
+				// close the dialog
+				$( this ).dialog( "close" );
+				  
+	    		// call callback
+	     		fnFunction(aPromptResponse);
+			}    		              		
     	},
     	id: 'dialog_accept_button'
        });

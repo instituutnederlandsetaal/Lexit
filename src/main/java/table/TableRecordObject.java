@@ -7,8 +7,10 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
-// this class allows for storage of one single table row, 
-// as a list of two-membered arrays  [0:column name, 1:value]
+/**
+ * The TableRecordObject allows for storage of ONE single table row, 
+ * as a list of two-membered arrays  [0:column name, 1:value]
+ */
 
 @XmlRootElement(name="results")
 public class TableRecordObject {

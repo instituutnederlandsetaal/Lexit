@@ -23,7 +23,10 @@ import resources.Constants;
 import resources.ContextObject;
 import resources.DbResponseObject;
 
-
+/**
+ * This class deals with communication with the database:
+ * it takes care of connections pool management, sends queries with proper data types, etc.
+ */
 
 public class PostgresConnectionManager {
 	

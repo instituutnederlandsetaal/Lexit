@@ -48,8 +48,7 @@ import resources.ContextObject;
 
 
 /**
- * Util contains some utilities like a join-function, and such
- * @author Fannee
+ * Util contains some utilities like a join-function, and such.
  *
  */
 public class Util {

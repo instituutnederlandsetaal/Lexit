@@ -27,6 +27,16 @@ hr {
 } 
 
 
+/******************************************************************* 
+ * Style for jquery ui menu item 
+ * used in dialogs for picking items out of an autocomplete list
+ *******************************************************************/
+
+.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+    background-color: #2b7cff;
+    color: white;
+}
+
 
 /*******************************************************************
  * Project management dialog

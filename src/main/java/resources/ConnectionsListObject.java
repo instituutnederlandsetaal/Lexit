@@ -7,6 +7,13 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
+/**
+ * The ConnectionsListObject holds a list of info about all connection pools (for the spy mode). 
+ * 
+ * Each entry holds info for one project, that is: 
+ *  projectname, total number of connections, active connections, idle connections, awaiting connections
+ */
+
 @XmlRootElement(name="root")
 public class ConnectionsListObject {
 	
