@@ -395,7 +395,7 @@ lexitusers.createMultipleUsers = function(){
 						},
 						"error": function(jqXHR, textStatus, errorThrown){
 							
-							fn.message(lang.error, lang.admingui_add_multipleroles_error+" " + textStatus+" "+errorThrown);
+							fn.message(lang.error, lang.admingui_add_multipleusers_error+" " + textStatus+" "+errorThrown);
 						}
 					});
 				};		
