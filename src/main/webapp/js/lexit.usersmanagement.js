@@ -334,7 +334,135 @@ lexitusers.createNewUser = function(){
 	}, 100);
 	
 };
+
+/**
+ * Create multiple users at once
+ */
+lexitusers.createMultipleUsers = function(){	
 	
+	fn.prompt([lang.admingui_add_multipleusers_title, 
+			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleusers_msg+"</DIV>"], 
+			["usernames", "default access role"], 
+			["::textarea", ["-::selected", "superuser", "superreader"]], 
+			function(resp){
+				
+				// get input
+				var usernames = resp["usernames"];
+				
+				// create arrays of usernames and passwords for the new users
+				
+				var aUsernames = usernames.split(/\r\n|\r|\n/) // split by line end
+					.map(username => username.trim()) // trim in case of tailing spaces or so
+					.filter(Boolean); // remove empty lines
+				var aPasswords = aUsernames.map(() => lexutil.generatePassword());			
+								
+		
+ 				// recursive function for creating users and passwords
+ 				
+				var fnSetUser = function(aUsernames, aPassword, iUserNr=0){	
+				
+					// get new user to create
+					var username = aUsernames[iUserNr];
+					var password = aPasswords[iUserNr];
+										
+					$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": username,
+							"password": password,
+							"default_role": resp["default access role"],
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							// process the next user 
+							if (iUserNr+1 < aUsernames.length){								
+								fnSetUser(aUsernames, aPassword, iUserNr+1);
+							}
+							
+							// if we're done, show the result
+							else {
+								fn.closeDialog();
+								lexitusers.refreshUserRight(function(){
+									fn.message(lang.ok, lang.admingui_add_multipleroles_title+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+										lexitusers.showMenu();
+									});				
+								});
+							}							
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_add_multipleroles_error+" " + textStatus+" "+errorThrown);
+						}
+					});
+				};		
+				
+				
+				
+				// create table to show accounts to be created
+				
+				var sTextForClipboard = "";
+				var sTableToShow = lang.admingui_add_multipleusers_confirm + 
+					"<BR><BR>"+
+					"<DIV id='usersoverview'>"+
+					"<TABLE id='userstable'>";
+				sTableToShow += "<TR><TD>USERNAME</TD><TD>&nbsp;&nbsp;</TD><TD>PASSWORD</TD></TR>";
+				for (var u=0; u<aUsernames.length; u++){
+					sTableToShow += "<TR><TD>&nbsp;"+aUsernames[u]+"</TD><TD>&nbsp;&nbsp;</TD><TD>"+aPasswords[u]+"</TD></TR>";
+					sTextForClipboard += "Username: "+aUsernames[u]+"\n"+"Password: "+aPasswords[u]+"\n\n";
+				}
+				sTableToShow += "</TABLE>";	
+				sTableToShow += "</DIV>";	
+				sTableToShow += '<button type="button" id="copyusers_to_clipboard">'+lang.admingui_add_multipleusers_clipboard+'</button>';
+				
+				
+				// show the admin the users about to be created and ask to confirm
+				
+				fn.confirm(lang.admingui_add_multipleusers_title, sTableToShow, 
+					function(){
+						// start the job!
+						fnSetUser(aUsernames);
+					},
+					function(){
+						fn.closeDialog();
+						lexitusers.refreshUserRight(function(){
+							fn.message(lang.ok, lang.admingui_add_multipleusers_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+								lexitusers.showMenu();
+							});				
+						});
+					}
+				);
+				// allow dialog to be built before adding assigning function to button
+				setTimeout(function(){
+					
+					$("#copyusers_to_clipboard").click(function(){
+						lexutil.saveToClipboard(sTextForClipboard);
+					});
+				}, 100);
+								
+				
+			},
+			function(){
+				fn.closeDialog();
+				lexitusers.showMenu();
+			},
+			false,
+			[50, 10]
+	);
+	
+	// allow dialog to be built before adding password generator
+	setTimeout(function(){
+		
+		$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
+		$("#password_generator").click(function(){
+			$("#prompt_password").val(lexutil.generatePassword());
+		});
+		$("#password_generator").after("<br>");
+	}, 100);
+};
 
 /**
  * Add or update a role for a user in a project (db)
@@ -432,20 +560,20 @@ lexitusers.addMultipleUsersToProject = function(){
 	
 	var aSelectedUsers = [];
 	
-	fn.prompt([lang.admingui_add_multipleusers_title, 
-		lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleusers_msg+"</DIV>"], 
+	fn.prompt([lang.admingui_add_multipleroles_title, 
+		lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleroles_msg+"</DIV>"], 
 			["project (db)", "role in project (db)"], 
 			["::compulsory", ["all::selected", "write", "read"]], 
 			function(resp){
 				
 				// function for assigning project to selected users
-				var fnSetUserWithRole = function(aSelectedUsers, iUserName=0){					
+				var fnSetUserWithRole = function(aSelectedUsers, iUserNr=0){					
 					
 					$.ajax({
 						"type": "POST",
 						"url": WEBSERV_URL+"/api/set_user_with_role",
 						"data": {
-							"username": aSelectedUsers[iUserName],
+							"username": aSelectedUsers[iUserNr],
 							"default_role": null,
 							"db_name": resp["project (db)"],
 							"role": resp["role in project (db)"],
@@ -455,16 +583,16 @@ lexitusers.addMultipleUsersToProject = function(){
 						"success": function(xml) {
 							
 							// process the next user 
-							if (iUserName < aSelectedUsers.length){
+							if (iUserNr+1 < aSelectedUsers.length){
 								
-								fnSetUserWithRole(aSelectedUsers, iUserName+1);
+								fnSetUserWithRole(aSelectedUsers, iUserNr+1);
 							}
 							
 							// if we're done, show the result
 							else {
 								fn.closeDialog();
 								lexitusers.refreshUserRight(function(){
-									fn.message(lang.ok, lang.admingui_add_multipleusers_title+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									fn.message(lang.ok, lang.admingui_add_multipleroles_title+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
 									});				
 								});
@@ -473,7 +601,7 @@ lexitusers.addMultipleUsersToProject = function(){
 						},
 						"error": function(jqXHR, textStatus, errorThrown){
 							
-							fn.message(lang.error, lang.admingui_add_multipleusers_error+" " + textStatus+" "+errorThrown);
+							fn.message(lang.error, lang.admingui_add_multipleroles_error+" " + textStatus+" "+errorThrown);
 						}
 	 				});
 				};				
@@ -1039,12 +1167,14 @@ lexitusers.showMenu = function(){
 	
 	// menu options in current language, with associated callback functions
 	oMenuOptions[lang.admingui_main_dialog_add_user] = 			function(){lexitusers.createNewUser();};
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_user] = 			function(){lexitusers.createMultipleUsers();};
 	oMenuOptions[lang.admingui_main_dialog_delete_user] =		function(){lexitusers.deleteUser();};
-	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
-	oMenuOptions[lang.admingui_add_multipleusers] = 			function(){lexitusers.addMultipleUsersToProject();};
 	oMenuOptions["separator1"] = 								null;
+	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_roles] = 			function(){lexitusers.addMultipleUsersToProject();};
+	oMenuOptions["separator2"] = 								null;
 	oMenuOptions[lang.admingui_main_dialog_projectmenu] =		function(){lexitusers.setListOfProjects();};	
-	oMenuOptions["separator2"] = 								null;	
+	oMenuOptions["separator3"] = 								null;	
 	oMenuOptions[lang.admingui_main_dialog_admin_password] =	function(){lexitusers.changeAdminPassword();};
 	
 	// build options, replacing "null" with the separator value (for empty line to separate groups)

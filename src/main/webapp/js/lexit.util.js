@@ -1792,3 +1792,18 @@ lexutil.generatePassword = function() {
 
   return password;
 };
+
+//******************************************************* 
+
+lexutil.saveToClipboard = function(someText){
+
+	navigator.clipboard.writeText(someText)
+    .then(function () {
+      console.log("Copied to clipboard");
+    })
+    .catch(function (err) {
+      console.error("Could not copy text: ", err);
+    });
+};
+
+//******************************************************* 

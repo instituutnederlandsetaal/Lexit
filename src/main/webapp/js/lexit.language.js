@@ -203,8 +203,10 @@ lang.paginate_last = "Laatste";
 lang.admingui_main_dialog_title = "Projecten- en gebruikersbeheer";
 lang.admingui_main_dialog_msg = "Maak een keuze:";
 lang.admingui_main_dialog_add_user = "Gebruiker toevoegen/bijwerken";
+lang.admingui_main_dialog_add_multiple_user = "Meerdere gebruikers ineens toevoegen";
 lang.admingui_main_dialog_delete_user = "Gebruiker verwijderen";
 lang.admingui_main_dialog_add_role = "Gebruikersrol toevoegen/bijwerken";
+lang.admingui_main_dialog_add_multiple_roles = "Meerdere gebruikers ineens aan een project toevoegen/bijwerken";
 lang.admingui_main_dialog_projectmenu = "Projectmenu bewerken";
 lang.admingui_main_dialog_admin_password = "Admin wachtwoord wijzigen";
 
@@ -218,6 +220,13 @@ lang.admingui_adduser_msg = "Gebruiker toevoegen/bijwerken:<BR><BR>Als het 'pass
 lang.admingui_adduser_passwordgenerator = "Genereer wachtwoord!";
 lang.admingui_adduser_success = "De gebruiker is opgeslagen!";
 lang.admingui_adduser_error = "Het opslaan van de gebruiker is mislukt:";
+
+lang.admingui_add_multipleusers_title = "Meerdere gebruikers ineens toevoegen";
+lang.admingui_add_multipleusers_msg = "Tik een lijst gebruikersnamen (één per regel) en klik op 'Ok'.<BR>Wachtwoorden worden automatisch aangemaakt.";
+lang.admingui_add_multipleusers_confirm = "De volgende accounts zullen worden aangemaakt.<BR><BR>Bent u akkoord?";
+lang.admingui_add_multipleusers_error = "Het toevoegen van gebruikers is mislukt:";
+lang.admingui_add_multipleusers_cancel = "Het toevoegen van gebruikers is geannuleerd!";
+lang.admingui_add_multipleusers_clipboard = "Kopieer inloggegevens naar klembord";
 
 lang.admingui_deleteuser_title = "Gebruiker verwijderen";
 lang.admingui_deleteuser_selector_msg = "Gebruiker verwijderen:";
@@ -238,10 +247,9 @@ lang.admingui_addrole_projectname_autocomplete = "Tik een projectnaam...";
 lang.admingui_addrole_success = "De Gebruikersrol is opgeslagen!";
 lang.admingui_addrole_error = "Het opslaan van de gebruikersrol is mislukt:";
 
-lang.admingui_add_multipleusers = "Meerdere gebruikers ineens aan een project toevoegen/bijwerken";
-lang.admingui_add_multipleusers_title = "Meerdere gebruikers ineens aan een project toevoegen";
-lang.admingui_add_multipleusers_msg = "Kies gebruikers (boven) en een project (onder),<BR>en klik 'OK' om te bevestigen:";
-lang.admingui_add_multipleusers_error = "Het toevoegen/bijwerken van gebruikers is mislukt:";
+lang.admingui_add_multipleroles_title = "Meerdere gebruikers ineens aan een project toevoegen";
+lang.admingui_add_multipleroles_msg = "Kies gebruikers (boven) en een project (onder),<BR>en klik 'OK' om te bevestigen:";
+lang.admingui_add_multipleroles_error = "Het toevoegen/bijwerken van gebruikers is mislukt:";
 
 lang.admingui_projectmenu_title = "Projectmenu bewerken";
 lang.admingui_projectmenu_msg = "<B>Vul een projectnaam en -omschrijving in &nbsp;&nbsp;|&nbsp;&nbsp; sleep naar de juiste sectie</B><BR><BR>"+
@@ -1823,8 +1831,10 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_main_dialog_title = "Projects & User management";
 		lang.admingui_main_dialog_msg = "Would you like to:";
 		lang.admingui_main_dialog_add_user = "Add/update a user";
+		lang.admingui_main_dialog_add_multiple_user = "Add multiple users at once";
 		lang.admingui_main_dialog_delete_user = "Delete a user";
 		lang.admingui_main_dialog_add_role = "Add/update roles";
+		lang.admingui_main_dialog_add_multiple_roles = "Add/update multiple users at once in a project";
 		lang.admingui_main_dialog_projectmenu = "Projects menu editor";
 		lang.admingui_main_dialog_admin_password = "Change admin password";
 		
@@ -1838,6 +1848,13 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_adduser_passwordgenerator = "Generate password!";
 		lang.admingui_adduser_success = "The user was set!";
 		lang.admingui_adduser_error = "Setting the user went wrong:";
+		
+		lang.admingui_add_multipleusers_title = "Create multiple users at one";
+		lang.admingui_add_multipleusers_msg = "Type in a list of usernames (one per rule) and click 'Ok'.<BR>Password will be created automatically.";
+		lang.admingui_add_multipleusers_confirm = "The following accounts are about to be created.<BR><BR>Do you agree?";
+		lang.admingui_add_multipleusers_error = "Adding/Updating multiple users went wrong:";
+		lang.admingui_add_multipleusers_cancel = "Adding/Updating multiple users was cancelled!";
+		lang.admingui_add_multipleusers_clipboard = "Copy credentials to clipboard";
 		
 		lang.admingui_deleteuser_title = "Delete user";
 		lang.admingui_deleteuser_selector_msg = "Delete user:";
@@ -1858,10 +1875,9 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_addrole_success = "The user role was set!";
 		lang.admingui_addrole_error = "Setting the user role went wrong:";
 		
-		lang.admingui_add_multipleusers = "Add/update multiple users at once in a project";
-		lang.admingui_add_multipleusers_title = "Add/update multiple users at once in a project";
-		lang.admingui_add_multipleusers_msg = "Choose users (above) and a project (below),<BR>and click 'OK' to validate:";
-		lang.admingui_add_multipleusers_error = "Adding/Updating multiple users went wrong:";
+		lang.admingui_add_multipleroles_title = "Add/update multiple users at once in a project";
+		lang.admingui_add_multipleroles_msg = "Choose users (above) and a project (below),<BR>and click 'OK' to validate:";
+		lang.admingui_add_multipleroles_error = "Adding/Updating multiple users went wrong:";
 		
 		lang.admingui_projectmenu_title = "Projects menu editor";
 		lang.admingui_projectmenu_msg = "<B>Fill in project name and description &nbsp;&nbsp;|&nbsp;&nbsp; drag & drop to the right section</B><BR><BR>"+
