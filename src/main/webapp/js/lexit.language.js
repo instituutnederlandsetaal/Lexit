@@ -1850,7 +1850,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_adduser_error = "Setting the user went wrong:";
 		
 		lang.admingui_add_multipleusers_title = "Create multiple users at one";
-		lang.admingui_add_multipleusers_msg = "Type in a list of usernames (one per rule) and click 'Ok'.<BR>Password will be created automatically.";
+		lang.admingui_add_multipleusers_msg = "Type in a list of usernames (one per line) and click 'Ok'.<BR>Passwords will be created automatically.";
 		lang.admingui_add_multipleusers_confirm = "The following accounts are about to be created.<BR><BR>Do you agree?";
 		lang.admingui_add_multipleusers_error = "Adding/Updating multiple users went wrong:";
 		lang.admingui_add_multipleusers_cancel = "Adding/Updating multiple users was cancelled!";
