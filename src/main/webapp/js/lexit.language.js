@@ -227,7 +227,7 @@ lang.admingui_add_multipleusers_confirm = "De volgende accounts zullen worden aa
 lang.admingui_add_multipleusers_success = "De gebruikers zijn toegevoegd:";
 lang.admingui_add_multipleusers_error = "Het toevoegen van gebruikers is mislukt:";
 lang.admingui_add_multipleusers_cancel = "Het toevoegen van gebruikers is geannuleerd!";
-lang.admingui_add_multipleusers_clipboard = "De inloggegevens zijn gekopieerd naar het klembord, zodat u deze aan de medewerken kunt doorgeven.";
+lang.admingui_add_multipleusers_clipboard = "De inloggegevens zijn gekopieerd naar het klembord, zodat u deze aan de medewerkers kunt doorgeven.";
 
 lang.admingui_deleteuser_title = "Gebruiker verwijderen";
 lang.admingui_deleteuser_selector_msg = "Gebruiker verwijderen:";
