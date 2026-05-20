@@ -4490,10 +4490,11 @@ fn.getFunctionOutput = function(){
  * @param {Array} aFunctionArguments - An array with the function args
  * @param {Function} fnCallback - Function called after the operation
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * @param [Boolean] [bAsync=false] - asynchronous or not
  * 
  * @see fn.getFunctionOutput
  */
-fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler){	
+fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler, bAsync = false){	
 	
 	var url = WEBSERV_URL+"/api/call_function";
 	
@@ -4517,7 +4518,7 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 	$.ajax( {
 		"type": "POST",
 		"url": url,
-		"async": false, // needed to block code execution while awaiting the server response
+		"async": bAsync, // false might be needed to block code execution while awaiting the server response
 		"data": aData,
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
