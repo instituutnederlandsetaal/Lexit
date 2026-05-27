@@ -83,7 +83,7 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 				var thisUser = aOneUserRole[0];
 				if (thisUser == "admin") continue;
 				
-				var aTheseRoles = (aOneUserRole[1]).split(",");
+				var aTheseRoles = (aOneUserRole[1]).split(",").sort();
 				for (var j=0; j<aTheseRoles.length; j++){
 					
 					if (aTheseRoles[j].split("_").length > 1){
@@ -177,99 +177,90 @@ lexitusers.getDefaultRole = function(someUser, fnCallback){
 /**
  * Delete a user (after confirmation)
  */
-lexitusers.deleteUser = function(){
+lexitusers.deleteUser = function(){	
 	
-	$.ajax({
-		"type": "GET",
-		"url": WEBSERV_URL+"/api/get_list_of_users",
-		"data": {
-			"dummy": lexutil.getUniqueNumber()
-		},
-		"dataType": "xml", // get response as xml
-		"success": function(xml) {
+	// declare function for deleting users, to be used as callback
+	
+	var fnDeleteUser = function(aListOfUsers){
 			
-			var aListOfUsers = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR).sort();
-			aListOfUsers = aListOfUsers.filter(someUser => someUser != "admin");
+		fn.prompt([lang.admingui_deleteuser_title, lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_deleteuser_selector_msg+"</DIV>"], 
+				["username"], 
+				[aListOfUsers], 
+				function(resp){
+					
+					var username = resp["username"];
 			
-			fn.prompt([lang.admingui_deleteuser_title, lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_deleteuser_selector_msg+"</DIV>"], 
- 					["username"], 
- 					[aListOfUsers], 
- 					function(resp){
+					fn.confirm(lang.admingui_deleteuser_title, (lang.admingui_deleteuser_confirm_msg).replace(/USERNAME/g, username),
+						function(){
 						
-						var username = resp["username"];
-				
-						fn.confirm(lang.admingui_deleteuser_title, (lang.admingui_deleteuser_confirm_msg).replace(/USERNAME/g, username),
-							function(){
-							
-								$.ajax({
-									"type": "POST",
-									"url": WEBSERV_URL+"/api/delete_user",
-									"data": {
-										"username": username,
-										"dummy": lexutil.getUniqueNumber()
-									},
-									"dataType": "xml", // get response as xml
-									"success": function(xml) {
-										
-										fn.closeDialog();										
-										lexitusers.refreshUserRight(function(){
-											fn.message(lang.ok, lang.admingui_deleteuser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
-												lexitusers.showMenu();
-											});	
-											setTimeout(function(){
-												lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
-											}, 100);
-										});
-										
-									},
-									"error": function(jqXHR, textStatus, errorThrown){
-										
-										fn.message(lang.error, lang.admingui_deleteuser_error+" " + textStatus+" "+errorThrown);
-									}
-				 				});
-							},
-							function(){
-								
-								fn.closeDialog();
-								lexitusers.refreshUserRight(function(){
-									fn.message(lang.ok, lang.admingui_deleteuser_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
-										lexitusers.showMenu();
+							$.ajax({
+								"type": "POST",
+								"url": WEBSERV_URL+"/api/delete_user",
+								"data": {
+									"username": username,
+									"dummy": lexutil.getUniqueNumber()
+								},
+								"dataType": "xml", // get response as xml
+								"success": function(xml) {
+									
+									fn.closeDialog();										
+									lexitusers.refreshUserRight(function(){
+										fn.message(lang.ok, lang.admingui_deleteuser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+											lexitusers.showMenu();
+										});	
+										setTimeout(function(){
+											lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+										}, 100);
 									});
-									setTimeout(function(){
-										lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
-									}, 100);	
+									
+								},
+								"error": function(jqXHR, textStatus, errorThrown){
+									
+									fn.message(lang.error, lang.admingui_deleteuser_error+" " + textStatus+" "+errorThrown);
+								}
+			 				});
+						},
+						function(){
+							
+							fn.closeDialog();
+							lexitusers.refreshUserRight(function(){
+								fn.message(lang.ok, lang.admingui_deleteuser_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									lexitusers.showMenu();
 								});
-								
-							}
-						);
- 				
-		 				
- 					},
- 					function(){
- 						fn.closeDialog();
-						lexitusers.showMenu();
- 					}
- 			);
+								setTimeout(function(){
+									lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+								}, 100);	
+							});
+							
+						}
+					);
 			
+	 				
+				},
+				function(){
+					fn.closeDialog();
+					lexitusers.showMenu();
+				}
+		);
+		
+		
+		// allow the prompt to be built before manipulating it
+		setTimeout(function(){
+			// insert empty row after the default access role selector
+			$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
 			
-			// allow the prompt to be built before manipulating it
-			setTimeout(function(){
-				// insert empty row after the default access role selector
-				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
-				
-				// make sure that when a user is selected, the overview scrolls to that user
-				$("#prompt_username").on("change", function(){					
-					lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
-				});
-			}, 100);
-			
-		},
-		"error": function(jqXHR, textStatus, errorThrown){
-			
-			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
-		}
-	});
+			// make sure that when a user is selected, the overview scrolls to that user
+			$("#prompt_username").on("change", function(){					
+				lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
+			});
+		}, 100);
 
+	}
+	
+	// get the current list of users, 
+	// and do the job
+	
+	lexitusers.getUsersAndDo(fnDeleteUser);
 	
 };
 
@@ -323,94 +314,396 @@ lexitusers.createNewUser = function(){
 			}
 	);
 	
-};
+	// allow dialog to be built before adding password generator
+	setTimeout(function(){
+		
+		$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
+		$("#password_generator").click(function(){
+			$("#prompt_password").val(lexutil.generatePassword());
+		});
+		$("#password_generator").after("<br>");
+	}, 100);
 	
+};
+
+/**
+ * Create multiple users at once
+ */
+lexitusers.createMultipleUsers = function(){	
+	
+	// declare function to be used as a callback
+	
+	var fnCreateMultipleUsers = function(aListOfUsers){
+	
+		fn.prompt([lang.admingui_add_multipleusers_title, 
+			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleusers_msg+"</DIV>"], 
+			["usernames", "default access role"], 
+			["::textarea", ["-::selected", "superuser", "superreader"]], 
+			function(resp){
+				
+				// get input
+				var usernames = resp["usernames"];
+				// we'll assign this variable to users that exist already 
+				var sExistsAlready = "[exists already]";
+				
+				// create arrays of usernames and passwords for the new users
+				
+				var aUsernames = usernames.split(/\r\n|\r|\n/) // split by line end
+					.map(username => username.trim()) // trim in case of tailing spaces or so
+					.filter(Boolean); // remove empty lines
+				var aPasswords = aUsernames.map(username => 
+					aListOfUsers.includes(username) ? sExistsAlready : lexutil.generatePassword()
+				);			
+								
+		
+ 				// recursive function for creating users and passwords
+ 				
+				var fnSetUser = function(aUsernames, aPassword, iUserNr=0){	
+				
+					// get new user to create
+					var username = aUsernames[iUserNr];
+					var password = aPasswords[iUserNr];
+					var defaultRole = resp["default access role"];
+					
+					// if the user is known already,
+					// make sure her/his account settings won't change
+					if (password == sExistsAlready){
+						password = ""; // making it empty will allow it to remain unchanged
+						defaultRole = null; // null role will allow that to remain unchanged as well
+					}
+										
+					$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": username,
+							"password": password,
+							"default_role": defaultRole,
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							// process the next user 
+							if (iUserNr+1 < aUsernames.length){								
+								fnSetUser(aUsernames, aPassword, iUserNr+1);
+							}
+							
+							// if we're done, show the result
+							else {
+								fn.closeDialog();
+								lexitusers.refreshUserRight(function(){
+									// show result of operation
+									fn.message(lang.ok, lang.admingui_add_multipleusers_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+										lexitusers.showMenu();
+									});	
+									// tell the user the accounts credentials are saved to clipboard
+									setTimeout(function(){
+										fn.message(lang.ok, lang.admingui_add_multipleusers_clipboard);
+									}, 500); // small delay to allow first dialog to be shown first
+								});
+							}							
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_add_multipleusers_error+" " + textStatus+" "+errorThrown);
+						}
+					});
+				};		
+				
+				
+				
+				// create table to show accounts to be created
+				
+				var sTextForClipboard = "";
+				var sTableToShow = lang.admingui_add_multipleusers_confirm + 
+					"<BR><BR>"+
+					"<DIV id='usersoverview'>"+
+					"<TABLE id='userstable'>";
+				sTableToShow += "<TR><TD>USERNAME</TD><TD>&nbsp;&nbsp;</TD><TD>PASSWORD</TD></TR>";
+				for (var u=0; u<aUsernames.length; u++){
+					sTableToShow += "<TR><TD>&nbsp;"+aUsernames[u]+"</TD><TD>&nbsp;&nbsp;</TD><TD>"+aPasswords[u]+"</TD></TR>";
+					sTextForClipboard += "Username: "+aUsernames[u]+"\n"+"Password: "+aPasswords[u]+"\n\n";
+				}
+				sTableToShow += "</TABLE>";	
+				sTableToShow += "</DIV>";	
+								
+				
+				// show the admin the users about to be created and ask to confirm
+				
+				fn.confirm(lang.admingui_add_multipleusers_title, sTableToShow, 
+					function(){
+						// copy accounts infomation into clipboard
+						lexutil.saveToClipboard(sTextForClipboard);
+						
+						// start the job!
+						fnSetUser(aUsernames);
+					},
+					function(){
+						fn.closeDialog();
+						lexitusers.refreshUserRight(function(){
+							fn.message(lang.ok, lang.admingui_add_multipleusers_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+								lexitusers.showMenu();
+							});				
+						});
+					}
+				);
+				
+			},
+			function(){
+				fn.closeDialog();
+				lexitusers.showMenu();
+			},
+			false,
+			[50, 10]
+		);
+	
+		// allow dialog to be built before adding password generator
+		setTimeout(function(){
+			
+			$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
+			$("#password_generator").click(function(){
+				$("#prompt_password").val(lexutil.generatePassword());
+			});
+			$("#password_generator").after("<br>");
+		}, 100);
+
+	};
+	
+	// get the current list of users, 
+	// and do the job
+	
+	lexitusers.getUsersAndDo(fnCreateMultipleUsers);
+};
+
 
 /**
  * Add or update a role for a user in a project (db)
  */
 lexitusers.addRoleInProject = function(){
 	
-	$.ajax({
-		"type": "GET",
-		"url": WEBSERV_URL+"/api/get_list_of_users",
-		"data": {
-			"dummy": lexutil.getUniqueNumber()
-		},
-		"dataType": "xml", // get response as xml
-		"success": function(xml) {
+	// declare function to be used in a callback
+	
+	var fnAddRoleInProject = function(aListOfUsers){
 			
-			var aListOfUsers = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);
-			aListOfUsers = aListOfUsers.filter(someUser => someUser != "admin").sort();
+		fn.prompt([lang.admingui_addrole_title, 
+			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_addrole_msg+"</DIV>"], 
+				["username", "default access role", "project (db)", "role in project (db)"], 
+				[aListOfUsers, ["NO CHANGE::selected", "-", "superuser", "superreader"], "", ["all::selected", "write", "read"]], 
+				function(resp){
+					
+					var username = resp["username"];
 			
-			fn.prompt([lang.admingui_addrole_title, 
-				lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_addrole_msg+"</DIV>"], 
- 					["username", "default access role", "project (db)", "role in project (db)"], 
- 					[aListOfUsers, ["NO CHANGE::selected", "-", "superuser", "superreader"], "", ["all::selected", "write", "read"]], 
- 					function(resp){
-						
-						var username = resp["username"];
- 				
-		 				$.ajax({
-							"type": "POST",
-							"url": WEBSERV_URL+"/api/set_user_with_role",
-							"data": {
-								"username": username,
-								"default_role": ( resp["default access role"] == 'NO CHANGE' ? null : resp["default access role"]),
-								"db_name": resp["project (db)"],
-								"role": resp["role in project (db)"],
-								"dummy": lexutil.getUniqueNumber()
-							},
-							"dataType": "xml", // get response as xml
-							"success": function(xml) {
+	 				$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": username,
+							"default_role": ( resp["default access role"] == 'NO CHANGE' ? null : resp["default access role"]),
+							"db_name": resp["project (db)"],
+							"role": resp["role in project (db)"],
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							fn.closeDialog();
+							lexitusers.refreshUserRight(function(){
+								fn.message(lang.ok, lang.admingui_addrole_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									lexitusers.showMenu();
+								});
+								setTimeout(function(){
+									lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+								}, 100);				
+							});
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_addrole_error+" " + textStatus+" "+errorThrown);
+						}
+	 				});
+				},
+				function(){
+					fn.closeDialog();
+					lexitusers.showMenu();
+				}
+		);
+		
+		
+		// allow the prompt to be built before manipulating it
+		setTimeout(function(){
+			
+			// insert empty row after the default access role selector
+			$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
+			
+			// make sure that when a user is selected, the overview scrolls to that user
+			$("#prompt_username").on("change", function(){					
+				lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
+			});
+			
+			// add autocomplete to project (db) field
+			lexitusers.setProjectAutoComplete();
+			
+		}, 100);
+		
+	};
+			
+
+	// get the current list of users, 
+	// and do the job
+	
+	lexitusers.getUsersAndDo(fnAddRoleInProject);
+											
+};
+
+
+
+/**
+ * Add multiple users to a project (db)
+ */
+lexitusers.addMultipleRolesToProject = function(){
+	
+	var aSelectedUsers = [];
+	
+	fn.prompt([lang.admingui_add_multipleroles_title, 
+		lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleroles_msg+"</DIV>"], 
+			["project (db)", "role in project (db)"], 
+			["::compulsory", ["all::selected", "write", "read"]], 
+			function(resp){
+				
+				// function for assigning project to selected users
+				var fnSetUserWithRole = function(aSelectedUsers, iUserNr=0){					
+					
+					$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": aSelectedUsers[iUserNr],
+							"default_role": null,
+							"db_name": resp["project (db)"],
+							"role": resp["role in project (db)"],
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							// process the next user 
+							if (iUserNr+1 < aSelectedUsers.length){
 								
+								fnSetUserWithRole(aSelectedUsers, iUserNr+1);
+							}
+							
+							// if we're done, show the result
+							else {
 								fn.closeDialog();
 								lexitusers.refreshUserRight(function(){
-									fn.message(lang.ok, lang.admingui_addrole_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									fn.message(lang.ok, lang.admingui_add_multipleroles_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
 										lexitusers.showMenu();
-									});
-									setTimeout(function(){
-										lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
-									}, 100);				
+									});				
 								});
-								
-							},
-							"error": function(jqXHR, textStatus, errorThrown){
-								
-								fn.message(lang.error, lang.admingui_addrole_error+" " + textStatus+" "+errorThrown);
-							}
-		 				});
- 					},
- 					function(){
- 						fn.closeDialog();
- 						lexitusers.showMenu();
- 					}
- 			);
-			
-			
-			// allow the prompt to be built before manipulating it
-			setTimeout(function(){
+							}							
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_add_multipleroles_error+" " + textStatus+" "+errorThrown);
+						}
+	 				});
+				};				
 				
-				// insert empty row after the default access role selector
-				$("<br>").insertAfter( $("#prompt_defaultaccessrole").next("br") );
 				
-				// make sure that when a user is selected, the overview scrolls to that user
-				$("#prompt_username").on("change", function(){					
-					lexitusers.smoothScroll("#usersoverview", "#user_"+($(this).val()).toLowerCase());
-				});
-				
-				// add autocomplete to project (db) field
-				lexitusers.setProjectAutoComplete();
-				
-			}, 100);
+				// start the job!
+				fnSetUserWithRole(aSelectedUsers);
+			},
+			function(){
+				fn.closeDialog();
+				lexitusers.showMenu();
+			}
+	);
+	
+	
+	// allow the prompt to be built before manipulating it
+	
+	setTimeout(function(){
+		
+		// add a checkbox selector to the list of users
+		
+		$("table#userstable tbody").find("tr").each(function(i){
 			
-		},
-		"error": function(jqXHR, textStatus, errorThrown){
+			var $thisRow = $(this);
 			
-			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
-		}
-	});
-											
+			// change columns title
+			if (i==0){
+				$thisRow.append(
+					$("<td></td>").text("SELECTION")
+				);
+			}
+			// some users should not be edited (like publicreader)
+			// so those users will not be given a checkbox
+			else if ($thisRow.attr("id") == 'user_publicreader'){
+				$thisRow.append(
+					$("<td></td>").text("")
+				);
+			}
+			// normal case: put checkbox
+			else {
+				
+				var $tdWithCheckbox = 
+					$("<td></td>")
+						.append(
+							
+							$("<input></input>")
+								.attr("type", "checkbox")
+						)
+						// append click event to TD (that will catch click on checkbox as well)
+						.click(function(event){
+							
+							// If the user clicked the checkbox itself, let the browser handle it,
+							// otherwise the TD click would toggle it twice
+							if ( $(event.target).is(":checkbox")){
+								return;
+							}		
+							
+							// if the TD was clicked, set the checkbox value and
+							// trigger a change event on the checkbox
+							var $thisCheckBox = $(this).find(":checkbox");
+							$thisCheckBox
+								.prop("checked", !$thisCheckBox.prop("checked"))
+								.trigger("change");						
+						})
+				
+				
+				// check event on checkbox should cause (de)selection of users
+				$tdWithCheckbox.find(":checkbox")
+					.on("change", function (){
+						
+						// read username and checkbox status
+						var username = $(this).closest("tr").attr("id").replace(/^user_/, "");
+						var userchecked = $(this).prop("checked");
+						
+						// add or remove user to/from selection given the checkbox status
+						if (userchecked){
+							aSelectedUsers.push(username);
+						}
+						else {
+							aSelectedUsers = aSelectedUsers.filter(x => x !== username);
+						}
+						
+					});
+					
+				$thisRow.append(	
+					$tdWithCheckbox
+				);
+			}
+			
+		});
+		
+		// add autocomplete to project (db) field
+		lexitusers.setProjectAutoComplete();
+		
+	}, 100);
 };
 
 
@@ -881,11 +1174,14 @@ lexitusers.showMenu = function(){
 	
 	// menu options in current language, with associated callback functions
 	oMenuOptions[lang.admingui_main_dialog_add_user] = 			function(){lexitusers.createNewUser();};
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_user] = 			function(){lexitusers.createMultipleUsers();};
 	oMenuOptions[lang.admingui_main_dialog_delete_user] =		function(){lexitusers.deleteUser();};
-	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
 	oMenuOptions["separator1"] = 								null;
+	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_roles] = 			function(){lexitusers.addMultipleRolesToProject();};
+	oMenuOptions["separator2"] = 								null;
 	oMenuOptions[lang.admingui_main_dialog_projectmenu] =		function(){lexitusers.setListOfProjects();};	
-	oMenuOptions["separator2"] = 								null;	
+	oMenuOptions["separator3"] = 								null;	
 	oMenuOptions[lang.admingui_main_dialog_admin_password] =	function(){lexitusers.changeAdminPassword();};
 	
 	// build options, replacing "null" with the separator value (for empty line to separate groups)
@@ -1042,6 +1338,37 @@ lexitusers.keepPublicReaderAlive = function(){
 	 	},
 		"error": function(jqXHR, textStatus, errorThrown){			
 			fn.message(lang.error, lang.failed+": " +	textStatus+" "+errorThrown);
+		}
+	});
+	
+};
+
+
+/**
+ * Function for getting the users list, which is required by several functions,
+ * which will be execute if given as a callback here
+ */
+lexitusers.getUsersAndDo = function(fnCallback){
+	
+	$.ajax({
+		"type": "GET",
+		"url": WEBSERV_URL+"/api/get_list_of_users",
+		"data": {
+			"dummy": lexutil.getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			
+			// parse the list of users and filter out the admin
+			var aListOfUsers = $(xml).find("response").text().split(ARG_INTERNAL_SEPARATOR);
+			aListOfUsers = aListOfUsers.filter(someUser => someUser != "admin").sort();
+			
+			// execute the callback and give the list of users as an argument
+			fnCallback(aListOfUsers);
+		},
+		"error": function(jqXHR, textStatus, errorThrown){
+			
+			fn.message(lang.error, lang.admingui_get_users_roles_error+" " + textStatus+" "+errorThrown);
 		}
 	});
 	

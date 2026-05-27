@@ -177,7 +177,7 @@ public class ContextObject {
 	// when some user does some database operations. The combination of
 	// username + dbname + sessionId guarantees that each user has its own
 	// database object, even when different users logged in with the same account
-	// into the same project (which is not allowed, but sadly happens!)
+	// into the same project (which is not recommended, but can happen!)
 	public String getUniqueIdentifier() {
 		return this.username + Constants.ARG_INTERNAL_SEPARATOR + 
 				this.dbName + Constants.ARG_INTERNAL_SEPARATOR + 
@@ -185,9 +185,11 @@ public class ContextObject {
 	}
 	
 	
-	 /*
+	/**
 	 * Retrieve the session ID from the request
      * (might be shibSession if using Clarin login, or the session ID otherwise)
+     * @param request
+     * @return session ID
 	 */
     private String getSessionId(HttpServletRequest request) {
 
