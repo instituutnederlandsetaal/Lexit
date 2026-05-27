@@ -208,7 +208,7 @@ public class DatabaseFunctions {
 	 * 
 	 * @param functionName
 	 * @param number of arguments (needed for distinction since we sometimes have homonyms)
-	 * @return string 'writing' or 'reading', describing the function operation type
+	 * @return string 'write' or 'read', describing the function operation type
 	 */
 	public String getFunctionOperationType(String functionName, int numberOfArgs){
 		
@@ -223,7 +223,7 @@ public class DatabaseFunctions {
 		// build a regex pattern like 
 		// .*(update|delete from|insert into) schema_name\.(table1|table2|table3|table_whatever).*
 		// and try to find this pattern in the function body text.
-		// Finally, if it matches, return string 'writing', otherwise string 'reading',
+		// Finally, if it matches, return 'all' or 'write', otherwise string 'read',
 		// which describes the function operation type.
 		
 		

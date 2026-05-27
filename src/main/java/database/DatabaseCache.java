@@ -7,25 +7,57 @@ public class DatabaseCache {
 	
 	public DatabaseCache() {}
 	
-	// columns names and types, etc. hashed for caching
-	private ConcurrentHashMap<String, String> tableAndColumnNameToTypes = new ConcurrentHashMap<String, String>(); 
+	
+	
+	// database host, username and password of the current database (cached from the properties file)
+	private ConcurrentHashMap<String, String> databaseAccessHash = new ConcurrentHashMap<String, String>();
+
+	
+	// Info about columns names types, etc. hashed for caching
+	
+	// table name + column name -> column type
+	private ConcurrentHashMap<String, String> tableAndColumnNameToTypes = new ConcurrentHashMap<String, String>();
+	
+	// table name + column name -> custom types values (e.g., for enum)
 	private ConcurrentHashMap<String, String> tableAndColumnNameToCustomTypesValues = new ConcurrentHashMap<String, String>();
+	
+	// function name -> array of types of the function parameters
 	private ConcurrentHashMap<String, String[]> functionNameToTypes = new ConcurrentHashMap<String, String[]>();
+	
+	// function name -> return type of the function
 	private ConcurrentHashMap<String, String> functionNameToReturnType = new ConcurrentHashMap<String, String>();
+	
+	// function name -> operation type of the function ('all', 'write', 'read')
 	private ConcurrentHashMap<String, String> functionNameToOperationType = new ConcurrentHashMap<String, String>();
+	
+	// table name -> primary key column name
 	private ConcurrentHashMap<String, String> tableNameToPrimaryKey = new ConcurrentHashMap<String, String>();
+	
+	// table name -> array of column names of the table
 	private ConcurrentHashMap<String, String[]> tableNameToColumnNames = new ConcurrentHashMap<String, String[]>();
+	
+	// table name + column name -> whether there is an index on the column
 	private ConcurrentHashMap<String, Boolean> tableAndColumnNameToIndex = new ConcurrentHashMap<String, Boolean>();
+	
+	// GO-TO query -> result set of the GO-TO query (as an array list of records)
 	private ConcurrentHashMap<String, ArrayList<String[]>> gotoQueryToResultSet = new ConcurrentHashMap<String, ArrayList<String[]>>();
 
+	
+	
 	// cache of total and partial counts
+	
+	// table name -> total count of records in the table
 	private ConcurrentHashMap<String, Integer> tableNameToCount = new ConcurrentHashMap<String, Integer>();
+	
+	// table name -> whether the count is exact (true) or estimated (false)
 	private ConcurrentHashMap<String, Boolean> tableNameToExactCount = new ConcurrentHashMap<String, Boolean>();
+	
+	// query -> count of records that satisfy the query
 	private ConcurrentHashMap<String, Integer> queryToCount = new ConcurrentHashMap<String, Integer>();
+	
+	// query -> whether the count is exact (true) or estimated (false)
 	private ConcurrentHashMap<String, Boolean> queryToCountQuality = new ConcurrentHashMap<String, Boolean>();
 	
-	// ConcurrentHashMap in which database location, username and password are put
-	private ConcurrentHashMap<String, String> databaseAccessHash = new ConcurrentHashMap<String, String>();
 	
 	
 	
