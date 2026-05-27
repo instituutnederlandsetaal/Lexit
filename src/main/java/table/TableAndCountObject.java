@@ -7,9 +7,13 @@ import jakarta.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The TableAndCountObject holds data and counting information as a result of a query in the database.
+ * 
+ * The content of this object is used to build the final ResultObject, which is returned to the client.
+ */
 
 public class TableAndCountObject {
-	//@JsonbSerialize(using = MapListSerializer.class)
 	@JsonbProperty("data")
 	ArrayList<ConcurrentHashMap<String, String>> content = new ArrayList<ConcurrentHashMap<String, String>>();
 	int count = 0;

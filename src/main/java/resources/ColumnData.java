@@ -3,7 +3,7 @@ package resources;
 import jakarta.xml.bind.annotation.XmlElement;
 
 /**
- * ColumnData Objects contain
+ * The ColumnData Objects hold
  * data about a column of a table, such as column name, (data) type, 
  * allowed values in case a column has a user-defined type in Postgres,
  * and comments to this column (which can contain some configuration:

@@ -7,6 +7,10 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
+/**
+ * The UsersListObject holds users info for the spy mode
+ */
+
 @XmlRootElement(name="root")
 public class UsersListObject {
 	

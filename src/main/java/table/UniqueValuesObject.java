@@ -8,9 +8,10 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
- * This class is used to store unique values occuring in a column.
- * This knowledge is used in the GUI to fill 'select boxes' in search boxes, or in table cells where data input is done by selecting a value. 
- * @author fannee
+ * The UniqueValuesObject is used to store unique values occurring in a table column.
+ * 
+ * This knowledge is used in the GUI to fill 'select boxes' in search boxes, 
+ * or in table cells where data input is done by selecting a value.
  *
  */
 @XmlRootElement(name="root")

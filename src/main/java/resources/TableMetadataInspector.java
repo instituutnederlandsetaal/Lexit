@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * The TableInspector class requests table metadata
  * (that is: column names, type and allowed values when a type is a Postgres user-defined type) 
  * and returns those as XML or JSON
- * @author Fannee
  *
  */
 @XmlRootElement(name="root")

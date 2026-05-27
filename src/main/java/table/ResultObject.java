@@ -15,6 +15,12 @@ import jakarta.xml.bind.annotation.XmlElement;
 import resources.Constants;
 import util.Database;
 
+/**
+ * The ResultObject holds the results of a request to the 'gettable' end point of the webservice.
+ * 
+ * That is: a list of rows, the total number of rows, the total number of rows filtered, etc.
+ */
+
 public class ResultObject {
 
 	// draw (originally: echo), unique query identifier

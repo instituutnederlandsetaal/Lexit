@@ -8,7 +8,7 @@ var lexitlogin = {};
  */
 lexitlogin.startLexitLogin = function(){
 		
-	fn.prompt("LOGIN", ["Username", "Password"], ["", ""], 
+	fn.prompt("LOGIN", ["Username", "Password"], ["::username", "::password"], 
 			function(resp){
 		
 				var url = WEBSERV_URL+"/api/login"; 
@@ -51,15 +51,10 @@ lexitlogin.startLexitLogin = function(){
 			}
 	);
 	
-	// set password type etc
+	// set focus etc
 	setTimeout(	function(){
-		$("div[id^='dialog-message']").find("form").attr("id", "loginForm");
-		$("div[id^='dialog-message']").find("input#prompt_username").attr("autocomplete", "username");
-		$("div[id^='dialog-message']").find("input#prompt_password").attr("autocomplete", "current-password");
-		
-		$("div[id^='dialog-message']").find("input#prompt_password").attr("type", "password");
-		fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );
-		
+		$("div[id^='dialog-message']").find("form").attr("id", "loginForm");		
+		fn._activeEnterForThisDialog( $("div[id^='dialog-message']").attr("id") );		
 		$("div[id^='dialog-message']").find("input#prompt_username").focus();
 		
 	}, 100); 
