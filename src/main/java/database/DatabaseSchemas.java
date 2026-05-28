@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-import resources.Constants;
 import util.FileProcessor;
 import util.Util;
 
@@ -67,7 +65,7 @@ public class DatabaseSchemas {
 		
 		// we need to know the column type, since collation is only to be applied to textual columns
 		String thisColType = db.getTypeOfColumn(tableName, columnName, null);
-		boolean isTextualType = DatabaseUtils.isTextualType(thisColType);
+		boolean isTextualType = Util.isTextualType(thisColType);
 		String customCollation = isTextualType ? declaredCustomCollation : null;
 		
 		// build the right collection clause now
@@ -121,7 +119,7 @@ public class DatabaseSchemas {
 		String[] args = new String[]{schema};
 		
 		// prepare max allowed cost initialization
-		int queryCost = db.getQueryCost( DatabaseUtils.replaceQuestionMarksByArgsInQuery(query, args));
+		int queryCost = db.getQueryCost( Util.replaceQuestionMarksByArgsInQuery(query, args));
 		long timeBefore = new Date().getTime();
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();

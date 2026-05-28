@@ -110,7 +110,7 @@ public class DatabaseCustomTypes {
 	public String[] getCustomtypesAllowedValues(String tableName, String[] columnNames, String[] columnTypes){
 		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		String[] customTypes = new String[columnNames.length];
 		
 		for (int i=0; i<columnNames.length; i++) {

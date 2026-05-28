@@ -2,7 +2,6 @@ package tables;
 
 
 import jakarta.json.bind.annotation.JsonbProperty;
-import jakarta.xml.bind.annotation.XmlElement;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;

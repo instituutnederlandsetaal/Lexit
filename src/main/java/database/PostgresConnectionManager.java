@@ -10,8 +10,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -518,7 +516,7 @@ public class PostgresConnectionManager {
 				if (oneArg.equals("NULL")) oneArg = null;
 				
 				if ( Util.isInteger(oneArg))
-					prest.setInt(i+1, Integer.parseInt( DatabaseUtils.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+					prest.setInt(i+1, Integer.parseInt( Util.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				else
 					prest.setString(i+1,oneArg);				
 			}
@@ -662,33 +660,33 @@ public class PostgresConnectionManager {
 					else if (oneType.endsWith("[]")) { // array
 						
 						String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
-						String nonArrayType = DatabaseUtils.getNonArrayType(oneType);
+						String nonArrayType = Util.getNonArrayType(oneType);
 						boolean valueIsList = cleanValue.contains(",");
-						if ( DatabaseUtils.isWholeNumberType(oneType) )
+						if ( Util.isWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
-						else if ( DatabaseUtils.isBigWholeNumberType(oneType) )
+						else if ( Util.isBigWholeNumberType(oneType) )
 							prest.setArray(i+1, conn.createArrayOf("bigint", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 						else
 							prest.setArray(i+1, conn.createArrayOf(nonArrayType, valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					}
 					
 					
-					else if ( DatabaseUtils.isBigWholeNumberType(oneType) ) {
+					else if ( Util.isBigWholeNumberType(oneType) ) {
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.BIGINT);
 						else 
-							prest.setLong(i+1, Long.parseLong( DatabaseUtils.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+							prest.setLong(i+1, Long.parseLong( Util.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 					}
-					else if ( DatabaseUtils.isWholeNumberType(oneType) ) {
+					else if ( Util.isWholeNumberType(oneType) ) {
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.INTEGER);
 						else 
-							prest.setInt(i+1, Integer.parseInt( DatabaseUtils.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+							prest.setInt(i+1, Integer.parseInt( Util.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 					}
 					
 					
 					
-					else if ( DatabaseUtils.isRealNumberType(oneType) ) {
+					else if ( Util.isRealNumberType(oneType) ) {
 						if (oneArg == null) 
 							prest.setNull(i+1, java.sql.Types.DOUBLE);
 						else 
@@ -891,30 +889,30 @@ public class PostgresConnectionManager {
 				else if (oneType.endsWith("[]")) { // array
 					
 					String cleanValue = oneArg.replaceAll("^(\\{)(.+)(\\})$", "$2");
-					String nonArrayType = DatabaseUtils.getNonArrayType(oneType);
+					String nonArrayType = Util.getNonArrayType(oneType);
 					boolean valueIsList = cleanValue.contains(",");
-					if ( DatabaseUtils.isWholeNumberType(oneType) )
+					if ( Util.isWholeNumberType(oneType) )
 						prest.setArray(i+1, conn.createArrayOf("integer", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
-					else if ( DatabaseUtils.isBigWholeNumberType(oneType) )
+					else if ( Util.isBigWholeNumberType(oneType) )
 						prest.setArray(i+1, conn.createArrayOf("bigint", valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 					else
 						prest.setArray(i+1, conn.createArrayOf(nonArrayType, valueIsList ? Util.splitString(cleanValue, ",") : new String[]{cleanValue}));
 				}
 				
-				else if ( DatabaseUtils.isBigWholeNumberType(oneType) ) {
+				else if ( Util.isBigWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.BIGINT);
 					else 
-						prest.setLong(i+1, Long.parseLong( DatabaseUtils.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+						prest.setLong(i+1, Long.parseLong( Util.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
-				else if ( DatabaseUtils.isWholeNumberType(oneType) ) {
+				else if ( Util.isWholeNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.INTEGER);
 					else 
-						prest.setInt(i+1, Integer.parseInt( DatabaseUtils.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
+						prest.setInt(i+1, Integer.parseInt( Util.getRidOfDecimal(oneArg) )); // rounding in case of decimal numbers
 				}
 				
-				else if ( DatabaseUtils.isRealNumberType(oneType) ) {
+				else if ( Util.isRealNumberType(oneType) ) {
 					if (oneArg == null) 
 						prest.setNull(i+1, java.sql.Types.DOUBLE);
 					else 

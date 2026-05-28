@@ -34,7 +34,6 @@ import com.opencsv.CSVReaderBuilder;
 
 import database.ArgumentTypesObject;
 import database.Database;
-import database.DatabaseUtils;
 import database.PostgresConnectionManager;
 import resources.Constants;
 import resources.ContextObject;
@@ -404,7 +403,7 @@ public class FileProcessor {
                             ato.addType("text");
                         }
                         // get question marks string for prepared statement to be used in row insertion later on
-                        questionMarks = DatabaseUtils.getStringOfQuestionMarks(oneRow);
+                        questionMarks = Util.getStringOfQuestionMarks(oneRow);
 
                         String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNames, " text, ")+" text);";
                         String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
@@ -657,7 +656,7 @@ public class FileProcessor {
 
 				// get question marks string for following prepared statement
 				String[] array = new String[columnNames.size()];
-				String questionMarks = DatabaseUtils.getStringOfQuestionMarks(columnNames.toArray(array));
+				String questionMarks = Util.getStringOfQuestionMarks(columnNames.toArray(array));
 
 
 

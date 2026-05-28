@@ -39,12 +39,12 @@ public class DatabaseRecords {
 		String schema = db.getSchema(tableName);
 		
 		for (int i=0; i<columnNames.length; i++) {
-			columnNames[i] = DatabaseUtils.getSafeFieldName(columnNames[i]);
+			columnNames[i] = Util.getSafeFieldName(columnNames[i]);
 		}
 		
 		String insertRecords = 
-			"INSERT INTO " + DatabaseUtils.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
-			"VALUES (" + DatabaseUtils.getStringOfQuestionMarks(values) + ") ;";		
+			"INSERT INTO " + Util.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
+			"VALUES (" + Util.getStringOfQuestionMarks(values) + ") ;";		
 		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
@@ -93,7 +93,7 @@ public class DatabaseRecords {
 		String schema = db.getSchema(tableName);
 		String primaryKey = db.getPrimaryKeyColumn(tableName);
 		
-		String insertQuery = "INSERT INTO "+ DatabaseUtils.getSafeTableName(tableName, schema) +" "+
+		String insertQuery = "INSERT INTO "+ Util.getSafeTableName(tableName, schema) +" "+
 		"SELECT ";
 		
 		// the columns to insert are the columns to copy
@@ -113,16 +113,16 @@ public class DatabaseRecords {
 			
 			// if the current column is just a column to copy, we will select the column without modifying it 
 			if (pattern == null)
-				allParts[i] = DatabaseUtils.getSafeFieldName(oneColumnToInsert);
+				allParts[i] = Util.getSafeFieldName(oneColumnToInsert);
 			// if the current column has a replacement value, we will select the column and modify the value in it
 			else
-				allParts[i] = "regexp_replace("+ DatabaseUtils.getSafeFieldName(oneColumnToInsert)+", '"+ DatabaseUtils.getDoubleEscape(pattern)+"', '"+ DatabaseUtils.getValidSqlBackReference(replacementValue)+"') AS "+ DatabaseUtils.getSafeFieldName(oneColumnToInsert);
+				allParts[i] = "regexp_replace("+ Util.getSafeFieldName(oneColumnToInsert)+", '"+ Util.getDoubleEscape(pattern)+"', '"+ Util.getValidSqlBackReference(replacementValue)+"') AS "+ Util.getSafeFieldName(oneColumnToInsert);
 		}
 		
 		// add the parts like SELECT regexp_replace(colname, '^regen', 'zon'), regexp(...), regexp(...) ...
 		insertQuery += Util.join(allParts, ",")+" "+
-		"FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) +" "+
-		"WHERE "+ DatabaseUtils.getSafeFieldName(primaryKey) +" = ? ;";
+		"FROM "+ Util.getSafeTableName(tableName, schema) +" "+
+		"WHERE "+ Util.getSafeFieldName(primaryKey) +" = ? ;";
 				
 				
 		// set datatypes of arguments
@@ -177,7 +177,7 @@ public class DatabaseRecords {
 		// build query:
 		// we'll be doing an 'insert' of rows
 		// modified by a 'select' with regexp_replace.
-		String insertQuery = "INSERT INTO "+ DatabaseUtils.getSafeTableName(tableName, schema) +" "+
+		String insertQuery = "INSERT INTO "+ Util.getSafeTableName(tableName, schema) +" "+
 		"SELECT ";
 		
 		String[] allParts = new String[filterColumnNames.length];
@@ -191,22 +191,22 @@ public class DatabaseRecords {
 			
 			// if we have no replacement value, we will select the column without modifying it 
 			if (replacement == null)
-				allParts[i] = DatabaseUtils.getSafeFieldName(oneFilterColumnName);
+				allParts[i] = Util.getSafeFieldName(oneFilterColumnName);
 			// if we do have a replacement value, we will select the column and modify the value in it
 			else
-				allParts[i] = "regexp_replace("+ DatabaseUtils.getSafeFieldName(oneFilterColumnName)+", '"+ DatabaseUtils.getDoubleEscape(pattern)+"', '"+ DatabaseUtils.getValidSqlBackReference(replacement)+"') AS "+ DatabaseUtils.getSafeFieldName(oneFilterColumnName);
+				allParts[i] = "regexp_replace("+ Util.getSafeFieldName(oneFilterColumnName)+", '"+ Util.getDoubleEscape(pattern)+"', '"+ Util.getValidSqlBackReference(replacement)+"') AS "+ Util.getSafeFieldName(oneFilterColumnName);
 		}
 		
 		// add the parts like SELECT regexp_replace('colname', '^regen', 'zon'), regexp(...), regexp(...) ...
 		insertQuery += Util.join(allParts, ",")+" "+
-		"FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) +" "+
+		"FROM "+ Util.getSafeTableName(tableName, schema) +" "+
 		"WHERE ";
 		
 		allParts = new String[filterColumnNames.length];
 		for (int i=0; i<filterColumnNames.length; i++) {
 			String oneColumnName = filterColumnNames[i];
 			String pattern = filterValues[i];
-			allParts[i] = DatabaseUtils.getSafeFieldName(oneColumnName) + 
+			allParts[i] = Util.getSafeFieldName(oneColumnName) + 
 					" " + db.getSuitableOperatorAndArg(tableName, oneColumnName, pattern, true);
 		}
 		
@@ -216,7 +216,7 @@ public class DatabaseRecords {
 		// do we expect a value in return?
 		if (returningField != null && !returningField.equals("null")) {
 			type = "insert";
-			insertQuery += "RETURNING "+ DatabaseUtils.getSafeFieldName(idColumn);
+			insertQuery += "RETURNING "+ Util.getSafeFieldName(idColumn);
 		}
 			
 		
@@ -283,13 +283,13 @@ public class DatabaseRecords {
 		String schema = db.getSchema(tableName);
 		
 		for (int i=0; i<columnNames.length; i++) {
-			columnNames[i] = DatabaseUtils.getSafeFieldName(columnNames[i]);
+			columnNames[i] = Util.getSafeFieldName(columnNames[i]);
 		}
 		
 		String insertRecords = 
-			"INSERT INTO " + DatabaseUtils.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
-			"VALUES (" + DatabaseUtils.getStringOfQuestionMarks(values) + ") " +
-			"RETURNING "+ DatabaseUtils.getSafeFieldName(idColumn)+";";		
+			"INSERT INTO " + Util.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
+			"VALUES (" + Util.getStringOfQuestionMarks(values) + ") " +
+			"RETURNING "+ Util.getSafeFieldName(idColumn)+";";		
 		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
@@ -349,28 +349,28 @@ public class DatabaseRecords {
 		// set the column names
 		
 		for (int i=0; i<columnNames.length; i++) {
-			columnNames[i] = DatabaseUtils.getSafeFieldName(columnNames[i]);
+			columnNames[i] = Util.getSafeFieldName(columnNames[i]);
 		}
 		
 		
 		// remove the primary key from the columns names
 		// and also the columns that should be skipped (if set!) 
 		
-		columnNames = Util.removeElement(columnNames, DatabaseUtils.getSafeFieldName(idColumn) );
+		columnNames = Util.removeElement(columnNames, Util.getSafeFieldName(idColumn) );
 		for (int i=0; i<columnNamesToSkip.length; i++)
 		{
-			columnNames = Util.removeElement(columnNames, DatabaseUtils.getSafeFieldName(columnNamesToSkip[i]) );
+			columnNames = Util.removeElement(columnNames, Util.getSafeFieldName(columnNamesToSkip[i]) );
 		}
 		
 		
 		// now build the row duplication query
 		
 		String duplicateRecord = 
-			"INSERT INTO " + DatabaseUtils.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
+			"INSERT INTO " + Util.getSafeTableName(tableName, schema) + " ("+ Util.join(columnNames, ",") + ") " +
 			"SELECT  " + Util.join(columnNames, ",") + " " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
-			"WHERE " + DatabaseUtils.getSafeFieldName(idColumn) + " = ? " +
-			"RETURNING " + DatabaseUtils.getSafeFieldName(idColumn) + ";";
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +
+			"WHERE " + Util.getSafeFieldName(idColumn) + " = ? " +
+			"RETURNING " + Util.getSafeFieldName(idColumn) + ";";
 		
 		// set datatypes of arguments
 		ArgumentTypesObject ato = new ArgumentTypesObject();
@@ -422,16 +422,16 @@ public class DatabaseRecords {
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		for (int i=0; i< columnNames.length; i++) {
 			String oneColumn = columnNames[i];
-			columnNames[i] = DatabaseUtils.getSafeFieldName(columnNames[i]);
+			columnNames[i] = Util.getSafeFieldName(columnNames[i]);
 			ato.setType(i, db.getTypeOfColumn(tableName, oneColumn, null));
 		}		
 		ato.setType(columnNames.length, db.getTypeOfColumn(tableName, idColumn, null));
 		
 		
 		String updateRecords = 
-			"UPDATE " + DatabaseUtils.getSafeTableName(tableName, schema) + 
+			"UPDATE " + Util.getSafeTableName(tableName, schema) + 
 			" SET "+ (Util.join(columnNames, " = ?,") +" = ? ") +
-			"WHERE "+ DatabaseUtils.getSafeFieldName(idColumn) +" = ? ;";
+			"WHERE "+ Util.getSafeFieldName(idColumn) +" = ? ;";
 		
 				
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();		
@@ -488,18 +488,18 @@ public class DatabaseRecords {
 		// setting pairs 
 		String[] settingPairs = new String[columnNamesToUpdate.length];
 		for (int i=0; i<columnNamesToUpdate.length; i++) {
-			settingPairs[i] = DatabaseUtils.getSafeFieldName(columnNamesToUpdate[i]) + " = ?";
+			settingPairs[i] = Util.getSafeFieldName(columnNamesToUpdate[i]) + " = ?";
 		}
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++) {
-			matchingPairs[i] = DatabaseUtils.getSafeFieldName(columnNamesToMatch[i]) + 
+			matchingPairs[i] = Util.getSafeFieldName(columnNamesToMatch[i]) + 
 					" " + db.getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
 		
 		String updateRecords = 
-			"UPDATE " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
+			"UPDATE " + Util.getSafeTableName(tableName, schema) + " " +
 			"SET "+ Util.join(settingPairs, ",") + " " +
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
@@ -552,23 +552,23 @@ public class DatabaseRecords {
 		String[] settingPairs = new String[columnNamesToUpdate.length];
 		for (int i=0; i<columnNamesToUpdate.length; i++) {
 			int indexOfMatcher = Util.getIndexOf(columnNamesToUpdate[i], columnNamesToMatch);
-			settingPairs[i] = DatabaseUtils.getSafeFieldName(columnNamesToUpdate[i]) + " = " +
+			settingPairs[i] = Util.getSafeFieldName(columnNamesToUpdate[i]) + " = " +
 			(
-				DatabaseUtils.allowsRegex(db.getTypeOfColumn(tableName, columnNamesToUpdate[i], null)) && indexOfMatcher>-1 ?
-					"regexp_replace("+ DatabaseUtils.getSafeFieldName(columnNamesToUpdate[i]) + ", '" + DatabaseUtils.getDoubleEscape(valuesToMatch[indexOfMatcher]) + "', '" + DatabaseUtils.getValidSqlBackReference(valuesToUpdate[i]) + "') " :
-						"'"+ DatabaseUtils.getValidSqlBackReference(valuesToUpdate[i])+"'"
+				Util.allowsRegex(db.getTypeOfColumn(tableName, columnNamesToUpdate[i], null)) && indexOfMatcher>-1 ?
+					"regexp_replace("+ Util.getSafeFieldName(columnNamesToUpdate[i]) + ", '" + Util.getDoubleEscape(valuesToMatch[indexOfMatcher]) + "', '" + Util.getValidSqlBackReference(valuesToUpdate[i]) + "') " :
+						"'"+ Util.getValidSqlBackReference(valuesToUpdate[i])+"'"
 			);
 		}
 		
 		// matching pairs with suitable operator
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++) {
-			matchingPairs[i] = DatabaseUtils.getSafeFieldName(columnNamesToMatch[i]) + 
+			matchingPairs[i] = Util.getSafeFieldName(columnNamesToMatch[i]) + 
 					" " + db.getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
 		}
 		
 		String updateRecords = 
-			"UPDATE " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
+			"UPDATE " + Util.getSafeTableName(tableName, schema) + " " +
 			"SET "+ Util.join(settingPairs, ",") + " " +
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";		
 		
@@ -607,8 +607,8 @@ public class DatabaseRecords {
 		ato.setType(0, db.getTypeOfColumn(tableName, idColumn, null));
 		
 		String deleteRecord = 
-			"DELETE FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
-			"WHERE " + DatabaseUtils.getSafeFieldName(idColumn) + " = ? ;";
+			"DELETE FROM " + Util.getSafeTableName(tableName, schema) + " " +
+			"WHERE " + Util.getSafeFieldName(idColumn) + " = ? ;";
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
 		
@@ -649,11 +649,11 @@ public class DatabaseRecords {
 		String[] valueTypes = db.getTypesOfColumns(tableName, columnNames);
 		for (int i = 0; i<columnNames.length; i++) {
 			ato.setType(i, valueTypes[i]);
-			columnNames[i] = DatabaseUtils.getSafeFieldName(columnNames[i]);
+			columnNames[i] = Util.getSafeFieldName(columnNames[i]);
 		}			
 		
 		String deleteRecords = 
-			"DELETE FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
+			"DELETE FROM " + Util.getSafeTableName(tableName, schema) + " " +
 			"WHERE " + (Util.join(columnNames, " = ? AND ") +" = ? ") + 
 			";";
 		
@@ -695,8 +695,8 @@ public class DatabaseRecords {
 		
 		String getRecord = 
 			"SELECT \"" + Util.join(columnsNames, "\", \"") + "\" " + // safe fieldnames
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
-			"WHERE " + DatabaseUtils.getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +
+			"WHERE " + Util.getSafeFieldName(idColumn) + " = ?;";	// id's require strict equality
 		
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
@@ -753,9 +753,9 @@ public class DatabaseRecords {
 		
 		String getRecords = 
 			"SELECT " + Util.join(columnsNames, ", ") + " " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
-			"WHERE " + DatabaseUtils.getSafeFieldName(idColumn) + " " +
-			"IN ("+ DatabaseUtils.getStringOfQuestionMarks(ids)+");";	
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +
+			"WHERE " + Util.getSafeFieldName(idColumn) + " " +
+			"IN ("+ Util.getStringOfQuestionMarks(ids)+");";	
 		
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
@@ -832,9 +832,9 @@ public class DatabaseRecords {
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++) {
 			matchingPairs[i] = 
-					DatabaseUtils.getSafeFieldName(columnNamesToMatch[i]) + " " + 
+					Util.getSafeFieldName(columnNamesToMatch[i]) + " " + 
 							db.getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
-			valuesToMatch[i] = DatabaseUtils.removeFrontOperator(valuesToMatch[i]);
+			valuesToMatch[i] = Util.removeFrontOperator(valuesToMatch[i]);
 		}			
 		
 		// set arguments
@@ -842,7 +842,7 @@ public class DatabaseRecords {
 		
 		String getRecord = 
 			"SELECT * " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +				
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +				
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
@@ -924,9 +924,9 @@ public class DatabaseRecords {
 		String[] matchingPairs = new String[columnNamesToMatch.length];
 		for (int i=0; i<columnNamesToMatch.length; i++) {
 			matchingPairs[i] = 
-					DatabaseUtils.getSafeFieldName(columnNamesToMatch[i]) + " " + 
+					Util.getSafeFieldName(columnNamesToMatch[i]) + " " + 
 							db.getSuitableOperatorAndArg(tableName, columnNamesToMatch[i], valuesToMatch[i], true);
-			valuesToMatch[i] = DatabaseUtils.removeFrontOperator(valuesToMatch[i]);
+			valuesToMatch[i] = Util.removeFrontOperator(valuesToMatch[i]);
 		}			
 		
 		// set arguments
@@ -934,7 +934,7 @@ public class DatabaseRecords {
 		
 		String getRecord = 
 			"SELECT * " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +				
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +				
 			"WHERE " + (Util.join(matchingPairs, " AND ")) + ";";
 		
 		
@@ -1036,7 +1036,7 @@ public class DatabaseRecords {
 			
 			String[] aSortBySafe = new String[aSortBy.length];
 			for (int i=0; i<aSortBy.length; i++) {
-				aSortBySafe[i] = DatabaseUtils.getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
+				aSortBySafe[i] = Util.getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
 			}
 			String bigSortString = Util.join(aSortBySafe, ", ");
 			
@@ -1070,15 +1070,15 @@ public class DatabaseRecords {
 				
 				// to_be_grouped subquery
 				
-				"		SELECT "+ DatabaseUtils.getSafeFieldName(columnName) +", " +
+				"		SELECT "+ Util.getSafeFieldName(columnName) +", " +
 				"			rownumber, (rownumber / " + iDisplayLength + ") AS page "+
 				"		FROM ("+
 				
 				// sort by field part, with row_number  (tmp subquery)
 				
-				"			SELECT "+ DatabaseUtils.getSafeFieldName(columnName) +", " +
+				"			SELECT "+ Util.getSafeFieldName(columnName) +", " +
 				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
-				"		 	FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) +" ";
+				"		 	FROM "+ Util.getSafeTableName(tableName, schema) +" ";
 			
 			// if filters are required, add those
 			if (filterColumns!=null) {
@@ -1086,7 +1086,7 @@ public class DatabaseRecords {
 				String[] parts = new String[filterColumns.length];
 				for (int i=0; i<filterColumns.length; i++)
 				{
-					parts[i] = DatabaseUtils.getSafeFieldName(filterColumns[i]) + " " +
+					parts[i] = Util.getSafeFieldName(filterColumns[i]) + " " +
 							db.getSuitableOperatorAndArg(tableName, filterColumns[i], filterValues[i], false);
 				}
 				getRowNumberQuery += Util.join(parts, " AND ");
@@ -1097,7 +1097,7 @@ public class DatabaseRecords {
 			getRowNumberQuery +=
 				"		) tmp "+
 				"	) to_be_grouped "+
-				"	 WHERE "+ DatabaseUtils.getSafeFieldName(columnName) + " " + 
+				"	 WHERE "+ Util.getSafeFieldName(columnName) + " " + 
 						db.getSuitableOperatorAndArg(tableName, columnName, columnValue, false) +
 				"	 GROUP BY page " + 
 				") all_occurences; ";
@@ -1154,7 +1154,7 @@ public class DatabaseRecords {
 			String[] aSortBySafe = new String[aSortBy.length];
 			for (int i=0; i<aSortBy.length; i++)
 			{
-				aSortBySafe[i] = DatabaseUtils.getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
+				aSortBySafe[i] = Util.getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
 			}
 			String bigSortString = Util.join(aSortBySafe, ", ");
 			
@@ -1181,7 +1181,7 @@ public class DatabaseRecords {
 			
 			String getRowNumberQuery =
 					
-				"	SELECT "+ DatabaseUtils.getSafeFieldName(primaryKey)+" AS ids_to_render, CAST( (row_number() OVER (ORDER BY page ASC)) AS integer)-1 AS occurence_nr "+
+				"	SELECT "+ Util.getSafeFieldName(primaryKey)+" AS ids_to_render, CAST( (row_number() OVER (ORDER BY page ASC)) AS integer)-1 AS occurence_nr "+
 				
 				"	FROM ("+
 				
@@ -1191,7 +1191,7 @@ public class DatabaseRecords {
 				//
 				
 				//		first row number of each page, and list of row id's contained in the page  
-				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + DatabaseUtils.getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + DatabaseUtils.getSafeFieldName(primaryKey) + ", " +
+				"		SELECT 'row:'||min(rownumber)||':"+primaryKey+":'||string_agg(" + Util.getSafeFieldName(primaryKey) + "::text, '"+ Constants.ARG_INTERNAL_SEPARATOR + "'::text) AS " + Util.getSafeFieldName(primaryKey) + ", " +
 
 				//          gather (in an array) a true/false value, telling us if the value we're searching for is found/not found in the row				
 				"			array_agg(searched_column" + db.getSuitableOperatorAndArg(tableName, columnName, columnValue, false) + ") AS \"conditionIsMet_arr\", " +
@@ -1202,9 +1202,9 @@ public class DatabaseRecords {
 				
 				// row-ids and row numbers
 				
-				"			SELECT " + DatabaseUtils.getSafeFieldName(primaryKey) + ", " + DatabaseUtils.getSafeFieldName(columnName)+" AS searched_column, " +
+				"			SELECT " + Util.getSafeFieldName(primaryKey) + ", " + Util.getSafeFieldName(columnName)+" AS searched_column, " +
 				"			 CAST(row_number() OVER (ORDER BY " + bigSortString + ") AS integer)-1 AS rownumber "+				
-				"		 	FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) +" ";
+				"		 	FROM "+ Util.getSafeTableName(tableName, schema) +" ";
 			
 			// if filters are required, add those
 			if (filterColumns!=null) {
@@ -1212,7 +1212,7 @@ public class DatabaseRecords {
 				String[] parts = new String[filterColumns.length];
 				for (int i=0; i<filterColumns.length; i++)
 				{
-					parts[i] = DatabaseUtils.getSafeFieldName(filterColumns[i]) + " " +
+					parts[i] = Util.getSafeFieldName(filterColumns[i]) + " " +
 							db.getSuitableOperatorAndArg(tableName, filterColumns[i], filterValues[i], false);
 				}
 				getRowNumberQuery += Util.join(parts, " AND ");
@@ -1302,9 +1302,9 @@ public class DatabaseRecords {
 		for (int i=0; i<columnNames.length; i++)
 		{			
 			matchingPairs[i] = 
-					DatabaseUtils.getSafeFieldName(columnNames[i]) + " " + 
+					Util.getSafeFieldName(columnNames[i]) + " " + 
 							db.getSuitableOperatorAndArg(tableName, columnNames[i], columnValues[i], true);
-			columnValues[i] = DatabaseUtils.removeFrontOperator(columnValues[i]);
+			columnValues[i] = Util.removeFrontOperator(columnValues[i]);
 		}	
 		
 		// set arguments
@@ -1313,7 +1313,7 @@ public class DatabaseRecords {
 		
 		String getIdQuery = 
 			"SELECT " + idColumn + " " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " +
+			"FROM " + Util.getSafeTableName(tableName, schema) + " " +
 			"WHERE " + Util.join(matchingPairs, " AND ") + 
 			";";	
 		

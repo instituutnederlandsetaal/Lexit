@@ -2,7 +2,6 @@ package util;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 

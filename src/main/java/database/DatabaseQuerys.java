@@ -214,7 +214,7 @@ public class DatabaseQuerys {
 		// (chosen notation is range[A,B], because only [A,B] is a regular expression) 
 		if ( columnValue.startsWith("range[") && columnValue.endsWith("]") ) {
 			
-			columnValue = DatabaseUtils.removeFrontOperator(columnValue);
+			columnValue = Util.removeFrontOperator(columnValue);
 			
 			if ( columnType.equals("date")) {
 				return "<@ " + arg + "::daterange";	
@@ -225,13 +225,13 @@ public class DatabaseQuerys {
 			if ( columnType.equals("timestamp with time zone") ) {
 				return "<@ " + arg + "::tstzrange  ";	
 			}
-			if (DatabaseUtils.isBigWholeNumberType(columnType)) {
+			if (Util.isBigWholeNumberType(columnType)) {
 				return "<@ " + arg + "::int8range";
 		   }
-		   if (DatabaseUtils.isWholeNumberType(columnType)) {
+		   if (Util.isWholeNumberType(columnType)) {
 			   return "<@ " + arg + "::int4range";
 		   }
-		   if (DatabaseUtils.isRealNumberType(columnType)) {
+		   if (Util.isRealNumberType(columnType)) {
 			   return "<@ " + arg + "::numrange";
 		   }
 			

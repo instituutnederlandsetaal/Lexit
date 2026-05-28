@@ -7,7 +7,6 @@ import java.util.Map;
 
 import resources.Constants;
 import resources.ResponseObject;
-import resources.TableResources;
 import tables.UniqueValuesObject;
 import util.Util;
 
@@ -35,7 +34,7 @@ public class DatabaseColumns {
 		
 		String[] columnNames;		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		// use caching
 		// (if we have looked up the column names already, they are stored in a hash)
@@ -100,7 +99,7 @@ public class DatabaseColumns {
 	public String[] getColumnsComments(String tableName, String[] columns){
 		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		// this query still works in Postgres 17
 		
@@ -122,7 +121,7 @@ public class DatabaseColumns {
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
 		
-		String[] args = new String[]{ schema+"."+ DatabaseUtils.getSafeTableNameOnly(tableNameOnly) };
+		String[] args = new String[]{ schema+"."+ Util.getSafeTableNameOnly(tableNameOnly) };
 		
 		try {
 			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, commentsQuery, args).getRows();				
@@ -194,13 +193,13 @@ public class DatabaseColumns {
 		   if (typeOfCol.equals("timestamp with time zone") ) {
 			   return "tstzrange";
 		   }
-		   if (DatabaseUtils.isBigWholeNumberType(typeOfCol)) {
+		   if (Util.isBigWholeNumberType(typeOfCol)) {
 			   return "int8range";
 		   }
-		   if (DatabaseUtils.isWholeNumberType(typeOfCol)) {
+		   if (Util.isWholeNumberType(typeOfCol)) {
 			   return "int4range";
 		   }
-		   if (DatabaseUtils.isRealNumberType(typeOfCol)) {
+		   if (Util.isRealNumberType(typeOfCol)) {
 			   return "numrange";
 		   }
 		}
@@ -213,7 +212,7 @@ public class DatabaseColumns {
 		
 		String type = "";
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		// use caching
 		// (if we have looked up the column type already, it is stored in a hash)
@@ -316,7 +315,7 @@ public class DatabaseColumns {
 				"  AND NOT a.attisdropped;"; // exclude dropped columns
 		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		String[] columnTypes = new String[columns.length];
 			
@@ -327,7 +326,7 @@ public class DatabaseColumns {
 			for (int i = 0; i<columns.length; i++) {
 				
 				// remove quote from names, in case the "safe" quote name was saved
-				columns[i] = DatabaseUtils.removeQuotesFromSqlReservedWord(columns[i]);				
+				columns[i] = Util.removeQuotesFromSqlReservedWord(columns[i]);				
 								
 				// use caching				
 				// (if we have looked up the column type already, it is stored in a hash)
@@ -391,9 +390,9 @@ public class DatabaseColumns {
 		
 		
 		String updateRecords = 
-			"UPDATE " + DatabaseUtils.getSafeTableName(tableName, schema) + " " + 
-			"SET "+ DatabaseUtils.getSafeFieldName(columnName) +" = ? " +
-			"WHERE "+ DatabaseUtils.getSafeFieldName(idColumn) +" = ? ;";	
+			"UPDATE " + Util.getSafeTableName(tableName, schema) + " " + 
+			"SET "+ Util.getSafeFieldName(columnName) +" = ? " +
+			"WHERE "+ Util.getSafeFieldName(idColumn) +" = ? ;";	
 		
 				
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();			
@@ -425,13 +424,13 @@ public class DatabaseColumns {
 		// (which is exactly what we expect when calling this function)
 		// see: http://zogovic.com/post/44856908222/optimizing-postgresql-query-for-distinct-values
 	    String query = "WITH RECURSIVE t(n) AS ("+
-	    	    "  SELECT MIN(" + DatabaseUtils.getSafeFieldName(columnName) + ") "+
-	    	    "  FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " "+
+	    	    "  SELECT MIN(" + Util.getSafeFieldName(columnName) + ") "+
+	    	    "  FROM " + Util.getSafeTableName(tableName, schema) + " "+
 	    	    "  UNION "+
-	    	    "  SELECT (SELECT " + DatabaseUtils.getSafeFieldName(columnName) + " " +
-	    	    "          FROM " + DatabaseUtils.getSafeTableName(tableName, schema)+" " +
-	    	    "          WHERE "+ DatabaseUtils.getSafeFieldName(columnName) +" > n " +
-	    	    "          ORDER BY "+ DatabaseUtils.getSafeFieldName(columnName) +" LIMIT 1) "+
+	    	    "  SELECT (SELECT " + Util.getSafeFieldName(columnName) + " " +
+	    	    "          FROM " + Util.getSafeTableName(tableName, schema)+" " +
+	    	    "          WHERE "+ Util.getSafeFieldName(columnName) +" > n " +
+	    	    "          ORDER BY "+ Util.getSafeFieldName(columnName) +" LIMIT 1) "+
 	    	    "  FROM t WHERE n IS NOT NULL "+
 	    	    ") "+
 	    	    "SELECT n FROM t WHERE n IS NOT NULL;";
@@ -481,27 +480,27 @@ public class DatabaseColumns {
 		// GROUP BY can be faster than DISTINCT
 	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
 	    
-    	String query = "SELECT " + DatabaseUtils.getSafeFieldName(columnName) + " AS n " + 
-    			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " + 
-    			"WHERE " + DatabaseUtils.getSafeFieldName(columnName)+" IS NOT NULL " +
+    	String query = "SELECT " + Util.getSafeFieldName(columnName) + " AS n " + 
+    			"FROM " + Util.getSafeTableName(tableName, schema) + " " + 
+    			"WHERE " + Util.getSafeFieldName(columnName)+" IS NOT NULL " +
     			(
     			columnValueFilter.isEmpty() ? "" : 
-    			"AND "+ DatabaseUtils.getSafeFieldName(columnName)+" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+    			"AND "+ Util.getSafeFieldName(columnName)+" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
     			) +
-    			"GROUP BY " + DatabaseUtils.getSafeFieldName(columnName) + " " +
-    			"ORDER BY " + DatabaseUtils.getSafeFieldName(columnName) + ";";
+    			"GROUP BY " + Util.getSafeFieldName(columnName) + " " +
+    			"ORDER BY " + Util.getSafeFieldName(columnName) + ";";
     	
     	if (limit != null) {
     		query = "SELECT n " +
     				"FROM (" +
-    				"	SELECT " + DatabaseUtils.getSafeFieldName(columnName) + " AS n " + 
-        			"	FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " + 
-        			"	WHERE " + DatabaseUtils.getSafeFieldName(columnName)+" IS NOT NULL " +
+    				"	SELECT " + Util.getSafeFieldName(columnName) + " AS n " + 
+        			"	FROM " + Util.getSafeTableName(tableName, schema) + " " + 
+        			"	WHERE " + Util.getSafeFieldName(columnName)+" IS NOT NULL " +
         			(
         				columnValueFilter.isEmpty() ? "" : 
-        				"AND "+ DatabaseUtils.getSafeFieldName(columnName)+" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
+        				"AND "+ Util.getSafeFieldName(columnName)+" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" "
         			) +
-        			"	GROUP BY " + DatabaseUtils.getSafeFieldName(columnName) + " " +
+        			"	GROUP BY " + Util.getSafeFieldName(columnName) + " " +
         			"	ORDER BY count(*) DESC " +
         			"	LIMIT " + limit + ") x " +
         			"ORDER BY n;";
@@ -546,7 +545,7 @@ public class DatabaseColumns {
 		if (columnValueFilter == null) 
 			columnValueFilter = "";
 		else
-			columnValueFilter = TableResources.setRightSearchValue(columnValueFilter);
+			columnValueFilter = Util.setRightSearchValue(columnValueFilter);
 		
 		
 		// prepare the column filters part
@@ -559,7 +558,7 @@ public class DatabaseColumns {
 		String columnsFilters = "";
 		if ( !columnValueFilter.isEmpty() ) {
 			
-			columnsFilters = "AND "+ DatabaseUtils.getSafeFieldName(columnName) +" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" ";
+			columnsFilters = "AND "+ Util.getSafeFieldName(columnName) +" "+ db.getSuitableOperatorAndArg(tableName, columnName, columnValueFilter, false)+" ";
 			columnsValues.add(columnValueFilter);
 			ato.setType(columnsValues.size()-1, "text");
 		}
@@ -573,24 +572,24 @@ public class DatabaseColumns {
 			String[] columnNameAndValuePair = aOtherFiltersAndValues[i].split("###");
 			if (columnNameAndValuePair.length != 2) continue;
 			String oneColumnName = columnNameAndValuePair[0];
-			String oneColumnValue = TableResources.setRightSearchValue(columnNameAndValuePair[1]);
+			String oneColumnValue = Util.setRightSearchValue(columnNameAndValuePair[1]);
 			
 			// check if current column can be searched given a search string
-			if ( !DatabaseUtils.valueIsSuitableForColumnType(oneColumnValue, db.getTypeOfColumn(tableName, oneColumnName, null)) ) {
+			if ( !Util.valueIsSuitableForColumnType(oneColumnValue, db.getTypeOfColumn(tableName, oneColumnName, null)) ) {
 				columnsFilters += (					
 						"AND " +
-								"CAST(" + DatabaseUtils.getSafeFieldName(oneColumnName) +" AS text) "+ db.getSuitableOperatorAndArg(tableName, null, oneColumnValue, false)+" "
+								"CAST(" + Util.getSafeFieldName(oneColumnName) +" AS text) "+ db.getSuitableOperatorAndArg(tableName, null, oneColumnValue, false)+" "
 						);		
-				columnsValues.add( DatabaseUtils.removeFrontOperator(oneColumnValue) );
+				columnsValues.add( Util.removeFrontOperator(oneColumnValue) );
 				ato.setType(columnsValues.size()-1, "text");
 			}
 			else
 			{
 				columnsFilters += (					
 						"AND " +
-								DatabaseUtils.getSafeFieldName(oneColumnName)+" "+ db.getSuitableOperatorAndArg(tableName, oneColumnName, oneColumnValue, false)+" "
+								Util.getSafeFieldName(oneColumnName)+" "+ db.getSuitableOperatorAndArg(tableName, oneColumnName, oneColumnValue, false)+" "
 						);		
-				columnsValues.add( DatabaseUtils.removeFrontOperator(oneColumnValue) );
+				columnsValues.add( Util.removeFrontOperator(oneColumnValue) );
 				ato.setType(columnsValues.size()-1, db.getTypeOfColumn(tableName, oneColumnName, null));
 			}	
 			
@@ -599,12 +598,12 @@ public class DatabaseColumns {
 		// GROUP BY can be faster than DISTINCT
 	    // see: http://stackoverflow.com/questions/6598778/solution-for-speeding-up-a-slow-select-distinct-query-in-postgres
 	    
-    	String query = "SELECT " + DatabaseUtils.getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
-    			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " + 
-    			"WHERE " + DatabaseUtils.getSafeFieldName(columnName)+" IS NOT NULL " +
+    	String query = "SELECT " + Util.getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+    			"FROM " + Util.getSafeTableName(tableName, schema) + " " + 
+    			"WHERE " + Util.getSafeFieldName(columnName)+" IS NOT NULL " +
     			"	" + columnsFilters +
-    			"GROUP BY " + DatabaseUtils.getSafeFieldName(columnName) + " " +
-    			"ORDER BY " + ( sortByFreq ? "count(*) DESC" : DatabaseUtils.getSafeFieldName(columnName)) + ";";
+    			"GROUP BY " + Util.getSafeFieldName(columnName) + " " +
+    			"ORDER BY " + ( sortByFreq ? "count(*) DESC" : Util.getSafeFieldName(columnName)) + ";";
     	
     	if (limit != null) {
     		// This takes the MOST frequent values,
@@ -628,11 +627,11 @@ public class DatabaseColumns {
     		
     		// This query applies the limit after sorting, not before!
     		
-    		query = "SELECT " + DatabaseUtils.getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
-        			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + " " + 
-        			"WHERE " + DatabaseUtils.getSafeFieldName(columnName)+" IS NOT NULL " +
+    		query = "SELECT " + Util.getSafeFieldName(columnName) + " AS n, count(*) AS cnt " + 
+        			"FROM " + Util.getSafeTableName(tableName, schema) + " " + 
+        			"WHERE " + Util.getSafeFieldName(columnName)+" IS NOT NULL " +
         			"	" + columnsFilters +
-        			"GROUP BY " + DatabaseUtils.getSafeFieldName(columnName) + " " +
+        			"GROUP BY " + Util.getSafeFieldName(columnName) + " " +
         			"ORDER BY "+ (sortByFreq ? "cnt DESC": "n") + " " +
         			"LIMIT " + limit + ";";
     	}    	  
@@ -685,7 +684,7 @@ public class DatabaseColumns {
 		// are we dealing with a view or a table here?				
 		// because views don't have indexes, so it's no use to check indexes!
 		ArrayList<String> listOfTrueTables = db.getTrueTablesList();
-		boolean currentTableIsaView = !(listOfTrueTables.contains(DatabaseUtils.getTableNameOnly(tableName)));
+		boolean currentTableIsaView = !(listOfTrueTables.contains(Util.getTableNameOnly(tableName)));
 		if (currentTableIsaView)
 			return true;
 		

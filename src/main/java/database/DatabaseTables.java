@@ -132,9 +132,9 @@ public class DatabaseTables {
 		// Instantiate the queries  (those will be enriched with filters etc. further on)
 		
 		// data query
-		String dataQuery = "SELECT "+ DatabaseUtils.getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) + " ";
+		String dataQuery = "SELECT "+ Util.getCommaSeparatedListOfColumnNamesForaSelect(allColumns)+" FROM "+ Util.getSafeTableName(tableName, schema) + " ";
 		// results count query		
-		String countQuery = "SELECT COUNT(*) AS count FROM "+ DatabaseUtils.getSafeTableName(tableName, schema) + " ";
+		String countQuery = "SELECT COUNT(*) AS count FROM "+ Util.getSafeTableName(tableName, schema) + " ";
 				
 		// arrays for storing values and types
 		ArrayList<String> queryValues = new ArrayList<String>();
@@ -162,16 +162,16 @@ public class DatabaseTables {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !DatabaseUtils.valueIsSuitableForColumnType(sSearch, db.getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
+				if ( !Util.valueIsSuitableForColumnType(sSearch, db.getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
 					queryParts.add(
-							"CAST("+ DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							"CAST("+ Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" AS text) " + db.getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" " + db.getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, db.getTypeOfColumn(tableName, currentColumnName, sSearch));
@@ -215,17 +215,17 @@ public class DatabaseTables {
 				queryValues.add(sSearch);
 				
 				// check if current column can be searched given a search string
-				if ( !DatabaseUtils.valueIsSuitableForColumnType(sSearch, db.getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
+				if ( !Util.valueIsSuitableForColumnType(sSearch, db.getTypeOfColumn(tableName, currentColumnName, sSearch)) ) {
 					
 					queryParts.add(
-							"CAST(" + DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							"CAST(" + Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" AS text) "+ db.getSuitableOperatorAndArg(tableName, null, sSearch, false)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" " + db.getSuitableOperatorAndArg(tableName, currentColumnName, sSearch, false) 
 							);
 					ato.setType(queryValues.size()-1, db.getTypeOfColumn(tableName, currentColumnName, sSearch));
@@ -263,16 +263,16 @@ public class DatabaseTables {
 				queryValues.add(currentSearchValue);
 				
 				// check if current column can be searched given a search string
-				if ( !DatabaseUtils.valueIsSuitableForColumnType(currentSearchValue, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
+				if ( !Util.valueIsSuitableForColumnType(currentSearchValue, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
 					queryParts.add(
-							"CAST("+ DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							"CAST("+ Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" AS text) "+ db.getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" " + db.getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn)  
 							);
 					ato.setType(queryValues.size()-1, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue));
@@ -318,16 +318,16 @@ public class DatabaseTables {
 				boolean caseSensitiveColumn = aCaseSensitiveColumnSearch.get(i);
 				
 				// check if current column can be searched given a search string
-				if ( !DatabaseUtils.valueIsSuitableForColumnType(currentSearchValue, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
+				if ( !Util.valueIsSuitableForColumnType(currentSearchValue, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue)) ) {
 					queryParts.add(
-							"CAST("+ DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							"CAST("+ Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" AS text) " + db.getSuitableOperatorAndArg(tableName, null, currentSearchValue, caseSensitiveColumn)
 							);
 					ato.setType(queryValues.size()-1, "text");
 				}
 				else {
 					queryParts.add(
-							DatabaseUtils.getSafeTableNameOnly(tableName) + "." + DatabaseUtils.getSafeFieldName(currentColumnName) + 
+							Util.getSafeTableNameOnly(tableName) + "." + Util.getSafeFieldName(currentColumnName) + 
 							" " + db.getSuitableOperatorAndArg(tableName, currentColumnName, currentSearchValue, caseSensitiveColumn) 
 							);
 					ato.setType(queryValues.size()-1, db.getTypeOfColumn(tableName, currentColumnName, currentSearchValue));
@@ -372,19 +372,19 @@ public class DatabaseTables {
 				// (this is to be detected by the presence of a '_lexit_custom_sort' column)
 				String thisColCustomSort = thisColSort+"_lexit_custom_sort";
 				String thisColCustomReverseSort = thisColSort+"_lexit_custom_reversesort";
-				boolean customSortDefined = (Util.getIndexOf(thisColCustomSort, allColumns)>-1 || Util.getIndexOf(DatabaseUtils.getSafeFieldName(thisColCustomSort), allColumns)>-1);				
-				boolean customReverseSortDefined = (Util.getIndexOf(thisColCustomReverseSort, allColumns)>-1 || Util.getIndexOf(DatabaseUtils.getSafeFieldName(thisColCustomReverseSort), allColumns)>-1);
+				boolean customSortDefined = (Util.getIndexOf(thisColCustomSort, allColumns)>-1 || Util.getIndexOf(Util.getSafeFieldName(thisColCustomSort), allColumns)>-1);				
+				boolean customReverseSortDefined = (Util.getIndexOf(thisColCustomReverseSort, allColumns)>-1 || Util.getIndexOf(Util.getSafeFieldName(thisColCustomReverseSort), allColumns)>-1);
 				
 				// Reverse sorting if required
 				if (reverseSort) {
 					
 					// if custom reverse sort is defined, apply it
 					if (customReverseSortDefined) {
-						sortPart += sortSeparator + DatabaseUtils.getSafeFieldName(thisColCustomReverseSort) + " " + collationClause + " " + thisSortDir;
+						sortPart += sortSeparator + Util.getSafeFieldName(thisColCustomReverseSort) + " " + collationClause + " " + thisSortDir;
 					}
 					// otherwise do reverse sort the default way
 					else {
-						sortPart += sortSeparator + "REVERSE("+ DatabaseUtils.getSafeFieldName(thisColSort) + ") " + collationClause + " " + thisSortDir;
+						sortPart += sortSeparator + "REVERSE("+ Util.getSafeFieldName(thisColSort) + ") " + collationClause + " " + thisSortDir;
 					}
 					
 				}
@@ -393,11 +393,11 @@ public class DatabaseTables {
 					
 					// if custom sort is defined, apply it
 					if (customSortDefined) {
-						sortPart += sortSeparator + DatabaseUtils.getSafeFieldName(thisColCustomSort) + " " + collationClause + " " + thisSortDir;
+						sortPart += sortSeparator + Util.getSafeFieldName(thisColCustomSort) + " " + collationClause + " " + thisSortDir;
 					}
 					// otherwise do sort the default way
 					else {
-						sortPart += sortSeparator + DatabaseUtils.getSafeFieldName(thisColSort) + " " + collationClause + " " + thisSortDir;
+						sortPart += sortSeparator + Util.getSafeFieldName(thisColSort) + " " + collationClause + " " + thisSortDir;
 					}
 				}
 				sortSeparator = ", ";
@@ -424,7 +424,7 @@ public class DatabaseTables {
 		
 		// remove operators that were put in from (like '<33'  or '!woord') 
 		for (int i=0; i<queryValues.size(); i++) {
-			queryValues.set(i, DatabaseUtils.removeFrontOperator(queryValues.get(i)) );
+			queryValues.set(i, Util.removeFrontOperator(queryValues.get(i)) );
 		}
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
@@ -476,7 +476,7 @@ public class DatabaseTables {
 				
 				// try counting the normal way (exact count, slower than estimate)
 				else  {
-					queryCost = db.getQueryCost( DatabaseUtils.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
+					queryCost = db.getQueryCost( Util.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 					
 					Util.debug(db.getContextObject(), "%%% FAST COUNT decision: "+queryCost+ "<"+db.maxAllowedCost +"?");					
 					
@@ -521,7 +521,7 @@ public class DatabaseTables {
 							// query cost computed by the database. So, we have to cancel recomputation.
 							recomputeMaxAllowedCost = false;
 							
-							count = db.getEstimateCount( DatabaseUtils.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
+							count = db.getEstimateCount( Util.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 							exactCount = false;
 						}
 						
@@ -532,7 +532,7 @@ public class DatabaseTables {
 					// get an estimate count
 					else {
 						Util.debug(db.getContextObject(), "%%% We will use an estimate count");
-						count = db.getEstimateCount( DatabaseUtils.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
+						count = db.getEstimateCount( Util.replaceQuestionMarksByArgsInQuery(queryWithoutOrderNorLimit, args));
 						exactCount = false;
 					}											
 				}				
@@ -656,7 +656,7 @@ public class DatabaseTables {
 	    	System.out.println(columnNames.length+" => "+Util.join(columnNames, ", "));
 	    }
 	    for (int i = 0; i < columnNames.length; i++) {
-	    	columnTypes[i] = db.getTypeOfColumn(tableName, DatabaseUtils.removeQuotesFromSqlReservedWord(columnNames[i]), null);
+	    	columnTypes[i] = db.getTypeOfColumn(tableName, Util.removeQuotesFromSqlReservedWord(columnNames[i]), null);
 	    }	    
 	 
 	    if (Constants.debug) {	    	
@@ -675,7 +675,7 @@ public class DatabaseTables {
 			// process each column of a record					
 			
 			for (int i=0; i<columnNames.length; i++) {
-				String columnName = DatabaseUtils.removeQuotesFromSqlReservedWord(columnNames[i]);				
+				String columnName = Util.removeQuotesFromSqlReservedWord(columnNames[i]);				
 				Object fieldvalue = row.get(columnName);				
 				String value = ( fieldvalue != null ? fieldvalue.toString() : "" );
 				
@@ -713,7 +713,7 @@ public class DatabaseTables {
 	public  String getPrimaryKeyColumn(String tableName){
 		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 				
 		// use caching
 		// (if we have already looked up the primary key, it is stored in a hash)
@@ -911,7 +911,7 @@ public class DatabaseTables {
 		
 		String getCountQuery = 
 			"SELECT COUNT(*) AS rowcount " +
-			"FROM " + DatabaseUtils.getSafeTableName(tableName, schema) + ";";	
+			"FROM " + Util.getSafeTableName(tableName, schema) + ";";	
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
 		
@@ -957,7 +957,7 @@ public class DatabaseTables {
 		Util.debug(db.getContextObject(), "## Get quick count of all tables records");
 		
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		boolean exactCount = true;
 		Map<String, Object> countAndQuality = new ConcurrentHashMap<String, Object>();
 		boolean bForceExactCount = db.getForceExactCount();
@@ -1011,7 +1011,7 @@ public class DatabaseTables {
 		// if count in case [1] failed (timeout), try this fast estimate count method as well
 		if ( ( !bForceExactCount && currentTableIsATrueTable) || count<0 ) {
 			exactCount = false;
-			count = db.getEstimateCount("SELECT * FROM "+ DatabaseUtils.getSafeTableName(tableNameOnly, schema));
+			count = db.getEstimateCount("SELECT * FROM "+ Util.getSafeTableName(tableNameOnly, schema));
 		}
 		
 		// store the count for caching (speed improvement)
@@ -1034,9 +1034,9 @@ public class DatabaseTables {
 	public void refreshMaterializedView(String viewName) {
         
         String schema = db.getSchema(viewName);
-        String viewNameOnly = DatabaseUtils.getTableNameOnly(viewName);
+        String viewNameOnly = Util.getTableNameOnly(viewName);
         
-        String query = "REFRESH MATERIALIZED VIEW "+ DatabaseUtils.getSafeTableName(viewNameOnly, schema)+";";
+        String query = "REFRESH MATERIALIZED VIEW "+ Util.getSafeTableName(viewNameOnly, schema)+";";
         
         PostgresConnectionManager dc = db.getPostgresConnectionManager();
         
@@ -1068,7 +1068,7 @@ public class DatabaseTables {
 			String newComment, ResponseObject dro){
 		
 		// remove suspicious sql
-		newComment = DatabaseUtils.removeSuspiciousSql( new String[]{newComment} )[0];
+		newComment = Util.removeSuspiciousSql( new String[]{newComment} )[0];
 		
 		String schema = db.getSchema(tableName);
 		
@@ -1081,7 +1081,7 @@ public class DatabaseTables {
 		
 		String setComment = 
 			"COMMENT ON " + tableType + " " + 
-					DatabaseUtils.getSafeTableName(tableName, schema) + " " +
+					Util.getSafeTableName(tableName, schema) + " " +
 			" IS E'" + newComment + "';";
 		
 		
@@ -1161,7 +1161,7 @@ public class DatabaseTables {
 	public void cleanCache(String tableName) {
 
 		String schema = db.getSchema(tableName);
-		String tableNameOnly = DatabaseUtils.getTableNameOnly(tableName);
+		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		String cachingKey = schema+tableNameOnly;
 		db.getCache().removeFromTableNameToCount(cachingKey);

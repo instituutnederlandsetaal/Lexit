@@ -21,8 +21,6 @@ import jakarta.ws.rs.core.SecurityContext;
 import tables.ResultObject;
 import tables.TableMetadata;
 import tables.TablesListObject;
-import database.Database;
-import database.DatabaseUtils;
 import util.Util;
 
 
@@ -430,8 +428,8 @@ public class TableResources {
 			if ( !oneSearchColumn.isEmpty()) {
 				
 				aSearchColumnNames.add( aAllColumns[i] ); 				
-				aSearchColumnValues.add(  setRightSearchValue(oneSearchColumn)  );
-				aCaseSensitiveColumnSearch.add( setRightCaseSensitivity(oneSearchColumn) );
+				aSearchColumnValues.add( Util.setRightSearchValue(oneSearchColumn)  );
+				aCaseSensitiveColumnSearch.add( Util.setRightCaseSensitivity(oneSearchColumn) );
 			}
 		}
 		
@@ -447,71 +445,14 @@ public class TableResources {
 		return new ResultObject(service.getDatabaseObject(co),
 				tableName, countOfTable, countQualityOfTable,
 				aCleanAllColumns,
-				iDisplayLength, iDisplayStart, setRightSearchValue(sSearch), 
+				iDisplayLength, iDisplayStart, Util.setRightSearchValue(sSearch), 
 				aSearchColumnNames, aSearchColumnValues, aCaseSensitiveColumnSearch,
 				true, aSortCol, aSortDir, iEcho, bCallForGoToFunction
 				);
 		
 	}
 	
-	// normally does nothing, but
-	// special cases: 
-	// - NULL in a string should be interpreted as null
-	// - "..." means case sensitive
-	// - "" should be interpreted as an empty string
-	public static String setRightSearchValue(String value){
-		
-		if (value.equals("NULL")) {
-			return null;
-		}
-		
-		// remove quotes if they are there
-		//
-		// important: if we have an operator in front, split the search string into operator string and searched value
-		// (like  '!word' ->  '!' and 'word') so as to process the quotes properly
-		String cleanValue = DatabaseUtils.removeFrontOperator(value);
-		String operator   = value.substring(0, value.length()-cleanValue.length());
-		
-		if ( (cleanValue.length()>=2 && cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) 
-				|| 
-			 (cleanValue.length()>=2 && cleanValue.startsWith("'") && cleanValue.endsWith("'")) )
-		{
-			// in a jsonb query, we might have quotes which have to be kept!
-			// (like {"name": "Piet"})			
-			if (cleanValue.matches(".*\"[^\"]+\"[ \\s]*:[ \\s]*\"[^\"]+\".*"))
-				return value;
-			
-			// at this point, we are sure we do have to remove the quotes, 
-			// do it!
-			cleanValue = cleanValue.substring(1, cleanValue.length()-1);
-			if (cleanValue.isEmpty()) cleanValue = "^$";
-			
-			// rebuild the original search string with operator (if available; operator may be empty)
-			value = operator + cleanValue;
-			return value;
-		}
-		
-		// default
-		return value;
-	}
 	
-	// normally does nothing, but
-	// special cases:
-	// - "..." is case sensitive
-	// - in all other cases, case insensitive!
-	private static boolean setRightCaseSensitivity(String value){
-		
-		// remove operator in front, if it's there
-		// (like  '!word' -> 'word')
-		String cleanValue = DatabaseUtils.removeFrontOperator(value);
-		
-		// quotes?
-		if ( (cleanValue.startsWith("\"") && cleanValue.endsWith("\"")) || 
-			 (cleanValue.startsWith("'") && cleanValue.endsWith("'")) ) {
-			return true;
-		}
-		return false;
-	}
 	
 	
 	// Query and register the count of a table, or get it from cache when available

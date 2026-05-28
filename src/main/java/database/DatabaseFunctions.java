@@ -32,7 +32,7 @@ public class DatabaseFunctions {
 	public TableRecordObject callFunction(String functionName, String[] args){
 		
 		// prevent sql injection
-		args = DatabaseUtils.removeSuspiciousSql(args);
+		args = Util.removeSuspiciousSql(args);
 		
 		ArgumentTypesObject ato = new ArgumentTypesObject();
 		
@@ -82,9 +82,9 @@ public class DatabaseFunctions {
 		ArrayList<String[]> res;
 		
 		String getRecord = returnType.equals("record") ? 
-			"SELECT (" + functionName + "("+ DatabaseUtils.getStringOfQuestionMarksWithCast(args, ato)+")).*;" 
+			"SELECT (" + functionName + "("+ Util.getStringOfQuestionMarksWithCast(args, ato)+")).*;" 
 			:
-			"SELECT " + functionName + "("+ DatabaseUtils.getStringOfQuestionMarksWithCast(args, ato)+");";	
+			"SELECT " + functionName + "("+ Util.getStringOfQuestionMarksWithCast(args, ato)+");";	
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
 		
