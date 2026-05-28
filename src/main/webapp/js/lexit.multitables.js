@@ -263,11 +263,14 @@ mt.removeAllTableRecords = function(){
 // Upon later calls, the filters are modified by the fnCallTableWithFilter function
 mt.createTableRecordWithFilter = function(sSomeTablename, fnCallTableWithFilter, aCallTableWithFilterValues){
 	
-	dbTableNames.push(sSomeTablename);
-	hsViewType.put(sSomeTablename, 'table');
-	hsTableKeysActive.put(sSomeTablename, true);
-	hsfTableFilterFunction.put(sSomeTablename, fnCallTableWithFilter );
-	hsfTableFilterValues.put(sSomeTablename, aCallTableWithFilterValues);	
+	if ( $.inArray(sSomeTablename, dbTableNames) <0 ) {
+		
+		dbTableNames.push(sSomeTablename);
+		hsViewType.put(sSomeTablename, 'table');
+		hsTableKeysActive.put(sSomeTablename, true);
+		hsfTableFilterFunction.put(sSomeTablename, fnCallTableWithFilter );
+		hsfTableFilterValues.put(sSomeTablename, aCallTableWithFilterValues);
+	}	
 };
 
 
