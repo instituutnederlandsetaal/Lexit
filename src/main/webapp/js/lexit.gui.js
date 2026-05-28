@@ -49,8 +49,8 @@ gui.activateEllipsis = function(sSomeTableName){
 	var oTableConfig = conf.getTableConfig(sSomeTableName);
 	
 	// we'll loop through the column list, and activate ellipsis on the columns where that's required
-	for (var iColNr=0; iColNr<mt.getListOfColumnsOf(sSomeTableName).length; iColNr++)
-	{
+	for (var iColNr=0; iColNr<mt.getListOfColumnsOf(sSomeTableName).length; iColNr++) {
+		
 		// column name
 		var sNameOfCurrentColumn = mt.getListOfVisibleColumnsOf(sSomeTableName)[iColNr];
 		
@@ -64,11 +64,12 @@ gui.activateEllipsis = function(sSomeTableName){
 		var columnEllipsisWidth = conf.getEllipsisWidth(oColumnConfig);
 		var columnEllipsisHeight = conf.getEllipsisHeight(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
+		var columnTextRendering = 	conf.getTextRendering(oColumnConfig);
 		
 	
 		// if the column is visible and if ellipsis is required, that activate it! 
-		if (columnVisible && columnEllipsis)
-		{
+		if (columnVisible && columnEllipsis) {
+			
 			// get rows 
 			var oRows = fx.getAllRows(sSomeTableName);
 			
@@ -78,10 +79,16 @@ gui.activateEllipsis = function(sSomeTableName){
 				
 				var divClassName = sSomeTableName+"_ellipdiv"+iRowNr+"_"+iColNr;
 				
+				// Ellipsis example:
 				// https://codepen.io/jessicamarcus/pen/KpMwZw
 				
-				var sData = fx.getDataFromCellInRow(oCurrentRow, sNameOfCurrentColumn);				
-				sData = "<div class='"+divClassName+"'>" + sData + "</div>";				
+				// get the cell data
+				var sData = fx.getDataFromCellInRow(oCurrentRow, sNameOfCurrentColumn);
+				// apply render if configured for this column
+				if (columnTextRendering != null) {sData = columnTextRendering(sData, oCurrentRow);}
+				// add a div around the cell data, with a unique class name, so we can apply the ellipsis to that
+				sData = "<div class='"+divClassName+"'>" + sData + "</div>";
+				// put the data back into the cell				
 				fx.putDataIntoCell(oCurrentRow, sNameOfCurrentColumn, sData);
 				
 				// currently selected row must be unwrapped
