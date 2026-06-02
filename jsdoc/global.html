@@ -161,7 +161,14 @@
 
             
 
-            <td class="description last">Background color of the column as an HTML color code (e.g., "#123ABC"). If only one color code is provided, Lex'it automatically calculates a different shade of that color for the odd rows. However, this does not work with literal color names (e.g., "green"). It is also possible to specify the colors for both odd and even rows explicitly by providing a two-element array with the two colors in sequence: ["#123ABC", "#ABC123"].</td>
+            <td class="description last">Background color of the column as an HTML color code (e.g., "#123ABC"). 
+If only one color code is provided, Lex'it automatically calculates a different 
+shade of that color for the odd rows. 
+
+However, this does not work with literal color names (e.g., "green"). 
+It is also possible to specify the colors for both odd and even rows explicitly 
+by providing a two-element array with the two colors in sequence: 
+["#123ABC", "#ABC123"].</td>
         </tr>
 
     
@@ -184,7 +191,10 @@
 
             
 
-            <td class="description last">Place a button in a column with the specified name as a string. It is also possible to use the content of the column as the button name: for this, an empty string should be provided for the name ("button": ""). The functionality of the button must be specified using the 'click' parameter.</td>
+            <td class="description last">Place a button in a column with the specified name as a string. 
+It is also possible to use the content of the column as the button name: 
+for this, an empty string should be provided for the name ("button": ""). 
+The functionality of the button must be specified using the 'click' parameter.</td>
         </tr>
 
     
@@ -207,7 +217,9 @@
 
             
 
-            <td class="description last">Add a tooltip to a button, visible on mouseover. This is useful for explaining the function of a button if the button's name is insufficient (e.g., due to a short name).</td>
+            <td class="description last">Add a tooltip to a button, visible on mouseover. 
+This is useful for explaining the function of a button if the button's name 
+is insufficient (e.g., due to a short name).</td>
         </tr>
 
     
@@ -230,7 +242,8 @@
 
             
 
-            <td class="description last">Add a tooltip to a cell, visible on mouseover. This is useful for indicating that clicking on a cell has a function..</td>
+            <td class="description last">Add a tooltip to a cell, visible on mouseover. 
+This is useful for indicating that clicking on a cell has a function..</td>
         </tr>
 
     
@@ -253,7 +266,14 @@
 
             
 
-            <td class="description last">Turn the search box of the specified column into a select box. The values to choose from can be specified in two ways: [1] As an empty array, in which case the tool will automatically retrieve the unique values from the database (e.g., {"choosefrom": []}). [2] As an array of string values. Since the select box will have "Choose" as its first value, "Choose" must also have an underlying value. This 'neutral' value should be the first element in the array, and if no value needs to be assigned, an empty string will suffice (e.g., {"choosefrom": ["", "1", "2", "3"]}, where "" will be the underlying value for "Choose").</td>
+            <td class="description last">Turn the search box of the specified column into a select box. The values to choose from can 
+be specified in two ways: 
+[1] As an empty array, in which case the tool will automatically retrieve the unique values from the database 
+(e.g., {"choosefrom": []}). 
+[2] As an array of string values. Since the select box will have "Choose" as its first value, 
+"Choose" must also have an underlying value. This 'neutral' value should be the first element in the array, 
+and if no value needs to be assigned, an empty string will suffice (e.g., {"choosefrom": ["", "1", "2", "3"]}, 
+where "" will be the underlying value for "Choose").</td>
         </tr>
 
     
@@ -276,7 +296,9 @@
 
             
 
-            <td class="description last">Declare labels for the values of a select box. This allows the incomprehensible values expected by the database to be made understandable to the user.</td>
+            <td class="description last">Declare labels for the values of a select box. 
+This allows the incomprehensible values expected by the database 
+to be made understandable to the user.</td>
         </tr>
 
     
@@ -299,7 +321,11 @@
 
             
 
-            <td class="description last">Assign a class to a column, for example, to style the cells of the column. This could include default classes declared in css/lexit_table.css, such as those used for centering content in cells.Lex'it provides some default classes, such as 'inlfont10pt' (for displaying the INL font in 10 pt) or 'inlfont' (this one without a font-size specification).</td>
+            <td class="description last">Assign a class to a column, for example, to style the cells of the column. 
+This could include default classes declared in css/lexit_table.css, such as those used for centering content in cells.
+
+Lex'it provides some default classes, such as 'inlfont10pt' (for displaying the INL font in 10 pt) 
+or 'inlfont' (this one without a font-size specification).</td>
         </tr>
 
     
@@ -345,7 +371,13 @@
 
             
 
-            <td class="description last">If this is not null, the table will be immediately sorted by this column upon initialization. If multiple columns are specified, the table will be sorted by all these columns. The possible values are 'asc', 'desc', or null (default).Note: If sorting by multiple columns at once, the priority is determined by the order in which the columns to be sorted are specified. It is better and more organized to specify the sorting columns in the table settings using the "columns_sorting" parameter (see there).</td>
+            <td class="description last">If this is not null, the table will be immediately sorted by this column upon initialization. 
+If multiple columns are specified, the table will be sorted by all these columns. 
+The possible values are 'asc', 'desc', or null (default).
+
+Note: If sorting by multiple columns at once, the priority is determined by the order in which the columns 
+to be sorted are specified. It is better and more organized to specify the sorting columns in the table settings 
+using the "columns_sorting" parameter (see there).</td>
         </tr>
 
     
@@ -368,7 +400,9 @@
 
             
 
-            <td class="description last">Context menu that should appear when clicking on a cell. For more information about the context menu object, see the documentation, see: https://swisnl.github.io/jQuery-contextMenu/docs.html)</td>
+            <td class="description last">Context menu that should appear when clicking on a cell. 
+For more information about the context menu object, see the documentation, 
+see: https://swisnl.github.io/jQuery-contextMenu/docs.html)</td>
         </tr>
 
     
@@ -391,7 +425,8 @@
 
             
 
-            <td class="description last">If this is true, the content of this column will be copied during a Search&Add action (insert). Columns with this setting set to false will not be included in the insert.</td>
+            <td class="description last">If this is true, the content of this column will be copied during a Search&Add action (insert). 
+Columns with this setting set to false will not be included in the insert.</td>
         </tr>
 
     
@@ -460,7 +495,9 @@
 
             
 
-            <td class="description last">Callback function to be called after a user edits a cell. Note: This is different from 'editfunc'. 'editfunc' is used to modify the behavior of the edit function, while 'editcallback' is executed last, after 'editfunc'.</td>
+            <td class="description last">Callback function to be called after a user edits a cell. 
+Note: This is different from 'editfunc'. 'editfunc' is used to modify the behavior of the edit function, 
+while 'editcallback' is executed last, after 'editfunc'.</td>
         </tr>
 
     
@@ -506,7 +543,11 @@
 
             
 
-            <td class="description last">Custom function to be executed after editing a cell. This function is intended to replace the default handling of cell input: normally, the software would update the edited cell directly in the database, but when the screen table is a view, other tables need to be updated instead, and this can be declared in 'editfunc'.</td>
+            <td class="description last">Custom function to be executed after editing a cell. 
+This function is intended to replace the default handling of cell input: 
+normally, the software would update the edited cell directly in the database, 
+but when the screen table is a view, other tables need to be updated instead, 
+and this can be declared in 'editfunc'.</td>
         </tr>
 
     
@@ -621,7 +662,8 @@
 
             
 
-            <td class="description last">Regex that the edited cell content must match to trigger the 'editfunc'. If 'edittrigger' is null, 'editfunc' will always be triggered.</td>
+            <td class="description last">Regex that the edited cell content must match to trigger the 'editfunc'. 
+If 'edittrigger' is null, 'editfunc' will always be triggered.</td>
         </tr>
 
     
@@ -644,7 +686,8 @@
 
             
 
-            <td class="description last">Ellipsis. When a cell contains a lot of text, ellipsis can be enabled: only a portion of the text will be displayed. On mouseover, the full content of the cell will be shown.</td>
+            <td class="description last">Ellipsis. When a cell contains a lot of text, ellipsis can be enabled: only a portion of the text will be displayed. 
+On mouseover, the full content of the cell will be shown.</td>
         </tr>
 
     
@@ -667,7 +710,10 @@
 
             
 
-            <td class="description last">Ellipsis. When ellipsis is applied and the user moves the mouse over the table, the cells open one after another, causing rows to swing open and closed, which can be very distracting. This also makes it difficult to select a row, as nearby rows keep opening and closing. One solution is to set a delay, so that the expansion of a row only happens if the mouse is still hovering over the cell after a specified duration. If not, the cell will not expand.</td>
+            <td class="description last">Ellipsis. When ellipsis is applied and the user moves the mouse over the table, the cells open one after another, 
+causing rows to swing open and closed, which can be very distracting. This also makes it difficult to select a row, 
+as nearby rows keep opening and closing. One solution is to set a delay, so that the expansion of a row only happens 
+if the mouse is still hovering over the cell after a specified duration. If not, the cell will not expand.</td>
         </tr>
 
     
@@ -713,7 +759,8 @@
 
             
 
-            <td class="description last">Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? (default: true)</td>
+            <td class="description last">Ellipsis: Should a selected row remain unwrapped instead of automatically wrapping on mouseout? 
+(default: true)</td>
         </tr>
 
     
@@ -736,7 +783,8 @@
 
             
 
-            <td class="description last">Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. (default: true)</td>
+            <td class="description last">Ellipsis unwrap. Determines whether an ellipsis cell should expand on mouseover or not. 
+(default: true)</td>
         </tr>
 
     
@@ -782,7 +830,8 @@
 
             
 
-            <td class="description last">Column filter that should be applied immediately upon initializing the table. To maintain the filter after initialization, set 'keepfilter': true as well.</td>
+            <td class="description last">Column filter that should be applied immediately upon initializing the table. 
+To maintain the filter after initialization, set 'keepfilter': true as well.</td>
         </tr>
 
     
@@ -805,7 +854,8 @@
 
             
 
-            <td class="description last">If this is 'false', a user cannot change the visibility of a column (e.g., useful when a hidden column contains information not intended for the user).</td>
+            <td class="description last">If this is 'false', a user cannot change the visibility of a column 
+(e.g., useful when a hidden column contains information not intended for the user).</td>
         </tr>
 
     
@@ -828,7 +878,9 @@
 
             
 
-            <td class="description last">If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 'RESET' button is clicked. If you want to prevent the filter from being modified in the meantime, set "searchable": false for the same column.</td>
+            <td class="description last">If this is 'true', the filter (from the 'filter':... parameter) will be reapplied when the 
+'RESET' button is clicked. If you want to prevent the filter from being modified in the meantime, 
+set "searchable": false for the same column.</td>
         </tr>
 
     
@@ -851,7 +903,8 @@
 
             
 
-            <td class="description last">When a column has a technical, non-user-friendly name, you can give it a more user-friendly name for display using this parameter.</td>
+            <td class="description last">When a column has a technical, non-user-friendly name, 
+you can give it a more user-friendly name for display using this parameter.</td>
         </tr>
 
     
@@ -897,7 +950,8 @@
 
             
 
-            <td class="description last">Declare the search values (keys) to be shown in the query builder, and their translation into database-understandable values (values) to construct a well-formed query.</td>
+            <td class="description last">Declare the search values (keys) to be shown in the query builder, 
+and their translation into database-understandable values (values) to construct a well-formed query.</td>
         </tr>
 
     
@@ -943,7 +997,11 @@
 
             
 
-            <td class="description last">Settings for the query builder (if the default behavior needs to be adjusted). Parameter 'grid': true/false determines whether the search values should be displayed as a grid.Parameter 'preselected' specifies which value should be preselected in the query builder.Parameter 'autostart': true/false determines whether the query formulated by the query builder should be immediately sent to the database when clicking OK.</td>
+            <td class="description last">Settings for the query builder (if the default behavior needs to be adjusted). 
+Parameter 'grid': true/false determines whether the search values should be displayed as a grid.
+Parameter 'preselected' specifies which value should be preselected in the query builder.
+Parameter 'autostart': true/false determines whether the query formulated by the query builder 
+should be immediately sent to the database when clicking OK.</td>
         </tr>
 
     
@@ -966,7 +1024,9 @@
 
             
 
-            <td class="description last">Modify the text of a cell before it is displayed on the screen. This is purely for rendering purposes. It does not affect the underlying data, so search queries are not influenced by this function</td>
+            <td class="description last">Modify the text of a cell before it is displayed on the screen. 
+This is purely for rendering purposes. 
+It does not affect the underlying data, so search queries are not influenced by this function</td>
         </tr>
 
     
@@ -1012,7 +1072,8 @@
 
             
 
-            <td class="description last">Function to be triggered when a search is applied to a given column. Example: automatically convert the search value to lowercase (this becomes the effective search value).</td>
+            <td class="description last">Function to be triggered when a search is applied to a given column. 
+Example: automatically convert the search value to lowercase (this becomes the effective search value).</td>
         </tr>
 
     
@@ -1035,7 +1096,9 @@
 
             
 
-            <td class="description last">An editable cell where only a limited number of values are allowed is typically edited via a select box. With this parameter, you can declare which mouse event should trigger the display of the select box. The default is 'mouseover'.</td>
+            <td class="description last">An editable cell where only a limited number of values are allowed is typically edited via a select box. 
+With this parameter, you can declare which mouse event should trigger the display of the select box. 
+The default is 'mouseover'.</td>
         </tr>
 
     
@@ -1196,7 +1259,10 @@
 
             
 
-            <td class="description last">When using select boxes, it may happen that a user accidentally clicks a value. To prevent this, you can enforce in the configuration that the user must press a specified key while making their selection. If the user does not press this key when making a selection in the select box, the choice will be rejected. This validation key can be specified as 'validator'.</td>
+            <td class="description last">When using select boxes, it may happen that a user accidentally clicks a value. 
+To prevent this, you can enforce in the configuration that the user must press a specified key 
+while making their selection. If the user does not press this key when making a selection in the select box, 
+the choice will be rejected. This validation key can be specified as 'validator'.</td>
         </tr>
 
     
@@ -1219,7 +1285,9 @@
 
             
 
-            <td class="description last">Visibility of a column. The visibility of a column can be changed by the user in the interface. To prevent this (e.g., because a column contains 'secret' information), you should also set "flexible_visibility": false.</td>
+            <td class="description last">Visibility of a column. The visibility of a column can be changed by the user in the interface. 
+To prevent this (e.g., because a column contains 'secret' information), 
+you should also set "flexible_visibility": false.</td>
         </tr>
 
     
@@ -1242,7 +1310,8 @@
 
             
 
-            <td class="description last">Width of a column. This can be specified in 'px', but a relative value (in '%') can also be provided.</td>
+            <td class="description last">Width of a column. This can be specified in 'px', 
+but a relative value (in '%') can also be provided.</td>
         </tr>
 
     
@@ -1362,7 +1431,10 @@
 
             
 
-            <td class="description last">Callback after a table draw. With 'repeat_callback: false', the callback is only triggered when the table opens. With 'repeat_callback: true', the callback is triggered on every table draw (refresh, pagination, etc.).</td>
+            <td class="description last">Callback after a table draw. 
+With 'repeat_callback: false', the callback is only triggered when the table opens. 
+With 'repeat_callback: true', the callback is triggered on every table draw 
+(refresh, pagination, etc.).</td>
         </tr>
 
     
@@ -1408,7 +1480,9 @@
 
             
 
-            <td class="description last">Show or hide the "Column Selection" button, allowing the user to choose which columns are visible. (default: true)</td>
+            <td class="description last">Show or hide the "Column Selection" button, 
+allowing the user to choose which columns are visible. 
+(default: true)</td>
         </tr>
 
     
@@ -1431,7 +1505,9 @@
 
             
 
-            <td class="description last">Defines the order in which columns should be displayed, if it needs to differ from the original database order. (default: null)</td>
+            <td class="description last">Defines the order in which columns should be displayed, 
+if it needs to differ from the original database order. 
+(default: null)</td>
         </tr>
 
     
@@ -1454,7 +1530,8 @@
 
             
 
-            <td class="description last">Specifies the columns to be sorted, in order of priority, provided as an associative array: { colname1: sortdir1, colname2: sortdir2, ...}</td>
+            <td class="description last">Specifies the columns to be sorted, in order of priority, 
+provided as an associative array: { colname1: sortdir1, colname2: sortdir2, ...}</td>
         </tr>
 
     
@@ -1523,7 +1600,11 @@
 
             
 
-            <td class="description last">By default, a table displays 10 rows at a time. The user can manually change this number in the GUI. However, if you want a different default number of rows without having to adjust it manually each time, you can specify it using 'displaylength'.</td>
+            <td class="description last">By default, a table displays 10 rows at a time. 
+The user can manually change this number in the GUI. 
+However, if you want a different default number of rows 
+without having to adjust it manually each time, 
+you can specify it using 'displaylength'.</td>
         </tr>
 
     
@@ -1546,7 +1627,8 @@
 
             
 
-            <td class="description last">Define the options available in the 'Show ... rows' menu (in the table header). * To display all rows, use the value -1.</td>
+            <td class="description last">Define the options available in the 'Show ... rows' menu (in the table header). 
+* To display all rows, use the value -1.</td>
         </tr>
 
     
@@ -1592,7 +1674,8 @@
 
             
 
-            <td class="description last">Make the table draggable (default: true)</td>
+            <td class="description last">Make the table draggable 
+(default: true)</td>
         </tr>
 
     
@@ -1615,7 +1698,8 @@
 
             
 
-            <td class="description last">Display the export button at the bottom of the table  (default: true)</td>
+            <td class="description last">Display the export button at the bottom of the table  
+(default: true)</td>
         </tr>
 
     
@@ -1638,7 +1722,9 @@
 
             
 
-            <td class="description last">Determine whether the number of results in the table should always be counted exactly. (default: false)</td>
+            <td class="description last">Determine whether the number of results in the table 
+should always be counted exactly. 
+(default: false)</td>
         </tr>
 
     
@@ -1661,7 +1747,8 @@
 
             
 
-            <td class="description last">Give a table focus (set it as active) if the mouse enters its container. (default: false)</td>
+            <td class="description last">Give a table focus (set it as active) if the mouse enters its container. 
+(default: false)</td>
         </tr>
 
     
@@ -1684,7 +1771,8 @@
 
             
 
-            <td class="description last">Height of the footer below the table. (default is 50px)</td>
+            <td class="description last">Height of the footer below the table. 
+(default is 50px)</td>
         </tr>
 
     
@@ -1730,7 +1818,8 @@
 
             
 
-            <td class="description last">Add a full export button to the table footer (see the manual for more information).</td>
+            <td class="description last">Add a full export button to the table footer 
+(see the manual for more information).</td>
         </tr>
 
     
@@ -1753,7 +1842,9 @@
 
             
 
-            <td class="description last">The table receives focus when the Tab key is pressed, if it is the table's turn [because tables receive focus in turn].(default: true)</td>
+            <td class="description last">The table receives focus when the Tab key is pressed, 
+if it is the table's turn [because tables receive focus in turn].
+(default: true)</td>
         </tr>
 
     
@@ -1776,7 +1867,8 @@
 
             
 
-            <td class="description last">Show or hide the "Go To" button.(default: true)</td>
+            <td class="description last">Show or hide the "Go To" button.
+(default: true)</td>
         </tr>
 
     
@@ -1799,7 +1891,11 @@
 
             
 
-            <td class="description last">If you want to group tables into subcategories in the tables menu (e.g., a category 'task tables', a category 'lookup tables', etc.), it is sufficient to assign a 'group' to the relevant tables. All tables that share the same group name will be grouped together in the table selection menu, with this group name as the header.</td>
+            <td class="description last">If you want to group tables into subcategories in the tables menu 
+(e.g., a category 'task tables', a category 'lookup tables', etc.), 
+it is sufficient to assign a 'group' to the relevant tables. 
+All tables that share the same group name will be grouped together 
+in the table selection menu, with this group name as the header.</td>
         </tr>
 
     
@@ -1822,7 +1918,13 @@
 
             
 
-            <td class="description last">When a table contains a column by which rows can be grouped (because multiple rows share the same value in that column), it is possible to make these groups visible. Use the "grouping_column" parameter to specify the column name for grouping. Note: This parameter only makes groups visually distinguishable on the screen. To actually group the data, the table must be pre-sorted by the same column.</td>
+            <td class="description last">When a table contains a column by which rows can be grouped 
+(because multiple rows share the same value in that column), 
+it is possible to make these groups visible. 
+Use the "grouping_column" parameter to specify the column name for grouping. 
+
+Note: This parameter only makes groups visually distinguishable on the screen. 
+To actually group the data, the table must be pre-sorted by the same column.</td>
         </tr>
 
     
@@ -1845,7 +1947,12 @@
 
             
 
-            <td class="description last">By default, the header of a table has a light gray background. However, with 'header_color', a custom color can be specified. When multiple tables are displayed on the screen, a unique color makes a table easier to recognize. If you don't want to choose a color yourself, Lex'it can select one automatically: set 'header_color' to 'auto'.</td>
+            <td class="description last">By default, the header of a table has a light gray background. 
+However, with 'header_color', a custom color can be specified. 
+When multiple tables are displayed on the screen, a unique color 
+makes a table easier to recognize. 
+If you don't want to choose a color yourself, Lex'it can select one automatically: 
+set 'header_color' to 'auto'.</td>
         </tr>
 
     
@@ -1868,7 +1975,8 @@
 
             
 
-            <td class="description last">Height of the header above the table. (default is 50px)</td>
+            <td class="description last">Height of the header above the table. 
+(default is 50px)</td>
         </tr>
 
     
@@ -1891,7 +1999,8 @@
 
             
 
-            <td class="description last">Show or hide the "?" button.(default: true)</td>
+            <td class="description last">Show or hide the "?" button.
+(default: true)</td>
         </tr>
 
     
@@ -1914,7 +2023,9 @@
 
             
 
-            <td class="description last">To provide more information about a table in the table overview, define the details here. This information will appear in the menu under 'Choose a table'.</td>
+            <td class="description last">To provide more information about a table in the table overview, 
+define the details here. 
+This information will appear in the menu under 'Choose a table'.</td>
         </tr>
 
     
@@ -1937,7 +2048,8 @@
 
             
 
-            <td class="description last">Keep the height of the table as small as the content allows (default is false)</td>
+            <td class="description last">Keep the height of the table as small as the content allows 
+(default is false)</td>
         </tr>
 
     
@@ -2006,7 +2118,8 @@
 
             
 
-            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified horizontal position.</td>
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned 
+* at the specified horizontal position.</td>
         </tr>
 
     
@@ -2029,7 +2142,9 @@
 
             
 
-            <td class="description last">Determine whether the search box for the entire table (searching all fields at once) should be available. (default is true)</td>
+            <td class="description last">Determine whether the search box for the entire table 
+(searching all fields at once) should be available. 
+(default is true)</td>
         </tr>
 
     
@@ -2075,7 +2190,9 @@
 
             
 
-            <td class="description last">If a table has an unattractive 'technical' name, * it can still be displayed with a nicer name in the interface. * Specify this name using this setting.</td>
+            <td class="description last">If a table has an unattractive 'technical' name, 
+* it can still be displayed with a nicer name in the interface. 
+* Specify this name using this setting.</td>
         </tr>
 
     
@@ -2098,7 +2215,8 @@
 
             
 
-            <td class="description last">Display pagination at bottom of the table content. (default: true)</td>
+            <td class="description last">Display pagination at bottom of the table content. 
+(default: true)</td>
         </tr>
 
     
@@ -2121,7 +2239,8 @@
 
             
 
-            <td class="description last">Display pagination on top of the table content. (default: true)</td>
+            <td class="description last">Display pagination on top of the table content. 
+(default: true)</td>
         </tr>
 
     
@@ -2144,7 +2263,9 @@
 
             
 
-            <td class="description last">Define the paging type of a table (numbers, simple, simple_numbers, full, full_numbers, first_last_numbers). The default is 'full_numbers'.</td>
+            <td class="description last">Define the paging type of a table (numbers, simple, simple_numbers, full, 
+full_numbers, first_last_numbers). 
+The default is 'full_numbers'.</td>
         </tr>
 
     
@@ -2167,7 +2288,8 @@
 
             
 
-            <td class="description last">Callback to be executed before a table is displayed and populated with data. This allows modifications to the table data before it is shown.</td>
+            <td class="description last">Callback to be executed before a table is displayed and populated with data. 
+This allows modifications to the table data before it is shown.</td>
         </tr>
 
     
@@ -2190,7 +2312,9 @@
 
             
 
-            <td class="description last">Callback to be executed when clicking the reset button, but just before the table is reloaded. This allows modifications such as adjusting filters, etc.</td>
+            <td class="description last">Callback to be executed when clicking the reset button, 
+but just before the table is reloaded. 
+This allows modifications such as adjusting filters, etc.</td>
         </tr>
 
     
@@ -2213,7 +2337,8 @@
 
             
 
-            <td class="description last">Show or hide the "Refresh" button. (default: true)</td>
+            <td class="description last">Show or hide the "Refresh" button. 
+(default: true)</td>
         </tr>
 
     
@@ -2236,7 +2361,8 @@
 
             
 
-            <td class="description last">Refresh the table when the window in which it is displayed regains focus. (default: true)</td>
+            <td class="description last">Refresh the table when the window in which it is displayed regains focus. 
+(default: true)</td>
         </tr>
 
     
@@ -2259,7 +2385,8 @@
 
             
 
-            <td class="description last">Repeat the callback every time the table is redrawn. (default: false)</td>
+            <td class="description last">Repeat the callback every time the table is redrawn. 
+(default: false)</td>
         </tr>
 
     
@@ -2282,7 +2409,8 @@
 
             
 
-            <td class="description last">Show or hide the "Search & Edit" button. (default: true)</td>
+            <td class="description last">Show or hide the "Search & Edit" button. 
+(default: true)</td>
         </tr>
 
     
@@ -2305,7 +2433,8 @@
 
             
 
-            <td class="description last">Show or hide the "RESET" button. (default: true)</td>
+            <td class="description last">Show or hide the "RESET" button. 
+(default: true)</td>
         </tr>
 
     
@@ -2328,7 +2457,8 @@
 
             
 
-            <td class="description last">Make the table resizable (default: true)</td>
+            <td class="description last">Make the table resizable 
+(default: true)</td>
         </tr>
 
     
@@ -2397,7 +2527,9 @@
 
             
 
-            <td class="description last">When a 'menu' is declared, the "selected" option allows preselecting a menu item. The value should be the name of the menu option that should be preselected.</td>
+            <td class="description last">When a 'menu' is declared, the "selected" option allows 
+preselecting a menu item. 
+The value should be the name of the menu option that should be preselected.</td>
         </tr>
 
     
@@ -2420,7 +2552,8 @@
 
             
 
-            <td class="description last">Show or hide the "Row Selection" button. (default: true)</td>
+            <td class="description last">Show or hide the "Row Selection" button. 
+(default: true)</td>
         </tr>
 
     
@@ -2443,7 +2576,8 @@
 
             
 
-            <td class="description last">Enable or disable the "Row Selection" button by default. (default: false, meaning selection mode is OFF)</td>
+            <td class="description last">Enable or disable the "Row Selection" button by default. 
+(default: false, meaning selection mode is OFF)</td>
         </tr>
 
     
@@ -2466,7 +2600,8 @@
 
             
 
-            <td class="description last">Width of the table. (synonym: "width")</td>
+            <td class="description last">Width of the table. 
+(synonym: "width")</td>
         </tr>
 
     
@@ -2489,7 +2624,8 @@
 
             
 
-            <td class="description last">If declared, the (top-left corner of the) table will be positioned * at the specified vertical position.</td>
+            <td class="description last">If declared, the (top-left corner of the) table will be positioned 
+* at the specified vertical position.</td>
         </tr>
 
     
@@ -2512,7 +2648,8 @@
 
             
 
-            <td class="description last">Show or hide the "Undo" button.(default: true)</td>
+            <td class="description last">Show or hide the "Undo" button.
+(default: true)</td>
         </tr>
 
     
@@ -2535,7 +2672,9 @@
 
             
 
-            <td class="description last">Define the default display mode of the table: 'table' (normal) or 'form' (form view). The default is 'table'.</td>
+            <td class="description last">Define the default display mode of the table: 
+'table' (normal) or 'form' (form view). 
+The default is 'table'.</td>
         </tr>
 
     
@@ -2558,7 +2697,8 @@
 
             
 
-            <td class="description last">Show or hide the "Form/Table View" button (default: true)</td>
+            <td class="description last">Show or hide the "Form/Table View" button 
+(default: true)</td>
         </tr>
 
     
@@ -2581,7 +2721,8 @@
 
             
 
-            <td class="description last">Width of the table. (synonym: "size")</td>
+            <td class="description last">Width of the table. 
+(synonym: "size")</td>
         </tr>
 
     
@@ -3058,7 +3199,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Apr 14 2026 13:46:10 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 02 2026 12:30:04 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

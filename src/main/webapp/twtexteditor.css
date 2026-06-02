@@ -1,0 +1,137 @@
+/* twtexteditor.css */
+
+.twtexteditor {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+  button {
+    background-color: #eee;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #ddd;
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+
+    button {
+      min-width: 2.2rem;
+      height: 2rem;
+      margin: 0.2rem;
+      padding: 6px 8px;
+      border: 1px solid #f8f8f8;
+      background: none;
+      cursor: pointer;
+
+      &:hover {
+        background: #fff;
+        border: 1px solid #ddd;
+      }
+
+      &:active,
+      &.active {
+        background: #eef;
+      }
+    }
+  }
+
+  .editor-area {
+    min-height: 160px;
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 10px;
+    outline: none;
+    white-space: pre-wrap;
+
+    ul,
+    ol {
+      list-style-position: inside;
+      margin-left: 1.2em;
+      padding-left: 0;
+    }
+  }
+
+  .link-popup {
+    display: none;
+    position: absolute;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    z-index: 40;
+
+    input {
+      width: 220px;
+      margin-right: 6px;
+      padding: 6px;
+    }
+  }
+
+  .link-dropdown-list {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 160px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 100;
+
+    li {
+      padding: 6px 10px;
+      cursor: pointer;
+
+      &:hover {
+        background: #eee;
+      }
+
+      .subtitle {
+        margin-left: 0.7rem;
+        font-size: 0.7em;
+        color: #666;
+      }
+    }
+  }
+
+  textarea {
+    width: 100%;
+    margin-top: 12px;
+    font-family: monospace;
+    box-sizing: border-box;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .link-hover-popup {
+    display: none;
+    position: absolute;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    z-index: 50;
+    min-width: 260px;
+
+    input {
+      width: 140px;
+      margin-right: 6px;
+      padding: 4px;
+    }
+  }
+
+  .spacer {
+    border-left: 1px solid #e0e0e0;
+    height: 1.4rem;
+    align-self: center;
+  }
+}
