@@ -101,22 +101,20 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 	var aConfigPresetPosition = conf.getTablePresetPosition(aTableSettings);
 	
 	// [1] if a specific table screen position is required, set it now
-	if (oExtraTableSettings["left"] != null && oExtraTableSettings["top"] != null)
-		{
+	if (oExtraTableSettings["left"] != null && oExtraTableSettings["top"] != null) {
 		$("#"+sSomeTableName+"_dynamic")
 			.css("position", "absolute")
 			.css("top", oExtraTableSettings["top"])
 			.css("left", oExtraTableSettings["left"]);
-		}
+	}
 	// [2] or if some tables are already loaded, pile the tables up
-	else if (mt.getListOfLoadedTables().length>1)
-		{
+	else if (mt.getListOfLoadedTables().length>1 && (mt.getListOfLoadedTables()).includes(sSomeTableName)) {
 		var iPreviousTableIndex = $.inArray(sSomeTableName, mt.getListOfLoadedTables())-1;
 		var sLastLoadedTable = mt.getListOfLoadedTables()[iPreviousTableIndex];		
 		fn.pileupTables(sLastLoadedTable, sSomeTableName);
-		}
+	}
 	// [3] or if configuration has top/left declared
-	else if (aConfigPresetPosition != null){
+	else if (aConfigPresetPosition != null) {
 		var iCurrentLeft = aConfigPresetPosition[0];
 		var iCurrentTop = aConfigPresetPosition[1];
 		$("#"+sSomeTableName+"_dynamic")
@@ -134,7 +132,7 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 			.css("position", "absolute")
 			.css("top", iCurrentTop)
 			.css("left", iCurrentLeft);
-		}
+	}
 	
 		
 
