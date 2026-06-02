@@ -48,7 +48,8 @@ public class DatabaseFunctions {
 			for (int i=0; i<argumentTypes.length; i++) {			
 				
 				// remove quotes around text arguments, if any
-				// (quotes used to be needed in an older version of Lex'it, as a way of distinguishing text arguments from others, but are no longer necessary)
+				// (quotes used to be needed in an older version of Lex'it, as a way of distinguishing text arguments from others, 
+				// but are no longer necessary)
 				if (args[i].trim().startsWith("'") && args[i].trim().endsWith("'"))  {                      
 					args[i] = args[i].trim().substring(1, args[i].trim().length()-1);
 				}

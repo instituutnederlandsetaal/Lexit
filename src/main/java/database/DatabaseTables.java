@@ -613,10 +613,18 @@ public class DatabaseTables {
 	
 	
 	
-	// Get a result set into an ArrayList, each record is a row
-	// a row is a hash mapping a column name to some content
-	// This is called 'getListOfIdToCell' because we add a row id required by Datatables
-	// to each row (t.i. DT_RowId).
+	/**
+	 * Get a result set into an ArrayList, each record is a row.
+	 * A row is a hash mapping a column name to some content.
+	 * This is called 'getListOfIdToCell' because we add the row ID required by Datatables
+	 * to each row (t.i. DT_RowId).
+	 * 
+	 * @param tableName
+	 * @param primaryKey
+	 * @param snapshot
+	 * @param requiredColumns
+	 * @return
+	 */
 	public ArrayList<ConcurrentHashMap<String, String>> getListOfIdToCell( 
 			String tableName, String primaryKey, ResultSetSnapshot snapshot, String[] requiredColumns ){
 
@@ -710,7 +718,7 @@ public class DatabaseTables {
 	 * @param table
 	 * @return primary key OR null
 	 */
-	public  String getPrimaryKeyColumn(String tableName){
+	public String getPrimaryKeyColumn(String tableName){
 		
 		String schema = db.getSchema(tableName);
 		String tableNameOnly = Util.getTableNameOnly(tableName);

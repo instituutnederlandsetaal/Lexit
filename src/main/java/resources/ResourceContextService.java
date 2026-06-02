@@ -72,8 +72,8 @@ public class ResourceContextService {
 	
 	/**
 	 * Retrieve the database access object for a given database name
-	 * @param co
-	 * @return
+	 * @param ContextObject
+	 * @return Database access object
 	 */
 	public synchronized Database getDatabaseObject(ContextObject co){
 		

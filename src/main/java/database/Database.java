@@ -161,20 +161,6 @@ public class Database {
 	}
 	
 	
-	/**
-	 * Get the collation clause for a column, which is used in a query
-	 * 
-	 * @param tableName
-	 * @param columnName
-	 * @return
-	 */
-	public String getCollationClause(String tableName, String columnName) {
-		
-		return databaseSchema.getCollationClause(tableName, columnName);
-	}
-	
-	
-	
 	
 	/**
 	 * Get custom collation to use
@@ -801,6 +787,20 @@ public class Database {
 	// ------------------------------------------------------------------------------------------
 	
 	
+	
+	/**
+	 * Get the collation clause for a column, which is used in a query
+	 * 
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
+	public String getCollationClause(String tableName, String columnName) {
+		
+		return databaseQuery.getCollationClause(tableName, columnName);
+	}
+	
+	
 	/**
 	 * Get the cost of a query. 
 	 * 
@@ -986,13 +986,14 @@ public class Database {
 	public PostgresConnectionManager createPostgresConnectionManager()  {
 		// first check if the database access data are known
 		// (that is: location, username, password, etc)
-		if ( getCache().getDatabaseAccessHash().size() == 0 )
+		if ( getCache().getDatabaseAccessHash().size() == 0 ) {
 			try {
 				getCache().setDatabaseAccessHash( FileProcessor.readDatabasePropertiesFile(co) );
 			} 
 			catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+		}
 		
 		ConcurrentHashMap<String, String> databaseAccessHash = getCache().getDatabaseAccessHash();		
 		String db = databaseAccessHash.get("db");
@@ -1049,16 +1050,5 @@ public class Database {
 		}
 		return this.pc;
 	}
-	
-	
-	
-	
-
-	
-
-	
-	
-
-
 	
 }

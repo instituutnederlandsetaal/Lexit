@@ -48,34 +48,6 @@ public class DatabaseSchemas {
 	}
 	
 	
-	/**
-	 * Get the collation clause for a column, which is used in a query
-	 * 
-	 * @param tableName
-	 * @param columnName
-	 * @return
-	 */
-	public String getCollationClause(String tableName, String columnName) {
-		
-		// get the declared custom collation for this database
-		// and if none is declared, return an empty string
-		String declaredCustomCollation = db.getCustomCollation();
-		if (declaredCustomCollation == null || declaredCustomCollation.isEmpty())
-			return "";
-		
-		// we need to know the column type, since collation is only to be applied to textual columns
-		String thisColType = db.getTypeOfColumn(tableName, columnName, null);
-		boolean isTextualType = Util.isTextualType(thisColType);
-		String customCollation = isTextualType ? declaredCustomCollation : null;
-		
-		// build the right collection clause now
-		String thisCollation = (customCollation != null && !customCollation.isEmpty()) ? "COLLATE \"" + customCollation + "\"" : "";
-		
-		return thisCollation;
-	}
-	
-	
-	
 	
 	
 	/**

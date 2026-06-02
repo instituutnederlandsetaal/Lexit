@@ -21,6 +21,10 @@ public class DatabaseQuerys {
 	}
 	
 	
+	// number of times we recomputed the maximal allowed cost, to compute an average value for it
+	int numberOfCostRecomputations = 1;
+	
+	
 	/**
 	 * Recompute the maximal allowed cost of a count query
 	 * 
@@ -50,10 +54,7 @@ public class DatabaseQuerys {
 	 * @param queryCost
 	 * @param timeBeforeCount
 	 * @param timeAfterCount
-	 */
-	
-	int numberOfCostRecomputations = 1;
-	
+	 */	
 	public void recomputeMaxAllowedCost(int queryCost, long timeBeforeCount, long timeAfterCount ){		
 		
 		// compute what the max allowed cost would be given the current
@@ -155,6 +156,33 @@ public class DatabaseQuerys {
 		
 		Util.debug(db.getContextObject(), "queryCost = "+queryCost);
 		return queryCost;		
+	}
+	
+	
+	/**
+	 * Get the collation clause for a column, which is used in a query
+	 * 
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
+	public String getCollationClause(String tableName, String columnName) {
+		
+		// get the declared custom collation for this database
+		// and if none is declared, return an empty string
+		String declaredCustomCollation = db.getCustomCollation();
+		if (declaredCustomCollation == null || declaredCustomCollation.isEmpty())
+			return "";
+		
+		// we need to know the column type, since collation is only to be applied to textual columns
+		String thisColType = db.getTypeOfColumn(tableName, columnName, null);
+		boolean isTextualType = Util.isTextualType(thisColType);
+		String customCollation = isTextualType ? declaredCustomCollation : null;
+		
+		// build the right collection clause now
+		String thisCollation = (customCollation != null && !customCollation.isEmpty()) ? "COLLATE \"" + customCollation + "\"" : "";
+		
+		return thisCollation;
 	}
 	
 	
