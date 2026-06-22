@@ -72,29 +72,50 @@ public class TableResources {
  			@Context HttpServletRequest httpServletRequest			
  			) {
  		
+ 		// response object to be returned to the client
  		DbResponseObject dro = new DbResponseObject();
  		
- 		boolean loginSuccessfull = lexitInfo.checkCredentials(username, password);
+ 		// get session ID
+ 		String sessionId = lexitInfo.getSessionId(httpServletRequest);
  		
- 		// if login is successful, return the session ID
- 		if (loginSuccessfull) {
+ 		
+ 		// first check if the session is blocked due to too many failed login attempts
+ 		
+ 		if (lexitInfo.isSessionBlocked(sessionId)) {
  			
- 			// set the session timeout to the maximum allowed duration
- 	 		// (this is needed to avoid that sessions expire too soon, as set in Tomcat's web.xml)
- 	 		//context.setSessionTimeout( (int) (Constants.MAX_SESSION_ID_DURATION / (60*1000)) ); // (needs to be set in minutes!)
- 			
- 	 		// get session ID
- 			String sessionId = lexitInfo.getSessionId(httpServletRequest);
- 			
- 			// remember that this session ID represents this user
- 			lexitInfo.setSessionIdIsUsername(sessionId, username);
- 			
- 			// return the session ID to the client:
- 			// it will be used identify the user when a request comes in!
- 			dro.setResponse( sessionId );
- 		}		
+ 			// if the session is blocked, return an error message
+ 			dro.setResponse( "Access denied. This session is blocked. Try again in "+ lexitInfo.getTimeUntilSessionIsUnblocked(sessionId));
+ 		}
+ 		
+ 		// if the session is not blocked, check the credentials
+ 		
  		else {
- 			dro.setResponse( "Access denied" );
+ 			
+ 			// evaluation of the credentials
+ 	 		boolean loginSuccessfull = lexitInfo.checkCredentials(username, password);
+ 	 		
+ 	 		
+ 	 		// if login is successful, return the session ID
+ 	 		if (loginSuccessfull) {
+ 	 			 			
+ 	 			// if some failed attempt was registered, remove it, as the user has now logged in successfully
+ 	 			lexitInfo.releaseSession(sessionId);
+ 	 			
+ 	 			// remember that this session ID represents this user
+ 	 			lexitInfo.setSessionIdIsUsername(sessionId, username);
+ 	 			
+ 	 			// return the session ID to the client:
+ 	 			// it will be used identify the user when a request comes in!
+ 	 			dro.setResponse( sessionId );
+ 	 		}
+ 	 		
+ 	 		// wrong password entered, register this as a failed attempt for this session ID, and return an error message
+ 	 		else {
+ 	 			lexitInfo.addFailedAttempt(sessionId);
+ 	 			
+ 	 			dro.setResponse( "Access denied" );
+ 	 		}
+ 			
  		}
  		
  		return dro;

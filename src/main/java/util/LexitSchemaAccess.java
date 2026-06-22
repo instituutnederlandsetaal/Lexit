@@ -11,6 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -54,7 +56,13 @@ public class LexitSchemaAccess {
 	private ConcurrentHashMap<String, String> sessionIds2users = new ConcurrentHashMap<String, String>();
 	private ConcurrentHashMap<String, Long> sessionIds2generationTime = new ConcurrentHashMap<String, Long>();
 	
+	// failed attemps and time blocked
+	private ConcurrentHashMap<String, Integer> sessionIds2failedAttempts = new ConcurrentHashMap<String, Integer>();
+	private ConcurrentHashMap<String, Instant> sessionIds2timeBlocked = new ConcurrentHashMap<String, Instant>();
 	
+	
+	
+		
 	
 	// ------------------------------------------------------------------------
 	
@@ -192,6 +200,70 @@ public class LexitSchemaAccess {
 			throw new RuntimeException(error, e);
 		}
 	}
+	
+	
+	
+	
+	/**
+	 * Add a failed login attempt for the given session id. If the number of failed attempts exceeds the maximum, block the session for a certain time.
+	 * @param sessionId
+	 */
+	public void addFailedAttempt(String sessionId) {
+		
+		// increment the number of failed attempts for the session
+		sessionIds2failedAttempts.put(sessionId, sessionIds2failedAttempts.getOrDefault(sessionId, 0) + 1);
+		
+		// if the number of failed attempts exceeds the maximum, block the session for a certain time
+		if (sessionIds2failedAttempts.get(sessionId) >= Constants.MAX_FAILED_ATTEMPTS) {
+			
+			Instant now = Instant.now();
+			Instant later = now.plusSeconds(Constants.LOCKTIME);
+            sessionIds2timeBlocked.put(sessionId, later);
+		}
+	}
+
+	/**
+	 * Release the session, i.e. remove all failed attempts and unblock the session.
+	 * @param sessionId
+	 */
+	public void releaseSession(String sessionId) {
+		sessionIds2failedAttempts.remove(sessionId);
+		sessionIds2timeBlocked.remove(sessionId);
+	}
+	
+	/**
+	 * Check if the session is currently blocked due to too many failed login attempts.
+	 * 
+	 * @param sessionId
+	 * @return true if the session is blocked, false otherwise
+	 */
+	public boolean isSessionBlocked(String sessionId) {
+		if (sessionIds2timeBlocked.containsKey(sessionId)) {
+			Instant blockedUntil = sessionIds2timeBlocked.get(sessionId);
+			return Instant.now().isBefore(blockedUntil);
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the time until the session is unblocked, i.e. the remaining time until the session is unblocked due to too many failed login attempts.
+	 * @param sessionId
+	 * @return a string representing the remaining time.
+	 */
+	public String getTimeUntilSessionIsUnblocked(String sessionId) {
+		if (sessionIds2timeBlocked.containsKey(sessionId)) {
+			Instant blockedUntil = sessionIds2timeBlocked.get(sessionId);
+			Duration duration = Duration.between(Instant.now(), blockedUntil);
+			long minutes = duration.toMinutes();
+			String minutesString = (minutes <= 1) ? "minute" : "minutes";
+			long seconds = duration.minusMinutes(minutes).getSeconds();
+			String secondsString = (seconds <= 1) ? "second" : "seconds";
+			return String.format("%d %s and %d %s.", minutes, minutesString, seconds, secondsString);
+		}
+		return "0 minute and 0 second.";
+	}
+	
+	
 	
 	
 	/**

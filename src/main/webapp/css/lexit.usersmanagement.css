@@ -24,6 +24,16 @@ div#usersoverview {
 
 hr {
 	border-top: 2px dotted #bbb;
+}
+
+
+
+/*******************************************************************
+ * Password generator dialog 
+ *******************************************************************/
+ 
+button.password_generator_button {
+	margin-right: 5px;
 } 
 
 

@@ -33,6 +33,17 @@ public class Constants {
 	
 	
 	// ------------------------------------------------------------------------
+	// VIEWS CONVENTIONS
+	// ------------------------------------------------------------------------
+	
+	// Lex'it requires some field to act as a primary key
+	// so if it is missing (like in view), the application expects
+	// the field acting as a primary key to be recognisable as such:
+	// it must be called the way it's stated here:
+	public final static String PRIMARYKEY_FIELDNAME = "pkid";
+	
+	
+	// ------------------------------------------------------------------------
 	// ADMIN AND ACCESS RIGHTS
 	// ------------------------------------------------------------------------
 	
@@ -59,14 +70,19 @@ public class Constants {
 	public final static String USER_WRITE_ACCESS = "write"; // read, write
 	public final static String USER_READ_ACCESS = "read";   // read
 	
+	
+	// ------------------------------------------------------------------------
+	// FAILED ATTEMPTS AND LOCKING
 	// ------------------------------------------------------------------------
 	
-	// Lex'it requires some field to act as a primary key
-	// so if it is missing (like in view), the application expects
-	// the field acting as a primary key to be recognisable as such:
-	// it must be called the way it's stated here:
-	public final static String PRIMARYKEY_FIELDNAME = "pkid";
-	
+	// max allowed number of failed login attempts before blocking the session (this is to prevent brute-force attacks)	
+	public final static int MAX_FAILED_ATTEMPTS = 5;
+		
+	// time (in seconds) that a session is blocked after reaching the max number of failed login attempts
+	public final static int LOCKTIME = 
+			10 *     // minutes
+			60;      // seconds
+		
 	
 	// ------------------------------------------------------------------------
 	// DEFAULT TIMEOUTS BEFORE DISPOSING OF A USERS ETC.

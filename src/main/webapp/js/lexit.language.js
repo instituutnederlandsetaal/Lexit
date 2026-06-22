@@ -217,7 +217,8 @@ lang.admingui_refresh_users_rights_error = "Het verversen van de gebruikersrecht
 
 lang.admingui_adduser_title = "Gebruiker toevoegen/bijwerken";
 lang.admingui_adduser_msg = "Gebruiker toevoegen/bijwerken:<BR><BR>Als het 'password' geen update behoeft, laat het leeg!";
-lang.admingui_adduser_passwordgenerator = "Genereer wachtwoord!";
+lang.admingui_adduser_easy_password = "Inhouse (goed te onthouden)";
+lang.admingui_adduser_strong_password = "Extern (sterk)";
 lang.admingui_adduser_success = "De gebruiker is opgeslagen!";
 lang.admingui_adduser_error = "Het opslaan van de gebruiker is mislukt:";
 
@@ -1847,7 +1848,9 @@ lang.setLanguage = function(sLanguageCode){
 		
 		lang.admingui_adduser_title = "Create/update user";
 		lang.admingui_adduser_msg = "Create or update a user:<BR><BR>If 'password' needs no update, leave it empty!";
-		lang.admingui_adduser_passwordgenerator = "Generate password!";
+		lang.admingui_adduser_easy_password = "In-house (memorable)";
+		lang.admingui_adduser_strong_password = "External (strong)";
+		
 		lang.admingui_adduser_success = "The user was set!";
 		lang.admingui_adduser_error = "Setting the user went wrong:";
 		
