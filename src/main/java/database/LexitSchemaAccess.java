@@ -798,7 +798,16 @@ public class LexitSchemaAccess {
 		
 		// if password and default role are given, save those!
 		
+		ArrayList<String> setters = new ArrayList<String>();
+		
 		if (defaultRole != null && !defaultRole.trim().isEmpty()) {
+			setters.add("default_access_role = '" + defaultRole + "'");
+		}
+		if (passwordEncoded != null && !passwordEncoded.trim().isEmpty()) {
+			setters.add("password = '" + passwordEncoded + "'");
+		}
+		
+		if ( setters.size() > 0 ){
 			
 			// connect to the lex'it schema database 
 			dc = getPostgresConnectionManager();
@@ -807,7 +816,7 @@ public class LexitSchemaAccess {
 					"INSERT INTO "+schemaName+".users(username, password, default_access_role) "+
 					"VALUES (?, ?, ?) "+				
 					"ON CONFLICT (username) "+
-					"DO UPDATE SET default_access_role = '"+defaultRole+"' " +( (passwordEncoded != null ) ? ", password = '"+passwordEncoded+"'" : "") + " "+
+					"DO UPDATE SET " + Util.join(setters, ", ") + " " +
 					"WHERE "+schemaName+".users.username = ?;";
 			
 			String[] addUserArgs = new String[] {username, passwordEncoded, defaultRole, username}; 
