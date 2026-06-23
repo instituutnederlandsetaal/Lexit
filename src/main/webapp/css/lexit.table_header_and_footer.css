@@ -111,10 +111,10 @@
 }
 
 .header_button.rowsel_button.functions_are_asleep {
-	background-color: #EE0000;
+	background-color: #EE0000 !important;
 }
 .header_button.rowsel_button.functions_are_awake {
-	background-color: #99CCFF;
+	background-color: #99CCFF !important;
 }
 
 .header_button.goto_button {
