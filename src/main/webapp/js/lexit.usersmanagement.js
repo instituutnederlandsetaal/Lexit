@@ -706,6 +706,203 @@ lexitusers.addMultipleRolesToProject = function(){
 };
 
 
+/** 
+ * Reset passwords of selected users
+ */
+lexitusers.resetPasswords = function(){
+	
+	var aSelectedUsers = [];
+	
+	fn.prompt([lang.admingui_reset_password_title, 
+		lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_reset_password_msg+"</DIV>"], 
+			["password type"], 
+			[[lang.admingui_adduser_easy_password+"::selected", lang.admingui_adduser_strong_password]], 
+			function(resp){
+				
+				// password type
+				var bStrong = (resp["password type"] == lang.admingui_adduser_strong_password);
+				
+				// create array of passwords 
+				// for the users to reset the password for				
+				var aPasswords = [];
+				for (var i=0; i<aSelectedUsers.length; i++){
+					aPasswords.push( lexutil.generatePassword(bStrong) );
+				}
+				
+				
+				// function for assigning project to selected users
+				var fnResetPassword = function(aSelectedUsers, aPasswords, iUserNr=0){
+					
+					$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": aSelectedUsers[iUserNr],
+							"password": aPasswords[iUserNr],
+							"default_role": null,
+							"db_name": null,
+							"role": null,
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							// process the next user 
+							if (iUserNr+1 < aSelectedUsers.length){								
+								fnResetPassword(aSelectedUsers, aPasswords, iUserNr+1);
+							}
+							
+							// if we're done, show the result
+							else {
+								fn.closeDialog();
+								lexitusers.refreshUserRight(function(){
+									fn.message(lang.ok, lang.admingui_reset_password_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+										lexitusers.showMenu();
+									});			
+									// tell the user the accounts credentials are saved to clipboard
+									setTimeout(function(){
+										fn.message(lang.ok, lang.admingui_reset_password_clipboard);
+									}, 500); // small delay to allow first dialog to be shown first	
+								});
+							}							
+							
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_reset_password_error+" " + textStatus+" "+errorThrown);
+						}
+					});		
+					
+				
+				};		
+				
+				
+				
+				// create table to show accounts to be reset
+				
+				var sTextForClipboard = "";
+				var sTableToShow = lang.admingui_reset_password_confirm + 
+					"<BR><BR>"+
+					"<DIV id='usersoverview'>"+
+					"<TABLE id='userstable'>";
+				sTableToShow += "<TR><TD>USERNAME</TD><TD>&nbsp;&nbsp;</TD><TD>PASSWORD</TD></TR>";
+				for (var u=0; u<aSelectedUsers.length; u++){
+					sTableToShow += "<TR><TD>&nbsp;"+aSelectedUsers[u]+"</TD><TD>&nbsp;&nbsp;</TD><TD>"+aPasswords[u]+"</TD></TR>";
+					sTextForClipboard += "Username: "+aSelectedUsers[u]+"\n"+"Password: "+aPasswords[u]+"\n\n";
+				}
+				sTableToShow += "</TABLE>";	
+				sTableToShow += "</DIV>";	
+				
+				
+				// show the admin the users about to be created and ask to confirm
+				
+				fn.confirm(lang.admingui_reset_password_title, sTableToShow, 
+					function(){
+						// copy accounts infomation into clipboard
+						lexutil.saveToClipboard(sTextForClipboard);
+						
+						// start the job!
+						fnResetPassword(aSelectedUsers, aPasswords);
+					},
+					function(){
+						fn.closeDialog();
+						lexitusers.refreshUserRight(function(){
+							fn.message(lang.ok, lang.admingui_reset_password_cancel+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+								lexitusers.showMenu();
+							});				
+						});
+					}
+				);	
+				
+			},
+			function(){
+				fn.closeDialog();
+				lexitusers.showMenu();
+			}
+	);
+	
+	
+	// allow the prompt to be built before manipulating it
+	
+	setTimeout(function(){
+		
+		// add a checkbox selector to the list of users
+		
+		$("table#userstable tbody").find("tr").each(function(i){
+			
+			var $thisRow = $(this);
+			
+			// add selection column
+			if (i==0){
+				$thisRow.append(
+					$("<td></td>").text("SELECTION")
+				);
+			}
+			// some users should not be edited (like publicreader)
+			// so those users will not be given a checkbox
+			else if ($thisRow.attr("id") == 'user_publicreader'){
+				$thisRow.append(
+					$("<td></td>").text("")
+				);
+			}
+			// normal case: put checkbox
+			else {
+				
+				var $tdWithCheckbox = 
+					$("<td></td>")
+						.append(
+							
+							$("<input></input>")
+								.attr("type", "checkbox")
+						)
+						// append click event to TD (that will catch click on checkbox as well)
+						.click(function(event){
+							
+							// If the user clicked the checkbox itself, let the browser handle it,
+							// otherwise the TD click would toggle it twice
+							if ( $(event.target).is(":checkbox")){
+								return;
+							}		
+							
+							// if the TD was clicked, set the checkbox value and
+							// trigger a change event on the checkbox
+							var $thisCheckBox = $(this).find(":checkbox");
+							$thisCheckBox
+								.prop("checked", !$thisCheckBox.prop("checked"))
+								.trigger("change");						
+						})
+				
+				
+				// check event on checkbox should cause (de)selection of users
+				$tdWithCheckbox.find(":checkbox")
+					.on("change", function (){
+						
+						// read username and checkbox status
+						var username = $(this).closest("tr").attr("id").replace(/^user_/, "");
+						var userchecked = $(this).prop("checked");
+						
+						// add or remove user to/from selection given the checkbox status
+						if (userchecked){
+							aSelectedUsers.push(username);
+						}
+						else {
+							aSelectedUsers = aSelectedUsers.filter(x => x !== username);
+						}
+						
+					});
+					
+				$thisRow.append(	
+					$tdWithCheckbox
+				);
+			}
+			
+		});
+		
+	}, 100);
+	
+};
+
+
 
 /**
  * Show an editable list of projects, to be shown in the projects menu
@@ -1173,12 +1370,13 @@ lexitusers.showMenu = function(){
 	
 	// menu options in current language, with associated callback functions
 	oMenuOptions[lang.admingui_main_dialog_add_user] = 			function(){lexitusers.createNewUser();};
-	oMenuOptions[lang.admingui_main_dialog_add_multiple_user] = 			function(){lexitusers.createMultipleUsers();};
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_user] = function(){lexitusers.createMultipleUsers();};
+	oMenuOptions[lang.admingui_main_dialog_reset_passwords] = 	function(){lexitusers.resetPasswords();};
 	oMenuOptions[lang.admingui_main_dialog_delete_user] =		function(){lexitusers.deleteUser();};
 	oMenuOptions["separator1"] = 								null;
 	oMenuOptions[lang.admingui_main_dialog_add_role] = 			function(){lexitusers.addRoleInProject();};
-	oMenuOptions[lang.admingui_main_dialog_add_multiple_roles] = 			function(){lexitusers.addMultipleRolesToProject();};
-	oMenuOptions["separator2"] = 								null;
+	oMenuOptions[lang.admingui_main_dialog_add_multiple_roles] =function(){lexitusers.addMultipleRolesToProject();};
+	oMenuOptions["separator2"] = 								null;		
 	oMenuOptions[lang.admingui_main_dialog_projectmenu] =		function(){lexitusers.setListOfProjects();};	
 	oMenuOptions["separator3"] = 								null;	
 	oMenuOptions[lang.admingui_main_dialog_admin_password] =	function(){lexitusers.changeAdminPassword();};

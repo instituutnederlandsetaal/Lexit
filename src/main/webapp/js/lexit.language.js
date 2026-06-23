@@ -204,6 +204,7 @@ lang.admingui_main_dialog_title = "Projecten- en gebruikersbeheer";
 lang.admingui_main_dialog_msg = "Maak een keuze:";
 lang.admingui_main_dialog_add_user = "Gebruiker toevoegen/bijwerken";
 lang.admingui_main_dialog_add_multiple_user = "Meerdere gebruikers ineens toevoegen";
+lang.admingui_main_dialog_reset_passwords = "Gebruikerswachtwoorden resetten";
 lang.admingui_main_dialog_delete_user = "Gebruiker verwijderen";
 lang.admingui_main_dialog_add_role = "Gebruikersrol toevoegen/bijwerken";
 lang.admingui_main_dialog_add_multiple_roles = "Meerdere gebruikers ineens aan een project toevoegen/bijwerken";
@@ -229,6 +230,14 @@ lang.admingui_add_multipleusers_success = "De gebruikers zijn toegevoegd:";
 lang.admingui_add_multipleusers_error = "Het toevoegen van gebruikers is mislukt:";
 lang.admingui_add_multipleusers_cancel = "Het toevoegen van gebruikers is geannuleerd!";
 lang.admingui_add_multipleusers_clipboard = "De inloggegevens zijn gekopieerd naar het klembord, zodat u deze aan de medewerkers kunt doorgeven.";
+
+lang.admingui_reset_password_title = "Wachtwoorden resetten";
+lang.admingui_reset_password_msg = "Kies gebruikers (boven) en het gewenste type wachtwoord (onder),<BR>en klik 'OK' om te bevestigen:";
+lang.admingui_reset_password_success = "De wachtwoorden zijn gereset!";
+lang.admingui_reset_password_error = "Het resetten van de wachtwoorden is mislukt:";
+lang.admingui_reset_password_confirm = "De volgende wachtwoorden zullen worden aangemaakt.<BR><BR>Bent u akkoord?";
+lang.admingui_reset_password_cancel = "Het resetten van wachtwoorden is geannuleerd!";
+lang.admingui_reset_password_clipboard = "De nieuwe wachtwoorden zijn gekopieerd naar het klembord, zodat u deze aan de medewerkers kunt doorgeven.";
 
 lang.admingui_deleteuser_title = "Gebruiker verwijderen";
 lang.admingui_deleteuser_selector_msg = "Gebruiker verwijderen:";
@@ -1835,6 +1844,7 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_main_dialog_msg = "Would you like to:";
 		lang.admingui_main_dialog_add_user = "Add/update a user";
 		lang.admingui_main_dialog_add_multiple_user = "Add multiple users at once";
+		lang.admingui_main_dialog_reset_passwords = "Reset user's passwords";
 		lang.admingui_main_dialog_delete_user = "Delete a user";
 		lang.admingui_main_dialog_add_role = "Add/update roles";
 		lang.admingui_main_dialog_add_multiple_roles = "Add/update multiple users at once in a project";
@@ -1861,6 +1871,15 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_add_multipleusers_error = "Adding/Updating multiple users went wrong:";
 		lang.admingui_add_multipleusers_cancel = "Adding/Updating multiple users was cancelled!";
 		lang.admingui_add_multipleusers_clipboard = "The login details have now been copied to the clipboard, so you can share them with your collaborators.";
+		
+		lang.admingui_reset_password_title = "Password reset";
+		lang.admingui_reset_password_msg = "Choose users (above) and a password type (below),<BR>and click 'OK' to validate:";
+		lang.admingui_reset_password_success = "Password reset succeeded:";
+		lang.admingui_reset_password_error = "The password reset went wrong:";
+		lang.admingui_reset_password_confirm = "The following passwords are about to be set.<BR><BR>Do you agree?";
+		lang.admingui_reset_password_cancel = "The password reset was cancelled!";
+		lang.admingui_reset_password_clipboard = "The new passwords have now been copied to the clipboard, so you can share them with your collaborators.";
+
 		
 		lang.admingui_deleteuser_title = "Delete user";
 		lang.admingui_deleteuser_selector_msg = "Delete user:";
