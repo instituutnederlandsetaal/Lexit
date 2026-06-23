@@ -1826,13 +1826,41 @@ lexutil.generatePassword = function(bStrong = false) {
  */
 lexutil.saveToClipboard = function(someText){
 
-	navigator.clipboard.writeText(someText)
-    .then(function () {
-      console.log("Copied to clipboard");
-    })
-    .catch(function (err) {
-      console.error("Could not copy text: ", err);
-    });
+	if (navigator.clipboard && window.isSecureContext) {
+		
+		navigator.clipboard.writeText(someText)
+		    .then(function () {
+		      console.log("Copied to clipboard");
+		    })
+		    .catch(function (err) {
+		      console.error("Could not copy text: ", err);
+		    });		
+	}
+	
+	// fallback if previous method isn't supported (e.g., in older browsers or non-secure contexts)
+	
+	else {
+		
+		// put text into an invisible textarea
+		var tmpTextArea = $("<textarea></textarea>").attr("id", "save_to_clipboard").text(someText);
+		$("#temporary_stuff").append(tmpTextArea); // exists by default in lexit 
+	
+		// and select it!	
+		var copyChar = $('#save_to_clipboard');
+		copyChar.select();
+	
+		try {	
+			// now copy it to clipboard
+			document.execCommand('copy');
+	
+			// remove temporary textarea
+			$("#save_to_clipboard").remove();
+		}
+		catch (err) {
+			console.log("Saving input into clipboard failed.");
+		}
+	}
+	
 };
 
 //******************************************************* 
