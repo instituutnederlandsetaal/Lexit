@@ -1777,24 +1777,53 @@ lexutil.uploadFile = function(sFileName) {
 
 //******************************************************* 
 
-lexutil.generatePassword = function() {
-  const consonants = "bcdfghjklmnpqrstvwxyz";
-  const vowels = "aeiou";
 
-  let password = "";
+/**
+ * Generate a random password. By default it generates a simple password (4 consonant-vowel pairs), 
+ * but if you set the parameter to true, it will generate a strong password (a mix of upper/lowercase, numbers and special chars).
+ * @param {Boolean} bStrong - Whether to generate a strong password (default: false)
+ * @returns {String} The generated password
+ */
+lexutil.generatePassword = function(bStrong = false) {
+	
+	const consonants = "bcdfghjklmnpqrstvwxyz";
+	const vowels = "aeiou";
+	const numbers = "0123456789";
+	const specialChars = "!@#$%&*+?";
+	
+	let password = "";
+	
+	// If strong password is requested, use a mix of all character types
+	if (bStrong){
+		
+		const chars = consonants + vowels + (consonants + vowels).toUpperCase() + numbers + specialChars;
+		
+		for (let i = 0; i < 20; i++) {			
+			password += chars[ Math.floor(Math.random() * chars.length) ];
+		}
+		
+	}
+	// Otherwise, generate a simple password consisting of 4 consonant-vowel pairs (e.g., "bakefogi")
+	// which is easier to remember but still reasonably secure for inhouse (internal) use.
+	else {	
+		for (let i = 0; i < 4; i++) {
+			const consonant = consonants[ Math.floor(Math.random() * consonants.length) ];
+			const vowel = vowels[ Math.floor(Math.random() * vowels.length) ];	
+			password += consonant + vowel;
+		}		
+	}
 
-  for (let i = 0; i < 4; i++) {
-    const consonant = consonants[Math.floor(Math.random() * consonants.length)];
-    const vowel = vowels[Math.floor(Math.random() * vowels.length)];
-
-    password += consonant + vowel;
-  }
-
-  return password;
+	return password;
 };
+
+
 
 //******************************************************* 
 
+/**
+ * Save some text to the clipboard (using the modern Clipboard API)
+ * @param {String} someText - The text to save to the clipboard
+ */
 lexutil.saveToClipboard = function(someText){
 
 	navigator.clipboard.writeText(someText)

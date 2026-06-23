@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2026.06.02
+	v2026.06.22
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -157,7 +157,10 @@
 	<script type="text/javascript" language="javascript" src="js/lexit.util.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.spy.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.login.js"></script>
-	<script type="text/javascript" language="javascript" src="js/lexit.projectsmenu.js"></script>	
+	<script type="text/javascript" language="javascript" src="js/lexit.projectsmenu.js"></script>
+	
+	<!-- extra custom dataTables functions as an extension to the standard installation -->
+	
 	<script type="text/javascript" language="javascript" src="js/lexit.dataTables.extension.js"></script> 
 	<script type="text/javascript" language="javascript" src="js/lexit.configurator.js"></script>
 	<script type="text/javascript" language="javascript" src="js/lexit.configfunctions_fn.js"></script>
@@ -181,7 +184,7 @@
 	var WEBSERV_URL = BASE_URL + "/webservice";
 	
 	// Argument separator within single string 
-	// this will be loaded from the webservice (so we're sure the same value is used both in client and server)
+	// this will be loaded from webservice (so we're sure the same value is used both in client and server)
 	// It will be set by lexitinit.setInternalSeparator() at initialization time
 	var ARG_INTERNAL_SEPARATOR = null;
 	

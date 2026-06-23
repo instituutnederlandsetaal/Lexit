@@ -317,11 +317,17 @@ lexitusers.createNewUser = function(){
 	// allow dialog to be built before adding password generator
 	setTimeout(function(){
 		
-		$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
-		$("#password_generator").click(function(){
-			$("#prompt_password").val(lexutil.generatePassword());
+		$("#prompt_password").after('<div id="password_generator_buttons_container"></div>');
+		$("#password_generator_buttons_container").append('<button type="button" class="password_generator_button" id="easy_password_generator">'+lang.admingui_adduser_easy_password+'</button>');
+		$("#password_generator_buttons_container").append('<button type="button" class="password_generator_button" id="strong_password_generator">'+lang.admingui_adduser_strong_password+'</button>');
+		
+		$("#easy_password_generator").click(function(){
+			$("#prompt_password").val(lexutil.generatePassword(false));
 		});
-		$("#password_generator").after("<br>");
+		$("#strong_password_generator").click(function(){
+			$("#prompt_password").val(lexutil.generatePassword(true));
+		});		
+		
 	}, 100);
 	
 };
@@ -337,8 +343,8 @@ lexitusers.createMultipleUsers = function(){
 	
 		fn.prompt([lang.admingui_add_multipleusers_title, 
 			lexitusers.overviewOfUsersAndRoles +"<BR><DIV>"+lang.admingui_add_multipleusers_msg+"</DIV>"], 
-			["usernames", "default access role"], 
-			["::textarea", ["-::selected", "superuser", "superreader"]], 
+			["usernames", "password type", "default access role"], 
+			["::textarea", [lang.admingui_adduser_easy_password+"::selected", lang.admingui_adduser_strong_password], ["-::selected", "superuser", "superreader"]], 
 			function(resp){
 				
 				// get input
@@ -346,13 +352,16 @@ lexitusers.createMultipleUsers = function(){
 				// we'll assign this variable to users that exist already 
 				var sExistsAlready = "[exists already]";
 				
+				// password type
+				var bStrong = (resp["password type"] == lang.admingui_adduser_strong_password);
+				
 				// create arrays of usernames and passwords for the new users
 				
 				var aUsernames = usernames.split(/\r\n|\r|\n/) // split by line end
 					.map(username => username.trim()) // trim in case of tailing spaces or so
 					.filter(Boolean); // remove empty lines
 				var aPasswords = aUsernames.map(username => 
-					aListOfUsers.includes(username) ? sExistsAlready : lexutil.generatePassword()
+					aListOfUsers.includes(username) ? sExistsAlready : lexutil.generatePassword(bStrong)
 				);			
 								
 		
@@ -458,16 +467,6 @@ lexitusers.createMultipleUsers = function(){
 			false,
 			[50, 10]
 		);
-	
-		// allow dialog to be built before adding password generator
-		setTimeout(function(){
-			
-			$("#prompt_password").after('<button type="button" id="password_generator">'+lang.admingui_adduser_passwordgenerator+'</button>');
-			$("#password_generator").click(function(){
-				$("#prompt_password").val(lexutil.generatePassword());
-			});
-			$("#password_generator").after("<br>");
-		}, 100);
 
 	};
 	
@@ -1062,7 +1061,7 @@ lexitusers.setListOfProjects = function(){
 			        // remember original position
 			        ui.item.data("oldIndex", ui.item.index());
 			    },
-				cancel: ".ui-state-disabled",	// cannot move disabled items
+				cancel: "input, .ui-state-disabled",	// don't move text input fields, and don't move disabled items either
 				update: function( event, ui ) {
 					
 					// when an item was moved, make sure it get the status label of the section it's been dragged to
@@ -1320,7 +1319,7 @@ lexitusers.keepPublicReaderAlive = function(){
 			
 			// check for access denied
 			var sResp = fn.getDbResponse(xml);
-	 		if (sResp == 'Access denied'){
+			if (sResp && sResp.toLowerCase().includes('access denied')){
 	 			fn.closeDialog();
 	 			fn.message(sResp, sResp, function(){
 	 				lexitinit.lexitReload();

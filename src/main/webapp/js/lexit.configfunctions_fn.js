@@ -4494,7 +4494,7 @@ fn.getFunctionOutput = function(){
  * 
  * @see fn.getFunctionOutput
  */
-fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler, bAsync = false){		
+fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler, bAsync = false){	
 	
 	var url = WEBSERV_URL+"/api/call_function";
 	
@@ -7141,7 +7141,7 @@ fn.startPublicReader = function(){
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
 			var sResp = fn.getDbResponse(xml);
-	 		if (sResp == 'Access denied'){
+			if (sResp && sResp.toLowerCase().includes('access denied')){	 		
 	 			fn.closeDialog();
 	 			fn.message(sResp, sResp, function(){
 	 				lexitinit.lexitReload();

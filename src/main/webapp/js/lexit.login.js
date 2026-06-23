@@ -27,7 +27,7 @@ lexitlogin.startLexitLogin = function(){
 					"dataType": "xml", // get response as xml
 					"success": function(xml) {
 						var sResp = fn.getDbResponse(xml);
-				 		if (sResp == 'Access denied'){
+						if (sResp && sResp.toLowerCase().includes('access denied')){
 				 			fn.closeDialog();
 				 			fn.message(sResp, sResp, function(){
 				 				lexitinit.lexitReload();
