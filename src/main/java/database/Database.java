@@ -18,8 +18,8 @@ import util.Util;
 
 
 /*
- * This class contains all the queries needed to read from or write into
- * the database used by Lex'it
+ * This class gathers all functions for building queries 
+ * to the database used by Lex'it
  * 
  */
 public class Database {
@@ -106,15 +106,6 @@ public class Database {
 		return this.dbCache;
 	}
 	
-	
-	// declare if we must be computing an exact count (default is false,
-	// but this can be set to true by user temporarily if needed)
-	public void setForceExactCount(boolean forceExactCount){
-		this.bForceExactCount = forceExactCount;
-	}
-	public boolean getForceExactCount(){
-		return this.bForceExactCount;
-	}
 	
 	
 	

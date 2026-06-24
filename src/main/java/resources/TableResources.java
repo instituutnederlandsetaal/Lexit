@@ -370,7 +370,7 @@ public class TableResources {
 		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
 		
 		// is exact count required by the user for this call?		
-		service.getDatabaseObject(co).setForceExactCount( sForceExactCount.equalsIgnoreCase("true") );				
+		service.getDatabaseObject(co).getCache().setExactCountRequired( tableName, sForceExactCount.equalsIgnoreCase("true") );				
 		
 		
 		Util.debug(co, "### Get table "+tableName);

@@ -46,11 +46,14 @@ public class DatabaseCache {
 	
 	// cache of total and partial counts
 	
-	// table name -> total count of records in the table
-	private ConcurrentHashMap<String, Integer> tableNameToCount = new ConcurrentHashMap<String, Integer>();
+	// table name -> whether exact count is required
+	private ConcurrentHashMap<String, Boolean> tableNameToRequiredExactCount = new ConcurrentHashMap<String, Boolean>();
 	
-	// table name -> whether the count is exact (true) or estimated (false)
-	private ConcurrentHashMap<String, Boolean> tableNameToExactCount = new ConcurrentHashMap<String, Boolean>();
+	// table name -> total count of records in the table
+	private ConcurrentHashMap<String, Integer> tableNameToTotalCount = new ConcurrentHashMap<String, Integer>();
+	
+	// table name -> whether the total count is exact (true) or estimated (false)
+	private ConcurrentHashMap<String, Boolean> tableNameToTotalCountQuality = new ConcurrentHashMap<String, Boolean>();
 	
 	// query -> count of records that satisfy the query
 	private ConcurrentHashMap<String, Integer> queryToCount = new ConcurrentHashMap<String, Integer>();
@@ -64,6 +67,8 @@ public class DatabaseCache {
 	
 	// getters and setters
 	
+	
+	// getters/setters for table and column name to types
 	public ConcurrentHashMap<String, String> getTableAndColumnNameToTypes() {
 		return tableAndColumnNameToTypes;
 	}
@@ -77,7 +82,7 @@ public class DatabaseCache {
 	}
 	
 	
-
+	// getters/setters for table and column name to custom types values
 	public ConcurrentHashMap<String, String> getTableAndColumnNameToCustomTypesValues() {
 		return tableAndColumnNameToCustomTypesValues;
 	}
@@ -91,17 +96,17 @@ public class DatabaseCache {
 	}
 
 	
-	
-	public ConcurrentHashMap<String, String[]> getFunctionNameToTypes() {
+	// getters/setters for functions argument types
+	public ConcurrentHashMap<String, String[]> getFunctionNameToArgTypes() {
 		return functionNameToTypes;
 	}
 
-	public void setFunctionNameToTypes(String functionName, String[] types) {
+	public void setFunctionNameToArgTypes(String functionName, String[] types) {
 		this.functionNameToTypes.put(functionName, types);
 	}
 	
 	
-
+	// getters/setters for functions return types
 	public ConcurrentHashMap<String, String> getFunctionNameToReturnTypes() {
 		return functionNameToReturnType;
 	}
@@ -112,7 +117,7 @@ public class DatabaseCache {
 
 	
 	
-	
+	// getters/setters for function operation types (read, write, all)
 	public ConcurrentHashMap<String, String> getFunctionNameToOperationTypes() {
 		return functionNameToOperationType;
 	}
@@ -122,7 +127,7 @@ public class DatabaseCache {
 	}
 
 	
-	
+	// getters/setters for table primary key
 	public ConcurrentHashMap<String, String> getTableNameToPrimaryKey() {
 		return tableNameToPrimaryKey;
 	}
@@ -136,7 +141,7 @@ public class DatabaseCache {
 	}
 
 	
-	
+	// getters/setters for table column names
 	public ConcurrentHashMap<String, String[]> getTableNameToColumnNames() {
 		return tableNameToColumnNames;
 	}
@@ -150,7 +155,7 @@ public class DatabaseCache {
 	}
 	
 	
-
+	// getters/setters for indexes on table columns (found: true, not found: false)
 	public ConcurrentHashMap<String, Boolean> getTableAndColumnNameToIndex() {
 		return tableAndColumnNameToIndex;
 	}
@@ -160,7 +165,7 @@ public class DatabaseCache {
 	}
 	
 	
-
+	// getters/setters for row numbers as result of a go-to query 
 	public ConcurrentHashMap<String, ArrayList<String[]>> getGotoQueryToResultSet() {
 		return gotoQueryToResultSet;
 	}
@@ -168,37 +173,48 @@ public class DatabaseCache {
 	public void setGotoQueryToResultSet(String getRowNumberQuery, ArrayList<String[]> results) {
 		this.gotoQueryToResultSet.put(getRowNumberQuery, results);
 	}
-
 	
 	
-	public ConcurrentHashMap<String, Integer> getTableNameToCount() {
-		return tableNameToCount;
+	
+	// declare if we must be computing an exact count (default is false,
+	// but this can be set to true by user temporarily if needed)
+	public void setExactCountRequired(String tableName, boolean forceExactCount){
+		this.tableNameToRequiredExactCount.put(tableName, forceExactCount);
+	}
+	public boolean getExactCountRequired(String tableName){
+		return this.tableNameToRequiredExactCount.get(tableName);
 	}
 
-	public void setTableNameToCount(String tableName, int count) {
-		this.tableNameToCount.put(tableName, count);
-	}
 	
-	public void removeFromTableNameToCount(String tableName) {
-		this.tableNameToCount.remove(tableName);
-	}
-	
-	
-
-	public ConcurrentHashMap<String, Boolean> getTableNameToExactCount() {
-		return tableNameToExactCount;
+	// getters/setters for table total count
+	public ConcurrentHashMap<String, Integer> getTableNameToTotalCount() {
+		return tableNameToTotalCount;
 	}
 
-	public void setTableNameToExactCount(String tableName, boolean exactCount) {
-		this.tableNameToExactCount.put(tableName, exactCount);
+	public void setTableNameToTotalCount(String tableName, int count) {
+		this.tableNameToTotalCount.put(tableName, count);
 	}
 	
-	public void removeFromTableNameToExactCount(String tableName) {
-		this.tableNameToExactCount.remove(tableName);
+	public void removeFromTableNameToTotalCount(String tableName) {
+		this.tableNameToTotalCount.remove(tableName);
 	}
 	
 	
+	// getters/setters for table total count quality (exact:true or estimated:false)
+	public ConcurrentHashMap<String, Boolean> getTableNameToTotalCountQuality() {
+		return tableNameToTotalCountQuality;
+	}
 
+	public void setTableNameToTotalCountQuality(String tableName, boolean exactCount) {
+		this.tableNameToTotalCountQuality.put(tableName, exactCount);
+	}
+	
+	public void removeFromTableNameToTotalCountQuality(String tableName) {
+		this.tableNameToTotalCountQuality.remove(tableName);
+	}
+	
+	
+	// getters/setters for count of records that satisfy a query
 	public ConcurrentHashMap<String, Integer> getQueryToCount() {
 		return queryToCount;
 	}
@@ -212,7 +228,7 @@ public class DatabaseCache {
 	}
 	
 	
-
+	// getters/setters for quality of count of records that satisfy a query (exact:true or estimated:false)
 	public ConcurrentHashMap<String, Boolean> getQueryToCountQuality() {
 		return queryToCountQuality;
 	}
@@ -226,7 +242,7 @@ public class DatabaseCache {
 	}
 	
 	
-
+	// getters/setters for database access hash
 	public ConcurrentHashMap<String, String> getDatabaseAccessHash() {
 		return databaseAccessHash;
 	}

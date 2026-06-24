@@ -152,13 +152,13 @@ public class DatabaseFunctions {
 		}
 		
 		String cachingKey = schemaName+functionName+numberOfArguments;
-		if ( db.getCache().getFunctionNameToTypes().containsKey(cachingKey) ) {
+		if ( db.getCache().getFunctionNameToArgTypes().containsKey(cachingKey) ) {
 			if (Constants.debug) {
 				System.out.println("## Function args types from cache: ");
-				System.out.println( Arrays.toString(db.getCache().getFunctionNameToTypes().get(cachingKey)) );
+				System.out.println( Arrays.toString(db.getCache().getFunctionNameToArgTypes().get(cachingKey)) );
 			}
 			
-			return db.getCache().getFunctionNameToTypes().get(cachingKey);
+			return db.getCache().getFunctionNameToArgTypes().get(cachingKey);
 		}
 		
 		
@@ -182,7 +182,7 @@ public class DatabaseFunctions {
 				for (int i=0; i<argumentTypes.length; i++) {
 					argumentTypes[i] = argumentTypes[i].trim();
 				}
-				db.getCache().setFunctionNameToTypes(cachingKey, argumentTypes);
+				db.getCache().setFunctionNameToArgTypes(cachingKey, argumentTypes);
 			}			
 			
 		} 
@@ -204,8 +204,8 @@ public class DatabaseFunctions {
 	
 	
 	/**
-	 * Determine if a function is a writing function (return 'writing')
-	 * or just a reading function  (return 'reading')
+	 * Determine if a function is a writing function (return 'write')
+	 * or just a reading function  (return 'read')
 	 * 
 	 * @param functionName
 	 * @param number of arguments (needed for distinction since we sometimes have homonyms)

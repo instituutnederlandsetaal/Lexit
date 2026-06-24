@@ -449,7 +449,7 @@ public class DatabaseTables {
 			boolean exactCount = db.getTrueTablesList().contains(tableName);
 			
 			// does the user requires an exact count just now?
-			boolean bExactCountRequiredByUser = db.getForceExactCount();
+			boolean bExactCountRequiredByUser = db.getCache().getExactCountRequired(tableName);
 			
 			// the key of the partial count is made up of prepared query string and its values (gives unique string)
 			String queryForCache = countQuery + " ("+ Util.join(args, ",") + ")";
@@ -590,9 +590,9 @@ public class DatabaseTables {
 		
 		
 		// We might have been counting with exact count now (if the user required to) 
-		// but now we are done with counting, so set bForceExactCount back to 
+		// but now we are done with counting, so set required count quality back to 
 		// its default value (=false, exact count not required)
-		db.setForceExactCount(false);
+		db.getCache().setExactCountRequired(tableName, false);
 		
 		long timeAtVeryEnd = new Date().getTime();
 		
@@ -924,7 +924,7 @@ public class DatabaseTables {
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();
 		
 		try {
-			boolean bForceExactCount = db.getForceExactCount();
+			boolean bForceExactCount = db.getCache().getExactCountRequired(tableName);
 			
 			// Get the count, but set a time limit...
 			// Except if we absolutely required an exact count (can be slow, but the user required it so...)
@@ -958,7 +958,7 @@ public class DatabaseTables {
 	/**
 	 * Get a fast estimate of the number of ALL rows of a table or view
 	 * @param tableName
-	 * @return
+	 * @return a map containing the count and a boolean indicating if it is an exact count or not
 	 */
 	public Map<String, Object> getQuickCountOfAllRows(String tableName) {
 		
@@ -968,24 +968,24 @@ public class DatabaseTables {
 		String tableNameOnly = Util.getTableNameOnly(tableName);
 		boolean exactCount = true;
 		Map<String, Object> countAndQuality = new ConcurrentHashMap<String, Object>();
-		boolean bForceExactCount = db.getForceExactCount();
+		boolean bForceExactCount = db.getCache().getExactCountRequired(tableNameOnly);
 		
 		// use caching
 		// (if we have looked up the count already, it is stored in a hash)
 		String cachingKey = schema+tableNameOnly;
 		if ( !bForceExactCount && // of course, don't read the cache if exact count is required
-				db.getCache().getTableNameToCount().containsKey(cachingKey))
+				db.getCache().getTableNameToTotalCount().containsKey(cachingKey))
 			{
-			Util.debug(db.getContextObject(), "## Count from cache = "+ db.getCache().getTableNameToCount().get(cachingKey)+" row(s)");
-			countAndQuality.put("exactCount", db.getCache().getTableNameToExactCount().get(cachingKey));
-			countAndQuality.put("count", db.getCache().getTableNameToCount().get(cachingKey));
+			Util.debug(db.getContextObject(), "## Count from cache = "+ db.getCache().getTableNameToTotalCount().get(cachingKey)+" row(s)");
+			countAndQuality.put("exactCount", db.getCache().getTableNameToTotalCountQuality().get(cachingKey));
+			countAndQuality.put("count", db.getCache().getTableNameToTotalCount().get(cachingKey));
 			return countAndQuality;
 			}
 		
 		
 		// first determine if we have a table or a view
 		// [1] a view requires a true count since there is no way to get a proper quick estimate
-		//     of the number of row of a view
+		//     of the number of rows of a view
 		// [2] for tables we can get an estimate count by using the getEstimateCount of this webservice
 		//     NB: A table also has an estimate of its number of rows in the pg_class table of Postgres
 		//         which can be get with: SELECT reltuples FROM pg_class WHERE oid = 'my_schema.tbl'::regclass;
@@ -1023,13 +1023,13 @@ public class DatabaseTables {
 		}
 		
 		// store the count for caching (speed improvement)
-		db.getCache().setTableNameToCount(cachingKey, count);
-		db.getCache().setTableNameToExactCount(cachingKey, exactCount);
+		db.getCache().setTableNameToTotalCount(cachingKey, count);
+		db.getCache().setTableNameToTotalCountQuality(cachingKey, exactCount);
 		
 		Util.debug(db.getContextObject(), "## Counting result was: "+(exactCount?"":"+/- ")+count+" row(s)");
 		
-		countAndQuality.put("exactCount", db.getCache().getTableNameToExactCount().get(cachingKey));
-		countAndQuality.put("count", db.getCache().getTableNameToCount().get(cachingKey));
+		countAndQuality.put("exactCount", db.getCache().getTableNameToTotalCountQuality().get(cachingKey));
+		countAndQuality.put("count", db.getCache().getTableNameToTotalCount().get(cachingKey));
 		return countAndQuality;
 	}
 	
@@ -1172,8 +1172,8 @@ public class DatabaseTables {
 		String tableNameOnly = Util.getTableNameOnly(tableName);
 		
 		String cachingKey = schema+tableNameOnly;
-		db.getCache().removeFromTableNameToCount(cachingKey);
-		db.getCache().removeFromTableNameToExactCount(cachingKey);
+		db.getCache().removeFromTableNameToTotalCount(cachingKey);
+		db.getCache().removeFromTableNameToTotalCountQuality(cachingKey);
 		db.getCache().removeFromTableNameToPrimaryKey(cachingKey);
 				
 		String[] columns = db.getCache().getTableNameToColumnNames().get(cachingKey);
