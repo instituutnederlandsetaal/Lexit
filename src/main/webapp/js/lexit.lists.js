@@ -1569,19 +1569,21 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 					
 					// check if the order settings are compatible with the columns we got from the database
 					var aDiff = lexutil.symmetricDifference(aColumns, aOrderSettings);
-					if (aDiff.length > 0){
-						
+					
+					// if there are differences, we have a problem and we should display a message to the user
+					if (aDiff.length > 0){						
 						var sCompare = lang.columns_list_to_compare + ": {" + aDiff.join(", ") + "}";
 						fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", sCompare+".");
-					}
-					else {
-						
-						aColumns = aOrderSettings.map(name => aColumns[aColumns.indexOf(name)]);
-						aColumnTypes = aOrderSettings.map(name => aColumnTypes[aColumns.indexOf(name)]);
-						aColumnCustomVals = aOrderSettings.map(name => aColumnCustomVals[aColumns.indexOf(name)]);						
-					}
-					
-										
+					}					
+					// otherwise apply the order settings to the columns and types we got from the database
+					else {						
+						var aNewColumns = aOrderSettings.map(name => aColumns[aColumns.indexOf(name)]);
+						var aNewColumnTypes = aOrderSettings.map(name => aColumnTypes[aColumns.indexOf(name)]);
+						var aNewColumnCustomVals = aOrderSettings.map(name => aColumnCustomVals[aColumns.indexOf(name)]);							
+						aColumns = aNewColumns;
+						aColumnTypes = aNewColumnTypes;
+						aColumnCustomVals = aNewColumnCustomVals;						
+					}										
 				}
 				
 				// store the columns and types now
