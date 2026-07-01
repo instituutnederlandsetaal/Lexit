@@ -1573,7 +1573,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 					// if there are differences, we have a problem and we should display a message to the user
 					if (aDiff.length > 0){						
 						var sCompare = lang.columns_list_to_compare + ": {" + aDiff.join(", ") + "}";
-						fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", sCompare+".");
+						fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch + " " + sCompare+".");
 					}					
 					// otherwise apply the order settings to the columns and types we got from the database
 					else {						
