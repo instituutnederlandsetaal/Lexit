@@ -196,7 +196,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 					lang.columns_list_name_mismatch1+ ":<BR>{"+ firstArray.join(", ") +"}.<BR><BR>"+
 					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}<BR><BR>"+
 					sCompare
-			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ ": " +sCause+".");
+			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ " " +sCause+".");
 		}
 	}
 	

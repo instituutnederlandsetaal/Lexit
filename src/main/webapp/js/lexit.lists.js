@@ -60,17 +60,21 @@ hFormListLabel2DisplayHeight = new Hashtable();
 // from [form list label] To [list sort settings]
 hFormListLabel2SortSettings = new Hashtable();
 
+// from [form list label] To [list order settings]
+hFormListLabel2OrderSettings = new Hashtable();
+
 
 
 
 
 // Remember which form is the parent of a list etc
-lists.register = function(sFormListLabel, sFormContainerId, sTableToFeedListWith, sDisplayHeight, oSortSettings){
+lists.register = function(sFormListLabel, sFormContainerId, sTableToFeedListWith, sDisplayHeight, oSortSettings, aOrderSettings){
 	
 	hFormListLabel2formId.put( sFormListLabel, sFormContainerId );
 	hFormListLabel2tableName.put( sFormListLabel, sTableToFeedListWith );
 	hFormListLabel2DisplayHeight.put( sFormListLabel, sDisplayHeight );
 	hFormListLabel2SortSettings.put( sFormListLabel, oSortSettings );	
+	hFormListLabel2OrderSettings.put( sFormListLabel, aOrderSettings );
 };
 
 
@@ -104,7 +108,8 @@ lists.buildLists = function(sFormTable, iListNr){
 	var sTableNameOfList =	lists.getFeedingTable(sFormListLabel);	
 	var sDisplayHeight = 	lists.getDisplayHeight(sFormListLabel);
 	var oSortSettings =		lists.getSortSettings(sFormListLabel);
-
+	var aOrderSettings =	lists.getColumnOrder(sFormListLabel);
+	
 
 
 	lists.getAllColumns(sTableNameOfList, function(aAllColumns){
@@ -325,7 +330,7 @@ lists.buildLists = function(sFormTable, iListNr){
 			lists.buildLists(sFormTable, iListNr+1);
 		}
 
-	});
+	}, aOrderSettings);
 	
 };
 
@@ -1198,6 +1203,15 @@ lists.getSortSettings = function(sFormListLabel){
 };
 
 
+/**
+ * Get the column order of a list, as set in the configuration
+ * @param {String} the label of a list
+ * @returns {Array} the columns in a specified order
+ */
+lists.getColumnOrder = function(sFormListLabel){
+	return hFormListLabel2OrderSettings.get(sFormListLabel);
+}
+
 
 // --------------------------------------------
 // retrieve the FEEDING TABLE NAME 
@@ -1514,7 +1528,7 @@ lists.getColumnsToUse = function(oLists, sListLabel){
  * 
  * @see fn.getAllColumns
  */
-lists.getAllColumns = function(sSomeTableName, fnCallback){
+lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 
 	if (hListTable2Cols.get(sSomeTableName) != null){
 
@@ -1547,7 +1561,32 @@ lists.getAllColumns = function(sSomeTableName, fnCallback){
 					aColumns.push( $(this).find("column_name").text() );
 					aColumnTypes.push( $(this).find("column_type").text() );
 					aColumnCustomVals.push( $(this).find("customtype_values").text() );
-				});
+				});				
+								
+				// do we have an order settings to apply?
+				
+				if (aOrderSettings != null && aOrderSettings.length > 0){
+					
+					// check if the order settings are compatible with the columns we got from the database
+					var aDiff = lexutil.symmetricDifference(aColumns, aOrderSettings);
+					
+					// if there are differences, we have a problem and we should display a message to the user
+					if (aDiff.length > 0){						
+						var sCompare = lang.columns_list_to_compare + ": {" + aDiff.join(", ") + "}";
+						fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch + " " + sCompare+".");
+					}					
+					// otherwise apply the order settings to the columns and types we got from the database
+					else {						
+						var aNewColumns = aOrderSettings.map(name => aColumns[aColumns.indexOf(name)]);
+						var aNewColumnTypes = aOrderSettings.map(name => aColumnTypes[aColumns.indexOf(name)]);
+						var aNewColumnCustomVals = aOrderSettings.map(name => aColumnCustomVals[aColumns.indexOf(name)]);							
+						aColumns = aNewColumns;
+						aColumnTypes = aNewColumnTypes;
+						aColumnCustomVals = aNewColumnCustomVals;						
+					}					
+				}
+				
+				// store the columns and types now
 
 				hListTable2Cols.put(sSomeTableName, aColumns);
 				hListTable2ColTypes.put(sSomeTableName, aColumnTypes);

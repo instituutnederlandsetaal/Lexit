@@ -848,7 +848,8 @@ form.buildViewGrid = function(sTableName){
 
 		var sTableFeedingList = oLists[sListLabel]["table"]["name"];
 		var oSortSettings = 	oLists[sListLabel]["table"]["columns_sorting"];
-
+		var aOrderSettings = 	oLists[sListLabel]["table"]["columns_order"] ?? [];
+		
 
 		// build the list div
 
@@ -911,7 +912,7 @@ form.buildViewGrid = function(sTableName){
 		// build the HTML table for the list,
 		// attach it to the div,
 		// and instantiate it as a Datatable
-		lists.register(sListLabel, sFormContainerId, sTableFeedingList, (parseFloat(aListDefinition[1]) *iGridHeightUnit) +"px", oSortSettings);
+		lists.register(sListLabel, sFormContainerId, sTableFeedingList, (parseFloat(aListDefinition[1]) *iGridHeightUnit) +"px", oSortSettings, aOrderSettings);
 	}
 
 	// now build all lists
