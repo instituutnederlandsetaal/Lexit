@@ -6904,7 +6904,7 @@ fn.removeHighlight = function(sString){
  * Call a webservice (works automatically crossDomain as well)
  * 
  * @param {String} sUrl - URL of the service
- * @param {Array} aParameters - parameters to send to the service, in an associative array
+ * @param {mixed} mParameters - associative array of parameters to send to the service, or some other type (use extra patameter 'processData':false in that case)
  * @param {String} [sMethod=GET] - type of call: GET or POST
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
@@ -6913,7 +6913,7 @@ fn.removeHighlight = function(sString){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
+fn.callService = function(sUrl, mParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";
@@ -6952,6 +6952,10 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 	// Kind of brutal force parameter: 'true' means force use the Lex'it service as a proxy, so as to avoid 'strict-origin-when-cross-origin' errors 
 	var bUseLexitServiceIsSet = ( typeof oExtraParams["useLexitService"] !== 'undefined' );	
 	
+	// just like in the jquery ajax API, parameter 'processData' is true by default, 
+	// but it can be set to false to keep the content of mParameters as-is 
+	var bProcessData = (typeof oExtraParams["processData"]=='undefined' || oExtraParams["processData"] == true);
+	
 	
 	// final decision on which service to use:
 	//
@@ -6968,7 +6972,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 
 	if ( bUseTheLexitServiceAsProxy ){
 
-		var sData = lexutil.getAssociativeArrayAsString(aParameters);
+		var sData = (bProcessData ? lexutil.getAssociativeArrayAsString(mParameters) : mParameters);
 		
 		var ajaxParams = {
 			url: WEBSERV_URL+"/api/call_external_service",
@@ -7004,7 +7008,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod,
 						});
 				else
 					fn.message(lang.error,
@@ -7033,7 +7037,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		var ajaxParams = {
 			"type": sMethod,
 			"url": sUrl,
-			"data": aParameters,
+			"data": mParameters,
 			"success": function(xml) {
 				// callback if it is set
 				if (fnCallback!=null)
@@ -7045,7 +7049,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
 						});
 				else
 					fn.message(lang.error,

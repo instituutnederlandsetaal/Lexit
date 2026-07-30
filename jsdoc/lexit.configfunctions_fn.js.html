@@ -242,7 +242,9 @@ fn.getLibrary = function(sPath, fnCallback, fnErrorHandler){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * @see fn.getLibrary
  */
-fn.getLibraries = function(sPathToFolder="", aLibraryFiles, fnCallback, fnErrorHandler){
+fn.getLibraries = function(sPathToFolder, aLibraryFiles, fnCallback, fnErrorHandler){
+	
+	if (sPathToFolder == null) sPathToFolder = "";
 	
 	// Default behaviour, when no sPathToFolder was specified:	
 	// in test mode, we load the files locally, but on the server we load the file from the 'lexit2_config' folder 
@@ -697,6 +699,8 @@ fn.getTableExtraSettings = function(sSomeTablename){
  * 
  * @param {(String|Node|API-object-instance)} mixed - Table name, table object, or some node of the table
  * @returns {String} The name of the table
+ * 
+ * @see fn.getTableNode
  */
 fn.getTableName = function(mixed){	
 	
@@ -2194,6 +2198,37 @@ fn.respawnTable = function(sSomeTablename, aExclude=[], fnCallBack){
 	
 };
 
+
+/**
+ * Get the table wrapper, given a node within the table or an API instance of the table.
+ * @param {(String|Node|API-object-instance)} mixed - Table node within the table or API instance of the table
+ * @returns {Node} The node of the table wrapper
+ * 
+ * @see fn.getTableName
+ */
+fn.getTableNode = function(mixed){
+	
+	// if input is a string
+	if (typeof mixed == 'string' &amp;&amp; mt.tableExists(mixed))
+		return $("#"+mixed+"_wrapper")[0];
+	
+	// if input is a node, get the closest table name
+	if ( $(mixed).is("td") || $(mixed).is("tr") ){
+		
+		if ($( mixed ).closest('div.dataTables_wrapper').length > 0)
+			return $( mixed ).closest('div.dataTables_wrapper')[0];
+
+		// in some rare cases, closest return nothing, don't know why...
+		// so here's a rescue operation: extract the table name from the row class name
+		var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
+		var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
+		var sTableWrapperId = aRowClassName[0].replace("_row", "_wrapper");
+		return $("#"+sTableWrapperId).get(0);
+	}	
+	
+	// otherwise we must have an API instance
+	return fx.getTableNode(mixed);
+};
 
 
 // *****************************************************************
@@ -4483,10 +4518,11 @@ fn.getFunctionOutput = function(){
  * @param {Array} aFunctionArguments - An array with the function args
  * @param {Function} fnCallback - Function called after the operation
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
+ * @param [Boolean] [bAsync=false] - asynchronous or not
  * 
  * @see fn.getFunctionOutput
  */
-fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler){	
+fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErrorHandler, bAsync = false){	
 	
 	var url = WEBSERV_URL+"/api/call_function";
 	
@@ -4510,7 +4546,7 @@ fn.callFunction = function(sFunctionName, aFunctionArguments, fnCallback, fnErro
 	$.ajax( {
 		"type": "POST",
 		"url": url,
-		"async": false, // needed to block code execution while awaiting the server response
+		"async": bAsync, // false might be needed to block code execution while awaiting the server response
 		"data": aData,
 	 	"dataType": "xml", // get response as xml
 	 	"success": function(xml) {
@@ -5091,12 +5127,16 @@ fn.repositionDialog = function(bCenter){
  * 
  * @param {String|Array} sTitle - Title of the message window (if array: sTitle as element #1, sMessage as element #2)
  * @param {String[]} aFieldNames - Fields names to show
- * @param {Array} aValues - Default string values (pre-filled when dialog opens). When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
+ * @param {Array} aValues - Default string values (pre-filled when dialog opens). 
+ * When a pre-filled value mustn't be editable, add '::disabled' to the value string. / 
  * When one needs a field to be a checkbox instead, just fill in the boolean value which has to be chosen by default /
- * When when one needs a datepicker, add '::datepicker' to the value string. /
- * When when one needs a text area for one field only, add '::textarea' to the value string. / 
- * And when one needs a selectbox, give an array of values to choose from. 
- * The value to be selected by default must have '::selected' attached in its string value.  
+ * When one needs a datepicker, add '::datepicker' to the string value. /
+ * When one needs a text area for one field only, add '::textarea' to the string value. / 
+ * When one needs a field to be compulsory, add '::compulsory' to the string value. / 
+ * When one needs a username field (for a login prompt or so), add '::username' to the string value. / 
+ * When one needs a password field (for a login prompt or so), add '::password' to the string value. / 
+ * And when one needs a selectbox, give an array of values to choose from; 
+ * the value to be selected by default must have '::selected' attached in its string value.  
  * @param {Function} fnFunction - Function called after the user clicked on 'OK'
  * @param {Function} [fnCancelFunction=null] - Function called after the user clicked on 'Cancel'
  * @param {Boolean} [bTextarea=false] - If true use textarea fields, otherwise use input fields (default)
@@ -5117,6 +5157,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	// list of editors to be activated when dialog is opened
 	var aEditorsId = [];
+	
+	// list of compulsory fields
+	var aCompulsoryFields = [];
 
 	// deal with title/message input
 	var sMessage = "";
@@ -5140,6 +5183,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	var promptForm = $("&lt;form>&lt;/form>");
 	var promptFieldSet = $("&lt;fieldset>&lt;/fieldset>");
 	for (var i=0; i&lt;aFieldNames.length; i++) {
+		
 		// should the input field be editable?
 		var bFixedValue = false;
 		// datepicker?
@@ -5148,13 +5192,30 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		var bOneTextarea = false;
 		// editor type
 		var bEditor = false;
+		
+		// login types
+		var bUsername = false;
+		var bPassword = false;
 
+		// process default field values and parameters (::compulsory, ::textarea, etc.)
 		if (aValues != null &amp;&amp; 
 				(aValues[i] instanceof String || typeof aValues[i] === "string") ) { // make sure we have a string, or this will crash!
+			
+			// register compulsory fields
+			if ( (aValues[i]).indexOf("::compulsory")>-1 ){
+				aCompulsoryFields.push(aFieldNames[i]);
+			}
+			
+			// read other parameters
 			bFixedValue = (aValues[i]).indexOf("::disabled")>-1;
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			bEditor = (aValues[i]).indexOf("::editor")>-1;
+			
+			bUsername = (aValues[i]).indexOf("::username")>-1;
+			bPassword = (aValues[i]).indexOf("::password")>-1;
+			
+			// extract the value (cut of the parameter)
 			aValues[i] = (aValues[i]).split("::")[0];
 		}
 
@@ -5269,10 +5330,18 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		else {
 			var sInputType = (bTextarea || bOneTextarea) ? "textarea" : "input";
 			input = $("&lt;"+sInputType+">&lt;/"+sInputType+">")
-				.attr("type", "text" )
+				.attr("type", (bPassword ? "password" : "text") )
 				.attr("name", fieldLC)
 				.attr("id", "prompt_"+fieldLC)
 				.prop('disabled', bFixedValue);
+				
+			// if login parameters
+			if (bUsername){
+				input.attr("autocomplete", "username");
+			}
+			if (bPassword){
+				input.attr("autocomplete", "current-password");
+			}
 			
 			// preset the input value, if available
 			if ((bTextarea || bOneTextarea)) {
@@ -5315,10 +5384,13 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		aButtons.push({
        	 text: lang.ok,
     	 click: function(){
+			
+			// for now, we don't know of any compulsory field that wasn't filled in
+			var bFailedCompulsoryField = false;
     		 
     		var aPromptResponse = {}; 
-     		for (var i=0; i&lt;aFieldNames.length; i++)
-    		{
+     		for (var i=0; i&lt;aFieldNames.length; i++) {
+				
      			// fieldname
      			var thisFieldName = $.trim(aFieldNames[i]);
      			
@@ -5328,6 +5400,14 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
     			// first try special case (select box), and then the normal case (text)
     			var thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).children("option:selected").val();
     			if (thisValue == null) { thisValue = $("#"+promptDivId+" #prompt_"+fieldLC).val(); }
+    			
+    			// if the current field is a compulsory one,
+    			// and its value is empty, stop right away and show an error
+    			if ($.inArray(aFieldNames[i], aCompulsoryFields)>-1 &amp;&amp; (thisValue == null || thisValue.trim() == '')){
+					bFailedCompulsoryField = true;
+					fn.message(lang.error, lang.forgot_compulsory_field.replace(/FIELDNAME/g, aFieldNames[i]));
+					break;
+				}
     			
     			
     			// compute output for fn.getPromptBoxInput
@@ -5342,10 +5422,16 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
     			aPromptResponse[thisFieldName] = thisValue;
     			
     		}
-     		$( this ).dialog( "close" );  
-    		// call callback
-     		fnFunction(aPromptResponse); 
-    		              		
+    		
+    		// all done?
+    		if ( !bFailedCompulsoryField){
+				
+				// close the dialog
+				$( this ).dialog( "close" );
+				  
+	    		// call callback
+	     		fnFunction(aPromptResponse);
+			}    		              		
     	},
     	id: 'dialog_accept_button'
        });
@@ -6846,7 +6932,7 @@ fn.removeHighlight = function(sString){
  * Call a webservice (works automatically crossDomain as well)
  * 
  * @param {String} sUrl - URL of the service
- * @param {Array} aParameters - parameters to send to the service, in an associative array
+ * @param {mixed} mParameters - associative array of parameters to send to the service, or some other type (use extra patameter 'processData':false in that case)
  * @param {String} [sMethod=GET] - type of call: GET or POST
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
@@ -6855,7 +6941,7 @@ fn.removeHighlight = function(sString){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
+fn.callService = function(sUrl, mParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";
@@ -6894,6 +6980,10 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 	// Kind of brutal force parameter: 'true' means force use the Lex'it service as a proxy, so as to avoid 'strict-origin-when-cross-origin' errors 
 	var bUseLexitServiceIsSet = ( typeof oExtraParams["useLexitService"] !== 'undefined' );	
 	
+	// just like in the jquery ajax API, parameter 'processData' is true by default, 
+	// but it can be set to false to keep the content of mParameters as-is 
+	var bProcessData = (typeof oExtraParams["processData"]=='undefined' || oExtraParams["processData"] == true);
+	
 	
 	// final decision on which service to use:
 	//
@@ -6910,7 +7000,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 
 	if ( bUseTheLexitServiceAsProxy ){
 
-		var sData = lexutil.getAssociativeArrayAsString(aParameters);
+		var sData = (bProcessData ? lexutil.getAssociativeArrayAsString(mParameters) : mParameters);
 		
 		var ajaxParams = {
 			url: WEBSERV_URL+"/api/call_external_service",
@@ -6946,7 +7036,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod,
 						});
 				else
 					fn.message(lang.error,
@@ -6975,7 +7065,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		var ajaxParams = {
 			"type": sMethod,
 			"url": sUrl,
-			"data": aParameters,
+			"data": mParameters,
 			"success": function(xml) {
 				// callback if it is set
 				if (fnCallback!=null)
@@ -6987,7 +7077,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
 						});
 				else
 					fn.message(lang.error,
@@ -7052,7 +7142,7 @@ fn.getCurrentSessionId = function(){
  * Open a Lex'it login dialog
  */
 fn.startLexitLogin = function(){
-	startLexitLogin();
+	lexitlogin.startLexitLogin();
 };
 
 /**
@@ -7061,7 +7151,7 @@ fn.startLexitLogin = function(){
  * @param {Function} fnCallback - some function to call after logging out
  */
 fn.startLexitLogout = function(fnCallback){
-	startLexitLogout(fnCallback);
+	lexitlogin.startLexitLogout(fnCallback);
 };
 
 
@@ -7083,14 +7173,14 @@ fn.startPublicReader = function(){
 		"dataType": "xml", // get response as xml
 		"success": function(xml) {
 			var sResp = fn.getDbResponse(xml);
-	 		if (sResp == 'Access denied'){
+			if (sResp &amp;&amp; sResp.toLowerCase().includes('access denied')){	 		
 	 			fn.closeDialog();
 	 			fn.message(sResp, sResp, function(){
-	 				lexitReload();
+	 				lexitinit.lexitReload();
 	 			});
 	 		}
 	 		else {
-	 			lexitReload();
+	 			lexitinit.lexitReload();
 	 		}
 	 	},
 		"error": function(jqXHR, textStatus, errorThrown){			
@@ -7335,7 +7425,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Apr 14 2026 13:46:10 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jul 30 2026 11:03:22 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>
