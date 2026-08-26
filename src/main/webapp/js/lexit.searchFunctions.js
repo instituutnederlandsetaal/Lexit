@@ -625,6 +625,81 @@ sf.enableSearchFields = function(someTablename){
 };
 
 
+// redraw the select box for a given column
+sf.redrawSelectBox = function(sSomeTableName, sColumnName){
+	
+	// retrieve table client configuration	
+	var oTableConfig = conf.getTableConfig(sSomeTableName); 
+
+	// if the current column is set to searchable:false, we have to disable the search field
+	var oColumnConfig = conf.getColumnConfig( oTableConfig, sColumnName );
+			
+	// read setting for select values in 'choosefrom' in config.js
+	var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+	var aColumnSelectionLabels = conf.getSelectionBoxLabels(oColumnConfig);
+	
+	// We have two possible selection box types
+	//    [1] set in client configuration (conf.getSelectionBox)
+	var aListOfOptions = aSelectBoxValues;
+	// or [2] set in Postgres database (Postgres ENUM type)
+	if (aSelectBoxValues == null) {
+		aListOfOptions = lexutil.cloneArray(mt.getListOfAllowedValuesInVisibleColumnsOf(sSomeTableName)[i]);
+		
+		// empty value as neutral choice
+		aListOfOptions.unshift("");
+	}
+	
+	// add 'ALLES' value to be able to choose everything except neutral value(s)
+	var sAllOptions = "";
+	var aAllAllowedValues = new Array(); 
+	for (var j=0; j<aListOfOptions.length; j++) {
+		if (aListOfOptions[j] != '' && aListOfOptions[j] != '-') {
+			// don't forget to escape the regex chars, otherwise choosing the ALLES option
+			// will sometimes not give the expected results
+			aAllAllowedValues.push( lexutil.escapeRegexChars(aListOfOptions[j]) );						
+		}
+	}
+	sAllOptions = "^("+aAllAllowedValues.join("|")+")$";
+	
+	// get select tag to update
+	var tableSearchboxes = $("table#"+sSomeTableName+"_searchboxes");
+	var inputTag =  tableSearchboxes.find("td.searchbox select#"+(sSomeTableName+"_searchbox_"+sColumnName) );
+	
+	// clear current dropdown
+	inputTag.empty();
+	
+	// start rebuilding
+	inputTag.append(
+		$("<option></option>")
+			.attr("value", aListOfOptions[0] )
+			.text( lang.choose )
+	);
+	for (var j=1; j<aListOfOptions.length; j++) {
+		var sLabel = aListOfOptions[j];
+		if (typeof aColumnSelectionLabels != 'undefined' && aColumnSelectionLabels != null && typeof aColumnSelectionLabels[ aListOfOptions[j] ] != 'undefined')
+			sLabel = aColumnSelectionLabels[ aListOfOptions[j] ];
+		
+		// escape regex chars in select values, otherwise those values will be interpreted as regexes
+		// (the escape is undone when reading the selected value by fn.getValueOfFilterBox() )
+		var sThisValue = fn.escapeRegexChars( aListOfOptions[j] );
+		sThisValue = sThisValue.replaceAll("\\\|", "|"); // exception to the rule (we alle regex pipes in select-values, so as to be able to query for alternative values in one single query)
+
+		inputTag.append(
+			$("<option></option>")							
+				.attr("value", sThisValue) 	 
+				.text( sLabel )
+		);
+	}
+	// finally add the 'ALLES' option
+	if (sAllOptions != null) {
+		inputTag.append(
+			$("<option></option>")							
+				.attr("value", sAllOptions )
+				.text( lang.EVERYTHING )
+		);
+	}	
+};
+
 
 
 

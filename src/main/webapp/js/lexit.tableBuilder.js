@@ -301,7 +301,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 		"processing": true,
 		"serverSide": true,
-		//"deferRender": true,   // TO-DO: we should test if this gives performance gain without bugs!!!
 		"ajax": {
 			"url": WEBSERV_URL+"/api/gettable",
 			"type": "POST",

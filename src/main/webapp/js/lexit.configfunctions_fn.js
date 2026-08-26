@@ -6632,6 +6632,68 @@ fn.addFilters = function(sSomeTable, oFilters){
 
 
 
+/**
+ * Rebuild the select box of a given column in a given table.
+ * @param {(String|API-object-instance)} sSomeTableName - A table name or object
+ * @param {String} sColumnName - Column name of the select box to rebuild
+ */
+fn.rebuildSelectBox = function(sSomeTableName, sColumnName){
+	
+	// get table name if an object was given
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+
+	// retrieve table client configuration	
+	var oTableConfig = conf.getTableConfig(sSomeTableName); 
+
+	// if the current column is set to searchable:false, we have to disable the search field
+	var oColumnConfig = conf.getColumnConfig( oTableConfig, sColumnName );
+			
+	// read setting for select values in 'choosefrom' in config.js
+	var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+
+	// if this column is set in the user configuration as a selection box
+	// and the given array of values to select from is empty, that means we need
+	// to get the values from the database (ENUM or SELECT DISTINCT).
+	if (aSelectBoxValues != null && aSelectBoxValues.length == 0) {	
+		var url = WEBSERV_URL+"/api/get_unique_values";
+		$.ajax( {
+			"type": "GET",
+			"async": false, // needed to block code execution while awaiting the server response
+			"url": url,
+			"data": {
+				"db_name": lexutil.getHttpParams().get("db"),
+				"table_name": sSomeTableName,
+				"column_name": sColumnName,
+				"dummy": lexutil.getUniqueNumber()
+				},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {				 		
+			
+				var aAllowedVals = td._getUniqueValues(xml);
+			
+				// put the array of values into the configuration variable "choosefrom" of that column			 		
+				conf.changeTableConfigValue(sSomeTableName, sColumnName, "choosefrom", aAllowedVals);
+				// save it to the Lex'it register as well
+				mt.setListOfAllowedValuesInColumnsOf(sSomeTableName, aAllowedVals);
+				
+				// rebuild in the GUI
+				sf.redrawSelectBox(sSomeTableName, sColumnName);
+				},
+			"error": function(jqXHR, textStatus, errorThrown){
+				fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sColumnName+"' "+
+					textStatus+" "+errorThrown);
+				}
+		} );
+	}
+	else {
+		// rebuild in the GUI
+		sf.redrawSelectBox(sSomeTableName, sColumnName);
+	}
+};
+
+
+
 
 // *************************************************************
 // *                 GOTO FUNCTION                             *
