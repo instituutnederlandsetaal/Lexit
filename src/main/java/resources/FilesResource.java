@@ -82,12 +82,37 @@ public class FilesResource {
 		
 		if ( !service.userIsAllowedTo(co, Constants.USER_WRITE_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
-
-		FileProcessor fp = new FileProcessor(service.getDatabaseObject(co));
+		
+		// get file processor and convert the file into a table in the database
+		FileProcessor fp = new FileProcessor(service, co);
 		ResponseObject ro = fp.convertFileIntoTable(dbName, fileInputStream, fileMetaData);
 
 		fileInputStream.close(); // avoid memory leaks!
 
+		return ro;
+	}
+	
+	
+	@Path("get_upload_info")
+	@GET
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public ResponseObject getUploadInfo(
+			@QueryParam("db_name") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) throws Exception {
+		
+		ResponseObject ro = new ResponseObject();
+		
+		// retrieve context object so as to get the session id and the upload info for this session
+		String userName = service.getLexitInfo().getUserName(httpServletRequest);		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		// retrieve the session id from the context object and get the upload info for this session
+		String sesionId = co.getSessionId();
+		String uploadInfo = service.getLexitInfo().getSessionIdUploadInfo(sesionId);
+		
+		ro.setResponse(uploadInfo);
 		return ro;
 	}
 	
@@ -108,7 +133,7 @@ public class FilesResource {
 		if ( !service.userIsAllowedTo(co, Constants.USER_ALL_ACCESS))
 			throw new RuntimeException("Permission denied to "+co.getUsername());
 
-		FileProcessor fp = new FileProcessor(service.getDatabaseObject(co));
+		FileProcessor fp = new FileProcessor(service, co);
 		ResponseObject ro = fp.removeUploadedFile(tableName);
 
 		return ro;

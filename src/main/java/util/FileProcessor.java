@@ -37,15 +37,21 @@ import database.Database;
 import database.PostgresConnectionManager;
 import resources.Constants;
 import resources.ContextObject;
+import resources.ResourceContextService;
 import resources.ResponseObject;
 
 public class FileProcessor {
 	
+	ResourceContextService service;
+	ContextObject co;
 	Database db;
 	
 	
-	public FileProcessor(Database db) {
-		this.db = db;
+	
+	public FileProcessor(ResourceContextService service, ContextObject co) {
+		this.service = service;
+		this.co = co;
+		this.db = service.getDatabaseObject(co);		
 	}
 	
 
@@ -379,8 +385,11 @@ public class FileProcessor {
 				String[] oneRow;
 
 				while ((oneRow = csvReader.readNext()) != null) {
+					
+					// keep track of upload activity (for the progress bar)
+					service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing row "+counter);
 
-                    //  ===============================
+                    // ===============================
                     // get the columns names (those will be our table columns)
                     // and create the table
                     // ===============================
@@ -461,7 +470,6 @@ public class FileProcessor {
 		catch (Exception e){
 			String error = Util.getDebugInfoForConsole("Error while converting file into table", new String[] {});
 			throw new RuntimeException(error, e);
-			//ro.setResponse("Error while converting file into table ");
 		}
 
 		return ro;
@@ -481,7 +489,6 @@ public class FileProcessor {
 	 * https://stackoverflow.com/questions/1516144/how-to-read-and-write-excel-file
 	 */
 	public ResponseObject convertFileIntoTable(String dbName, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
-
 		
 		ResponseObject ro = new ResponseObject();
 
@@ -490,8 +497,14 @@ public class FileProcessor {
 
 		// get filename (we will use it further on as part of the table name)
 		String fileName = fileMetaData.getFileName();
+		
+		// keep track of upload activity (for the progress bar)
+		service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Started uploading file '"+fileName+"'");
+		
         String fileType = fileName.substring(fileName.indexOf(".")+1).toLowerCase();
 		fileName = getSafeSqlName( fileName.substring(0, fileName.lastIndexOf(".")) );
+		
+		
 
 
         // read the XL file
@@ -526,6 +539,9 @@ public class FileProcessor {
 				Sheet sheet = wb.getSheetAt(sheetNr);
 				String sheetName = getSafeSqlName( sheet.getSheetName() );
 				String tableName = fileName + "_" + sheetName;
+				
+				// keep track of upload activity (for the progress bar)
+				service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing sheet '"+sheetName+"' ("+sheetNr+"/"+numberOfSheets+")");
 
 				// check if the table exists already
 				// and if it does, add the date to table name to make it unique
@@ -665,6 +681,9 @@ public class FileProcessor {
 				// ===============================
 
 				for (int rowNr = nrofFirstRow; rowNr < (nrOfRows+1); rowNr++) {
+					
+					// keep track of upload activity (for the progress bar)
+					service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing row "+rowNr+"/"+(nrOfRows+1)+" in sheet '"+sheetName+"' ("+sheetNr+"/"+numberOfSheets+")");
 
 					row = sheet.getRow(rowNr);
 					if (!isRowEmpty(row)) {

@@ -57,6 +57,9 @@ public class LexitSchemaAccess {
 	private ConcurrentHashMap<String, Integer> sessionIds2failedAttempts = new ConcurrentHashMap<String, Integer>();
 	private ConcurrentHashMap<String, Instant> sessionIds2timeBlocked = new ConcurrentHashMap<String, Instant>();
 	
+	// upload info
+	private ConcurrentHashMap<String, String> sessionIds2upload = new ConcurrentHashMap<String, String>();
+	
 	
 	
 	// ------------------------------------------------------------------------
@@ -222,7 +225,7 @@ public class LexitSchemaAccess {
 	 */
 	public void releaseSession(String sessionId) {
 		sessionIds2failedAttempts.remove(sessionId);
-		sessionIds2timeBlocked.remove(sessionId);
+		sessionIds2timeBlocked.remove(sessionId);		
 	}
 	
 	/**
@@ -367,6 +370,25 @@ public class LexitSchemaAccess {
 		}
 	}
 	
+	
+	/**
+	 * Register a session ID corresponding to a given upload info,
+	 * @param sessionId
+	 * @param uploadInfo
+	 */
+	public void setSessionIdUploadInfo(String sessionId, String uploadInfo) {
+		sessionIds2upload.put(sessionId, uploadInfo);
+	}
+	
+	/**
+	 * Get the upload info corresponding to a given session ID
+	 * @param sessionId
+	 * @return
+	 */
+	public String getSessionIdUploadInfo(String sessionId) {
+		return sessionIds2upload.get(sessionId);
+	}
+	
 
 	
 	/**
@@ -376,6 +398,9 @@ public class LexitSchemaAccess {
 	private void removeSessionId(String sessionId) {
 		sessionIds2users.remove(sessionId);
 		sessionIds2generationTime.remove(sessionId);
+		sessionIds2upload.remove(sessionId);
+		sessionIds2failedAttempts.remove(sessionId);
+		sessionIds2timeBlocked.remove(sessionId);
 	}
 	
 

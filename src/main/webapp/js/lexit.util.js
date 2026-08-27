@@ -1722,6 +1722,36 @@ lexutil.uploadFile = function(sFileName) {
 
 	// this might take a while, so put spinner
 	lexutil.showSpinner("#dynamic", true);
+	
+	// set an interval, getting upload status info from the server, and updating the progress bar accordingly
+	var sUploadStatus = "";
+	var uploadStatusIntervalId = setInterval(function() {
+		
+		var url = WEBSERV_URL+"/api/get_upload_info";
+			
+			$.ajax({
+				type: "GET",
+				url: url,
+				data: {
+					"db_name": lexutil.getHttpParams().get("db") 
+				},
+				dataType: "xml",
+				success: function(xml) {
+					
+					fn.closeDialog();
+					sUploadStatus = $(xml).find("response").text();
+					fn.message(lang.import_dialog_title, sUploadStatus);
+					
+				},
+				error: function(xhr, status, error) {					
+					// stop retrieval of upload status info
+					clearInterval(uploadStatusIntervalId);					
+					fn.message(lang.error, lang.loading_file_failed + "<BR><BR>("+sUploadStatus+")");
+				}
+			});
+		
+	}, 1000);
+		
 
 	setTimeout(function() {
 		var url = WEBSERV_URL+"/api/upload_file";
@@ -1736,6 +1766,10 @@ lexutil.uploadFile = function(sFileName) {
 
 				// remove spinner
 				lexutil.removeSpinner("#dynamic");
+				
+				// stop retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+
 				
 				// remove upload dialog
 				fn.closeDialog();
@@ -1752,9 +1786,7 @@ lexutil.uploadFile = function(sFileName) {
 				// this is needed to allow a redirect, without triggering a dialog in Chrome preventing it!
 				$(window).off('beforeunload');
 
-				// reload!
-				//var redirectUrl = document.URL.substring(0, document.URL.indexOf("?"));
-				//window.location.replace(redirectUrl + "?db=" + lexutil.getHttpParams().get("db") + "&table=" + sLoadedSheet + ( bTestMode ? "&test=true":""));
+				// load table
 				fn.callTable(sLoadedSheet);
 
 				// ALTERNATIVE implementation
@@ -1764,10 +1796,14 @@ lexutil.uploadFile = function(sFileName) {
 			},
 			error: function(xhr, status, error) {
 				
+				// stop retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+				
+				// remove spinner etc
 				lexutil.removeSpinner("#dynamic");
 				fn.closeDialog();
 				
-				fn.message(lang.error, lang.loading_file_failed);
+				fn.message(lang.error, lang.loading_file_failed+ "<BR><BR>("+sUploadStatus+")");
 			}
 		});
 	}, 100);
