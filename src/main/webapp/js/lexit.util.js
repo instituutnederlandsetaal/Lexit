@@ -1724,31 +1724,21 @@ lexutil.uploadFile = function(sFileName) {
 	lexutil.showSpinner("#dynamic", true);
 	
 	// set an interval, getting upload status info from the server, and updating the progress bar accordingly
-	var sUploadStatus = "";
+	
 	var uploadStatusIntervalId = setInterval(function() {
 		
-		var url = WEBSERV_URL+"/api/get_upload_info";
-			
-			$.ajax({
-				type: "GET",
-				url: url,
-				data: {
-					"db_name": lexutil.getHttpParams().get("db") 
-				},
-				dataType: "xml",
-				success: function(xml) {
-					
-					fn.closeDialog();
-					sUploadStatus = $(xml).find("response").text();
-					fn.message(lang.import_dialog_title, sUploadStatus);
-					
-				},
-				error: function(xhr, status, error) {					
-					// stop retrieval of upload status info
-					clearInterval(uploadStatusIntervalId);					
-					fn.message(lang.error, lang.loading_file_failed + "<BR><BR>("+sUploadStatus+")");
-				}
-			});
+		lexutil.getUploadInfo(
+			function(sUploadStatus) {
+				fn.closeDialog();
+				fn.message(lang.import_dialog_title, sUploadStatus);
+			},
+			function() {
+				// stop retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+				fn.closeDialog();	
+				fn.message(lang.error, lang.loading_file_failed + "<BR><BR>(uploadStatusIntervalId failed)");
+			}
+		);
 		
 	}, 1000);
 		
@@ -1796,19 +1786,54 @@ lexutil.uploadFile = function(sFileName) {
 			},
 			error: function(xhr, status, error) {
 				
-				// stop retrieval of upload status info
+				// stop interval function for retrieval of upload status info
 				clearInterval(uploadStatusIntervalId);
 				
 				// remove spinner etc
 				lexutil.removeSpinner("#dynamic");
 				fn.closeDialog();
 				
-				fn.message(lang.error, lang.loading_file_failed+ "<BR><BR>("+sUploadStatus+")");
+				// we do need the VERY LAST upload status, so we call getUploadInfo one last time, 
+				// and show the error message with the most up-to-date info we can get from the server
+				
+				lexutil.getUploadInfo(
+					function(sUploadStatus) {
+						fn.message(lang.error, lang.loading_file_failed+ "<BR><BR>("+sUploadStatus+")");
+					},
+					function() {
+						fn.message(lang.error, lang.loading_file_failed + "<BR><BR>(final getUploadInfo failed)");
+					}
+				);
+				
+				
 			}
 		});
 	}, 100);
 
-}
+};
+
+
+lexutil.getUploadInfo = function(fnCallback, fnErrorCallback) {
+
+	var url = WEBSERV_URL+"/api/get_upload_info";
+				
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"db_name": lexutil.getHttpParams().get("db") 
+		},
+		dataType: "xml",
+		success: function(xml) {
+			
+			fnCallback( $(xml).find("response").text() );
+			
+		},
+		error: function(xhr, status, error) {					
+			fnErrorCallback(xhr, status, error);
+		}
+	});	
+};
 
 
 //******************************************************* 

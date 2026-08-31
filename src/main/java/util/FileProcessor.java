@@ -501,7 +501,7 @@ public class FileProcessor {
 		// keep track of upload activity (for the progress bar)
 		service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Started uploading file '"+fileName+"'");
 		
-        String fileType = fileName.substring(fileName.indexOf(".")+1).toLowerCase();
+        String fileType = fileName.substring(fileName.lastIndexOf(".")+1).toLowerCase();
 		fileName = getSafeSqlName( fileName.substring(0, fileName.lastIndexOf(".")) );
 		
 		
@@ -541,7 +541,7 @@ public class FileProcessor {
 				String tableName = fileName + "_" + sheetName;
 				
 				// keep track of upload activity (for the progress bar)
-				service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing sheet '"+sheetName+"' ("+sheetNr+"/"+numberOfSheets+")");
+				service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing sheet '"+sheetName+"' ("+(sheetNr+1)+"/"+numberOfSheets+")");
 
 				// check if the table exists already
 				// and if it does, add the date to table name to make it unique
@@ -683,7 +683,7 @@ public class FileProcessor {
 				for (int rowNr = nrofFirstRow; rowNr < (nrOfRows+1); rowNr++) {
 					
 					// keep track of upload activity (for the progress bar)
-					service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing row "+rowNr+"/"+(nrOfRows+1)+" in sheet '"+sheetName+"' ("+sheetNr+"/"+numberOfSheets+")");
+					service.getLexitInfo().setSessionIdUploadInfo(co.getSessionId(), "Processing row "+rowNr+"/"+(nrOfRows+1)+" in sheet '"+sheetName+"' ("+(sheetNr+1)+"/"+numberOfSheets+")");
 
 					row = sheet.getRow(rowNr);
 					if (!isRowEmpty(row)) {
