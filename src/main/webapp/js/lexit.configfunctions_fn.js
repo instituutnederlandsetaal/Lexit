@@ -6827,7 +6827,6 @@ fn.quote = function(str){
  */
 fn.escapeRegexChars = function(str){
 	return str.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
-	//return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
 

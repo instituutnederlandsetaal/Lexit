@@ -433,7 +433,7 @@ sf.enableSearchFields = function(someTablename){
 				
 				// escape regex chars in select values, otherwise those values will be interpreted as regexes
 				// (the escape is undone when reading the selected value by fn.getValueOfFilterBox() )
-				var sThisValue = fn.escapeRegexChars( aListOfOptions[j] );
+				var sThisValue = $.startsWith(aListOfOptions[j], "range[") ? aListOfOptions[j] : fn.escapeRegexChars( aListOfOptions[j] );
 				sThisValue = sThisValue.replaceAll("\\\|", "|"); // exception to the rule (we alle regex pipes in select-values, so as to be able to query for alternative values in one single query)
 
 				inputTag.append(
@@ -681,7 +681,7 @@ sf.redrawSelectBox = function(sSomeTableName, sColumnName){
 		
 		// escape regex chars in select values, otherwise those values will be interpreted as regexes
 		// (the escape is undone when reading the selected value by fn.getValueOfFilterBox() )
-		var sThisValue = fn.escapeRegexChars( aListOfOptions[j] );
+		var sThisValue = $.startsWith(aListOfOptions[j], "range[") ? aListOfOptions[j] : fn.escapeRegexChars( aListOfOptions[j] );
 		sThisValue = sThisValue.replaceAll("\\\|", "|"); // exception to the rule (we alle regex pipes in select-values, so as to be able to query for alternative values in one single query)
 
 		inputTag.append(
