@@ -436,12 +436,16 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		        		// generate row tooltips showing the row numbers and such, if required by config					
 		        		if (bTooltipsAllowedInTable){
 						
-			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
-			        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
-			        		
-			        		$("td:eq("+iColNumber+")", oCurrentRow.node())
-				        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
-								.addClass("tooltip");
+			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);		
+							
+							if (sCellToolTip!=null && sCellToolTip !== false) { // if 'cell_tooltip':false, no tooltip is wanted at all, even the default one
+								
+								var currentTooltip = sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
+								
+				        		$("td:eq("+iColNumber+")", oCurrentRow.node())
+					        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
+									.addClass("tooltip");
+							}
 						}
 							
 						// special rendering, if required by config

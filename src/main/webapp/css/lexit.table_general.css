@@ -12,7 +12,7 @@
 	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);  
     -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     max-width: 99vw; /* maximum width of the table, to prevent it from being too wide, since have a bit of margin on the left */
-    min-width: 50vw; /* minimum width of the table, to prevent it from being too small (since the pagination div is 45vw wide!) */
+    min-width: 49vw; /* minimum width of the table, to prevent it from being too small (since the pagination div is 45vw wide!) */
 	margin-right: 10px;
 	width: 100%;
 }
