@@ -6186,6 +6186,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 	var sButtonBgColor = 	conf.getHeaderButtonBgColor(aButtonSettings);
 	var sButtonTextColor = 	conf.getHeaderButtonTextColor(aButtonSettings);
 	var sToolTip = 			conf.getHeaderButtonToolTip(aButtonSettings);
+	var sButtonClass = 		conf.getHeaderButtonClass(aButtonSettings);
 	
 	var customButton = $("<button/>")
 	.attr("id", sSomeTableName+"_button_"+iIndexOfNewButton)
@@ -6203,9 +6204,12 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 		fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
 	});
 	
-	// add tooltip
+	// add tooltip, class etc.
 	if (sToolTip != null)
 		customButton.attr("title", sToolTip).addClass("tooltip");
+	
+	if (sButtonClass != null)
+		customButton.addClass(sButtonClass);
 
 	$("#"+sSomeTableName+"_filter").append(
 		$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+iIndexOfNewButton).css("display", "inline").append(customButton)
