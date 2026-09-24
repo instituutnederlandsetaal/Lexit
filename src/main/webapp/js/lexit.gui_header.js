@@ -402,7 +402,7 @@ head.putCustomHeaderButtons = function(sSomeTableName){
 	if (iNumberOfCustomButtons>0)
 		$("#"+sSomeTableName+"_filter").append(
 				$("<div></div>")
-				.attr("id", sSomeTableName+"_room_between_buttons")
+				.attr("id", sSomeTableName+"_room_between_buttons")				
 				.addClass("room_between_buttons")
 				.append($("<br/>"))
 				);

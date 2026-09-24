@@ -365,6 +365,13 @@
 	top: 30px;
 }
 
+.export_pane.compact {
+	position: relative;
+	left: 0;
+	height: 0;
+	top: 0;
+}
+
 
 /*******************************************************************
  * Export buttons
@@ -372,6 +379,14 @@
 
 .dataTables_wrapper div.export_pane div.dt-buttons {
 	float: right;
+}
+.dataTables_wrapper div.export_pane.compact div.dt-buttons {
+	position: absolute;
+	top: -40px;
+	left: 5px;	
+}
+.dataTables_wrapper div.export_pane.compact div.dt-buttons a.dt-button {
+	font-size: 9pt !important;
 }
 
 /*full export button */
