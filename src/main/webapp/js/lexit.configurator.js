@@ -60,10 +60,10 @@ var oTableSettingsList_example = {
 		
 		/**
 		 * @type {boolean}
-		 * @description Display the export buttons in a compact form (left alighed, on same height as the pagination pane).
+		 * @description Make the table footer more compact (eg. put the export buttons on same height as the pagination pane, etc).
 		 * (default: false)
 		 */
-		"compact_export_buttons": true,
+		"compact_footer": true,
 		
 		
 		/** 
@@ -2151,10 +2151,10 @@ conf.getFullExportButtonSettings = function(aTableSettings){
 	return aTableSettings["full_export_button"];
 };
 
-conf.getCompactExportButtons = function(aTableSettings){
-	if (typeof aTableSettings["compact_export_buttons"] == 'undefined')
+conf.getCompactFooter = function(aTableSettings){
+	if (typeof aTableSettings["compact_footer"] == 'undefined')
 		return false;
-	return aTableSettings["compact_export_buttons"];
+	return aTableSettings["compact_footer"];
 };
 
 

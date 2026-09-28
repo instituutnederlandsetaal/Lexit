@@ -875,7 +875,7 @@ tb.addExportButtons = function(sSomeTableName){
 
 	// full export button required too? 
 
-	var aFullButtonSettings = conf.getFullExportButtonSettings(conf.getTableSettings(sSomeTableName));
+	var aFullButtonSettings = conf.getFullExportButtonSettings( conf.getTableSettings(sSomeTableName) );
 	if (aFullButtonSettings != null){
 
 		var sFullExportName = aFullButtonSettings["nice_name"];
@@ -906,7 +906,7 @@ tb.addExportButtons = function(sSomeTableName){
 		.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
 		
 	// set compact style if needed
-	var bCompactStyle = conf.getCompactExportButtons(conf.getTableSettings(sSomeTableName));
+	var bCompactStyle = conf.getCompactFooter( conf.getTableSettings(sSomeTableName) );
 	if (bCompactStyle) {$("div.export_pane").addClass("compact");}
 	
 
