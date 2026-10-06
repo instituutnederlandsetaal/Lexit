@@ -403,12 +403,15 @@ form.buildViewGrid = function(sTableName){
 	
 
 	// get table size (the form grid pixel size must fit into it)	
-	var iTableWidth = parseInt( $( "#"+sTableName+"_dynamic" ).css("width") );
-	var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
+	var iTableWidth =  parseInt( $("#"+sTableName+"_dynamic" ).css("width") );
+	var iTableHeight = parseInt( $("#"+sTableName+"_dynamic.table_div").css("min-height") );
+	// the following wasn't good after all, since a table might have a huge height when some cells are filled with lots of text...
+	//var iTableHeight = parseInt( $( "#"+sTableName+"_dynamic" ).css("height") ) - parseInt( $( "#"+sTableName+"_dynamic .top" ).css("height") );
+
 	
 	// if the given height and/or width is larger than the table, or it has a 0 value, set it to the table size	
 	if (iFormWidth == 0 || iFormWidth > iTableWidth ) iFormWidth = iTableWidth;
-	if (iFormHeight == 0 || iFormHeight > iTableHeight ) iFormHeight = iTableHeight;
+	if (iFormHeight == 0) iFormHeight = iTableHeight; // allow for whateven height was declared (we can't do that for width, since the form must fit into the table width)
 
 	var sFormPositionSetting = oFormGrid["align"];
 	var sFormPosPix = (iTableWidth - iFormWidth)/2; //default: center
@@ -815,7 +818,9 @@ form.buildViewGrid = function(sTableName){
 			if (bHasTextEditor){
 				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName)
 				.css("width", "calc("+aCellSize[0]+" * (var(--"+sFormContainerId+"_cellwidth)))")
-				.css("height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))");
+				.css("height", "calc("+aCellSize[1]+" * (var(--"+sFormContainerId+"_cellheight)))")
+				.css("overflow-y", "auto")
+				.css("overflow-x", "hidden");
 			}			
 		}
 		else {
@@ -1517,8 +1522,9 @@ form.manageViewGrid = function(sTableName){
 			// Or do we have a select box?		
 			var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 			if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
-			// do an editor?
+			// do we have an editor?
 			var bHasTextEditor = oFormGrid["cells"][sCellName]["editor"] != null ? oFormGrid["cells"][sCellName]["editor"] : false;
+			var aEditorButtons = oFormGrid["cells"][sCellName]["editor_buttons"];
 
 
 			// is the cell editable?
@@ -1590,7 +1596,8 @@ form.manageViewGrid = function(sTableName){
 						$(thisEditor).html(sTextData);
 					}
 					else {
-						form._createEditorForCell($("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea"));
+						var nEditorNode = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea");
+						form._createEditorForCell(nEditorNode, aEditorButtons);
 					}
 				}
 			}
@@ -1639,7 +1646,7 @@ form.manageViewGrid = function(sTableName){
 				// BEWARE : we don't register keyup events in the 'view HTML' textarea of the editor, because those are applied to the cell content only when
 				// the user switches back to the WYSIWYG view. Before this switch, the cell value is not modified YET!
 				
-				$(".trumbowyg-editor").keyup(function(){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).find(".trumbowyg-editor").keyup(function(){
 					
 					// some keys are not to be considered as 'content modification'
 					var sPressedKey = kf._getPressedKey();
@@ -1657,7 +1664,7 @@ form.manageViewGrid = function(sTableName){
 					form.setResetButtonToSetting(sTableName, "active");
 				});	
 				
-				$(".trumbowyg-button-pane").click(function(e){
+				$("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName).find(".trumbowyg-button-pane").click(function(e){
 										
 					// past this point, we do have a content modification
 					$(this).parent().find(".trumbowyg-editor-box").addClass("modified");
@@ -1815,12 +1822,11 @@ form.manageViewGrid = function(sTableName){
 
 
 
-form._createEditorForCell = function(nCell){
+form._createEditorForCell = function(nCell, aEditorButtons){
 	
-	$(nCell).trumbowyg({
-		lang: lang.getLanguageCode(),
-	    btns: [
-	        ['viewHTML'],
+	if (aEditorButtons == null){
+		aEditorButtons = [
+			['viewHTML'],
 	        ['formatting'],
 	        ['strong', 'em', 'del'],
 	        ['superscript', 'subscript'],
@@ -1829,7 +1835,12 @@ form._createEditorForCell = function(nCell){
 	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
 	        ['unorderedList', 'orderedList'],
 	        ['removeformat']
-	    ]
+		];
+	}
+	
+	$(nCell).trumbowyg({
+		lang: lang.getLanguageCode(),
+	    btns: aEditorButtons
 	});
 };
 

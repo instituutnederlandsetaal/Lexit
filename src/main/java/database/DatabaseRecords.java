@@ -1047,9 +1047,8 @@ public class DatabaseRecords {
 			// set argument types
 			ArgumentTypesObject ato = new ArgumentTypesObject();
 			String[] argsColumns = Util.concatArr( filterColumns, new String[]{columnName} );
-			String[] valueTypes = db.getTypesOfColumns(tableName, argsColumns);
 			for (int i=0; i<argsColumns.length; i++) {
-				ato.setType(i, valueTypes[i]);
+				ato.setType(i, db.getTypeOfColumn(tableName, argsColumns[i], args[i]));				
 			}
 			 
 			// query 
@@ -1152,8 +1151,7 @@ public class DatabaseRecords {
 			// with safe field names, meaning quoted when PostgreSql requires that.
 			
 			String[] aSortBySafe = new String[aSortBy.length];
-			for (int i=0; i<aSortBy.length; i++)
-			{
+			for (int i=0; i<aSortBy.length; i++) {
 				aSortBySafe[i] = Util.getSafeFieldName(aSortBy[i]) + " " + aSortDir[i];
 			}
 			String bigSortString = Util.join(aSortBySafe, ", ");
@@ -1168,10 +1166,9 @@ public class DatabaseRecords {
 			String[] argsColumns = Util.concatArr( new String[]{columnName}, filterColumns );
 			
 			// set argument types
-			ArgumentTypesObject ato = new ArgumentTypesObject();
-			String[] valueTypes = db.getTypesOfColumns(tableName, argsColumns);
+			ArgumentTypesObject ato = new ArgumentTypesObject();			
 			for (int i=0; i<argsColumns.length; i++) {
-				ato.setType(i, valueTypes[i]);
+				ato.setType(i, db.getTypeOfColumn(tableName, argsColumns[i], argValues[i]));
 			}
 			 
 			// query 

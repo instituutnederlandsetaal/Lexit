@@ -875,6 +875,7 @@ fn.getCurrentDisplayStart = function(sSomeTablename){
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @returns {Integer} total number of rows of a table
  * @see fn.getTotalNumberOfPages
+ * @see fn.getNumberOfFilteredRows
  */
 fn.getTotalNumberOfRows = function(sSomeTablename){
 	
@@ -882,6 +883,22 @@ fn.getTotalNumberOfRows = function(sSomeTablename){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsTotal;	
+};
+
+
+/**
+ * Get the number of filtered rows (size of result set after filtering)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} number of filtered rows
+ * @see fn.getTotalNumberOfRows
+ */
+fn.getNumberOfFilteredRows = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsDisplay;	
 };
 
 
@@ -2027,6 +2044,8 @@ fn.showTable = function(sSomeTablename){
  * (normally this is determined by the users actions in the GUI)
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * 
+ * @see fn.setActiveRow, fn.getActiveTable, fn.getActiveRow
  */
 fn.setActiveTable = function(sSomeTablename){
 	
@@ -2035,6 +2054,7 @@ fn.setActiveTable = function(sSomeTablename){
 	
 	kf.setActiveTable(sSomeTablename);
 };
+
 
 /**
  * Toggle the viewtype of a table (form vs table view)
@@ -2544,6 +2564,25 @@ fn.getActiveRowNode = function(sSomeTable){
 	}
 	
 	return mt.getDataTableObjectOf(sSomeTable).row( kf.getActiveRowNumber() ).node();
+};
+
+
+/**
+ * Set manually which row is active now in currently active table
+ * @param {Node} nRow - Row node of the row to be set as active
+ * 
+ * @see fn.getActiveRowNode, fn.setActiveTable
+ */
+fn.setActiveRowNode = function(nRowNode){
+	
+	// get active table and unselect all rows
+	var sSomeTablename = kf.getActiveTable();
+	fn.unselectAllRowNodes(sSomeTablename);	
+	
+	// set the active row number and select the row node
+	var iRowNumber = mt.getDataTableObjectOf(sSomeTablename).row(nRowNode).index();
+	kf.setActiveRowNumber(iRowNumber);
+	fn.selectRowNode(sSomeTablename, iRowNumber);	
 };
 
 
