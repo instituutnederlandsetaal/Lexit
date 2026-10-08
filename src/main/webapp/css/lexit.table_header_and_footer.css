@@ -62,10 +62,16 @@
 	z-index: 2; /* keep the table length selector in front (prevents pagination div from getting in front of this div) */
 }
 
+.dataTables_length select {
+	border: 1px solid #aaa;
+	border-radius: 3px;
+	padding: 2px;	
+}
+
 /*******************************************************************
  * Table global search box
  *
- * BEWARE: at the moment, the header buttons are attached to this element (bad, should be fixed in the future)
+ * BEWARE: at the moment, the header buttons are attached to this element (not ideal, should be fixed in the future)
  *******************************************************************/
  
 .dataTables_filter {
@@ -74,6 +80,13 @@
 	left: 50vw;
 	text-align: right;
 	/* BEWARE: don't use 'top'/'bottom' properties here, to allow the div having this class to be horizontally sticky only, t.i. not vertically sticky */	
+}
+
+.dataTables_filter input {
+	border: 1px solid #aaa;
+	border-radius: 3px;
+	padding: 3px;
+	margin-left: 3px;
 }
 
 
@@ -352,6 +365,13 @@
 	top: 30px;
 }
 
+.export_pane.compact {
+	position: relative;
+	left: 0;
+	height: 0;
+	top: 0;
+}
+
 
 /*******************************************************************
  * Export buttons
@@ -359,6 +379,14 @@
 
 .dataTables_wrapper div.export_pane div.dt-buttons {
 	float: right;
+}
+.dataTables_wrapper div.export_pane.compact div.dt-buttons {
+	position: absolute;
+	top: -38px;
+	left: 5px;	
+}
+.dataTables_wrapper div.export_pane.compact div.dt-buttons a.dt-button {
+	font-size: 9pt !important;
 }
 
 /*full export button */

@@ -1722,6 +1722,26 @@ lexutil.uploadFile = function(sFileName) {
 
 	// this might take a while, so put spinner
 	lexutil.showSpinner("#dynamic", true);
+	
+	// set an interval, getting upload status info from the server, and updating the progress bar accordingly
+	
+	var uploadStatusIntervalId = setInterval(function() {
+		
+		lexutil.getUploadInfo(
+			function(sUploadStatus) {
+				fn.closeDialog();
+				fn.message(lang.import_dialog_title, sUploadStatus);
+			},
+			function() {
+				// stop retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+				fn.closeDialog();	
+				fn.message(lang.error, lang.loading_file_failed + "<BR><BR>(uploadStatusIntervalId failed)");
+			}
+		);
+		
+	}, 1000);
+		
 
 	setTimeout(function() {
 		var url = WEBSERV_URL+"/api/upload_file";
@@ -1736,6 +1756,10 @@ lexutil.uploadFile = function(sFileName) {
 
 				// remove spinner
 				lexutil.removeSpinner("#dynamic");
+				
+				// stop retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+
 				
 				// remove upload dialog
 				fn.closeDialog();
@@ -1752,9 +1776,7 @@ lexutil.uploadFile = function(sFileName) {
 				// this is needed to allow a redirect, without triggering a dialog in Chrome preventing it!
 				$(window).off('beforeunload');
 
-				// reload!
-				//var redirectUrl = document.URL.substring(0, document.URL.indexOf("?"));
-				//window.location.replace(redirectUrl + "?db=" + lexutil.getHttpParams().get("db") + "&table=" + sLoadedSheet + ( bTestMode ? "&test=true":""));
+				// load table
 				fn.callTable(sLoadedSheet);
 
 				// ALTERNATIVE implementation
@@ -1764,15 +1786,54 @@ lexutil.uploadFile = function(sFileName) {
 			},
 			error: function(xhr, status, error) {
 				
+				// stop interval function for retrieval of upload status info
+				clearInterval(uploadStatusIntervalId);
+				
+				// remove spinner etc
 				lexutil.removeSpinner("#dynamic");
 				fn.closeDialog();
 				
-				fn.message(lang.error, lang.loading_file_failed);
+				// we do need the VERY LAST upload status, so we call getUploadInfo one last time, 
+				// and show the error message with the most up-to-date info we can get from the server
+				
+				lexutil.getUploadInfo(
+					function(sUploadStatus) {
+						fn.message(lang.error, lang.loading_file_failed+ "<BR><BR>("+sUploadStatus+")");
+					},
+					function() {
+						fn.message(lang.error, lang.loading_file_failed + "<BR><BR>(final getUploadInfo failed)");
+					}
+				);
+				
+				
 			}
 		});
 	}, 100);
 
-}
+};
+
+
+lexutil.getUploadInfo = function(fnCallback, fnErrorCallback) {
+
+	var url = WEBSERV_URL+"/api/get_upload_info";
+				
+	$.ajax({
+		type: "GET",
+		url: url,
+		data: {
+			"db_name": lexutil.getHttpParams().get("db") 
+		},
+		dataType: "xml",
+		success: function(xml) {
+			
+			fnCallback( $(xml).find("response").text() );
+			
+		},
+		error: function(xhr, status, error) {					
+			fnErrorCallback(xhr, status, error);
+		}
+	});	
+};
 
 
 //******************************************************* 

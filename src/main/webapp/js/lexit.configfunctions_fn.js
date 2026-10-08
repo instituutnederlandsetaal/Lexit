@@ -875,6 +875,7 @@ fn.getCurrentDisplayStart = function(sSomeTablename){
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @returns {Integer} total number of rows of a table
  * @see fn.getTotalNumberOfPages
+ * @see fn.getNumberOfFilteredRows
  */
 fn.getTotalNumberOfRows = function(sSomeTablename){
 	
@@ -882,6 +883,22 @@ fn.getTotalNumberOfRows = function(sSomeTablename){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsTotal;	
+};
+
+
+/**
+ * Get the number of filtered rows (size of result set after filtering)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} number of filtered rows
+ * @see fn.getTotalNumberOfRows
+ */
+fn.getNumberOfFilteredRows = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsDisplay;	
 };
 
 
@@ -2027,6 +2044,8 @@ fn.showTable = function(sSomeTablename){
  * (normally this is determined by the users actions in the GUI)
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * 
+ * @see fn.setActiveRow, fn.getActiveTable, fn.getActiveRow
  */
 fn.setActiveTable = function(sSomeTablename){
 	
@@ -2035,6 +2054,7 @@ fn.setActiveTable = function(sSomeTablename){
 	
 	kf.setActiveTable(sSomeTablename);
 };
+
 
 /**
  * Toggle the viewtype of a table (form vs table view)
@@ -2544,6 +2564,25 @@ fn.getActiveRowNode = function(sSomeTable){
 	}
 	
 	return mt.getDataTableObjectOf(sSomeTable).row( kf.getActiveRowNumber() ).node();
+};
+
+
+/**
+ * Set manually which row is active now in currently active table
+ * @param {Node} nRow - Row node of the row to be set as active
+ * 
+ * @see fn.getActiveRowNode, fn.setActiveTable
+ */
+fn.setActiveRowNode = function(nRowNode){
+	
+	// get active table and unselect all rows
+	var sSomeTablename = kf.getActiveTable();
+	fn.unselectAllRowNodes(sSomeTablename);	
+	
+	// set the active row number and select the row node
+	var iRowNumber = mt.getDataTableObjectOf(sSomeTablename).row(nRowNode).index();
+	kf.setActiveRowNumber(iRowNumber);
+	fn.selectRowNode(sSomeTablename, iRowNumber);	
 };
 
 
@@ -5230,8 +5269,16 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// Build the options as a string
 				for (var j = 0; j < aValues[i].length; j++) {
 				    var sThisValue = aValues[i][j];
-				    var bSelected = sThisValue.indexOf("::selected") > -1; // pre-selection
+					
+					// pre-selection
+				    var bSelected = sThisValue.indexOf("::selected") > -1; 
 				    sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
 				
 				    // Build each option as a string and append to optionsHTML
 				    optionsHTML += `<option value="${sThisValue}" ${bSelected ? 'selected' : ''}>${sThisValue}</option>`;
@@ -5253,8 +5300,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// build the options to select 
 				for (var j=0; j<aValues[i].length; j++) {
 					var sThisValue = aValues[i][j];
-					var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
+					
+					// pre-selection!
+					var bSelected = sThisValue.indexOf("::selected")>-1; 
 					sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
+					
 					var thisOption = $("<option></option>")
 						.attr("value", sThisValue)
 						.text(sThisValue);
@@ -6186,6 +6242,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 	var sButtonBgColor = 	conf.getHeaderButtonBgColor(aButtonSettings);
 	var sButtonTextColor = 	conf.getHeaderButtonTextColor(aButtonSettings);
 	var sToolTip = 			conf.getHeaderButtonToolTip(aButtonSettings);
+	var sButtonClass = 		conf.getHeaderButtonClass(aButtonSettings);
 	
 	var customButton = $("<button/>")
 	.attr("id", sSomeTableName+"_button_"+iIndexOfNewButton)
@@ -6203,9 +6260,12 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 		fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
 	});
 	
-	// add tooltip
+	// add tooltip, class etc.
 	if (sToolTip != null)
 		customButton.attr("title", sToolTip).addClass("tooltip");
+	
+	if (sButtonClass != null)
+		customButton.addClass(sButtonClass);
 
 	$("#"+sSomeTableName+"_filter").append(
 		$("<div></div>").attr("id", sSomeTableName+"_custombutton_"+iIndexOfNewButton).css("display", "inline").append(customButton)
@@ -6632,6 +6692,68 @@ fn.addFilters = function(sSomeTable, oFilters){
 
 
 
+/**
+ * Rebuild the select box of a given column in a given table.
+ * @param {(String|API-object-instance)} sSomeTableName - A table name or object
+ * @param {String} sColumnName - Column name of the select box to rebuild
+ */
+fn.rebuildSelectBox = function(sSomeTableName, sColumnName){
+	
+	// get table name if an object was given
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+
+	// retrieve table client configuration	
+	var oTableConfig = conf.getTableConfig(sSomeTableName); 
+
+	// if the current column is set to searchable:false, we have to disable the search field
+	var oColumnConfig = conf.getColumnConfig( oTableConfig, sColumnName );
+			
+	// read setting for select values in 'choosefrom' in config.js
+	var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+
+	// if this column is set in the user configuration as a selection box
+	// and the given array of values to select from is empty, that means we need
+	// to get the values from the database (ENUM or SELECT DISTINCT).
+	if (aSelectBoxValues != null && aSelectBoxValues.length == 0) {	
+		var url = WEBSERV_URL+"/api/get_unique_values";
+		$.ajax( {
+			"type": "GET",
+			"async": false, // needed to block code execution while awaiting the server response
+			"url": url,
+			"data": {
+				"db_name": lexutil.getHttpParams().get("db"),
+				"table_name": sSomeTableName,
+				"column_name": sColumnName,
+				"dummy": lexutil.getUniqueNumber()
+				},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {				 		
+			
+				var aAllowedVals = td._getUniqueValues(xml);
+			
+				// put the array of values into the configuration variable "choosefrom" of that column			 		
+				conf.changeTableConfigValue(sSomeTableName, sColumnName, "choosefrom", aAllowedVals);
+				// save it to the Lex'it register as well
+				mt.setListOfAllowedValuesInColumnsOf(sSomeTableName, aAllowedVals);
+				
+				// rebuild in the GUI
+				sf.redrawSelectBox(sSomeTableName, sColumnName);
+				},
+			"error": function(jqXHR, textStatus, errorThrown){
+				fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sColumnName+"' "+
+					textStatus+" "+errorThrown);
+				}
+		} );
+	}
+	else {
+		// rebuild in the GUI
+		sf.redrawSelectBox(sSomeTableName, sColumnName);
+	}
+};
+
+
+
 
 // *************************************************************
 // *                 GOTO FUNCTION                             *
@@ -6765,7 +6887,6 @@ fn.quote = function(str){
  */
 fn.escapeRegexChars = function(str){
 	return str.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
-	//return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
 
@@ -6904,7 +7025,7 @@ fn.removeHighlight = function(sString){
  * Call a webservice (works automatically crossDomain as well)
  * 
  * @param {String} sUrl - URL of the service
- * @param {Array} aParameters - parameters to send to the service, in an associative array
+ * @param {mixed} mParameters - associative array of parameters to send to the service, or some other type (use extra patameter 'processData':false in that case)
  * @param {String} [sMethod=GET] - type of call: GET or POST
  * @param {String} [sResponseDataType=xml] - type of data that you're expecting back from the server
  * @param {Function} [fnCallback=null] - function to call as a callback after the service has sent a response
@@ -6913,7 +7034,7 @@ fn.removeHighlight = function(sString){
  * @param {Function} [fnErrorHandler=null] - Some function to call when an error occurs
  * 
  */
-fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
+fn.callService = function(sUrl, mParameters, sMethod, sResponseDataType, fnCallback, oExtraParams, fnErrorHandler){
 	
 	if (sMethod == undefined)
 		sMethod = "GET";
@@ -6952,6 +7073,10 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 	// Kind of brutal force parameter: 'true' means force use the Lex'it service as a proxy, so as to avoid 'strict-origin-when-cross-origin' errors 
 	var bUseLexitServiceIsSet = ( typeof oExtraParams["useLexitService"] !== 'undefined' );	
 	
+	// just like in the jquery ajax API, parameter 'processData' is true by default, 
+	// but it can be set to false to keep the content of mParameters as-is 
+	var bProcessData = (typeof oExtraParams["processData"]=='undefined' || oExtraParams["processData"] == true);
+	
 	
 	// final decision on which service to use:
 	//
@@ -6968,7 +7093,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 
 	if ( bUseTheLexitServiceAsProxy ){
 
-		var sData = lexutil.getAssociativeArrayAsString(aParameters);
+		var sData = (bProcessData ? lexutil.getAssociativeArrayAsString(mParameters) : mParameters);
 		
 		var ajaxParams = {
 			url: WEBSERV_URL+"/api/call_external_service",
@@ -7004,7 +7129,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod,
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod,
 						});
 				else
 					fn.message(lang.error,
@@ -7033,7 +7158,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 		var ajaxParams = {
 			"type": sMethod,
 			"url": sUrl,
-			"data": aParameters,
+			"data": mParameters,
 			"success": function(xml) {
 				// callback if it is set
 				if (fnCallback!=null)
@@ -7045,7 +7170,7 @@ fn.callService = function(sUrl, aParameters, sMethod, sResponseDataType, fnCallb
 					fnErrorHandler({
 						"jqXHR": jqXHR, "textStatus": textStatus, "errorThrown": errorThrown, 
 						"lexit_function": "fn.callService",
-						"sUrl": sUrl, "aParameters": aParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
+						"sUrl": sUrl, "mParameters": mParameters, "sMethod": sMethod, "sResponseDataType": sResponseDataType
 						});
 				else
 					fn.message(lang.error,

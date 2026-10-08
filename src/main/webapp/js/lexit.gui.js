@@ -1234,11 +1234,10 @@ gui.deHighlightDiv = function(sDivName){
 gui.setColumnHighlight = function(sSomeTableName){
 	
 	// column highlight is not needed in form view mode
-	if (mt.getViewType(sSomeTableName) == 'form')
-		{
+	if (mt.getViewType(sSomeTableName) == 'form') {
 		$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
 		return;
-		}		
+	}		
 	
 	// a color map of the cell colors needs to be build
 	// (we do it at each table redraw, because if the table contains only one row when it's
@@ -1254,8 +1253,8 @@ gui.setColumnHighlight = function(sSomeTableName){
 	
 	$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
 	
-	if ($("#"+sSomeTableName+" tbody tr:not('.group')").length <= iRowThreshold)
-		{
+	if ($("#"+sSomeTableName+" tbody tr:not('.group')").length <= iRowThreshold) {
+		
 		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseenter.columnHighlight", "td", 
 			function() {				
 				// highlight columns
@@ -1272,7 +1271,8 @@ gui.setColumnHighlight = function(sSomeTableName){
 			
 				// keep column header adjustment
 				gui.setSearchboxesCss(sSomeTableName);
-			});
+			}
+		);
 		$("#"+sSomeTableName+" tbody tr:not('.group')").on("mouseleave.columnHighlight", "td", 
 				   function() {					
 					// remove highlight from columns
@@ -1303,11 +1303,10 @@ gui.setColumnHighlight = function(sSomeTableName){
 gui.setColumnHighlightResetter = function(sSomeTableName){
 	
 	// column highlight is not needed in form view mode
-	if (mt.getViewType(sSomeTableName) == 'form')
-		{
+	if (mt.getViewType(sSomeTableName) == 'form') {
 		$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
 		return;
-		}
+	}
 	
 	// store default sorting setting
 	var iDefaultSortColNr = gui._getTheSortingColumnIndex(sSomeTableName);

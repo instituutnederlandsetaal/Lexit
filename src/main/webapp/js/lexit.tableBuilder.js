@@ -301,7 +301,6 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		
 		"processing": true,
 		"serverSide": true,
-		//"deferRender": true,   // TO-DO: we should test if this gives performance gain without bugs!!!
 		"ajax": {
 			"url": WEBSERV_URL+"/api/gettable",
 			"type": "POST",
@@ -437,12 +436,16 @@ tb.buildTable = function(sSomeTableName, fnFunction, oExtraTableSettings){
 		        		// generate row tooltips showing the row numbers and such, if required by config					
 		        		if (bTooltipsAllowedInTable){
 						
-			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);
-			        		var currentTooltip =	sCellToolTip!=null && sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
-			        		
-			        		$("td:eq("+iColNumber+")", oCurrentRow.node())
-				        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
-								.addClass("tooltip");
+			        		var sCellToolTip =		conf.getCellTooltip(oColumnConfig);		
+							
+							if (sCellToolTip!=null && sCellToolTip !== false) { // if 'cell_tooltip':false, no tooltip is wanted at all, even the default one
+								
+								var currentTooltip = sCellToolTip!="" ? sCellToolTip+"<BR>" : "";
+								
+				        		$("td:eq("+iColNumber+")", oCurrentRow.node())
+					        		.attr("title", currentTooltip + "<span style='color: #00BFFF'>"+ lang.row +" "+ (iRowNumber+1) +" " +lang.in_column+ " '"+currentColumnName+"'</span>")
+									.addClass("tooltip");
+							}
 						}
 							
 						// special rendering, if required by config
@@ -872,7 +875,7 @@ tb.addExportButtons = function(sSomeTableName){
 
 	// full export button required too? 
 
-	var aFullButtonSettings = conf.getFullExportButtonSettings(conf.getTableSettings(sSomeTableName));
+	var aFullButtonSettings = conf.getFullExportButtonSettings( conf.getTableSettings(sSomeTableName) );
 	if (aFullButtonSettings != null){
 
 		var sFullExportName = aFullButtonSettings["nice_name"];
@@ -901,6 +904,10 @@ tb.addExportButtons = function(sSomeTableName){
 	// attach the buttons to the bottom pane
 	oTable.buttons().container()
 		.appendTo( $('#'+sSomeTableName+'_wrapper div.export_pane' ) );
+		
+	// set compact style if needed
+	var bCompactStyle = conf.getCompactFooter( conf.getTableSettings(sSomeTableName) );
+	if (bCompactStyle) {$("div.export_pane").addClass("compact");}
 	
 
 	// add button groups label

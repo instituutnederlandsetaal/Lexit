@@ -58,6 +58,14 @@ var oTableSettingsList_example = {
 		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
 		
 		
+		/**
+		 * @type {boolean}
+		 * @description Make the table footer more compact (eg. put the export buttons on same height as the pagination pane, etc).
+		 * (default: false)
+		 */
+		"compact_footer": true,
+		
+		
 		/** 
 		 * @type {function} 
 		 * @description Ensure that a context menu appears when a row in the table is clicked
@@ -2141,6 +2149,12 @@ conf.getFullExportButtonSettings = function(aTableSettings){
 	if (typeof aTableSettings["full_export_button"] == 'undefined')
 		return null;
 	return aTableSettings["full_export_button"];
+};
+
+conf.getCompactFooter = function(aTableSettings){
+	if (typeof aTableSettings["compact_footer"] == 'undefined')
+		return false;
+	return aTableSettings["compact_footer"];
 };
 
 

@@ -69,7 +69,7 @@ hFormListLabel2OrderSettings = new Hashtable();
 
 // Remember which form is the parent of a list etc
 lists.register = function(sFormListLabel, sFormContainerId, sTableToFeedListWith, sDisplayHeight, oSortSettings, aOrderSettings){
-	
+		
 	hFormListLabel2formId.put( sFormListLabel, sFormContainerId );
 	hFormListLabel2tableName.put( sFormListLabel, sTableToFeedListWith );
 	hFormListLabel2DisplayHeight.put( sFormListLabel, sDisplayHeight );
@@ -108,8 +108,8 @@ lists.buildLists = function(sFormTable, iListNr){
 	var sTableNameOfList =	lists.getFeedingTable(sFormListLabel);	
 	var sDisplayHeight = 	lists.getDisplayHeight(sFormListLabel);
 	var oSortSettings =		lists.getSortSettings(sFormListLabel);
-	var aOrderSettings =	lists.getColumnOrder(sFormListLabel);
-	
+	var aOrderSettings =	lists.getColumnOrder(sFormListLabel);	
+
 
 
 	lists.getAllColumns(sTableNameOfList, function(aAllColumns){
@@ -1561,8 +1561,8 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 					aColumns.push( $(this).find("column_name").text() );
 					aColumnTypes.push( $(this).find("column_type").text() );
 					aColumnCustomVals.push( $(this).find("customtype_values").text() );
-				});				
-								
+				});
+				
 				// do we have an order settings to apply?
 				
 				if (aOrderSettings != null && aOrderSettings.length > 0){
@@ -1583,7 +1583,7 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 						aColumns = aNewColumns;
 						aColumnTypes = aNewColumnTypes;
 						aColumnCustomVals = aNewColumnCustomVals;						
-					}					
+					}										
 				}
 				
 				// store the columns and types now

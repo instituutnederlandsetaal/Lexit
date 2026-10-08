@@ -301,8 +301,7 @@
 
 
 <div class="description">
-    Clear screen selection
-(prevent browser from selecting the whole page upon clicking on a button)
+    Clear screen selection(prevent browser from selecting the whole page upon clicking on a button)
 </div>
 
 
@@ -390,8 +389,7 @@
 
 
 <div class="description">
-    Get a clone of an array.
-(see http://stackoverflow.com/questions/565430/deep-copying-an-array-using-jquery)
+    Get a clone of an array.(see http://stackoverflow.com/questions/565430/deep-copying-an-array-using-jquery)
 </div>
 
 
@@ -557,8 +555,7 @@
 
 
 <div class="description">
-    Clone an object
-Usage: var newObj = NEW lexutil.cloneObject(oldObj)
+    Clone an objectUsage: var newObj = NEW lexutil.cloneObject(oldObj)
 </div>
 
 
@@ -724,9 +721,7 @@ Usage: var newObj = NEW lexutil.cloneObject(oldObj)
 
 
 <div class="description">
-    Change luminance
-Usage: var newColor = lexutil.colorLuminance("#AA2222", -0.5);
-(see: https://www.sitepoint.com/javascript-generate-lighter-darker-color/)
+    Change luminanceUsage: var newColor = lexutil.colorLuminance("#AA2222", -0.5);(see: https://www.sitepoint.com/javascript-generate-lighter-darker-color/)
 </div>
 
 
@@ -908,13 +903,7 @@ Usage: var newColor = lexutil.colorLuminance("#AA2222", -0.5);
 
 
 <div class="description">
-    Make sure an array contains no null values, by converting those into 'NULL' strings.
-
-We need this function in some ajax calls, as we otherwise can't use 'join' to
-concat arguments values into one string (sent by ajax),
-so such values need to be converted into strings (the webservice will
-convert those back into true NULL values afterwards)
-NB: this type of conversion is not needed for true/false, as join can deal with those values as wished.
+    Make sure an array contains no null values, by converting those into 'NULL' strings.We need this function in some ajax calls, as we otherwise can't use 'join' toconcat arguments values into one string (sent by ajax),so such values need to be converted into strings (the webservice willconvert those back into true NULL values afterwards)NB: this type of conversion is not needed for true/false, as join can deal with those values as wished.
 </div>
 
 
@@ -1073,8 +1062,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Copy events from one element to another
-(source: https://stackoverflow.com/questions/2337521/copy-events-from-one-element-to-other-using-jquery)
+    Copy events from one element to another(source: https://stackoverflow.com/questions/2337521/copy-events-from-one-element-to-other-using-jquery)
 </div>
 
 
@@ -1234,8 +1222,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Count the number of members of an object 
-(see: http://stackoverflow.com/questions/956719/number-of-elements-in-a-javascript-object)
+    Count the number of members of an object (see: http://stackoverflow.com/questions/956719/number-of-elements-in-a-javascript-object)
 </div>
 
 
@@ -1394,9 +1381,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Escape regular expression characters in a string
-(see: http://snipplr.com/view/9649/)
-(see: http://stackoverflow.com/questions/280793/case-insensitive-string-replacement-in-javascript)
+    Escape regular expression characters in a string(see: http://snipplr.com/view/9649/)(see: http://stackoverflow.com/questions/280793/case-insensitive-string-replacement-in-javascript)
 </div>
 
 
@@ -1519,6 +1504,165 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
         
 <div class="param-desc">
     the string with all RegEx characters escaped
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="String.html">String</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".generatePassword"><span class="type-signature">(static) </span>generatePassword<span class="signature">(bStrong)</span><span class="type-signature"> &rarr; {<a href="String.html">String</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Generate a random password. By default it generates a simple password (4 consonant-vowel pairs), but if you set the parameter to true, it will generate a strong password (a mix of upper/lowercase, numbers and special chars).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>bStrong</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether to generate a strong password (default: false)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.util.js.html">lexit.util.js</a>, <a href="lexit.util.js.html#line1787">line 1787</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The generated password
 </div>
 
 
@@ -2056,10 +2200,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Get the highest z-index in the page
-
-(see https://stackoverflow.com/questions/1118198/how-can-you-figure-out-the-highest-z-index-in-your-document)
-(see: https://www.sitepoint.com/jquery-find-highest-z-index-page/)
+    Get the highest z-index in the page(see https://stackoverflow.com/questions/1118198/how-can-you-figure-out-the-highest-z-index-in-your-document)(see: https://www.sitepoint.com/jquery-find-highest-z-index-page/)
 </div>
 
 
@@ -2539,8 +2680,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Get the smallest value of an array 
-(see: http://www.javascriptkit.com/javatutors/arraysort.shtml)
+    Get the smallest value of an array (see: http://www.javascriptkit.com/javatutors/arraysort.shtml)
 </div>
 
 
@@ -2699,8 +2839,7 @@ NB: this type of conversion is not needed for true/false, as join can deal with 
 
 
 <div class="description">
-    Get unique number. We generally use this function for adding a (dummy) unique parameter value to http-requests, 
-so as to make sure browsers won't use their cache
+    Get unique number. We generally use this function for adding a (dummy) unique parameter value to http-requests, so as to make sure browsers won't use their cache
 </div>
 
 
@@ -2920,8 +3059,7 @@ so as to make sure browsers won't use their cache
 
 
 <div class="description">
-    Check if a string contains (html) tags
-(see: https://stackoverflow.com/questions/15458876/check-if-a-string-is-html-or-not)
+    Check if a string contains (html) tags(see: https://stackoverflow.com/questions/15458876/check-if-a-string-is-html-or-not)
 </div>
 
 
@@ -3080,8 +3218,7 @@ so as to make sure browsers won't use their cache
 
 
 <div class="description">
-    Convert HEX color to RGB
-(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
+    Convert HEX color to RGB(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
 </div>
 
 
@@ -3249,8 +3386,7 @@ so as to make sure browsers won't use their cache
 
 
 <div class="description">
-    Check if a given HTML entity is a common one. 
-If the input contains a custom IvdNT entity, the function should return false.
+    Check if a given HTML entity is a common one. If the input contains a custom IvdNT entity, the function should return false.
 </div>
 
 
@@ -4068,8 +4204,7 @@ If the input contains a custom IvdNT entity, the function should return false.
 
 
 <div class="description">
-    Programmatically detect if a color is light or dark
-(see: https://awik.io/determine-color-bright-dark-using-javascript/)
+    Programmatically detect if a color is light or dark(see: https://awik.io/determine-color-bright-dark-using-javascript/)
 </div>
 
 
@@ -4683,8 +4818,7 @@ If the input contains a custom IvdNT entity, the function should return false.
 
 
 <div class="description">
-    Convert RGB color string 'rgb(r,g,b)' to HEX
-(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
+    Convert RGB color string 'rgb(r,g,b)' to HEX(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
 </div>
 
 
@@ -4852,8 +4986,7 @@ If the input contains a custom IvdNT entity, the function should return false.
 
 
 <div class="description">
-    Convert RGB color to HEX
-(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
+    Convert RGB color to HEX(see: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
 </div>
 
 
@@ -5241,6 +5374,143 @@ If the input contains a custom IvdNT entity, the function should return false.
     
 
     
+    <h4 class="name" id=".saveToClipboard"><span class="type-signature">(static) </span>saveToClipboard<span class="signature">(someText)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Save some text to the clipboard (using the modern Clipboard API)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someText</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="String.html">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The text to save to the clipboard</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lexit.util.js.html">lexit.util.js</a>, <a href="lexit.util.js.html#line1827">line 1827</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id=".setStatistics"><span class="type-signature">(static) </span>setStatistics<span class="signature">(sDomain)</span><span class="type-signature"></span></h4>
     
 
@@ -5386,9 +5656,7 @@ If the input contains a custom IvdNT entity, the function should return false.
 
 
 <div class="description">
-    Get a different (t.i. lighter or darker) shade, given a HEX color code
-Usage: var newColor = lexutil.shadeColor("#AA2222", -10);
-(see: http://stackoverflow.com/questions/3403882/javascript-one-shade-darker)
+    Get a different (t.i. lighter or darker) shade, given a HEX color codeUsage: var newColor = lexutil.shadeColor("#AA2222", -10);(see: http://stackoverflow.com/questions/3403882/javascript-one-shade-darker)
 </div>
 
 
@@ -5913,8 +6181,7 @@ Usage: var newColor = lexutil.shadeColor("#AA2222", -10);
 
 
 <div class="description">
-    Sort an array of array's (2 dimensional array only) by the first element of each array)
-(see: http://stackoverflow.com/questions/5435228/sort-an-array-with-arrays-in-it-by-string)
+    Sort an array of array's (2 dimensional array only) by the first element of each array)(see: http://stackoverflow.com/questions/5435228/sort-an-array-with-arrays-in-it-by-string)
 </div>
 
 
@@ -6073,8 +6340,7 @@ Usage: var newColor = lexutil.shadeColor("#AA2222", -10);
 
 
 <div class="description">
-    Convert any string into a color
-(see https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript)
+    Convert any string into a color(see https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript)
 </div>
 
 
@@ -6900,7 +7166,7 @@ Usage: var newColor = lexutil.shadeColor("#AA2222", -10);
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Jun 02 2026 12:30:04 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jul 30 2026 11:03:23 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>
