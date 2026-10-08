@@ -1175,6 +1175,11 @@ public class DatabaseTables {
 		db.getCache().removeFromTableNameToTotalCount(cachingKey);
 		db.getCache().removeFromTableNameToTotalCountQuality(cachingKey);
 		db.getCache().removeFromTableNameToPrimaryKey(cachingKey);
+		
+		// commented out, as these settings must be hold after reset!
+		//
+		//db.getCache().removeFromTableAndColumnNameToIndex(cachingKey);
+		//db.getCache().removeFromExactCountRequired(cachingKey);
 				
 		String[] columns = db.getCache().getTableNameToColumnNames().get(cachingKey);
 		if (columns != null) {

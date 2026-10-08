@@ -39,7 +39,7 @@ public class DatabaseColumns {
 		// use caching
 		// (if we have looked up the column names already, they are stored in a hash)
 		String cachingKey = schema+tableNameOnly;
-		if ( db.getCache().getTableNameToColumnNames().containsKey(cachingKey) ) {
+		if ( db.getCache().getTableNameToColumnNames().containsKey(cachingKey) ) {			
 			Util.debug(db.getContextObject(), "## Column names from cache");
 			return db.getCache().getTableNameToColumnNames().get(cachingKey);
 		}
@@ -96,7 +96,7 @@ public class DatabaseColumns {
 	 * @param columns
 	 * @return
 	 */
-	public String[] getColumnsComments(String tableName, String[] columns){
+	public String[] getColumnsComments(String tableName, String[] columns){		
 		
 		String schema = db.getSchema(tableName);
 		String tableNameOnly = Util.getTableNameOnly(tableName);

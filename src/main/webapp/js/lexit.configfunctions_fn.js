@@ -5269,8 +5269,16 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// Build the options as a string
 				for (var j = 0; j < aValues[i].length; j++) {
 				    var sThisValue = aValues[i][j];
-				    var bSelected = sThisValue.indexOf("::selected") > -1; // pre-selection
+					
+					// pre-selection
+				    var bSelected = sThisValue.indexOf("::selected") > -1; 
 				    sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
 				
 				    // Build each option as a string and append to optionsHTML
 				    optionsHTML += `<option value="${sThisValue}" ${bSelected ? 'selected' : ''}>${sThisValue}</option>`;
@@ -5292,8 +5300,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// build the options to select 
 				for (var j=0; j<aValues[i].length; j++) {
 					var sThisValue = aValues[i][j];
-					var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
+					
+					// pre-selection!
+					var bSelected = sThisValue.indexOf("::selected")>-1; 
 					sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
+					
 					var thisOption = $("<option></option>")
 						.attr("value", sThisValue)
 						.text(sThisValue);

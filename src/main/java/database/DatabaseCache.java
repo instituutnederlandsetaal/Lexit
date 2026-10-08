@@ -164,6 +164,10 @@ public class DatabaseCache {
 		this.tableAndColumnNameToIndex.put(indexName, indexExists);
 	}
 	
+	public void removeFromTableAndColumnNameToIndex(String tableName) {
+		this.tableAndColumnNameToIndex.remove(tableName);
+	}
+	
 	
 	// getters/setters for row numbers as result of a go-to query 
 	public ConcurrentHashMap<String, ArrayList<String[]>> getGotoQueryToResultSet() {
@@ -184,6 +188,10 @@ public class DatabaseCache {
 	public boolean getExactCountRequired(String tableName){
 		return this.tableNameToRequiredExactCount.get(tableName);
 	}
+	public void removeFromExactCountRequired(String tableName) {
+		this.tableNameToRequiredExactCount.remove(tableName);
+	}
+	
 
 	
 	// getters/setters for table total count

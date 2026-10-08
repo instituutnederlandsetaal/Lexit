@@ -135,6 +135,9 @@ public class FilesResource {
 
 		FileProcessor fp = new FileProcessor(service, co);
 		ResponseObject ro = fp.removeUploadedFile(tableName);
+		
+		// clean the cache for this table, otherwise re-uploading the same file might not work properly as the table is still in the cache
+		service.getDatabaseObject(co).cleanCache(tableName);
 
 		return ro;
 	}
