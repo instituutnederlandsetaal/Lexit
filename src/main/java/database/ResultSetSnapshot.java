@@ -4,9 +4,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Utility class to create a snapshot of a ResultSet.
@@ -90,7 +92,33 @@ public class ResultSetSnapshot {
         while (rs.next()) {
             Map<String, Object> row = new LinkedHashMap<>();
             for (int i = 1; i <= columnCount; i++) {
-                row.put(meta.getColumnLabel(i), rs.getObject(i));
+            	
+            	String columnName = meta.getColumnLabel(i);
+            	Object value = rs.getObject(i);
+            	
+            	// handle inconsistent quoting behavior with int8[] arrays types, 
+            	// probably caused by pgJDBC switching between text and binary transfer formats 
+            	// (we don't want quotes in numeric arrays!)
+            	
+            	if (value instanceof java.sql.Array) {
+            	    java.sql.Array array = (java.sql.Array) value;
+            	    String baseType = array.getBaseTypeName();
+
+            	    if (Arrays.asList(
+            	            "int2", "int4", "int8",
+            	            "float4", "float8", "numeric"
+            	        ).contains(baseType)) {
+
+            	        Object[] numbers = (Object[]) array.getArray();
+
+            	        value = numbers == null ? null :
+            	            Arrays.stream(numbers)
+            	                .map(n -> n == null ? "NULL" : n.toString())
+            	                .collect(Collectors.joining(",", "{", "}"));
+            	    }
+            	}
+            	
+                row.put(columnName, value);
             }
             rows.add(row);
         }

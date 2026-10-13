@@ -34,6 +34,16 @@ public class ArgumentTypesObject {
 		return this.indexToType.get(index);
 	}
 	
+	// get all types as an array of strings, in order of their index
+	public String[] getTypesArray() {
+		
+		String[] types = new String[indexToType.size()];
+		for (int i = 0; i < indexToType.size(); i++) {
+			types[i] = indexToType.get(i);
+		}
+		return types;
+	}
+	
 	
 	public int getSize(){
 		return indexToType.size();
