@@ -212,8 +212,10 @@ mt.getNumberOfLoadedTables = function(){
 // get list of loaded tables
 
 mt.getListOfLoadedTables = function(){
-	return dbTableNames;
+	return dbTableNames;  // same result as hoTable.keys()
 };
+
+
 
 
 // check if a table is the main loaded table (that is: the first loaded table) 

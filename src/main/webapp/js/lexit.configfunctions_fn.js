@@ -509,6 +509,22 @@ fn.rebuildTablesMenu = function(){
 };
 
 
+/**
+ * Get the list of tables that are available in the GUI (that is: the tables that are visible in the tables menu)
+ */
+fn.getListOfTables = function(){
+	
+	// get the list of tables from the select box in the GUI
+	var aAvailableTables = $("#selected_source option").map(function () {
+	  return $(this).val();
+	}).get();
+	
+	// return the tables that are available, but filter out the default value (which is not a table)
+	return aAvailableTables.filter(function (value) {
+		return value !== lang.choose_a_table_default_value;		  
+	});
+};
+
 
 
 // *****************************************************************
