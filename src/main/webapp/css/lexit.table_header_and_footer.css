@@ -186,6 +186,9 @@
 	font-size: 7pt;
 	-webkit-border-radius: 15px;
 	-moz-border-radius: 15px;
+	position: relative;
+	top: -2px;
+	left: 2px;
 }
 
 .tableerasebutton {
@@ -198,6 +201,9 @@
 	font-size: 7pt;	
 	-webkit-border-radius: 15px;
 	-moz-border-radius: 15px;
+	position: relative;
+	top: -2px;
+	left: 2px;
 }
 
 
