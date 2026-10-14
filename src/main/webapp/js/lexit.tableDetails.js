@@ -306,6 +306,7 @@ td.selectColumns = function(sSomeTablename){
 		.attr("id", promptDivId)
 		.addClass("columns_selection_interface")
 		.attr("title", lang.columns_selection_and_order);	
+		
 	
 	var sortableUl = $("<ul></ul>").attr("id", sortableId);	
 	
@@ -361,7 +362,6 @@ td.selectColumns = function(sSomeTablename){
 		}	
 	
 	
-
 	promptDiv.append(sortableUl);
 		
 	$(document.body).append(promptDiv);
@@ -692,6 +692,25 @@ td.selectColumns = function(sSomeTablename){
             // style
             $(".ui-dialog").addClass("ui-dialog-shadow");
             $( this ).closest(".ui-dialog").putInFront();
+			
+			// add search field to be able to scroll through the list of columns
+			let searchTimer = 0;
+			var searchDiv = $("<div></div>")
+				.attr("id", "columns_selection_search")
+			var searchField = $("<input></input>")
+				.attr("type", "text")
+				.addClass("columns_selection_search_field")
+				.attr("placeholder", lang.columns_selection_search_placeholder)
+				.keyup(function(){
+					clearTimeout(searchTimer);
+					var sSearchTerm = $(this).val().toLowerCase();
+					searchTimer = setTimeout(function() {
+						lexutil.smoothScroll("#"+promptDivId, $("li[id^='"+sSearchTerm+"']"), true);
+					}, 500);	
+				});
+			$(searchDiv).append(searchField);
+			$(searchDiv).insertBefore("#"+promptDivId);
+			
         }
 	})
 	.keyup(function() {		 

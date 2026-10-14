@@ -109,6 +109,18 @@ div.simple_search_and_replace div.ssr_buttons_span {
 }
 
 
+	
+input.columns_selection_search_field {
+	position: relative;
+	top: 3px;
+	left: 15px;
+	height: 20px;
+	margin-top: 3px;
+	margin-bottom: 10px;
+}
+
+
+
 /*******************************************************************
  * Query builder interface (ctrl + click in columns search boxes) 
  *******************************************************************/

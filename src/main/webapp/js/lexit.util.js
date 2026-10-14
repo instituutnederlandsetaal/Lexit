@@ -183,22 +183,27 @@ $.fn.isOnScreen = function(){
  * @param {String} anchor - the anchor to scroll to
  * @param {Boolean} bVerticalOnly - if true, only scroll vertically; otherwise scroll both horizontally and vertically
  */
-lexutil.smoothScroll = function(div, anchor, bVerticalOnly=false) {
-	
-	// get the offset (currentPos) and the number of pixels  
-	// to add or subtract from the offset 
-	// (in case we need to subtract, the value to add will
-	//  be negative) 
-	var currentYPos = $(div).scrollTop();
-	var currentXPos = $(div).scrollLeft();
-	var yTtarget = $(anchor).position().top;	
-	var xTtarget = $(anchor).position().left;
-	var yToGo = (yTtarget-currentYPos);
-	var xToGo = bVerticalOnly ? 0 : (xTtarget-currentXPos);
-	
-	// Go to the anchor by resetting the scrollbar position
-	$(div).animate({scrollTop:yToGo, scrollLeft:xToGo}, 800);
-}
+lexutil.smoothScroll = function(div, anchor, bVerticalOnly = false) {
+
+    var $div = $(div);
+    var $anchor = $(anchor);
+
+    var currentYPos = $div.scrollTop();
+    var currentXPos = $div.scrollLeft();
+
+    var yToGo = currentYPos + $anchor.offset().top - $div.offset().top;
+    var xToGo = currentXPos + $anchor.offset().left - $div.offset().left;
+
+    var target = {
+        scrollTop: yToGo
+    };
+
+    if (!bVerticalOnly) {
+        target.scrollLeft = xToGo;
+    }
+
+    $div.stop(true).animate(target, 800);
+};
 
 
 //*******************************************************
