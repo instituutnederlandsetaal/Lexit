@@ -56,12 +56,138 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 };
 
 
+// apply regex tables declared in the configuration file to the tables returned by the database
+ts.applyRegexTablesDeclaration = function(xml){
+	
+	// var the list of tables and views obtained from the database
+	var aAllTables = new Array();
+	$(xml).find("oneTable").each(function(){		
+		var tableItems = 		$(this).find("item");
+		var sTableName = 		tableItems.eq(0).text();
+		aAllTables.push(sTableName);
+	});
+	
+	
+	// now retrieve the names of all tables and views that are declared in the configuration file
+	var aAllSettingsTables = Object.keys(oTableSettingsList);
+	var aAllConfigTables = Object.keys(oTableConfigurationList);
+	
+	// gel the names of the tables declared as a regex
+	var aRegexSettingsTables = aAllSettingsTables.filter(function(sOneTableName){
+		return lexutil.isRegex(sOneTableName);
+	});	
+	var aRegexConfigTables = aAllConfigTables.filter(function(sOneTableName){
+		return lexutil.isRegex(sOneTableName);
+	});
+	
+	// if there are regex tables, apply their settings to the tables whose names match the regex
+	if (aRegexSettingsTables.length>0) {
+		
+		regexsettingsloop:
+		for (var i=0; i<aRegexSettingsTables.length; i++){
+			var sRegexTableName = aRegexSettingsTables[i];
+			var oRegexTableSettings = oTableSettingsList[sRegexTableName];
+			
+			// for each table returned by the database, check if it matches the regex
+			for (var j=0; j<aAllTables.length; j++){
+				
+				var sTableName = aAllTables[j];
+				var bMatch = false;
+				
+				// do we have a match? (we need to catch the error, as some regexes are invalid and will cause an error)
+				try {
+					bMatch = new RegExp(sRegexTableName).test(sTableName)
+				} 
+				catch(e) {
+					continue regexsettingsloop;
+				}
+				
+				if (bMatch){
+									
+					// get the settings of the matching table
+					var oMatchingTableSettings = oTableSettingsList[sTableName] || {};					
+					
+					// loop through the properties of the regex table settings and apply those to the matching table
+					for (var sPropName in oRegexTableSettings){
+						
+						// we only apply the properties that are not already set in the matching table settings							
+						if ( !Object.hasOwn(oMatchingTableSettings, sPropName) ){
+							var oPropValue = oRegexTableSettings[sPropName];
+							conf.changeTableSettingValue(sTableName, sPropName, oPropValue);
+						}						
+					}
+					
+				}
+				
+				
+			}
+					
+		}
+	}	
+	
+	// if there are regex tables, apply their config to the tables whose names match the regex
+	if (aRegexConfigTables.length>0) {
+		
+		regexconfigloop:
+		for (var i=0; i<aRegexConfigTables.length; i++){
+			var sRegexTableName = aRegexConfigTables[i];
+			var oRegexTableConfigColumns = oTableConfigurationList[sRegexTableName];
+			
+			// for each table returned by the database, check if it matches the regex
+			for (var j=0; j<aAllTables.length; j++){
+				
+				var sTableName = aAllTables[j];
+				var bMatch = false;
+				
+				// do we have a match? (we need to catch the error, as some regexes are invalid and will cause an error)
+				try {					
+					bMatch = new RegExp(sRegexTableName).test(sTableName)
+				} 
+				catch(e) {
+					continue regexconfigloop;
+				}
+					
+				if (bMatch){
+									
+					// get the columns config of the matching table
+					var oMatchingTableConfigColumns = oTableConfigurationList[sTableName] || {};					
+					
+					// loop through the columns of the regex table config and apply those to the matching table
+					for (var sColName in oRegexTableConfigColumns){
+						
+						// we only apply the columns configs that are not already part in the matching table config							
+						if ( !Object.hasOwn(oMatchingTableConfigColumns, sColName)){															
+							var oColConfig = oRegexTableConfigColumns[sColName];
+							
+							// if the table config doesn't exist yet, create it
+							if (oTableConfigurationList[sTableName] == null)
+								oTableConfigurationList[sTableName] = {}
+							oTableConfigurationList[sTableName][sColName] = oColConfig;
+						}						
+					}						
+					
+					
+				}				
+				
+			}
+					
+		}
+	}
+		
+};
+
+
 
 // process list of tables and views obtained from the database
 // (this is called by the previous function ts.getListOfTables)
 
 ts.processTableListResponse = function(sTableToCallUponStartUp, xml){
-		
+	
+	// first of all, apply regex tables declared in the configuration file to the tables returned by the database
+	ts.applyRegexTablesDeclaration(xml);
+	
+	
+	// now we can process the list of tables an start to apply the configuration settings to them
 	var iNumberOfVisibleTables = 0;
 	
 	// lists of tables groups

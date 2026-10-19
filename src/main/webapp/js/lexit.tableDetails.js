@@ -34,12 +34,88 @@ td.getColumnsOfTable = function(sSomeTableName, fnFunction, oExtraTableSettings)
 };
 
 
+// apply the regex declaration of the config file to the columns returned by the database
+td.applyRegexColumnsDeclaration = function(xml, sSomeTableName){
+	
+	// get all the column names returned by the databas
+	var aAllColumns = new Array();	
+	$(xml).find("columns").find("column").each(function(){			
+		var sColumnName = $(this).find("column_name").text();
+		aAllColumns.push( sColumnName );	
+	});
+	
+	// now retrieve the table client configuration
+	var oTableConfig = conf.getTableConfig(sSomeTableName);	
+	if (oTableConfig != null){
+	
+		// put all the keys of the associative array oTableConfig into an array
+		var aAllConfigColumns = Object.keys(oTableConfig);
+		
+		// gel the names of the colums declared as a regex
+		var aRegexColumns = aAllConfigColumns.filter(function(sOneColName){
+			return lexutil.isRegex(sOneColName);
+		});	
+		
+		// if there are regex columns, apply their config to the columns matching the regex
+		if (aRegexColumns.length>0){
+			
+			regexloop:
+			for (var i=0; i<aRegexColumns.length; i++){
+				var sRegexColName = aRegexColumns[i];
+				var oRegexColConfig = oTableConfig[sRegexColName];
+				
+				// for each column returned by the database, check if it matches the regex
+				for (var j=0; j<aAllColumns.length; j++){
+					
+					var sColName = aAllColumns[j];
+					var bMatch = false;
+					
+					// do we have a match? (we need to catch the error, as some regexes are invalid and will cause an error)
+					try {
+						bMatch = new RegExp(sRegexColName).test(sColName)
+					} 
+					catch(e) {					
+						continue regexloop;
+					}
+						
+					if (bMatch){
+																
+						// get the column config of the matching column
+						var oMatchingColConfig = conf.getColumnConfig(oTableConfig, sColName) || {};
+						
+						// loop through the properties of the regex column config and apply those to the matching column
+						for (var sPropName in oRegexColConfig){
+							
+							// we only apply the properties that are not already set in the matching column config
+							
+							if ( !Object.hasOwn(oMatchingColConfig, sPropName) ){
+								var oPropValue = oRegexColConfig[sPropName];
+								conf.changeTableConfigValue(sSomeTableName, sColName, sPropName, oPropValue);
+							}						
+						}
+						
+					}
+					
+					
+				}
+						
+			}			
+		}
+	}
+};
+
+
 
 // process the list of columns of a table, so as to build the table properly
-// (this is call by the previous function td.getColumnsOfTable)
+// (this is called by the previous function td.getColumnsOfTable)
 
 td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTableSettings, fnSecretCallback){
 	
+	// firsts of all, apply the regex declaration of the config file to the columns returned by the database
+	td.applyRegexColumnsDeclaration(xml, sSomeTableName);
+	
+	
+	// now process the column response
 	var aAllColumns = new Array();	
 	var aColumnsTypes = new Array();
 	var oaAllowedValuesForColumns = new Array();	
@@ -49,8 +125,6 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		
 	$(xml).find("columns").find("column").each(function(){
 		
-		var sColumnName = $(this).find("column_name").text();
-		
 		var sCurrentColumnName = $(this).find("column_name").text();
 		var sCurrentColumnType = $(this).find("column_type").text();
 		var aCurrentAllowedValues = $(this).find("customtype_values").text().split("|");
@@ -58,7 +132,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 		
 		// The column comment is meant to modify the configuration of the javascript file
 		// (read explanation of function td._processColumnComments)
-		td._processColumnComments(sSomeTableName, sColumnName, aCurrentColumnComment);
+		td._processColumnComments(sSomeTableName, sCurrentColumnName, aCurrentColumnComment);
 		
 		aAllColumns.push( sCurrentColumnName );				
 		aColumnsTypes.push( sCurrentColumnType );
@@ -92,7 +166,7 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 			 		conf.changeTableConfigValue(sSomeTableName, sCurrentColumnName, "choosefrom", td._getUniqueValues(xml));
 			 		},
 				"error": function(jqXHR, textStatus, errorThrown){
-					fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sColumnName+"' "+
+					fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sCurrentColumnName+"' "+
 						textStatus+" "+errorThrown);
 					}
 				} );
@@ -100,17 +174,17 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 				
 	});
 	
+	// we now have a list of all columns, their types, etc.
+	// we make a exact copy of this list as we will need it in its original state further on
+	// while the list is about to be modified now 
+	var aOriginalColumnsList = lexutil.cloneArray(aAllColumns);
 	
-	// we have a column list now, so we are able to 
-	// make a shallow copy of the original config, so we can restore it when needed
-	conf.makeRestoreCopyOfTableConfig(sSomeTableName, aAllColumns);
-	
+		
 	
 	// DEAL WITH SAVED CONFIG
 	
 	// adapt the configuration to custom user config (saved during some previous session)
-	var sChosenColumns = $.cookie(fn.getCurrentProject()+"_"+sSomeTableName+"_columns");
-	
+	var sChosenColumns = $.cookie(fn.getCurrentProject()+"_"+sSomeTableName+"_columns");	
 	
 	
 	// the cookie contains a comma separated list of columns with their visibility settings and in the right order
@@ -153,53 +227,57 @@ td.processColumnResponse = function(xml, sSomeTableName, fnFunction, oExtraTable
 	
 	// retrieve the table settings and get the required column order, if any is given as a setting
 	var aTableSettings = conf.getTableSettings(sSomeTableName);
-	var aColumnOrder = conf.getColumnOrder(aTableSettings);
+	var aConfigColumnOrder = conf.getColumnOrder(aTableSettings);
 	
 	
 	// if a column order was given, reorder the column types accordingly
-	if (aColumnOrder != null) {
-		// first check if the list of columns returned by database is
-		// the same as the list of columns from the table configuration settings
-		var firstArray = lexutil.cloneArray(aAllColumns);
-		var secondArray = lexutil.cloneArray(aColumnOrder);
-		firstArray.sort();
-		secondArray.sort();
+	if (aConfigColumnOrder != null) {
 		
-		// the arrays are identical, we can proceed with the reordering of column types		
-		if (lexutil.arraysAreEqual(firstArray, secondArray)) {
-			
-			var aNewColumnTypes = new Array();
-			var oaNewAllowedValues = new Array();
-			// build new types list etc in right order
-			for (var i=0; i<aColumnOrder.length; i++) {
-				var iIndexOfCurrentColumnInOldColumnsArray = $.inArray(aColumnOrder[i], aAllColumns);				
-				var sColTypeForCurrentColumn = aColumnsTypes[iIndexOfCurrentColumnInOldColumnsArray];
-				var aAllowedValuesForCurrentColumn = oaAllowedValuesForColumns[iIndexOfCurrentColumnInOldColumnsArray];
-				aNewColumnTypes.push(sColTypeForCurrentColumn);
-				oaNewAllowedValues.push(aAllowedValuesForCurrentColumn);
-				
-			}			
-			aAllColumns = aColumnOrder;
-			aColumnsTypes = aNewColumnTypes;
-			oaAllowedValuesForColumns = oaNewAllowedValues;
+		// first, check if all columns in the columns order setting are present in the list of columns returned by the database
+		// throw unknkown columns away
+	
+		var aNewColumnOrder = new Array();
+		for (var i=0; i<aConfigColumnOrder.length; i++) {
+			if ($.inArray(aConfigColumnOrder[i], aAllColumns) > -1)
+				aNewColumnOrder.push(aConfigColumnOrder[i]);
 		}
-		// if the arrays are not identical, we should give an error message
-		else {
+		
+		// second, if the (filtered) columns order is not the same length as the original column list,
+		// add the missing database columns to the end of the filtered columns order, 
+		// to make sure we have all columns in the end
+		
+		if (aConfigColumnOrder.length != aAllColumns.length) {
 			
-			var sCompare = lang.columns_list_to_compare + ": {" + lexutil.symmetricDifference(firstArray, secondArray).join(", ") + "}";
-			
-			var sCause = (aColumnOrder.length != aAllColumns.length) ?
-					lang.columns_list_number_mismatch1+": "+aAllColumns.length+".<BR><BR>"+
-					lang.columns_list_number_mismatch2+": "+aColumnOrder.length+".<BR><BR>"+
-					sCompare 
-					: 
-					lang.columns_list_name_mismatch1+ ":<BR>{"+ firstArray.join(", ") +"}.<BR><BR>"+
-					lang.columns_list_name_mismatch2+ ":<BR>{"+ secondArray.join(", ") +"}<BR><BR>"+
-					sCompare
-			fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch+ " " +sCause+".");
+			for (var i=0; i<aAllColumns.length; i++) {
+				if ($.inArray(aAllColumns[i], aNewColumnOrder) == -1)
+					aNewColumnOrder.push(aAllColumns[i]);
+			}
+			conf.changeTableSettingValue(sSomeTableName, "columns_order", aNewColumnOrder);
 		}
+		
+
+
+		// re-order types and allowed values the same way as the columns
+					
+		var aNewColumnTypes = new Array();
+		var oaNewAllowedValues = new Array();
+		
+		// build new types list etc in right order
+		for (var i=0; i<aNewColumnOrder.length; i++) {
+			var iIndexOfCurrentColumnInOldColumnsArray = $.inArray(aNewColumnOrder[i], aAllColumns);				
+			var sColTypeForCurrentColumn = aColumnsTypes[iIndexOfCurrentColumnInOldColumnsArray];
+			var aAllowedValuesForCurrentColumn = oaAllowedValuesForColumns[iIndexOfCurrentColumnInOldColumnsArray];
+			aNewColumnTypes.push(sColTypeForCurrentColumn);
+			oaNewAllowedValues.push(aAllowedValuesForCurrentColumn);			
+		}			
+		aAllColumns = aNewColumnOrder;
+		aColumnsTypes = aNewColumnTypes;
+		oaAllowedValuesForColumns = oaNewAllowedValues;			
 	}
 	
+	
+	// make a shallow copy of the original config, so we can restore it when needed
+	conf.makeRestoreCopyOfTableConfig(sSomeTableName, aOriginalColumnsList);
 	
 	// assign list of columns names and types to table we're going to build
 	mt.setListOfColumnsOf(sSomeTableName, aAllColumns);

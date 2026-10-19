@@ -1016,10 +1016,9 @@ conf.getTableConfig = function(sTablename){
 conf.getColumnsList = function(oTableConfig){
 	
 	var columnList = new Array();
-	for (oneColumnName in oTableConfig)
-		{
+	for (oneColumnName in oTableConfig) {
 		columnList.push(oneColumnName);
-		}
+	}
 	return columnList;
 };
 
