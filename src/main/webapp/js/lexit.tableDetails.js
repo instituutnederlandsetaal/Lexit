@@ -779,11 +779,16 @@ td.selectColumns = function(sSomeTablename){
 				.attr("type", "text")
 				.addClass("columns_selection_search_field")
 				.attr("placeholder", lang.columns_selection_search_placeholder)
-				.keyup(function(){
+				.keyup(function(){					
 					clearTimeout(searchTimer);
+					// remove highlight from all columns first, so we can put it back on the matching ones
+					$( "#"+promptDivId ).find("li").removeClass("ui-state-highlight").addClass("ui-state-default");
+					
 					var sSearchTerm = $(this).val().toLowerCase();
-					searchTimer = setTimeout(function() {
-						lexutil.smoothScroll("#"+promptDivId, $("li[id^='"+sSearchTerm+"']"), true);
+					searchTimer = setTimeout(function() {						
+						// put hightlight on the matching columns and scroll to the first one
+						$( "#"+promptDivId ).find("li[id*='"+sSearchTerm+"']").removeClass("ui-state-default").addClass("ui-state-highlight");
+						lexutil.smoothScroll("#"+promptDivId, $("li[id*='"+sSearchTerm+"']"), true);
 					}, 500);	
 				});
 			$(searchDiv).append(searchField);

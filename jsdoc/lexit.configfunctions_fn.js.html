@@ -440,10 +440,10 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 			}, 500);
 		}
 		
-		if (sPathToCustomLogo != null) {
+		if (sPathToCustomLogo != null) {			
 			$("#square_logo").empty().append(
 				$("&lt;img>").attr("src", sPathToCustomLogo).css("height", sCustomLogoSize).css("width", sCustomLogoSize)
-			);
+			);			
 		}
 	}
 	else {
@@ -536,6 +536,22 @@ fn.rebuildTablesMenu = function(){
 	ts.getListOfTables(null, {}, {}, false);
 };
 
+
+/**
+ * Get the list of tables that are available in the GUI (that is: the tables that are visible in the tables menu)
+ */
+fn.getListOfTables = function(){
+	
+	// get the list of tables from the select box in the GUI
+	var aAvailableTables = $("#selected_source option").map(function () {
+	  return $(this).val();
+	}).get();
+	
+	// return the tables that are available, but filter out the default value (which is not a table)
+	return aAvailableTables.filter(function (value) {
+		return value !== lang.choose_a_table_default_value;		  
+	});
+};
 
 
 
@@ -903,6 +919,7 @@ fn.getCurrentDisplayStart = function(sSomeTablename){
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
  * @returns {Integer} total number of rows of a table
  * @see fn.getTotalNumberOfPages
+ * @see fn.getNumberOfFilteredRows
  */
 fn.getTotalNumberOfRows = function(sSomeTablename){
 	
@@ -910,6 +927,22 @@ fn.getTotalNumberOfRows = function(sSomeTablename){
 		sSomeTablename = fn.getTableName(sSomeTablename);
 
 	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsTotal;	
+};
+
+
+/**
+ * Get the number of filtered rows (size of result set after filtering)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * @returns {Integer} number of filtered rows
+ * @see fn.getTotalNumberOfRows
+ */
+fn.getNumberOfFilteredRows = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+		sSomeTablename = fn.getTableName(sSomeTablename);
+
+	return mt.getDataTableObjectOf(sSomeTablename).page.info().recordsDisplay;	
 };
 
 
@@ -2055,6 +2088,8 @@ fn.showTable = function(sSomeTablename){
  * (normally this is determined by the users actions in the GUI)
  * 
  * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ * 
+ * @see fn.setActiveRow, fn.getActiveTable, fn.getActiveRow
  */
 fn.setActiveTable = function(sSomeTablename){
 	
@@ -2063,6 +2098,7 @@ fn.setActiveTable = function(sSomeTablename){
 	
 	kf.setActiveTable(sSomeTablename);
 };
+
 
 /**
  * Toggle the viewtype of a table (form vs table view)
@@ -2572,6 +2608,25 @@ fn.getActiveRowNode = function(sSomeTable){
 	}
 	
 	return mt.getDataTableObjectOf(sSomeTable).row( kf.getActiveRowNumber() ).node();
+};
+
+
+/**
+ * Set manually which row is active now in currently active table
+ * @param {Node} nRow - Row node of the row to be set as active
+ * 
+ * @see fn.getActiveRowNode, fn.setActiveTable
+ */
+fn.setActiveRowNode = function(nRowNode){
+	
+	// get active table and unselect all rows
+	var sSomeTablename = kf.getActiveTable();
+	fn.unselectAllRowNodes(sSomeTablename);	
+	
+	// set the active row number and select the row node
+	var iRowNumber = mt.getDataTableObjectOf(sSomeTablename).row(nRowNode).index();
+	kf.setActiveRowNumber(iRowNumber);
+	fn.selectRowNode(sSomeTablename, iRowNumber);	
 };
 
 
@@ -5258,8 +5313,16 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// Build the options as a string
 				for (var j = 0; j &lt; aValues[i].length; j++) {
 				    var sThisValue = aValues[i][j];
-				    var bSelected = sThisValue.indexOf("::selected") > -1; // pre-selection
+					
+					// pre-selection
+				    var bSelected = sThisValue.indexOf("::selected") > -1; 
 				    sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
 				
 				    // Build each option as a string and append to optionsHTML
 				    optionsHTML += `&lt;option value="${sThisValue}" ${bSelected ? 'selected' : ''}>${sThisValue}&lt;/option>`;
@@ -5281,8 +5344,17 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 				// build the options to select 
 				for (var j=0; j&lt;aValues[i].length; j++) {
 					var sThisValue = aValues[i][j];
-					var bSelected = sThisValue.indexOf("::selected")>-1; // pre-selection!
+					
+					// pre-selection!
+					var bSelected = sThisValue.indexOf("::selected")>-1; 
 					sThisValue = sThisValue.replace("::selected", "");
+					
+					// register compulsory fields
+					if ( sThisValue.indexOf("::compulsory")>-1 ){
+						aCompulsoryFields.push(aFieldNames[i]);
+						sThisValue = sThisValue.replace("::compulsory", "");
+					}
+					
 					var thisOption = $("&lt;option>&lt;/option>")
 						.attr("value", sThisValue)
 						.text(sThisValue);
@@ -6214,6 +6286,7 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 	var sButtonBgColor = 	conf.getHeaderButtonBgColor(aButtonSettings);
 	var sButtonTextColor = 	conf.getHeaderButtonTextColor(aButtonSettings);
 	var sToolTip = 			conf.getHeaderButtonToolTip(aButtonSettings);
+	var sButtonClass = 		conf.getHeaderButtonClass(aButtonSettings);
 	
 	var customButton = $("&lt;button/>")
 	.attr("id", sSomeTableName+"_button_"+iIndexOfNewButton)
@@ -6231,9 +6304,12 @@ fn.addCustomButton = function(sSomeTableName, oButtonConfig){
 		fnButtonFunction( mt.getDataTableObjectOf(sSomeTableName) );
 	});
 	
-	// add tooltip
+	// add tooltip, class etc.
 	if (sToolTip != null)
 		customButton.attr("title", sToolTip).addClass("tooltip");
+	
+	if (sButtonClass != null)
+		customButton.addClass(sButtonClass);
 
 	$("#"+sSomeTableName+"_filter").append(
 		$("&lt;div>&lt;/div>").attr("id", sSomeTableName+"_custombutton_"+iIndexOfNewButton).css("display", "inline").append(customButton)
@@ -6660,6 +6736,68 @@ fn.addFilters = function(sSomeTable, oFilters){
 
 
 
+/**
+ * Rebuild the select box of a given column in a given table.
+ * @param {(String|API-object-instance)} sSomeTableName - A table name or object
+ * @param {String} sColumnName - Column name of the select box to rebuild
+ */
+fn.rebuildSelectBox = function(sSomeTableName, sColumnName){
+	
+	// get table name if an object was given
+	if (typeof sSomeTableName == 'object')
+		sSomeTableName = fn.getTableName(sSomeTableName);
+
+	// retrieve table client configuration	
+	var oTableConfig = conf.getTableConfig(sSomeTableName); 
+
+	// if the current column is set to searchable:false, we have to disable the search field
+	var oColumnConfig = conf.getColumnConfig( oTableConfig, sColumnName );
+			
+	// read setting for select values in 'choosefrom' in config.js
+	var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
+
+	// if this column is set in the user configuration as a selection box
+	// and the given array of values to select from is empty, that means we need
+	// to get the values from the database (ENUM or SELECT DISTINCT).
+	if (aSelectBoxValues != null &amp;&amp; aSelectBoxValues.length == 0) {	
+		var url = WEBSERV_URL+"/api/get_unique_values";
+		$.ajax( {
+			"type": "GET",
+			"async": false, // needed to block code execution while awaiting the server response
+			"url": url,
+			"data": {
+				"db_name": lexutil.getHttpParams().get("db"),
+				"table_name": sSomeTableName,
+				"column_name": sColumnName,
+				"dummy": lexutil.getUniqueNumber()
+				},
+			"dataType": "xml", // get response as xml
+			"success": function(xml) {				 		
+			
+				var aAllowedVals = td._getUniqueValues(xml);
+			
+				// put the array of values into the configuration variable "choosefrom" of that column			 		
+				conf.changeTableConfigValue(sSomeTableName, sColumnName, "choosefrom", aAllowedVals);
+				// save it to the Lex'it register as well
+				mt.setListOfAllowedValuesInColumnsOf(sSomeTableName, aAllowedVals);
+				
+				// rebuild in the GUI
+				sf.redrawSelectBox(sSomeTableName, sColumnName);
+				},
+			"error": function(jqXHR, textStatus, errorThrown){
+				fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.error_while_building_searchbox+ ": '"+sColumnName+"' "+
+					textStatus+" "+errorThrown);
+				}
+		} );
+	}
+	else {
+		// rebuild in the GUI
+		sf.redrawSelectBox(sSomeTableName, sColumnName);
+	}
+};
+
+
+
 
 // *************************************************************
 // *                 GOTO FUNCTION                             *
@@ -6793,7 +6931,6 @@ fn.quote = function(str){
  */
 fn.escapeRegexChars = function(str){
 	return str.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&amp;");
-	//return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&amp;");
 };
 
 
@@ -7425,7 +7562,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Thu Jul 30 2026 11:03:22 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Oct 20 2026 11:47:49 GMT+0200 (Midden-Europese zomertijd)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -8,7 +8,7 @@
 	
 	<title>
 	Lex'it
-	v2026.10.15
+	v2026.10.20
 	</title>
 	<!-- first version was GigantLex v2012 -->
 	
@@ -175,6 +175,8 @@
 	
 	// CONSTANTS
 	
+	var LEXIT_LOGO = "favicon-klein.png";
+	
 	// INL Home url, as a regex like: /(...)/
 	// current value should catch both 'inl' as 'ivdnt' domains
 	var INL_HOMEURL = /(inl\.loc|ivdnt\.loc|localhost|172\.16\.)/;
@@ -288,7 +290,7 @@
 	$(document).ready(function() {
 		
 		// Add huisstijl balk and title
-		fn.setBalk(true, true, "favicon-klein.png", "50px");
+		fn.setBalk(true, true, LEXIT_LOGO, "50px");
 		$("#projectname").html(`<span><a href="/lexit2">lex'it</a></span>`);
 		
 		// put INL logo

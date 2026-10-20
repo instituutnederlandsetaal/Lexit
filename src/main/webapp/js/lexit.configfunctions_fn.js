@@ -412,10 +412,10 @@ fn.setBalk = function(bSetting, bSetLinks=false, sPathToCustomLogo, sCustomLogoS
 			}, 500);
 		}
 		
-		if (sPathToCustomLogo != null) {
+		if (sPathToCustomLogo != null) {			
 			$("#square_logo").empty().append(
 				$("<img>").attr("src", sPathToCustomLogo).css("height", sCustomLogoSize).css("width", sCustomLogoSize)
-			);
+			);			
 		}
 	}
 	else {
