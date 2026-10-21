@@ -1,0 +1,12 @@
+
+
+/* prevent box of trumbowyg-editor from growing vertically when clicking into an empty editor
+  (since a 'p' element is added automatically on click)  */
+  
+.trumbowyg-editor > p:first-child {
+    margin-top: 0;
+}
+
+.trumbowyg-editor > p:last-child {
+    margin-bottom: 0;
+}
