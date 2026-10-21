@@ -655,8 +655,9 @@ var oTableConfigurationList_example = {
 		"editfunc": function(t, n, newValue){},
 		
 		/**
-		 * @type {boolean}
-		 * @description Convert a cell into a wysiwyg editor for editing.
+		 * @type {(boolean|string)}
+		 * @description Convert a cell into a wysiwyg editor for editing. 
+		 * Instead of a boolean, one can give the name of the editor whished for (to be used for future support of other editors).
 		 */
 		"editor": true,
 		
@@ -665,6 +666,12 @@ var oTableConfigurationList_example = {
 		 * @description Custom function to be executed after clicking the Save button of the wysiwyg editor.
 		 */
 		"editor_callback": function(t, n, newValue){},
+		
+		/**
+		 * @type {Object}
+		 * @description Custom configuration for the wysiwyg editor. 
+		 */
+		"editor_config": {"btns": [["viewHTML"], ["formatting"]]},
 		
 		
 		/**
@@ -1616,6 +1623,13 @@ conf.getEditorCallback = function(aColumnConfig){
 	if (typeof aColumnConfig["editor_callback"] == 'undefined')
 		return null;
 	return aColumnConfig["editor_callback"];
+};
+
+conf.getEditorConfig = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["editor_config"] == 'undefined')
+		return {};
+	return aColumnConfig["editor_config"];
 };
 
 

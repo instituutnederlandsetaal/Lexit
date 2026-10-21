@@ -70,6 +70,41 @@ public class DatabaseTables {
 	}
 	
 	
+	/**
+	 * Get the Postgres name of a table (usually 63 bytes), which might be shorter than the name given in the create statement
+	 * 
+	 * @param tableName
+	 * @return Postgres name of the table
+	 */
+	public String getPostgresNameOfaTable(String tableName) {
+		
+		String schema = db.getSchemaName();
+		
+		// the trick: we cast the table name to a 'name' type, which is the Postgres internal type for table names
+		String query = "SELECT CAST(? AS name)::text AS table_name;";
+		
+		String[] args = new String[]{tableName};
+		ArgumentTypesObject ato = new ArgumentTypesObject();
+		ato.addType("name");
+		
+		ArrayList<String[]> result = new ArrayList<String[]>();
+
+		PostgresConnectionManager dc = db.getPostgresConnectionManager();
+		
+		try {
+			List<Map<String, Object>> rs = dc.sendPreparedQuery(schema, query, args).getRows();
+
+			result = Util.getResultSetCopyInAList(rs, new String[]{"table_name"});
+
+		} catch (Exception e) {
+			String error = Util.getDebugInfoForConsole("Error while executing query "+query, args);
+			throw new RuntimeException(error, e);
+		}
+		
+		return result.get(0)[0];
+		
+	}
+	
 	
 	
 	/**

@@ -342,7 +342,7 @@ public class FileProcessor {
 			tableName = tableName+"_"+formatter.format(date);
 		}
 
-		ro.setResponse(tableName); // note the table name, which will be opened in the GUI
+		ro.setResponse( db.getPostgresNameOfaTable(tableName) ); // note the table name, which will be opened in the GUI
 
 		try {
 			// detect which delimiter is used in the CSV file
@@ -414,8 +414,8 @@ public class FileProcessor {
                         // get question marks string for prepared statement to be used in row insertion later on
                         questionMarks = Util.getStringOfQuestionMarks(oneRow);
 
-                        String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNames, " text, ")+" text);";
-                        String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
+                        String createTableQuery = "CREATE TABLE "+currentSchema+".\""+tableName+"\" ("+Util.join(columnNames, " text, ")+" text);";
+                        String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+".\""+tableName+"\" IS '_UPLOADED_';";
                         
                         PostgresConnectionManager dc = db.getPostgresConnectionManager();
                         
@@ -437,7 +437,7 @@ public class FileProcessor {
 
                     else {
 
-                        String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
+                        String insertQuery = "INSERT INTO "+currentSchema+".\""+tableName+"\" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
                         
                         PostgresConnectionManager dc = db.getPostgresConnectionManager();
                         
@@ -567,7 +567,8 @@ public class FileProcessor {
 				int nrOfColumns = 0; // this will be set further on
 				int nrofFirstRow = findFirstNonEmptyRow(sheet);
 
-				ro.setResponse(tableName); // note the (last processed) table name, which will be opened in the GUI
+				
+				ro.setResponse( db.getPostgresNameOfaTable(tableName) ); // note the (last processed) table name, which will be opened in the GUI
 
 
 				// ===============================
@@ -654,8 +655,8 @@ public class FileProcessor {
 				// ===============================
 
 
-				String createTableQuery = "CREATE TABLE "+currentSchema+"."+tableName+" ("+Util.join(columnNamesAndTypes, ", ")+");";
-				String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+"."+tableName+" IS '_UPLOADED_';";
+				String createTableQuery = "CREATE TABLE "+currentSchema+".\""+tableName+"\" ("+Util.join(columnNamesAndTypes, ", ")+");";
+				String addUploadedCommentQuery = "COMMENT ON TABLE "+currentSchema+".\""+tableName+"\" IS '_UPLOADED_';";
 				
 				PostgresConnectionManager dc = db.getPostgresConnectionManager();
 				
@@ -704,7 +705,7 @@ public class FileProcessor {
 						}
 
 						// insert those values into the table
-						String insertQuery = "INSERT INTO "+currentSchema+"."+tableName+" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
+						String insertQuery = "INSERT INTO "+currentSchema+".\""+tableName+"\" ("+Util.join(columnNames, ", ")+") VALUES ("+questionMarks+");";
 						
 						
 						try {
@@ -778,7 +779,7 @@ public class FileProcessor {
 			return ro;
 		}
 
-		String dropTableIfExists = "DROP TABLE IF EXISTS "+currentSchema+"."+tableName+";";
+		String dropTableIfExists = "DROP TABLE IF EXISTS "+currentSchema+".\""+tableName+"\";";
 		
 		
 		PostgresConnectionManager dc = db.getPostgresConnectionManager();

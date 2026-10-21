@@ -668,6 +668,17 @@ public class Database {
 		return databaseTables.checkIfTableExists(tableName);
 	}
 	
+	/**
+	 * Get the 63 bits Postgres name of a table, given its name in the config file
+	 * @param tableName
+	 * @return
+	 */
+	public String getPostgresNameOfaTable(String tableName){
+
+		return databaseTables.getPostgresNameOfaTable(tableName);
+	}
+	
+	
 	
 	/**
 	 * Get a fast estimate of the number of ALL rows of a table or view

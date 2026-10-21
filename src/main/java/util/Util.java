@@ -864,7 +864,9 @@ public class Util {
 	 */
 	public static String getSafeTableName(String tableName, String schema){
 		
-		if (tableName.toLowerCase().equals(tableName) && !tableName.contains("-"))
+		if (	tableName.toLowerCase().equals(tableName)	// no capitals 
+				&& !tableName.contains("-") 				// no hyphen
+				&& !Character.isDigit(tableName.charAt(0))) // numbers in front will cause errors in Postgres
 			return schema+"."+tableName;
 		
 		return schema+".\""+tableName+"\"";

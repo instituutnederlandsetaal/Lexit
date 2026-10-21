@@ -1930,3 +1930,47 @@ lexutil.saveToClipboard = function(someText){
 };
 
 //******************************************************* 
+
+/**
+ * Instantiate a text editor (like Trumbowyg) on a given selector
+ */
+lexutil.instantiateEditor = function(sSelector, sEditorType="trumbowyg", oEditorConfig){
+	
+	if (oEditorConfig == null) oEditorConfig = {};
+	
+	// default editor type
+		
+	if (sEditorType == "trumbowyg" || sEditorType == true) {
+	
+		// default buttons
+		if (oEditorConfig["btns"] == null){
+			oEditorConfig["btns"] = [
+				['viewHTML'],
+		        ['formatting'],
+		        ['strong', 'em', 'del'],
+		        ['superscript', 'subscript'],
+		        ['link'],
+		        ['insertImage'],
+		        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+		        ['unorderedList', 'orderedList'],
+		        ['removeformat']
+			];
+		}
+		
+		// prevent automatic convension of tags
+		if (oEditorConfig["semantic"] == null){
+			oEditorConfig["semantic"] = false;
+		}
+		
+		// set current language for the editor, if not set already
+		if (oEditorConfig["lang"] == null){
+			oEditorConfig["lang"] = lang.getLanguageCode();
+		}
+		
+		$(sSelector).trumbowyg(oEditorConfig);
+	}
+	
+	// other editors can be added here in the future
+};
+
+//******************************************************* 

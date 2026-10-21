@@ -684,7 +684,7 @@ form.buildViewGrid = function(sTableName){
 		var aCellSize = oCell["definition"];
 		var sCellClass = oCell["class"];
 		var sPlaceholder = oCell["tooltip"];
-		var bHasTextEditor = oCell["editor"] != null ? oCell["editor"] : false;
+		var bHasTextEditor = oCell["editor"] != null && oCell["editor"] != false;
 		
 		
 		if (aPosition == null && sCellBlockName == null){
@@ -1523,8 +1523,9 @@ form.manageViewGrid = function(sTableName){
 			var aSelectBoxValues = conf.getSelectionBox(oColumnConfig);
 			if (aSelectBoxValues == null) aSelectBoxValues = mt.getListOfAllowedValuesInColumnsOf(sTableName)[iColumnIndex];
 			// do we have an editor?
-			var bHasTextEditor = oFormGrid["cells"][sCellName]["editor"] != null ? oFormGrid["cells"][sCellName]["editor"] : false;
-			var aEditorButtons = oFormGrid["cells"][sCellName]["editor_buttons"];
+			var mEditorType = oFormGrid["cells"][sCellName]["editor"];
+			var bHasTextEditor = mEditorType != null && mEditorType != false;
+			var oEditorConfig = oFormGrid["cells"][sCellName]["editor_config"];
 
 
 			// is the cell editable?
@@ -1597,7 +1598,7 @@ form.manageViewGrid = function(sTableName){
 					}
 					else {
 						var nEditorNode = $("#"+sTableName+"_wrapper #form_cellvalue_"+sCellName+" textarea");
-						form._createEditorForCell(nEditorNode, aEditorButtons);
+						form._createEditorForCell(nEditorNode, mEditorType, oEditorConfig);
 					}
 				}
 			}
@@ -1821,27 +1822,16 @@ form.manageViewGrid = function(sTableName){
 };
 
 
-
-form._createEditorForCell = function(nCell, aEditorButtons){
+// create an editor for a given cell
+form._createEditorForCell = function(nCell, mEditor="trumbowyg", oEditorConfig={}){
 	
-	if (aEditorButtons == null){
-		aEditorButtons = [
-			['viewHTML'],
-	        ['formatting'],
-	        ['strong', 'em', 'del'],
-	        ['superscript', 'subscript'],
-	        ['link'],
-	        ['insertImage'],
-	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
-	        ['unorderedList', 'orderedList'],
-	        ['removeformat']
-		];
+	// default editor type
+	
+	if (mEditor != "trumbowyg" || mEditor == true) {	
+		lexutil.instantiateEditor(nCell, mEditor, oEditorConfig);
 	}
 	
-	$(nCell).trumbowyg({
-		lang: lang.getLanguageCode(),
-	    btns: aEditorButtons
-	});
+	// other editors can be added here in the future
 };
 
 

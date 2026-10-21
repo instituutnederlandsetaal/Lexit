@@ -5184,6 +5184,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	// list of editors to be activated when dialog is opened
 	var aEditorsId = [];
+	var aEditorsType = [];
 	
 	// list of compulsory fields
 	var aCompulsoryFields = [];
@@ -5218,6 +5219,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		// textarea type
 		var bOneTextarea = false;
 		// editor type
+		var sEditorType = "trumbowyg";
 		var bEditor = false;
 		
 		// login types
@@ -5238,6 +5240,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			bEditor = (aValues[i]).indexOf("::editor")>-1;
+			sEditorType = (aValues[i]).indexOf("::trumbowyg")>-1 ? 
+				"trumbowyg" : (aValues[i]).indexOf("::othereditor")>-1 ? "othereditor" : sEditorType; // might add other types of editors in the future
 			
 			bUsername = (aValues[i]).indexOf("::username")>-1;
 			bPassword = (aValues[i]).indexOf("::password")>-1;
@@ -5367,6 +5371,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			input.html("<p>"+(aValues!=null ? aValues[i]: "")+"</p>");		
 			
 			aEditorsId.push("prompt_" + fieldLC);
+			aEditorsType.push(sEditorType);
 		}
 		
 		// text field type
@@ -5546,7 +5551,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	// activate the editors
 	setTimeout(function(){
 		for (var i=0; i<aEditorsId.length; i++){
-			fn._createEditorForPrompt(aEditorsId[i]);
+			fn._createEditorForPrompt(aEditorsId[i], aEditorsType[i]);
 		}
 		if (aEditorsId.length > 0)
 		setTimeout(function(){fn.repositionDialog(true);}, 100); // reposition dialog after editor is created, since that might change dialog dimensions
@@ -5564,22 +5569,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 
 
 // create a trumbowyg editor for a given field in a prompt dialog
-fn._createEditorForPrompt = function(fieldId){
+fn._createEditorForPrompt = function(fieldId, sEditorType){
 	
-	$("#"+fieldId).trumbowyg({
-		lang: lang.getLanguageCode(),
-	    btns: [
-	        ['viewHTML'],
-	        ['formatting'],
-	        ['strong', 'em', 'del'],
-	        ['superscript', 'subscript'],
-	        ['link'],
-	        ['insertImage'],
-	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
-	        ['unorderedList', 'orderedList'],
-	        ['removeformat']
-	    ]
-	});
+	lexutil.instantiateEditor("#"+fieldId, sEditorType, null);
 };
 
 
