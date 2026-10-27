@@ -1967,6 +1967,31 @@ lexutil.instantiateEditor = function(sSelector, sEditorType="trumbowyg", oEditor
 			oEditorConfig["lang"] = lang.getLanguageCode();
 		}
 		
+		// 
+		if (oEditorConfig["autogrow"] == null){
+			oEditorConfig["autogrow"] = false;
+		}
+		
+		
+		// if the editor to be instantiated is part of a form,
+		// we need to manipulate the css a bit, to make sure the editor box gets a scrollbar if needed,
+		// and that the (parent) form cell containing the editor box doesn't!
+		
+		var nFormCell = $(sSelector).closest("div.form_cellvalue");
+		if (nFormCell.length > 0) {
+			// get the if of the form cell
+			var sElementId = nFormCell.attr("id");
+			
+			// get rid of overflow in the form cell, so it won't have a scrollbar
+			$("#"+sElementId).css("overflow", "hidden");
+			
+			// get the height of the form cell, and apply it as max height to the (child) editor box, so it will have a scrollbar if needed
+			// (while the editor pane stays visible on top despite scrolling the editor box)
+			var iHeight = $(sSelector).css("height");
+			fn.addCss("#"+sElementId+" .trumbowyg-box {max-height: "+iHeight+" !important}");
+		}
+		
+		// instantiate the editor
 		$(sSelector).trumbowyg(oEditorConfig);
 	}
 	
