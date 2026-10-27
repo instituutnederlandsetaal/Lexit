@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -90,6 +91,39 @@ public class FilesResource {
 		fileInputStream.close(); // avoid memory leaks!
 
 		return ro;
+	}
+	
+	
+	
+	@Path("get_upload_columns")
+	@POST
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public ResponseObject getUploadColumns(
+			@FormDataParam("file") InputStream fileInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileMetaData,
+			@FormDataParam("db") String dbName,
+			@Context ServletContext context,
+			@Context SecurityContext sc,
+			@Context HttpServletRequest httpServletRequest) throws Exception {
+		
+		String userName = service.getLexitInfo().getUserName(httpServletRequest);		
+		ContextObject co = new ContextObject(context, sc, httpServletRequest, dbName, userName);
+		
+		ResponseObject ro = new ResponseObject();
+		List<String> columns;
+		
+		FileProcessor fp = new FileProcessor(service, co);
+		
+		try {
+			columns = fp.getXlsColumnNames(fileInputStream);
+			ro.setResponse(Util.join(columns, Constants.ARG_INTERNAL_SEPARATOR));
+		}
+		catch (Exception e) {
+			ro.setResponse("Error while retrieving the column names from the uploaded file '"+fileMetaData.getFileName()+"'");
+			throw new RuntimeException("Error while retrieving the column names from the uploaded file", e);
+		}
+		
+		return ro;		
 	}
 	
 	

@@ -352,7 +352,12 @@ var oTableSettingsList_example = {
 		 * */
 		"refresh_button": true,
 		
-				
+		/** 
+		 * @type {boolean} 
+		 * @description Refresh all tables when a table has been dragged. 
+		 * (default: true)
+		 */
+		"refresh_tables_upon_drag": true,				
 		
 		/** 
 		 * @type {boolean} 
@@ -737,6 +742,12 @@ var oTableConfigurationList_example = {
 		"ellipsis_unwrap": true,
 		
 		
+		/**
+		 * @type {boolean}
+		 * @description Ellipsis unwrap. Determines whether an ellipsis cell in an active row should expanded by default or not. 
+		 * (default: true)
+		 */
+		"ellipsis_unwrap_active_row": true,
 		
 		
 		/**
@@ -1349,6 +1360,14 @@ conf.getEllipsisUnwrap = function(aColumnConfig){
 	if (typeof aColumnConfig["ellipsis_unwrap"] == 'undefined')
 		return true;		
 	return aColumnConfig["ellipsis_unwrap"];
+};
+
+// retrieve ellipsis behavior: should the content of the active row be unwrapped by default or not?
+conf.getEllipsisUnwrapActiveRow = function(aColumnConfig){
+	
+	if (typeof aColumnConfig["ellipsis_unwrap_active_row"] == 'undefined')
+		return true;		
+	return aColumnConfig["ellipsis_unwrap_active_row"];
 };
 
 // retrieve ellipsis behavior: should a selected row remain unwrapped or not?
@@ -2725,6 +2744,15 @@ conf.getTableDraggable = function(aTableSettings){
 	if (typeof aTableSettings["draggable"] == 'undefined')
 		return true;
 	return aTableSettings["draggable"];
+};
+
+
+// refresh the tables after a drag operation (default: true [see reason in comments of function: in head.setHeaderSensitivity])
+conf.getTableRefreshDraggable = function(aTableSettings){
+
+	if (typeof aTableSettings["refresh_tables_upon_drag"] == 'undefined')
+		return true;
+	return aTableSettings["refresh_tables_upon_drag"];
 };
 
 // get resizable setting

@@ -3155,15 +3155,14 @@ fn.getDataFromCellNode = function(nCell){
 	fn._checkApiInstance("fn.getDataFromCellNode", nCell);
 	fn._checkjQueryObject("fn.getDataFromCellNode", nCell);
 	
-	if (fn.isRowNode(nCell))
-		{
+	if (fn.isRowNode(nCell)) {
 		fn.message(lang.error, 
 				lang.error_when_calling+ " fn.getDataFromCellNode("+fn.getTableName(nCell)+").&lt;BR>" +
 				lang.error_function_called_with_illegal_value+". "+
 				lang.error_function_called_with_illegal_value_input+ ": row node. " +
 				lang.error_function_called_with_illegal_value_expected+ ": cell node.");
 		return;
-		}	
+	}	
 	
 	var sTable = fn.getTableName(nCell);
 	var oTable = mt.getDataTableObjectOf(sTable);
@@ -4762,6 +4761,7 @@ fn.setAutoComplete = function(sSomeTablename, sColumnName, bFilterBox, sFunction
  *  @see fn.confirm
  *  @see fn.prompt
  *  @see fn.promptReorder
+ *  @see fn.getActiveDialog
  */
 fn.closeDialog = function(){
 	
@@ -4769,6 +4769,22 @@ fn.closeDialog = function(){
 	// (see fn.message function etc about the way ids are defined)
 	
 	$("div[id^='dialog-message']").dialog( "close" );
+};
+
+
+/**
+ * Get the currently opened dialog (if any)
+ * @returns {Node} - node of the currently opened dialog (if any)
+ */
+fn.getActiveDialog = function(){
+	// find the dialog being in front
+	var activeDialog = $("div[id^='dialog-message']")
+	    .sort(function (a, b) {
+	        var zA = parseInt($(a).closest(".ui-dialog").css("z-index"), 10) || 0;
+	        var zB = parseInt($(b).closest(".ui-dialog").css("z-index"), 10) || 0;
+	        return zB - zA;
+	    })[0];
+	return activeDialog;
 };
 
 
@@ -5212,6 +5228,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	
 	// list of editors to be activated when dialog is opened
 	var aEditorsId = [];
+	var aEditorsType = [];
 	
 	// list of compulsory fields
 	var aCompulsoryFields = [];
@@ -5246,6 +5263,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 		// textarea type
 		var bOneTextarea = false;
 		// editor type
+		var sEditorType = "trumbowyg";
 		var bEditor = false;
 		
 		// login types
@@ -5266,6 +5284,8 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			bDatePicker = (aValues[i]).indexOf("::datepicker")>-1;
 			bOneTextarea = (aValues[i]).indexOf("::textarea")>-1;
 			bEditor = (aValues[i]).indexOf("::editor")>-1;
+			sEditorType = (aValues[i]).indexOf("::trumbowyg")>-1 ? 
+				"trumbowyg" : (aValues[i]).indexOf("::othereditor")>-1 ? "othereditor" : sEditorType; // might add other types of editors in the future
 			
 			bUsername = (aValues[i]).indexOf("::username")>-1;
 			bPassword = (aValues[i]).indexOf("::password")>-1;
@@ -5395,6 +5415,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 			input.html("&lt;p>"+(aValues!=null ? aValues[i]: "")+"&lt;/p>");		
 			
 			aEditorsId.push("prompt_" + fieldLC);
+			aEditorsType.push(sEditorType);
 		}
 		
 		// text field type
@@ -5574,7 +5595,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	// activate the editors
 	setTimeout(function(){
 		for (var i=0; i&lt;aEditorsId.length; i++){
-			fn._createEditorForPrompt(aEditorsId[i]);
+			fn._createEditorForPrompt(aEditorsId[i], aEditorsType[i]);
 		}
 		if (aEditorsId.length > 0)
 		setTimeout(function(){fn.repositionDialog(true);}, 100); // reposition dialog after editor is created, since that might change dialog dimensions
@@ -5592,22 +5613,9 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 
 
 // create a trumbowyg editor for a given field in a prompt dialog
-fn._createEditorForPrompt = function(fieldId){
+fn._createEditorForPrompt = function(fieldId, sEditorType){
 	
-	$("#"+fieldId).trumbowyg({
-		lang: lang.getLanguageCode(),
-	    btns: [
-	        ['viewHTML'],
-	        ['formatting'],
-	        ['strong', 'em', 'del'],
-	        ['superscript', 'subscript'],
-	        ['link'],
-	        ['insertImage'],
-	        ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
-	        ['unorderedList', 'orderedList'],
-	        ['removeformat']
-	    ]
-	});
+	lexutil.instantiateEditor("#"+fieldId, sEditorType, null);
 };
 
 
@@ -6805,13 +6813,17 @@ fn.rebuildSelectBox = function(sSomeTableName, sColumnName){
 
 /**
  * Go to the right page of a table, given some column name and a value it should contain 
+ * Note: this function has a preferred wrapper called fn.goToPageWhere, which allows 
+ * to pass the filter as an associative array and a callback function to be executed when the page is reached.
  * 
  * @param {(String|API-object-instance)} sSomeTable - A table name or object
  * @param {String} sColumnName - Name of columns to search through
  * @param {String} sColumnValue - Value to search for
+ * @param {Boolean} bKeepFilters - If true, the current filters will be kept, otherwise they will be reset
+ * 
+ * @see fn.goToPageWhere
  */
-fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
-	
+fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue, bKeepFilters){
 	
 	// BEWARE:
 	// this function might not work as expected if some search was
@@ -6821,37 +6833,70 @@ fn.goToTheRightPage = function(sSomeTablename, sColumnName, sColumnValue){
 	if (typeof sSomeTablename == 'object')
 		sSomeTablename = fn.getTableName(sSomeTablename);
 	
-	// reset filters
-	// this is needed because we will add filters here and we want to make
-	// sure that filters from previous rounds get cleaned
-	mt.getDataTableObjectOf(sSomeTablename).resetSearchFilters(false);
+	var oTableConfig = conf.getTableConfig(sSomeTablename);
+	var aTableColumns = mt.getListOfColumnsOf(sSomeTablename);
 	
 	// initialize compulsory filters arrays
 	// (these are filters in addition to the "go to"-filter)
-	var filterColumnNames = new Array();
-	var filterValues = new Array();
+	var aFilterColumnNames = new Array();
+	var aFilterValues = new Array();		
+	
+	// reset filters
+	// this is needed because we will add filters here and we want to make
+	// sure that filters from previous rounds get cleaned
+	if (bKeepFilters != true){
+		fn.resetAllFilters(sSomeTablename, false);
+	}
+	else {
+		var oCurrentFilters = fn.getFilters(sSomeTablename);
+		for (var sColName in oCurrentFilters) {
+			if (oCurrentFilters[sColName] != null &amp;&amp; oCurrentFilters[sColName] != "") {
+				aFilterColumnNames.push(sColName);
+				aFilterValues.push(oCurrentFilters[sColName]);
+			}
+		}
+	}
+	
+	// gather the compulsory filters from config
+	for (var i=0; i&lt;aTableColumns.length; i++) {
+		var aColumnConfig = conf.getColumnConfig(oTableConfig, aTableColumns[i]);		
+		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
+		if (keepfilter) {
+			aFilterColumnNames.push(aTableColumns[i]);
+			aFilterValues.push(conf.getFilter(aColumnConfig));
+		}
+	}
 	
 	// find sorting columns and directions	
 	var aSortColumns = fn.getSortingColumns(sSomeTablename);
 	var aSortDirections = fn.getSortingDirections(sSomeTablename);
 	
-	// gather the compulsory filters 
-	
-	var oTableConfig = conf.getTableConfig(sSomeTablename);
-	for (var i=0; i&lt;mt.getListOfColumnsOf(sSomeTablename).length; i++) {
-		var aColumnConfig = conf.getColumnConfig(oTableConfig, mt.getListOfColumnsOf(sSomeTablename)[i]);		
-		var keepfilter = conf.getKeepFilterSetting(aColumnConfig);
-		if (keepfilter) {
-			filterColumnNames.push(mt.getListOfColumnsOf(sSomeTablename)[i]);
-			filterValues.push(conf.getFilter(aColumnConfig));
-		}
-	}
-	
-	
 	// now request the corresponding row number
 	// and jump to that position in the table
-	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues);
+	sf.getRowNumber(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, aFilterColumnNames, aFilterValues);
 	
+};
+
+
+/**
+ * Go to the right page of a table, given some column name and a value it should contain
+ * This function is a wrapper around fn.goToTheRightPage, but it allows to pass the filters as an associative array
+ * and a callback function to be executed when the page is reached.
+ * 
+ * @see fn.goToTheRightPage
+ */
+fn.goToPageWhere = function(sSomeTablename, oFilter, fnCallback, bKeepFilters){
+	
+	// for now only one filter allowed	
+	var sColumnName = Object.keys(oFilter)[0];
+	var sColumnValue = oFilter[sColumnName];	
+
+	if (fnCallback != null){
+		fn.addDrawCallback(sSomeTablename, function() {
+			fnCallback();
+		});	
+	}	
+	fn.goToTheRightPage(sSomeTablename, sColumnName, sColumnValue, bKeepFilters);
 };
 
 
@@ -7562,7 +7607,7 @@ fn._checkjQueryObject = function(sFunctionName, oArgument){
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Oct 20 2026 11:47:49 GMT+0200 (Midden-Europese zomertijd)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Oct 27 2026 10:08:57 GMT+0100 (Midden-Europese standaardtijd)
 </footer>
 
 <script> prettyPrint(); </script>

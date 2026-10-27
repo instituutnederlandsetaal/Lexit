@@ -57,7 +57,7 @@ public class LexitSchemaAccess {
 	private ConcurrentHashMap<String, Integer> sessionIds2failedAttempts = new ConcurrentHashMap<String, Integer>();
 	private ConcurrentHashMap<String, Instant> sessionIds2timeBlocked = new ConcurrentHashMap<String, Instant>();
 	
-	// upload info
+	// upload info (upload status is connected to session, since different users might be uploading at the same time)
 	private ConcurrentHashMap<String, String> sessionIds2upload = new ConcurrentHashMap<String, String>();
 	
 	

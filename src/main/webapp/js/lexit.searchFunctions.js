@@ -144,7 +144,7 @@ sf.goTo = function(sSomeTablename){
 // subroutine van sf.goTo
 // get the row number (!=id) of a record, given some value to match in some table
 // and jump to that position in the table
-sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, filterColumnNames, filterValues){
+sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColumns, aSortDirections, aFilterColumnNames, aFilterValues){
 	
 	if ( aSortColumns == null || aSortColumns.length == 0 ){
 		fn.message(lang.beware, lang.header_goto_missing_sort);
@@ -196,13 +196,12 @@ sf.getRowNumber = function(sSomeTablename, sColumnName, sColumnValue, aSortColum
 			"occurence_nr": mt.getOccurenceNr(sSomeTablename),
 			"sort_columns": aSortColumns.join(","),
 			"sort_directions": aSortDirections.join(","),
-			"filter_column_names": filterColumnNames.join(ARG_INTERNAL_SEPARATOR),
-			"filter_values": filterValues.join(ARG_INTERNAL_SEPARATOR),
+			"filter_column_names": aFilterColumnNames.join(ARG_INTERNAL_SEPARATOR),
+			"filter_values": aFilterValues.join(ARG_INTERNAL_SEPARATOR),
 			"display_length": fn.getCurrentDisplayLength(sSomeTablename)
 			
 		},
 		dataType: "xml",
-		contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 		success: function(xml) {
 			fn.closeDialog(); // close automatically the GoTo message about building an index
 			gui.removeProcessingMsg(sSomeTablename);

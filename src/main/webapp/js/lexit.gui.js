@@ -65,6 +65,7 @@ gui.activateEllipsis = function(sSomeTableName){
 		var columnEllipsisHeight = conf.getEllipsisHeight(oColumnConfig);
 		var columnEllipsisUnwrap = conf.getEllipsisUnwrap(oColumnConfig);
 		var columnTextRendering = 	conf.getTextRendering(oColumnConfig);
+		var columnEllipsisUnwrapActiveRow = conf.getEllipsisUnwrapActiveRow(oColumnConfig);
 		
 	
 		// if the column is visible and if ellipsis is required, that activate it! 
@@ -91,13 +92,13 @@ gui.activateEllipsis = function(sSomeTableName){
 				// put the data back into the cell				
 				fx.putDataIntoCell(oCurrentRow, sNameOfCurrentColumn, sData);
 				
-				// currently selected row must be unwrapped
-				var bSelectedRow = (kf.getActiveTable() == sSomeTableName) ? kf.getActiveRowNumber() == iRowNr : false;
+				// currently selected row must be unwrapped 
+				var bUnwrapActiveRow = (kf.getActiveTable() == sSomeTableName) ? (columnEllipsisUnwrapActiveRow && kf.getActiveRowNumber() == iRowNr) : false;
 								
 				$("div."+divClassName)
 				.css("overflow", "hidden")
 				.css("text-overflow", "ellipsis")
-				.css("white-space", bSelectedRow ? "normal" : "nowrap")
+				.css("white-space", bUnwrapActiveRow ? "normal" : "nowrap")
 				.css("max-width", columnEllipsisWidth);
 
 				// if some (max) height was set, apply that

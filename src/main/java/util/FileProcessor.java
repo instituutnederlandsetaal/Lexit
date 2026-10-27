@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,8 +18,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -733,6 +736,33 @@ public class FileProcessor {
 		return ro;
 	}
 	
+	/**
+	 * Get the column names of an Excel file
+	 * 
+	 * @param file
+	 * @return a list of column names
+	 * @throws IOException 
+	 * @throws EncryptedDocumentException 
+	 */
+	public List<String> getXlsColumnNames(InputStream fileInputStream) throws EncryptedDocumentException, IOException {
+
+		List<String> names = new ArrayList<>();
+		
+		try (Workbook workbook = WorkbookFactory.create(fileInputStream)) {
+	        
+	        Row header = workbook.getSheetAt(0).getRow(0);
+
+	        if (header != null) {
+	            DataFormatter formatter = new DataFormatter();
+
+	            for (int i = 0; i < header.getLastCellNum(); i++) {
+	                names.add(formatter.formatCellValue(header.getCell(i)));
+	            }
+	        }	        
+		}
+		
+		return names;
+	}
 	
 	// Helper method to handle cell content dynamically
     public static String getCellValue(Cell cell) {

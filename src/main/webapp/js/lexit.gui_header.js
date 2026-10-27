@@ -77,10 +77,16 @@ head.setHeaderSensitivity = function(sSomeTableName){
 				        // somehow the highlight of columns get slow after dragging,
 				        // but refreshing all tables seems to help
 				        // NB: as a consequence the undo stack of each table will be emptied
-				        var aAllTables = mt.getListOfLoadedTables();
-				        for (var i=0; i<aAllTables.length; i++){
-				        	fn.refreshTable(aAllTables[i]);				        	
-				        }
+						//
+						// NB: this is can be turned off in the configuration file, by setting 'refresh_tables_upon_drag' to false
+						
+						if (conf.getTableRefreshDraggable(conf.getTableSettings(sSomeTableName))){						
+							var aAllTables = mt.getListOfLoadedTables();
+					        for (var i=0; i<aAllTables.length; i++){
+					        	fn.refreshTable(aAllTables[i]);				        	
+					        }							
+						}
+				        
 				        
 				        // callback, if declared
 						var oTableSettings = conf.getTableSettings(sSomeTableName);
