@@ -1211,39 +1211,7 @@ head.putTableEraseButton = function(sSomeTablename){
 			
 			fn.confirm(lang.beware, lang.import_erase_confirm,
 				function(){
-
-					$.ajax( {
-						"type": "POST",
-						"url": WEBSERV_URL+"/api/remove_uploaded_table",
-						"data": {
-							"db_name": lexutil.getHttpParams().get("db"),
-							"table_name": sSomeTablename,
-							"dummy": lexutil.getUniqueNumber()
-						},
-						"dataType": "xml", // get response as xml
-						"success": function(xml) {
-							fn.message( lang.succeeded+"!", lang.import_erase_table_done, function(){
-
-								// callback upon close, if set in the configuration
-								var aTableSettings = conf.getTableSettings(sSomeTablename);
-								var fnCallback = conf.getCloseCallback(aTableSettings);
-								if ( fnCallback != null ) {
-									fnCallback(mt.getDataTableObjectOf(sSomeTablename));
-								}
-
-								// remove table
-								$("#"+sSomeTablename+"_wrapper").hide("slow");
-								tb.destroyTable(sSomeTablename, null, true);
-								mt.removeTableRecord(sSomeTablename);
-								// remove table from menu
-								$("div#tablechoice select#selected_source").find("option[value='" + sSomeTablename + "']").remove();
-							});
-						},
-						"error": function(jqXHR, textStatus, errorThrown){
-
-							fn.message(lang.failed, lang.import_erase_table_failed+ ": "+textStatus+" "+errorThrown);
-						}
-					} );
+					head._eraseUploadedTable(sSomeTablename);					
 				});
 		});
 
@@ -1253,7 +1221,43 @@ head.putTableEraseButton = function(sSomeTablename){
 			.addClass("tableerasebutton")			
 			.append(tableEraseButton)			
 	);
+};
 
+head._eraseUploadedTable = function(sSomeTablename){
+	
+	$.ajax( {
+		"type": "POST",
+		"url": WEBSERV_URL+"/api/remove_uploaded_table",
+		"data": {
+			"db_name": lexutil.getHttpParams().get("db"),
+			"table_name": sSomeTablename,
+			"dummy": lexutil.getUniqueNumber()
+		},
+		"dataType": "xml", // get response as xml
+		"success": function(xml) {
+			fn.message( lang.succeeded+"!", lang.import_erase_table_done, function(){
+
+				// callback upon close, if set in the configuration
+				var aTableSettings = conf.getTableSettings(sSomeTablename);
+				var fnCallback = conf.getCloseCallback(aTableSettings);
+				if ( fnCallback != null ) {
+					fnCallback(mt.getDataTableObjectOf(sSomeTablename));
+				}
+
+				// remove table
+				$("#"+sSomeTablename+"_wrapper").hide("slow");
+				tb.destroyTable(sSomeTablename, null, true);
+				mt.removeTableRecord(sSomeTablename);
+				// remove table from menu
+				$("div#tablechoice select#selected_source").find("option[value='" + sSomeTablename + "']").remove();
+			});
+		},
+		"error": function(jqXHR, textStatus, errorThrown){
+
+			fn.message(lang.failed, lang.import_erase_table_failed+ ": "+textStatus+" "+errorThrown);
+		}
+	} );
+	
 };
 
 

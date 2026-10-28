@@ -1567,7 +1567,22 @@ fn.tableIsUploaded = function(sSomeTablename){
 
 	var aTabbleDetails = mt.getAvailableTableDetails(sSomeTablename);
 	return (aTabbleDetails != null && aTabbleDetails[2].indexOf("_UPLOADED_")>-1);
-}
+};
+
+
+/**
+ * Erase an uploaded table (t.i. a table that was uploaded as a CSV/XLS file or so)
+ * 
+ * @param {(String|API-object-instance)} sSomeTablename - Table name or object
+ */
+fn.eraseUploadedTable = function(sSomeTablename){
+	
+	if (typeof sSomeTablename == 'object')
+			sSomeTablename = fn.getTableName(sSomeTablename);
+	
+	if (fn.tableIsUploaded(sSomeTablename))
+		head._eraseUploadedTable(sSomeTablename);
+};
 
 
 /**

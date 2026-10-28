@@ -1967,7 +1967,7 @@ lexutil.instantiateEditor = function(sSelector, sEditorType="trumbowyg", oEditor
 			oEditorConfig["lang"] = lang.getLanguageCode();
 		}
 		
-		// 
+		// not sure if we still need this (it was part of a strategy to make scrolling of editor box possible without pushing the editor button pane out of sight)
 		if (oEditorConfig["autogrow"] == null){
 			oEditorConfig["autogrow"] = false;
 		}
