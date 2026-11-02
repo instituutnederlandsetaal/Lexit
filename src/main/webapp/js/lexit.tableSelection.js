@@ -59,7 +59,7 @@ ts.getListOfTables = function(sTableToCallUponStartUp, oContentToMatchUponStartU
 // apply regex tables declared in the configuration file to the tables returned by the database
 ts.applyRegexTablesDeclaration = function(xml){
 	
-	// var the list of tables and views obtained from the database
+	// get the list of tables and views obtained from the database
 	var aAllTables = new Array();
 	$(xml).find("oneTable").each(function(){		
 		var tableItems = 		$(this).find("item");
@@ -67,6 +67,13 @@ ts.applyRegexTablesDeclaration = function(xml){
 		aAllTables.push(sTableName);
 	});
 	
+	// check needed vars
+	if (oTableSettingsList == null){
+		oTableSettingsList = {};
+	}
+	if (oTableConfigurationList == null){
+		oTableConfigurationList = {};
+	}
 	
 	// now retrieve the names of all tables and views that are declared in the configuration file
 	var aAllSettingsTables = Object.keys(oTableSettingsList);
