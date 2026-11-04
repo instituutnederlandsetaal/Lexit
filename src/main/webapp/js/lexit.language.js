@@ -223,6 +223,9 @@ lang.admingui_adduser_easy_password = "Inhouse (goed te onthouden)";
 lang.admingui_adduser_strong_password = "Extern (sterk)";
 lang.admingui_adduser_success = "De gebruiker is opgeslagen!";
 lang.admingui_adduser_error = "Het opslaan van de gebruiker is mislukt:";
+lang.admingui_adduser_warning = "Gebruiker 'USERNAME' bestaat al.<BR><BR>Wilt u deze gebruiker bijwerken?<BR><BR>Zo niet, kies dan een andere gebruikersnaam.";
+lang.admingui_adduser_cancel = "Het toevoegen/bijwerken van de gebruiker is geannuleerd!";
+
 
 lang.admingui_add_multipleusers_title = "Meerdere gebruikers ineens toevoegen";
 lang.admingui_add_multipleusers_msg = "Tik een lijst gebruikersnamen (één per regel) en klik op 'Ok'.<BR>Wachtwoorden worden automatisch aangemaakt.";
@@ -1861,10 +1864,11 @@ lang.setLanguage = function(sLanguageCode){
 		lang.admingui_adduser_title = "Create/update user";
 		lang.admingui_adduser_msg = "Create or update a user:<BR><BR>If 'password' needs no update, leave it empty!";
 		lang.admingui_adduser_easy_password = "In-house (memorable)";
-		lang.admingui_adduser_strong_password = "External (strong)";
-		
+		lang.admingui_adduser_strong_password = "External (strong)";		
 		lang.admingui_adduser_success = "The user was set!";
 		lang.admingui_adduser_error = "Setting the user went wrong:";
+		lang.admingui_adduser_warning = "Username 'USERNAME' already exists.<BR><BR>Are you sure you want to update the existing user?<BR><BR>If not, please choose another username.";
+		lang.admingui_adduser_cancel = "Adding/updating the user was cancelled!";
 		
 		lang.admingui_add_multipleusers_title = "Create multiple users at once";
 		lang.admingui_add_multipleusers_msg = "Type in a list of usernames (one per line) and click 'Ok'.<BR>Passwords will be created automatically.";

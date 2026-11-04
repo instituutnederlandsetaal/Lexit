@@ -3,7 +3,8 @@ var lexitusers = {}
 
 
 // kind of global storage for overview of users and roles
-lexitusers.overviewOfUsersAndRoles;	
+lexitusers.overviewOfUsersAndRoles;
+lexitusers.aUsers = [];		
 
 
 
@@ -105,6 +106,9 @@ lexitusers.updateOverviewOfUsersAndRoles = function(fnCallback){
 					
 				}
 				sOutPut += "<TR id='user_"+thisUser.toLowerCase()+"'><TD>&nbsp;"+thisUser+"</TD><TD>&nbsp;&nbsp;</TD><TD>"+aTheseRoles.join('<BR>')+"</TD></TR>";
+				
+				// keep a list of all users, convinient for other functions to use
+				lexitusers.aUsers.push(thisUser.toLowerCase());
 			}
 			sOutPut += "</TABLE>";												
 			lexitusers.overviewOfUsersAndRoles = 
@@ -278,35 +282,56 @@ lexitusers.createNewUser = function(){
 				
 				var username = resp["username"];
 				var password = resp["password"];
+				
+				var fnSetUserWithRole = function(username, password, resp){
 		
- 				$.ajax({
-					"type": "POST",
-					"url": WEBSERV_URL+"/api/set_user_with_role",
-					"data": {
-						"username": username,
-						"password": password,
-						"default_role": resp["default access role"],
-						"dummy": lexutil.getUniqueNumber()
-					},
-					"dataType": "xml", // get response as xml
-					"success": function(xml) {
-						
-						fn.closeDialog();
-						lexitusers.refreshUserRight(function(){
-							fn.message("OK", lang.admingui_adduser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+	 				$.ajax({
+						"type": "POST",
+						"url": WEBSERV_URL+"/api/set_user_with_role",
+						"data": {
+							"username": username,
+							"password": password,
+							"default_role": resp["default access role"],
+							"dummy": lexutil.getUniqueNumber()
+						},
+						"dataType": "xml", // get response as xml
+						"success": function(xml) {
+							
+							fn.closeDialog();
+							lexitusers.refreshUserRight(function(){
+								fn.message("OK", lang.admingui_adduser_success+"<BR><BR>"+lexitusers.overviewOfUsersAndRoles, function(){
+									lexitusers.showMenu();
+								});
+								setTimeout(function(){
+									lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
+								}, 100);				
+							});
+	 						
+						},
+						"error": function(jqXHR, textStatus, errorThrown){
+							
+							fn.message(lang.error, lang.admingui_adduser_error+" " + textStatus+" "+errorThrown);
+						}
+	 				});
+				};
+				
+				// check if the username is known
+				if (lexitusers.aUsers.includes(username.toLowerCase())){
+					fn.confirm(lang.admingui_adduser_title, lang.admingui_adduser_warning.replace(/USERNAME/g, username),
+						function(){
+							fnSetUserWithRole(username, password, resp);
+						},
+						function(){
+							fn.message(lang.ok, lang.admingui_adduser_cancel, function(){
 								lexitusers.showMenu();
 							});
-							setTimeout(function(){
-								lexitusers.smoothScroll("#usersoverview", "#user_"+username.toLowerCase());
-							}, 100);				
-						});
- 						
-					},
-					"error": function(jqXHR, textStatus, errorThrown){
-						
-						fn.message(lang.error, lang.admingui_adduser_error+" " + textStatus+" "+errorThrown);
-					}
- 				});
+						}
+					);
+				}
+				// otherwise just carry on
+				else {
+					fnSetUserWithRole(username, password, resp);
+				}
 			},
 			function(){
 				fn.closeDialog();
