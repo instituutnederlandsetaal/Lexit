@@ -787,8 +787,13 @@ td.selectColumns = function(sSomeTablename){
 					var sSearchTerm = $(this).val().toLowerCase();
 					searchTimer = setTimeout(function() {						
 						// put hightlight on the matching columns and scroll to the first one
-						$( "#"+promptDivId ).find("li[id*='"+sSearchTerm+"']").removeClass("ui-state-default").addClass("ui-state-highlight");
-						lexutil.smoothScroll("#"+promptDivId, $("li[id*='"+sSearchTerm+"']"), true);
+						$( "#"+promptDivId ).find("li[id*='"+sSearchTerm+"'], li:contains('"+sSearchTerm+"')").removeClass("ui-state-default").addClass("ui-state-highlight");
+						try {
+							lexutil.smoothScroll("#"+promptDivId, $("li[id*='"+sSearchTerm+"'], li:contains('"+sSearchTerm+"')"), true);
+						}
+						catch(e) {
+							// do nothing
+						}
 					}, 500);	
 				});
 			$(searchDiv).append(searchField);
