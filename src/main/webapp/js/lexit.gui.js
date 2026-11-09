@@ -1230,10 +1230,31 @@ gui.deHighlightDiv = function(sDivName){
  *   HIGHLIGHT OF COLUMNS
  */
 
+// some global variables to keep track of the highlighted column and the last column
+// (NOTE: in use in the new [non-legacy] mode)
+
+gui.oHighlighted = {};
+gui.oLastColumn = {};
+
+
 // highlight whole column at mouseover
-// http://datatables.net/examples/api/highlight.html
 gui.setColumnHighlight = function(sSomeTableName){
 	
+	var oTableSettings = conf.getTableSettings(sSomeTableName);
+	var sHighlightingMode = conf.getColumnsHighlightingMode(oTableSettings)
+	 
+	// if LEGACY mode is NOT requested, 
+	// leave this function right away 
+	// (because the new method is implemented in setColumnHighlightResetter)
+	
+	if (sHighlightingMode !== 'legacy') {
+		return;
+	}
+
+	
+	// the following is the LEGACY highlighting
+	// (original url: )http://datatables.net/examples/api/highlight.html)	 
+		
 	// column highlight is not needed in form view mode
 	if (mt.getViewType(sSomeTableName) == 'form') {
 		$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
@@ -1300,27 +1321,101 @@ gui.setColumnHighlight = function(sSomeTableName){
 };
 
 
-// when the table is sorted by a new column, we need to rebuild the map of cell colors
-gui.setColumnHighlightResetter = function(sSomeTableName){
+// help function for the new (non-legacy) column highlighting method: clear the highlight of a column	
+gui.clearHighlight = function(nNode) {
 	
-	// column highlight is not needed in form view mode
-	if (mt.getViewType(sSomeTableName) == 'form') {
-		$("#"+sSomeTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
+	if ( $(nNode).is("td") || $(nNode).is("tr") ) {
+		
+		var sTableName = fn.getTableName(nNode);
+		
+		var highlighted = gui.oHighlighted[sTableName] || [];
+	    for (const cell of highlighted) {
+	        cell.classList.remove('column-hover');
+	    }
+	
+		gui.oHighlighted[sTableName] = [];    
+		gui.oLastColumn[sTableName] = null;
+	}
+}
+
+// when the table is sorted by a new column, we need to rebuild the map of cell colors
+gui.setColumnHighlightResetter = function(sTableName) {
+	
+	var oTableSettings = conf.getTableSettings(sTableName);
+	var sHighlightingMode = conf.getColumnsHighlightingMode(oTableSettings)
+	
+	// no columns highlighting is needed, 
+	// so leave this function right away
+	if (sHighlightingMode == 'none') {
 		return;
 	}
 	
-	// store default sorting setting
-	var iDefaultSortColNr = gui._getTheSortingColumnIndex(sSomeTableName);
-			
-	mt.columnsHighlight_putSortingColumnForColor(sSomeTableName, iDefaultSortColNr);
+	// NEW columns highlighting mode
+	if (sHighlightingMode == 'new') {
 	
-	// when a new sorting column is chosen, store it
-	$("#"+sSomeTableName+"_dynamic").on("click", "#"+sSomeTableName+" thead tr th", function(){
+		const oTable = mt.getDataTableObjectOf(sTableName);
+		const $body = $(oTable.table().body());
 		
-		var iColNr = $("#"+sSomeTableName+" thead tr th").index(this);
-		mt.columnsHighlight_putSortingColumnForColor(sSomeTableName, iColNr);		
-		gui.buildMapOfCellBackgroundColors(sSomeTableName);
-	});
+		$body.on('mouseenter', 'td', function () { 
+			
+			var tableName = fn.getTableName(this);
+			var table = mt.getDataTableObjectOf(tableName);			
+			
+		    const index = table.cell(this).index();
+			var lastColumn = gui.oLastColumn[tableName] || null;
+			
+			// if the current column is the same as the last one, do nothing
+		    if (!index || index.column === lastColumn) 
+				return;
+	
+			// otherwise, clear the previous highlight and highlight the new column
+		    gui.clearHighlight(this);
+			// current column becomes the last column for the next mouseover event
+		    gui.oLastColumn[tableName] = index.column;
+	
+			// get all the cells in the current column
+			// and store them in the gui.oHighlighted object
+		    gui.oHighlighted[tableName] = table
+		        .column(gui.oLastColumn[tableName], { page: 'current' })
+		        .nodes()
+		        .toArray();
+	
+			// add the highlight class to all the cells in the current column
+		    for (const cell of gui.oHighlighted[tableName]) {
+		        cell.classList.add('column-hover');
+		    }
+		});
+	
+		// on mouseleave of the table body, clear the highlight
+		// (as highlighting will be applied at mouseenter of a new column)
+		$body.on('mouseleave', function(){
+			gui.clearHighlight(this);
+		});
+
+	}
+	
+	// LEGACY columns highlighting mode
+	if (sHighlightingMode == 'legacy') {
+	
+		// column highlight is not needed in form view mode
+		if (mt.getViewType(sTableName) == 'form') {
+			$("#"+sTableName+" tbody").off("mouseenter.columnHighlight mouseleave.columnHighlight", "td");
+			return;
+		}
+		
+		// store default sorting setting
+		var iDefaultSortColNr = gui._getTheSortingColumnIndex(sTableName);
+				
+		mt.columnsHighlight_putSortingColumnForColor(sTableName, iDefaultSortColNr);
+		
+		// when a new sorting column is chosen, store it
+		$("#"+sTableName+"_dynamic").on("click", "#"+sTableName+" thead tr th", function(){
+			
+			var iColNr = $("#"+sTableName+" thead tr th").index(this);
+			mt.columnsHighlight_putSortingColumnForColor(sTableName, iColNr);		
+			gui.buildMapOfCellBackgroundColors(sTableName);
+		});
+	}
 };
 
 gui._getTheSortingColumnIndex = function(sSomeTableName){

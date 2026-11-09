@@ -40,6 +40,17 @@ var oTableSettingsList_example = {
 		 * */
 		"columns_button": true,
 		
+		
+		/** 
+		 * @type {string} 
+		 * @description Set the columns highlighting mode (default: "new"). 
+		 * Possible values are:
+		 * - "new":		new, more performing highlighting,
+		 * - "legacy":	old, less performing highlighting,
+		 * - "none": 	no columns highlighting.
+		 * */
+		"columns_highlighting": "new",
+		
 	
 		/** 
 		 * @type {array} 
@@ -56,6 +67,7 @@ var oTableSettingsList_example = {
 		 * provided as an associative array: { colname1: sortdir1, colname2: sortdir2, ...}
 		 * */
 		"columns_sorting": {"colname1": "asc/desc", "colname2": "asc/desc", "colnameX": "asc/desc"},
+	
 		
 		
 		/**
@@ -2737,6 +2749,14 @@ conf.getDefaultSortingFromTableSettings = function(aTableSettings){
 	return null;
 };
 
+// get column_highlighting mode (default is 'new')
+conf.getColumnsHighlightingMode = function(aTableSettings){
+	
+	if (typeof aTableSettings["columns_highlighting"] != 'undefined')
+		return aTableSettings["columns_highlighting"];
+	
+	return "new"; 
+};
 
 // get draggable setting
 conf.getTableDraggable = function(aTableSettings){

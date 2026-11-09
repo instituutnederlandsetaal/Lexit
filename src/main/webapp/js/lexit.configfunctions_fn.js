@@ -697,23 +697,23 @@ fn.getTableName = function(mixed){
 		return mixed;
 	
 	// if input is a node, get the closest table name
-	if ( $(mixed).is("td") || $(mixed).is("tr") )
-		{
-			if ($( mixed ).closest('table').length > 0)
-				return $( mixed ).closest('table')[0].id;
+	if ( $(mixed).is("td") || $(mixed).is("tr") ) {
+		
+		if ($( mixed ).closest('table').length > 0)
+			return $( mixed ).closest('table')[0].id;
 
-			// in some rare cases, closest return nothing, don't know why...
-			// so here's a rescue operation: extract the table name from the row class name
-			var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
-			var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
-			var sTableName = aRowClassName[0].replace("_row", "");
-			return sTableName;
-
-		}	
+		// in some rare cases, closest return nothing, don't know why...
+		// so here's a rescue operation: extract the table name from the row class name
+		var aClassNames = $(fn.getRowNode(mixed)).attr('class').split(" ");
+		var aRowClassName = (aClassNames.filter( function(value){return $.endsWith(value, "_row");}));
+		var sTableName = aRowClassName[0].replace("_row", "");
+		return sTableName;
+	}	
 	
 	// otherwise we must have an API instance
 	return fx.getTableName(mixed);
 };
+
 
 
 /**
