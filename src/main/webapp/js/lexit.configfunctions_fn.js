@@ -14,6 +14,11 @@ var fn = {};
 
 
 
+fn.iPromptHeightRatio = 0.75; // default height of prompt dialog as a fraction of the window height
+
+
+
+
 /**
  * @typedef TableSettingsArray
  * @type {Object}
@@ -5537,7 +5542,7 @@ fn.prompt = function(sTitle, aFieldNames, aValues, fnFunction, fnCancelFunction,
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
 		height: "auto",
-		maxHeight: $(window).height(),
+		maxHeight: ($(window).height())*fn.iPromptHeightRatio,
         width: "auto",
         modal: true,
         open: function( event, ui ){
@@ -5650,7 +5655,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 
 	var iNumberOfPixelOccupedByOptions = (749.0/23.0); // real life example: 749px taken by 23 options
 	var iPercentOfHeightTakenByFullDialog = 0.78; // real life example: 749px (dialog) vs 952px (window)
-	var iWindowHeight = $(window).height();
+	var iWindowHeight = ($(window).height())*fn.iPromptHeightRatio;
 	var iComputedHeight = aAllOptions.length * iNumberOfPixelOccupedByOptions;
 
 
@@ -5762,6 +5767,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	});
 	
 	
+	
 	// Open dialog	
 	// Important detail: Pressing enter should trigger click on OK button
 	// cross-browser implementation: http://stackoverflow.com/questions/868889/submit-jquery-ui-dialog-on-enter
@@ -5769,7 +5775,7 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
 		height: "auto",
-		maxHeight: $(window).height(),
+		maxHeight: ($(window).height())*fn.iPromptHeightRatio,  
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
@@ -5988,7 +5994,7 @@ fn.promptReorder = function(sTitle, aFieldNames, fnFunction, fnCancelFunction){
 	$( "#"+promptDivId ).dialog({
 		autoOpen: false,
 		height: "auto",
-		maxHeight: $(window).height(),
+		maxHeight: ($(window).height())*fn.iPromptHeightRatio,
         width: 600,  // 'auto' setting caused dialog to get to small, very ugly and not readable
         modal: true,
         open: function( event, ui ){
