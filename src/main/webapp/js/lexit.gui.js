@@ -1247,7 +1247,7 @@ gui.setColumnHighlight = function(sSomeTableName){
 	// leave this function right away 
 	// (because the new method is implemented in setColumnHighlightResetter)
 	
-	if (sHighlightingMode !== 'legacy') {
+	if (sHighlightingMode !== 'legacy') {		
 		return;
 	}
 
@@ -1335,6 +1335,11 @@ gui.clearHighlight = function(nNode) {
 	
 		gui.oHighlighted[sTableName] = [];    
 		gui.oLastColumn[sTableName] = null;
+		
+		setTimeout(function(){
+			// keep column header adjustment
+			gui.setSearchboxesCss(sTableName);
+		}, 500);
 	}
 }
 
@@ -1384,6 +1389,11 @@ gui.setColumnHighlightResetter = function(sTableName) {
 		    for (const cell of gui.oHighlighted[tableName]) {
 		        cell.classList.add('column-hover');
 		    }
+			
+			setTimeout(function(){
+				// keep column header adjustment
+				gui.setSearchboxesCss(tableName);
+			}, 500);
 		});
 	
 		// on mouseleave of the table body, clear the highlight
