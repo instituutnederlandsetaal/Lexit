@@ -1551,9 +1551,9 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 				"db_name": lexutil.getHttpParams().get("db") 
 				},
 			dataType: "xml",
-			//contentType: "application/x-www-form-urlencoded;charset=UTF-8",
 			success: function(xml) {
 				
+				// parse the response and store the columns and types in the hash tables
 				var aColumns = new Array();
 				var aColumnTypes = new Array();
 				var aColumnCustomVals = new Array();
@@ -1567,23 +1567,36 @@ lists.getAllColumns = function(sSomeTableName, fnCallback, aOrderSettings){
 				
 				if (aOrderSettings != null && aOrderSettings.length > 0){
 					
-					// check if the order settings are compatible with the columns we got from the database
-					var aDiff = lexutil.symmetricDifference(aColumns, aOrderSettings);
+					// first, check if all columns in the columns order setting are present in the list of columns returned by the database
+					// throw unknkown columns away
+
+					var aNewColumnOrder = new Array();
+					for (var i=0; i<aOrderSettings.length; i++) {
+						if ($.inArray(aOrderSettings[i], aColumns) > -1)
+							aNewColumnOrder.push(aOrderSettings[i]);
+					}
 					
-					// if there are differences, we have a problem and we should display a message to the user
-					if (aDiff.length > 0){						
-						var sCompare = lang.columns_list_to_compare + ": {" + aDiff.join(", ") + "}";
-						fn.message(lang.error_occurred_in_table+ " '"+sSomeTableName+"'", lang.columns_list_mismatch + " " + sCompare+".");
+					// second, if the (filtered) columns order is not the same length as the original column list,
+					// add the missing database columns to the end of the filtered columns order, 
+					// to make sure we have all columns in the end
+
+					if (aOrderSettings.length != aColumns.length) {
+						
+						for (var i=0; i<aColumns.length; i++) {
+							if ($.inArray(aColumns[i], aNewColumnOrder) == -1)
+								aNewColumnOrder.push(aColumns[i]);
+						}
 					}					
-					// otherwise apply the order settings to the columns and types we got from the database
-					else {						
-						var aNewColumns = aOrderSettings.map(name => aColumns[aColumns.indexOf(name)]);
-						var aNewColumnTypes = aOrderSettings.map(name => aColumnTypes[aColumns.indexOf(name)]);
-						var aNewColumnCustomVals = aOrderSettings.map(name => aColumnCustomVals[aColumns.indexOf(name)]);							
-						aColumns = aNewColumns;
-						aColumnTypes = aNewColumnTypes;
-						aColumnCustomVals = aNewColumnCustomVals;						
-					}										
+					
+					// apply new order	
+										
+					var aNewColumns = aNewColumnOrder.map(name => aColumns[aColumns.indexOf(name)]);
+					var aNewColumnTypes = aNewColumnOrder.map(name => aColumnTypes[aColumns.indexOf(name)]);
+					var aNewColumnCustomVals = aNewColumnOrder.map(name => aColumnCustomVals[aColumns.indexOf(name)]);							
+					aColumns = aNewColumns;
+					aColumnTypes = aNewColumnTypes;
+					aColumnCustomVals = aNewColumnCustomVals;						
+															
 				}
 				
 				// store the columns and types now
