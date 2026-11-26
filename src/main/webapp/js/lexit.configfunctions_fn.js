@@ -5698,11 +5698,10 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 
 	
 	// user instructions
-	if (mSelectionMode == false)
-		{
+	if (mSelectionMode == false) {
 		var sP = $("<p></p>").html(lang.hold_ctrl_for_multiple_choice+ ":");	
 		promptDiv.append(sP);
-		}	
+	}	
 	
 	// selectable part	
 	var selectableUl = $("<ol></ol>")
@@ -5801,10 +5800,12 @@ fn.promptSelect = function(sTitle, aAllOptions, aAlreadyChosen, fnFunction, fnCa
 	
 	$( function() {		
 		
-		$( "#"+selectableId ).selectable();
+		$( "#"+selectableId ).selectable({
+		    filter: ':not(.no-select)'
+		});
 		
-		if (mSelectionMode != false)
-		{
+		if (mSelectionMode != false) {
+			
 			$( "#"+selectableId ).on( "selectableselected", function( event, ui ) {
 				
 				// if some function was set, execute it and give the selected text as an argument
@@ -5837,6 +5838,11 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 			selectableUl.append($("<br/>"));
 		}
 		
+		// '::label' codes an option to be put as a label before groups of options (and not behave as an option to select)
+		else if (sOption.indexOf("::label")>-1) {
+			selectableUl.append($("<span></span>").addClass("no-select").html(sOption.replace("::label", "")));
+		}
+		
 		// normal case: build option
 		else {
 			// one element 		
@@ -5848,10 +5854,9 @@ fn._promptSelect_AppendOptions = function(selectableUl, aAllOptions, aAlreadyCho
 				.css("min-height", "18px");	
 			
 			// if some item was pre-selected, assign it the selected class
-			if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1)
-				{
+			if (aAlreadyChosen != null && aAlreadyChosen.indexOf(sOption)>-1) {
 				liElement.addClass("ui-selected");
-				}
+			}
 			
 			var spanElement = $("<span></span>").html( $.trim(sOption) );
 			liElement.append(spanElement);
